@@ -16836,11 +16836,11 @@ async function startProCheckout() {
       body: JSON.stringify({ access_token: ctState.accessToken })
     });
     const data = await r.json();
-    ctState.accounts = (data.accounts || []).map(a => ({
+  ctState.accounts = (data.accounts || []).map(a => ({
       ctidTraderAccountId: a.ctidTraderAccountId,
       accountNumber:       a.accountNumber,
       brokerName:          a.brokerName || a.brokerTitleShort,
-      _env:                a._env || 'demo'
+      _env:                a._env || ctState.env || 'demo'
     })).filter(a => a.ctidTraderAccountId);
     if (!ctState.accountId && ctState.accounts.length) {
       ctState.accountId    = ctState.accounts[0].ctidTraderAccountId;
@@ -17032,6 +17032,7 @@ async function startProCheckout() {
     await loadState();
     if (ctState.accessToken) {
       try { await fetchAccounts(); } catch(e){ console.warn('[ctrader] accounts', e); }
+      render();
     }
     render();
     startPolling();
