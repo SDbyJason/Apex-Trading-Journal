@@ -16706,12 +16706,11 @@ async function startProCheckout() {
     if (!logoutBtn) return false;
     const logoutWrapper = logoutBtn.closest('div[style*="max-width:900px"]') || logoutBtn.parentNode;
     if (!logoutWrapper || !logoutWrapper.parentNode) return false;
-    cardEl = buildCard();
+   cardEl = buildCard();
     logoutWrapper.parentNode.insertBefore(cardEl, logoutWrapper);
     render();
-    // Falls accounts noch nicht geladen: nachladen
-    if (ctState.accessToken && (!ctState.accounts || !ctState.accounts.length)) {
-      fetchAccounts().then(() => render()).catch(() => {});
+    if (ctState.accessToken) {
+      fetchAccounts().then(() => render()).catch(e => { console.warn(e); render(); });
     }
     return true;
   }
