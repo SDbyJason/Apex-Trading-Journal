@@ -16845,11 +16845,11 @@ async function fetchAccounts() {
     });
     const data = await r.json();
     console.log('[fetchAccounts] API response:', JSON.stringify(data));
-    ctState.accounts = (data.accounts || []).map(a => ({
-      ctidTraderAccountId: a.ctidTraderAccountId,
+   ctState.accounts = (data.accounts || []).map(a => ({
+      ctidTraderAccountId: a.ctidTraderAccountId || a.accountId,
       accountNumber:       a.accountNumber,
-      brokerName:          a.brokerName || a.brokerTitleShort,
-      _env:                a._env || ctState.env || 'demo'
+      brokerName:          a.brokerName || a.brokerTitle || null,
+      _env:                a.live === false ? 'demo' : (a.live === true ? 'live' : (a._env || ctState.env || 'demo'))
     })).filter(a => a.ctidTraderAccountId);
     if (!ctState.accountId && ctState.accounts.length) {
       ctState.accountId    = ctState.accounts[0].ctidTraderAccountId;
