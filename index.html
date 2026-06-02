@@ -16833,9 +16833,10 @@ async function startProCheckout() {
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
   // ─── 8. ACCOUNTS ───────────────────────────────────────────────
- async function fetchAccounts() {
+async function fetchAccounts() {
+    console.log('[fetchAccounts] start, token:', ctState.accessToken?.substring(0,10), 'expiresAt:', new Date(ctState.expiresAt));
     try { await ensureFreshToken(); } catch(e) {
-      // Token evtl. noch gültig, trotzdem versuchen
+      console.warn('[fetchAccounts] ensureFreshToken failed:', e.message);
       if (!ctState.accessToken) throw e;
     }
     const r = await fetch(`${WORKER_URL}/api/accounts`, {
