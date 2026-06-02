@@ -16833,24 +16833,36 @@ async function startProCheckout() {
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
   // ─── 8. ACCOUNTS ───────────────────────────────────────────────
-async function fetchAccounts() {
+  // Direct REST calls to cTrader – no proxy needed, CORS is open on their API
+  async function fetchAccounts() {
     console.log('[fetchAccounts] start, token:', ctState.accessToken?.substring(0,10), 'expiresAt:', new Date(ctState.expiresAt));
     try { await ensureFreshToken(); } catch(e) {
       console.warn('[fetchAccounts] ensureFreshToken failed:', e.message);
       if (!ctState.accessToken) throw e;
     }
-    const r = await fetch(`${WORKER_URL}/api/accounts`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ access_token: ctState.accessToken })
-    });
-    const data = await r.json();
-    console.log('[fetchAccounts] API response:', JSON.stringify(data));
-   ctState.accounts = (data.accounts || []).map(a => ({
-      ctidTraderAccountId: a.ctidTraderAccountId || a.accountId,
-      accountNumber:       a.accountNumber,
-      brokerName:          a.brokerName || a.brokerTitle || null,
-      _env:                a.live === false ? 'demo' : (a.live === true ? 'live' : (a._env || ctState.env || 'demo'))
-    })).filter(a => a.ctidTraderAccountId);
+    const token = encodeURIComponent(ctState.accessToken);
+    const [liveRes, demoRes] = await Promise.all([
+      fetch(`https://api.spotware.com/connect/tradingaccounts?access_token=${token}`).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`https://demo-api.spotware.com/connect/tradingaccounts?access_token=${token}`).then(r => r.ok ? r.json() : null).catch(() => null),
+    ]);
+    const seen = new Set();
+    const accounts = [];
+    for (const [result, envLabel] of [[liveRes,'live'],[demoRes,'demo']]) {
+      if (!result?.data) continue;
+      for (const a of result.data) {
+        const id = a.ctidTraderAccountId || a.accountId;
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        accounts.push({
+          ctidTraderAccountId: id,
+          accountNumber:       a.accountNumber,
+          brokerName:          a.brokerName || a.brokerTitle || null,
+          _env:                a.live === false ? 'demo' : (a.live === true ? 'live' : envLabel)
+        });
+      }
+    }
+    console.log('[fetchAccounts] direct response:', accounts.length, 'accounts');
+    ctState.accounts = accounts;
     if (!ctState.accountId && ctState.accounts.length) {
       ctState.accountId    = ctState.accounts[0].ctidTraderAccountId;
       ctState.accountLabel = ctState.accounts[0].accountNumber;
@@ -16859,26 +16871,32 @@ async function fetchAccounts() {
   }
 
   // ─── 9. TOKEN REFRESH ──────────────────────────────────────────
+  // cTrader token endpoint supports CORS – call directly, no proxy needed
   async function ensureFreshToken() {
     if (!ctState.accessToken) throw new Error('not_connected');
     if (Date.now() < ctState.expiresAt - 60_000) return;
     if (!ctState.refreshToken) throw new Error('no_refresh_token');
+    // Proxy still needed for refresh because client_secret must stay server-side
     const r = await fetch(`${WORKER_URL}/api/refresh`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ refresh_token: ctState.refreshToken })
     });
+    if (!r.ok) {
+      const txt = await r.text().catch(() => '');
+      throw new Error(`refresh_failed: ${r.status} ${txt.substring(0,120)}`);
+    }
     const d = await r.json();
     const accessToken  = d.accessToken  || d.access_token;
     const refreshToken = d.refreshToken || d.refresh_token;
     const expiresIn    = d.expiresIn    || d.expires_in;
-    if (!accessToken) throw new Error('refresh_failed');
+    if (!accessToken) throw new Error('refresh_failed: no access_token in response');
     ctState.accessToken  = accessToken;
     ctState.refreshToken = refreshToken || ctState.refreshToken;
     ctState.expiresAt    = Date.now() + (expiresIn ? expiresIn*1000 : 30*60*1000);
     await saveState();
   }
 
-  // ─── 10. SYNC TRADES ───────────────────────────────────────────
+  // ─── 10. SYNC TRADES (retry logic for cold-start 503s) ────────
   async function ctSyncNow(daysBack) {
     if (!ctState.accessToken) { alert('Connect cTrader first.'); return; }
     if (!ctState.accountId)   { alert('Select an account first.'); return; }
@@ -16888,18 +16906,47 @@ async function fetchAccounts() {
       const from = daysBack
         ? now - daysBack*24*60*60*1000
         : (ctState.lastSync ? ctState.lastSync - 60_000 : now - 90*24*60*60*1000);
-      const r = await fetch(`${WORKER_URL}/api/deals`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          access_token:        ctState.accessToken,
-          ctidTraderAccountId: ctState.accountId,
-          accountEnv:          ctState.accountEnv,
-          fromTimestamp:       from,
-          toTimestamp:         now
-        })
-      });
-      const data  = await r.json();
-      const deals = Array.isArray(data) ? data : (data.data || data.deals || []);
+      const accountId = Number(ctState.accountId);
+
+      // Retry up to 3 times with backoff – handles cold-start 503s from Deno Deploy
+      // which also strips CORS headers, making the browser see a CORS error instead of 503.
+      let deals = null, lastErr = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 30000);
+          const r = await fetch(`${WORKER_URL}/api/deals`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              access_token:        ctState.accessToken,
+              ctidTraderAccountId: accountId,
+              accountEnv:          ctState.accountEnv,
+              fromTimestamp:       from,
+              toTimestamp:         now
+            })
+          });
+          clearTimeout(timer);
+          if (r.ok) {
+            const data = await r.json();
+            deals = Array.isArray(data) ? data : (data.data || data.deals || []);
+            break;
+          }
+          const errText = await r.text().catch(() => '');
+          lastErr = new Error(`Server error ${r.status}: ${errText.substring(0, 200)}`);
+          console.warn(`[ctrader] attempt ${attempt} failed (${r.status})`);
+        } catch(fetchErr) {
+          lastErr = fetchErr;
+          console.warn(`[ctrader] attempt ${attempt} fetch error:`, fetchErr.message);
+        }
+        if (attempt < 3) {
+          if (window.showToast) showToast(`Sync attempt ${attempt} failed, retrying…`);
+          await new Promise(r => setTimeout(r, attempt * 2000));
+        }
+      }
+      if (deals == null) throw lastErr || new Error('All sync attempts failed');
+
       const result = mergeDealsIntoJournal(deals);
       ctState.lastSync = now;
       await saveState();
