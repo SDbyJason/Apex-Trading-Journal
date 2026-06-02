@@ -16833,8 +16833,11 @@ async function startProCheckout() {
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
   // ─── 8. ACCOUNTS ───────────────────────────────────────────────
-  async function fetchAccounts() {
-    await ensureFreshToken();
+ async function fetchAccounts() {
+    try { await ensureFreshToken(); } catch(e) {
+      // Token evtl. noch gültig, trotzdem versuchen
+      if (!ctState.accessToken) throw e;
+    }
     const r = await fetch(`${WORKER_URL}/api/accounts`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ access_token: ctState.accessToken })
