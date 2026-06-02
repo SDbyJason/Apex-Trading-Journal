@@ -17040,9 +17040,11 @@ async function fetchAccounts() {
     while (!window.currentUID && tries < 80) { await sleep(250); tries++; }
     await loadState();
     if (ctState.accessToken) {
-      try { await fetchAccounts(); } catch(e){ console.warn('[ctrader] accounts', e); }
-      render();
-    }
+   try { await fetchAccounts(); } catch(e){ console.warn('[ctrader] accounts', e); }
+     ctSyncNow().catch(()=>{}); // ← diese Zeile hinzufügen
+     render();
+}
+
     render();
     startPolling();
     await processAuthHash();
