@@ -16709,6 +16709,10 @@ async function startProCheckout() {
     cardEl = buildCard();
     logoutWrapper.parentNode.insertBefore(cardEl, logoutWrapper);
     render();
+    // Falls accounts noch nicht geladen: nachladen
+    if (ctState.accessToken && (!ctState.accounts || !ctState.accounts.length)) {
+      fetchAccounts().then(() => render()).catch(() => {});
+    }
     return true;
   }
 
