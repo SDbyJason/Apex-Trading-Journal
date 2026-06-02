@@ -16751,6 +16751,7 @@ async function startProCheckout() {
           accountEnv:   ctState.accountEnv,
           accounts:     ctState.accounts || [],
           lastSync:     ctState.lastSync,
+          connectedAt:  ctState.connectedAt,
           env:          ctState.env
         }
       }, { merge: true });
@@ -16824,6 +16825,7 @@ async function startProCheckout() {
     ctState.refreshToken = payload.refreshToken;
     ctState.expiresAt    = Date.now() + (payload.expiresIn ? payload.expiresIn*1000 : 30*60*1000);
     ctState.env          = payload.env || ctState.env;
+    if (!ctState.connectedAt) ctState.connectedAt = Date.now(); // track when user first connected
     try { await fetchAccounts(); } catch(e) { console.warn('[ctrader] fetchAccounts', e); }
     await saveState();
     render();
@@ -16959,7 +16961,7 @@ async function startProCheckout() {
       const now  = Date.now();
       const from = daysBack
         ? now - daysBack*24*60*60*1000
-        : (ctState.lastSync ? ctState.lastSync - 60_000 : now - 90*24*60*60*1000);
+        : (ctState.lastSync ? ctState.lastSync - 60_000 : (ctState.connectedAt || now - 24*60*60*1000));
       const accountId = Number(ctState.accountId);
 
       const deals = await ctFetchDealsChunked(ctState.accessToken, accountId, ctState.accountEnv, from, now);
