@@ -16833,41 +16833,45 @@ async function startProCheckout() {
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
   // ─── 8. ACCOUNTS ───────────────────────────────────────────────
-  // Direct REST calls to cTrader – no proxy needed, CORS is open on their API
+  // Must go through proxy – cTrader REST API blocks direct browser requests (no CORS)
   async function fetchAccounts() {
     console.log('[fetchAccounts] start, token:', ctState.accessToken?.substring(0,10), 'expiresAt:', new Date(ctState.expiresAt));
     try { await ensureFreshToken(); } catch(e) {
       console.warn('[fetchAccounts] ensureFreshToken failed:', e.message);
       if (!ctState.accessToken) throw e;
     }
-    const token = encodeURIComponent(ctState.accessToken);
-    const [liveRes, demoRes] = await Promise.all([
-      fetch(`https://api.spotware.com/connect/tradingaccounts?access_token=${token}`).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch(`https://demo-api.spotware.com/connect/tradingaccounts?access_token=${token}`).then(r => r.ok ? r.json() : null).catch(() => null),
-    ]);
-    const seen = new Set();
-    const accounts = [];
-    for (const [result, envLabel] of [[liveRes,'live'],[demoRes,'demo']]) {
-      if (!result?.data) continue;
-      for (const a of result.data) {
-        const id = a.ctidTraderAccountId || a.accountId;
-        if (!id || seen.has(id)) continue;
-        seen.add(id);
-        accounts.push({
-          ctidTraderAccountId: id,
-          accountNumber:       a.accountNumber,
-          brokerName:          a.brokerName || a.brokerTitle || null,
-          _env:                a.live === false ? 'demo' : (a.live === true ? 'live' : envLabel)
+    let lastErr = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const r = await fetch(`${WORKER_URL}/api/accounts`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: ctState.accessToken })
         });
+        if (r.ok) {
+          const data = await r.json();
+          console.log('[fetchAccounts] proxy response:', JSON.stringify(data));
+          ctState.accounts = (data.accounts || []).map(a => ({
+            ctidTraderAccountId: a.ctidTraderAccountId || a.accountId,
+            accountNumber:       a.accountNumber,
+            brokerName:          a.brokerName || a.brokerTitle || null,
+            _env:                a.live === false ? 'demo' : (a.live === true ? 'live' : (a._env || ctState.env || 'demo'))
+          })).filter(a => a.ctidTraderAccountId);
+          if (!ctState.accountId && ctState.accounts.length) {
+            ctState.accountId    = ctState.accounts[0].ctidTraderAccountId;
+            ctState.accountLabel = ctState.accounts[0].accountNumber;
+            ctState.accountEnv   = ctState.accounts[0]._env;
+          }
+          return;
+        }
+        lastErr = new Error(`Proxy ${r.status}`);
+        console.warn(`[fetchAccounts] attempt ${attempt} failed (${r.status})`);
+      } catch(e) {
+        lastErr = e;
+        console.warn(`[fetchAccounts] attempt ${attempt} error:`, e.message);
       }
+      if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 2000));
     }
-    console.log('[fetchAccounts] direct response:', accounts.length, 'accounts');
-    ctState.accounts = accounts;
-    if (!ctState.accountId && ctState.accounts.length) {
-      ctState.accountId    = ctState.accounts[0].ctidTraderAccountId;
-      ctState.accountLabel = ctState.accounts[0].accountNumber;
-      ctState.accountEnv   = ctState.accounts[0]._env;
-    }
+    throw lastErr || new Error('fetchAccounts failed');
   }
 
   // ─── 9. TOKEN REFRESH ──────────────────────────────────────────
