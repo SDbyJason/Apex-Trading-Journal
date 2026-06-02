@@ -16844,7 +16844,8 @@ async function fetchAccounts() {
       body: JSON.stringify({ access_token: ctState.accessToken })
     });
     const data = await r.json();
-  ctState.accounts = (data.accounts || []).map(a => ({
+    console.log('[fetchAccounts] API response:', JSON.stringify(data));
+    ctState.accounts = (data.accounts || []).map(a => ({
       ctidTraderAccountId: a.ctidTraderAccountId,
       accountNumber:       a.accountNumber,
       brokerName:          a.brokerName || a.brokerTitleShort,
