@@ -16935,6 +16935,9 @@ async function startProCheckout() {
           if (r.ok) {
             const data = await r.json();
             chunkDeals = Array.isArray(data) ? data : (data.data || data.deals || []);
+            // Save rotated tokens immediately so next chunk uses fresh token
+            if (data.newAccessToken)  { ctState.accessToken  = data.newAccessToken;  accessToken = data.newAccessToken; }
+            if (data.newRefreshToken) { ctState.refreshToken = data.newRefreshToken; refreshToken = data.newRefreshToken; }
             break;
           }
           const errText = await r.text().catch(() => '');
