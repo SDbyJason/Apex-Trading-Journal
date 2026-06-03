@@ -16902,59 +16902,48 @@ async function startProCheckout() {
     await saveState();
   }
 
-  // ─── 10. SYNC TRADES (chunked by 30d to avoid Deno 30s timeout) ─
-  // Deno Deploy has a ~30s request timeout. Fetching 90 days of deals in one
-  // request times out. We split into 30-day chunks and call the proxy per chunk.
+  // ─── 10. SYNC TRADES ───────────────────────────────────────────
+  // Single request per sync — the server (server.ts) handles internal 7-day chunking
+  // with correct token rotation between chunks. No frontend chunking needed.
   async function ctFetchDealsChunked(accessToken, refreshToken, accountId, accountEnv, from, to) {
-    const MS_30 = 30 * 24 * 60 * 60 * 1000;
-    const allDeals = [];
-    let chunkFrom = from;
-    let chunkNum = 0;
-    while (chunkFrom < to) {
-      const chunkTo = Math.min(chunkFrom + MS_30, to);
-      chunkNum++;
-      const label = new Date(chunkFrom).toLocaleDateString('de') + '–' + new Date(chunkTo).toLocaleDateString('de');
-      if (window.showToast) showToast(`Syncing chunk ${chunkNum}: ${label}…`);
-      console.log(`[ctrader] chunk ${chunkNum}: ${label}`);
+    const label = new Date(from).toLocaleDateString('de') + '–' + new Date(to).toLocaleDateString('de');
+    if (window.showToast) showToast(`Syncing ${label}…`);
+    console.log(`[ctrader] fetching deals from ${label}`);
 
-      let chunkDeals = null, lastErr = null;
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          const r = await fetch(`${WORKER_URL}/api/deals`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              access_token:        accessToken,
-              refresh_token:       refreshToken,
-              ctidTraderAccountId: accountId,
-              accountEnv:          accountEnv,
-              fromTimestamp:       chunkFrom,
-              toTimestamp:         chunkTo
-            })
-          });
-          if (r.ok) {
-            const data = await r.json();
-            chunkDeals = Array.isArray(data) ? data : (data.data || data.deals || []);
-            // Save rotated tokens immediately so next chunk uses fresh token
-            if (data.newAccessToken)  { ctState.accessToken  = data.newAccessToken;  accessToken = data.newAccessToken; }
-            if (data.newRefreshToken) { ctState.refreshToken = data.newRefreshToken; refreshToken = data.newRefreshToken; }
-            break;
-          }
-          const errText = await r.text().catch(() => '');
-          lastErr = new Error(`Server error ${r.status}: ${errText.substring(0, 200)}`);
-          console.warn(`[ctrader] chunk ${chunkNum} attempt ${attempt} failed (${r.status})`);
-        } catch(fetchErr) {
-          lastErr = fetchErr;
-          console.warn(`[ctrader] chunk ${chunkNum} attempt ${attempt} error:`, fetchErr.message);
+    let lastErr = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const r = await fetch(`${WORKER_URL}/api/deals`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_token:        accessToken,
+            refresh_token:       refreshToken,
+            ctidTraderAccountId: accountId,
+            accountEnv:          accountEnv,
+            fromTimestamp:       from,
+            toTimestamp:         to
+          })
+        });
+        if (r.ok) {
+          const data = await r.json();
+          const deals = Array.isArray(data) ? data : (data.data || data.deals || []);
+          // cTrader rotates tokens on every deal request — always persist the latest ones
+          const newAccessToken  = data.newAccessToken  || accessToken;
+          const newRefreshToken = data.newRefreshToken || refreshToken;
+          console.log(`[ctrader] got ${deals.length} deals`);
+          return { deals, newAccessToken, newRefreshToken };
         }
-        if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 2000));
+        const errText = await r.text().catch(() => '');
+        lastErr = new Error(`Server error ${r.status}: ${errText.substring(0, 200)}`);
+        console.warn(`[ctrader] attempt ${attempt} failed (${r.status})`);
+      } catch(fetchErr) {
+        lastErr = fetchErr;
+        console.warn(`[ctrader] attempt ${attempt} error:`, fetchErr.message);
       }
-      if (chunkDeals == null) throw lastErr || new Error(`Chunk ${chunkNum} failed`);
-      console.log(`[ctrader] chunk ${chunkNum}: ${chunkDeals.length} deals`);
-      allDeals.push(...chunkDeals);
-      chunkFrom = chunkTo + 1;
+      if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 2000));
     }
-    return { deals: allDeals, newAccessToken: null, newRefreshToken: null };
+    throw lastErr || new Error('ctFetchDeals failed after 3 attempts');
   }
 
   async function ctSyncNow(daysBack) {
@@ -16962,7 +16951,7 @@ async function startProCheckout() {
     if (!ctState.accountId)   { alert('Select an account first.'); return; }
     try {
       await ensureFreshToken();
-      const now  = Date.now();
+      const now    = Date.now();
       const MS_DAY = 24 * 60 * 60 * 1000;
 
       // Check if we have ever successfully imported cTrader trades
@@ -16977,21 +16966,23 @@ async function startProCheckout() {
         // Incremental sync: from last successful sync minus 5min overlap
         from = ctState.lastSync - 5 * 60_000;
       } else {
-        // First sync or no trades yet: go back 90 days
-        from = now - 90 * MS_DAY;
+        // First sync or no trades yet: go back 180 days
+        from = now - 180 * MS_DAY;
       }
 
       const accountId = Number(ctState.accountId);
 
-      const { deals, newAccessToken, newRefreshToken } = await ctFetchDealsChunked(ctState.accessToken, ctState.refreshToken, accountId, ctState.accountEnv, from, now);
+      const { deals, newAccessToken, newRefreshToken } = await ctFetchDealsChunked(
+        ctState.accessToken, ctState.refreshToken, accountId, ctState.accountEnv, from, now
+      );
 
-      // Update tokens if cTrader rotated them during the session
+      // Always persist the latest rotated tokens from cTrader
       if (newAccessToken)  { ctState.accessToken  = newAccessToken; }
       if (newRefreshToken) { ctState.refreshToken = newRefreshToken; }
 
       const result = mergeDealsIntoJournal(deals);
-      // Only advance lastSync if this was a successful sync with data, or explicit range sync
-      if (daysBack || deals.length > 0) ctState.lastSync = now;
+      // Advance lastSync after every successful request (even 0 deals = range checked)
+      ctState.lastSync = now;
       await saveState();
       if (window.save) await save();
       if (window.renderTrades) renderTrades();
