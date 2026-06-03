@@ -16876,20 +16876,17 @@ async function startProCheckout() {
     throw lastErr || new Error('fetchAccounts failed');
   }
 
-  // ─── 9. TOKEN REFRESH ──────────────────────────────────────────
-  // cTrader token endpoint supports CORS – call directly, no proxy needed
-  async function ensureFreshToken() {
-    if (!ctState.accessToken) throw new Error('not_connected');
-    if (Date.now() < ctState.expiresAt - 60_000) return;
+  // ─── 9. TOKEN REFRESH ──────────────────────────────────────────────
+  async function doTokenRefresh() {
     if (!ctState.refreshToken) throw new Error('no_refresh_token');
-    // Proxy still needed for refresh because client_secret must stay server-side
+    console.log('[ctrader] refreshing access token...');
     const r = await fetch(`${WORKER_URL}/api/refresh`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: ctState.refreshToken })
     });
     if (!r.ok) {
       const txt = await r.text().catch(() => '');
-      throw new Error(`refresh_failed: ${r.status} ${txt.substring(0,120)}`);
+      throw new Error(`refresh_failed: ${r.status} ${txt.substring(0, 120)}`);
     }
     const d = await r.json();
     const accessToken  = d.accessToken  || d.access_token;
@@ -16898,8 +16895,35 @@ async function startProCheckout() {
     if (!accessToken) throw new Error('refresh_failed: no access_token in response');
     ctState.accessToken  = accessToken;
     ctState.refreshToken = refreshToken || ctState.refreshToken;
-    ctState.expiresAt    = Date.now() + (expiresIn ? expiresIn*1000 : 30*60*1000);
+    // expiresIn from cTrader is in seconds (~2628000 = 30 days)
+    ctState.expiresAt    = Date.now() + (expiresIn ? expiresIn * 1000 : 30 * 60 * 1000);
     await saveState();
+    console.log('[ctrader] token refreshed, new expiresAt:', new Date(ctState.expiresAt));
+  }
+
+  // Ensures the stored accessToken is valid before API calls.
+  // expiresAt=0 forces a refresh (set when token rotation detected server-side).
+  async function ensureFreshToken() {
+    if (!ctState.accessToken) throw new Error('not_connected');
+    const needsRefresh = ctState.expiresAt === 0 || Date.now() >= ctState.expiresAt - 60_000;
+    if (!needsRefresh) return;
+    await doTokenRefresh();
+  }
+
+  // Wraps an async API call: on CH_ACCESS_TOKEN_INVALID, forces a token refresh
+  // and retries once. Handles tokens rotated server-side (expiresAt stale in DB).
+  async function withTokenRetry(fn) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (e && (e.message || '').includes('ACCESS_TOKEN_INVALID')) {
+        console.warn('[ctrader] access token invalid, forcing refresh and retrying...');
+        ctState.expiresAt = 0;
+        await doTokenRefresh();
+        return await fn();
+      }
+      throw e;
+    }
   }
 
   // ─── 10. SYNC TRADES (chunked by 30d to avoid Deno 30s timeout) ─
@@ -16968,10 +16992,12 @@ async function startProCheckout() {
         : (ctState.lastSync ? ctState.lastSync - 5*60_000 : (ctState.connectedAt || now - 24*60*60*1000));
       const accountId = Number(ctState.accountId);
 
-      const { deals, newAccessToken, newRefreshToken } = await ctFetchDealsChunked(ctState.accessToken, ctState.refreshToken, accountId, ctState.accountEnv, from, now);
+      const { deals, newAccessToken, newRefreshToken } = await withTokenRetry(() =>
+        ctFetchDealsChunked(ctState.accessToken, ctState.refreshToken, accountId, ctState.accountEnv, from, now)
+      );
 
       // Update tokens if cTrader rotated them during the session
-      if (newAccessToken)  { ctState.accessToken  = newAccessToken; }
+      if (newAccessToken)  { ctState.accessToken  = newAccessToken; ctState.expiresAt = 0; } // force re-check next sync
       if (newRefreshToken) { ctState.refreshToken = newRefreshToken; }
 
       const result = mergeDealsIntoJournal(deals);
