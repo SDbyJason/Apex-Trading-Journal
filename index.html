@@ -16905,7 +16905,7 @@ async function startProCheckout() {
   // ─── 10. SYNC TRADES (chunked by 30d to avoid Deno 30s timeout) ─
   // Deno Deploy has a ~30s request timeout. Fetching 90 days of deals in one
   // request times out. We split into 30-day chunks and call the proxy per chunk.
-  async function ctFetchDealsChunked(accessToken, accountId, accountEnv, from, to) {
+  async function ctFetchDealsChunked(accessToken, refreshToken, accountId, accountEnv, from, to) {
     const MS_30 = 30 * 24 * 60 * 60 * 1000;
     const allDeals = [];
     let chunkFrom = from;
@@ -16925,7 +16925,7 @@ async function startProCheckout() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               access_token:        accessToken,
-              refresh_token:       ctState.refreshToken,
+              refresh_token:       refreshToken,
               ctidTraderAccountId: accountId,
               accountEnv:          accountEnv,
               fromTimestamp:       chunkFrom,
@@ -16951,7 +16951,7 @@ async function startProCheckout() {
       allDeals.push(...chunkDeals);
       chunkFrom = chunkTo + 1;
     }
-    return allDeals;
+    return { deals: allDeals, newAccessToken: null, newRefreshToken: null };
   }
 
   async function ctSyncNow(daysBack) {
@@ -16962,10 +16962,14 @@ async function startProCheckout() {
       const now  = Date.now();
       const from = daysBack
         ? now - daysBack*24*60*60*1000
-        : (ctState.lastSync ? ctState.lastSync - 60_000 : (ctState.connectedAt || now - 24*60*60*1000));
+        : (ctState.lastSync ? ctState.lastSync - 5*60_000 : (ctState.connectedAt || now - 24*60*60*1000));
       const accountId = Number(ctState.accountId);
 
-      const deals = await ctFetchDealsChunked(ctState.accessToken, accountId, ctState.accountEnv, from, now);
+      const { deals, newAccessToken, newRefreshToken } = await ctFetchDealsChunked(ctState.accessToken, ctState.refreshToken, accountId, ctState.accountEnv, from, now);
+
+      // Update tokens if cTrader rotated them during the session
+      if (newAccessToken)  { ctState.accessToken  = newAccessToken; }
+      if (newRefreshToken) { ctState.refreshToken = newRefreshToken; }
 
       const result = mergeDealsIntoJournal(deals);
       ctState.lastSync = now;
