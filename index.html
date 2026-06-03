@@ -16961,6 +16961,7 @@ async function startProCheckout() {
 
       let from;
       if (daysBack) {
+        // Explicit range requested — always fetch full range regardless of lastSync
         from = now - daysBack * MS_DAY;
       } else if (ctState.lastSync && hasCtraderTrades) {
         // Incremental sync: from last successful sync minus 5min overlap
@@ -16970,6 +16971,7 @@ async function startProCheckout() {
         from = now - 180 * MS_DAY;
       }
 
+      console.log(`[ctrader] sync range: ${new Date(from).toISOString()} → ${new Date(now).toISOString()}`);
       const accountId = Number(ctState.accountId);
 
       const { deals, newAccessToken, newRefreshToken } = await ctFetchDealsChunked(
@@ -16981,8 +16983,12 @@ async function startProCheckout() {
       if (newRefreshToken) { ctState.refreshToken = newRefreshToken; }
 
       const result = mergeDealsIntoJournal(deals);
-      // Advance lastSync after every successful request (even 0 deals = range checked)
-      ctState.lastSync = now;
+      // Advance lastSync ONLY when deals were actually found, or this is the very first sync.
+      // If we got 0 deals, keep the old lastSync so the next run retries the same range
+      // rather than jumping forward and permanently skipping this window.
+      if (result.added > 0 || result.updated > 0 || !ctState.lastSync) {
+        ctState.lastSync = now;
+      }
       await saveState();
       if (window.save) await save();
       if (window.renderTrades) renderTrades();
@@ -16999,23 +17005,38 @@ async function startProCheckout() {
   function mergeDealsIntoJournal(deals) {
     let added=0, updated=0, skipped=0;
     if (!window.journalData) window.journalData = {};
+
+    // Helper: cTrader timestamps can be epoch-ms OR epoch-seconds — normalise to ms
+    function toMs(ts) {
+      if (!ts) return null;
+      const n = Number(ts);
+      // If the value looks like seconds (< year 3000 in seconds = 32503680000),
+      // but also > a plausible unix-second for year 2000 (946684800)
+      return (n > 946684800 && n < 32503680000) ? n * 1000 : n;
+    }
+
     const byPos = {};
     deals.forEach(d => {
       const pid = String(d.positionId || d.dealId);
       (byPos[pid] = byPos[pid] || []).push(d);
     });
     Object.entries(byPos).forEach(([pid, group]) => {
-      group.sort((a,b) => (a.executionTimestamp||a.createTimestamp||0) - (b.executionTimestamp||b.createTimestamp||0));
+      group.sort((a,b) => (toMs(a.executionTimestamp||a.createTimestamp)||0) - (toMs(b.executionTimestamp||b.createTimestamp)||0));
       const openDeal  = group[0];
       const closeDeal = group[group.length-1];
-      if (!closeDeal.closePositionDetail) return; // skip open positions (no closePositionDetail)
+      // Accept both field name variants returned by different cTrader API versions
+      const cpd = closeDeal.closePositionDetail || closeDeal.closePositionDetails
+                || openDeal.closePositionDetail  || openDeal.closePositionDetails;
+      if (!cpd) return; // still an open position — no close detail present
 
-      const closeTs = closeDeal.executionTimestamp || closeDeal.createTimestamp;
+      const rawTs  = closeDeal.executionTimestamp || closeDeal.createTimestamp;
+      const closeTs = toMs(rawTs);
+      if (!closeTs) return;
       const dateKey = new Date(closeTs).toISOString().slice(0,10);
       if (!journalData[dateKey]) journalData[dateKey] = { trades: [], notes: '', disc:5, conf:5, focus:5, pat:5 };
       const trades = journalData[dateKey].trades;
       const idx = trades.findIndex(t => t.ctraderId && String(t.ctraderId) === pid);
-      const mapped = mapDealToTrade(pid, openDeal, closeDeal);
+      const mapped = mapDealToTrade(pid, openDeal, closeDeal, cpd);
 
       if (idx === -1) { trades.push(mapped); added++; }
       else {
@@ -17031,11 +17052,18 @@ async function startProCheckout() {
         updated++;
       }
     });
+    console.log(`[ctrader] merge result: +${added} added, ${updated} updated, ${skipped} skipped`);
     return { added, updated, skipped };
   }
-  function mapDealToTrade(positionId, openDeal, closeDeal) {
+  function mapDealToTrade(positionId, openDeal, closeDeal, cpd) {
+    cpd = cpd || {};
+    // Helper: normalise epoch-s → epoch-ms
+    function toMs(ts) {
+      if (!ts) return null;
+      const n = Number(ts);
+      return (n > 946684800 && n < 32503680000) ? n * 1000 : n;
+    }
     const symbol = closeDeal.symbolName || openDeal.symbolName || '';
-    const cpd    = closeDeal.closePositionDetail || {};
     // tradeSide from cTrader: 1=BUY, 2=SELL (numeric protobuf enum)
     const sideRaw = (openDeal.tradeSide || openDeal.dealType || '').toString().toUpperCase();
     const sideNum = Number(openDeal.tradeSide || 0);
@@ -17043,23 +17071,28 @@ async function startProCheckout() {
                  : (sideRaw.includes('SELL')|| sideRaw === 'SHORT' || sideNum === 2) ? 'short' : '';
     const entry  = openDeal.executionPrice  || openDeal.price || '';
     const exit   = closeDeal.executionPrice || closeDeal.price || '';
-    const lots   = Number(openDeal.volume || openDeal.filledVolume || cpd.closedVolume || 0) / 100;
+    // volume is in 1/100 lots in cTrader (e.g. 100000 = 1 lot)
+    const rawVol = Number(openDeal.volume || openDeal.filledVolume || cpd.closedVolume || 0);
+    const lots   = rawVol > 0 ? rawVol / 100 : '';
     const pnl    = (cpd.grossProfit !== undefined ? cpd.grossProfit : (cpd.netProfit || 0));
     let pips = '';
     if (entry && exit) {
       const diff  = (parseFloat(exit) - parseFloat(entry)) * (dir === 'short' ? -1 : 1);
       const isJPY = /JPY/i.test(symbol);
-      pips = (diff * (isJPY ? 100 : 10000)).toFixed(1);
+      const isMetal = /XAU|GOLD|XAG|SILVER/i.test(symbol);
+      pips = isMetal ? (diff * 10).toFixed(1) : (diff * (isJPY ? 100 : 10000)).toFixed(1);
     }
+    const openTs  = toMs(openDeal.executionTimestamp  || openDeal.createTimestamp);
+    const closeTs = toMs(closeDeal.executionTimestamp || closeDeal.createTimestamp);
     return {
       symbol, market: guessMarket(symbol), dir,
       entry: String(entry), sl:'', tp:'', exit: String(exit),
-      pips, rr:'', session: detectSession(openDeal.executionTimestamp || openDeal.createTimestamp),
-      tf:'', setup:'', lots: String(lots || ''), grade:'',
+      pips, rr:'', session: detectSession(openTs),
+      tf:'', setup:'', lots: lots !== '' ? String(lots) : '', grade:'',
       mistakes:[], positives:[], note:'', pnl,
       source:'ctrader', ctraderId: positionId,
-      openTime:  openDeal.executionTimestamp  || openDeal.createTimestamp  || null,
-      closeTime: closeDeal.executionTimestamp || closeDeal.createTimestamp || null,
+      openTime:  openTs  || null,
+      closeTime: closeTs || null,
       manuallyEdited: false
     };
   }
@@ -17072,8 +17105,8 @@ async function startProCheckout() {
     if (/USD|EUR|GBP|JPY|AUD|CAD|CHF|NZD/.test(s)) return 'Forex';
     return '';
   }
-  function detectSession(ts) {
-    if (!ts) return ''; const h = new Date(ts).getUTCHours();
+  function detectSession(tsMs) {
+    if (!tsMs) return ''; const h = new Date(tsMs).getUTCHours();
     if (h<7) return 'Asia'; if (h<12) return 'London'; if (h<17) return 'NY'; return 'Late';
   }
 
