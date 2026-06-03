@@ -16963,9 +16963,24 @@ async function startProCheckout() {
     try {
       await ensureFreshToken();
       const now  = Date.now();
-      const from = daysBack
-        ? now - daysBack*24*60*60*1000
-        : (ctState.lastSync ? ctState.lastSync - 5*60_000 : (ctState.connectedAt || now - 24*60*60*1000));
+      const MS_DAY = 24 * 60 * 60 * 1000;
+
+      // Check if we have ever successfully imported cTrader trades
+      const hasCtraderTrades = window.journalData && Object.values(window.journalData).some(
+        day => day.trades && day.trades.some(t => t.source === 'ctrader')
+      );
+
+      let from;
+      if (daysBack) {
+        from = now - daysBack * MS_DAY;
+      } else if (ctState.lastSync && hasCtraderTrades) {
+        // Incremental sync: from last successful sync minus 5min overlap
+        from = ctState.lastSync - 5 * 60_000;
+      } else {
+        // First sync or no trades yet: go back 90 days
+        from = now - 90 * MS_DAY;
+      }
+
       const accountId = Number(ctState.accountId);
 
       const { deals, newAccessToken, newRefreshToken } = await ctFetchDealsChunked(ctState.accessToken, ctState.refreshToken, accountId, ctState.accountEnv, from, now);
@@ -16975,7 +16990,8 @@ async function startProCheckout() {
       if (newRefreshToken) { ctState.refreshToken = newRefreshToken; }
 
       const result = mergeDealsIntoJournal(deals);
-      if (deals.length > 0 || !ctState.lastSync) ctState.lastSync = now; // only advance lastSync if we got data
+      // Only advance lastSync if this was a successful sync with data, or explicit range sync
+      if (daysBack || deals.length > 0) ctState.lastSync = now;
       await saveState();
       if (window.save) await save();
       if (window.renderTrades) renderTrades();
@@ -17001,8 +17017,7 @@ async function startProCheckout() {
       group.sort((a,b) => (a.executionTimestamp||a.createTimestamp||0) - (b.executionTimestamp||b.createTimestamp||0));
       const openDeal  = group[0];
       const closeDeal = group[group.length-1];
-      // Accept if: multiple deals grouped (open+close), OR single deal that IS the close (has closePositionDetail)
-      if (!closeDeal.closePositionDetail) return; // skip if no close detail — position still open
+      if (!closeDeal.closePositionDetail) return; // skip open positions (no closePositionDetail)
 
       const closeTs = closeDeal.executionTimestamp || closeDeal.createTimestamp;
       const dateKey = new Date(closeTs).toISOString().slice(0,10);
@@ -17030,15 +17045,15 @@ async function startProCheckout() {
   function mapDealToTrade(positionId, openDeal, closeDeal) {
     const symbol = closeDeal.symbolName || openDeal.symbolName || '';
     const cpd    = closeDeal.closePositionDetail || {};
-    // tradeSide: 1=BUY/LONG, 2=SELL/SHORT (numeric from cTrader protobuf)
-    const sideRaw = (openDeal.tradeSide || openDeal.dealType || cpd.closingDealType || '').toString().toUpperCase();
+    // tradeSide from cTrader: 1=BUY, 2=SELL (numeric protobuf enum)
+    const sideRaw = (openDeal.tradeSide || openDeal.dealType || '').toString().toUpperCase();
     const sideNum = Number(openDeal.tradeSide || 0);
     const dir    = (sideRaw.includes('BUY') || sideRaw === 'LONG'  || sideNum === 1) ? 'long'
                  : (sideRaw.includes('SELL')|| sideRaw === 'SHORT' || sideNum === 2) ? 'short' : '';
     const entry  = openDeal.executionPrice  || openDeal.price || '';
     const exit   = closeDeal.executionPrice || closeDeal.price || '';
     const lots   = Number(openDeal.volume || openDeal.filledVolume || cpd.closedVolume || 0) / 100;
-    const pnl    = (cpd.grossProfit !== undefined ? cpd.grossProfit : cpd.netProfit) || 0;
+    const pnl    = (cpd.grossProfit !== undefined ? cpd.grossProfit : (cpd.netProfit || 0));
     let pips = '';
     if (entry && exit) {
       const diff  = (parseFloat(exit) - parseFloat(entry)) * (dir === 'short' ? -1 : 1);
