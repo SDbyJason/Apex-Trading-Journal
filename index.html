@@ -16681,6 +16681,8 @@ async function startProCheckout() {
         <select id="ctAccountSelect" class="ct-select"></select>
         <button class="ct-btn" id="ctBtnSync">Sync Now</button>
         <button class="ct-btn" id="ctBtnSync30">Sync Last 30d</button>
+        <button class="ct-btn" id="ctBtnSync180">Sync Last 180d</button>
+        <button class="ct-btn" id="ctBtnResetSync" title="Reset sync pointer — forces full re-fetch on next Sync Now">Reset Sync</button>
         <button class="ct-btn danger" id="ctBtnDisconnect">Disconnect</button>
       </div>
       <div id="ctLastSync" class="ct-meta"></div>
@@ -16689,6 +16691,13 @@ async function startProCheckout() {
     card.querySelector('#ctBtnLive').onclick       = () => ctStartOAuth('live');
     card.querySelector('#ctBtnSync').onclick       = () => ctSyncNow();
     card.querySelector('#ctBtnSync30').onclick     = () => ctSyncNow(30);
+    card.querySelector('#ctBtnSync180').onclick    = () => ctSyncNow(180);
+    card.querySelector('#ctBtnResetSync').onclick  = async () => {
+      ctState.lastSync = 0;
+      await saveState();
+      if (window.showToast) showToast('Sync pointer reset — next Sync Now will fetch 180 days');
+      render();
+    };
     card.querySelector('#ctBtnDisconnect').onclick = () => ctDisconnect();
     return card;
   }
@@ -16959,15 +16968,22 @@ async function startProCheckout() {
         day => day.trades && day.trades.some(t => t.source === 'ctrader')
       );
 
+      // Sanity-check lastSync: reject future values or pre-2000 values.
+      // A corrupted/second-based timestamp would produce a far-future date.
+      const MIN_VALID_LS = new Date('2000-01-01').getTime();
+      const lastSyncOk = ctState.lastSync && ctState.lastSync >= MIN_VALID_LS && ctState.lastSync <= now;
+      if (ctState.lastSync && !lastSyncOk) {
+        console.warn('[ctrader] lastSync invalid (' + new Date(ctState.lastSync).toISOString() + ') — resetting');
+        ctState.lastSync = 0;
+        await saveState();
+      }
+
       let from;
       if (daysBack) {
-        // Explicit range requested — always fetch full range regardless of lastSync
         from = now - daysBack * MS_DAY;
-      } else if (ctState.lastSync && hasCtraderTrades) {
-        // Incremental sync: from last successful sync minus 5min overlap
+      } else if (lastSyncOk && hasCtraderTrades) {
         from = ctState.lastSync - 5 * 60_000;
       } else {
-        // First sync or no trades yet: go back 180 days
         from = now - 180 * MS_DAY;
       }
 
