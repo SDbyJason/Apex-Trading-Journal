@@ -16975,7 +16975,7 @@ async function startProCheckout() {
       if (newRefreshToken) { ctState.refreshToken = newRefreshToken; }
 
       const result = mergeDealsIntoJournal(deals);
-      ctState.lastSync = now;
+      if (deals.length > 0 || !ctState.lastSync) ctState.lastSync = now; // only advance lastSync if we got data
       await saveState();
       if (window.save) await save();
       if (window.renderTrades) renderTrades();
@@ -17001,7 +17001,8 @@ async function startProCheckout() {
       group.sort((a,b) => (a.executionTimestamp||a.createTimestamp||0) - (b.executionTimestamp||b.createTimestamp||0));
       const openDeal  = group[0];
       const closeDeal = group[group.length-1];
-      if (group.length < 2 && !closeDeal.closePositionDetail) return; // only journal CLOSED positions
+      // Accept if: multiple deals grouped (open+close), OR single deal that IS the close (has closePositionDetail)
+      if (!closeDeal.closePositionDetail) return; // skip if no close detail — position still open
 
       const closeTs = closeDeal.executionTimestamp || closeDeal.createTimestamp;
       const dateKey = new Date(closeTs).toISOString().slice(0,10);
@@ -17028,13 +17029,16 @@ async function startProCheckout() {
   }
   function mapDealToTrade(positionId, openDeal, closeDeal) {
     const symbol = closeDeal.symbolName || openDeal.symbolName || '';
-    const dirRaw = (openDeal.tradeSide || openDeal.dealType || '').toString().toUpperCase();
-    const dir    = dirRaw.includes('BUY') || dirRaw === 'LONG'  ? 'long'
-                 : dirRaw.includes('SELL')|| dirRaw === 'SHORT' ? 'short' : '';
+    const cpd    = closeDeal.closePositionDetail || {};
+    // tradeSide: 1=BUY/LONG, 2=SELL/SHORT (numeric from cTrader protobuf)
+    const sideRaw = (openDeal.tradeSide || openDeal.dealType || cpd.closingDealType || '').toString().toUpperCase();
+    const sideNum = Number(openDeal.tradeSide || 0);
+    const dir    = (sideRaw.includes('BUY') || sideRaw === 'LONG'  || sideNum === 1) ? 'long'
+                 : (sideRaw.includes('SELL')|| sideRaw === 'SHORT' || sideNum === 2) ? 'short' : '';
     const entry  = openDeal.executionPrice  || openDeal.price || '';
     const exit   = closeDeal.executionPrice || closeDeal.price || '';
-    const lots   = (openDeal.volume || openDeal.filledVolume || 0) / 100;
-    const pnl    = closeDeal.closePositionDetail ? (closeDeal.closePositionDetail.grossProfit || closeDeal.closePositionDetail.netProfit || 0) : 0;
+    const lots   = Number(openDeal.volume || openDeal.filledVolume || cpd.closedVolume || 0) / 100;
+    const pnl    = (cpd.grossProfit !== undefined ? cpd.grossProfit : cpd.netProfit) || 0;
     let pips = '';
     if (entry && exit) {
       const diff  = (parseFloat(exit) - parseFloat(entry)) * (dir === 'short' ? -1 : 1);
