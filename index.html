@@ -16968,7 +16968,7 @@ async function startProCheckout() {
         from = ctState.lastSync - 5 * 60_000;
       } else {
         // First sync or no trades yet: go back 180 days
-        from = now - 180 * MS_DAY;
+        from = now - 30 * MS_DAY; // Default: 30 days. Use Sync Last 180d button for full history.
       }
 
       console.log(`[ctrader] sync range: ${new Date(from).toISOString()} → ${new Date(now).toISOString()}`);
