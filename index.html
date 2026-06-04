@@ -16992,6 +16992,7 @@ async function startProCheckout() {
       await saveState();
       if (window.save) await save();
       if (window.renderTrades) renderTrades();
+      if (window.updateOverview) updateOverview();
       render();
       const msg = `cTrader sync: +${result.added} new · ${result.updated} updated · ${result.skipped} skipped`;
       if (window.showToast) showToast(msg); else alert(msg);
@@ -17071,10 +17072,9 @@ async function startProCheckout() {
                  : (sideRaw.includes('SELL')|| sideRaw === 'SHORT' || sideNum === 2) ? 'short' : '';
     const entry  = openDeal.executionPrice  || openDeal.price || '';
     const exit   = closeDeal.executionPrice || closeDeal.price || '';
-    // volume is in 1/100 lots in cTrader (e.g. 100000 = 1 lot)
+    // cTrader volume is in units of 0.01 lots (e.g. 100 = 0.01 lot, 10000 = 1 lot, 100000 = 10 lots)
     const rawVol = Number(openDeal.volume || openDeal.filledVolume || cpd.closedVolume || 0);
-    // cTrader volume unit = 0.01 lots (e.g. 100000 = 1 lot, 10000 = 0.1 lot)
-    const lots   = rawVol > 0 ? rawVol / 100000 : '';
+    const lots   = rawVol > 0 ? rawVol / 10000 : '';
     const pnl    = (cpd.grossProfit !== undefined ? cpd.grossProfit : (cpd.netProfit || 0));
     let pips = '';
     if (entry && exit) {
@@ -17087,7 +17087,10 @@ async function startProCheckout() {
     const closeTs = toMs(closeDeal.executionTimestamp || closeDeal.createTimestamp);
     return {
       symbol, market: guessMarket(symbol), dir,
-      entry: String(entry), sl:'', tp:'', exit: String(exit),
+      entry: String(entry),
+      sl: openDeal.stopLoss    != null && Number(openDeal.stopLoss)    > 0 ? String(openDeal.stopLoss)    : '',
+      tp: openDeal.takeProfit  != null && Number(openDeal.takeProfit)  > 0 ? String(openDeal.takeProfit)  : '',
+      exit: String(exit),
       pips, rr:'', session: detectSession(openTs),
       tf:'', setup:'', lots: lots !== '' ? String(lots) : '', grade:'',
       mistakes:[], positives:[], note:'', pnl,
@@ -17519,6 +17522,7 @@ async function startProCheckout() {
 
       if (window.save) await window.save();
       if (window.renderTrades) window.renderTrades();
+      if (window.updateOverview) window.updateOverview();
 
       // Persist last import timestamp
       if (window.db && window.currentUID) {
