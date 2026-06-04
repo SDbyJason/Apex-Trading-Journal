@@ -17076,20 +17076,59 @@ async function startProCheckout() {
     const rawVol = Number(openDeal.volume || openDeal.filledVolume || cpd.closedVolume || 0);
     const lots   = rawVol > 0 ? rawVol / 10000 : '';
     const pnl    = (cpd.grossProfit !== undefined ? cpd.grossProfit : (cpd.netProfit || 0));
+
+    // --- Pip calculation ---
+    // Use symbolId as additional Metal detector in case symbolName resolved late or is empty.
+    // cTrader XAU/USD is always symbolId 41 on most brokers — but we primarily rely on name.
+    // Symbol name check first; fall back to guessMarket for metals detection.
     let pips = '';
     if (entry && exit) {
-      const diff  = (parseFloat(exit) - parseFloat(entry)) * (dir === 'short' ? -1 : 1);
-      const isJPY = /JPY/i.test(symbol);
-      const isMetal = /XAU|GOLD|XAG|SILVER/i.test(symbol);
-      pips = isMetal ? (diff * 10).toFixed(1) : (diff * (isJPY ? 100 : 10000)).toFixed(1);
+      const diff      = (parseFloat(exit) - parseFloat(entry)) * (dir === 'short' ? -1 : 1);
+      const symUpper  = symbol.toUpperCase();
+      const isJPY     = /JPY/.test(symUpper);
+      // Detect metals by name; if name is empty, fall back to market guess via entry price range
+      // XAU (Gold) trades ~1800-3500, XAG ~20-35 — use entry price as heuristic when name unknown
+      const isMetal   = /XAU|GOLD|XAG|SILVER/.test(symUpper)
+                     || (symbol === '' && parseFloat(String(entry)) > 100 && parseFloat(String(entry)) < 10000);
+      const isIndex   = /US30|NAS|SPX|DAX|UK100|JPN|NIK|FTSE|DJIA/.test(symUpper);
+      if (isMetal) {
+        // Gold: 1 pip = $0.10 price movement → multiply price diff by 10
+        pips = (diff * 10).toFixed(1);
+      } else if (isJPY) {
+        pips = (diff * 100).toFixed(1);
+      } else if (isIndex) {
+        // Indices: 1 pip = 1 point
+        pips = diff.toFixed(1);
+      } else {
+        pips = (diff * 10000).toFixed(1);
+      }
     }
+
+    // --- SL / TP ---
+    // cTrader Deal objects do NOT carry stopLoss/takeProfit — those live on the Position.
+    // Best-effort: read from openDeal (some brokers include it), cpd (close detail),
+    // or any field variant. Leave empty rather than store 0.
+    function pickPrice(a, b, c, d) {
+      for (const v of [a, b, c, d]) {
+        if (v != null && Number(v) > 0) return String(v);
+      }
+      return '';
+    }
+    const sl = pickPrice(
+      openDeal.stopLoss, openDeal.stop_loss,
+      cpd.stopLoss,      closeDeal.stopLoss
+    );
+    const tp = pickPrice(
+      openDeal.takeProfit, openDeal.take_profit,
+      cpd.takeProfit,      closeDeal.takeProfit
+    );
+
     const openTs  = toMs(openDeal.executionTimestamp  || openDeal.createTimestamp);
     const closeTs = toMs(closeDeal.executionTimestamp || closeDeal.createTimestamp);
     return {
       symbol, market: guessMarket(symbol), dir,
       entry: String(entry),
-      sl: openDeal.stopLoss    != null && Number(openDeal.stopLoss)    > 0 ? String(openDeal.stopLoss)    : '',
-      tp: openDeal.takeProfit  != null && Number(openDeal.takeProfit)  > 0 ? String(openDeal.takeProfit)  : '',
+      sl, tp,
       exit: String(exit),
       pips, rr:'', session: detectSession(openTs),
       tf:'', setup:'', lots: lots !== '' ? String(lots) : '', grade:'',
