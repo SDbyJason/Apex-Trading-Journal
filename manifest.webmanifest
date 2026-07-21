@@ -1,0 +1,28 @@
+{
+  "name": "APEX Trading Journal",
+  "short_name": "APEX",
+  "description": "Professional trading journal, analytics and AI coach — cTrader, MT5, ATAS, Quantower & TradingView auto-tracking.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#080a0e",
+  "theme_color": "#080a0e",
+  "categories": ["finance", "productivity", "business"],
+  "icons": [
+    {
+      "src": "/apex-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/apex-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
+    }
+  ]
+}
