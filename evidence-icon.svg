@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0d074"/>
+      <stop offset="0.5" stop-color="#e0b84c"/>
+      <stop offset="1" stop-color="#b8922f"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14161c"/>
+      <stop offset="1" stop-color="#080a0e"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <path d="M256 108 L372 175 L372 337 L256 404 L140 337 L140 175 Z"
+        fill="none" stroke="url(#g)" stroke-width="20" stroke-linejoin="round"/>
+  <!-- ET-Ligatur: der obere Balken des E läuft durch und wird zum Querbalken des T -->
+  <path d="M181 178 H331 V200 H203 V245 H245 V267 H203 V308 H253 V330 H181 Z"
+        fill="url(#g)"/>
+  <rect x="281" y="200" width="22" height="130" fill="url(#g)"/>
+</svg>
