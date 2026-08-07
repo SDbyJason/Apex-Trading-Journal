@@ -49381,6 +49381,21 @@ textarea.dr-in { min-height: 120px; resize: vertical; line-height: 1.6; }
     finishManual: finishManual
   };
 
+  /* The markup for this page is appended at the end of the document, which
+     puts it in <body> — but every other .page lives inside #shell, and the
+     shell is what nav() shows and lays out. Outside it the page went active
+     and stayed invisible: no error, no clue, just a blank screen.
+
+     Moved at load instead of by hand-placing the markup inside the shell:
+     this file is spliced in as a block, and a block that repairs its own
+     position cannot be broken by where it happens to land. */
+  (function mountPage() {
+    var pg = document.getElementById('page-drills');
+    var shell = document.getElementById('shell');
+    if (pg && shell && pg.parentElement !== shell) shell.appendChild(pg);
+    else if (!pg || !shell) setTimeout(mountPage, 400);
+  })();
+
   // Render when the page is opened, not on load — the chart library and a
   // year of nothing are not worth fetching for a tab nobody visited.
   if (typeof window.nav === 'function' && !window._drNavHook) {
