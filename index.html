@@ -49133,6 +49133,20 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
      Nothing here is generated. The model never sees these numbers and never
      comments on them; it wrote the surrounding chapter and that is all.   */
 
+  /* SETUPS is declared `const` at the top level of another script block.
+     A top-level const lives in the global LEXICAL environment, not on
+     `window` — so `window.SETUPS` is undefined while the bare name resolves
+     fine. Reading it the wrong way left the setup picker empty, which
+     silently disabled every piece of evidence in the book: no tag chosen,
+     no trades matched, no numbers, and no error anywhere.
+     The literal list is a fallback only, and must stay in step with the one
+     the journal uses. */
+  function setupList() {
+    try { if (typeof SETUPS !== 'undefined' && SETUPS.length) return SETUPS; } catch (e) { }
+    return ['Supply Zone', 'Demand Zone', 'BOS Retest', 'CHoCH', 'FVG Fill', 'Order Block',
+            'Liquidity Sweep', 'Breakout Retest', 'EMA Bounce', 'HTF Confluence', 'ICT Killzone'];
+  }
+
   var MIN_FOR_STATS = 10;   // below this a win rate is noise, so we show none
   var MIN_FOR_EXAMPLES = 1;
 
@@ -49357,7 +49371,7 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
       + '<div class="ac-s" style="margin:5px 0 8px">Pick the tag you use on these trades. Every chapter then shows '
       + '<strong>your own</strong> trades, numbers and habits next to the text — that is where the book stops being generic.</div>'
       + '<div class="ac-setups" id="acSetups">'
-      + (window.SETUPS || []).filter(function (x) { return x !== 'Custom'; }).map(function (x) {
+      + setupList().filter(function (x) { return x !== 'Custom'; }).map(function (x) {
           return '<button type="button" class="ac-chip" data-setup="' + esc(x) + '" onclick="this.classList.toggle(\'on\')">' + esc(x) + '</button>';
         }).join('')
       + '</div></div>'
@@ -49397,9 +49411,25 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
         setups: picked, chapters: chapters, progress: {}, createdAt: Date.now() })
         .then(function (id) { open(id); });
     }).catch(function (e) {
+      /* Two very different failures used to share one message, and the wording
+         blamed the description for both. A permissions error from Firestore is
+         not something the reader can fix by writing more clearly — telling them
+         to try again "a little more concretely" sends them in circles. */
+      var raw = String((e && e.message) || e);
       var m = document.getElementById('acMsg');
-      if (m) m.innerHTML = '<span style="color:var(--loss)">That did not work: ' + esc(String(e.message || e))
-        + '. Try describing it a little more concretely, or again in a moment.</span>';
+      var text;
+      if (/permission|insufficient/i.test(raw)) {
+        text = 'The chapters were written, but saving them failed: your account is not allowed to write here yet. '
+             + 'That is a configuration problem on our side, not something wrong with your description.';
+      } else if (/cut off|unparsable|malformed/i.test(raw)) {
+        text = 'The answer came back incomplete. Try again — or shorten the description a little, '
+             + 'which usually fixes it.';
+      } else if (/fetch|network|failed to fetch/i.test(raw)) {
+        text = 'Could not reach the writing service. Check your connection and try again.';
+      } else {
+        text = 'That did not work: ' + esc(raw) + '. Try again in a moment.';
+      }
+      if (m) m.innerHTML = '<span style="color:var(--loss)">' + text + '</span>';
       var b2 = document.getElementById('acGo'); if (b2) { b2.disabled = false; b2.textContent = 'Write the book →'; }
     });
   }
