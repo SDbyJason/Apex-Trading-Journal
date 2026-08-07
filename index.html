@@ -7930,10 +7930,10 @@ body.light #landingPage * {
       <span class="lp-tag green">Read-only keys</span>
     </div>
     <div class="lp-card reveal d2">
-      <span class="lp-card-icon">🎯</span>
-      <div class="lp-card-title">Drill your strategy</div>
-      <div class="lp-card-desc">Describe how you trade, and Evidence searches real history for places where it applied. You get the setups that worked, the ones that <strong>lost by the rules</strong>, and the near-misses that only looked right — and you decide each one before the chart shows you what happened. Because recognising your setup under time pressure is the part reading a journal never teaches.</div>
-      <span class="lp-tag green">Practice</span>
+      <span class="lp-card-icon">📘</span>
+      <div class="lp-card-title">Academy</div>
+      <div class="lp-card-desc">Two courses to read. One on <strong>trading psychology</strong> — why traders who know exactly what to do still do something else: loss aversion, tilt, revenge trading, position size as a psychological decision. And one that writes <strong>your own strategy</strong> up as six chapters from your own description, so you can study the method you actually trade. Questions after every chapter, and it remembers where you stopped.</div>
+      <span class="lp-tag green">Learn</span>
     </div>
     <div class="lp-card reveal d3">
       <span class="lp-card-icon">🚀</span>
@@ -8125,7 +8125,7 @@ body.light #landingPage * {
         <li><b>Options exposure</b> — net Greeks by underlying &amp; expiry</li>
         <li><b>Session review</b> — sequence, size drift &amp; revenge-window detection</li>
         <li><b>Strategy Lab</b> — automated indicator backtesting + optimiser</li>
-        <li><b>Strategy Drills</b> — learn a strategy on real setups, traps included</li>
+        <li><b>Academy</b> — psychology course + your own strategy written up as a book, with quizzes</li>
         <li>Candlestick charts — drag entry / SL / TP</li>
         <li>Auto MFE / MAE from real price data</li>
         <li>Risk of Ruin, Sharpe &amp; Expectancy / setup</li>
@@ -8210,7 +8210,7 @@ body.light #landingPage * {
         <tr><td>Options exposure — net delta, gamma, theta &amp; vega by underlying and expiry</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Session review — give-back, size drift, revenge windows &amp; rule adherence</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Market Replay — trade any past day candle by candle</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>Strategy Drills — practise your own strategy on real historical setups</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Academy — trading psychology course and your strategy written up, with quizzes</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Tick-precision fills — real tick order when stop and target share a candle</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Replay trade management — multi-TP scale-out, break-even, trailing stop, partial closes</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Drag stop &amp; targets on the chart while the trade runs</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -9001,7 +9001,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">⏱️</div><div><div class="apex-feat-label">Tick-precision replay fills</div><div class="apex-feat-desc">When a stop and a target fall in the same candle, the real Dukascopy tick order decides which came first — instead of always assuming the stop won</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">◎</div><div><div class="apex-feat-label">Options exposure</div><div class="apex-feat-desc">Net delta, gamma, theta and vega across the book, with a heatmap by underlying and expiry</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">📋</div><div><div class="apex-feat-label">Session review</div><div class="apex-feat-desc">Intraday give-back, revenge windows, size drift after losses and rule adherence — with a coach verdict on the process, not the P&L</div></div></div>
-      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎯</div><div><div class="apex-feat-label">Strategy Drills — practise recognising your setup</div><div class="apex-feat-desc">Describe a strategy, and Evidence finds real places in history where it applied — the ones that worked, the ones that lost by the rules, and the near-misses that only looked like a setup. You decide, then see what happened</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎯</div><div><div class="apex-feat-label">Academy — learn it, then check that it stuck</div><div class="apex-feat-desc">A written course on trading psychology — loss aversion, tilt, revenge trading, sizing — plus your own strategy written up as six chapters from your description. Questions after every chapter</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">⚙️</div><div><div class="apex-feat-label">Strategy Lab — automated backtesting</div><div class="apex-feat-desc">Build indicator rules by clicking, run them over years of real bars, sweep the parameters and prove it with a walk-forward test — no code needed</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🕯️</div><div><div class="apex-feat-label">Candlestick Trade Charts</div><div class="apex-feat-desc">See every trade on real candles — drag entry / SL / TP directly on the chart and it updates your journal</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">📐</div><div><div class="apex-feat-label">Auto MFE / MAE</div><div class="apex-feat-desc">Fetches price data & computes max favorable / adverse excursion automatically</div></div></div>
@@ -9724,7 +9724,7 @@ function _authAction(type) {
           <div class="nav-group-drop" id="navgdrop-tools">
             <button class="nav-item" onclick="nav('calculators');closeNavGroups()" id="nav-calculators">Calculators</button>
             <button class="nav-item" onclick="nav('econews');closeNavGroups()" id="nav-econews">Eco Calendar</button>
-            <button class="nav-item" onclick="nav('drills');closeNavGroups()" id="nav-drills">Strategy Drills</button>
+            <button class="nav-item" onclick="nav('academy');closeNavGroups()" id="nav-academy">Academy</button>
             <button class="nav-item" onclick="nav('developer');closeNavGroups()" id="nav-developer">API &amp; Webhooks</button>
           </div>
         </div>
@@ -48774,636 +48774,895 @@ body.light .apxFR-card { background: #fff; }
 })();
 </script>
 
+
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   Evidence — Psychology curriculum  (fixed, authored, offline)
+   ────────────────────────────────────────────────────────────────
+   Deliberately NOT generated. Three reasons:
+
+     · Consistency. Every reader gets the same course, so a claim can be
+       checked, corrected and improved once instead of drifting per user.
+     · Cost and speed. No model call, no waiting, works offline, free.
+     · Accuracy. This material makes claims about how people behave under
+       risk. Generated prose invents supporting numbers, and a learner
+       treats a lesson as settled fact.
+
+   Where a concept comes from published behavioural research it is named
+   without inventing figures. Where it is craft knowledge rather than
+   research, it says so.
+   ════════════════════════════════════════════════════════════════ */
+window.APEX_PSYCH_COURSE = {
+  id: 'psychology',
+  title: 'The psychology of trading',
+  summary: 'Why traders who know exactly what to do still do something else — and what actually helps.',
+  chapters: [
+
+  { id: 'p1', title: 'Knowing is not doing',
+    body: [
+      'Almost nobody loses money because they did not know the rule. They lose it because the rule was clear at the weekend and vague at 15:34 with a position open. The gap between knowing and doing is where trading accounts die, and it is not a knowledge problem — reading more will not close it.',
+      'The reason is that the two happen in different states. When you write your plan you are calm, unbiased and have no money at stake. When you apply it you are none of those things. A plan written by the calm version of you has to survive contact with the version that has just lost twice in a row.',
+      'This is why the fix is almost never "be more disciplined". Discipline is not a quantity you can decide to have more of in the moment; it is the result of decisions you made earlier, when deciding was easy. Every rule you can settle in advance — position size, daily loss limit, how many trades — is one decision the stressed version of you no longer has to make.',
+      'The practical consequence runs through this whole course: build the constraint before you need it. A daily loss limit set on Sunday is a real limit. The same number "decided" while down three trades is a wish.',
+      'It also changes what a journal is for. Recording what you did is only the start. The value is in noticing which rules you break repeatedly — because a rule you break every week is not a discipline failure, it is a badly designed rule.'
+    ],
+    keyPoints: [
+      'The gap is between calm-you writing the plan and stressed-you applying it.',
+      'Decisions made in advance survive pressure; decisions made under pressure do not.',
+      'A rule you break repeatedly is usually a design problem, not a character problem.'
+    ],
+    quiz: [
+      { q: 'You break the same rule about position size roughly once a week. What is the most useful conclusion?',
+        options: ['You need more discipline', 'The rule probably does not fit how you actually trade and should be redesigned', 'You should stop trading that instrument', 'You should raise the limit so you stop breaking it'],
+        correct: 1,
+        why: 'A rule broken that regularly is telling you something about its design. "More discipline" is not actionable and has already failed weekly. Simply raising the limit removes the constraint instead of fixing it.' },
+      { q: 'Why is a daily loss limit set before the session stronger than one decided during it?',
+        options: ['It is a larger number', 'It is set by the calm version of you, who has nothing at stake in that moment', 'Brokers enforce it automatically', 'It makes the trade smaller'],
+        correct: 1,
+        why: 'The point is who decides, not what the number is. Once you are down and want it back, the decision is made by the person the limit exists to protect you from.' }
+    ] },
+
+  { id: 'p2', title: 'Losses hurt more than wins feel good',
+    body: [
+      'People do not weigh gains and losses equally. Losing a given amount registers as a stronger event than gaining the same amount — the finding known as loss aversion, from the prospect theory work of Kahneman and Tversky. It is not a flaw specific to traders; it is how humans evaluate risk generally.',
+      'In a market this produces a very specific and very expensive pattern: cutting winners early and letting losers run. Both feel right in the moment. Closing a winner converts an uncertain gain into a certain one and stops the discomfort of watching it fluctuate. Holding a loser postpones the moment the loss becomes real — while it is open, it still might come back.',
+      'Notice that both behaviours are attempts to manage a feeling, not to manage a position. The market does not know or care where you entered. Your entry price is information about your past, not about what price will do next. The question is always "would I open this position right now, at this price, on this information?" — and if the answer is no, the fact that you are already in it is not a reason to stay.',
+      'The second-order effect is worse than the first. A method with a genuine edge can be turned into a losing one purely through this asymmetry: small wins, large losses, and a strategy that tested well now bleeds.',
+      'What helps is making the exit not a decision. A stop placed at entry and a target defined at entry take the exit out of the hands of the person who will be uncomfortable later. Moving a stop further away is the single most reliable warning sign that this is happening.'
+    ],
+    keyPoints: [
+      'Loss aversion means a loss registers more strongly than an equivalent gain (Kahneman & Tversky).',
+      'It produces cut-winners-early, hold-losers-long — both of which manage feelings, not positions.',
+      'Your entry price says nothing about what price does next.',
+      'Moving a stop further away is the clearest signal that discomfort, not analysis, is driving.'
+    ],
+    quiz: [
+      { q: 'A position is 20 pips against you and approaching your stop. You widen the stop "to give it room". What has most likely just happened?',
+        options: ['You adapted to new volatility', 'You converted a planned, known loss into an unknown one to postpone discomfort', 'You improved the risk-reward ratio', 'You followed the trend'],
+        correct: 1,
+        why: 'Widening a stop after entry replaces a risk you accepted with one you have not. Genuine volatility adjustment happens before entry, when the stop is set — not while it is being hit.' },
+      { q: 'Which question is the right one for an open position?',
+        options: ['How far is it from my entry?', 'How much have I already made or lost on it?', 'Would I open this position right now at this price?', 'How long have I held it?'],
+        correct: 2,
+        why: 'Only the third is about the future. Entry price, unrealised P&L and holding time are all facts about your past and carry no information about what price does next.' },
+      { q: 'A strategy backtests profitably but loses money live, with much smaller average wins than the test. What is the most likely cause?',
+        options: ['The backtest was wrong', 'The market regime changed', 'Winners are being closed early — loss aversion in execution', 'Spread costs'],
+        correct: 2,
+        why: 'Smaller average wins with the same entries points at execution, not the edge. Cutting winners early is the classic mechanism, and it is visible as a gap between planned and realised targets.' }
+    ] },
+
+  { id: 'p3', title: 'Tilt: how it starts and what it looks like',
+    body: [
+      'Tilt is the state where you are still trading but no longer trading your method. The word comes from poker, and the useful part of the idea is that it is a state, not a mood — you can be calm and on tilt, and you can be annoyed and perfectly disciplined.',
+      'It rarely starts with a big loss. More often it starts with something that feels like unfairness: a trade that was right and lost anyway, a stop hit by a wick before the move you predicted, a missed setup that ran without you. What follows is a subtle shift in what you are trying to do. Instead of executing a method with an expectancy, you begin trying to get something back or prove something.',
+      'The observable signs are consistent, which is what makes them useful. Trade frequency rises. Position size drifts up. Time between trades falls. Setups get looser — you take the one that is "close enough". Analysis gets shorter. And crucially, you can usually justify every single one of these individually.',
+      'That last point is why self-diagnosis in the moment does not work. The state that impairs your judgement is the same state you would need good judgement to detect. This is not a failure of honesty; it is structural.',
+      'So the countermeasure has to be external and mechanical: a limit that acts without your agreement. A trade count cap, a daily loss limit, a cooldown timer after a loss. Evidence can flag the pattern from your own data, but the flag only helps if the constraint was already set — a warning you can dismiss is a warning you will dismiss.'
+    ],
+    keyPoints: [
+      'Tilt is a state, not a mood: still trading, no longer trading your method.',
+      'It usually starts with perceived unfairness, not with a big loss.',
+      'Signs: more trades, bigger size, shorter gaps, looser setups, less analysis.',
+      'You cannot reliably detect it from inside it — the constraint must be external and set in advance.'
+    ],
+    quiz: [
+      { q: 'Which sequence is the most reliable early sign of tilt?',
+        options: ['One large loss', 'Trades getting more frequent while setups get looser', 'A losing day', 'Trading a new instrument'],
+        correct: 1,
+        why: 'A single loss or a losing day is normal variance. The combination of rising frequency and falling standards is the behavioural signature, and it is measurable from your own journal.' },
+      { q: 'Why is "I will notice when I am on tilt and stop" unreliable?',
+        options: ['Most people are dishonest with themselves', 'The state that impairs judgement is the same one you would need good judgement to detect', 'Tilt happens too fast to notice', 'It only affects beginners'],
+        correct: 1,
+        why: 'It is a structural problem, not a character one. That is exactly why the countermeasure has to be a limit that acts without needing your agreement in the moment.' },
+      { q: 'A trader takes a setup that is "close enough" after two losses. What is the most accurate description?',
+        options: ['Reasonable adaptation to conditions', 'A standards drop typical of tilt, individually justifiable', 'Good use of discretion', 'A different strategy'],
+        correct: 1,
+        why: 'The defining feature of tilt behaviour is that each individual step can be justified. That is what makes it hard to catch without a pre-set rule.' }
+    ] },
+
+  { id: 'p4', title: 'Revenge trading and the cost of immediacy',
+    body: [
+      'Revenge trading is the specific case of tilt where the next trade exists because of the last one. The tell is simple: if the previous trade had won, would you be taking this one? If the honest answer is no, the market is not the reason you are here.',
+      'What makes it so costly is timing. The re-entry usually comes fast — often within minutes — and speed removes the only thing that would have stopped it, which is the gap where you check the setup against your rules. A trade taken in ninety seconds has not been checked. It has been felt.',
+      'The size usually rises too, and for a reason that sounds rational: to recover the loss in one trade rather than three. But raising size after a loss is exactly backwards relative to the risk. You are increasing exposure at the moment your judgement is measurably worse, which turns a normal losing streak into a serious drawdown.',
+      'The standard countermeasure is a cooldown — a fixed period after a loss during which you do not enter. Fifteen minutes is a common choice and there is nothing magic about the number; the mechanism is that it forces the gap back in. It works because it is mechanical. A cooldown you can waive when the setup "is really good" is not a cooldown.',
+      'One thing worth being clear about: a loss is not evidence that you did anything wrong. If you followed the method, the loss was part of it. Treating every loss as a mistake to be corrected is itself a cause of revenge trading, because it creates a debt that feels like it needs settling.'
+    ],
+    keyPoints: [
+      'The test: would you take this trade if the last one had won?',
+      'Speed is the mechanism — a fast re-entry has skipped the check against your rules.',
+      'Raising size after a loss increases exposure exactly when judgement is worst.',
+      'A loss by the rules is not a mistake, and treating it as one creates the debt that drives revenge.'
+    ],
+    quiz: [
+      { q: 'What is the sharpest single test for a revenge trade?',
+        options: ['Is the setup weaker than usual?', 'Would I be taking this trade if the previous one had won?', 'Am I angry?', 'Is the size larger than usual?'],
+        correct: 1,
+        why: 'The others are symptoms and can be absent. The counterfactual goes directly at the cause: whether the previous trade, rather than the market, is the reason this one exists.' },
+      { q: 'Why does raising size after a loss make things worse than the maths alone suggests?',
+        options: ['Spreads widen after losses', 'It increases exposure at the moment judgement is measurably worse', 'It always breaks the daily loss limit', 'Brokers penalise larger positions'],
+        correct: 1,
+        why: 'The two effects compound: a bigger position and a worse decision at the same time. That combination is what turns an ordinary losing streak into a drawdown that is hard to recover.' },
+      { q: 'A cooldown rule works mainly because…',
+        options: ['fifteen minutes is how long emotion lasts', 'it is mechanical and forces back the gap in which you would check your rules', 'the market usually reverses in that time', 'it reduces the number of trades'],
+        correct: 1,
+        why: 'The duration is arbitrary; the mechanism is not. Anything you can waive in the moment provides no protection, which is why it has to act without your agreement.' }
+    ] },
+
+  { id: 'p5', title: 'Position size is a psychological decision',
+    body: [
+      'Position size is usually taught as arithmetic: risk per trade, stop distance, lots. The arithmetic matters, but the reason it matters is behavioural. Size determines how a normal losing streak feels, and how it feels determines whether you still follow your method at the end of it.',
+      'Every method has losing streaks. They are not evidence of anything being wrong — a method that wins slightly more often than not will still produce runs of consecutive losses, and the longer you trade the more certain it becomes that you will meet a long one. The question is not whether it happens but what state you are in when it does.',
+      'This is the real argument for small risk per trade. At a modest size, a run of six losses is uncomfortable and survivable, and you are still the person who wrote the plan. At a size that felt exciting, the same run is an emergency, and emergencies produce exactly the behaviour that turns a drawdown into a blown account.',
+      'There is a second effect that gets less attention: oversizing degrades execution before it degrades the account. When a position is too large you watch it differently. Small adverse moves become significant. You close early, or you cannot bring yourself to close at all. The size changed the trade you were capable of managing.',
+      'Practically: choose a size at which you can be wrong several times in a row and still take the next signal exactly as written. If a normal losing streak at your current size would change how you trade, the size is wrong — regardless of what the arithmetic permits.'
+    ],
+    keyPoints: [
+      'Losing streaks are certain; your state during them is what size controls.',
+      'Oversizing damages execution before it damages the balance.',
+      'The right size is the one at which a normal streak does not change how you trade.',
+      'The arithmetic sets an upper bound. Your behaviour sets the real one.'
+    ],
+    quiz: [
+      { q: 'What is the strongest practical test for whether your position size is right?',
+        options: ['It fits the 1% rule', 'A normal losing streak at that size would not change how you take the next signal', 'It gives a good risk-reward ratio', 'It is the largest the account allows'],
+        correct: 1,
+        why: 'A percentage rule is a useful upper bound but says nothing about you. The behavioural test is the binding one, because the point of sizing is surviving streaks with your method intact.' },
+      { q: 'Which effect of oversizing appears first?',
+        options: ['A margin call', 'Degraded execution — closing early or freezing', 'A larger drawdown', 'Higher commissions'],
+        correct: 1,
+        why: 'The account damage comes later. The immediate effect is on management: a position too large to sit with changes every decision you make while it is open.' },
+      { q: 'You have six losses in a row with a method that historically wins about half its trades. What does this most likely indicate?',
+        options: ['The method has stopped working', 'Normal variance, which any method with losses will produce', 'You should double size to recover', 'The market regime has certainly changed'],
+        correct: 1,
+        why: 'Runs like this are an ordinary property of sequences with losses, not a signal in themselves. Deciding a method is broken from a short streak is how working methods get discarded.' }
+    ] },
+
+  { id: 'p6', title: 'Judging a trade you lost',
+    body: [
+      'The most valuable habit in trading is also the least natural: judging a trade by whether you followed your process, not by whether it made money. Outcome and decision quality are different things, and in a domain with this much randomness they come apart constantly.',
+      'There are four combinations and only two are what they look like. A good decision that wins, and a bad decision that loses, both teach the right lesson by accident. The dangerous two are the others. A good decision that loses feels like a mistake and tempts you to change a method that is fine. A bad decision that wins feels like skill and quietly teaches you to do it again — this is the more expensive of the two, because nothing about it prompts review.',
+      'That is why grading has to happen on the process. Did the setup match your rules? Was the stop where the method says? Was the size right? Was it taken because the conditions were there, or because you were bored, or behind? Those questions have answers that do not depend on the outcome.',
+      'This is also what makes a journal worth keeping. If the record only holds profit and loss, the only pattern you can find is which trades made money — and over a small sample that is mostly noise. If it holds the decision, you can find out which of your own behaviours cost you, which is the only thing you can actually change.',
+      'A practical rule that costs nothing: after each trade, mark separately whether you followed the plan and whether it made money. Over a few months the interesting cases are the disagreements, and they are the ones nobody looks at.'
+    ],
+    keyPoints: [
+      'Decision quality and outcome are different things and often disagree.',
+      'The dangerous cases are the good decision that lost and the bad decision that won.',
+      'A bad decision that wins is the more expensive, because nothing prompts you to review it.',
+      'Record whether you followed the plan separately from whether it profited.'
+    ],
+    quiz: [
+      { q: 'Which of the four outcome/decision combinations is most expensive over time?',
+        options: ['Good decision, loss', 'Bad decision, loss', 'Bad decision, win', 'Good decision, win'],
+        correct: 2,
+        why: 'A bad decision that wins reinforces itself and triggers no review — you learn to repeat it. A bad decision that loses at least teaches the correct lesson.' },
+      { q: 'Why is grading on process rather than profit the more useful habit?',
+        options: ['Profit is hard to calculate', 'Process questions have answers that do not depend on the outcome, and behaviour is what you can change', 'It makes losses feel better', 'Brokers report it that way'],
+        correct: 1,
+        why: 'The purpose is finding what you can act on. Outcome over a small sample is mostly noise; your own behaviour is both measurable and changeable.' },
+      { q: 'You followed your plan exactly and the trade lost. What is the correct entry in your review?',
+        options: ['A mistake to be corrected', 'Rule followed; outcome negative — no change required', 'Evidence the strategy needs adjusting', 'A sign to reduce size'],
+        correct: 1,
+        why: 'Treating every loss as a mistake creates the sense of a debt to settle, which is a direct cause of revenge trading. A loss by the rules is part of the method working as designed.' }
+    ] }
+  ]
+};
+</script>
 <style>
-#page-drills .dr-wrap { max-width: 1080px; }
-.dr-card { border: 0.5px solid var(--rim); border-radius: 15px; padding: 18px 20px;
+#page-academy .ac-wrap { max-width: 860px; }
+.ac-card { border: 0.5px solid var(--rim); border-radius: 15px; padding: 20px 22px;
   background: rgba(255,255,255,0.012); margin-bottom: 14px; }
-.dr-card.gold { border-color: var(--gold-line); background: rgba(201,168,76,0.05); }
-.dr-h { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--ink); margin-bottom: 5px; }
-.dr-s { font-size: 12.5px; color: var(--ink3); line-height: 1.65; }
-.dr-b { background: var(--elevated); border: 0.5px solid var(--rim2); color: var(--ink2);
-  border-radius: 10px; padding: 10px 17px; font-size: 13px; cursor: pointer;
-  font-family: var(--font-body); white-space: nowrap; }
-.dr-b:hover { border-color: var(--gold-line); color: var(--gold); }
-.dr-b.primary { background: linear-gradient(135deg, var(--gold), #b8923d); color: #07080b; border: 0; font-weight: 700; }
-.dr-b.long { border-color: rgba(62,207,142,.5); color: var(--profit); }
-.dr-b.short { border-color: rgba(240,99,106,.5); color: var(--loss); }
-.dr-b:disabled { opacity: .45; cursor: not-allowed; }
-.dr-row { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
-.dr-in, .dr-sel { background: var(--raised); border: 0.5px solid var(--rim2); color: var(--ink);
-  border-radius: 10px; padding: 10px 12px; font-size: 13px; font-family: var(--font-body); width: 100%; }
-.dr-in:focus, .dr-sel:focus { outline: none; border-color: var(--gold-line); }
-textarea.dr-in { min-height: 120px; resize: vertical; line-height: 1.6; }
-.dr-lbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--ink3); margin-bottom: 5px; display: block; }
-.dr-list { display: grid; gap: 10px; }
-.dr-item { border: 0.5px solid var(--rim); border-radius: 13px; padding: 14px 16px;
-  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; cursor: pointer; }
-.dr-item:hover { border-color: var(--gold-line); }
-.dr-item-name { font-weight: 700; color: var(--ink); font-size: 14px; }
-.dr-item-meta { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
-.dr-badge { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-  padding: 3px 8px; border-radius: 6px; background: var(--raised); color: var(--ink3); }
-.dr-badge.on { background: var(--gold-dim); color: var(--gold); }
-.dr-chart { width: 100%; height: 420px; border: 0.5px solid var(--rim); border-radius: 13px; overflow: hidden; }
-@media(max-width:700px){ .dr-chart { height: 300px; } }
-.dr-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 13px 0; }
-.dr-prog { flex: 1; min-width: 120px; height: 4px; border-radius: 2px; background: var(--rim2); overflow: hidden; }
-.dr-prog i { display: block; height: 100%; background: var(--gold); }
-.dr-verdict { border-radius: 12px; padding: 14px 16px; margin-top: 13px; font-size: 13px; line-height: 1.65; }
-.dr-verdict.ok { background: rgba(62,207,142,.08); border: 0.5px solid rgba(62,207,142,.35); color: var(--ink2); }
-.dr-verdict.no { background: rgba(240,99,106,.08); border: 0.5px solid rgba(240,99,106,.35); color: var(--ink2); }
-.dr-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 14px 0; }
-.dr-stat { border: 0.5px solid var(--rim); border-radius: 12px; padding: 13px; text-align: center; }
-.dr-stat b { display: block; font-size: 21px; font-weight: 800; color: var(--gold); font-family: var(--font-display); }
-.dr-stat span { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); }
-@media(max-width:700px){ .dr-stats { grid-template-columns: repeat(2,1fr); } }
-.dr-rule { font-family: var(--font-mono); font-size: 12px; color: var(--ink2);
-  padding: 7px 11px; border-radius: 8px; background: var(--raised); margin-bottom: 6px; }
-.dr-warn { border-left: 2px solid var(--gold); padding: 9px 13px; margin: 12px 0;
-  background: rgba(201,168,76,.05); font-size: 12.5px; color: var(--ink2); line-height: 1.65; }
+.ac-card.gold { border-color: var(--gold-line); background: rgba(201,168,76,0.05); }
+.ac-h { font-family: var(--font-display); font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+.ac-s { font-size: 13px; color: var(--ink3); line-height: 1.7; }
+.ac-b { background: var(--elevated); border: 0.5px solid var(--rim2); color: var(--ink2);
+  border-radius: 10px; padding: 10px 18px; font-size: 13px; cursor: pointer; font-family: var(--font-body); }
+.ac-b:hover { border-color: var(--gold-line); color: var(--gold); }
+.ac-b.primary { background: linear-gradient(135deg, var(--gold), #b8923d); color: #07080b; border: 0; font-weight: 700; }
+.ac-b:disabled { opacity: .45; cursor: not-allowed; }
+.ac-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ac-in, .ac-sel { background: var(--raised); border: 0.5px solid var(--rim2); color: var(--ink);
+  border-radius: 10px; padding: 11px 13px; font-size: 13px; font-family: var(--font-body); width: 100%; }
+.ac-in:focus { outline: none; border-color: var(--gold-line); }
+textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
+.ac-track { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:720px){ .ac-track { grid-template-columns: 1fr; } }
+.ac-tile { border: 0.5px solid var(--rim); border-radius: 15px; padding: 22px; cursor: pointer; transition: .15s; }
+.ac-tile:hover { border-color: var(--gold-line); }
+.ac-tile-ico { font-size: 26px; margin-bottom: 12px; }
+.ac-item { border: 0.5px solid var(--rim); border-radius: 12px; padding: 14px 16px;
+  display: flex; gap: 12px; align-items: center; cursor: pointer; margin-bottom: 9px; }
+.ac-item:hover { border-color: var(--gold-line); }
+.ac-item.done { border-color: rgba(62,207,142,.4); }
+.ac-num { width: 26px; height: 26px; border-radius: 50%; flex: none; display: flex;
+  align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800;
+  background: var(--raised); color: var(--ink3); border: 0.5px solid var(--rim2); }
+.ac-item.done .ac-num { background: var(--profit); color: #07080b; border: 0; }
+.ac-item-t { font-weight: 700; color: var(--ink); font-size: 14px; }
+.ac-item-m { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
+.ac-prose p { font-size: 14.5px; line-height: 1.85; color: var(--ink2); margin: 0 0 17px; }
+.ac-key { border-left: 2px solid var(--gold); padding: 4px 0 4px 15px; margin: 20px 0; }
+.ac-key li { font-size: 13.5px; color: var(--ink2); line-height: 1.7; margin-bottom: 7px; }
+.ac-mis { border: 0.5px solid rgba(240,99,106,.3); background: rgba(240,99,106,.05);
+  border-radius: 12px; padding: 14px 17px; margin: 18px 0; }
+.ac-mis li { font-size: 13px; color: var(--ink2); line-height: 1.7; margin-bottom: 6px; }
+.ac-opt { display: block; width: 100%; text-align: left; border: 0.5px solid var(--rim2);
+  background: var(--raised); color: var(--ink2); border-radius: 11px; padding: 13px 16px;
+  font-size: 13.5px; margin-bottom: 9px; cursor: pointer; font-family: var(--font-body); line-height: 1.55; }
+.ac-opt:hover { border-color: var(--gold-line); }
+.ac-opt.right { border-color: var(--profit); background: rgba(62,207,142,.09); color: var(--ink); }
+.ac-opt.wrong { border-color: var(--loss); background: rgba(240,99,106,.09); color: var(--ink); }
+.ac-opt:disabled { cursor: default; }
+.ac-why { font-size: 13px; color: var(--ink2); line-height: 1.7; padding: 13px 16px;
+  border-radius: 11px; background: var(--raised); margin: 4px 0 14px; }
+.ac-bar { height: 4px; border-radius: 2px; background: var(--rim2); overflow: hidden; margin: 14px 0; }
+.ac-bar i { display: block; height: 100%; background: var(--gold); transition: width .3s; }
+.ac-badge { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 6px; background: var(--raised); color: var(--ink3); margin-left: auto; }
+.ac-badge.on { background: rgba(62,207,142,.15); color: var(--profit); }
+.ac-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 14px 0; }
+.ac-stat { border: 0.5px solid var(--rim); border-radius: 12px; padding: 13px; text-align: center; }
+.ac-stat b { display: block; font-size: 20px; font-weight: 800; color: var(--gold); font-family: var(--font-display); }
+.ac-stat span { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); }
+@media(max-width:700px){ .ac-stats { grid-template-columns: repeat(2,1fr); } }
+.ac-chart { width: 100%; height: 340px; border: 0.5px solid var(--rim); border-radius: 12px; overflow: hidden; margin: 14px 0; }
+.ac-shot { width: 100%; border-radius: 12px; border: 0.5px solid var(--rim); display: block; margin: 14px 0; }
+.ac-setups { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ac-chip { border: 0.5px solid var(--rim2); background: var(--raised); color: var(--ink2);
+  border-radius: 999px; padding: 8px 15px; font-size: 12.5px; cursor: pointer; font-family: var(--font-body); }
+.ac-chip.on { background: var(--gold-dim); border-color: var(--gold-line); color: var(--gold); font-weight: 600; }
+.ac-warn { border-left: 2px solid var(--gold); padding: 10px 14px; margin: 14px 0;
+  background: rgba(201,168,76,.05); font-size: 12.5px; color: var(--ink2); line-height: 1.7; }
 </style>
 
-<div class="page" id="page-drills">
+<div class="page" id="page-academy">
   <div class="ph">
-    <div class="ph-eyebrow">Practice</div>
-    <h1>Strategy <span style="color:var(--gold)">Drills</span></h1>
-    <p>Learn a strategy by trading it on days that already happened — including the traps</p>
+    <div class="ph-eyebrow">Learn</div>
+    <h1>Trading <span style="color:var(--gold)">Academy</span></h1>
+    <p>Read it like a book, then check whether it stuck</p>
   </div>
-  <div class="dr-wrap" id="drRoot"></div>
+  <div class="ac-wrap" id="acRoot"></div>
 </div>
 
 <script>
 /* ════════════════════════════════════════════════════════════════
-   Evidence — Strategy Drills · interface  (window.ApexDrillsUI)
+   Evidence — Academy  (window.ApexAcademy)
    ────────────────────────────────────────────────────────────────
-   Five screens over one engine: list → create → learn → practise →
-   result, plus a manual fallback when a strategy cannot be formalised.
+   Two tracks, one reader:
 
-   Two decisions worth knowing before changing anything here:
+     Psychology — a fixed course, written and shipped with the app.
+       Not generated: it makes claims about how people behave under
+       risk, and a learner treats a lesson as settled fact. One
+       authored text can be checked and corrected; a generated one
+       drifts per user and invents its own supporting numbers.
 
-   1. The decision IS the trade. You answer long / short / skip, then
-      the chart reveals what happened. No stop dragging, no position
-      sizing — those are Market Replay's job, and this tool grades
-      RULE ADHERENCE, which is exactly "did you act, and on which
-      side". Mixing in trade management would blur what is being
-      measured and make a correct decision look wrong because the
-      management was clumsy.
+     Your strategy — generated from the trader's own description,
+       because nobody can author that in advance. Six chapters, then
+       questions per chapter.
 
-   2. Nothing here writes to journalData. Ever. Practice trades in a
-      journal turn a win rate into a blend of real trading and dry
-      runs, which is worse than having no win rate at all.
+   Progress lives in Firestore per chapter, so the book remembers
+   where you were across devices and sessions.
+
+   What this is NOT: the earlier chart-drill build. That one had you
+   trading historical locations, and it was the wrong shape for what
+   was wanted — reading and understanding first, checked by questions.
+   The spot-finding engine is still in the file and unused; it is the
+   basis for adding real chart examples later.
    ════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
 
-  var TF_MS = { '5m': 300000, '15m': 900000, '1h': 3600000 };
-  var view = 'list', state = {}, chart = null;
+  var WORKER = function () { return window.APEX_COACH_URL || 'https://spring-fire-06a2.4kjyyyftv6.workers.dev'; };
+  var view = 'home', st = {};
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function root() { return document.getElementById('drRoot'); }
+  function root() { return document.getElementById('acRoot'); }
   function isPro() { return (window.currentPlan || 'free') === 'pro'; }
+  function go(v, s) { view = v; if (s) st = s; render(); }
 
-  function go(v, st) { view = v; if (st) state = st; render(); }
+  /* ═══════════════ storage ═══════════════ */
 
-  /* ═══════════════ list ═══════════════ */
+  function col() {
+    if (!window.db || !window.currentUID) return null;
+    return window.db.collection('apexUsers').doc(window.currentUID).collection('academy');
+  }
+  var Store = {
+    get: function (id) {
+      var c = col(); if (!c) return Promise.resolve(null);
+      return c.doc(id).get().then(function (d) { return d.exists ? Object.assign({ id: d.id }, d.data()) : null; })
+        .catch(function () { return null; });
+    },
+    save: function (id, data) {
+      var c = col(); if (!c) return Promise.resolve(id);
+      var ref = id ? c.doc(id) : c.doc();
+      return ref.set(Object.assign({ updatedAt: Date.now() }, data), { merge: true })
+        .then(function () { return ref.id; });
+    },
+    list: function () {
+      var c = col(); if (!c) return Promise.resolve([]);
+      return c.orderBy('updatedAt', 'desc').limit(30).get().then(function (snap) {
+        var out = []; snap.forEach(function (d) {
+          var v = d.data() || {};
+          if (v.kind === 'course') out.push({ id: d.id, title: v.title, chapters: (v.chapters || []).length, progress: v.progress || {} });
+        });
+        return out;
+      }).catch(function () { return []; });
+    },
+    remove: function (id) { var c = col(); return c ? c.doc(id).delete() : Promise.resolve(); }
+  };
 
-  function renderList() {
-    root().innerHTML = '<div class="dr-card"><div class="dr-h">Loading…</div></div>';
-    window.ApexDrills.Store.list().then(function (rows) {
+  /* Progress is a map chapterId → {read:bool, quiz:{score,total}}. Kept on the
+     course document rather than in a subcollection: it is a handful of
+     booleans that are always read together with the course itself. */
+  function saveProgress() {
+    if (!st.course || !st.course.id) return;
+    Store.save(st.course.id, { progress: st.course.progress || {} });
+  }
+
+  /* ═══════════════ evidence from the reader's own journal ═══════════════
+
+     The reason this feature is worth anything. Without it the strategy book
+     is Gemini handing the trader back what the trader typed — pleasant,
+     structured, and adding nothing. Everything below is computed from their
+     own trades, is true, and is something they could not have written into
+     the description because they did not know it.
+
+     Nothing here is generated. The model never sees these numbers and never
+     comments on them; it wrote the surrounding chapter and that is all.   */
+
+  var MIN_FOR_STATS = 10;   // below this a win rate is noise, so we show none
+  var MIN_FOR_EXAMPLES = 1;
+
+  function evidence(setups) {
+    if (!setups || !setups.length || typeof window.getAllTrades !== 'function') return null;
+    var all = [];
+    try { all = window.getAllTrades() || []; } catch (e) { return null; }
+    var want = setups.map(function (x) { return String(x).toLowerCase(); });
+
+    var mine = all.filter(function (t) {
+      return t.setup && want.indexOf(String(t.setup).toLowerCase()) >= 0;
+    });
+    var closed = mine.filter(function (t) { return t.pips !== '' && t.pips != null && isFinite(parseFloat(t.pips)); });
+
+    var out = { total: mine.length, closed: closed.length, setups: setups,
+                examples: [], stats: null, behaviour: null, sessions: null };
+
+    /* Examples: closed trades, most recent first, winners and losers both.
+       Deliberately not winners only — a book that shows only the ones that
+       worked teaches that this setup works, which is not what the data says. */
+    out.examples = closed.slice().sort(function (a, b) {
+      return (b.openTime || 0) - (a.openTime || 0);
+    }).slice(0, 6).map(function (t) {
+      return { symbol: t.symbol, dir: t.dir, entry: t.entry, exit: t.exit,
+               pips: parseFloat(t.pips), date: t._date, openTime: t.openTime,
+               session: t.session, note: t.note, sl: t.sl,
+               mistakes: t.mistakes || [], positives: t.positives || [],
+               charts: (t.charts || []).length ? t.charts : null };
+    });
+
+    if (closed.length >= MIN_FOR_STATS) {
+      var wins = closed.filter(function (t) { return parseFloat(t.pips) > 0; });
+      var sum = closed.reduce(function (a, t) { return a + parseFloat(t.pips); }, 0);
+      var gross = closed.reduce(function (a, t) { var p = parseFloat(t.pips); return a + (p > 0 ? p : 0); }, 0);
+      var loss = closed.reduce(function (a, t) { var p = parseFloat(t.pips); return a + (p < 0 ? -p : 0); }, 0);
+
+      // The same numbers over everything else they trade, so the comparison
+      // means something. A 41% win rate is neither good nor bad on its own.
+      var others = all.filter(function (t) {
+        return t.pips !== '' && t.pips != null && isFinite(parseFloat(t.pips))
+          && (!t.setup || want.indexOf(String(t.setup).toLowerCase()) < 0);
+      });
+      var oWins = others.filter(function (t) { return parseFloat(t.pips) > 0; });
+
+      out.stats = {
+        n: closed.length,
+        winRate: wins.length / closed.length,
+        avgPips: sum / closed.length,
+        totalPips: sum,
+        profitFactor: loss > 0 ? gross / loss : null,
+        otherWinRate: others.length >= MIN_FOR_STATS ? oWins.length / others.length : null,
+        otherAvg: others.length >= MIN_FOR_STATS ? others.reduce(function (a, t) { return a + parseFloat(t.pips); }, 0) / others.length : null
+      };
+
+      /* Where they trade it against where it works. These two are usually
+         different, and that gap is the single most useful line in the book —
+         nobody looks it up voluntarily. */
+      var bySess = {};
+      closed.forEach(function (t) {
+        var k = t.session || 'unknown';
+        (bySess[k] = bySess[k] || []).push(parseFloat(t.pips));
+      });
+      var rows = Object.keys(bySess).filter(function (k) { return bySess[k].length >= 4; })
+        .map(function (k) {
+          var a = bySess[k];
+          return { session: k, n: a.length,
+                   avg: a.reduce(function (x, y) { return x + y; }, 0) / a.length,
+                   winRate: a.filter(function (x) { return x > 0; }).length / a.length };
+        });
+      if (rows.length >= 2) {
+        var most = rows.slice().sort(function (a, b) { return b.n - a.n; })[0];
+        var best = rows.slice().sort(function (a, b) { return b.avg - a.avg; })[0];
+        out.sessions = { rows: rows.sort(function (a, b) { return b.avg - a.avg; }),
+                         mostTraded: most, best: best, mismatch: most.session !== best.session };
+      }
+    }
+
+    if (mine.length >= 4) {
+      var noStop = mine.filter(function (t) { return !t.sl || String(t.sl).trim() === ''; }).length;
+      var mcount = {};
+      mine.forEach(function (t) { (t.mistakes || []).forEach(function (m) { mcount[m] = (mcount[m] || 0) + 1; }); });
+      var top = Object.keys(mcount).sort(function (a, b) { return mcount[b] - mcount[a]; })
+        .slice(0, 3).map(function (k) { return { tag: k, n: mcount[k] }; });
+      out.behaviour = { noStop: noStop, noStopPct: noStop / mine.length, topMistakes: top };
+    }
+    return out;
+  }
+
+  function pct(x) { return Math.round(x * 100) + '%'; }
+  function sign(x) { return (x > 0 ? '+' : '') + (Math.round(x * 10) / 10); }
+
+  function evidenceHtml(ev) {
+    if (!ev) return '';
+    if (!ev.total) {
+      return '<div class="ac-card" style="margin-top:18px"><div class="ac-h">From your own trading</div>'
+        + '<div class="ac-s">No trades tagged <strong>' + ev.setups.map(esc).join('</strong> or <strong>') + '</strong> yet. '
+        + 'Set the <em>Setup</em> field when you log a trade and this section fills itself — with your charts, '
+        + 'your numbers and your habits, instead of textbook examples.</div></div>';
+    }
+
+    var h = '<div class="ac-card" style="margin-top:18px"><div class="ac-h">From your own trading</div>';
+
+    if (ev.stats) {
+      var s = ev.stats;
+      var cmp = '';
+      if (s.otherWinRate != null) {
+        var better = s.avgPips > s.otherAvg;
+        cmp = '<div class="ac-s" style="margin-top:10px">Against everything else you trade '
+          + '(' + pct(s.otherWinRate) + ', ' + sign(s.otherAvg) + ' pips average): this setup is <strong style="color:var(--'
+          + (better ? 'profit' : 'loss') + ')">' + (better ? 'stronger' : 'weaker') + '</strong> for you.</div>';
+      }
+      h += '<div class="ac-stats">'
+        + '<div class="ac-stat"><b>' + s.n + '</b><span>Closed trades</span></div>'
+        + '<div class="ac-stat"><b>' + pct(s.winRate) + '</b><span>Win rate</span></div>'
+        + '<div class="ac-stat"><b>' + sign(s.avgPips) + '</b><span>Avg pips</span></div>'
+        + '<div class="ac-stat"><b>' + (s.profitFactor ? (Math.round(s.profitFactor * 100) / 100) : '—') + '</b><span>Profit factor</span></div>'
+        + '</div>' + cmp;
+    } else {
+      h += '<div class="ac-s">You have <strong>' + ev.total + '</strong> trade' + (ev.total === 1 ? '' : 's')
+        + ' tagged this way. Statistics start at ' + MIN_FOR_STATS + ' closed trades — below that a win rate '
+        + 'is noise, and showing one anyway would be worse than showing none.</div>';
+    }
+
+    if (ev.sessions && ev.sessions.mismatch) {
+      h += '<div class="ac-mis" style="border-color:var(--gold-line);background:rgba(201,168,76,.06)">'
+        + '<div class="ac-s"><strong style="color:var(--gold)">Where you trade it is not where it works.</strong><br>'
+        + 'Most of these trades are in <strong>' + esc(ev.sessions.mostTraded.session) + '</strong> ('
+        + ev.sessions.mostTraded.n + ' trades, ' + sign(ev.sessions.mostTraded.avg) + ' pips average), '
+        + 'but your best results come from <strong>' + esc(ev.sessions.best.session) + '</strong> ('
+        + ev.sessions.best.n + ' trades, ' + sign(ev.sessions.best.avg) + ' pips average).</div></div>';
+    }
+
+    if (ev.behaviour) {
+      var b = ev.behaviour, bits = [];
+      if (b.noStop) bits.push('<strong>' + b.noStop + '</strong> of them had no stop recorded (' + pct(b.noStopPct) + ')');
+      if (b.topMistakes.length) bits.push('most flagged: ' + b.topMistakes.map(function (m) {
+        return '<strong>' + esc(m.tag) + '</strong> (' + m.n + '×)'; }).join(', '));
+      if (bits.length) h += '<div class="ac-s" style="margin-top:12px">How you actually execute it — ' + bits.join(' · ') + '.</div>';
+    }
+
+    if (ev.examples.length) {
+      h += '<div class="ac-s" style="margin-top:16px;font-weight:700;color:var(--ink)">Your last '
+        + ev.examples.length + ' — winners and losers both</div><div style="margin-top:10px">'
+        + ev.examples.map(function (e, i) {
+          var win = e.pips > 0;
+          return '<div class="ac-item" onclick="ApexAcademy.example(' + i + ')">'
+            + '<div class="ac-num" style="background:' + (win ? 'rgba(62,207,142,.16)' : 'rgba(240,99,106,.16)')
+            + ';color:var(--' + (win ? 'profit' : 'loss') + ');border:0">' + (win ? '+' : '−') + '</div>'
+            + '<div style="flex:1"><div class="ac-item-t">' + esc(e.symbol || '?') + ' · '
+            + esc((e.dir || '').toUpperCase()) + ' · ' + sign(e.pips) + ' pips</div>'
+            + '<div class="ac-item-m">' + esc(e.date || '') + (e.session ? ' · ' + esc(e.session) : '')
+            + (e.mistakes.length ? ' · ' + esc(e.mistakes.join(', ')) : '')
+            + (e.charts ? ' · has chart' : '') + '</div></div>'
+            + '<span class="ac-badge">open</span></div>';
+        }).join('') + '</div>';
+    }
+    return h + '</div>';
+  }
+
+  /* ═══════════════ home ═══════════════ */
+
+  function renderHome() {
+    root().innerHTML =
+      '<div class="ac-track">'
+      + '<div class="ac-tile" onclick="ApexAcademy.psych()">'
+      + '<div class="ac-tile-ico">🧠</div><div class="ac-h">The psychology of trading</div>'
+      + '<div class="ac-s">Six chapters on why traders who know exactly what to do still do something else — '
+      + 'loss aversion, tilt, revenge trading, sizing, and judging a trade you lost. '
+      + 'Written and checked, not generated.</div>'
+      + '<div class="ac-s" style="margin-top:12px;color:var(--gold);font-weight:600">Start reading →</div></div>'
+      + '<div class="ac-tile" onclick="ApexAcademy.strategies()">'
+      + '<div class="ac-tile-ico">📘</div><div class="ac-h">Your strategy, as a book</div>'
+      + '<div class="ac-s">Describe how you trade and Evidence writes it up as six chapters — the idea behind it, '
+      + 'when it fits, the entry, stop and target, what it is <em>not</em>, and the mistakes people make with it. '
+      + 'Then questions to check it stuck.</div>'
+      + '<div class="ac-s" style="margin-top:12px;color:var(--gold);font-weight:600">Open →</div></div>'
+      + '</div>';
+  }
+
+  /* ═══════════════ psychology ═══════════════ */
+
+  function psych() {
+    var C = window.APEX_PSYCH_COURSE;
+    Store.get('psychology').then(function (saved) {
+      st = { course: { id: 'psychology', title: C.title, summary: C.summary,
+                       chapters: C.chapters, progress: (saved && saved.progress) || {}, fixed: true } };
+      go('course');
+    });
+  }
+
+  /* ═══════════════ strategy courses ═══════════════ */
+
+  function strategies() {
+    root().innerHTML = '<div class="ac-card"><div class="ac-h">Loading…</div></div>';
+    Store.list().then(function (rows) {
       var items = rows.length ? rows.map(function (r) {
-        var p = r.progress || {};
-        var score = p.score != null ? Math.round(p.score * 100) + '%' : '—';
-        return '<div class="dr-item" onclick="ApexDrillsUI.open(\'' + r.id + '\')">'
-          + '<div style="flex:1;min-width:180px"><div class="dr-item-name">' + esc(r.name || 'Untitled') + '</div>'
-          + '<div class="dr-item-meta">' + esc(r.symbol) + ' · ' + esc(r.tf)
-          + ' · ' + (r.counts ? ((r.counts.A || 0) + (r.counts.B || 0)) + ' setups, ' + (r.counts.C || 0) + ' traps' : '')
-          + (r.manual ? ' · marked by hand' : '') + '</div></div>'
-          + '<span class="dr-badge' + (p.sessions ? ' on' : '') + '">' + (p.sessions || 0) + ' sessions</span>'
-          + '<span class="dr-badge' + (p.score > 0.75 ? ' on' : '') + '">' + score + '</span>'
-          + '</div>';
-      }).join('') : '<div class="dr-s">No strategies yet. Add the first one below — it takes a description, not code.</div>';
+        var done = Object.keys(r.progress || {}).filter(function (k) { return r.progress[k] && r.progress[k].read; }).length;
+        return '<div class="ac-item" onclick="ApexAcademy.open(\'' + r.id + '\')">'
+          + '<div class="ac-num">' + done + '</div>'
+          + '<div style="flex:1"><div class="ac-item-t">' + esc(r.title || 'Untitled') + '</div>'
+          + '<div class="ac-item-m">' + done + ' of ' + r.chapters + ' chapters read</div></div>'
+          + '<span class="ac-badge' + (done >= r.chapters ? ' on' : '') + '">'
+          + (done >= r.chapters ? 'complete' : 'in progress') + '</span></div>';
+      }).join('') : '<div class="ac-s">Nothing written up yet.</div>';
 
-      root().innerHTML =
-        '<div class="dr-card gold"><div class="dr-h">What this is</div>'
-        + '<div class="dr-s">Describe a strategy in your own words. Evidence turns it into rules, '
-        + 'then searches real history for places where it applied — the ones that worked, the ones that '
-        + 'lost anyway, and the ones that only looked like a setup. You trade them again and find out '
-        + 'which you can actually spot in the moment.<br><br>'
-        + '<strong>Nothing here touches your journal.</strong> Practice trades never reach your statistics.</div></div>'
-        + '<div class="dr-card"><div class="dr-h">Your strategies</div>'
-        + '<div class="dr-list" style="margin-top:12px">' + items + '</div>'
-        + '<div class="dr-row" style="margin-top:14px">'
-        + '<button class="dr-b primary" onclick="ApexDrillsUI.create()">+ New strategy</button></div></div>';
+      root().innerHTML = '<div class="ac-card"><div class="ac-h">Your strategy books</div>'
+        + '<div style="margin-top:14px">' + items + '</div>'
+        + '<div class="ac-row" style="margin-top:16px">'
+        + '<button class="ac-b" onclick="ApexAcademy.home()">← Back</button>'
+        + '<button class="ac-b primary" onclick="ApexAcademy.create()">+ Write up a strategy</button></div></div>';
     });
   }
 
-  /* ═══════════════ create ═══════════════ */
-
-  function renderCreate() {
-    var syms = window.ApexDrills.SYMBOLS.map(function (s) {
-      return '<option value="' + s.id + '">' + esc(s.label) + '</option>'; }).join('');
-    var tfs = window.ApexDrills.TIMEFRAMES.map(function (t) {
-      return '<option value="' + t + '"' + (t === '15m' ? ' selected' : '') + '>' + t + '</option>'; }).join('');
-
+  function create() {
     root().innerHTML =
-      '<div class="dr-card"><div class="dr-h">Describe your strategy</div>'
-      + '<div class="dr-s" style="margin-bottom:14px">Write it the way you would explain it to another trader. '
-      + 'Name the entry trigger, what has to be true around it, and where the stop and target go. '
-      + 'The more precise the trigger, the better the practice — “buy the dip” cannot be searched for, '
-      + '“buy when price crosses back above the 50 EMA after being below it” can.</div>'
-      + '<textarea class="dr-in" id="drDesc" placeholder="Example: I go long when the 20 EMA crosses above the 50 EMA and RSI-14 is above 50. Stop is 1.5 ATR below entry, target 2R. Short is the mirror image."></textarea>'
-      + '<div class="dr-row" style="margin-top:12px">'
-      + '<div style="flex:1;min-width:170px"><label class="dr-lbl">Instrument</label><select class="dr-sel" id="drSym">' + syms + '</select></div>'
-      + '<div style="flex:1;min-width:130px"><label class="dr-lbl">Timeframe</label><select class="dr-sel" id="drTf">' + tfs + '</select></div>'
-      + '</div>'
-      + '<div class="dr-warn">The first build downloads a year of history and searches it. That takes a '
-      + 'minute or two, once — after that this strategy opens instantly.</div>'
-      + '<div class="dr-row"><button class="dr-b" onclick="ApexDrillsUI.list()">Back</button>'
-      + '<button class="dr-b primary" id="drGo" onclick="ApexDrillsUI.propose()">Turn this into rules →</button></div>'
-      + '<div id="drMsg" class="dr-s" style="margin-top:12px"></div></div>';
+      '<div class="ac-card"><div class="ac-h">Describe how you trade</div>'
+      + '<div class="ac-s" style="margin-bottom:14px">Write it as you would explain it to someone sitting next to you. '
+      + 'What has to be true before you look, what makes you enter, where the stop goes, when you are out. '
+      + 'Rough sentences are fine — the point is that it is <em>your</em> method, not a textbook one.</div>'
+      + '<textarea class="ac-in" id="acDesc" placeholder="Example: I only trade the London open on gold. I wait for the first hour to set a range, then take a break of that range in the direction of the daily trend. Stop goes behind the range, target is twice the risk. I stop after two losses."></textarea>'
+      + '<div style="margin-top:16px"><label class="ac-lbl" style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)">Which setup is this in your journal?</label>'
+      + '<div class="ac-s" style="margin:5px 0 8px">Pick the tag you use on these trades. Every chapter then shows '
+      + '<strong>your own</strong> trades, numbers and habits next to the text — that is where the book stops being generic.</div>'
+      + '<div class="ac-setups" id="acSetups">'
+      + (window.SETUPS || []).filter(function (x) { return x !== 'Custom'; }).map(function (x) {
+          return '<button type="button" class="ac-chip" data-setup="' + esc(x) + '" onclick="this.classList.toggle(\'on\')">' + esc(x) + '</button>';
+        }).join('')
+      + '</div></div>'
+      + '<div class="ac-warn">Writing the chapters takes a few seconds. Once written, the book is saved and opens instantly — '
+      + 'you can come back to it whenever, and it remembers where you stopped.</div>'
+      + '<div class="ac-row"><button class="ac-b" onclick="ApexAcademy.strategies()">Back</button>'
+      + '<button class="ac-b primary" id="acGo" onclick="ApexAcademy.write()">Write the book →</button></div>'
+      + '<div class="ac-s" id="acMsg" style="margin-top:13px"></div></div>';
   }
 
-  function msg(html, cls) {
-    var el = document.getElementById('drMsg');
-    if (el) el.innerHTML = '<span style="color:var(--' + (cls || 'ink3') + ')">' + html + '</span>';
-  }
+  function write() {
+    var desc = (document.getElementById('acDesc') || {}).value || '';
+    if (desc.trim().length < 30) {
+      document.getElementById('acMsg').innerHTML = '<span style="color:var(--loss)">A little more, please — '
+        + 'a single line gives nothing to write six chapters about.</span>';
+      return;
+    }
+    var picked = [].slice.call(document.querySelectorAll('#acSetups .ac-chip.on'))
+                   .map(function (n) { return n.getAttribute('data-setup'); });
+    var b = document.getElementById('acGo'); if (b) { b.disabled = true; b.textContent = 'Writing…'; }
+    document.getElementById('acMsg').textContent = 'Reading your description and writing the chapters…';
 
-  function propose() {
-    var desc = (document.getElementById('drDesc') || {}).value || '';
-    var sym = (document.getElementById('drSym') || {}).value || 'XAUUSD';
-    var tf = (document.getElementById('drTf') || {}).value || '15m';
-    if (desc.trim().length < 25) { msg('Say a little more — one line is not enough to search for.', 'loss'); return; }
-    var b = document.getElementById('drGo'); if (b) { b.disabled = true; b.textContent = 'Reading…'; }
-    msg('Turning your description into rules…');
-
-    window.ApexDrills.proposeRules(desc, sym, tf).then(function (r) {
-      if (!r.ok && r.reason === 'unformalisable') {
-        state = { desc: desc, symbol: sym, tf: tf, unsure: r.unsure };
-        go('manual');
-        return;
+    fetch(WORKER() + '/academy', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'course', description: desc })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (res.error || !res.chapters || !res.chapters.length) {
+        throw new Error(res.hint || res.error || 'no chapters came back');
       }
-      if (!r.ok) {
-        msg('That did not produce a usable rule set: '
-          + esc((r.warnings || []).map(function (w) { return w.msg; }).join(' ')) + ' — try describing the entry trigger more concretely.', 'loss');
-        return;
-      }
-      state = { desc: desc, symbol: sym, tf: tf, strategy: r.strategy,
-                confidence: r.confidence, unsure: r.unsure };
-      go('confirm');
+      var chapters = res.chapters.map(function (c, i) {
+        return { id: 'c' + i, title: c.title || ('Chapter ' + (i + 1)),
+                 body: Array.isArray(c.body) ? c.body : String(c.body || '').split(/\n\n+/),
+                 keyPoints: c.keyPoints || [], mistakes: c.mistakes || [] };
+      });
+      return Store.save(null, { kind: 'course', title: res.title || 'My strategy',
+        summary: res.summary || '', level: res.level || '', description: desc,
+        setups: picked, chapters: chapters, progress: {}, createdAt: Date.now() })
+        .then(function (id) { open(id); });
     }).catch(function (e) {
-      msg('Could not reach the rule service: ' + esc(String(e.message || e)), 'loss');
-    }).then(function () {
-      var b2 = document.getElementById('drGo'); if (b2) { b2.disabled = false; b2.textContent = 'Turn this into rules →'; }
+      var m = document.getElementById('acMsg');
+      if (m) m.innerHTML = '<span style="color:var(--loss)">That did not work: ' + esc(String(e.message || e))
+        + '. Try describing it a little more concretely, or again in a moment.</span>';
+      var b2 = document.getElementById('acGo'); if (b2) { b2.disabled = false; b2.textContent = 'Write the book →'; }
     });
   }
 
-  /* ═══════════════ confirm the rules ═══════════════ */
-
-  function condLines(list) {
-    return (list || []).map(function (c) {
-      return '<div class="dr-rule">' + esc(window.ApexStrategy.condLabel(c)) + '</div>'; }).join('')
-      || '<div class="dr-s">none</div>';
-  }
-
-  function renderConfirm() {
-    var S = state.strategy, conf = Math.round((state.confidence || 0) * 100);
-    var low = conf < 55;
-    root().innerHTML =
-      '<div class="dr-card"><div class="dr-h">' + esc(S.name) + '</div>'
-      + '<div class="dr-s">' + esc(S.note) + '</div>'
-      + '<div class="dr-stats" style="grid-template-columns:repeat(3,1fr)">'
-      + '<div class="dr-stat"><b>' + esc(S.symbol) + '</b><span>Instrument</span></div>'
-      + '<div class="dr-stat"><b>' + esc(S.tf) + '</b><span>Timeframe</span></div>'
-      + '<div class="dr-stat"><b style="color:var(--' + (low ? 'loss' : 'profit') + ')">' + conf + '%</b><span>Confidence</span></div>'
-      + '</div>'
-      + (low ? '<div class="dr-warn"><strong>Low confidence.</strong> Much of this was guessed from a '
-             + 'description that left room for interpretation. Read the rules below carefully — if they are not '
-             + 'your strategy, go back and be more specific rather than practising something else.</div>' : '')
-      + ((state.unsure || []).length
-          ? '<div class="dr-warn"><strong>Assumptions made:</strong><br>' +
-            state.unsure.map(function (u) { return '· ' + esc(u); }).join('<br>') + '</div>' : '')
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">'
-      + '<div><label class="dr-lbl">Long entry — all must be true</label>' + condLines(S.entry.long) + '</div>'
-      + '<div><label class="dr-lbl">Short entry — all must be true</label>' + condLines(S.entry.short) + '</div>'
-      + '</div>'
-      + '<div class="dr-s" style="margin-top:12px">Stop: ' + esc(S.risk.slMode === 'atr' ? (S.risk.slAtrMult + ' × ATR') : (S.risk.slPips + ' pips'))
-      + ' · Target: ' + esc(S.risk.tpMode === 'r' ? (S.risk.tpR + 'R') : (S.risk.tpMode === 'none' ? 'none' : S.risk.tpPips + ' pips')) + '</div>'
-      + '<div class="dr-row" style="margin-top:16px">'
-      + '<button class="dr-b" onclick="ApexDrillsUI.create()">Rewrite description</button>'
-      + '<button class="dr-b primary" onclick="ApexDrillsUI.build()">These are my rules — find the setups →</button>'
-      + '</div><div id="drMsg" class="dr-s" style="margin-top:12px"></div></div>';
-  }
-
-  /* ═══════════════ build the spot list ═══════════════ */
-
-  function build() {
-    var S = state.strategy;
-    root().innerHTML = '<div class="dr-card"><div class="dr-h">Searching history</div>'
-      + '<div class="dr-s" id="drBuildMsg">Downloading bars…</div>'
-      + '<div class="dr-bar"><div class="dr-prog"><i id="drBuildBar" style="width:4%"></i></div></div>'
-      + '<div class="dr-s">This runs once. The result is stored, so every session after this starts immediately.</div></div>';
-
-    var to = Date.now(), from = to - 365 * 24 * 3600 * 1000;
-    window.ApexDrills.buildSpots(S, {
-      from: from, to: to,
-      onProgress: function (p) {
-        var b = document.getElementById('drBuildBar'), m = document.getElementById('drBuildMsg');
-        var d = p.p || {};
-        if (d.phase === 'data' && m) m.textContent = 'Downloading bars… ' + (d.done || 0) + '/' + (d.total || '?');
-        if (d.phase === 'run' && m) m.textContent = 'Testing the rules over ' + (d.total || 0).toLocaleString() + ' bars…';
-        if (b && d.total) b.style.width = Math.min(96, Math.round((d.done / d.total) * 100)) + '%';
-      }
-    }).then(function (res) {
-      if (!res.ok) {
-        state.tooFew = res;
-        go('manual');
-        return;
-      }
-      return window.ApexDrills.Store.save(null, {
-        name: S.name, note: S.note, symbol: S.symbol, tf: S.tf,
-        description: state.desc, strategy: S, confidence: state.confidence,
-        unsure: state.unsure || [], manual: false,
-        spots: res.spots, counts: res.counts, builtAt: Date.now(),
-        range: { from: res.from, to: res.to },
-        progress: { realWinRate: res.winRate || null }
-      }).then(function (id) { open(id); });
-    }).catch(function (e) {
-      root().innerHTML = '<div class="dr-card"><div class="dr-h">That did not work</div>'
-        + '<div class="dr-s">' + esc(String(e.message || e)) + '</div>'
-        + '<div class="dr-row" style="margin-top:14px"><button class="dr-b" onclick="ApexDrillsUI.create()">Back</button></div></div>';
+  function open(id) {
+    root().innerHTML = '<div class="ac-card"><div class="ac-h">Loading…</div></div>';
+    Store.get(id).then(function (c) {
+      if (!c) { strategies(); return; }
+      c.progress = c.progress || {};
+      st = { course: c };
+      go('course');
     });
   }
 
-  /* ═══════════════ manual fallback (step 7) ═══════════════ */
+  /* ═══════════════ chapter list ═══════════════ */
 
-  function renderManual() {
-    var few = state.tooFew;
-    var why = few
-      ? 'The rules were valid, but over a whole year they only produced <strong>' + few.found +
-        '</strong> setups. Fewer than ' + window.ApexDrills.MIN_SIGNALS + ' is not enough to practise on — ' +
-        'you would be drilling coincidence.'
-      : 'This strategy could not be expressed as rules. That happens with methods built on market structure ' +
-        'read by eye, order flow, or judgement that has no fixed trigger — and rather than guess at rules ' +
-        'and have you practise something that is not your strategy, Evidence says so.';
+  function renderCourse() {
+    var c = st.course, prog = c.progress || {};
+    var done = c.chapters.filter(function (ch) { return prog[ch.id] && prog[ch.id].read; }).length;
+
+    var items = c.chapters.map(function (ch, i) {
+      var p = prog[ch.id] || {};
+      var q = p.quiz ? (p.quiz.score + '/' + p.quiz.total + ' on the questions') : 'not tested yet';
+      return '<div class="ac-item' + (p.read ? ' done' : '') + '" onclick="ApexAcademy.chapter(' + i + ')">'
+        + '<div class="ac-num">' + (p.read ? '✓' : (i + 1)) + '</div>'
+        + '<div style="flex:1"><div class="ac-item-t">' + esc(ch.title) + '</div>'
+        + '<div class="ac-item-m">' + (p.read ? q : (ch.body.length + ' sections')) + '</div></div></div>';
+    }).join('');
 
     root().innerHTML =
-      '<div class="dr-card"><div class="dr-h">Mark the setups yourself</div>'
-      + '<div class="dr-s">' + why + '</div>'
-      + ((state.unsure || []).length ? '<div class="dr-warn">' + state.unsure.map(esc).join('<br>') + '</div>' : '')
-      + '<div class="dr-s" style="margin-top:12px">The manual route works for any strategy: step through the chart, '
-      + 'and whenever you see one of your setups, mark it and say which way you would have gone. '
-      + 'From <strong>10 marks</strong> the tool can build drills; more is better. '
-      + 'You are the source of truth here — the traps then come from the places you did <em>not</em> mark.</div>'
-      + '<div class="dr-row" style="margin-top:16px">'
-      + '<button class="dr-b" onclick="ApexDrillsUI.create()">Rewrite the description instead</button>'
-      + '<button class="dr-b primary" onclick="ApexDrillsUI.startManual()">Start marking →</button></div></div>';
+      '<div class="ac-card gold"><div class="ac-h">' + esc(c.title) + '</div>'
+      + '<div class="ac-s">' + esc(c.summary || '') + '</div>'
+      + '<div class="ac-bar"><i style="width:' + Math.round(done / c.chapters.length * 100) + '%"></i></div>'
+      + '<div class="ac-s">' + done + ' of ' + c.chapters.length + ' chapters read</div></div>'
+      + '<div class="ac-card">' + items + '</div>'
+      + '<div class="ac-row"><button class="ac-b" onclick="ApexAcademy.' + (c.fixed ? 'home' : 'strategies') + '()">← Back</button>'
+      + (c.fixed ? '' : '<button class="ac-b" style="margin-left:auto" onclick="ApexAcademy.remove()">Delete this book</button>')
+      + '</div>';
   }
 
-  function startManual() {
-    state.marks = [];
-    state.manualIdx = 0;
-    var tfms = TF_MS[state.tf] || 900000;
-    // Walk a year in windows of ~200 bars; the trader scrolls, we advance.
-    state.manualTo = Date.now();
-    state.manualFrom = state.manualTo - 365 * 24 * 3600 * 1000;
-    go('marking');
+  /* ═══════════════ reading a chapter ═══════════════ */
+
+  function chapter(i) {
+    st.ci = i; st.quiz = null;
+    // Recomputed per chapter open, not cached: the journal changes while the
+    // book is being read, and stale numbers in a section titled "from your own
+    // trading" would be worse than none.
+    st.ev = st.course.fixed ? null : evidence(st.course.setups || []);
+    go('chapter');
   }
 
-  function renderMarking() {
+  /* One example trade, full size. The chart is rebuilt from symbol and
+     timestamp — no screenshot needed — but a screenshot the trader saved
+     wins, because it shows what THEY were looking at, including whatever
+     they had drawn on it. */
+  function example(i) {
+    var e = st.ev && st.ev.examples[i]; if (!e) return;
+    st.example = e; go('example');
+  }
+
+  function renderExample() {
+    var e = st.example, win = e.pips > 0;
+    var tags = [].concat(e.mistakes.map(function (m) { return ['loss', m]; }),
+                         e.positives.map(function (m) { return ['profit', m]; }));
     root().innerHTML =
-      '<div class="dr-card"><div class="dr-h">Mark your setups — <span id="drMarkN">' + (state.marks.length) + '</span>/10 minimum</div>'
-      + '<div class="dr-s">Move through the chart. When the current bar is one of your entries, press Long or Short. '
-      + 'Skip moves on without marking.</div>'
-      + '<div class="dr-chart" id="drChart" style="margin-top:13px"></div>'
-      + '<div class="dr-row" style="margin-top:13px">'
-      + '<button class="dr-b" onclick="ApexDrillsUI.markStep(-1)">← back</button>'
-      + '<button class="dr-b long" onclick="ApexDrillsUI.mark(\'long\')">Long here</button>'
-      + '<button class="dr-b short" onclick="ApexDrillsUI.mark(\'short\')">Short here</button>'
-      + '<button class="dr-b" onclick="ApexDrillsUI.markStep(1)">Skip →</button>'
-      + '<button class="dr-b primary" id="drMarkDone" onclick="ApexDrillsUI.finishManual()"'
-      + (state.marks.length >= 10 ? '' : ' disabled') + '>Done — build drills</button>'
-      + '</div><div class="dr-s" id="drMarkMsg" style="margin-top:10px">Loading chart…</div></div>';
-    mountMarkChart();
+      '<div class="ac-card"><div class="ac-s" style="color:var(--gold);font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase">Your trade</div>'
+      + '<div class="ac-h" style="font-size:20px;margin:6px 0 4px">' + esc(e.symbol || '?') + ' · '
+      + esc((e.dir || '').toUpperCase()) + ' · <span style="color:var(--' + (win ? 'profit' : 'loss') + ')">'
+      + sign(e.pips) + ' pips</span></div>'
+      + '<div class="ac-s">' + esc(e.date || '') + (e.session ? ' · ' + esc(e.session) : '')
+      + (e.entry ? ' · entry ' + esc(e.entry) : '') + (e.exit ? ' → ' + esc(e.exit) : '')
+      + (e.sl ? ' · stop ' + esc(e.sl) : ' · <span style="color:var(--loss)">no stop recorded</span>') + '</div>'
+      + (e.charts ? '<img class="ac-shot" src="' + esc(e.charts[0].url || e.charts[0]) + '" alt="">'
+                  : '<div class="ac-chart" id="acChart"></div>')
+      + (tags.length ? '<div class="ac-setups">' + tags.map(function (t) {
+            return '<span class="ac-chip" style="cursor:default;color:var(--' + t[0] + ')">' + esc(t[1]) + '</span>'; }).join('') + '</div>' : '')
+      + (e.note ? '<div class="ac-why" style="margin-top:14px">' + esc(e.note) + '</div>' : '')
+      + '<div class="ac-row" style="margin-top:18px"><button class="ac-b" onclick="ApexAcademy.chapter(' + st.ci + ')">← Back to the chapter</button></div></div>';
+
+    if (!e.charts && e.openTime) mountExampleChart(e);
   }
 
-  function mountMarkChart() {
-    var el = document.getElementById('drChart'); if (!el) return;
-    window.ApexChart.create(el, { symbol: state.symbol, timeframe: state.tf, volume: false })
+  function mountExampleChart(e) {
+    var el = document.getElementById('acChart'); if (!el || !window.ApexChart) return;
+    var win = 90 * 900000;   // ~90 bars of 15m either side
+    window.ApexChart.create(el, { symbol: e.symbol, timeframe: '15m', volume: false })
+      .then(function (c) { return c.loadRange(e.openTime - win, e.openTime + win).then(function () { return c; }); })
       .then(function (c) {
-        chart = c;
-        return c.loadRange(state.manualFrom, state.manualTo);
-      }).then(function () {
-        state.cursor = Math.min(200, chart.total() - 1);
-        chart.reveal(state.cursor);
-        var m = document.getElementById('drMarkMsg');
-        if (m) m.textContent = 'Bar ' + state.cursor + ' of ' + chart.total();
-      }).catch(function (e) {
-        var m = document.getElementById('drMarkMsg');
-        if (m) m.innerHTML = '<span style="color:var(--loss)">Chart could not load: ' + esc(String(e.message || e)) + '</span>';
+        c.setMarkers([{ time: e.openTime / 1000, side: e.dir === 'long' ? 'buy' : 'sell' }]);
+        if (e.entry) c.setLevels({ entry: parseFloat(e.entry), sl: e.sl ? parseFloat(e.sl) : null });
+      })
+      .catch(function () {
+        el.innerHTML = '<div class="ac-s" style="padding:20px;text-align:center">'
+          + 'No chart data for this instrument and date.</div>';
       });
   }
 
-  function markStep(d) {
-    if (!chart) return;
-    state.cursor = Math.max(30, Math.min(chart.total() - 1, state.cursor + d * 5));
-    chart.reveal(state.cursor);
-    var m = document.getElementById('drMarkMsg');
-    if (m) m.textContent = 'Bar ' + state.cursor + ' of ' + chart.total();
-  }
+  function renderChapter() {
+    var c = st.course, ch = c.chapters[st.ci];
+    var body = ch.body.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+    var keys = (ch.keyPoints || []).length
+      ? '<div class="ac-key"><div class="ac-s" style="font-weight:700;color:var(--gold);margin-bottom:8px">What to take away</div><ul style="margin:0;padding-left:16px">'
+        + ch.keyPoints.map(function (k) { return '<li>' + esc(k) + '</li>'; }).join('') + '</ul></div>' : '';
+    var mis = (ch.mistakes || []).length
+      ? '<div class="ac-mis"><div class="ac-s" style="font-weight:700;color:var(--loss);margin-bottom:8px">Where it goes wrong</div><ul style="margin:0;padding-left:16px">'
+        + ch.mistakes.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') + '</ul></div>' : '';
 
-  function mark(side) {
-    if (!chart) return;
-    var bar = chart.currentBar && chart.currentBar();
-    state.marks.push({ i: state.cursor, t: bar ? bar.t : Date.now(), side: side });
-    var n = document.getElementById('drMarkN'); if (n) n.textContent = state.marks.length;
-    var d = document.getElementById('drMarkDone'); if (d && state.marks.length >= 10) d.disabled = false;
-    markStep(1);
-  }
-
-  /* Manual marks become A-locations; the untouched stretches between them
-     become the traps and the quiet spells. The trader vouched for the marks,
-     which is an honest source — unlike a model guessing at a chart. */
-  function finishManual() {
-    var spots = state.marks.map(function (m) {
-      return { kind: 'A', i: m.i, t: m.t, side: m.side, truth: { act: true, side: m.side } };
-    });
-    var busy = {}; spots.forEach(function (s) { for (var k = -40; k <= 40; k++) busy[s.i + k] = true; });
-    var maxI = Math.max.apply(null, spots.map(function (s) { return s.i; })) + 400;
-    for (var i = 60; i < maxI; i += 53) {
-      if (busy[i]) continue;
-      spots.push({ kind: 'D', i: i, t: 0, side: null, truth: { act: false } });
-      i += 150;
-    }
-    window.ApexDrills.Store.save(null, {
-      name: (state.strategy && state.strategy.name) || 'Hand-marked strategy',
-      note: 'Locations marked by hand — no rule set.',
-      symbol: state.symbol, tf: state.tf, description: state.desc,
-      strategy: null, manual: true, spots: spots,
-      counts: spots.reduce(function (m, s) { m[s.kind] = (m[s.kind] || 0) + 1; return m; }, {}),
-      builtAt: Date.now(), range: { from: state.manualFrom, to: state.manualTo },
-      progress: {}
-    }).then(function (id) { open(id); });
-  }
-
-  /* ═══════════════ open a strategy ═══════════════ */
-
-  function open(id) {
-    root().innerHTML = '<div class="dr-card"><div class="dr-h">Loading…</div></div>';
-    window.ApexDrills.Store.get(id).then(function (d) {
-      if (!d) { go('list'); return; }
-      state = { drill: d };
-      go('detail');
-    });
-  }
-
-  function renderDetail() {
-    var d = state.drill, p = d.progress || {}, c = d.counts || {};
-    var mix = window.ApexDrills.mixFor(p.score, p.realWinRate);
-    var learned = !!p.learned;
     root().innerHTML =
-      '<div class="dr-card"><div class="dr-h">' + esc(d.name) + '</div>'
-      + '<div class="dr-s">' + esc(d.note || '') + '</div>'
-      + '<div class="dr-stats">'
-      + '<div class="dr-stat"><b>' + ((c.A || 0) + (c.B || 0)) + '</b><span>Real setups</span></div>'
-      + '<div class="dr-stat"><b>' + (c.C || 0) + '</b><span>Traps</span></div>'
-      + '<div class="dr-stat"><b>' + (p.sessions || 0) + '</b><span>Sessions</span></div>'
-      + '<div class="dr-stat"><b>' + (p.score != null ? Math.round(p.score * 100) + '%' : '—') + '</b><span>Accuracy</span></div>'
-      + '</div>'
-      + '<div class="dr-s">Difficulty: <strong>' + (mix.t < 0.15 ? 'teaching mix — winners dominate'
-          : mix.t > 0.8 ? 'realistic — the strategy as it actually behaves' : 'tightening') + '</strong>'
-      + (p.realWinRate != null ? ' · this strategy really wins ' + Math.round(p.realWinRate * 100) + '% of the time' : '')
-      + '</div>'
-      + '<div class="dr-row" style="margin-top:16px">'
-      + '<button class="dr-b" onclick="ApexDrillsUI.list()">← All strategies</button>'
-      + (!learned && (c.A || 0) ? '<button class="dr-b" onclick="ApexDrillsUI.learn()">Show me the pattern first</button>' : '')
-      + '<button class="dr-b primary" onclick="ApexDrillsUI.session()">Start a session →</button>'
-      + '<button class="dr-b" style="margin-left:auto" onclick="ApexDrillsUI.remove()">Delete</button>'
+      '<div class="ac-card"><div class="ac-s" style="color:var(--gold);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px">Chapter ' + (st.ci + 1) + ' of ' + c.chapters.length + '</div>'
+      + '<div class="ac-h" style="font-size:22px;margin:6px 0 18px">' + esc(ch.title) + '</div>'
+      + '<div class="ac-prose">' + body + '</div>' + keys + mis
+      + evidenceHtml(st.ev)
+      + '<div class="ac-row" style="margin-top:20px">'
+      + '<button class="ac-b" onclick="ApexAcademy.back()">← All chapters</button>'
+      + (st.ci > 0 ? '<button class="ac-b" onclick="ApexAcademy.chapter(' + (st.ci - 1) + ')">Previous</button>' : '')
+      + '<button class="ac-b primary" onclick="ApexAcademy.quizStart()">Check that it stuck →</button>'
+      + (st.ci < c.chapters.length - 1 ? '<button class="ac-b" style="margin-left:auto" onclick="ApexAcademy.chapter(' + (st.ci + 1) + ')">Skip to next chapter</button>' : '')
+      + '</div></div>';
+
+    // Reading it counts as read. Deliberately not gated on the quiz — the quiz
+    // is a check, not a toll gate, and treating it as one makes people skim.
+    var p = c.progress[ch.id] = c.progress[ch.id] || {};
+    if (!p.read) { p.read = true; saveProgress(); }
+  }
+
+  /* ═══════════════ quiz ═══════════════ */
+
+  function quizStart() {
+    var ch = st.course.chapters[st.ci];
+    if (ch.quiz && ch.quiz.length) { st.quiz = { qs: ch.quiz, i: 0, right: 0, picked: null }; go('quiz'); return; }
+
+    root().innerHTML = '<div class="ac-card"><div class="ac-h">Writing the questions…</div>'
+      + '<div class="ac-s">A few seconds. They are written once and then kept with the chapter.</div></div>';
+
+    fetch(WORKER() + '/academy', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'quiz', title: ch.title, body: ch.body.join('\n\n'), n: 4 })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      var qs = (res.questions || []).filter(function (q) {
+        return q && q.q && Array.isArray(q.options) && q.options.length === 4
+          && q.correct >= 0 && q.correct < 4;
+      });
+      if (!qs.length) throw new Error(res.error || 'no usable questions');
+      ch.quiz = qs;
+      if (!st.course.fixed) Store.save(st.course.id, { chapters: st.course.chapters });
+      st.quiz = { qs: qs, i: 0, right: 0, picked: null };
+      go('quiz');
+    }).catch(function (e) {
+      root().innerHTML = '<div class="ac-card"><div class="ac-h">No questions this time</div>'
+        + '<div class="ac-s">' + esc(String(e.message || e)) + '</div>'
+        + '<div class="ac-row" style="margin-top:14px"><button class="ac-b" onclick="ApexAcademy.chapter(' + st.ci + ')">Back to the chapter</button>'
+        + '<button class="ac-b primary" onclick="ApexAcademy.quizStart()">Try again</button></div></div>';
+    });
+  }
+
+  function renderQuiz() {
+    var q = st.quiz, cur = q.qs[q.i];
+    var opts = cur.options.map(function (o, k) {
+      var cls = '';
+      if (q.picked != null) {
+        if (k === cur.correct) cls = ' right';
+        else if (k === q.picked) cls = ' wrong';
+      }
+      return '<button class="ac-opt' + cls + '"' + (q.picked != null ? ' disabled' : '')
+        + ' onclick="ApexAcademy.pick(' + k + ')">' + esc(o) + '</button>';
+    }).join('');
+
+    root().innerHTML =
+      '<div class="ac-card"><div class="ac-s" style="color:var(--gold);font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase">Question ' + (q.i + 1) + ' of ' + q.qs.length + '</div>'
+      + '<div class="ac-h" style="font-size:17px;margin:8px 0 16px">' + esc(cur.q) + '</div>'
+      + opts
+      + (q.picked != null
+          ? '<div class="ac-why"><strong style="color:var(--' + (q.picked === cur.correct ? 'profit' : 'loss') + ')">'
+            + (q.picked === cur.correct ? 'Correct. ' : 'Not quite. ') + '</strong>' + esc(cur.why || '') + '</div>'
+            + '<div class="ac-row"><button class="ac-b primary" onclick="ApexAcademy.nextQ()">'
+            + (q.i < q.qs.length - 1 ? 'Next question →' : 'See the result →') + '</button></div>'
+          : '<div class="ac-row" style="margin-top:6px"><button class="ac-b" onclick="ApexAcademy.chapter(' + st.ci + ')">Back to the chapter</button></div>')
+      + '</div>';
+  }
+
+  function pick(k) {
+    if (st.quiz.picked != null) return;
+    st.quiz.picked = k;
+    if (k === st.quiz.qs[st.quiz.i].correct) st.quiz.right++;
+    renderQuiz();
+  }
+
+  function nextQ() {
+    var q = st.quiz;
+    if (q.i < q.qs.length - 1) { q.i++; q.picked = null; renderQuiz(); return; }
+
+    var ch = st.course.chapters[st.ci];
+    var p = st.course.progress[ch.id] = st.course.progress[ch.id] || {};
+    p.read = true;
+    // Best attempt is kept, not the latest — re-reading and re-testing should
+    // never look like going backwards.
+    if (!p.quiz || q.right > p.quiz.score) p.quiz = { score: q.right, total: q.qs.length, at: Date.now() };
+    saveProgress();
+
+    var pct = Math.round(q.right / q.qs.length * 100);
+    var verdict = pct === 100 ? 'That chapter is solid.'
+      : pct >= 60 ? 'Mostly there. The explanations above cover what slipped.'
+      : 'Worth reading the chapter again — the questions test understanding, not recall, so a low score usually means one idea has not landed rather than that you forgot a detail.';
+
+    root().innerHTML =
+      '<div class="ac-card"><div class="ac-h">' + q.right + ' of ' + q.qs.length + ' correct</div>'
+      + '<div class="ac-bar"><i style="width:' + pct + '%"></i></div>'
+      + '<div class="ac-s">' + verdict + '</div>'
+      + '<div class="ac-row" style="margin-top:18px">'
+      + '<button class="ac-b" onclick="ApexAcademy.chapter(' + st.ci + ')">Read it again</button>'
+      + (st.ci < st.course.chapters.length - 1
+          ? '<button class="ac-b primary" onclick="ApexAcademy.chapter(' + (st.ci + 1) + ')">Next chapter →</button>'
+          : '<button class="ac-b primary" onclick="ApexAcademy.back()">Back to chapters</button>')
       + '</div></div>';
   }
 
-  /* ═══════════════ learn phase (step 6) ═══════════════ */
-
-  function learn() {
-    var A = state.drill.spots.filter(function (s) { return s.kind === 'A'; }).slice(0, 6);
-    if (!A.length) { go('detail'); return; }
-    state.learnSet = A; state.learnIdx = 0;
-    go('learn');
-  }
-
-  function renderLearn() {
-    var i = state.learnIdx, set = state.learnSet, s = set[i];
-    root().innerHTML =
-      '<div class="dr-card"><div class="dr-h">Example ' + (i + 1) + ' of ' + set.length + '</div>'
-      + '<div class="dr-s">This is a place where your rules fired and the trade worked. '
-      + 'Watch what the chart looked like <em>before</em> the entry — that is what you have to recognise later.</div>'
-      + '<div class="dr-chart" id="drChart" style="margin-top:13px"></div>'
-      + '<div class="dr-bar"><div class="dr-prog"><i style="width:' + Math.round((i + 1) / set.length * 100) + '%"></i></div></div>'
-      + '<div class="dr-verdict ok"><strong>' + (s.side === 'long' ? 'Long' : 'Short') + '</strong>'
-      + (s.outcome ? ' — closed ' + (s.outcome.pips > 0 ? '+' : '') + s.outcome.pips + ' pips' : '') + '</div>'
-      + '<div class="dr-row" style="margin-top:13px">'
-      + '<button class="dr-b" onclick="ApexDrillsUI.learnStep(-1)"' + (i ? '' : ' disabled') + '>← previous</button>'
-      + (i < set.length - 1
-          ? '<button class="dr-b primary" onclick="ApexDrillsUI.learnStep(1)">Next example →</button>'
-          : '<button class="dr-b primary" onclick="ApexDrillsUI.learnDone()">Got it — start practising →</button>')
-      + '<button class="dr-b" style="margin-left:auto" onclick="ApexDrillsUI.back()">Stop</button>'
-      + '</div></div>';
-    showSpot(state.learnSet[state.learnIdx], true);
-  }
-
-  function learnStep(d) { state.learnIdx = Math.max(0, Math.min(state.learnSet.length - 1, state.learnIdx + d)); renderLearn(); }
-  function learnDone() {
-    var d = state.drill;
-    d.progress = Object.assign({}, d.progress, { learned: true });
-    window.ApexDrills.Store.save(d.id, { progress: d.progress });
-    session();
-  }
-
-  /* ═══════════════ chart for one location ═══════════════ */
-
-  /* Only the window around this location is fetched — roughly 180 bars.
-     Loading the year again per drill is what the stored spot list exists to
-     avoid. */
-  function showSpot(spot, revealAll) {
-    var el = document.getElementById('drChart'); if (!el) return Promise.resolve();
-    var tfms = TF_MS[state.drill ? state.drill.tf : state.tf] || 900000;
-    var LB = window.ApexDrills.LOOKBACK, FW = window.ApexDrills.RUNFWD;
-    var from = spot.t - LB * tfms, to = spot.t + FW * tfms;
-    var sym = state.drill ? state.drill.symbol : state.symbol;
-    var tf = state.drill ? state.drill.tf : state.tf;
-
-    return window.ApexChart.create(el, { symbol: sym, timeframe: tf, volume: false })
-      .then(function (c) { chart = c; return c.loadRange(from, to); })
-      .then(function () {
-        var total = chart.total();
-        // Everything after the decision bar stays hidden until it is answered.
-        var at = Math.max(10, Math.min(total - 1, Math.round(total * (LB / (LB + FW)))));
-        state.decisionBar = at;
-        chart.reveal(revealAll ? total : at);
-        if (revealAll) chart.setMarkers([{ time: spot.t / 1000, side: spot.side === 'long' ? 'buy' : 'sell' }]);
-      }).catch(function () { });
-  }
-
-  /* ═══════════════ practice session (step 3) ═══════════════ */
-
-  function session() {
-    var d = state.drill;
-    var set = window.ApexDrills.pickSession(d.spots, d.progress || {}, 20);
-    if (!set.length) { go('detail'); return; }
-    state.set = set; state.idx = 0; state.answers = [];
-    go('drill');
-  }
-
-  function renderDrill() {
-    var i = state.idx, set = state.set;
-    root().innerHTML =
-      '<div class="dr-card"><div class="dr-h">Location ' + (i + 1) + ' of ' + set.length + '</div>'
-      + '<div class="dr-s">Would you take a trade here? The chart stops at the decision bar — '
-      + 'what comes next is hidden until you answer.</div>'
-      + '<div class="dr-chart" id="drChart" style="margin-top:13px"></div>'
-      + '<div class="dr-bar"><div class="dr-prog"><i style="width:' + Math.round(i / set.length * 100) + '%"></i></div></div>'
-      + '<div class="dr-row" id="drAnswers">'
-      + '<button class="dr-b long" onclick="ApexDrillsUI.answer(\'long\')">Long</button>'
-      + '<button class="dr-b short" onclick="ApexDrillsUI.answer(\'short\')">Short</button>'
-      + '<button class="dr-b" onclick="ApexDrillsUI.answer(null)">No trade</button>'
-      + '<button class="dr-b" style="margin-left:auto" onclick="ApexDrillsUI.back()">Stop session</button>'
-      + '</div><div id="drReveal"></div></div>';
-    showSpot(set[i], false);
-  }
-
-  function answer(side) {
-    var s = state.set[state.idx];
-    state.answers.push({ spot: s, acted: !!side, side: side });
-
-    // Reveal what actually happened — the whole point of the exercise.
-    if (chart) chart.reveal(chart.total());
-    var box = document.getElementById('drReveal');
-    var acts = document.getElementById('drAnswers');
-    if (acts) acts.style.display = 'none';
-
-    var g = window.ApexDrills.grade([{ spot: s, acted: !!side, side: side }]);
-    var right = g.right === 1;
-    var truth = s.truth.act ? ('a valid setup — ' + s.truth.side) : 'not a setup';
-    var why;
-    if (s.kind === 'A') why = 'Your rules fired here and the trade worked' + (s.outcome ? ' (+' + s.outcome.pips + ' pips)' : '') + '.';
-    else if (s.kind === 'B') why = 'Your rules fired here and the trade <strong>lost</strong>' + (s.outcome ? ' (' + s.outcome.pips + ' pips)' : '')
-      + '. Taking it was still correct — a loss by the rules is not a mistake.';
-    else if (s.kind === 'C') why = 'A trap: ' + esc(s.missing || 'one condition was missing') + '.';
-    else why = 'Nothing here. No signal anywhere near — the correct answer is to wait.';
-
-    if (box) box.innerHTML =
-      '<div class="dr-verdict ' + (right ? 'ok' : 'no') + '"><strong>'
-      + (right ? '✓ Correct' : '✗ ' + (s.truth.act ? 'This was ' + truth : 'This was ' + truth))
-      + '</strong><br>' + why + '</div>'
-      + '<div class="dr-row" style="margin-top:12px"><button class="dr-b primary" onclick="ApexDrillsUI.next()">'
-      + (state.idx < state.set.length - 1 ? 'Next location →' : 'See the result →') + '</button></div>';
-  }
-
-  function next() {
-    if (state.idx < state.set.length - 1) { state.idx++; renderDrill(); }
-    else finish();
-  }
-
-  /* ═══════════════ result (step 5) ═══════════════ */
-
-  function finish() {
-    var g = window.ApexDrills.grade(state.answers);
-    g.shown = state.answers.map(function (a) { return a.spot.i; });
-    var d = state.drill;
-    var prog = window.ApexDrills.updateProgress(d.progress, g);
-    prog.realWinRate = (d.progress || {}).realWinRate;
-
-    root().innerHTML =
-      '<div class="dr-card"><div class="dr-h">Session result</div>'
-      + '<div class="dr-stats">'
-      + '<div class="dr-stat"><b>' + Math.round(g.score * 100) + '%</b><span>Correct</span></div>'
-      + '<div class="dr-stat"><b>' + g.missed + '</b><span>Setups missed</span></div>'
-      + '<div class="dr-stat"><b>' + g.trap + '</b><span>Traps traded</span></div>'
-      + '<div class="dr-stat"><b>' + (g.impatient + g.wrongSide) + '</b><span>Other mistakes</span></div>'
-      + '</div>'
-      + '<div class="dr-s" id="drReview">Writing the review…</div>'
-      + '<div class="dr-row" style="margin-top:16px">'
-      + '<button class="dr-b" onclick="ApexDrillsUI.open(\'' + d.id + '\')">Back to strategy</button>'
-      + '<button class="dr-b primary" onclick="ApexDrillsUI.again()">Another session →</button></div></div>';
-
-    window.ApexDrills.Store.save(d.id, { progress: prog });
-    d.progress = prog;
-    window.ApexDrills.Store.saveSession(d.id, {
-      score: g.score, right: g.right, total: g.total,
-      missed: g.missed, trap: g.trap, impatient: g.impatient, wrongSide: g.wrongSide,
-      mistakes: g.mistakes.slice(0, 40)
-    });
-
-    window.ApexDrills.review(d.name, g).then(function (txt) {
-      var el = document.getElementById('drReview');
-      if (el) el.innerHTML = txt
-        ? esc(txt).replace(/\n/g, '<br>')
-        : 'The numbers above are the review — the written summary was not available.';
-    });
-  }
-
-  function again() { open(state.drill.id); }
-  function back() { if (state.drill) open(state.drill.id); else go('list'); }
+  function back() { go('course'); }
   function remove() {
-    if (!confirm('Delete “' + state.drill.name + '” and its practice history?')) return;
-    window.ApexDrills.Store.remove(state.drill.id).then(function () { go('list'); });
+    if (!confirm('Delete “' + st.course.title + '”?')) return;
+    Store.remove(st.course.id).then(function () { strategies(); });
   }
 
   /* ═══════════════ router ═══════════════ */
 
   function render() {
-    if (chart && chart.destroy) { try { chart.destroy(); } catch (e) { } chart = null; }
     if (!isPro()) {
-      root().innerHTML = '<div class="dr-card gold"><div class="dr-h">🔒 Strategy Drills is a Pro feature</div>'
-        + '<div class="dr-s">Practising a strategy on real history means downloading and searching years of '
-        + 'tick data, which is what makes it a paid feature. Journaling and statement import stay free.</div>'
-        + '<div class="dr-row" style="margin-top:14px"><button class="dr-b primary" onclick="openUpgradeModal()">See Pro</button></div></div>';
+      root().innerHTML = '<div class="ac-card gold"><div class="ac-h">🔒 Academy is a Pro feature</div>'
+        + '<div class="ac-s">Both tracks — the psychology course and writing your own strategy up as a book — '
+        + 'are part of Pro.</div><div class="ac-row" style="margin-top:14px">'
+        + '<button class="ac-b primary" onclick="openUpgradeModal()">See Pro</button></div></div>';
       return;
     }
-    if (view === 'list') return renderList();
-    if (view === 'create') return renderCreate();
-    if (view === 'confirm') return renderConfirm();
-    if (view === 'manual') return renderManual();
-    if (view === 'marking') return renderMarking();
-    if (view === 'detail') return renderDetail();
-    if (view === 'learn') return renderLearn();
-    if (view === 'drill') return renderDrill();
-    renderList();
+    if (view === 'home') return renderHome();
+    if (view === 'course') return renderCourse();
+    if (view === 'chapter') return renderChapter();
+    if (view === 'quiz') return renderQuiz();
+    if (view === 'example') return renderExample();
+    renderHome();
   }
 
-  window.ApexDrillsUI = {
-    render: render, list: function () { state = {}; go('list'); },
-    create: function () { go('create'); }, propose: propose, build: build,
-    open: open, learn: learn, learnStep: learnStep, learnDone: learnDone,
-    session: session, answer: answer, next: next, again: again, back: back,
-    remove: remove, startManual: startManual, mark: mark, markStep: markStep,
-    finishManual: finishManual
+  window.ApexAcademy = {
+    render: render, home: function () { st = {}; go('home'); },
+    psych: psych, strategies: strategies, create: create, write: write, open: open,
+    chapter: chapter, back: back, quizStart: quizStart, pick: pick, nextQ: nextQ,
+    remove: remove, example: example, evidence: evidence
   };
 
-  /* The markup for this page is appended at the end of the document, which
-     puts it in <body> — but every other .page lives inside #shell, and the
-     shell is what nav() shows and lays out. Outside it the page went active
-     and stayed invisible: no error, no clue, just a blank screen.
-
-     Moved at load instead of by hand-placing the markup inside the shell:
-     this file is spliced in as a block, and a block that repairs its own
-     position cannot be broken by where it happens to land. */
+  /* Same repair as the previous build needed: this block is appended at the
+     end of the document, which puts the page in <body>, while every other
+     .page lives inside #shell — and outside the shell it goes active and
+     stays invisible with no error at all. */
   (function mountPage() {
-    var pg = document.getElementById('page-drills');
-    var shell = document.getElementById('shell');
+    var pg = document.getElementById('page-academy'), shell = document.getElementById('shell');
     if (pg && shell && pg.parentElement !== shell) shell.appendChild(pg);
     else if (!pg || !shell) setTimeout(mountPage, 400);
   })();
 
-  // Render when the page is opened, not on load — the chart library and a
-  // year of nothing are not worth fetching for a tab nobody visited.
-  if (typeof window.nav === 'function' && !window._drNavHook) {
-    window._drNavHook = true;
+  if (typeof window.nav === 'function' && !window._acNavHook) {
+    window._acNavHook = true;
     var prev = window.nav;
     window.nav = function (id) {
       var r = prev.apply(this, arguments);
-      if (id === 'drills') { try { render(); } catch (e) { console.warn('[drills]', e); } }
+      if (id === 'academy') { try { render(); } catch (e) { console.warn('[academy]', e); } }
       return r;
     };
   }
