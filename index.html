@@ -3,7 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Evidence Trading — Journal, Analytics &amp; Replay</title>
+<!-- ══ SEO ══════════════════════════════════════════════════════════
+     Added 07.08.2026. The site was not in Google's index at all, and the
+     cause was structural (see the AUTH VISIBILITY note further down), not
+     the tags — but without these there is nothing for a result to show.
+
+     The title leads with what people search for and ends with the brand:
+     nobody looks for "Evidence Trading" yet, and the brand at the front
+     would spend the most valuable characters on a name no one types.
+     ═══════════════════════════════════════════════════════════════════ -->
+<title>Trading Journal with Auto-Sync &amp; Market Replay | Evidence</title>
+<meta name="description" content="A trading journal that fills itself. Sync trades from cTrader, MT5, TradingView or Binance, then see where your edge really is. Free plan, no card.">
+<link rel="canonical" href="https://evidencetrading.com/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/">
+<meta property="og:title" content="Trading Journal with Auto-Sync, Analytics &amp; Market Replay">
+<meta property="og:description" content="Your trades arrive on their own — from cTrader, MT5, TradingView, Binance or a CSV. Then 68 metrics, an AI coach and a replay that lets you trade any past day again.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta property="og:image:alt" content="Evidence Trading">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Trading Journal with Auto-Sync, Analytics &amp; Market Replay">
+<meta name="twitter:description" content="Your trades arrive on their own — from cTrader, MT5, TradingView, Binance or a CSV. Then 68 metrics, an AI coach and a tick-accurate replay.">
+<meta name="twitter:image" content="https://evidencetrading.com/icons/icon-512.png">
 <!-- ── PWA: installable app + push ── -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#080a0e">
@@ -6956,12 +6981,30 @@ footer {
 
 <style>
 /* ── AUTH VISIBILITY DEFAULTS ──────────────────────────────
-   Landing, onboard und shell sind alle versteckt beim Start.
-   Der Splash wird angezeigt bis Firebase die Auth prüft.
-   onAuthStateChanged entscheidet dann was sichtbar wird.
+   INVERTED on 07.08.2026 for search engines. It used to be the other way
+   round: everything hidden, and onAuthStateChanged decided what appears.
+
+   For a visitor that is 300 ms. For a crawler it is the difference between
+   "this page has content" and "this page is empty" — the first pass runs no
+   JavaScript at all, and the render pass comes later, is time-boxed, and here
+   hung on a third-party auth callback. The site was not ranking badly; it was
+   not in the index at all.
+
+   So now: the landing is the DEFAULT state, and being signed in is what hides
+   it. The splash still covers everything while Firebase answers, so a signed-in
+   user never sees the landing flash past — but the splash is switched on by an
+   inline script rather than by CSS, so without JavaScript it never appears and
+   the landing stays readable. That combination is the whole point: correct for
+   a crawler, unchanged for a user.
+
+   Do not "tidy" this back into a CSS default for the splash. That single line
+   is what makes the content visible to a crawler.
 ──────────────────────────────────────────────────────────── */
-#landingPage { display: none; }
+#landingPage { display: block; }
 #onboard     { display: none; }
+/* Off until the inline script below turns it on — see the note above. */
+#apexAuthSplash { display: none; }
+#apexAuthSplash.armed { display: flex; }
 
 /* ── AUTH SPLASH SCREEN ──────────────────────────────────── */
 #apexAuthSplash {
@@ -7192,6 +7235,9 @@ body.light #landingPage * {
 #landingPage .lp-h1{
   font-family:var(--lp-display); font-weight:800; font-size:clamp(2.7rem,8vw,5.6rem); line-height:.96; letter-spacing:-.02em; margin:0;
 }
+#landingPage .lp-h1 .lp-h1-kw{ display:block; font-family:var(--lp-display); font-weight:600;
+  font-size:clamp(1.05rem,2.1vw,1.6rem); line-height:1.25; letter-spacing:-.01em;
+  color:var(--lp-mute); margin-top:18px; max-width:20ch; }
 #landingPage .lp-h1 .grad{ background:linear-gradient(120deg,var(--lp-gold-hi),var(--lp-gold) 72%); -webkit-background-clip:text; background-clip:text; color:transparent; }
 #landingPage .lp-sub{ font-size:clamp(1.05rem,1.8vw,1.3rem); color:var(--lp-text); margin:24px 0 18px; max-width:44ch; font-weight:400; }
 #landingPage .lp-badges{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:22px; }
@@ -7466,6 +7512,69 @@ body.light #landingPage * {
 }
 </style>
 
+
+<!-- Structured data. Two things are deliberately absent:
+     • FAQPage — the landing has no visible FAQ, and marking up content a
+       visitor cannot see is a guidelines violation, not a shortcut.
+     • aggregateRating — we have no verified public reviews. Inventing one is
+       the single fastest way to earn a manual action.
+     The prices below must stay in step with the checkout worker. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://evidencetrading.com/#org",
+      "name": "Evidence Trading",
+      "url": "https://evidencetrading.com/",
+      "logo": "https://evidencetrading.com/icons/icon-512.png",
+      "email": "jziborius@gmail.com"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://evidencetrading.com/#website",
+      "url": "https://evidencetrading.com/",
+      "name": "Evidence Trading",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://evidencetrading.com/#org" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://evidencetrading.com/#app",
+      "name": "Evidence Trading",
+      "applicationCategory": "FinanceApplication",
+      "applicationSubCategory": "Trading Journal",
+      "operatingSystem": "Web browser, iOS, Android",
+      "url": "https://evidencetrading.com/",
+      "image": "https://evidencetrading.com/icons/icon-512.png",
+      "description": "A trading journal that fills itself. Trades sync automatically from cTrader, MetaTrader 5, TradingView, ATAS, Quantower, Binance and Bybit, or import from a statement. Includes 68 performance metrics, an AI trading coach, guardrails, a prop firm cockpit and a tick-accurate market replay.",
+      "publisher": { "@id": "https://evidencetrading.com/#org" },
+      "featureList": [
+        "Automatic trade sync from cTrader, MetaTrader 5, TradingView, ATAS and Quantower",
+        "Crypto auto-sync from Binance and Bybit via read-only API keys",
+        "Statement import for 90+ brokers and prop firms with free column mapping",
+        "68 performance metrics with custom formulas",
+        "Tick-accurate market replay of any past trading day",
+        "AI trading coach with live risk alerts and A-F trade reviews",
+        "Prop firm cockpit with drawdown and consistency tracking",
+        "Multi-account comparison across brokers, prop challenges and demo accounts",
+        "Read-only REST API"
+      ],
+      "offers": [
+        { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR",
+          "category": "free", "url": "https://evidencetrading.com/" },
+        { "@type": "Offer", "name": "Pro Monthly", "price": "24.99", "priceCurrency": "EUR",
+          "url": "https://evidencetrading.com/" },
+        { "@type": "Offer", "name": "Pro Yearly", "price": "179.00", "priceCurrency": "EUR",
+          "url": "https://evidencetrading.com/" },
+        { "@type": "Offer", "name": "Founding Lifetime", "price": "299.00", "priceCurrency": "EUR",
+          "url": "https://evidencetrading.com/" }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -7542,6 +7651,25 @@ body.light #landingPage * {
   <div class="splash-logo-mark"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#etMark"/></svg></div>
   <div class="splash-spinner"></div>
 </div>
+<script>
+/* Arms the splash the instant the element exists — immediately after it in the
+   document, so the browser has not painted yet and a signed-in user never sees
+   the landing flash past underneath.
+
+   Deliberately inline and un-deferred, and deliberately NOT a CSS default: a
+   crawler that executes no JavaScript never runs this, so no splash covers the
+   page and the landing is what it reads. That is the entire trick.
+
+   Placed AFTER the element and addressed by id, not via currentScript — the
+   first attempt used currentScript.nextElementSibling and silently did
+   nothing. Correct in theory, unreliable in practice; an id lookup cannot
+   misfire. */
+(function(){ try {
+  if (/[?&]demo=1/.test(location.search)) return;   // demo drives the app directly
+  var sp = document.getElementById('apexAuthSplash');
+  if (sp) sp.classList.add('armed');
+} catch(e){} })();
+</script>
 
 <!-- ════ LANDING: PRODUCT SHOWCASE + TESTIMONIALS (styles) ════ -->
 <style>
@@ -7667,8 +7795,12 @@ body.light #landingPage * {
     <!-- Der Name ist hier auf zwei Elemente verteilt (Zeilenumbruch + Farbverlauf),
          deshalb greift protectBrand() nicht — aus „Trading" wurde sonst „Handel".
          Die ganze Überschrift von der Übersetzung ausnehmen. -->
-    <h1 class="lp-h1 reveal d1 notranslate" translate="no">Evidence<br><span class="grad">Trading</span></h1>
-    <div class="lp-sub reveal d2">Journal, quant analytics and market replay — in one place.</div>
+    <!-- The brand still owns the big type; the keyword line under it is what a
+         search engine reads. Only the NAME carries notranslate now (it used to
+         wrap the whole heading, which turned "Trading" into "Handel") — the
+         keyword line is meant to be translated like the rest of the page. -->
+    <h1 class="lp-h1 reveal d1"><span class="notranslate" translate="no">Evidence<br><span class="grad">Trading</span></span><span class="lp-h1-kw">The trading journal that fills itself</span></h1>
+    <div class="lp-sub reveal d2">Auto-synced from your broker, quant analytics and market replay — in one place.</div>
     <div class="lp-badges reveal d3">
       <span class="lp-badge"><span class="dot"></span> Read-Only Broker Access</span>
       <span class="lp-badge gold">cTrader · MT5 · ATAS · Quantower · TradingView</span>
@@ -8245,6 +8377,16 @@ body.light #landingPage * {
            style="color:var(--lp-gold)"><b>Verträge hier kündigen</b></a></li>
     <li><a href="#" onclick="goToAuth('login');return false;">Login</a></li>
     <li><a href="#" onclick="goToAuth('register');return false;">Register</a></li>
+  </ul>
+  <!-- Real <a href> links to the standalone pages. A sitemap entry alone is a
+       weak signal; a link from the site's own home page is the strong one.
+       Plain hrefs on purpose — no onclick, so a crawler that runs nothing
+       still follows them. -->
+  <ul class="footer-links">
+    <li><a href="/ctrader-trading-journal.html">cTrader trading journal</a></li>
+    <li><a href="/prop-firm-trading-journal.html">Prop firm trading journal</a></li>
+    <li><a href="/trading-journal-market-replay.html">Trading journal with market replay</a></li>
+    <li><a href="/crypto-trading-journal.html">Crypto trading journal</a></li>
   </ul>
 </footer>
 
