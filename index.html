@@ -474,7 +474,7 @@
     var s = document.createElement('style');
     s.id = 'apex-legal-css';
     s.textContent = [
-      '.lgl-back{position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);',
+      '.lgl-back{position:fixed;inset:0;z-index:1000001;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);',
         'display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto}',
       '.lgl{background:var(--elevated,#14161a);border:0.5px solid var(--rim,rgba(255,255,255,.1));border-radius:16px;',
         'width:min(820px,100%);margin:auto;box-shadow:0 24px 70px rgba(0,0,0,.6)}',
@@ -776,7 +776,12 @@
     var s = document.createElement('style');
     s.id = 'apex-dialog-css';
     s.textContent = [
-      '.apxd-back{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);',
+      /* Above #apexUpgradeOverlay (999999). A dialog is always a response to a
+   click on what is already on screen, so it belongs on top of it — the
+   order confirmation used to open BEHIND the upgrade modal and looked
+   like nothing had happened. .lgl-back stays one step higher, because
+   the terms open FROM this dialog. */
+      '.apxd-back{position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);',
         'display:flex;align-items:center;justify-content:center;padding:20px}',
       '.apxd{background:var(--elevated);border:0.5px solid var(--rim);border-radius:16px;width:min(430px,100%);',
         'box-shadow:0 24px 70px rgba(0,0,0,.55);padding:22px 22px 18px}',
@@ -23734,46 +23739,94 @@ window.APEX_MAIL_URL = "https://apex-stripe-webhook.4kjyyyftv6.workers.dev";
 
    Die Zustimmung wird mit Wortlaut und Zeitpunkt protokolliert, weil sie im
    Streitfall nachgewiesen werden muss.                                      */
-const ORDER_CONSENT_TEXT =
-  'Ich verlange ausdrücklich, dass Sie mit der Erbringung der Dienstleistung vor Ablauf ' +
-  'der Widerrufsfrist beginnen. Mir ist bekannt, dass ich bei einem Widerruf einen ' +
-  'anteiligen Betrag für die bis dahin erbrachte Leistung zu zahlen habe.';
+/* Zwei Sprachfassungen, KEINE Maschinenübersetzung.
 
-const PLAN_INFO = {
-  monthly:  { label: 'Evidence Pro — Monatsabo',  price: '24,99 €', term: 'Laufzeit 1 Monat, verlängert sich automatisch um je 1 Monat' },
-  annual:   { label: 'Evidence Pro — Jahresabo',  price: '179,00 €', term: 'Laufzeit 12 Monate, verlängert sich automatisch um je 12 Monate' },
-  lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '299,00 €', term: 'Einmalzahlung, keine Verlängerung' }
+   Der Kasten trug `translate="no"` und war komplett deutsch — richtig gedacht
+   (die Wortlaute sind rechtlich vorgegeben und dürfen nicht verrutschen),
+   im Ergebnis aber falsch: ein englischsprachiger Käufer bekam an der einzigen
+   Stelle, an der er zustimmen soll, unlesbaren Text. Für ihn erfüllt das
+   § 312j gerade NICHT — die Vorschrift will Klarheit für den Verbraucher,
+   nicht deutsche Buchstaben.
+
+   Deshalb: fest hinterlegte Fassungen je Sprache, weiterhin `translate="no"`.
+   Die Zustimmung ist ein Beweismittel; sie durch einen Übersetzungsdienst
+   laufen zu lassen, dessen Ausgabe sich morgen ändern kann, wäre der
+   schlechtere Weg.
+
+   Protokolliert wird immer der Wortlaut, den der Nutzer TATSÄCHLICH gesehen
+   hat — sonst belegt das Protokoll eine Zustimmung, die so nie erteilt wurde.
+
+   Kein Rechtsrat: dass die englische Fassung „zahlungspflichtig bestellen"
+   gleichwertig wiedergibt, sollte anwaltlich bestätigt werden.              */
+const ORDER_I18N = {
+  de: {
+    consent: 'Ich verlange ausdrücklich, dass Sie mit der Erbringung der Dienstleistung vor Ablauf ' +
+             'der Widerrufsfrist beginnen. Mir ist bekannt, dass ich bei einem Widerruf einen ' +
+             'anteiligen Betrag für die bis dahin erbrachte Leistung zu zahlen habe.',
+    title:   'Bestellung prüfen',
+    cancelable: 'Jederzeit zum Ende der laufenden Abrechnungsperiode kündbar.',
+    vat:     'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
+    legal:   'Es gelten unsere <a href="#agb" style="color:var(--gold)" data-ord-legal="agb">AGB</a>, die ' +
+             '<a href="#widerruf" style="color:var(--gold)" data-ord-legal="widerruf">Widerrufsbelehrung</a> und die ' +
+             '<a href="#datenschutz" style="color:var(--gold)" data-ord-legal="datenschutz">Datenschutzerklärung</a>.',
+    cancel:  'Abbrechen',
+    submit:  'Zahlungspflichtig bestellen',
+    plans: {
+      monthly:  { label: 'Evidence Pro — Monatsabo',  price: '24,99 €',  term: 'Laufzeit 1 Monat, verlängert sich automatisch um je 1 Monat' },
+      annual:   { label: 'Evidence Pro — Jahresabo',  price: '179,00 €', term: 'Laufzeit 12 Monate, verlängert sich automatisch um je 12 Monate' },
+      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '299,00 €', term: 'Einmalzahlung, keine Verlängerung' }
+    }
+  },
+  en: {
+    consent: 'I expressly request that you begin providing the service before the withdrawal period ' +
+             'has expired. I understand that if I withdraw, I must pay a proportionate amount for the ' +
+             'service already provided up to that point.',
+    title:   'Review your order',
+    cancelable: 'Cancel any time, effective at the end of the current billing period.',
+    vat:     'No VAT is charged (small business rule, § 19 UStG, Germany).',
+    legal:   'Our <a href="#agb" style="color:var(--gold)" data-ord-legal="agb">Terms</a>, ' +
+             '<a href="#widerruf" style="color:var(--gold)" data-ord-legal="widerruf">Right of Withdrawal</a> and ' +
+             '<a href="#datenschutz" style="color:var(--gold)" data-ord-legal="datenschutz">Privacy Policy</a> apply.',
+    cancel:  'Cancel',
+    submit:  'Buy now — payment required',
+    plans: {
+      monthly:  { label: 'Evidence Pro — Monthly',  price: '€24.99',  term: '1-month term, renews automatically for 1 month at a time' },
+      annual:   { label: 'Evidence Pro — Yearly',   price: '€179.00', term: '12-month term, renews automatically for 12 months at a time' },
+      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '€299.00', term: 'One-off payment, no renewal' }
+    }
+  }
 };
 
+function orderLang() {
+  var l = String(window.apexLocale || navigator.language || 'en').toLowerCase();
+  return l.indexOf('de') === 0 ? ORDER_I18N.de : ORDER_I18N.en;
+}
+
 function confirmOrder(plan) {
-  const info = PLAN_INFO[plan] || PLAN_INFO.monthly;
+  const t    = orderLang();
+  const info = t.plans[plan] || t.plans.monthly;
   if (window.ApexDialog && ApexDialog.ensureCss) ApexDialog.ensureCss();
   return new Promise(function (resolve) {
     const back = document.createElement('div');
     back.className = 'apxd-back';
     back.innerHTML =
       '<div class="apxd" role="dialog" aria-modal="true" translate="no" style="width:min(500px,100%)">' +
-        '<h4>Bestellung prüfen</h4>' +
+        '<h4>' + t.title + '</h4>' +
         '<div style="border:0.5px solid var(--rim);border-radius:10px;padding:13px 15px;margin-bottom:14px;background:var(--layer)">' +
           '<div style="display:flex;justify-content:space-between;gap:10px;font-weight:600;color:var(--ink)">' +
             '<span>' + info.label + '</span><span>' + info.price + '</span></div>' +
           '<div style="font-size:11.5px;color:var(--ink3);margin-top:6px;line-height:1.6">' +
-            info.term + '.<br>' +
-            'Jederzeit zum Ende der laufenden Abrechnungsperiode kündbar.<br>' +
-            'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.</div>' +
+            info.term + '.<br>' + t.cancelable + '<br>' + t.vat + '</div>' +
         '</div>' +
         '<label style="display:flex;gap:9px;align-items:flex-start;font-size:12px;line-height:1.6;color:var(--ink2);cursor:pointer;margin-bottom:14px">' +
           // width/margin müssen die .apxd-input-Regel überschreiben, die auf alle Eingaben zielt
           '<input type="checkbox" id="ordConsent" style="width:15px;height:15px;margin:2px 0 0;padding:0;' +
             'accent-color:var(--gold);flex:none">' +
-          '<span style="flex:1;min-width:0">' + ORDER_CONSENT_TEXT + '</span></label>' +
-        '<div style="font-size:11.5px;color:var(--ink3);margin-bottom:14px">' +
-          'Es gelten unsere <a href="#agb" style="color:var(--gold)" data-ord-legal="agb">AGB</a>, die ' +
-          '<a href="#widerruf" style="color:var(--gold)" data-ord-legal="widerruf">Widerrufsbelehrung</a> und die ' +
-          '<a href="#datenschutz" style="color:var(--gold)" data-ord-legal="datenschutz">Datenschutzerklärung</a>.</div>' +
+          '<span style="flex:1;min-width:0">' + t.consent + '</span></label>' +
+        '<div style="font-size:11.5px;color:var(--ink3);margin-bottom:14px">' + t.legal + '</div>' +
         '<div class="apxd-row">' +
-          '<button class="apxd-b" data-ord-no>Abbrechen</button>' +
-          '<button class="apxd-b primary" data-ord-yes disabled>Zahlungspflichtig bestellen</button>' +
+          '<button class="apxd-b" data-ord-no>' + t.cancel + '</button>' +
+          '<button class="apxd-b primary" data-ord-yes disabled>' + t.submit + '</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(back);
@@ -23789,7 +23842,11 @@ function confirmOrder(plan) {
       if (lgl) { e.preventDefault(); if (window.ApexLegal) ApexLegal.open(lgl); return; }
       if (e.target === back || (e.target.hasAttribute && e.target.hasAttribute('data-ord-no'))) finish(null);
       if (e.target.hasAttribute && e.target.hasAttribute('data-ord-yes') && box.checked) {
-        finish({ text: ORDER_CONSENT_TEXT, at: Date.now(), plan: plan, price: info.price });
+        /* Der protokollierte Wortlaut ist der GESEHENE, nicht der deutsche
+           Standardtext — sonst belegt das Protokoll eine Zustimmung, die in
+           dieser Form nie erteilt wurde. */
+        finish({ text: t.consent, at: Date.now(), plan: plan, price: info.price,
+                 lang: (t === ORDER_I18N.de ? 'de' : 'en') });
       }
     });
   });
@@ -23852,6 +23909,7 @@ async function startProCheckout(plan) {
     if (window.db) {
       await db.collection('apexUsers').doc(uid).collection('private').doc('orderConsent').set({
         text: consent.text, at: consent.at, plan: consent.plan, price: consent.price,
+        lang: consent.lang || 'de',
         userAgent: (navigator.userAgent || '').slice(0, 200)
       }, { merge: true });
     }
