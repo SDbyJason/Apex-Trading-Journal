@@ -7929,6 +7929,12 @@ body.light #landingPage * {
       <div class="lp-card-desc">Paste a <strong>read-only</strong> API key from <strong>Binance</strong> or <strong>Bybit</strong> and your fills arrive by themselves every ten minutes — app open or not, no export, no upload. Read-only means read-only: a key that is allowed to trade or withdraw is refused at the door, and the key is stored so that not even your own account can read it back.</div>
       <span class="lp-tag green">Read-only keys</span>
     </div>
+    <div class="lp-card reveal d2">
+      <span class="lp-card-icon">🎯</span>
+      <div class="lp-card-title">Drill your strategy</div>
+      <div class="lp-card-desc">Describe how you trade, and Evidence searches real history for places where it applied. You get the setups that worked, the ones that <strong>lost by the rules</strong>, and the near-misses that only looked right — and you decide each one before the chart shows you what happened. Because recognising your setup under time pressure is the part reading a journal never teaches.</div>
+      <span class="lp-tag green">Practice</span>
+    </div>
     <div class="lp-card reveal d3">
       <span class="lp-card-icon">🚀</span>
       <div class="lp-card-title">Set up in three steps</div>
@@ -8119,6 +8125,7 @@ body.light #landingPage * {
         <li><b>Options exposure</b> — net Greeks by underlying &amp; expiry</li>
         <li><b>Session review</b> — sequence, size drift &amp; revenge-window detection</li>
         <li><b>Strategy Lab</b> — automated indicator backtesting + optimiser</li>
+        <li><b>Strategy Drills</b> — learn a strategy on real setups, traps included</li>
         <li>Candlestick charts — drag entry / SL / TP</li>
         <li>Auto MFE / MAE from real price data</li>
         <li>Risk of Ruin, Sharpe &amp; Expectancy / setup</li>
@@ -8203,6 +8210,7 @@ body.light #landingPage * {
         <tr><td>Options exposure — net delta, gamma, theta &amp; vega by underlying and expiry</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Session review — give-back, size drift, revenge windows &amp; rule adherence</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Market Replay — trade any past day candle by candle</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Strategy Drills — practise your own strategy on real historical setups</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Tick-precision fills — real tick order when stop and target share a candle</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Replay trade management — multi-TP scale-out, break-even, trailing stop, partial closes</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Drag stop &amp; targets on the chart while the trade runs</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -8993,6 +9001,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">⏱️</div><div><div class="apex-feat-label">Tick-precision replay fills</div><div class="apex-feat-desc">When a stop and a target fall in the same candle, the real Dukascopy tick order decides which came first — instead of always assuming the stop won</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">◎</div><div><div class="apex-feat-label">Options exposure</div><div class="apex-feat-desc">Net delta, gamma, theta and vega across the book, with a heatmap by underlying and expiry</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">📋</div><div><div class="apex-feat-label">Session review</div><div class="apex-feat-desc">Intraday give-back, revenge windows, size drift after losses and rule adherence — with a coach verdict on the process, not the P&L</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎯</div><div><div class="apex-feat-label">Strategy Drills — practise recognising your setup</div><div class="apex-feat-desc">Describe a strategy, and Evidence finds real places in history where it applied — the ones that worked, the ones that lost by the rules, and the near-misses that only looked like a setup. You decide, then see what happened</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">⚙️</div><div><div class="apex-feat-label">Strategy Lab — automated backtesting</div><div class="apex-feat-desc">Build indicator rules by clicking, run them over years of real bars, sweep the parameters and prove it with a walk-forward test — no code needed</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🕯️</div><div><div class="apex-feat-label">Candlestick Trade Charts</div><div class="apex-feat-desc">See every trade on real candles — drag entry / SL / TP directly on the chart and it updates your journal</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">📐</div><div><div class="apex-feat-label">Auto MFE / MAE</div><div class="apex-feat-desc">Fetches price data & computes max favorable / adverse excursion automatically</div></div></div>
@@ -9715,6 +9724,7 @@ function _authAction(type) {
           <div class="nav-group-drop" id="navgdrop-tools">
             <button class="nav-item" onclick="nav('calculators');closeNavGroups()" id="nav-calculators">Calculators</button>
             <button class="nav-item" onclick="nav('econews');closeNavGroups()" id="nav-econews">Eco Calendar</button>
+            <button class="nav-item" onclick="nav('drills');closeNavGroups()" id="nav-drills">Strategy Drills</button>
             <button class="nav-item" onclick="nav('developer');closeNavGroups()" id="nav-developer">API &amp; Webhooks</button>
           </div>
         </div>
@@ -48243,6 +48253,1145 @@ body.light .apxFR-card { background: #fff; }
       if (n > 120) clearInterval(t);
     }, 1000);
   })();
+})();
+</script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   Evidence — Strategy Drills · engine  (window.ApexDrills)
+   ────────────────────────────────────────────────────────────────
+   A practice tool, deliberately separate from the journal. You add a
+   strategy, the engine finds real historical places where it applied,
+   and you trade them again — including the ones that lost and the ones
+   that only looked like a setup.
+
+   THE ONE RULE THIS FILE EXISTS TO ENFORCE
+   No language model ever decides whether a chart location is a setup.
+   Gemini translates a description into ApexStrategy rules — data the
+   user sees and can correct — and everything after that is arithmetic
+   over real bars. A model that judges chart snapshots will occasionally
+   insist a setup is there when it is not, and in a tool whose purpose
+   is teaching recognition, one wrong example poisons every right one.
+
+   THE FOUR KINDS OF LOCATION
+     A  rule fired, trade won      → trade it.  Teaches the pattern.
+     B  rule fired, trade lost     → trade it.  Teaches that a loss by
+                                     the rules is not a mistake.
+     C  near-miss: all but one     → skip it.   The actual trap.
+        condition were true
+     D  nothing anywhere near      → wait.      Teaches patience.
+
+   B is the one such tools always omit, and leaving it out is what makes
+   them harmful: a hundred drills of nothing but winners teaches that a
+   correct setup wins. It does not. The first real loss then reads as
+   "the strategy is broken" and a working method gets thrown away. So
+   grading here scores RULE ADHERENCE, never outcome.
+
+   C is not invented either. Drop one condition, run the same evaluator,
+   and keep the bars where the relaxed rule fires and the full one does
+   not. Those are this strategy's own historical near-misses.
+   ════════════════════════════════════════════════════════════════ */
+(function () {
+  "use strict";
+
+  var WORKER = function () {
+    return window.APEX_COACH_URL || 'https://spring-fire-06a2.4kjyyyftv6.workers.dev';
+  };
+
+  /* A rule that fires a dozen times in ten years cannot be practised — the
+     drills would be noise dressed up as training. Below this, the tool says
+     so and offers the manual path instead of quietly building a bad course. */
+  var MIN_SIGNALS = 40;
+
+  /* Deliberately two instruments to start with (decision 07.08.2026). Not a
+     technical limit — the data layer serves far more — but a quality one:
+     every instrument needs its own sanity check that the spots it produces
+     are actually worth practising, and two done properly beat twenty
+     assumed. Both are among the most traded and both have clean tick
+     history. */
+  var SYMBOLS = [
+    { id: 'XAUUSD', label: 'Gold (XAUUSD)' },
+    { id: 'NAS100', label: 'Nasdaq 100 (NAS100)' }
+  ];
+
+  /* Lower timeframes are not just a preference here — they decide whether the
+     feature works at all. Download time scales with DAYS, not bars: one year
+     of 15m data costs the same wait as one year of 1h, but yields four times
+     the bars and therefore four times the signals. So the shorter frames get
+     enough material out of a range that is still tolerable to fetch. */
+  var TIMEFRAMES = ['5m', '15m', '1h'];
+
+  /* How much chart the trader sees before the decision point, and how far it
+     is allowed to run afterwards. Both in bars. */
+  var LOOKBACK  = 120;
+  var RUNFWD    = 60;
+
+  function num(x, d) { var v = parseFloat(x); return isFinite(v) ? v : (d || 0); }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+  /* ═══════════════ 1 · description → rules ═══════════════ */
+
+  function proposeRules(description, symbol, tf) {
+    return fetch(WORKER() + '/drill', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'rules', description: description, symbol: symbol, tf: tf })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (res.error) throw new Error(res.error);
+      var r = res.rules || {};
+      if (r.unformalisable) {
+        return { ok: false, reason: 'unformalisable', unsure: r.unsure || [], raw: r };
+      }
+      // Merge onto a blank strategy so every field the engine needs exists,
+      // whatever the model chose to leave out.
+      var S = window.ApexStrategy.blank();
+      S.name   = r.name || 'Untitled strategy';
+      S.note   = r.note || '';
+      /* Das Modell darf das Instrument NICHT wählen. Es schlägt gern etwas
+         vor, das in der Beschreibung vorkam ("funktioniert gut auf EURUSD"),
+         und dann rechnet der Backtest auf einem Instrument, für das die
+         Stellen nie geprüft wurden. Der Nutzer hat es ausgewählt, dabei
+         bleibt es. */
+      S.symbol = symbol || S.symbol;
+      S.tf     = r.tf || tf || S.tf;
+      S.dir    = (r.dir === 'long' || r.dir === 'short') ? r.dir : 'both';
+      if (r.entry) { S.entry.long = r.entry.long || []; S.entry.short = r.entry.short || []; }
+      if (r.exit)  { S.exit.long  = r.exit.long  || []; S.exit.short  = r.exit.short  || []; }
+      if (r.risk)  Object.keys(r.risk).forEach(function (k) { S.risk[k] = r.risk[k]; });
+      S = window.ApexStrategy.normalise(S);
+
+      var warn = window.ApexStrategy.validate(S);
+      var stop = warn.filter(function (w) { return w.level === 'stop'; });
+      if (stop.length) return { ok: false, reason: 'invalid', warnings: stop, strategy: S };
+
+      return { ok: true, strategy: S,
+               confidence: num(r.confidence, 0.5),
+               unsure: r.unsure || [] };
+    });
+  }
+
+  /* ═══════════════ 2 · rules → locations ═══════════════ */
+
+  /* Every entry condition removed once, giving one relaxed variant per
+     condition. A bar that fires in a variant but not in the original had
+     exactly that one condition missing — which is precisely what a trap
+     looks like to a trader who is pattern-matching instead of checking. */
+  /* Weakening a single condition, when there is nothing to drop.
+     crossOver fires on the bar the lines cross; gt is true for every bar
+     afterwards. So the bars where gt holds but crossOver does not are the
+     ones where the signal ALREADY HAPPENED — a late entry into a move that
+     started without you. That is not a contrived trap, it is the most
+     common real one, and it is what a trader who pattern-matches on shape
+     instead of on the trigger walks into. */
+  var WEAKEN = { crossOver: 'gt', crossUnder: 'lt', gtPips: 'gt', ltPips: 'lt' };
+
+  function relaxedVariants(S) {
+    var out = [];
+    ['long', 'short'].forEach(function (side) {
+      var list = (S.entry[side] || []);
+      if (!list.length) return;
+      var other = side === 'long' ? 'short' : 'long';
+
+      if (list.length >= 2) {
+        // Enough conditions to drop one: the near-miss is "all but this".
+        list.forEach(function (_, idx) {
+          var v = clone(S);
+          v.entry[side] = list.filter(function (__, k) { return k !== idx; });
+          v.entry[other] = []; v.dir = side;
+          out.push({ side: side, kind: 'missing',
+                     label: window.ApexStrategy.condLabel(list[idx]),
+                     strategy: window.ApexStrategy.normalise(v) });
+        });
+        return;
+      }
+
+      /* Exactly one condition. Dropping it would leave "no rule", which fires
+         on every bar and would drown the session in nonsense. Weaken it
+         instead — and only if the operator has a meaningful weaker form.
+         A rule built on `rising` or a bare `gt` has no honest near-miss, and
+         then the strategy simply gets no traps rather than invented ones. */
+      var c = list[0], weak = WEAKEN[c.op];
+      if (!weak) return;
+      var v2 = clone(S);
+      v2.entry[side] = [Object.assign({}, c, { op: weak })];
+      v2.entry[other] = []; v2.dir = side;
+      out.push({ side: side, kind: 'late',
+                 label: 'the trigger already happened — ' +
+                        window.ApexStrategy.condLabel(c) + ' fired earlier, this is a chase',
+                 strategy: window.ApexStrategy.normalise(v2) });
+    });
+    return out;
+  }
+
+  function buildSpots(S, opts) {
+    opts = opts || {};
+    var onP = opts.onProgress || function () {};
+    S = window.ApexStrategy.normalise(S);
+
+    return window.ApexBacktest.run({
+      strategy: S, symbol: S.symbol, tf: S.tf,
+      from: opts.from, to: opts.to,
+      onProgress: function (p) { onP({ phase: 'backtest', p: p }); }
+    }).then(function (res) {
+      var bars = res.data.bid, n = bars.n;
+      var spec = window.ApexReplay.specFor(S.symbol);
+      var pipSize = (spec && spec.pipSize) || 0.0001;
+
+      // bar index for a timestamp — the backtest reports times, we need bars
+      var idxAt = {};
+      for (var i = 0; i < n; i++) idxAt[bars.t[i]] = i;
+
+      var spots = [];
+      var signalBars = {};
+
+      // ── A and B, straight from the backtest ──
+      res.trades.forEach(function (t) {
+        var i = idxAt[t.openT];
+        if (i == null || i < LOOKBACK || i > n - RUNFWD) return;
+        signalBars[i] = true;
+        spots.push({
+          kind: num(t.pips, 0) > 0 ? 'A' : 'B',
+          i: i, t: bars.t[i], side: t.side,
+          truth: { act: true, side: t.side },
+          outcome: { pips: num(t.pips, 0), entry: t.entry, exit: t.exit, reason: t.reason }
+        });
+      });
+
+      var valid = spots.length;
+      if (valid < MIN_SIGNALS) {
+        return { ok: false, reason: 'too_few_signals', found: valid, needed: MIN_SIGNALS,
+                 symbol: S.symbol, tf: S.tf, bars: n };
+      }
+
+      // ── C, the near-misses ──
+      var variants = relaxedVariants(S);
+      variants.forEach(function (v) {
+        var ev;
+        try { ev = window.ApexStrategy.compile(v.strategy, bars, { pipSize: pipSize }); }
+        catch (e) { return; }
+        var fire = v.side === 'long' ? ev.longEntry : ev.shortEntry;
+        if (!fire) return;
+        for (var i = LOOKBACK; i < n - RUNFWD; i++) {
+          if (signalBars[i]) continue;                 // it was a real signal
+          if (!ev.allowed(i) || !ev.volOk(i)) continue;
+          var ok = false;
+          try { ok = fire(i); } catch (e) { break; }
+          if (!ok) continue;
+          spots.push({
+            kind: 'C', i: i, t: bars.t[i], side: v.side,
+            truth: { act: false },
+            missing: v.label
+          });
+          /* A "late" variant stays true for the whole move, so it would
+             otherwise contribute a hundred near-identical bars. A missing
+             condition is far more localised and can be sampled tighter. */
+          i += (v.kind === 'late' ? 90 : 20);
+        }
+      });
+
+      // ── D, genuinely quiet stretches ──
+      var busy = {};
+      spots.forEach(function (s) { for (var k = -40; k <= 40; k++) busy[s.i + k] = true; });
+      for (var i = LOOKBACK; i < n - RUNFWD; i += 37) {
+        if (busy[i]) continue;
+        spots.push({ kind: 'D', i: i, t: bars.t[i], side: null, truth: { act: false } });
+        i += 200;
+      }
+
+      spots.sort(function (a, b) { return a.i - b.i; });
+      return {
+        ok: true, symbol: S.symbol, tf: S.tf, pipSize: pipSize,
+        from: res.from, to: res.to, bars: n,
+        counts: spots.reduce(function (m, s) { m[s.kind] = (m[s.kind] || 0) + 1; return m; }, {}),
+        winRate: res.stats && res.stats.winRate,
+        spots: spots
+      };
+    });
+  }
+
+  /* ═══════════════ 3 · difficulty ═══════════════ */
+
+  /* Early on the pattern has to be visible at all, so winners dominate. As
+     the rolling score climbs, the mix walks toward the strategy's REAL
+     distribution — including the losers and the empty stretches. Tied to
+     measured accuracy, not to session count: someone who is still guessing
+     after ten sessions should not be handed the realistic mix.            */
+  function mixFor(score, realWinRate) {
+    var s = Math.max(0, Math.min(1, num(score, 0)));
+    var w = Math.max(0.25, Math.min(0.9, num(realWinRate, 0.5)));
+    // t = 0 → teaching mix, t = 1 → the strategy as it really behaves
+    var t = Math.max(0, Math.min(1, (s - 0.5) / 0.35));
+    var A = (1 - t) * 0.60 + t * (0.55 * w);
+    var B = (1 - t) * 0.10 + t * (0.55 * (1 - w));
+    var C = (1 - t) * 0.25 + t * 0.28;
+    var D = (1 - t) * 0.05 + t * 0.17;
+    var sum = A + B + C + D;
+    return { A: A / sum, B: B / sum, C: C / sum, D: D / sum, t: t };
+  }
+
+  /* Pick this session's locations. Weak spots come back: if the trader keeps
+     trading traps, traps get over-represented until that stops. */
+  function pickSession(pool, progress, count) {
+    count = count || 20;
+    var prog = progress || {};
+    var mix = mixFor(prog.score, prog.realWinRate);
+
+    // Over-weight the kind that is going worst, capped so it never becomes
+    // the whole session — one weakness must not crowd out the strategy.
+    var acc = prog.accuracy || {};
+    ['A', 'B', 'C', 'D'].forEach(function (k) {
+      var a = acc[k];
+      if (a != null && a < 0.7) mix[k] = Math.min(0.55, mix[k] * 1.6);
+    });
+    var tot = mix.A + mix.B + mix.C + mix.D;
+
+    var seen = prog.seen || {};
+    var by = { A: [], B: [], C: [], D: [] };
+    pool.forEach(function (s) { if (by[s.kind]) by[s.kind].push(s); });
+
+    // Least-recently-shown first, so the pool cycles instead of repeating.
+    Object.keys(by).forEach(function (k) {
+      by[k].sort(function (a, b) { return (seen[a.i] || 0) - (seen[b.i] || 0); });
+    });
+
+    var out = [];
+    ['A', 'B', 'C', 'D'].forEach(function (k) {
+      var want = Math.round(count * (mix[k] / tot));
+      out = out.concat(by[k].slice(0, want));
+    });
+    // Shuffle — a predictable order would let someone learn the sequence
+    // instead of the setup.
+    for (var i = out.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)); var tmp = out[i]; out[i] = out[j]; out[j] = tmp;
+    }
+    return out.slice(0, count);
+  }
+
+  /* ═══════════════ 4 · grading ═══════════════ */
+
+  /* Deterministic, and it grades the DECISION, not the money. Answers:
+       A/B  traded, correct side → right
+       C/D  skipped             → right
+     Everything else is one of four named mistakes, because "you did badly"
+     teaches nothing and "you traded 6 traps" does.                        */
+  function grade(answers) {
+    var r = { total: 0, right: 0,
+              missed: 0,        // valid setup skipped
+              trap: 0,          // near-miss traded
+              impatient: 0,     // traded where nothing was there
+              wrongSide: 0,     // right location, wrong direction
+              byKind: {}, mistakes: [] };
+
+    answers.forEach(function (a) {
+      var s = a.spot, k = s.kind;
+      r.total++;
+      r.byKind[k] = r.byKind[k] || { n: 0, right: 0 };
+      r.byKind[k].n++;
+
+      var shouldAct = !!s.truth.act;
+      var didAct    = !!a.acted;
+      var ok;
+
+      if (shouldAct && didAct)       { ok = (a.side === s.truth.side); if (!ok) r.wrongSide++; }
+      else if (shouldAct && !didAct) { ok = false; r.missed++; }
+      else if (!shouldAct && didAct) { ok = false; if (k === 'C') r.trap++; else r.impatient++; }
+      else                           { ok = true; }
+
+      if (ok) { r.right++; r.byKind[k].right++; }
+      else r.mistakes.push({ i: s.i, t: s.t, kind: k, missing: s.missing || null,
+                             expected: shouldAct ? ('trade ' + s.truth.side) : 'skip',
+                             did: didAct ? ('traded ' + (a.side || '?')) : 'skipped' });
+    });
+
+    r.score = r.total ? r.right / r.total : 0;
+    r.accuracy = {};
+    Object.keys(r.byKind).forEach(function (k) {
+      r.accuracy[k] = r.byKind[k].n ? r.byKind[k].right / r.byKind[k].n : null;
+    });
+    return r;
+  }
+
+  /* The numbers above go to Gemini as FACTS. It writes the explanation and
+     nothing else — same split as the session reviewer: arithmetic first,
+     narrative on top, never the other way round. */
+  function review(strategyName, g) {
+    return fetch(WORKER() + '/drill', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'review', facts: {
+        strategy: strategyName,
+        locations: g.total, correct: g.right, score: Math.round(g.score * 100) + '%',
+        missedValidSetups: g.missed, tradedTraps: g.trap,
+        tradedNothing: g.impatient, wrongDirection: g.wrongSide,
+        accuracyByKind: g.accuracy,
+        mostCommonMissingCondition: (function () {
+          var c = {}; g.mistakes.forEach(function (m) { if (m.missing) c[m.missing] = (c[m.missing] || 0) + 1; });
+          var best = null; Object.keys(c).forEach(function (k) { if (!best || c[k] > c[best]) best = k; });
+          return best ? { condition: best, times: c[best] } : null;
+        })()
+      } })
+    }).then(function (r) { return r.json(); })
+      .then(function (res) { return res.text || ''; })
+      .catch(function () { return ''; });
+  }
+
+  /* ═══════════════ 5 · storage ═══════════════
+
+     The location list is computed ONCE per strategy and kept. That is not an
+     optimisation, it is what makes the feature possible at all: fetching a
+     year of bars takes minutes (download time scales with days, not bars), so
+     recomputing per session would mean a coffee break before every drill.
+
+     What gets stored is tiny — a few hundred locations, each a timestamp, a
+     kind and an outcome. A session then loads only the ~180-bar window around
+     each location it actually shows.
+
+     Spots are packed into arrays rather than objects. 500 locations as named
+     objects is roughly 80 KB of repeated key names; packed it is under 20.
+     Firestore's 1 MB document limit is not close either way, but this is read
+     on every session open and the difference is free.                       */
+
+  var PACK_KIND = ['A', 'B', 'C', 'D'];
+
+  function packSpots(spots) {
+    return spots.map(function (s) {
+      return [PACK_KIND.indexOf(s.kind), s.i, s.t,
+              s.side === 'long' ? 1 : (s.side === 'short' ? 2 : 0),
+              s.truth.act ? 1 : 0,
+              s.outcome ? Math.round(num(s.outcome.pips, 0) * 10) / 10 : 0,
+              s.missing || ''];
+    });
+  }
+  function unpackSpots(rows) {
+    return (rows || []).map(function (r) {
+      var side = r[3] === 1 ? 'long' : (r[3] === 2 ? 'short' : null);
+      var o = { kind: PACK_KIND[r[0]] || 'D', i: r[1], t: r[2], side: side,
+                truth: { act: !!r[4], side: side } };
+      if (r[5]) o.outcome = { pips: r[5] };
+      if (r[6]) o.missing = r[6];
+      return o;
+    });
+  }
+
+  function col() {
+    if (!window.db || !window.currentUID) return null;
+    return window.db.collection('apexUsers').doc(window.currentUID).collection('drills');
+  }
+
+  var Store = {
+    list: function () {
+      var c = col(); if (!c) return Promise.resolve([]);
+      return c.orderBy('updatedAt', 'desc').limit(50).get().then(function (snap) {
+        var out = []; snap.forEach(function (d) {
+          var v = d.data() || {};
+          // Deliberately WITHOUT the spot list — the overview needs names and
+          // progress, not a megabyte of locations for strategies nobody opened.
+          out.push({ id: d.id, name: v.name, symbol: v.symbol, tf: v.tf,
+                     manual: !!v.manual, builtAt: v.builtAt,
+                     counts: v.counts || {}, progress: v.progress || {} });
+        });
+        return out;
+      }).catch(function () { return []; });
+    },
+
+    get: function (id) {
+      var c = col(); if (!c) return Promise.resolve(null);
+      return c.doc(id).get().then(function (d) {
+        if (!d.exists) return null;
+        var v = d.data() || {};
+        v.id = d.id;
+        v.spots = unpackSpots(v.spots);
+        return v;
+      });
+    },
+
+    save: function (id, data) {
+      var c = col(); if (!c) return Promise.reject(new Error('not signed in'));
+      var doc = Object.assign({}, data, { updatedAt: Date.now() });
+      if (doc.spots) doc.spots = packSpots(doc.spots);
+      var ref = id ? c.doc(id) : c.doc();
+      if (!id) doc.createdAt = Date.now();
+      return ref.set(doc, { merge: true }).then(function () { return ref.id; });
+    },
+
+    remove: function (id) {
+      var c = col(); if (!c) return Promise.resolve();
+      return c.doc(id).delete();
+    },
+
+    /* One session document per run, kept whole: the answers are what makes a
+       later "you keep doing X" statement checkable rather than asserted. */
+    saveSession: function (drillId, session) {
+      var c = col(); if (!c) return Promise.resolve(null);
+      return c.doc(drillId).collection('sessions').add(
+        Object.assign({ at: Date.now() }, session));
+    },
+
+    sessions: function (drillId, n) {
+      var c = col(); if (!c) return Promise.resolve([]);
+      return c.doc(drillId).collection('sessions')
+        .orderBy('at', 'desc').limit(n || 20).get()
+        .then(function (snap) { var o = []; snap.forEach(function (d) { o.push(Object.assign({ id: d.id }, d.data())); }); return o; })
+        .catch(function () { return []; });
+    }
+  };
+
+  /* Progress after a session. The rolling score is what drives difficulty, so
+     it is deliberately slow to move: one lucky session must not promote
+     someone to the realistic mix, and one bad one must not demote them.
+     Weight 0.3 means roughly the last three sessions carry the signal.      */
+  function updateProgress(prev, g) {
+    var p = prev || {};
+    var seen = p.seen || {};
+    (g.shown || []).forEach(function (i) { seen[i] = Date.now(); });
+
+    var score = p.score == null ? g.score : (p.score * 0.7 + g.score * 0.3);
+    var acc = p.accuracy || {};
+    Object.keys(g.accuracy || {}).forEach(function (k) {
+      if (g.accuracy[k] == null) return;
+      acc[k] = acc[k] == null ? g.accuracy[k] : (acc[k] * 0.7 + g.accuracy[k] * 0.3);
+    });
+
+    return { score: score, accuracy: acc, seen: seen,
+             sessions: (p.sessions || 0) + 1,
+             realWinRate: p.realWinRate != null ? p.realWinRate : null,
+             lastAt: Date.now() };
+  }
+
+  window.ApexDrills = {
+    SYMBOLS: SYMBOLS,
+    TIMEFRAMES: TIMEFRAMES,
+    Store: Store,
+    updateProgress: updateProgress,
+    proposeRules: proposeRules,
+    buildSpots: buildSpots,
+    pickSession: pickSession,
+    mixFor: mixFor,
+    grade: grade,
+    review: review,
+    MIN_SIGNALS: MIN_SIGNALS,
+    LOOKBACK: LOOKBACK,
+    RUNFWD: RUNFWD
+  };
+})();
+</script>
+
+<style>
+#page-drills .dr-wrap { max-width: 1080px; }
+.dr-card { border: 0.5px solid var(--rim); border-radius: 15px; padding: 18px 20px;
+  background: rgba(255,255,255,0.012); margin-bottom: 14px; }
+.dr-card.gold { border-color: var(--gold-line); background: rgba(201,168,76,0.05); }
+.dr-h { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--ink); margin-bottom: 5px; }
+.dr-s { font-size: 12.5px; color: var(--ink3); line-height: 1.65; }
+.dr-b { background: var(--elevated); border: 0.5px solid var(--rim2); color: var(--ink2);
+  border-radius: 10px; padding: 10px 17px; font-size: 13px; cursor: pointer;
+  font-family: var(--font-body); white-space: nowrap; }
+.dr-b:hover { border-color: var(--gold-line); color: var(--gold); }
+.dr-b.primary { background: linear-gradient(135deg, var(--gold), #b8923d); color: #07080b; border: 0; font-weight: 700; }
+.dr-b.long { border-color: rgba(62,207,142,.5); color: var(--profit); }
+.dr-b.short { border-color: rgba(240,99,106,.5); color: var(--loss); }
+.dr-b:disabled { opacity: .45; cursor: not-allowed; }
+.dr-row { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+.dr-in, .dr-sel { background: var(--raised); border: 0.5px solid var(--rim2); color: var(--ink);
+  border-radius: 10px; padding: 10px 12px; font-size: 13px; font-family: var(--font-body); width: 100%; }
+.dr-in:focus, .dr-sel:focus { outline: none; border-color: var(--gold-line); }
+textarea.dr-in { min-height: 120px; resize: vertical; line-height: 1.6; }
+.dr-lbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 5px; display: block; }
+.dr-list { display: grid; gap: 10px; }
+.dr-item { border: 0.5px solid var(--rim); border-radius: 13px; padding: 14px 16px;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; cursor: pointer; }
+.dr-item:hover { border-color: var(--gold-line); }
+.dr-item-name { font-weight: 700; color: var(--ink); font-size: 14px; }
+.dr-item-meta { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
+.dr-badge { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 6px; background: var(--raised); color: var(--ink3); }
+.dr-badge.on { background: var(--gold-dim); color: var(--gold); }
+.dr-chart { width: 100%; height: 420px; border: 0.5px solid var(--rim); border-radius: 13px; overflow: hidden; }
+@media(max-width:700px){ .dr-chart { height: 300px; } }
+.dr-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 13px 0; }
+.dr-prog { flex: 1; min-width: 120px; height: 4px; border-radius: 2px; background: var(--rim2); overflow: hidden; }
+.dr-prog i { display: block; height: 100%; background: var(--gold); }
+.dr-verdict { border-radius: 12px; padding: 14px 16px; margin-top: 13px; font-size: 13px; line-height: 1.65; }
+.dr-verdict.ok { background: rgba(62,207,142,.08); border: 0.5px solid rgba(62,207,142,.35); color: var(--ink2); }
+.dr-verdict.no { background: rgba(240,99,106,.08); border: 0.5px solid rgba(240,99,106,.35); color: var(--ink2); }
+.dr-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 14px 0; }
+.dr-stat { border: 0.5px solid var(--rim); border-radius: 12px; padding: 13px; text-align: center; }
+.dr-stat b { display: block; font-size: 21px; font-weight: 800; color: var(--gold); font-family: var(--font-display); }
+.dr-stat span { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); }
+@media(max-width:700px){ .dr-stats { grid-template-columns: repeat(2,1fr); } }
+.dr-rule { font-family: var(--font-mono); font-size: 12px; color: var(--ink2);
+  padding: 7px 11px; border-radius: 8px; background: var(--raised); margin-bottom: 6px; }
+.dr-warn { border-left: 2px solid var(--gold); padding: 9px 13px; margin: 12px 0;
+  background: rgba(201,168,76,.05); font-size: 12.5px; color: var(--ink2); line-height: 1.65; }
+</style>
+
+<div class="page" id="page-drills">
+  <div class="ph">
+    <div class="ph-eyebrow">Practice</div>
+    <h1>Strategy <span style="color:var(--gold)">Drills</span></h1>
+    <p>Learn a strategy by trading it on days that already happened — including the traps</p>
+  </div>
+  <div class="dr-wrap" id="drRoot"></div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   Evidence — Strategy Drills · interface  (window.ApexDrillsUI)
+   ────────────────────────────────────────────────────────────────
+   Five screens over one engine: list → create → learn → practise →
+   result, plus a manual fallback when a strategy cannot be formalised.
+
+   Two decisions worth knowing before changing anything here:
+
+   1. The decision IS the trade. You answer long / short / skip, then
+      the chart reveals what happened. No stop dragging, no position
+      sizing — those are Market Replay's job, and this tool grades
+      RULE ADHERENCE, which is exactly "did you act, and on which
+      side". Mixing in trade management would blur what is being
+      measured and make a correct decision look wrong because the
+      management was clumsy.
+
+   2. Nothing here writes to journalData. Ever. Practice trades in a
+      journal turn a win rate into a blend of real trading and dry
+      runs, which is worse than having no win rate at all.
+   ════════════════════════════════════════════════════════════════ */
+(function () {
+  "use strict";
+
+  var TF_MS = { '5m': 300000, '15m': 900000, '1h': 3600000 };
+  var view = 'list', state = {}, chart = null;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function root() { return document.getElementById('drRoot'); }
+  function isPro() { return (window.currentPlan || 'free') === 'pro'; }
+
+  function go(v, st) { view = v; if (st) state = st; render(); }
+
+  /* ═══════════════ list ═══════════════ */
+
+  function renderList() {
+    root().innerHTML = '<div class="dr-card"><div class="dr-h">Loading…</div></div>';
+    window.ApexDrills.Store.list().then(function (rows) {
+      var items = rows.length ? rows.map(function (r) {
+        var p = r.progress || {};
+        var score = p.score != null ? Math.round(p.score * 100) + '%' : '—';
+        return '<div class="dr-item" onclick="ApexDrillsUI.open(\'' + r.id + '\')">'
+          + '<div style="flex:1;min-width:180px"><div class="dr-item-name">' + esc(r.name || 'Untitled') + '</div>'
+          + '<div class="dr-item-meta">' + esc(r.symbol) + ' · ' + esc(r.tf)
+          + ' · ' + (r.counts ? ((r.counts.A || 0) + (r.counts.B || 0)) + ' setups, ' + (r.counts.C || 0) + ' traps' : '')
+          + (r.manual ? ' · marked by hand' : '') + '</div></div>'
+          + '<span class="dr-badge' + (p.sessions ? ' on' : '') + '">' + (p.sessions || 0) + ' sessions</span>'
+          + '<span class="dr-badge' + (p.score > 0.75 ? ' on' : '') + '">' + score + '</span>'
+          + '</div>';
+      }).join('') : '<div class="dr-s">No strategies yet. Add the first one below — it takes a description, not code.</div>';
+
+      root().innerHTML =
+        '<div class="dr-card gold"><div class="dr-h">What this is</div>'
+        + '<div class="dr-s">Describe a strategy in your own words. Evidence turns it into rules, '
+        + 'then searches real history for places where it applied — the ones that worked, the ones that '
+        + 'lost anyway, and the ones that only looked like a setup. You trade them again and find out '
+        + 'which you can actually spot in the moment.<br><br>'
+        + '<strong>Nothing here touches your journal.</strong> Practice trades never reach your statistics.</div></div>'
+        + '<div class="dr-card"><div class="dr-h">Your strategies</div>'
+        + '<div class="dr-list" style="margin-top:12px">' + items + '</div>'
+        + '<div class="dr-row" style="margin-top:14px">'
+        + '<button class="dr-b primary" onclick="ApexDrillsUI.create()">+ New strategy</button></div></div>';
+    });
+  }
+
+  /* ═══════════════ create ═══════════════ */
+
+  function renderCreate() {
+    var syms = window.ApexDrills.SYMBOLS.map(function (s) {
+      return '<option value="' + s.id + '">' + esc(s.label) + '</option>'; }).join('');
+    var tfs = window.ApexDrills.TIMEFRAMES.map(function (t) {
+      return '<option value="' + t + '"' + (t === '15m' ? ' selected' : '') + '>' + t + '</option>'; }).join('');
+
+    root().innerHTML =
+      '<div class="dr-card"><div class="dr-h">Describe your strategy</div>'
+      + '<div class="dr-s" style="margin-bottom:14px">Write it the way you would explain it to another trader. '
+      + 'Name the entry trigger, what has to be true around it, and where the stop and target go. '
+      + 'The more precise the trigger, the better the practice — “buy the dip” cannot be searched for, '
+      + '“buy when price crosses back above the 50 EMA after being below it” can.</div>'
+      + '<textarea class="dr-in" id="drDesc" placeholder="Example: I go long when the 20 EMA crosses above the 50 EMA and RSI-14 is above 50. Stop is 1.5 ATR below entry, target 2R. Short is the mirror image."></textarea>'
+      + '<div class="dr-row" style="margin-top:12px">'
+      + '<div style="flex:1;min-width:170px"><label class="dr-lbl">Instrument</label><select class="dr-sel" id="drSym">' + syms + '</select></div>'
+      + '<div style="flex:1;min-width:130px"><label class="dr-lbl">Timeframe</label><select class="dr-sel" id="drTf">' + tfs + '</select></div>'
+      + '</div>'
+      + '<div class="dr-warn">The first build downloads a year of history and searches it. That takes a '
+      + 'minute or two, once — after that this strategy opens instantly.</div>'
+      + '<div class="dr-row"><button class="dr-b" onclick="ApexDrillsUI.list()">Back</button>'
+      + '<button class="dr-b primary" id="drGo" onclick="ApexDrillsUI.propose()">Turn this into rules →</button></div>'
+      + '<div id="drMsg" class="dr-s" style="margin-top:12px"></div></div>';
+  }
+
+  function msg(html, cls) {
+    var el = document.getElementById('drMsg');
+    if (el) el.innerHTML = '<span style="color:var(--' + (cls || 'ink3') + ')">' + html + '</span>';
+  }
+
+  function propose() {
+    var desc = (document.getElementById('drDesc') || {}).value || '';
+    var sym = (document.getElementById('drSym') || {}).value || 'XAUUSD';
+    var tf = (document.getElementById('drTf') || {}).value || '15m';
+    if (desc.trim().length < 25) { msg('Say a little more — one line is not enough to search for.', 'loss'); return; }
+    var b = document.getElementById('drGo'); if (b) { b.disabled = true; b.textContent = 'Reading…'; }
+    msg('Turning your description into rules…');
+
+    window.ApexDrills.proposeRules(desc, sym, tf).then(function (r) {
+      if (!r.ok && r.reason === 'unformalisable') {
+        state = { desc: desc, symbol: sym, tf: tf, unsure: r.unsure };
+        go('manual');
+        return;
+      }
+      if (!r.ok) {
+        msg('That did not produce a usable rule set: '
+          + esc((r.warnings || []).map(function (w) { return w.msg; }).join(' ')) + ' — try describing the entry trigger more concretely.', 'loss');
+        return;
+      }
+      state = { desc: desc, symbol: sym, tf: tf, strategy: r.strategy,
+                confidence: r.confidence, unsure: r.unsure };
+      go('confirm');
+    }).catch(function (e) {
+      msg('Could not reach the rule service: ' + esc(String(e.message || e)), 'loss');
+    }).then(function () {
+      var b2 = document.getElementById('drGo'); if (b2) { b2.disabled = false; b2.textContent = 'Turn this into rules →'; }
+    });
+  }
+
+  /* ═══════════════ confirm the rules ═══════════════ */
+
+  function condLines(list) {
+    return (list || []).map(function (c) {
+      return '<div class="dr-rule">' + esc(window.ApexStrategy.condLabel(c)) + '</div>'; }).join('')
+      || '<div class="dr-s">none</div>';
+  }
+
+  function renderConfirm() {
+    var S = state.strategy, conf = Math.round((state.confidence || 0) * 100);
+    var low = conf < 55;
+    root().innerHTML =
+      '<div class="dr-card"><div class="dr-h">' + esc(S.name) + '</div>'
+      + '<div class="dr-s">' + esc(S.note) + '</div>'
+      + '<div class="dr-stats" style="grid-template-columns:repeat(3,1fr)">'
+      + '<div class="dr-stat"><b>' + esc(S.symbol) + '</b><span>Instrument</span></div>'
+      + '<div class="dr-stat"><b>' + esc(S.tf) + '</b><span>Timeframe</span></div>'
+      + '<div class="dr-stat"><b style="color:var(--' + (low ? 'loss' : 'profit') + ')">' + conf + '%</b><span>Confidence</span></div>'
+      + '</div>'
+      + (low ? '<div class="dr-warn"><strong>Low confidence.</strong> Much of this was guessed from a '
+             + 'description that left room for interpretation. Read the rules below carefully — if they are not '
+             + 'your strategy, go back and be more specific rather than practising something else.</div>' : '')
+      + ((state.unsure || []).length
+          ? '<div class="dr-warn"><strong>Assumptions made:</strong><br>' +
+            state.unsure.map(function (u) { return '· ' + esc(u); }).join('<br>') + '</div>' : '')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">'
+      + '<div><label class="dr-lbl">Long entry — all must be true</label>' + condLines(S.entry.long) + '</div>'
+      + '<div><label class="dr-lbl">Short entry — all must be true</label>' + condLines(S.entry.short) + '</div>'
+      + '</div>'
+      + '<div class="dr-s" style="margin-top:12px">Stop: ' + esc(S.risk.slMode === 'atr' ? (S.risk.slAtrMult + ' × ATR') : (S.risk.slPips + ' pips'))
+      + ' · Target: ' + esc(S.risk.tpMode === 'r' ? (S.risk.tpR + 'R') : (S.risk.tpMode === 'none' ? 'none' : S.risk.tpPips + ' pips')) + '</div>'
+      + '<div class="dr-row" style="margin-top:16px">'
+      + '<button class="dr-b" onclick="ApexDrillsUI.create()">Rewrite description</button>'
+      + '<button class="dr-b primary" onclick="ApexDrillsUI.build()">These are my rules — find the setups →</button>'
+      + '</div><div id="drMsg" class="dr-s" style="margin-top:12px"></div></div>';
+  }
+
+  /* ═══════════════ build the spot list ═══════════════ */
+
+  function build() {
+    var S = state.strategy;
+    root().innerHTML = '<div class="dr-card"><div class="dr-h">Searching history</div>'
+      + '<div class="dr-s" id="drBuildMsg">Downloading bars…</div>'
+      + '<div class="dr-bar"><div class="dr-prog"><i id="drBuildBar" style="width:4%"></i></div></div>'
+      + '<div class="dr-s">This runs once. The result is stored, so every session after this starts immediately.</div></div>';
+
+    var to = Date.now(), from = to - 365 * 24 * 3600 * 1000;
+    window.ApexDrills.buildSpots(S, {
+      from: from, to: to,
+      onProgress: function (p) {
+        var b = document.getElementById('drBuildBar'), m = document.getElementById('drBuildMsg');
+        var d = p.p || {};
+        if (d.phase === 'data' && m) m.textContent = 'Downloading bars… ' + (d.done || 0) + '/' + (d.total || '?');
+        if (d.phase === 'run' && m) m.textContent = 'Testing the rules over ' + (d.total || 0).toLocaleString() + ' bars…';
+        if (b && d.total) b.style.width = Math.min(96, Math.round((d.done / d.total) * 100)) + '%';
+      }
+    }).then(function (res) {
+      if (!res.ok) {
+        state.tooFew = res;
+        go('manual');
+        return;
+      }
+      return window.ApexDrills.Store.save(null, {
+        name: S.name, note: S.note, symbol: S.symbol, tf: S.tf,
+        description: state.desc, strategy: S, confidence: state.confidence,
+        unsure: state.unsure || [], manual: false,
+        spots: res.spots, counts: res.counts, builtAt: Date.now(),
+        range: { from: res.from, to: res.to },
+        progress: { realWinRate: res.winRate || null }
+      }).then(function (id) { open(id); });
+    }).catch(function (e) {
+      root().innerHTML = '<div class="dr-card"><div class="dr-h">That did not work</div>'
+        + '<div class="dr-s">' + esc(String(e.message || e)) + '</div>'
+        + '<div class="dr-row" style="margin-top:14px"><button class="dr-b" onclick="ApexDrillsUI.create()">Back</button></div></div>';
+    });
+  }
+
+  /* ═══════════════ manual fallback (step 7) ═══════════════ */
+
+  function renderManual() {
+    var few = state.tooFew;
+    var why = few
+      ? 'The rules were valid, but over a whole year they only produced <strong>' + few.found +
+        '</strong> setups. Fewer than ' + window.ApexDrills.MIN_SIGNALS + ' is not enough to practise on — ' +
+        'you would be drilling coincidence.'
+      : 'This strategy could not be expressed as rules. That happens with methods built on market structure ' +
+        'read by eye, order flow, or judgement that has no fixed trigger — and rather than guess at rules ' +
+        'and have you practise something that is not your strategy, Evidence says so.';
+
+    root().innerHTML =
+      '<div class="dr-card"><div class="dr-h">Mark the setups yourself</div>'
+      + '<div class="dr-s">' + why + '</div>'
+      + ((state.unsure || []).length ? '<div class="dr-warn">' + state.unsure.map(esc).join('<br>') + '</div>' : '')
+      + '<div class="dr-s" style="margin-top:12px">The manual route works for any strategy: step through the chart, '
+      + 'and whenever you see one of your setups, mark it and say which way you would have gone. '
+      + 'From <strong>10 marks</strong> the tool can build drills; more is better. '
+      + 'You are the source of truth here — the traps then come from the places you did <em>not</em> mark.</div>'
+      + '<div class="dr-row" style="margin-top:16px">'
+      + '<button class="dr-b" onclick="ApexDrillsUI.create()">Rewrite the description instead</button>'
+      + '<button class="dr-b primary" onclick="ApexDrillsUI.startManual()">Start marking →</button></div></div>';
+  }
+
+  function startManual() {
+    state.marks = [];
+    state.manualIdx = 0;
+    var tfms = TF_MS[state.tf] || 900000;
+    // Walk a year in windows of ~200 bars; the trader scrolls, we advance.
+    state.manualTo = Date.now();
+    state.manualFrom = state.manualTo - 365 * 24 * 3600 * 1000;
+    go('marking');
+  }
+
+  function renderMarking() {
+    root().innerHTML =
+      '<div class="dr-card"><div class="dr-h">Mark your setups — <span id="drMarkN">' + (state.marks.length) + '</span>/10 minimum</div>'
+      + '<div class="dr-s">Move through the chart. When the current bar is one of your entries, press Long or Short. '
+      + 'Skip moves on without marking.</div>'
+      + '<div class="dr-chart" id="drChart" style="margin-top:13px"></div>'
+      + '<div class="dr-row" style="margin-top:13px">'
+      + '<button class="dr-b" onclick="ApexDrillsUI.markStep(-1)">← back</button>'
+      + '<button class="dr-b long" onclick="ApexDrillsUI.mark(\'long\')">Long here</button>'
+      + '<button class="dr-b short" onclick="ApexDrillsUI.mark(\'short\')">Short here</button>'
+      + '<button class="dr-b" onclick="ApexDrillsUI.markStep(1)">Skip →</button>'
+      + '<button class="dr-b primary" id="drMarkDone" onclick="ApexDrillsUI.finishManual()"'
+      + (state.marks.length >= 10 ? '' : ' disabled') + '>Done — build drills</button>'
+      + '</div><div class="dr-s" id="drMarkMsg" style="margin-top:10px">Loading chart…</div></div>';
+    mountMarkChart();
+  }
+
+  function mountMarkChart() {
+    var el = document.getElementById('drChart'); if (!el) return;
+    window.ApexChart.create(el, { symbol: state.symbol, timeframe: state.tf, volume: false })
+      .then(function (c) {
+        chart = c;
+        return c.loadRange(state.manualFrom, state.manualTo);
+      }).then(function () {
+        state.cursor = Math.min(200, chart.total() - 1);
+        chart.reveal(state.cursor);
+        var m = document.getElementById('drMarkMsg');
+        if (m) m.textContent = 'Bar ' + state.cursor + ' of ' + chart.total();
+      }).catch(function (e) {
+        var m = document.getElementById('drMarkMsg');
+        if (m) m.innerHTML = '<span style="color:var(--loss)">Chart could not load: ' + esc(String(e.message || e)) + '</span>';
+      });
+  }
+
+  function markStep(d) {
+    if (!chart) return;
+    state.cursor = Math.max(30, Math.min(chart.total() - 1, state.cursor + d * 5));
+    chart.reveal(state.cursor);
+    var m = document.getElementById('drMarkMsg');
+    if (m) m.textContent = 'Bar ' + state.cursor + ' of ' + chart.total();
+  }
+
+  function mark(side) {
+    if (!chart) return;
+    var bar = chart.currentBar && chart.currentBar();
+    state.marks.push({ i: state.cursor, t: bar ? bar.t : Date.now(), side: side });
+    var n = document.getElementById('drMarkN'); if (n) n.textContent = state.marks.length;
+    var d = document.getElementById('drMarkDone'); if (d && state.marks.length >= 10) d.disabled = false;
+    markStep(1);
+  }
+
+  /* Manual marks become A-locations; the untouched stretches between them
+     become the traps and the quiet spells. The trader vouched for the marks,
+     which is an honest source — unlike a model guessing at a chart. */
+  function finishManual() {
+    var spots = state.marks.map(function (m) {
+      return { kind: 'A', i: m.i, t: m.t, side: m.side, truth: { act: true, side: m.side } };
+    });
+    var busy = {}; spots.forEach(function (s) { for (var k = -40; k <= 40; k++) busy[s.i + k] = true; });
+    var maxI = Math.max.apply(null, spots.map(function (s) { return s.i; })) + 400;
+    for (var i = 60; i < maxI; i += 53) {
+      if (busy[i]) continue;
+      spots.push({ kind: 'D', i: i, t: 0, side: null, truth: { act: false } });
+      i += 150;
+    }
+    window.ApexDrills.Store.save(null, {
+      name: (state.strategy && state.strategy.name) || 'Hand-marked strategy',
+      note: 'Locations marked by hand — no rule set.',
+      symbol: state.symbol, tf: state.tf, description: state.desc,
+      strategy: null, manual: true, spots: spots,
+      counts: spots.reduce(function (m, s) { m[s.kind] = (m[s.kind] || 0) + 1; return m; }, {}),
+      builtAt: Date.now(), range: { from: state.manualFrom, to: state.manualTo },
+      progress: {}
+    }).then(function (id) { open(id); });
+  }
+
+  /* ═══════════════ open a strategy ═══════════════ */
+
+  function open(id) {
+    root().innerHTML = '<div class="dr-card"><div class="dr-h">Loading…</div></div>';
+    window.ApexDrills.Store.get(id).then(function (d) {
+      if (!d) { go('list'); return; }
+      state = { drill: d };
+      go('detail');
+    });
+  }
+
+  function renderDetail() {
+    var d = state.drill, p = d.progress || {}, c = d.counts || {};
+    var mix = window.ApexDrills.mixFor(p.score, p.realWinRate);
+    var learned = !!p.learned;
+    root().innerHTML =
+      '<div class="dr-card"><div class="dr-h">' + esc(d.name) + '</div>'
+      + '<div class="dr-s">' + esc(d.note || '') + '</div>'
+      + '<div class="dr-stats">'
+      + '<div class="dr-stat"><b>' + ((c.A || 0) + (c.B || 0)) + '</b><span>Real setups</span></div>'
+      + '<div class="dr-stat"><b>' + (c.C || 0) + '</b><span>Traps</span></div>'
+      + '<div class="dr-stat"><b>' + (p.sessions || 0) + '</b><span>Sessions</span></div>'
+      + '<div class="dr-stat"><b>' + (p.score != null ? Math.round(p.score * 100) + '%' : '—') + '</b><span>Accuracy</span></div>'
+      + '</div>'
+      + '<div class="dr-s">Difficulty: <strong>' + (mix.t < 0.15 ? 'teaching mix — winners dominate'
+          : mix.t > 0.8 ? 'realistic — the strategy as it actually behaves' : 'tightening') + '</strong>'
+      + (p.realWinRate != null ? ' · this strategy really wins ' + Math.round(p.realWinRate * 100) + '% of the time' : '')
+      + '</div>'
+      + '<div class="dr-row" style="margin-top:16px">'
+      + '<button class="dr-b" onclick="ApexDrillsUI.list()">← All strategies</button>'
+      + (!learned && (c.A || 0) ? '<button class="dr-b" onclick="ApexDrillsUI.learn()">Show me the pattern first</button>' : '')
+      + '<button class="dr-b primary" onclick="ApexDrillsUI.session()">Start a session →</button>'
+      + '<button class="dr-b" style="margin-left:auto" onclick="ApexDrillsUI.remove()">Delete</button>'
+      + '</div></div>';
+  }
+
+  /* ═══════════════ learn phase (step 6) ═══════════════ */
+
+  function learn() {
+    var A = state.drill.spots.filter(function (s) { return s.kind === 'A'; }).slice(0, 6);
+    if (!A.length) { go('detail'); return; }
+    state.learnSet = A; state.learnIdx = 0;
+    go('learn');
+  }
+
+  function renderLearn() {
+    var i = state.learnIdx, set = state.learnSet, s = set[i];
+    root().innerHTML =
+      '<div class="dr-card"><div class="dr-h">Example ' + (i + 1) + ' of ' + set.length + '</div>'
+      + '<div class="dr-s">This is a place where your rules fired and the trade worked. '
+      + 'Watch what the chart looked like <em>before</em> the entry — that is what you have to recognise later.</div>'
+      + '<div class="dr-chart" id="drChart" style="margin-top:13px"></div>'
+      + '<div class="dr-bar"><div class="dr-prog"><i style="width:' + Math.round((i + 1) / set.length * 100) + '%"></i></div></div>'
+      + '<div class="dr-verdict ok"><strong>' + (s.side === 'long' ? 'Long' : 'Short') + '</strong>'
+      + (s.outcome ? ' — closed ' + (s.outcome.pips > 0 ? '+' : '') + s.outcome.pips + ' pips' : '') + '</div>'
+      + '<div class="dr-row" style="margin-top:13px">'
+      + '<button class="dr-b" onclick="ApexDrillsUI.learnStep(-1)"' + (i ? '' : ' disabled') + '>← previous</button>'
+      + (i < set.length - 1
+          ? '<button class="dr-b primary" onclick="ApexDrillsUI.learnStep(1)">Next example →</button>'
+          : '<button class="dr-b primary" onclick="ApexDrillsUI.learnDone()">Got it — start practising →</button>')
+      + '<button class="dr-b" style="margin-left:auto" onclick="ApexDrillsUI.back()">Stop</button>'
+      + '</div></div>';
+    showSpot(state.learnSet[state.learnIdx], true);
+  }
+
+  function learnStep(d) { state.learnIdx = Math.max(0, Math.min(state.learnSet.length - 1, state.learnIdx + d)); renderLearn(); }
+  function learnDone() {
+    var d = state.drill;
+    d.progress = Object.assign({}, d.progress, { learned: true });
+    window.ApexDrills.Store.save(d.id, { progress: d.progress });
+    session();
+  }
+
+  /* ═══════════════ chart for one location ═══════════════ */
+
+  /* Only the window around this location is fetched — roughly 180 bars.
+     Loading the year again per drill is what the stored spot list exists to
+     avoid. */
+  function showSpot(spot, revealAll) {
+    var el = document.getElementById('drChart'); if (!el) return Promise.resolve();
+    var tfms = TF_MS[state.drill ? state.drill.tf : state.tf] || 900000;
+    var LB = window.ApexDrills.LOOKBACK, FW = window.ApexDrills.RUNFWD;
+    var from = spot.t - LB * tfms, to = spot.t + FW * tfms;
+    var sym = state.drill ? state.drill.symbol : state.symbol;
+    var tf = state.drill ? state.drill.tf : state.tf;
+
+    return window.ApexChart.create(el, { symbol: sym, timeframe: tf, volume: false })
+      .then(function (c) { chart = c; return c.loadRange(from, to); })
+      .then(function () {
+        var total = chart.total();
+        // Everything after the decision bar stays hidden until it is answered.
+        var at = Math.max(10, Math.min(total - 1, Math.round(total * (LB / (LB + FW)))));
+        state.decisionBar = at;
+        chart.reveal(revealAll ? total : at);
+        if (revealAll) chart.setMarkers([{ time: spot.t / 1000, side: spot.side === 'long' ? 'buy' : 'sell' }]);
+      }).catch(function () { });
+  }
+
+  /* ═══════════════ practice session (step 3) ═══════════════ */
+
+  function session() {
+    var d = state.drill;
+    var set = window.ApexDrills.pickSession(d.spots, d.progress || {}, 20);
+    if (!set.length) { go('detail'); return; }
+    state.set = set; state.idx = 0; state.answers = [];
+    go('drill');
+  }
+
+  function renderDrill() {
+    var i = state.idx, set = state.set;
+    root().innerHTML =
+      '<div class="dr-card"><div class="dr-h">Location ' + (i + 1) + ' of ' + set.length + '</div>'
+      + '<div class="dr-s">Would you take a trade here? The chart stops at the decision bar — '
+      + 'what comes next is hidden until you answer.</div>'
+      + '<div class="dr-chart" id="drChart" style="margin-top:13px"></div>'
+      + '<div class="dr-bar"><div class="dr-prog"><i style="width:' + Math.round(i / set.length * 100) + '%"></i></div></div>'
+      + '<div class="dr-row" id="drAnswers">'
+      + '<button class="dr-b long" onclick="ApexDrillsUI.answer(\'long\')">Long</button>'
+      + '<button class="dr-b short" onclick="ApexDrillsUI.answer(\'short\')">Short</button>'
+      + '<button class="dr-b" onclick="ApexDrillsUI.answer(null)">No trade</button>'
+      + '<button class="dr-b" style="margin-left:auto" onclick="ApexDrillsUI.back()">Stop session</button>'
+      + '</div><div id="drReveal"></div></div>';
+    showSpot(set[i], false);
+  }
+
+  function answer(side) {
+    var s = state.set[state.idx];
+    state.answers.push({ spot: s, acted: !!side, side: side });
+
+    // Reveal what actually happened — the whole point of the exercise.
+    if (chart) chart.reveal(chart.total());
+    var box = document.getElementById('drReveal');
+    var acts = document.getElementById('drAnswers');
+    if (acts) acts.style.display = 'none';
+
+    var g = window.ApexDrills.grade([{ spot: s, acted: !!side, side: side }]);
+    var right = g.right === 1;
+    var truth = s.truth.act ? ('a valid setup — ' + s.truth.side) : 'not a setup';
+    var why;
+    if (s.kind === 'A') why = 'Your rules fired here and the trade worked' + (s.outcome ? ' (+' + s.outcome.pips + ' pips)' : '') + '.';
+    else if (s.kind === 'B') why = 'Your rules fired here and the trade <strong>lost</strong>' + (s.outcome ? ' (' + s.outcome.pips + ' pips)' : '')
+      + '. Taking it was still correct — a loss by the rules is not a mistake.';
+    else if (s.kind === 'C') why = 'A trap: ' + esc(s.missing || 'one condition was missing') + '.';
+    else why = 'Nothing here. No signal anywhere near — the correct answer is to wait.';
+
+    if (box) box.innerHTML =
+      '<div class="dr-verdict ' + (right ? 'ok' : 'no') + '"><strong>'
+      + (right ? '✓ Correct' : '✗ ' + (s.truth.act ? 'This was ' + truth : 'This was ' + truth))
+      + '</strong><br>' + why + '</div>'
+      + '<div class="dr-row" style="margin-top:12px"><button class="dr-b primary" onclick="ApexDrillsUI.next()">'
+      + (state.idx < state.set.length - 1 ? 'Next location →' : 'See the result →') + '</button></div>';
+  }
+
+  function next() {
+    if (state.idx < state.set.length - 1) { state.idx++; renderDrill(); }
+    else finish();
+  }
+
+  /* ═══════════════ result (step 5) ═══════════════ */
+
+  function finish() {
+    var g = window.ApexDrills.grade(state.answers);
+    g.shown = state.answers.map(function (a) { return a.spot.i; });
+    var d = state.drill;
+    var prog = window.ApexDrills.updateProgress(d.progress, g);
+    prog.realWinRate = (d.progress || {}).realWinRate;
+
+    root().innerHTML =
+      '<div class="dr-card"><div class="dr-h">Session result</div>'
+      + '<div class="dr-stats">'
+      + '<div class="dr-stat"><b>' + Math.round(g.score * 100) + '%</b><span>Correct</span></div>'
+      + '<div class="dr-stat"><b>' + g.missed + '</b><span>Setups missed</span></div>'
+      + '<div class="dr-stat"><b>' + g.trap + '</b><span>Traps traded</span></div>'
+      + '<div class="dr-stat"><b>' + (g.impatient + g.wrongSide) + '</b><span>Other mistakes</span></div>'
+      + '</div>'
+      + '<div class="dr-s" id="drReview">Writing the review…</div>'
+      + '<div class="dr-row" style="margin-top:16px">'
+      + '<button class="dr-b" onclick="ApexDrillsUI.open(\'' + d.id + '\')">Back to strategy</button>'
+      + '<button class="dr-b primary" onclick="ApexDrillsUI.again()">Another session →</button></div></div>';
+
+    window.ApexDrills.Store.save(d.id, { progress: prog });
+    d.progress = prog;
+    window.ApexDrills.Store.saveSession(d.id, {
+      score: g.score, right: g.right, total: g.total,
+      missed: g.missed, trap: g.trap, impatient: g.impatient, wrongSide: g.wrongSide,
+      mistakes: g.mistakes.slice(0, 40)
+    });
+
+    window.ApexDrills.review(d.name, g).then(function (txt) {
+      var el = document.getElementById('drReview');
+      if (el) el.innerHTML = txt
+        ? esc(txt).replace(/\n/g, '<br>')
+        : 'The numbers above are the review — the written summary was not available.';
+    });
+  }
+
+  function again() { open(state.drill.id); }
+  function back() { if (state.drill) open(state.drill.id); else go('list'); }
+  function remove() {
+    if (!confirm('Delete “' + state.drill.name + '” and its practice history?')) return;
+    window.ApexDrills.Store.remove(state.drill.id).then(function () { go('list'); });
+  }
+
+  /* ═══════════════ router ═══════════════ */
+
+  function render() {
+    if (chart && chart.destroy) { try { chart.destroy(); } catch (e) { } chart = null; }
+    if (!isPro()) {
+      root().innerHTML = '<div class="dr-card gold"><div class="dr-h">🔒 Strategy Drills is a Pro feature</div>'
+        + '<div class="dr-s">Practising a strategy on real history means downloading and searching years of '
+        + 'tick data, which is what makes it a paid feature. Journaling and statement import stay free.</div>'
+        + '<div class="dr-row" style="margin-top:14px"><button class="dr-b primary" onclick="openUpgradeModal()">See Pro</button></div></div>';
+      return;
+    }
+    if (view === 'list') return renderList();
+    if (view === 'create') return renderCreate();
+    if (view === 'confirm') return renderConfirm();
+    if (view === 'manual') return renderManual();
+    if (view === 'marking') return renderMarking();
+    if (view === 'detail') return renderDetail();
+    if (view === 'learn') return renderLearn();
+    if (view === 'drill') return renderDrill();
+    renderList();
+  }
+
+  window.ApexDrillsUI = {
+    render: render, list: function () { state = {}; go('list'); },
+    create: function () { go('create'); }, propose: propose, build: build,
+    open: open, learn: learn, learnStep: learnStep, learnDone: learnDone,
+    session: session, answer: answer, next: next, again: again, back: back,
+    remove: remove, startManual: startManual, mark: mark, markStep: markStep,
+    finishManual: finishManual
+  };
+
+  // Render when the page is opened, not on load — the chart library and a
+  // year of nothing are not worth fetching for a tab nobody visited.
+  if (typeof window.nav === 'function' && !window._drNavHook) {
+    window._drNavHook = true;
+    var prev = window.nav;
+    window.nav = function (id) {
+      var r = prev.apply(this, arguments);
+      if (id === 'drills') { try { render(); } catch (e) { console.warn('[drills]', e); } }
+      return r;
+    };
+  }
 })();
 </script>
 
