@@ -6311,6 +6311,53 @@ body {
     user-select: text;
   }
 }
+/* ── Desktop: Bedienelemente markieren sich nicht mehr ───────────────
+   Mit Maus reicht ein Klick mit minimaler Bewegung, und der Text im
+   Button/Tab/Label wird blau markiert. Deshalb NUR die Bedienelemente
+   sperren und nicht wie oben den ganzen Body — Fliesstext, Tabellen und
+   KI-Antworten müssen am Desktop kopierbar bleiben.
+   Ausweg im Einzelfall: class="selectable" am Element.                */
+@media (pointer: fine) {
+  button, [role="button"], [onclick], label, summary, select, nav,
+  .tab, .btn, .chip, .pill, .toggle, .switch {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+  /* Innerhalb eines Bedienelements darf ein Eingabefeld weiter markieren,
+     und .selectable sticht die Sperre immer aus. */
+  input, textarea, [contenteditable], [contenteditable="true"],
+  .selectable, .selectable * {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+  }
+}
+
+/* ── Safari + Google Translate: 1 Klick markierte den ganzen Absatz ──
+   Google Translate ersetzt den Text durch verschachtelte Wrapper
+   (<font dir="auto" style="vertical-align:inherit">…). WebKit behandelt so
+   einen Wrapper beim Klick als eine Einheit und markiert ihn komplett blau;
+   Blink tut das nicht, in der englischen Fassung tritt es nicht auf.
+   Deshalb der Selektionsmodus hier ausdrücklich auf `text` — markieren und
+   kopieren per Ziehen bleibt damit erhalten, der Klick markiert nichts mehr. */
+font {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+  vertical-align: baseline;
+}
+/* In Bedienelementen gilt weiter die Sperre von oben — der Wrapper steckt
+   auch in Button-Beschriftungen. */
+@media (pointer: fine) {
+  button font, [role="button"] font, [onclick] font, label font,
+  summary font, nav font, .tab font, .btn font, .chip font, .pill font {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+}
+
 /* Tap-Highlight (blauer/grauer Flash) global aus */
 * { -webkit-tap-highlight-color: transparent; }
 
