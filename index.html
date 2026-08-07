@@ -6334,13 +6334,17 @@ body {
   }
 }
 
-/* ── Google-Übersetzer: „Originaltext anzeigen" beim Klick abschalten ──
-   Das Widget legt auf ein angeklicktes Segment eine eigene Hervorhebung
-   (.goog-text-highlight) und blendet die Sprechblase #goog-gt-tt ein. Das
-   sieht aus wie eine blaue Textmarkierung, ist aber keine — window.get-
-   Selection() ist dabei leer, deshalb greift kein `user-select`. Nur in
-   der übersetzten Fassung sichtbar, in der englischen Originalfassung nie. */
-.goog-text-highlight {
+/* ── Google-Übersetzer: „Originaltext anzeigen" abschalten ─────────────
+   Das Widget hebt das Textsegment unter der Maus hervor (#c9d7f1 plus
+   2px-Schatten) und blendet dazu die Sprechblase #goog-gt-tt ein.
+   Ausgelöst wird das schon durch blosses Verweilen, nicht erst durch einen
+   Klick — deshalb sah es nach einer Textselektion aus, ohne eine zu sein:
+   getSelection() bleibt leer, der Fokus bleibt auf <body>, `user-select`
+   greift nicht, und ein MutationObserver am Klick findet nichts. Nur in
+   der übersetzten Fassung, in der englischen Originalfassung nie.
+   .goog-text-highlight ist der alte Klassenname, VIpgJd-… der aktuelle. */
+.goog-text-highlight,
+font.VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q {
   background: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
@@ -29190,6 +29194,28 @@ function goToAuthPro(screen) {
       kill.forEach(function(n){ n.style.display='none'; });
     }catch(e){} }
     try{ var mo=new MutationObserver(gtClean); mo.observe(document.body,{childList:true,subtree:true}); }catch(e){}
+    /* Googles „Originaltext anzeigen": beim Verweilen mit der Maus hängt das
+       Widget dem Segment eine Klasse mit Hintergrund und Schatten an — sieht
+       aus wie eine blaue Textmarkierung, ist aber keine. Die CSS-Regel dagegen
+       nennt den heutigen Klassennamen (VIpgJd-…); der ist von Google generiert
+       und ändert sich. Dieser Beobachter greift unabhängig vom Namen: bekommt
+       ein Übersetzungs-<font> eine Hintergrundfarbe, wird sie sofort entfernt.
+       Nur `class` wird beobachtet, nicht `style` — sonst löst die eigene
+       Korrektur die nächste Runde aus. */
+    try{
+      var gtHi=new MutationObserver(function(ms){
+        for(var i=0;i<ms.length;i++){
+          var n=ms[i].target;
+          if(!n || n.nodeType!==1 || n.tagName!=='FONT') continue;
+          var bg=getComputedStyle(n).backgroundColor;
+          if(bg && bg!=='rgba(0, 0, 0, 0)' && bg!=='transparent'){
+            n.style.setProperty('background','none','important');
+            n.style.setProperty('box-shadow','none','important');
+          }
+        }
+      });
+      gtHi.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+    }catch(e){}
     setInterval(gtClean, 1500);
     window.googleTranslateElementInit=function(){
       try{ new google.translate.TranslateElement({pageLanguage:'en', autoDisplay:false}, 'google_translate_element'); }catch(e){}
