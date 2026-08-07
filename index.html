@@ -6334,28 +6334,21 @@ body {
   }
 }
 
-/* ── Safari + Google Translate: 1 Klick markierte den ganzen Absatz ──
-   Google Translate ersetzt den Text durch verschachtelte Wrapper
-   (<font dir="auto" style="vertical-align:inherit">…). WebKit behandelt so
-   einen Wrapper beim Klick als eine Einheit und markiert ihn komplett blau;
-   Blink tut das nicht, in der englischen Fassung tritt es nicht auf.
-   Deshalb der Selektionsmodus hier ausdrücklich auf `text` — markieren und
-   kopieren per Ziehen bleibt damit erhalten, der Klick markiert nichts mehr. */
-font {
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  user-select: text;
-  vertical-align: baseline;
+/* ── Google-Übersetzer: „Originaltext anzeigen" beim Klick abschalten ──
+   Das Widget legt auf ein angeklicktes Segment eine eigene Hervorhebung
+   (.goog-text-highlight) und blendet die Sprechblase #goog-gt-tt ein. Das
+   sieht aus wie eine blaue Textmarkierung, ist aber keine — window.get-
+   Selection() ist dabei leer, deshalb greift kein `user-select`. Nur in
+   der übersetzten Fassung sichtbar, in der englischen Originalfassung nie. */
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
-/* In Bedienelementen gilt weiter die Sperre von oben — der Wrapper steckt
-   auch in Button-Beschriftungen. */
-@media (pointer: fine) {
-  button font, [role="button"] font, [onclick] font, label font,
-  summary font, nav font, .tab font, .btn font, .chip font, .pill font {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
-  }
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.VIpgJd-yAWNEb-L7lbkb {
+  display: none !important;
 }
 
 /* Tap-Highlight (blauer/grauer Flash) global aus */
