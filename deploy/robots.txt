@@ -1,0 +1,14 @@
+# evidencetrading.com
+# The app and the marketing site share one document, so there is nothing here
+# to keep crawlers out of — the app is behind a login and returns the same
+# landing page to anyone not signed in.
+
+User-agent: *
+Allow: /
+
+# Nothing of value and it changes constantly.
+Disallow: /*?demo=1
+Disallow: /*?checkout=
+Disallow: /*&kiosk=1
+
+Sitemap: https://evidencetrading.com/sitemap.xml
