@@ -48966,6 +48966,97 @@ window.APEX_PSYCH_COURSE = {
         options: ['A mistake to be corrected', 'Rule followed; outcome negative — no change required', 'Evidence the strategy needs adjusting', 'A sign to reduce size'],
         correct: 1,
         why: 'Treating every loss as a mistake creates the sense of a debt to settle, which is a direct cause of revenge trading. A loss by the rules is part of the method working as designed.' }
+    ] },
+
+  /* ── Tier 2. The first six answer "why do I do that"; these answer
+        "what do the numbers actually mean", which is where most traders
+        misread their own results and abandon working methods. ── */
+
+  { id: 'p7', tier: 2, title: 'Win rate tells you almost nothing',
+    body: [
+      'Ask a trader how their method is doing and most will answer with a win rate. It is the least informative number they could have picked, and the habit costs people working strategies.',
+      'A win rate on its own cannot be good or bad, because it says nothing about the size of the wins and losses. A method that wins 30% of the time and makes four times its risk when it wins is excellent. A method that wins 80% of the time and occasionally gives back ten times its risk is a slow way to lose everything. Both are common, and the second one feels far better while it is running.',
+      'The number that actually decides is expectancy: what one trade is worth on average, counting both outcomes. Multiply the win rate by the average win, subtract the loss rate times the average loss. If that is positive, the method makes money over enough trades. If it is negative, no amount of discipline makes it profitable — discipline applied to a negative edge just loses money more consistently.',
+      'This matters psychologically more than mathematically. A high win rate is emotionally comfortable: you are right most days. That comfort is exactly why methods with poor payoff ratios survive in people\'s accounts far longer than they should, and why methods that are right three times in ten get abandoned in week two despite being better.',
+      'The practical habit: when you judge a method, quote two numbers or none. Win rate alone is not a claim about anything.'
+    ],
+    keyPoints: [
+      'Win rate says nothing without the average win and average loss beside it.',
+      'Expectancy — win rate × average win minus loss rate × average loss — is what decides.',
+      'A high win rate is emotionally comfortable, which keeps bad payoff ratios alive.',
+      'Discipline applied to a negative edge loses money more consistently, not less.'
+    ],
+    quiz: [
+      { q: 'Method A wins 35% with a 3:1 payoff. Method B wins 75% with a 1:4 payoff. Which has a positive expectancy?',
+        options: ['A only', 'B only', 'Both', 'Neither'],
+        correct: 0,
+        why: 'A returns 0.35×3 − 0.65×1 = +0.40 per unit risked. B returns 0.75×1 − 0.25×4 = −0.25. B feels much better to trade and loses money.' },
+      { q: 'Why do methods with poor payoff ratios survive longer than they should in real accounts?',
+        options: ['They are harder to test', 'Being right often is emotionally comfortable, so the ratio goes unexamined', 'Brokers favour them', 'They have lower commissions'],
+        correct: 1,
+        why: 'The comfort of frequent small wins is the mechanism. It is also why a method that is right three times in ten gets abandoned early despite being the better one.' },
+      { q: 'A trader says "my strategy is 68% accurate". What is missing?',
+        options: ['The number of trades', 'The average win and average loss', 'The instrument', 'The timeframe'],
+        correct: 1,
+        why: 'Sample size matters too, but without the payoff ratio the accuracy figure cannot be turned into an expectancy — so it is not yet a claim about profitability at all.' }
+    ] },
+
+  { id: 'p8', tier: 2, title: 'Losing streaks are not a signal',
+    body: [
+      'Every method with losses produces runs of them, and the runs are longer than intuition suggests. A method that wins half its trades will, over a few hundred trades, almost certainly produce a run of seven or eight losses somewhere. Nothing has gone wrong when that happens. It is a property of sequences, not a message from the market.',
+      'The problem is that a streak arrives with a story attached. By the fifth loss the mind has already produced an explanation — the market changed, the edge is gone, something is different now. That explanation feels like analysis and is usually pattern-matching on noise. It is also unfalsifiable in the moment, because the only thing that would settle it is more trades, which is exactly what you no longer want to take.',
+      'This is where most working methods die. Not in a drawdown that breaks the account, but in a drawdown that breaks the trader\'s belief, after which the method is replaced with another one, which then meets its own first streak.',
+      'Two things help, both decided in advance. First, know roughly what a normal streak looks like for your method — if your win rate is around 50%, runs of six are ordinary, and knowing that in advance removes most of the story. Second, define beforehand what would actually count as evidence that the method has stopped working: a number of trades, a drawdown depth, a change you can name. Anything decided during a streak is decided by the person the rule exists to protect you from.',
+      'And keep the sample honest. Twenty trades tells you almost nothing about a method either way, in either direction.'
+    ],
+    keyPoints: [
+      'Long losing runs are an ordinary property of any method with losses.',
+      'A streak arrives with an explanation attached, and the explanation is usually noise.',
+      'Most working methods are abandoned during a normal streak, not a fatal one.',
+      'Define in advance what would count as evidence the method is broken.'
+    ],
+    quiz: [
+      { q: 'Your method wins about half its trades and you have just lost six in a row. What does that tell you?',
+        options: ['The edge is gone', 'The market regime changed', 'Almost nothing — runs like that are ordinary', 'You should halve your size permanently'],
+        correct: 2,
+        why: 'Runs of six at a 50% win rate are entirely ordinary over a few hundred trades. Treating one as information is how working methods get discarded.' },
+      { q: 'Why is "the market has changed" so persuasive during a streak?',
+        options: ['It is usually true', 'It feels like analysis, is unfalsifiable in the moment, and settling it requires more trades you no longer want to take', 'Other traders say it', 'It is what the news reports'],
+        correct: 1,
+        why: 'The explanation cannot be tested without doing the one thing the streak has made you unwilling to do. That is what makes it feel like insight rather than avoidance.' },
+      { q: 'When should you decide what counts as evidence your method has stopped working?',
+        options: ['During the drawdown, with fresh data', 'Before you start trading it', 'After a fixed number of months', 'When your account is down 50%'],
+        correct: 1,
+        why: 'Any threshold set during a streak is set by the state the threshold exists to protect against. Deciding in advance is the whole mechanism.' }
+    ] },
+
+  { id: 'p9', tier: 2, title: 'Designing rules you will not break',
+    body: [
+      'A rule you break weekly is not a discipline problem. It is a design problem, and the fix is to redesign the rule rather than to try harder — the first chapter said this, and this one is about how.',
+      'Rules fail for three reasons, and they need different repairs. Some are unenforceable: they depend on a judgement you have to make in the moment you are least able to make it. "I will not trade when I am emotional" cannot work, because the state it names is the state that decides whether it applies. Replace it with something countable — a trade cap, a time window, a loss limit.',
+      'Some are too strict for how you actually trade. A rule that forbids something you genuinely need forces a choice between breaking it and trading badly, and the rule loses. If you keep overriding a rule for good reasons, the rule is wrong.',
+      'And some have no consequence. A rule that nothing enforces is a preference. This is why a limit in the platform beats a limit in a notebook, and why any constraint you can waive by clicking past a warning provides roughly nothing.',
+      'A workable rule has three properties: it is countable, so you can tell afterwards whether you kept it; it is decided in advance, so the stressed version of you never gets a vote; and it fails closed, meaning that when you ignore it something actually stops. Test a new rule against those three before you adopt it, and check after a month how often you kept it. A rule you kept 95% of the time is working. One you kept 60% of the time is telling you something.'
+    ],
+    keyPoints: [
+      'Unenforceable rules depend on judgement in the moment judgement fails — replace with countable ones.',
+      'A rule you override for good reasons is the wrong rule.',
+      'A rule nothing enforces is a preference.',
+      'Countable, decided in advance, fails closed. Then measure how often you actually kept it.'
+    ],
+    quiz: [
+      { q: 'Which of these is unenforceable as written?',
+        options: ['Maximum four trades per day', 'No trading in the first fifteen minutes after the open', 'I will not trade when I am emotional', 'Stop at minus 2% for the day'],
+        correct: 2,
+        why: 'It depends on you assessing your own state at exactly the moment that assessment is unreliable. The other three are countable after the fact by anyone.' },
+      { q: 'You override the same rule regularly and each time there was a genuinely good reason. What follows?',
+        options: ['You lack discipline', 'The rule does not match how you actually need to trade and should be redesigned', 'You should add a penalty', 'You should trade less'],
+        correct: 1,
+        why: 'Repeated overrides for sound reasons are evidence about the rule, not about you. A rule that forces a choice between breaking it and trading badly always loses.' },
+      { q: 'What does "fails closed" mean for a trading rule?',
+        options: ['It stops you trading permanently', 'When you ignore it, something actually stops rather than merely warning you', 'It closes open positions', 'It only applies at the close'],
+        correct: 1,
+        why: 'A warning you can click past has no enforcement, which makes the rule a preference. The constraint has to act without needing your agreement in the moment.' }
     ] }
   ]
 };
@@ -49235,6 +49326,320 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     return out;
   }
 
+  /* ═══════════════ evidence for the psychology course ═══════════════
+
+     The strategy book borrows its numbers from Stat Lab's territory — a
+     delivery win, not new information. This is different: nobody builds a
+     pivot table asking "how long after a loss do I re-enter". These figures
+     exist in the journal and are effectively never looked at.
+
+     Every statement below is arithmetic over the reader's own trades. The
+     model never sees them and never comments on them. Where the data is too
+     thin the chapter simply shows nothing — a behavioural claim from four
+     trades would be exactly the kind of false certainty this course warns
+     against.                                                              */
+
+  var PSYCH_WINDOW_DAYS = 90;
+  var MIN_TRADES_PSYCH = 15;
+
+  function recentTrades() {
+    if (typeof window.getAllTrades !== 'function') return [];
+    var all = [];
+    try { all = window.getAllTrades() || []; } catch (e) { return []; }
+    var since = Date.now() - PSYCH_WINDOW_DAYS * 86400000;
+    return all.filter(function (t) {
+      var ms = t.openTime || (t._date ? Date.parse(t._date + 'T12:00:00') : 0);
+      return ms && ms >= since;
+    }).sort(function (a, b) { return (a.openTime || 0) - (b.openTime || 0); });
+  }
+
+  function tagCount(trades, tag) {
+    return trades.filter(function (t) { return (t.mistakes || []).indexOf(tag) >= 0; }).length;
+  }
+  function pipsOf(t) { var v = parseFloat(t.pips); return isFinite(v) ? v : null; }
+
+  /* ═══════════════ A · commitments: reading → doing → measured ═══════════════
+
+     The course itself argues that knowing is not doing, and then a course
+     that only informs does exactly what it criticises. This is the part that
+     closes the loop.
+
+     Every commitment maps to ONE metric that can be counted from the journal
+     without the trader having to flag anything. When the commitment is made,
+     the current value is frozen as the "before". Afterwards the same metric
+     is computed over the period since — so the comparison is like for like.
+
+     Nothing here is generated, and nothing is graded by a model. The
+     question "did it change" has an arithmetic answer.                     */
+
+  function tradesBetween(from, to) {
+    if (typeof window.getAllTrades !== 'function') return [];
+    var all = [];
+    try { all = window.getAllTrades() || []; } catch (e) { return []; }
+    return all.filter(function (t) {
+      var ms = t.openTime || (t._date ? Date.parse(t._date + 'T12:00:00') : 0);
+      return ms && ms >= from && ms <= (to || Date.now());
+    }).sort(function (a, b) { return (a.openTime || 0) - (b.openTime || 0); });
+  }
+
+  /* lower: is a smaller number the improvement?
+     min:   below this many observations the metric is not reported at all —
+            a behaviour change claimed from three trades is noise wearing a
+            number, which is the failure this whole course warns about.      */
+  var METRICS = {
+    reentry20: { label: 'Re-entries within 20 minutes of a loss', unit: '%', lower: true, min: 6,
+      calc: function (tr) {
+        var quick = 0, after = 0;
+        for (var i = 0; i < tr.length - 1; i++) {
+          var a = tr[i], b = tr[i + 1], pa = pipsOf(a);
+          if (pa == null || pa >= 0) continue;
+          var end = a.closeTime || a.openTime, start = b.openTime;
+          if (!end || !start || start < end) continue;
+          after++; if (start - end <= 20 * 60000) quick++;
+        }
+        return after ? { value: quick / after * 100, n: after, detail: quick + ' of ' + after } : null;
+      } },
+    tradesPerDay: { label: 'Trades per day', unit: '', lower: true, min: 5,
+      calc: function (tr) {
+        var byDay = {}; tr.forEach(function (t) { if (t._date) byDay[t._date] = (byDay[t._date] || 0) + 1; });
+        var d = Object.keys(byDay); if (!d.length) return null;
+        var sum = d.reduce(function (a, k) { return a + byDay[k]; }, 0);
+        return { value: sum / d.length, n: d.length, detail: sum + ' trades over ' + d.length + ' days' };
+      } },
+    sizeAfterLoss: { label: 'Size increase after a loss', unit: '%', lower: true, min: 6,
+      calc: function (tr) {
+        var base = [], al = [];
+        for (var k = 0; k < tr.length; k++) {
+          var lots = parseFloat(tr[k].lots); if (!isFinite(lots) || lots <= 0) continue;
+          var prev = tr[k - 1], pp = prev ? pipsOf(prev) : null;
+          if (pp != null && pp < 0) al.push(lots); else base.push(lots);
+        }
+        if (base.length < 4 || al.length < 3) return null;
+        var b1 = base.reduce(function (a, c) { return a + c; }, 0) / base.length;
+        var b2 = al.reduce(function (a, c) { return a + c; }, 0) / al.length;
+        return { value: (b2 - b1) / b1 * 100, n: al.length, detail: al.length + ' trades after a loss' };
+      } },
+    movingSl: { label: 'Trades flagged “Moving SL”', unit: '%', lower: true, min: 8,
+      calc: function (tr) {
+        if (!tr.length) return null;
+        var n = tr.filter(function (t) { return (t.mistakes || []).indexOf('Moving SL') >= 0; }).length;
+        return { value: n / tr.length * 100, n: tr.length, detail: n + ' of ' + tr.length };
+      } },
+    noStop: { label: 'Trades with no stop recorded', unit: '%', lower: true, min: 8,
+      calc: function (tr) {
+        if (!tr.length) return null;
+        var n = tr.filter(function (t) { return !t.sl || String(t.sl).trim() === ''; }).length;
+        return { value: n / tr.length * 100, n: tr.length, detail: n + ' of ' + tr.length };
+      } },
+    unflagged: { label: 'Trades with no review flag either way', unit: '%', lower: true, min: 8,
+      calc: function (tr) {
+        var c = tr.filter(function (t) { return pipsOf(t) != null; });
+        if (!c.length) return null;
+        var n = c.filter(function (t) { return !(t.positives || []).length && !(t.mistakes || []).length; }).length;
+        return { value: n / c.length * 100, n: c.length, detail: n + ' of ' + c.length };
+      } }
+  };
+
+  /* Deliberately a short fixed list per chapter, not free text. A commitment
+     you type yourself cannot be measured, and an unmeasured commitment is
+     the same wish the course spends six chapters warning about. */
+  var COMMITMENTS = {
+    p2: [{ id: 'movingSl', text: 'I do not move a stop further away once the trade is open' }],
+    p3: [{ id: 'tradesPerDay', text: 'I cap myself at a normal number of trades a day' }],
+    p4: [{ id: 'reentry20', text: 'After a loss I wait 20 minutes before the next entry' }],
+    p5: [{ id: 'sizeAfterLoss', text: 'I do not increase size after a loss' },
+         { id: 'noStop', text: 'Every trade has a stop recorded' }],
+    p6: [{ id: 'unflagged', text: 'I mark every trade as plan followed or not' }],
+    p9: [{ id: 'unflagged', text: 'I record whether I kept my rules, so I can measure it' }]
+  };
+
+  function commitmentsDoc() { return Store.get('commitments'); }
+
+  function makeCommitment(chapterId, metricId, text) {
+    var m = METRICS[metricId]; if (!m) return Promise.resolve();
+    var before = m.calc(tradesBetween(Date.now() - 90 * 86400000));
+    return commitmentsDoc().then(function (d) {
+      var list = (d && d.list) || [];
+      // One live commitment per metric — two overlapping ones would measure
+      // the same thing from different start dates and disagree.
+      list = list.filter(function (c) { return c.metric !== metricId; });
+      list.push({ chapter: chapterId, metric: metricId, text: text, at: Date.now(),
+                  before: before ? { value: before.value, n: before.n, detail: before.detail } : null });
+      return Store.save('commitments', { kind: 'commitments', list: list });
+    });
+  }
+
+  function dropCommitment(metricId) {
+    return commitmentsDoc().then(function (d) {
+      var list = ((d && d.list) || []).filter(function (c) { return c.metric !== metricId; });
+      return Store.save('commitments', { kind: 'commitments', list: list });
+    });
+  }
+
+  /* The report. Returns null while there is not yet enough data since the
+     commitment — saying "no change" after four trades would be a false
+     verdict, and a false verdict here is worse than silence. */
+  function commitmentReport(c) {
+    var m = METRICS[c.metric]; if (!m) return null;
+    var since = m.calc(tradesBetween(c.at));
+    var days = Math.floor((Date.now() - c.at) / 86400000);
+    if (!since || since.n < m.min) {
+      return { c: c, m: m, pending: true, days: days,
+               need: m.min, have: since ? since.n : 0 };
+    }
+    var b = c.before ? c.before.value : null;
+    var delta = b == null ? null : since.value - b;
+    var better = delta == null ? null : (m.lower ? delta < -0.5 : delta > 0.5);
+    var worse = delta == null ? null : (m.lower ? delta > 0.5 : delta < -0.5);
+    return { c: c, m: m, days: days, before: c.before, after: since,
+             delta: delta, better: better, worse: worse };
+  }
+
+  function psychEvidence(chapterId) {
+    var tr = recentTrades();
+    if (tr.length < MIN_TRADES_PSYCH) return null;
+    var closed = tr.filter(function (t) { return pipsOf(t) != null; });
+    if (closed.length < MIN_TRADES_PSYCH) return null;
+    var out = [];
+
+    if (chapterId === 'p1') {
+      // Which rule gets broken most — the design question from the chapter.
+      var counts = {};
+      tr.forEach(function (t) { (t.mistakes || []).forEach(function (m) { counts[m] = (counts[m] || 0) + 1; }); });
+      var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; }).slice(0, 3);
+      if (top.length) {
+        out.push({ n: counts[top[0]], text: 'Your most repeated flag in the last ' + PSYCH_WINDOW_DAYS
+          + ' days is <strong>' + esc(top[0]) + '</strong> (' + counts[top[0]] + '×'
+          + (top[1] ? ', then ' + esc(top[1]) + ' ' + counts[top[1]] + '×' : '') + '). '
+          + 'A flag that keeps coming back is worth treating as a rule that does not fit, not as a lapse.' });
+      }
+    }
+
+    if (chapterId === 'p2') {
+      // The loss-aversion signature: wins smaller than losses.
+      var w = closed.filter(function (t) { return pipsOf(t) > 0; }).map(pipsOf);
+      var l = closed.filter(function (t) { return pipsOf(t) < 0; }).map(function (t) { return -pipsOf(t); });
+      if (w.length >= 5 && l.length >= 5) {
+        var aw = w.reduce(function (a, b) { return a + b; }, 0) / w.length;
+        var al = l.reduce(function (a, b) { return a + b; }, 0) / l.length;
+        var ratio = aw / al;
+        out.push({ n: closed.length, text: 'Your average win is <strong>' + Math.round(aw)
+          + ' pips</strong>, your average loss <strong>' + Math.round(al) + ' pips</strong> — a ratio of '
+          + (Math.round(ratio * 100) / 100) + '. '
+          + (ratio < 1
+              ? 'Wins smaller than losses is the classic signature of the asymmetry described above: winners closed early, losers held.'
+              : 'Winners larger than losers — the asymmetry is not showing in your numbers.') });
+      }
+      var early = tagCount(tr, 'Early Exit'), moving = tagCount(tr, 'Moving SL');
+      if (early || moving) out.push({ n: early + moving, text: 'Flagged by you: <strong>Early Exit</strong> '
+        + early + '×, <strong>Moving SL</strong> ' + moving + '×. Those are the two behaviours this chapter is about.' });
+    }
+
+    if (chapterId === 'p3') {
+      // Trade count per day — the frequency half of the tilt signature.
+      var byDay = {};
+      tr.forEach(function (t) { var d = t._date || ''; if (d) byDay[d] = (byDay[d] || 0) + 1; });
+      var days = Object.keys(byDay), counts2 = days.map(function (d) { return byDay[d]; });
+      if (days.length >= 8) {
+        var avg = counts2.reduce(function (a, b) { return a + b; }, 0) / days.length;
+        var heavy = days.filter(function (d) { return byDay[d] >= Math.max(5, Math.ceil(avg * 2)); });
+        var heavyP = heavy.reduce(function (a, d) {
+          return a + tr.filter(function (t) { return t._date === d; })
+                       .reduce(function (x, t) { return x + (pipsOf(t) || 0); }, 0); }, 0);
+        /* A clean result is a result. Reporting "on 0 days" as a bare statistic
+           reads like the tool found nothing to say, when in fact it checked
+           the thing the chapter warns about and it is not happening. */
+        out.push({ n: days.length, text: heavy.length
+          ? 'You average <strong>' + (Math.round(avg * 10) / 10) + ' trades a day</strong>, but on <strong>'
+            + heavy.length + ' day' + (heavy.length === 1 ? '' : 's') + '</strong> you took at least double that — '
+            + 'and those days came to <strong style="color:var(--' + (heavyP >= 0 ? 'profit' : 'loss') + ')">'
+            + sign(heavyP) + ' pips</strong> in total.'
+          : 'You average <strong>' + (Math.round(avg * 10) / 10) + ' trades a day</strong>, and no day in this '
+            + 'period ran to double that. The frequency half of the tilt signature is not showing.' });
+      }
+      var over = tagCount(tr, 'Overtrading'), emo = tagCount(tr, 'Emotional Entry') + tagCount(tr, 'Impulsive Trade');
+      if (over || emo) out.push({ n: over + emo, text: 'Flagged by you: <strong>Overtrading</strong> ' + over
+        + '×, emotional or impulsive entries ' + emo + '×.' });
+    }
+
+    if (chapterId === 'p4') {
+      /* The one nobody looks up: how quickly a loss is followed by the next
+         entry. Computed from timestamps, so it does not depend on the trader
+         having flagged anything. */
+      var quick = 0, after = 0, quickPips = 0;
+      for (var i = 0; i < tr.length - 1; i++) {
+        var a = tr[i], b = tr[i + 1];
+        if (pipsOf(a) == null || pipsOf(a) >= 0) continue;
+        var end = a.closeTime || a.openTime, start = b.openTime;
+        if (!end || !start || start < end) continue;
+        after++;
+        if (start - end <= 20 * 60000) { quick++; quickPips += (pipsOf(b) || 0); }
+      }
+      if (after >= 8) {
+        out.push({ n: quick, text: quick
+          ? 'After a losing trade you opened the next one within <strong>20 minutes</strong> on <strong>'
+            + quick + '</strong> of ' + after + ' occasions (' + pct(quick / after) + ')'
+            + (quick >= 3 ? ', and those trades came to <strong style="color:var(--' + (quickPips >= 0 ? 'profit' : 'loss')
+               + ')">' + sign(quickPips) + ' pips</strong>.' : '.')
+          : 'Across ' + after + ' losses in this period, you never re-entered within 20 minutes. '
+            + 'The gap this chapter is about is one you already leave.' });
+      }
+      var rev = tagCount(tr, 'Revenge Trade');
+      if (rev) out.push({ n: rev, text: 'You flagged <strong>Revenge Trade</strong> ' + rev + '× yourself.' });
+    }
+
+    if (chapterId === 'p5') {
+      // Size drift after a loss — the mechanism the chapter describes.
+      var base = [], afterLoss = [];
+      for (var k = 0; k < tr.length; k++) {
+        var lots = parseFloat(tr[k].lots);
+        if (!isFinite(lots) || lots <= 0) continue;
+        var prev = tr[k - 1];
+        if (prev && pipsOf(prev) != null && pipsOf(prev) < 0) afterLoss.push(lots); else base.push(lots);
+      }
+      if (base.length >= 8 && afterLoss.length >= 5) {
+        var b1 = base.reduce(function (a, c) { return a + c; }, 0) / base.length;
+        var b2 = afterLoss.reduce(function (a, c) { return a + c; }, 0) / afterLoss.length;
+        var d = (b2 - b1) / b1;
+        out.push({ n: afterLoss.length, text: 'Your average size after a loss is <strong>'
+          + (Math.round(b2 * 100) / 100) + '</strong> against <strong>' + (Math.round(b1 * 100) / 100)
+          + '</strong> otherwise — ' + (Math.abs(d) < 0.08 ? 'essentially unchanged, which is what you want.'
+            : (d > 0 ? '<strong style="color:var(--loss)">' + pct(d) + ' larger</strong>. That is the drift this chapter describes.'
+                     : pct(-d) + ' smaller.')) });
+      }
+      var noSl = tr.filter(function (t) { return !t.sl || String(t.sl).trim() === ''; }).length;
+      if (noSl) out.push({ n: noSl, text: '<strong>' + noSl + '</strong> of your last ' + tr.length
+        + ' trades have no stop recorded.' });
+    }
+
+    if (chapterId === 'p6') {
+      // Followed the plan and lost — the case the chapter says to record.
+      var fp = closed.filter(function (t) { return (t.positives || []).indexOf('Followed Plan') >= 0; });
+      if (fp.length >= 5) {
+        var fpLoss = fp.filter(function (t) { return pipsOf(t) < 0; }).length;
+        out.push({ n: fp.length, text: 'You marked <strong>Followed Plan</strong> on ' + fp.length
+          + ' trades, and <strong>' + fpLoss + '</strong> of those lost. Those are the ones to leave alone — '
+          + 'they are the method working, not mistakes to correct.' });
+      }
+      var noTag = closed.filter(function (t) {
+        return !(t.positives || []).length && !(t.mistakes || []).length; }).length;
+      if (noTag) out.push({ n: noTag, text: '<strong>' + noTag + '</strong> of ' + closed.length
+        + ' closed trades carry no flag either way — for those, the record holds the outcome but not the decision.' });
+    }
+
+    return out.length ? out : null;
+  }
+
+  function psychEvidenceHtml(list) {
+    if (!list) return '';
+    return '<div class="ac-card" style="margin-top:18px;border-color:var(--gold-line);background:rgba(201,168,76,.04)">'
+      + '<div class="ac-h">This chapter, in your own numbers</div>'
+      + '<div class="ac-s" style="margin-bottom:10px">Last ' + PSYCH_WINDOW_DAYS
+      + ' days, from your journal. Nothing here is an opinion — it is counted.</div>'
+      + list.map(function (x) { return '<div class="ac-s" style="padding:9px 0;border-top:0.5px solid var(--rim)">' + x.text + '</div>'; }).join('')
+      + '</div>';
+  }
+
   function pct(x) { return Math.round(x * 100) + '%'; }
   function sign(x) { return (x > 0 ? '+' : '') + (Math.round(x * 10) / 10); }
 
@@ -49306,16 +49711,116 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     return h + '</div>';
   }
 
+  /* ═══════════════ B · spaced repetition ═══════════════
+
+     A quiz taken straight after reading measures whether you were paying
+     attention thirty seconds ago. Whether it stuck is a different question,
+     and the only way to ask it is later.
+
+     So a question answered WRONG comes back after 7 days, and if answered
+     right then, again after 30 — after which it is considered learned.
+     Answered wrong again, the clock restarts. Only the misses come back;
+     re-asking what someone already knows trains nothing and wastes the
+     goodwill that makes them open the app.                                */
+
+  var REVIEW_STAGES = [7, 30];   // days
+
+  function reviewDue(course) {
+    var due = [], now = Date.now();
+    (course.chapters || []).forEach(function (ch, ci) {
+      var p = (course.progress || {})[ch.id];
+      ((p && p.review) || []).forEach(function (r) {
+        if (r.done) return;
+        if (r.due <= now) due.push({ ci: ci, chapterId: ch.id, qi: r.qi, stage: r.stage });
+      });
+    });
+    return due;
+  }
+
+  function scheduleReview(course, chapterId, qi, gotItRight) {
+    var p = course.progress[chapterId] = course.progress[chapterId] || {};
+    p.review = p.review || [];
+    var row = p.review.filter(function (r) { return r.qi === qi; })[0];
+    if (!row) { row = { qi: qi, stage: 0, due: 0, done: false }; p.review.push(row); }
+    if (gotItRight) {
+      row.stage++;
+      if (row.stage >= REVIEW_STAGES.length) { row.done = true; row.due = 0; }
+      else row.due = Date.now() + REVIEW_STAGES[row.stage] * 86400000;
+    } else {
+      // Wrong: back to the start of the ladder, not merely postponed.
+      row.stage = 0; row.done = false;
+      row.due = Date.now() + REVIEW_STAGES[0] * 86400000;
+    }
+  }
+
+  /* ═══════════════ C · chapters that speak up ═══════════════
+
+     The journal knows when a chapter applies. Rules kept deliberately tight,
+     because a course that nags becomes a course people close: at most the
+     two strongest signals, each one carrying a NUMBER. A prompt without a
+     figure is a lecture, and nobody needs another one of those.          */
+
+  var TRIGGERS = [
+    { chapter: 'p4', metric: 'reentry20', over: 25,
+      say: function (v, d) { return 'You re-entered within 20 minutes of a loss on <strong>' + d
+        + '</strong> occasions (' + Math.round(v) + '%).'; } },
+    { chapter: 'p3', metric: 'tradesPerDay', over: 6,
+      say: function (v) { return 'You are averaging <strong>' + (Math.round(v * 10) / 10)
+        + ' trades a day</strong> over the last 30 days.'; } },
+    { chapter: 'p5', metric: 'sizeAfterLoss', over: 15,
+      say: function (v) { return 'Your position size runs <strong>' + Math.round(v)
+        + '% larger</strong> after a loss than otherwise.'; } },
+    { chapter: 'p2', metric: 'movingSl', over: 10,
+      say: function (v, d) { return 'You flagged <strong>Moving SL</strong> on ' + d + ' trades.'; } },
+    { chapter: 'p5', metric: 'noStop', over: 15,
+      say: function (v, d) { return '<strong>' + d + '</strong> of your recent trades have no stop recorded.'; } }
+  ];
+
+  function triggers() {
+    var tr = tradesBetween(Date.now() - 30 * 86400000);
+    if (tr.length < MIN_TRADES_PSYCH) return [];
+    var C = window.APEX_PSYCH_COURSE;
+    var hits = [];
+    TRIGGERS.forEach(function (t) {
+      var m = METRICS[t.metric]; if (!m) return;
+      var r = m.calc(tr);
+      if (!r || r.n < m.min || r.value <= t.over) return;
+      var idx = -1;
+      C.chapters.forEach(function (ch, i) { if (ch.id === t.chapter) idx = i; });
+      if (idx < 0) return;
+      hits.push({ ci: idx, title: C.chapters[idx].title,
+                  text: t.say(r.value, r.detail), over: r.value - t.over });
+    });
+    // Strongest first, and never more than two.
+    return hits.sort(function (a, b) { return b.over - a.over; }).slice(0, 2);
+  }
+
   /* ═══════════════ home ═══════════════ */
 
   function renderHome() {
-    root().innerHTML =
-      '<div class="ac-track">'
+    var hits = [];
+    try { hits = triggers(); } catch (e) { }
+    var nudges = hits.length
+      ? '<div class="ac-card" style="border-color:var(--gold-line);background:rgba(201,168,76,.05)">'
+        + '<div class="ac-h">Worth reading right now</div>'
+        + '<div class="ac-s" style="margin-bottom:10px">From your last 30 days — counted, not guessed.</div>'
+        + hits.map(function (h) {
+            return '<div class="ac-item" onclick="ApexAcademy.psychAt(' + h.ci + ')">'
+              + '<div class="ac-num">→</div><div style="flex:1">'
+              + '<div class="ac-item-t">' + esc(h.title) + '</div>'
+              + '<div class="ac-item-m">' + h.text + '</div></div></div>';
+          }).join('') + '</div>'
+      : '';
+
+    root().innerHTML = nudges
+      + '<div id="acDue"></div>'
+      + '<div class="ac-track">'
       + '<div class="ac-tile" onclick="ApexAcademy.psych()">'
       + '<div class="ac-tile-ico">🧠</div><div class="ac-h">The psychology of trading</div>'
-      + '<div class="ac-s">Six chapters on why traders who know exactly what to do still do something else — '
-      + 'loss aversion, tilt, revenge trading, sizing, and judging a trade you lost. '
-      + 'Written and checked, not generated.</div>'
+      + '<div class="ac-s">' + (window.APEX_PSYCH_COURSE ? window.APEX_PSYCH_COURSE.chapters.length : 9)
+      + ' chapters on why traders who know exactly what to do still do something else — loss aversion, '
+      + 'tilt, revenge trading, sizing, what a win rate does and does not tell you, and how to design a '
+      + 'rule you will not break. Written and checked, not generated.</div>'
       + '<div class="ac-s" style="margin-top:12px;color:var(--gold);font-weight:600">Start reading →</div></div>'
       + '<div class="ac-tile" onclick="ApexAcademy.strategies()">'
       + '<div class="ac-tile-ico">📘</div><div class="ac-h">Your strategy, as a book</div>'
@@ -49323,7 +49828,63 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
       + 'when it fits, the entry, stop and target, what it is <em>not</em>, and the mistakes people make with it. '
       + 'Then questions to check it stuck.</div>'
       + '<div class="ac-s" style="margin-top:12px;color:var(--gold);font-weight:600">Open →</div></div>'
-      + '</div>';
+      + '</div>'
+      + '<div id="acCommit"></div>';
+
+    // Both blocks need Firestore, so they fill in after the page is already up.
+    renderDueTile();
+    renderCommitmentsTile();
+  }
+
+  function renderDueTile() {
+    Store.get('psychology').then(function (saved) {
+      var C = window.APEX_PSYCH_COURSE;
+      var course = { chapters: C.chapters, progress: (saved && saved.progress) || {} };
+      var due = reviewDue(course);
+      var el = document.getElementById('acDue'); if (!el || !due.length) return;
+      el.innerHTML = '<div class="ac-card"><div class="ac-h">' + due.length + ' question'
+        + (due.length === 1 ? '' : 's') + ' due for review</div>'
+        + '<div class="ac-s">Ones you got wrong, coming back after a gap — that is the difference '
+        + 'between having understood something and still knowing it.</div>'
+        + '<div class="ac-row" style="margin-top:13px"><button class="ac-b primary" onclick="ApexAcademy.review()">Review them →</button></div></div>';
+    });
+  }
+
+  function renderCommitmentsTile() {
+    commitmentsDoc().then(function (d) {
+      var list = (d && d.list) || [];
+      var el = document.getElementById('acCommit'); if (!el || !list.length) return;
+      el.innerHTML = '<div class="ac-card"><div class="ac-h">What you committed to</div>'
+        + list.map(function (c) {
+            var r = commitmentReport(c); if (!r) return '';
+            return '<div style="padding:12px 0;border-top:0.5px solid var(--rim)">'
+              + '<div class="ac-item-t">' + esc(c.text) + '</div>' + reportLine(r) + '</div>';
+          }).join('') + '</div>';
+    });
+  }
+
+  function reportLine(r) {
+    if (r.pending) {
+      return '<div class="ac-item-m">Set ' + r.days + ' day' + (r.days === 1 ? '' : 's') + ' ago · '
+        + r.have + ' of ' + r.need + ' trades needed before this can be measured. '
+        + 'A verdict from fewer would be noise.</div>';
+    }
+    var u = r.m.unit, b = r.before ? Math.round(r.before.value * 10) / 10 : null;
+    var a = Math.round(r.after.value * 10) / 10;
+    var col = r.better ? 'profit' : (r.worse ? 'loss' : 'ink3');
+    var word = r.better ? 'It is working.' : (r.worse ? 'It has gone the other way.' : 'Essentially unchanged.');
+    return '<div class="ac-item-m">' + esc(r.m.label) + ' — before <strong>' + (b == null ? '—' : b + u)
+      + '</strong>, since <strong style="color:var(--' + col + ')">' + a + u + '</strong> ('
+      + r.after.detail + ', ' + r.days + ' days). <strong style="color:var(--' + col + ')">' + word + '</strong></div>';
+  }
+
+  function psychAt(ci) {
+    var C = window.APEX_PSYCH_COURSE;
+    Store.get('psychology').then(function (saved) {
+      st = { course: { id: 'psychology', title: C.title, summary: C.summary,
+                       chapters: C.chapters, progress: (saved && saved.progress) || {}, fixed: true } };
+      chapter(ci);
+    });
   }
 
   /* ═══════════════ psychology ═══════════════ */
@@ -49478,6 +50039,7 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     // book is being read, and stale numbers in a section titled "from your own
     // trading" would be worse than none.
     st.ev = st.course.fixed ? null : evidence(st.course.setups || []);
+    st.pev = st.course.fixed ? psychEvidence(st.course.chapters[i].id) : null;
     go('chapter');
   }
 
@@ -49541,7 +50103,7 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
       '<div class="ac-card"><div class="ac-s" style="color:var(--gold);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px">Chapter ' + (st.ci + 1) + ' of ' + c.chapters.length + '</div>'
       + '<div class="ac-h" style="font-size:22px;margin:6px 0 18px">' + esc(ch.title) + '</div>'
       + '<div class="ac-prose">' + body + '</div>' + keys + mis
-      + evidenceHtml(st.ev)
+      + evidenceHtml(st.ev) + psychEvidenceHtml(st.pev) + '<div id="acCommitBox"></div>'
       + '<div class="ac-row" style="margin-top:20px">'
       + '<button class="ac-b" onclick="ApexAcademy.back()">← All chapters</button>'
       + (st.ci > 0 ? '<button class="ac-b" onclick="ApexAcademy.chapter(' + (st.ci - 1) + ')">Previous</button>' : '')
@@ -49553,6 +50115,105 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     // is a check, not a toll gate, and treating it as one makes people skim.
     var p = c.progress[ch.id] = c.progress[ch.id] || {};
     if (!p.read) { p.read = true; saveProgress(); }
+    renderCommitBox(ch.id);
+  }
+
+  /* The commitment box. Only on chapters that have a measurable one — a
+     chapter with no countable behaviour attached gets nothing rather than a
+     vague "think about this", which would train people to ignore the box. */
+  function renderCommitBox(chapterId) {
+    var opts = COMMITMENTS[chapterId];
+    var el = document.getElementById('acCommitBox');
+    if (!el || !opts || !opts.length) return;
+    commitmentsDoc().then(function (d) {
+      var list = (d && d.list) || [];
+      var mine = list.filter(function (c) { return c.chapter === chapterId; });
+      if (mine.length) {
+        var r = commitmentReport(mine[0]);
+        el.innerHTML = '<div class="ac-card" style="margin-top:18px;border-color:rgba(62,207,142,.4)">'
+          + '<div class="ac-h">Your commitment from this chapter</div>'
+          + '<div class="ac-item-t" style="margin-bottom:4px">' + esc(mine[0].text) + '</div>'
+          + (r ? reportLine(r) : '')
+          + '<div class="ac-row" style="margin-top:13px"><button class="ac-b" onclick="ApexAcademy.dropCommit(\''
+          + esc(mine[0].metric) + '\')">Drop this commitment</button></div></div>';
+        return;
+      }
+      el.innerHTML = '<div class="ac-card" style="margin-top:18px;border-color:var(--gold-line);background:rgba(201,168,76,.04)">'
+        + '<div class="ac-h">Turn this into something you do</div>'
+        + '<div class="ac-s" style="margin-bottom:12px">Reading a chapter changes nothing on its own — that is '
+        + 'what the first chapter is about. Pick one and Evidence measures whether it actually changed, '
+        + 'against your journal, starting from today.</div>'
+        + opts.map(function (o) {
+            return '<button class="ac-opt" onclick="ApexAcademy.commit(\'' + esc(chapterId) + '\',\''
+              + esc(o.id) + '\',\'' + esc(o.text).replace(/'/g, "\\'") + '\')">' + esc(o.text) + '</button>';
+          }).join('') + '</div>';
+    });
+  }
+
+  function commit(chapterId, metricId, text) {
+    makeCommitment(chapterId, metricId, text).then(function () { renderCommitBox(chapterId); });
+  }
+  function dropCommit(metricId) {
+    dropCommitment(metricId).then(function () { renderCommitBox(st.course.chapters[st.ci].id); });
+  }
+
+  /* ── review session across chapters ── */
+  function review() {
+    var C = window.APEX_PSYCH_COURSE;
+    Store.get('psychology').then(function (saved) {
+      var course = { id: 'psychology', title: C.title, summary: C.summary, chapters: C.chapters,
+                     progress: (saved && saved.progress) || {}, fixed: true };
+      st = { course: course };
+      var due = reviewDue(course);
+      var qs = due.map(function (d) {
+        var ch = course.chapters[d.ci];
+        return { q: (ch.quiz || [])[d.qi], chapterId: ch.id, qi: d.qi, chTitle: ch.title };
+      }).filter(function (x) { return x.q; });
+      if (!qs.length) { go('home'); return; }
+      st.rev = { items: qs, i: 0, right: 0, picked: null };
+      go('review');
+    });
+  }
+
+  function renderReview() {
+    var r = st.rev, item = r.items[r.i], cur = item.q;
+    var opts = cur.options.map(function (o, k) {
+      var cls = '';
+      if (r.picked != null) { if (k === cur.correct) cls = ' right'; else if (k === r.picked) cls = ' wrong'; }
+      return '<button class="ac-opt' + cls + '"' + (r.picked != null ? ' disabled' : '')
+        + ' onclick="ApexAcademy.revPick(' + k + ')">' + esc(o) + '</button>';
+    }).join('');
+    root().innerHTML = '<div class="ac-card">'
+      + '<div class="ac-s" style="color:var(--gold);font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase">'
+      + 'Review ' + (r.i + 1) + ' of ' + r.items.length + ' · ' + esc(item.chTitle) + '</div>'
+      + '<div class="ac-h" style="font-size:17px;margin:8px 0 16px">' + esc(cur.q) + '</div>' + opts
+      + (r.picked != null
+          ? '<div class="ac-why"><strong style="color:var(--' + (r.picked === cur.correct ? 'profit' : 'loss') + ')">'
+            + (r.picked === cur.correct ? 'Correct. ' : 'Not quite. ') + '</strong>' + esc(cur.why || '') + '</div>'
+            + '<div class="ac-row"><button class="ac-b primary" onclick="ApexAcademy.revNext()">'
+            + (r.i < r.items.length - 1 ? 'Next →' : 'Done') + '</button></div>'
+          : '<div class="ac-row" style="margin-top:6px"><button class="ac-b" onclick="ApexAcademy.home()">Later</button></div>')
+      + '</div>';
+  }
+
+  function revPick(k) {
+    if (st.rev.picked != null) return;
+    st.rev.picked = k;
+    var item = st.rev.items[st.rev.i];
+    var ok = k === item.q.correct;
+    if (ok) st.rev.right++;
+    scheduleReview(st.course, item.chapterId, item.qi, ok);
+    Store.save('psychology', { progress: st.course.progress });
+    renderReview();
+  }
+
+  function revNext() {
+    if (st.rev.i < st.rev.items.length - 1) { st.rev.i++; st.rev.picked = null; renderReview(); return; }
+    root().innerHTML = '<div class="ac-card"><div class="ac-h">' + st.rev.right + ' of '
+      + st.rev.items.length + ' correct</div>'
+      + '<div class="ac-s">The ones you missed come back in a week. The ones you got come back in a month, '
+      + 'and then not again.</div>'
+      + '<div class="ac-row" style="margin-top:16px"><button class="ac-b primary" onclick="ApexAcademy.home()">Done</button></div></div>';
   }
 
   /* ═══════════════ quiz ═══════════════ */
@@ -49613,7 +50274,10 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
   function pick(k) {
     if (st.quiz.picked != null) return;
     st.quiz.picked = k;
-    if (k === st.quiz.qs[st.quiz.i].correct) st.quiz.right++;
+    var ok = k === st.quiz.qs[st.quiz.i].correct;
+    if (ok) st.quiz.right++;
+    st.quiz.answers = st.quiz.answers || [];
+    st.quiz.answers[st.quiz.i] = ok;
     renderQuiz();
   }
 
@@ -49627,6 +50291,9 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     // Best attempt is kept, not the latest — re-reading and re-testing should
     // never look like going backwards.
     if (!p.quiz || q.right > p.quiz.score) p.quiz = { score: q.right, total: q.qs.length, at: Date.now() };
+    // Every answer schedules its own next appearance — misses in a week,
+    // hits in a month, then done.
+    (q.answers || []).forEach(function (a, qi) { scheduleReview(st.course, ch.id, qi, a); });
     saveProgress();
 
     var pct = Math.round(q.right / q.qs.length * 100);
@@ -49667,6 +50334,7 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     if (view === 'chapter') return renderChapter();
     if (view === 'quiz') return renderQuiz();
     if (view === 'example') return renderExample();
+    if (view === 'review') return renderReview();
     renderHome();
   }
 
@@ -49674,7 +50342,9 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     render: render, home: function () { st = {}; go('home'); },
     psych: psych, strategies: strategies, create: create, write: write, open: open,
     chapter: chapter, back: back, quizStart: quizStart, pick: pick, nextQ: nextQ,
-    remove: remove, example: example, evidence: evidence
+    remove: remove, example: example, evidence: evidence, psychEvidence: psychEvidence,
+    commit: commit, dropCommit: dropCommit, review: review, revPick: revPick, revNext: revNext,
+    psychAt: psychAt, triggers: triggers, METRICS: METRICS
   };
 
   /* Same repair as the previous build needed: this block is appended at the
