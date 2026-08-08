@@ -905,7 +905,7 @@
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-08-08';
+  window.APEX_BUILD = '2026-08-08b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -13089,50 +13089,67 @@ document.addEventListener('click', function(e) {
 });
 
 // ─── MOBILE SHEET HELPERS ─────────────
-var _mobileSheetGroups = {
-  trading: {
-    title: 'Trading',
-    items: [
-      { id: 'journal',     icon: '◧', label: 'Journal' },
-      { id: 'calendar',    icon: '◫', label: 'Calendar' },
-      { id: 'stats',       icon: '◈', label: 'Statistics' }
-    ]
-  },
-  analysis: {
-    title: 'Analysis',
-    items: [
-      { id: 'insights',   icon: '◉', label: 'AI Insights' },
-      { id: 'psychology', icon: '◎', label: 'Psychology' },
-      { id: 'setups',     icon: '◈', label: 'Setups' },
-      { id: 'playbooks',  icon: '📋', label: 'Playbooks' },
-      { id: 'indicator',  icon: '◉', label: 'SD Zones' }
-    ]
-  },
-  tools: {
-    title: 'Tools',
-    items: [
-      { id: 'calculators', icon: '◧', label: 'Calculators' },
-      { id: 'econews',     icon: '📰', label: 'Eco Calendar' }
-    ]
-  },
-  social: {
-    title: 'Social',
-    items: [
-      { id: 'community', icon: '◎', label: 'Community' },
-      { id: 'feed',      icon: '◈', label: 'Setup Feed' },
-      { id: 'news',      icon: '📣', label: 'News & Offers' },
-      { id: 'inbox',     icon: '✉', label: 'Inbox' }
-    ]
-  }
+var _mobileSheetTitles = {
+  trading:  'Trading',
+  analysis: 'Analysis',
+  tools:    'Tools',
+  social:   'Social'
 };
+
+/* The phone sheet reads its entries out of the desktop nav instead of
+   keeping its own copy.
+
+   The copy is exactly what went wrong: this used to be a second hardcoded
+   list, and every page added since it was written — Edge Lab, Prop Firm,
+   Rules Engine, Academy, Glossary, API & Webhooks — existed on desktop and
+   was simply unreachable on a phone. Nothing errored, the entries just
+   were not there, so the features looked missing rather than broken.
+   Deriving them means adding a nav button is now the only step. */
+function _mobileSheetItems(group) {
+  var drop = document.getElementById('navgdrop-' + group);
+  if (!drop) return [];
+  var out = [];
+  drop.querySelectorAll('.nav-item').forEach(function (b) {
+    /* Only skip what is deliberately hidden inline (plan-gated or admin
+       entries). Never use offsetParent here: the whole desktop nav is
+       display:none on a phone, so that test hides everything. */
+    if (b.style.display === 'none') return;
+    /* id first, onclick second. Entries injected at runtime by their own
+       module — Accounts, Mentor & Team — assign b.onclick as a property,
+       so getAttribute('onclick') is null for them and reading only the
+       attribute would silently drop exactly those two. */
+    var id = /^nav-(.+)$/.exec(b.id || '');
+    var m  = id || /nav\(\s*'([^']+)'/.exec(b.getAttribute('onclick') || '');
+    if (!m) return;
+    /* Strip the badge <span>s, or the label reads "Inbox 3" — but only
+       those. Product names sit in <span class="notranslate"> so Google
+       Translate leaves them alone, and removing every span deleted those
+       words too: "Setup Feed" became "Feed", and "Prop Firm" — which is
+       entirely inside one — became empty and was dropped from the sheet
+       altogether. Badges are the spans carrying an id or a pill style.
+       The cleaned innerHTML is kept rather than textContent so the
+       notranslate wrappers survive into the sheet as well. */
+    var clone = b.cloneNode(true);
+    clone.querySelectorAll('span').forEach(function (s) {
+      if (s.classList.contains('notranslate')) return;
+      if (s.id || /background/i.test(s.getAttribute('style') || '')) s.remove();
+    });
+    var label = clone.innerHTML.replace(/\s+/g, ' ').trim();
+    if ((clone.textContent || '').trim()) out.push({ id: m[1], label: label });
+  });
+  return out;
+}
+
 function mobileNavMore(group) {
-  var g = _mobileSheetGroups[group];
-  if (!g) return;
-  document.getElementById('mobileSheetTitle').textContent = g.title;
+  var title = _mobileSheetTitles[group];
+  if (!title) return;
+  var items = _mobileSheetItems(group);
+  if (!items.length) return;
+  document.getElementById('mobileSheetTitle').textContent = title;
   var container = document.getElementById('mobileSheetItems');
   var currentPage = document.querySelector('.page.active');
   var currentId = currentPage ? currentPage.id.replace('page-','') : '';
-  container.innerHTML = g.items.map(function(item) {
+  container.innerHTML = items.map(function(item) {
     var isActive = item.id === currentId ? ' active' : '';
     return '<button class="sheet-nav-item' + isActive + '" onclick="nav(\'' + item.id + '\');closeMobileSheet()">' +
       item.label + '</button>';
@@ -19992,9 +20009,7 @@ window.switchStatsTab = function(tab) {
 
 // ── Mobile sheet groups ────────────────────────────────────────────
 (function() {
-  if (typeof _mobileSheetGroups === 'undefined') return;
-  if (_mobileSheetGroups.analysis && !_mobileSheetGroups.analysis.items.find(function(x){return x.id==='rules';}))
-    _mobileSheetGroups.analysis.items.push({ id: 'rules', icon: '⚖', label: 'Rules Engine' });
+
 })();
 
 // ═══════════════════════════════════════════════════════════════════
@@ -28752,11 +28767,8 @@ function goToAuthPro(screen) {
       if(id==='edgelab'){ try{ render(); }catch(e){ console.error('EdgeLab render', e); } }
     };
     window._edgeNavHooked=true;
-    // mobile sheet group
-    try{ if(window._mobileSheetGroups && _mobileSheetGroups.analysis){
-      var items=_mobileSheetGroups.analysis.items;
-      if(!items.some(function(i){return i.id==='edgelab';})) items.unshift({id:'edgelab',icon:'◆',label:'Edge Lab'});
-    }}catch(e){}
+    // The phone sheet reads the desktop nav directly, so the Edge Lab
+    // button added above is all it takes — no separate mobile entry.
     // re-render Edge Lab when the Pro plan resolves (async) or theme toggles
     function edgeActive(){ var p=document.getElementById('page-edgelab'); return p && p.classList.contains('active'); }
     if(typeof window.applyProPlan==='function' && !window._edgeProHooked){
@@ -30743,7 +30755,6 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
       b.setAttribute('onclick',"nav('channels');closeNavGroups()"); b.textContent='Servers'; grp.insertBefore(b, grp.firstChild);
     }
     var navc=document.getElementById('nav-channels'); if(navc) navc.textContent='Servers';
-    try{ if(window._mobileSheetGroups && _mobileSheetGroups.social){ var it=_mobileSheetGroups.social.items; if(!it.some(function(i){return i.id==='channels';})) it.unshift({id:'channels',icon:'💬',label:'Servers'}); } }catch(e){}
     if(typeof window.nav==='function' && !window._csNavHooked){
       var on=window.nav; window.nav=function(id){ try{buildPage();}catch(e){} on.apply(this,arguments); if(id==='channels'){ try{CS.render();}catch(e){console.error('CS',e);} } };
       window._csNavHooked=true;
@@ -34671,9 +34682,6 @@ body.light .pt-sugg{background:var(--layer)}
       st.parentNode.insertBefore(b, st.nextSibling);
     }
     try{
-      if(window._mobileSheetGroups && _mobileSheetGroups.trading &&
-         !_mobileSheetGroups.trading.items.some(function(i){return i.id==='accounts';}))
-        _mobileSheetGroups.trading.items.push({ id:'accounts', icon:'🏦', label:'Accounts' });
     }catch(e){}
 
     page.querySelectorAll('.acx-tab').forEach(function(t){
@@ -35586,9 +35594,6 @@ body.light .pt-sugg{background:var(--layer)}
       if(inbox) drop.insertBefore(b, inbox); else drop.appendChild(b);
     }
     try{
-      if(window._mobileSheetGroups && _mobileSheetGroups.social &&
-         !_mobileSheetGroups.social.items.some(function(i){return i.id==='mentor';}))
-        _mobileSheetGroups.social.items.push({ id:'mentor', icon:'🎓', label:'Mentor & Team' });
     }catch(e){}
     return true;
   }
