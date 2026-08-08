@@ -905,7 +905,7 @@
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-08-08b';
+  window.APEX_BUILD = '2026-08-08c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7981,6 +7981,17 @@ body.light #landingPage * {
       <div class="lp-card-desc">Nine written chapters on <strong>trading psychology</strong> — and under each one, your own numbers from your journal. Plus <strong>your own strategy</strong> written up as a book from your description, with your real trades on that setup as the examples. Questions after every chapter, and the ones you get wrong come back a week later.</div>
       <span class="lp-tag green">Learn</span>
     </div>
+    <div class="lp-card reveal d2">
+      <span class="lp-card-icon">📖</span>
+      <div class="lp-card-title">Trading Glossary</div>
+      <!-- Deliberately no <strong> around R:R / SL / NFP. Three emphasised
+           tokens separated by commas made Google Translate abandon the
+           sentence halfway: the German rendering came out "wieR:R,SL or NFP
+           and you get the words behind it", half translated and with the
+           spaces eaten. Emphasis only on whole clauses here. -->
+      <div class="lp-card-desc"><strong>429 terms, written out and explained</strong> — order types, chart patterns, prop firm rules, the option Greeks, the slang. Search an abbreviation such as R:R, SL or NFP and you get the words behind it plus a plain definition, and typos or paraphrases still find it. All of it free. <strong>With Pro</strong>, anything the 429 do not cover gets looked up by AI, which also says so when a word is not a trading term at all.</div>
+      <span class="lp-tag green">Free · AI lookup with Pro</span>
+    </div>
     <div class="lp-card reveal d3">
       <span class="lp-card-icon">🚀</span>
       <div class="lp-card-title">Set up in three steps</div>
@@ -8185,6 +8196,7 @@ body.light #landingPage * {
         <li><b>Prop firm cockpit</b> — drawdown, consistency &amp; payout tracking</li>
         <li>Rules engine · Psychology score &amp; heatmaps · Goal tracker</li>
         <li>Outgoing webhooks — Zapier, Make, Discord &amp; Slack</li>
+        <li>Trading glossary — 429 terms, written out &amp; explained</li>
         <li>Basic performance stats</li>
         <li>Win rate &amp; pips tracking</li>
         <li>Community feed access</li>
@@ -8212,6 +8224,7 @@ body.light #landingPage * {
         <li><b>Academy</b> — 9-chapter trading psychology course, with your own numbers beside every chapter</li>
         <li><b>Commitments</b> — pick one habit per chapter; Evidence measures whether it actually changed</li>
         <li><b>Your strategy as a book</b> — written up from your description, with your own trades as examples</li>
+        <li><b>Glossary AI lookup</b> — any term the 429 curated ones do not cover, explained on demand</li>
         <li>Candlestick charts — drag entry / SL / TP</li>
         <li>Auto MFE / MAE from real price data</li>
         <li>Risk of Ruin, Sharpe &amp; Expectancy / setup</li>
@@ -8321,6 +8334,8 @@ body.light #landingPage * {
         <tr><td>Tiltmeter — automatic tilt detection</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Habit Tracker + performance correlation</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Psychology score &amp; mistake heatmaps</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Trading glossary — 429 terms, written out &amp; explained</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Glossary AI lookup for terms outside the curated 429</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr class="lp-compare-cat"><td colspan="3">Integrations, Reports &amp; Tools</td></tr>
         <tr><td>cTrader Auto-Sync (Live &amp; Demo)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Background sync — cTrader syncs while the app is closed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -9093,6 +9108,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🧠</div><div><div class="apex-feat-label">Academy — a psychology course that reads your journal</div><div class="apex-feat-desc">Nine written chapters on why traders who know exactly what to do still do something else — and under each one, your own numbers: how fast you re-enter after a loss, whether your size drifts up, how often you move a stop</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">✅</div><div><div class="apex-feat-label">Commitments — the part that makes it stick</div><div class="apex-feat-desc">Pick one habit per chapter. Evidence freezes where you stand today and tells you weeks later whether it actually changed — measured against your own trades, not asked about</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">📘</div><div><div class="apex-feat-label">Your strategy, written up as a book</div><div class="apex-feat-desc">Describe how you trade and get six chapters back — including what your strategy is <em>not</em> — with your own trades on that setup as the examples, winners and losers both</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">📖</div><div><div class="apex-feat-label">Glossary AI lookup</div><div class="apex-feat-desc">The glossary itself is free — 429 trading terms, abbreviations written out and explained. Pro adds the lookup for everything it does not cover: the AI explains the term, or tells you plainly that it is not a trading term at all</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">⚙️</div><div><div class="apex-feat-label">Strategy Lab — automated backtesting</div><div class="apex-feat-desc">Build indicator rules by clicking, run them over years of real bars, sweep the parameters and prove it with a walk-forward test — no code needed</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🕯️</div><div><div class="apex-feat-label">Candlestick Trade Charts</div><div class="apex-feat-desc">See every trade on real candles — drag entry / SL / TP directly on the chart and it updates your journal</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">📐</div><div><div class="apex-feat-label">Auto MFE / MAE</div><div class="apex-feat-desc">Fetches price data & computes max favorable / adverse excursion automatically</div></div></div>
@@ -51129,6 +51145,11 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
 
   var q = '', cat = '', aiState = null, aiBusy = false;
 
+  /* The 429 curated terms stay free — they cost nothing to serve and are
+     the page anyone can land on. The AI lookup is the Pro part, because
+     it is the part that costs money on every call. */
+  function isPro() { return typeof window.currentPlan !== 'undefined' && window.currentPlan === 'pro'; }
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -51304,6 +51325,20 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       }
       if (aiState.data) return aiCardHTML(aiState.data);
     }
+    /* Free plan: say what the button would do and what it costs to get it,
+       rather than showing a button that then refuses. A locked control the
+       user can press and be rejected by is worse than an honest one. */
+    if (!isPro()) {
+      return '<div class="gl-empty">'
+        + '<h3>Not in the glossary</h3>'
+        + '<p>No entry for &ldquo;' + esc(q) + '&rdquo;. With Pro, the AI looks up any term '
+        + 'that is not in the 429 curated ones &mdash; it explains it, or tells you it is not '
+        + 'a trading term at all.</p>'
+        + '<button class="gl-b primary" onclick="if(window.openUpgradeModal)openUpgradeModal()">'
+        + '&#9889; Upgrade to Pro</button>'
+        + '</div>';
+    }
+
     return '<div class="gl-empty">'
       + '<h3>Not in the glossary</h3>'
       + '<p>No entry for &ldquo;' + esc(q) + '&rdquo;. Ask the AI to look it up &mdash; '
@@ -51330,7 +51365,9 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       + '</div>'
       + '<div class="gl-hint">' + total + ' terms, written out and explained. '
       + 'Abbreviations, chart patterns, order types, prop firm rules, slang. '
-      + 'Anything missing gets looked up by AI.</div>';
+      /* Do not promise the AI lookup to a plan that does not have it. */
+      + (isPro() ? 'Anything missing gets looked up by AI.'
+                 : 'With Pro, anything missing gets looked up by AI.') + '</div>';
 
     html += '<div class="gl-chips"><span class="gl-chip' + (cat ? '' : ' on') + '" onclick="ApexGlossary.cat(\'\')">All</span>';
     categories().forEach(function (c) {
@@ -51375,6 +51412,10 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
   function ask() {
     var term = q.trim();
     if (!term || aiBusy) return;
+    /* Gate the call itself, not just the button. The button is one way in;
+       a cached-looking state or a console call is another, and the worker
+       spends money either way. */
+    if (!isPro()) { if (window.openUpgradeModal) window.openUpgradeModal(); return; }
     var cached = aiCacheGet(term);
     if (cached) { aiState = { forTerm: term, data: cached }; render(); return; }
 
@@ -51446,6 +51487,20 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
     window.nav = function (id) {
       var r = prev.apply(this, arguments);
       if (id === 'glossary') { try { render(); } catch (e) { console.warn('[glossary]', e); } }
+      return r;
+    };
+  }
+
+  /* The plan resolves asynchronously, so a Pro user who opens the page
+     early would be told the AI lookup needs Pro. Re-render once it lands,
+     the same way Edge Lab does. */
+  if (typeof window.applyProPlan === 'function' && !window._glProHook) {
+    window._glProHook = true;
+    var origPlan = window.applyProPlan;
+    window.applyProPlan = function () {
+      var r = origPlan.apply(this, arguments);
+      var pg = document.getElementById('page-glossary');
+      if (pg && pg.classList.contains('active')) { try { render(); } catch (e) {} }
       return r;
     };
   }
