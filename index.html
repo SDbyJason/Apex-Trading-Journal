@@ -905,7 +905,7 @@
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-08-07';
+  window.APEX_BUILD = '2026-08-08';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -9816,6 +9816,7 @@ function _authAction(type) {
             <button class="nav-item" onclick="nav('calculators');closeNavGroups()" id="nav-calculators">Calculators</button>
             <button class="nav-item" onclick="nav('econews');closeNavGroups()" id="nav-econews">Eco Calendar</button>
             <button class="nav-item" onclick="nav('academy');closeNavGroups()" id="nav-academy">Academy</button>
+            <button class="nav-item" onclick="nav('glossary');closeNavGroups()" id="nav-glossary">Glossary</button>
             <button class="nav-item" onclick="nav('developer');closeNavGroups()" id="nav-developer">API &amp; Webhooks</button>
           </div>
         </div>
@@ -12844,7 +12845,7 @@ function nav(id) {
   // Mobile bottom nav active state
   document.querySelectorAll('.mbn-item').forEach(b => b.classList.remove('active'));
   var mbnMap = { overview:'overview', journal:'trading', calendar:'trading', stats:'trading',
-    calculators:'tools', econews:'tools', developer:'tools', psychology:'analysis', insights:'analysis', setups:'analysis', propfirm:'analysis',
+    calculators:'tools', econews:'tools', developer:'tools', glossary:'tools', psychology:'analysis', insights:'analysis', setups:'analysis', propfirm:'analysis',
     indicator:'analysis', playbooks:'analysis', community:'social', feed:'social', news:'social', inbox:'social', settings:'settings' };
   var mbnTarget = document.getElementById('mbn-' + (mbnMap[id] || id));
   if (mbnTarget) mbnTarget.classList.add('active');
@@ -50476,6 +50477,970 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     window.nav = function (id) {
       var r = prev.apply(this, arguments);
       if (id === 'academy') { try { render(); } catch (e) { console.warn('[academy]', e); } }
+      return r;
+    };
+  }
+})();
+</script>
+
+
+<!-- ══ GLOSSARY DATA ══ -->
+<script>
+/* ── Evidence Trading — glossary dataset ───────────────────────────────
+   One row per term: [term, expansion, category, definition, aliases]
+
+   `expansion` is the written-out form of an abbreviation and is empty for
+   terms that are already words. That distinction is the whole point of the
+   tool: a beginner meeting "OCO" in a broker menu needs "One-Cancels-the-
+   Other" before any definition means anything.
+
+   Definitions are deliberately short and plain. A glossary that needs a
+   glossary has failed. Where a term is routinely misunderstood, the entry
+   says what it is NOT — that is usually the sentence that does the work.
+
+   English only: this text is fed to the translation layer as the source
+   language. See the language rule before adding anything here.
+   ──────────────────────────────────────────────────────────────────── */
+window.APEX_GLOSSARY = [
+
+/* ══ Orders & execution ══════════════════════════════════════════════ */
+["Market order","","Orders & execution","An order to buy or sell immediately at the best price currently available. You are guaranteed to get filled, but not at any particular price.","mkt order"],
+["Limit order","","Orders & execution","An order to buy at or below a set price, or sell at or above it. You control the price but are not guaranteed a fill.","limit"],
+["Stop order","","Orders & execution","An order that sits inactive until price reaches a trigger level, then becomes a market order. Used both to enter on breakouts and to exit losers.","stop market,stop loss order"],
+["Stop-limit order","","Orders & execution","A stop order that turns into a limit order rather than a market order when triggered. Protects you from a terrible fill, at the risk of no fill at all.","stop limit"],
+["SL","Stop loss","Orders & execution","The price at which you exit a losing trade. Placed when the trade is opened, not decided while it is running.","stoploss,stop-loss"],
+["TP","Take profit","Orders & execution","The price at which you close a winning trade. Also called the target or limit exit.","takeprofit,take-profit,target"],
+["OCO","One-Cancels-the-Other","Orders & execution","Two linked orders where filling one automatically cancels the other. The normal way to attach a stop and a target to the same position.","one cancels other"],
+["OTO","One-Triggers-the-Other","Orders & execution","An order that, once filled, automatically places a second order — typically an entry that then places its own stop.","one triggers other"],
+["Bracket order","","Orders & execution","An entry order with a stop loss and a take profit attached at once, so the trade is fully defined before it exists.","bracket"],
+["Trailing stop","","Orders & execution","A stop loss that follows price at a fixed distance as the trade moves in your favour, and never moves back.","trail stop,trailing"],
+["GTC","Good-Til-Cancelled","Orders & execution","An order that stays live until you cancel it or it fills, surviving across sessions.","good til cancelled"],
+["GTD","Good-Til-Date","Orders & execution","An order that stays live until a date you set, then expires by itself.","good til date"],
+["DAY order","","Orders & execution","An order that is cancelled automatically at the end of the trading session if it has not filled.","day"],
+["IOC","Immediate-Or-Cancel","Orders & execution","Fill whatever part of the order can be filled right now; cancel the rest.","immediate or cancel"],
+["FOK","Fill-Or-Kill","Orders & execution","Fill the entire order immediately or cancel all of it. No partial fills.","fill or kill"],
+["MOC","Market-On-Close","Orders & execution","A market order that executes at the closing auction of the session.","market on close"],
+["LOC","Limit-On-Close","Orders & execution","A limit order that only participates in the closing auction.","limit on close"],
+["Iceberg order","","Orders & execution","A large order that only shows a small portion in the order book at a time, hiding the true size.","iceberg,reserve order"],
+["Fill","","Orders & execution","The execution of an order. A partial fill means only part of your size was executed.","filled,execution"],
+["Partial fill","","Orders & execution","Only part of your order size executed. The rest stays working or is cancelled, depending on the order type.","partial"],
+["Slippage","","Orders & execution","The difference between the price you expected and the price you actually got. Usually worst in fast markets and around news.","slip"],
+["Spread","","Orders & execution","The gap between the bid and the ask. It is a cost you pay on entry and exit whether the trade wins or loses.","bid ask spread"],
+["Bid","","Orders & execution","The highest price a buyer is currently willing to pay. You sell into the bid.",""],
+["Ask","","Orders & execution","The lowest price a seller is currently willing to accept. You buy at the ask.","offer"],
+["Mid price","","Orders & execution","The midpoint between bid and ask. Often used for charting and valuation, but you cannot usually trade at it.","mid"],
+["Liquidity","","Orders & execution","How much size can be traded without moving the price. Thin liquidity means wide spreads and bad fills.","liquid,illiquid"],
+["Depth of market","","Orders & execution","The list of resting buy and sell orders at each price level. Shows where size is waiting, not where price will go.","DOM,order book,book,ladder"],
+["Level 2","","Orders & execution","Market data showing the order book beyond the best bid and offer.","L2,level two"],
+["Time and sales","","Orders & execution","A running log of every executed trade with price, size and time. Shows what actually happened, unlike the order book.","tape,T&S"],
+["Maker","","Orders & execution","A participant who places a resting order and provides liquidity. Usually pays a lower fee or receives a rebate.","maker fee"],
+["Taker","","Orders & execution","A participant who removes liquidity by hitting an existing order. Usually pays a higher fee.","taker fee"],
+["Requote","","Orders & execution","When a broker rejects your requested price and offers a new one, typically during fast moves.",""],
+["Rejection","","Orders & execution","An order the broker or exchange refused, for example due to insufficient margin or an invalid price.","rejected order"],
+["Latency","","Orders & execution","The delay between sending an order and it reaching the exchange. Matters most for short-term and automated strategies.","ping"],
+["VWAP execution","","Orders & execution","Splitting a large order over time to achieve an average price close to the volume-weighted average.",""],
+["Dark pool","","Orders & execution","A private venue where large orders execute without being displayed publicly beforehand.","dark pools"],
+["PFOF","Payment For Order Flow","Orders & execution","A broker being paid by a market maker to route your orders to them. Affects execution quality and is why some brokers are commission-free.","payment for order flow"],
+["Auction","","Orders & execution","A concentrated matching event, typically at the open and close, where a single price clears the most volume.","opening auction,closing auction"],
+
+/* ══ Positions & trade mechanics ═════════════════════════════════════ */
+["Long","","Positions","A position that profits when price rises. Buying first, selling later.","go long,buy side"],
+["Short","","Positions","A position that profits when price falls. Selling first, buying back later.","go short,short selling"],
+["Flat","","Positions","Holding no position at all. Being flat is a valid decision, not the absence of one.","no position"],
+["Entry","","Positions","The price and moment at which a position is opened.","open price"],
+["Exit","","Positions","The price and moment at which a position is closed.","close price"],
+["Position size","","Positions","How much you trade — lots, contracts or shares. The single most powerful risk control you have.","size,sizing"],
+["Scaling in","","Positions","Adding to a position in stages rather than entering all at once.","scale in,pyramiding"],
+["Scaling out","","Positions","Closing a position in stages, taking partial profits while leaving some running.","scale out,partial close"],
+["Averaging down","","Positions","Adding to a losing position to improve the average entry price. It improves your average price and worsens your risk at the same time.","average down,add to loser"],
+["Break-even stop","","Positions","Moving the stop to the entry price so the trade can no longer lose. Reduces risk and also reduces the chance the trade reaches target.","breakeven,BE stop"],
+["Runner","","Positions","The remaining part of a position left open after partial profits have been taken.","runners"],
+["Hedge","","Positions","A second position taken to offset the risk of the first, rather than to profit on its own.","hedging,hedged"],
+["Netting account","","Positions","An account where two opposite trades in the same symbol combine into one net position.","netting"],
+["Hedging account","","Positions","An account that allows long and short positions in the same symbol to exist side by side.",""],
+["Open position","","Positions","A trade that has been entered and not yet closed. Its profit or loss is unrealised.",""],
+["Closed trade","","Positions","A trade that has been fully exited. Its profit or loss is realised and final.",""],
+["Realised P&L","Realised profit and loss","Positions","Profit or loss from trades that are already closed. This is the money that is actually yours.","realized pnl"],
+["Unrealised P&L","Unrealised profit and loss","Positions","The current paper profit or loss on open positions. It is not money until you close.","unrealized pnl,floating pnl,open pnl"],
+["P&L","Profit and Loss","Positions","The money result of a trade or a period. Positive is profit, negative is loss.","PnL,PL,profit and loss"],
+["Rollover","","Positions","Moving a position from an expiring contract to the next one, or the daily interest adjustment on a held forex position.","roll"],
+["Overnight position","","Positions","A position held past the daily session close. Exposes you to gap risk and financing costs.","hold overnight"],
+["Round trip","","Positions","One complete trade: entry and exit together. Commission is often quoted per round trip.","roundturn,round turn"],
+
+/* ══ Risk & money management ═════════════════════════════════════════ */
+["R","Risk unit","Risk & money management","One unit of the money you risked on a trade. A trade that makes three times what it risked is a +3R trade. R lets you compare trades of different sizes.","R multiple,R-multiple"],
+["RR","Risk-Reward ratio","Risk & money management","How much you stand to make compared to what you risk. 1:3 means risking one unit to make three. It says nothing about how often you will win.","R:R,risk reward,reward risk"],
+["Risk per trade","","Risk & money management","The share of the account you are willing to lose on a single trade, usually expressed as a percentage.","per trade risk"],
+["Drawdown","","Risk & money management","The drop from a peak in account value to the following trough. The number that decides whether you survive, not your best month.","DD"],
+["Max drawdown","","Risk & money management","The largest peak-to-trough fall the account has ever had.","MDD,maximum drawdown"],
+["Daily drawdown","","Risk & money management","The loss limit measured within one trading day. Central to prop firm rules.","daily loss limit,DLL"],
+["Trailing drawdown","","Risk & money management","A loss limit that rises with your equity high, so profits raise the floor you must stay above.","trailing DD"],
+["Equity","","Risk & money management","Account balance plus the current value of open positions. What the account is worth right now.",""],
+["Balance","","Risk & money management","Account value counting only closed trades. Ignores open profit and loss.",""],
+["Free margin","","Risk & money management","Equity minus the margin currently tied up. What you have left to open new positions with.","available margin,usable margin"],
+["Margin","","Risk & money management","The deposit the broker holds while a leveraged position is open. It is collateral, not a cost or a fee.","initial margin"],
+["Maintenance margin","","Risk & money management","The minimum equity that must remain for a position to stay open. Fall below it and you get a margin call.",""],
+["Margin call","","Risk & money management","A demand to add funds or reduce positions because equity has fallen too close to the margin requirement.",""],
+["Margin level","","Risk & money management","Equity divided by used margin, as a percentage. Brokers force-close positions below a set level.",""],
+["Stop out","","Risk & money management","The broker automatically closing your positions because margin ran too low. Not a decision you get to make.","stopout,liquidation"],
+["Leverage","","Risk & money management","Trading a position larger than your capital using borrowed funds. It multiplies gains and losses equally — it does not create an edge.","gearing"],
+["Kelly criterion","","Risk & money management","A formula for the position size that maximises long-run growth given your edge. Full Kelly is far too aggressive for real trading; fractions of it are used instead.","kelly"],
+["Risk of ruin","","Risk & money management","The probability of losing enough of the account that recovery is realistically impossible.","ruin"],
+["Position sizing formula","","Risk & money management","Risk amount divided by stop distance gives size. Set the stop by the chart, then let the formula choose the size — never the other way round.",""],
+["Exposure","","Risk & money management","Total risk currently at work across all open positions, including correlated ones.","total exposure"],
+["Correlation risk","","Risk & money management","Holding several positions that move together, so they are really one large position wearing different names.","correlated positions"],
+["Notional value","","Risk & money management","The full market value a position controls, as opposed to the margin posted for it.","notional"],
+["Var","Value at Risk","Risk & money management","A statistical estimate of the loss that will not be exceeded over a period at a given confidence level.","value at risk,VaR"],
+["Break-even win rate","","Risk & money management","The hit rate a strategy needs just to avoid losing money at its reward-to-risk ratio. At 1:2 it is 33 percent.","breakeven winrate"],
+
+/* ══ Performance metrics ═════════════════════════════════════════════ */
+["Win rate","","Performance metrics","The share of trades that closed in profit. On its own it means almost nothing — it must be read against reward-to-risk.","winrate,hit rate,strike rate"],
+["Profit factor","","Performance metrics","Gross profit divided by gross loss. Above 1.0 is profitable; below is not.","PF"],
+["Expectancy","","Performance metrics","The average result you can expect per trade, in money or in R. The one number that actually says whether a strategy makes money.","expected value,EV"],
+["Sharpe ratio","","Performance metrics","Return divided by the volatility of returns. Penalises upside and downside swings equally.","sharpe"],
+["Sortino ratio","","Performance metrics","Like Sharpe, but only counts downside volatility. Usually the fairer measure for trading.","sortino"],
+["Calmar ratio","","Performance metrics","Annual return divided by maximum drawdown. A pain-adjusted return measure.","calmar"],
+["Equity curve","","Performance metrics","A chart of account value over time. Its smoothness matters as much as its slope.",""],
+["Average win","","Performance metrics","The mean profit of winning trades. Compared against average loss, it defines your payoff.","avg win"],
+["Average loss","","Performance metrics","The mean loss of losing trades. If it exceeds your average win by a lot, your stops are not being respected.","avg loss"],
+["Payoff ratio","","Performance metrics","Average win divided by average loss. The realised version of your intended reward-to-risk.","win loss ratio"],
+["Consecutive losses","","Performance metrics","The longest run of losing trades. Perfectly normal streaks are much longer than most traders expect.","losing streak,streak"],
+["MAE","Maximum Adverse Excursion","Performance metrics","The furthest a trade went against you before it closed. Reveals whether your stops are too tight or too wide.","max adverse excursion"],
+["MFE","Maximum Favourable Excursion","Performance metrics","The furthest a trade went in your favour before it closed. Reveals whether you are exiting winners too early.","max favourable excursion,max favorable excursion"],
+["CAGR","Compound Annual Growth Rate","Performance metrics","The smoothed yearly growth rate of an account over a multi-year period.","compound annual growth"],
+["Recovery factor","","Performance metrics","Net profit divided by maximum drawdown. How much return you earned per unit of pain.",""],
+["Sample size","","Performance metrics","How many trades a statistic is based on. Under roughly 30 trades, almost any figure is noise.","n,sample"],
+["Slippage cost","","Performance metrics","Cumulative money lost to worse-than-expected fills. Often the hidden difference between a backtest and reality.",""],
+
+/* ══ Market structure & price action ═════════════════════════════════ */
+["Support","","Market structure","A price area where buying has previously been strong enough to stop a decline.",""],
+["Resistance","","Market structure","A price area where selling has previously been strong enough to stop an advance.",""],
+["Higher high","","Market structure","A swing high above the previous swing high. Part of the definition of an uptrend.","HH"],
+["Higher low","","Market structure","A swing low above the previous swing low. The pullback that confirms an uptrend.","HL"],
+["Lower high","","Market structure","A swing high below the previous swing high. Part of the definition of a downtrend.","LH"],
+["Lower low","","Market structure","A swing low below the previous swing low.","LL"],
+["BOS","Break of Structure","Market structure","Price closing beyond the last swing point in the direction of the trend, confirming it continues.","break of structure"],
+["CHoCH","Change of Character","Market structure","The first break against the prevailing trend, suggesting the structure may be turning.","change of character,choch"],
+["Trend","","Market structure","A sustained sequence of higher highs and higher lows, or lower highs and lower lows.","trending"],
+["Range","","Market structure","Price moving sideways between a roughly fixed high and low. Most markets spend most of their time here.","ranging,sideways"],
+["Breakout","","Market structure","Price moving decisively beyond a range boundary or key level.","break out"],
+["Fakeout","","Market structure","A breakout that immediately reverses back into the range, trapping those who chased it.","false breakout,fake out"],
+["Pullback","","Market structure","A temporary move against the trend before it resumes. Where most trend entries are taken.","retracement,throwback,dip"],
+["Retest","","Market structure","Price returning to a broken level to test it from the other side before continuing.","re-test"],
+["Swing high","","Market structure","A local peak with lower highs on both sides.","swing point"],
+["Swing low","","Market structure","A local trough with higher lows on both sides.",""],
+["Liquidity sweep","","Market structure","A quick push beyond an obvious high or low to trigger the stops resting there, followed by a reversal.","stop hunt,sweep,liquidity grab"],
+["Order block","","Market structure","The last opposing candle before a strong move away, treated as an area where large orders were placed.","OB"],
+["FVG","Fair Value Gap","Market structure","A three-candle pattern leaving a price gap that was passed through too quickly, often revisited later.","fair value gap,price inefficiency"],
+["Supply zone","","Market structure","An area where selling previously overwhelmed buying and price fell away sharply.","supply"],
+["Demand zone","","Market structure","An area where buying previously overwhelmed selling and price rose away sharply.","demand"],
+["Premium and discount","","Market structure","Whether price sits in the upper or lower half of a defined range — expensive or cheap relative to it.","discount zone,premium zone"],
+["Equal highs","","Market structure","Two or more highs at nearly the same price, forming an obvious pool of stop orders above them.","EQH,equal lows,EQL"],
+["Mitigation","","Market structure","Price returning to an area where an earlier position was opened, allowing it to be managed or added to.","mitigation block"],
+["Gap","","Market structure","A jump between one bar's close and the next bar's open, with no trading in between. Common at the weekly forex open and daily stock open.","gapping,gap up,gap down"],
+["Gap fill","","Market structure","Price returning to trade through a previous gap.","fill the gap"],
+["Round number","","Market structure","A price ending in zeros that attracts orders and reacts more often than chance alone would suggest.","psychological level,big figure"],
+["Pivot point","","Market structure","A calculated level from the prior period's high, low and close, used as an intraday reference.","pivots,PP"],
+["ATH","All-Time High","Market structure","The highest price ever traded in the instrument's history.","all time high"],
+["ATL","All-Time Low","Market structure","The lowest price ever traded in the instrument.s history. The mirror of the all-time high.","all time low"],
+["52-week high","","Market structure","The highest price over the past year. Widely watched in stocks.","52 week high,52w high"],
+["Trendline","","Market structure","A straight line connecting successive swing lows or swing highs to visualise the trend's slope.","trend line"],
+["Channel","","Market structure","Two parallel trendlines containing price movement.","price channel"],
+["Consolidation","","Market structure","A pause in a trend where price contracts before continuing or reversing.","base,basing"],
+["Whipsaw","","Market structure","Price moving sharply one way then immediately the other, stopping out both directions.","choppy,sawtooth"],
+
+/* ══ Chart patterns ══════════════════════════════════════════════════ */
+["Head and shoulders","","Chart patterns","A three-peak reversal pattern with a higher middle peak. Confirmed only when the neckline breaks.","H&S,head shoulders"],
+["Inverse head and shoulders","","Chart patterns","The bottoming version of head and shoulders, signalling a possible move up.","inverted head and shoulders"],
+["Double top","","Chart patterns","Two failed attempts at the same high, suggesting buyers are exhausted.","M pattern"],
+["Double bottom","","Chart patterns","Two failed attempts at the same low, suggesting sellers are exhausted.","W pattern"],
+["Triple top","","Chart patterns","Three failed attempts at the same high.","triple bottom"],
+["Flag","","Chart patterns","A short counter-trend drift after a sharp move, usually resolving in the original direction.","bull flag,bear flag"],
+["Pennant","","Chart patterns","A small symmetrical triangle after a sharp move; a continuation pattern.","pennants"],
+["Triangle","","Chart patterns","Converging trendlines showing contracting volatility. Ascending, descending or symmetrical.","ascending triangle,descending triangle,symmetrical triangle"],
+["Wedge","","Chart patterns","Converging trendlines that both slope the same way, often reversing the prevailing move.","rising wedge,falling wedge"],
+["Cup and handle","","Chart patterns","A rounded base followed by a small pullback, then a breakout. A classic stock continuation pattern.","cup with handle"],
+["Rectangle","","Chart patterns","A horizontal range with clear parallel boundaries.","box,trading range"],
+["Rounding bottom","","Chart patterns","A slow, curved reversal from downtrend to uptrend.","saucer"],
+["Falling knife","","Chart patterns","A steep, fast decline. Buying into it is a common way to lose money quickly.","catching a falling knife"],
+["Dead cat bounce","","Chart patterns","A brief recovery within a strong downtrend that fails and continues lower.",""],
+["Island reversal","","Chart patterns","A cluster of bars isolated by gaps on both sides, marking a sharp turn.",""],
+["Elliott Wave","","Chart patterns","A theory that markets move in five waves with the trend and three against it.","elliott,wave theory"],
+["Wyckoff","","Chart patterns","A framework describing markets as cycles of accumulation, markup, distribution and markdown by large operators.","wyckoff method,accumulation,distribution"],
+["Harmonic pattern","","Chart patterns","Price patterns defined by specific Fibonacci ratios, such as Gartley, Bat, Butterfly and Crab.","gartley,butterfly pattern,crab pattern"],
+
+/* ══ Candlesticks ════════════════════════════════════════════════════ */
+["Candlestick","","Candlesticks","A bar showing open, high, low and close for a period. The body is open-to-close; the wicks are the extremes.","candle,candles"],
+["OHLC","Open, High, Low, Close","Candlesticks","The four prices that define a bar. Everything on a candlestick chart is built from them.","open high low close"],
+["Wick","","Candlesticks","The thin line above or below a candle body, showing a price that was reached but rejected.","shadow,tail"],
+["Body","","Candlesticks","The thick part of a candle, between open and close.","real body"],
+["Doji","","Candlesticks","A candle that opens and closes at nearly the same price. Indecision, not a signal by itself.",""],
+["Pin bar","","Candlesticks","A candle with a long wick and small body, showing a rejection of one direction.","hammer,shooting star,pinbar"],
+["Engulfing","","Candlesticks","A candle whose body completely covers the previous candle's body, in the opposite direction.","bullish engulfing,bearish engulfing"],
+["Inside bar","","Candlesticks","A candle whose entire range fits within the previous candle's range. Contraction before expansion.","IB"],
+["Outside bar","","Candlesticks","A candle whose range fully covers the previous candle's, on both sides.",""],
+["Marubozu","","Candlesticks","A candle with almost no wicks, showing one side controlled the whole period.",""],
+["Morning star","","Candlesticks","A three-candle bullish reversal: a large down candle, a small indecisive one, then a large up candle.","evening star"],
+["Three white soldiers","","Candlesticks","Three consecutive strong up candles, indicating sustained buying.","three black crows"],
+["Heikin Ashi","","Candlesticks","A smoothed candle type built from averaged prices. Easier to read trend from, but the prices shown are not real prices.","heiken ashi"],
+["Renko","","Candlesticks","A chart made of fixed-size bricks that ignore time entirely, plotting only price movement.","renko chart"],
+
+/* ══ Indicators ══════════════════════════════════════════════════════ */
+["MA","Moving Average","Indicators","The average price over the last N periods, redrawn each bar. Smooths noise and always lags.","moving average"],
+["SMA","Simple Moving Average","Indicators","A moving average weighting every period equally.","simple moving average"],
+["EMA","Exponential Moving Average","Indicators","A moving average weighting recent prices more heavily, so it reacts faster than an SMA.","exponential moving average"],
+["WMA","Weighted Moving Average","Indicators","A moving average with linearly decreasing weights on older data.","weighted moving average"],
+["VWAP","Volume-Weighted Average Price","Indicators","The average price weighted by volume, reset each session. Widely used as an intraday fair-value reference.","volume weighted average price"],
+["RSI","Relative Strength Index","Indicators","An oscillator from 0 to 100 measuring the speed of recent gains against losses. Above 70 and below 30 mean strong momentum, not automatic reversals.","relative strength index"],
+["MACD","Moving Average Convergence Divergence","Indicators","The difference between two EMAs, plotted with a signal line and histogram. A momentum and trend tool.","macd"],
+["Stochastic","","Indicators","An oscillator comparing the close to the recent high-low range.","stochastic oscillator,stoch"],
+["Bollinger Bands","","Indicators","A moving average with bands set a number of standard deviations away, showing how stretched price is.","bollinger,BB"],
+["ATR","Average True Range","Indicators","The average size of a bar's full range over N periods. The standard way to measure volatility and to size stops.","average true range"],
+["ADX","Average Directional Index","Indicators","Measures how strong a trend is, without saying which direction.","average directional index"],
+["Ichimoku","","Indicators","A multi-line Japanese system showing trend, support, resistance and momentum in one view.","ichimoku cloud,kumo"],
+["Fibonacci retracement","","Indicators","Horizontal levels at 38.2, 50 and 61.8 percent of a move, used to anticipate pullback depth.","fib,fibs,fibonacci"],
+["Fibonacci extension","","Indicators","Projected levels beyond a completed move, used for targets.","fib extension"],
+["Pivot points","","Indicators","Calculated support and resistance levels derived from the prior session's range.","floor pivots"],
+["OBV","On-Balance Volume","Indicators","A running total that adds volume on up days and subtracts on down days.","on balance volume"],
+["CCI","Commodity Channel Index","Indicators","An oscillator measuring deviation from a statistical mean price.","commodity channel index"],
+["Parabolic SAR","Stop And Reverse","Indicators","Dots that trail price and flip sides when the trend changes. Often used as a trailing stop.","PSAR,sar"],
+["Keltner Channel","","Indicators","Bands set at an ATR distance from an EMA. Volatility bands based on range rather than deviation.","keltner"],
+["Donchian Channel","","Indicators","The highest high and lowest low over N periods. The core of classic breakout systems.","donchian"],
+["Volume profile","","Indicators","A histogram of volume traded at each price rather than each time. Shows where the market agreed on value.","market profile,VP"],
+["POC","Point of Control","Indicators","The price level with the most traded volume in a profile. A strong magnet and reference.","point of control"],
+["Value area","","Indicators","The price range containing roughly 70 percent of a session's volume.","VAH,VAL,value area high,value area low"],
+["Divergence","","Indicators","Price making a new extreme while an oscillator does not. A warning of weakening momentum, not a signal on its own.","bullish divergence,bearish divergence"],
+["Golden cross","","Indicators","A short moving average crossing above a long one, commonly the 50 over the 200.","death cross"],
+["Overbought","","Indicators","An oscillator reading high enough to suggest the move is stretched. Strong trends stay overbought for a long time.","oversold"],
+["Repainting","","Indicators","An indicator that changes its past signals after the fact, making backtests look far better than reality.","repaint"],
+
+/* ══ Order flow ══════════════════════════════════════════════════════ */
+["Footprint chart","","Order flow","A chart showing buy and sell volume executed at each price inside every bar.","footprint"],
+["Delta","","Order flow","The difference between volume executed at the ask and at the bid. Measures aggression, not direction.","cumulative delta,CVD"],
+["Absorption","","Order flow","Large resting orders soaking up aggressive market orders without price moving.",""],
+["Imbalance","","Order flow","A large disparity between buying and selling at neighbouring price levels.",""],
+["Open interest","","Order flow","The number of derivative contracts currently outstanding. Rising open interest with rising price means new money entering.","OI"],
+["Market maker","","Order flow","A firm that continuously quotes both bid and ask and profits from the spread.","MM"],
+["HFT","High-Frequency Trading","Order flow","Automated trading operating on microsecond timescales, mostly market making and arbitrage.","high frequency trading"],
+["Spoofing","","Order flow","Placing large orders with no intention of filling them, to mislead others. Illegal on regulated venues.",""],
+
+/* ══ Forex ═══════════════════════════════════════════════════════════ */
+["Forex","Foreign Exchange","Forex","The market for trading one currency against another. The largest and most liquid market in the world.","FX,foreign exchange"],
+["Pip","Percentage In Point","Forex","The standard smallest price step in a currency pair — 0.0001 for most pairs, 0.01 for yen pairs.","pips"],
+["Pipette","","Forex","One tenth of a pip, the fifth decimal place on most pairs.","point,fractional pip"],
+["Lot","","Forex","The standard trade size unit. One standard lot is 100,000 units of the base currency.","standard lot"],
+["Mini lot","","Forex","10,000 units of the base currency, one tenth of a standard lot.","0.1 lot"],
+["Micro lot","","Forex","1,000 units of the base currency, one hundredth of a standard lot.","0.01 lot"],
+["Base currency","","Forex","The first currency in a pair. In EURUSD it is the euro — the thing you are buying or selling.",""],
+["Quote currency","","Forex","The second currency in a pair, in which the price is expressed.","counter currency"],
+["Major pairs","","Forex","The most traded pairs, all involving the US dollar: EURUSD, GBPUSD, USDJPY, USDCHF, AUDUSD, USDCAD, NZDUSD.","majors"],
+["Minor pairs","","Forex","Liquid pairs that do not include the US dollar, such as EURGBP or EURJPY.","crosses,minors"],
+["Exotic pairs","","Forex","Pairs involving a smaller-economy currency. Wider spreads and sharper moves.","exotics"],
+["Swap","","Forex","The interest paid or received for holding a position overnight, from the rate difference between the two currencies.","rollover interest,swap fee"],
+["Carry trade","","Forex","Holding a position to collect the interest rate differential rather than for the price move.","carry"],
+["Cable","","Forex","Market slang for GBPUSD, from the transatlantic telegraph cable used to transmit its rate.",""],
+["Fiber","","Forex","Market slang for EURUSD, the most heavily traded currency pair in the world.","fibre"],
+["Loonie","","Forex","Market slang for USDCAD, after the loon bird on the Canadian dollar coin. Closely tied to the oil price.",""],
+["Aussie","","Forex","Market slang for AUDUSD. Often treated as a risk-on currency and sensitive to commodity prices and Chinese data.",""],
+["Kiwi","","Forex","Market slang for NZDUSD, named after the bird on the New Zealand dollar coin. Usually moves closely with the Aussie.",""],
+["Gopher","","Forex","Market slang for USDJPY. The yen side is a classic safe haven, so the pair often falls when markets turn risk-off.","ninja"],
+["Swissy","","Forex","Market slang for USDCHF. The Swiss franc is a safe-haven currency, so the pair often falls during market stress.",""],
+["DXY","Dollar Index","Forex","An index of the US dollar against a basket of major currencies.","dollar index,USDX"],
+["London session","","Forex","The most liquid forex session, roughly 08:00–17:00 London time. Overlaps New York in the afternoon.","london open"],
+["New York session","","Forex","The US session, roughly 08:00–17:00 New York time. Highest volatility during the London overlap.","NY session"],
+["Asian session","","Forex","The Tokyo and Sydney hours. Typically quieter and more range-bound.","tokyo session,sydney session"],
+["Killzone","","Forex","A narrow window around a session open where volatility tends to concentrate.","kill zone"],
+
+/* ══ Futures ═════════════════════════════════════════════════════════ */
+["Futures","","Futures","Standardised exchange-traded contracts to buy or sell an asset at a set price on a future date.","futures contract"],
+["Tick","","Futures","The smallest price increment a contract can move. Each tick has a fixed money value.","tick size"],
+["Tick value","","Futures","The money gained or lost per contract per tick of movement.",""],
+["Contract size","","Futures","How much of the underlying one contract represents.","multiplier"],
+["ES","E-mini S&P 500","Futures","The E-mini S&P 500 futures contract. One of the most traded index futures in the world.","emini,e-mini"],
+["MES","Micro E-mini S&P 500","Futures","A one-tenth-size version of the ES contract, popular with smaller accounts.","micro es"],
+["NQ","E-mini Nasdaq 100","Futures","The E-mini Nasdaq 100 futures contract.","nasdaq futures"],
+["MNQ","Micro E-mini Nasdaq 100","Futures","The one-tenth-size Nasdaq 100 futures contract.","micro nq"],
+["YM","E-mini Dow","Futures","The E-mini Dow Jones futures contract.","dow futures"],
+["RTY","E-mini Russell 2000","Futures","The E-mini Russell 2000 small-cap index futures contract.","russell futures"],
+["CL","Crude Oil futures","Futures","The WTI crude oil futures contract.","crude oil,WTI"],
+["GC","Gold futures","Futures","The COMEX gold futures contract.","gold futures"],
+["Expiry","","Futures","The date a contract stops trading and settles.","expiration"],
+["Front month","","Futures","The nearest expiring contract, usually the most liquid one.","front contract"],
+["Contango","","Futures","When later-dated contracts trade above nearer ones. Normal for storable commodities.",""],
+["Backwardation","","Futures","When later-dated contracts trade below nearer ones, often signalling near-term scarcity.",""],
+["Settlement","","Futures","The official end-of-day or expiry price used for marking positions.","settle"],
+["Day margin","","Futures","The reduced margin a broker requires for positions closed before the session ends.","intraday margin"],
+["Globex","","Futures","The CME's electronic trading platform, running nearly 24 hours.","CME Globex"],
+
+/* ══ Options ═════════════════════════════════════════════════════════ */
+["Option","","Options","A contract giving the right, but not the obligation, to buy or sell at a set price before a date.","options"],
+["Call","","Options","An option giving the right to buy the underlying at the strike price.","call option"],
+["Put","","Options","An option giving the right to sell the underlying at the strike price.","put option"],
+["Strike","","Options","The price at which an option can be exercised.","strike price"],
+["Premium","","Options","The price paid for an option. The maximum a buyer can lose.","option premium"],
+["ITM","In The Money","Options","An option with intrinsic value — the strike is favourable versus current price.","in the money"],
+["OTM","Out of The Money","Options","An option with no intrinsic value; only time value remains.","out of the money"],
+["ATM","At The Money","Options","An option whose strike is at or very near the current price.","at the money"],
+["IV","Implied Volatility","Options","The volatility the market is pricing into an option. High IV means expensive options.","implied volatility"],
+["IV crush","","Options","A sharp drop in implied volatility after an event, cutting option prices even if price moved your way.",""],
+["Theta","","Options","The rate at which an option loses value as time passes. Works against buyers every day.","time decay"],
+["Delta (options)","","Options","How much an option's price moves per one point move in the underlying. Also a rough probability of finishing in the money.",""],
+["Gamma","","Options","The rate at which delta itself changes. High gamma means the position's exposure shifts fast.",""],
+["Vega","","Options","How much an option's price changes per one point change in implied volatility.",""],
+["Rho","","Options","How much an option's price changes with interest rates. Usually the least important Greek.",""],
+["Greeks","","Options","The set of sensitivities — delta, gamma, theta, vega, rho — describing how an option's price reacts.","the greeks"],
+["Covered call","","Options","Selling a call against shares you already own, trading upside for income.",""],
+["Cash-secured put","","Options","Selling a put while holding enough cash to buy the shares if assigned.","CSP"],
+["Spread (options)","","Options","A position combining two or more options to shape risk, such as a vertical, calendar or butterfly.","vertical spread,credit spread,debit spread"],
+["Iron condor","","Options","A four-leg options position that profits if price stays within a range.","condor"],
+["Straddle","","Options","Buying a call and a put at the same strike, profiting from a large move either way.","strangle"],
+["Assignment","","Options","Being obliged to deliver or receive the underlying because an option you sold was exercised.","assigned"],
+["Exercise","","Options","Using an option's right to buy or sell the underlying.",""],
+["0DTE","Zero Days To Expiration","Options","Options expiring the same day. Extremely fast-moving and unforgiving.","zero dte,DTE"],
+
+/* ══ Stocks & equities ═══════════════════════════════════════════════ */
+["Share","","Stocks","A unit of ownership in a company.","stock,shares"],
+["Ticker","","Stocks","The short code identifying an instrument, such as AAPL.","symbol,ticker symbol"],
+["Market cap","Market Capitalisation","Stocks","Share price multiplied by shares outstanding. The market's valuation of the whole company.","market capitalization,mcap"],
+["Float","","Stocks","The number of shares actually available to trade publicly. A small float makes a stock move violently.","free float"],
+["Short interest","","Stocks","The share of the float currently sold short.",""],
+["Short squeeze","","Stocks","A sharp rally forcing short sellers to buy back, pushing price higher still.","squeeze"],
+["Pre-market","","Stocks","Trading before the official open. Thin liquidity and wide spreads.","premarket"],
+["After-hours","","Stocks","Trading after the official close, usually around earnings releases.","post market,extended hours"],
+["Earnings","","Stocks","A company's quarterly results release. A scheduled event with unpredictable price impact.","earnings report,ER"],
+["EPS","Earnings Per Share","Stocks","Company profit divided by shares outstanding.","earnings per share"],
+["P/E ratio","Price to Earnings ratio","Stocks","Share price divided by earnings per share. A basic valuation yardstick.","PE ratio,price earnings"],
+["Dividend","","Stocks","A cash payment distributed to shareholders out of profits.","dividends"],
+["Ex-dividend date","","Stocks","The date from which buying the share no longer entitles you to the upcoming dividend. Price typically drops by the dividend amount.","ex div"],
+["Stock split","","Stocks","Dividing existing shares into more shares at a proportionally lower price. Changes nothing about the company's value.","split,reverse split"],
+["Blue chip","","Stocks","A large, established, financially stable company.",""],
+["Penny stock","","Stocks","A very low-priced, thinly traded stock. Prone to manipulation.",""],
+["IPO","Initial Public Offering","Stocks","A company's first sale of shares to the public.","initial public offering"],
+["ETF","Exchange-Traded Fund","Stocks","A fund that trades like a single share and tracks an index, sector or asset.","exchange traded fund"],
+["Index","","Stocks","A basket of instruments tracked as one number, such as the S&P 500 or DAX.","indices,indexes"],
+["Halt","","Stocks","A temporary suspension of trading, usually after extreme moves or pending news.","trading halt,circuit breaker"],
+["PDT","Pattern Day Trader","Stocks","A US rule requiring a 25,000 dollar minimum equity for accounts making four or more day trades in five business days.","pattern day trader rule"],
+["Locate","","Stocks","Confirmation that shares are available to borrow before you can short them.","borrow,hard to borrow,HTB"],
+
+/* ══ Crypto ══════════════════════════════════════════════════════════ */
+["Crypto","Cryptocurrency","Crypto","Digital assets recorded on a blockchain and traded 24 hours a day, seven days a week.","cryptocurrency"],
+["BTC","Bitcoin","Crypto","The first and largest cryptocurrency, often used as the market's reference asset.","bitcoin"],
+["ETH","Ethereum","Crypto","The second largest cryptocurrency and the main smart-contract platform.","ethereum"],
+["Altcoin","","Crypto","Any cryptocurrency other than Bitcoin.","alts,altcoins"],
+["Stablecoin","","Crypto","A crypto token designed to hold a fixed value, usually one US dollar.","USDT,USDC,stablecoins"],
+["Perpetual","","Crypto","A futures contract with no expiry date, held in line with spot price by a funding mechanism.","perp,perps,perpetual swap"],
+["Funding rate","","Crypto","A periodic payment between longs and shorts on perpetuals that keeps the contract near spot price.","funding"],
+["Spot","","Crypto","Buying or selling the asset itself for immediate settlement, rather than a derivative of it.","spot market"],
+["DEX","Decentralised Exchange","Crypto","An exchange running on smart contracts with no central operator holding your funds.","decentralized exchange"],
+["CEX","Centralised Exchange","Crypto","A conventional company-run crypto exchange that custodies your funds.","centralized exchange"],
+["Gas fee","","Crypto","The network fee paid to process a blockchain transaction.","gas"],
+["Wallet","","Crypto","Software or hardware holding the private keys that control your crypto.","hot wallet,cold wallet"],
+["Halving","","Crypto","The scheduled reduction of Bitcoin's block reward, roughly every four years.","bitcoin halving"],
+["Market dominance","","Crypto","One asset's share of total crypto market capitalisation, usually quoted for Bitcoin.","BTC dominance"],
+["Liquidation (crypto)","","Crypto","Forced closure of a leveraged crypto position when margin runs out. Large clusters of them cause cascade moves.","liq,liquidations"],
+["Whale","","Crypto","A holder large enough to move the market with a single order.","whales"],
+["Rug pull","","Crypto","A project whose creators abandon it and take investors' funds.","rugpull,rugged"],
+
+/* ══ Prop firms & funded accounts ════════════════════════════════════ */
+["Prop firm","Proprietary trading firm","Prop firms","A firm that provides trading capital in exchange for a share of profits, usually after an evaluation.","prop trading,proprietary firm"],
+["Challenge","","Prop firms","The evaluation phase where you must hit a profit target without breaking the loss rules.","evaluation,phase 1"],
+["Funded account","","Prop firms","An account with firm capital, granted after passing the evaluation.","funded"],
+["Profit target","","Prop firms","The gain required to pass an evaluation phase, typically 8 to 10 percent.",""],
+["Profit split","","Prop firms","The share of profits you keep, commonly 80 to 90 percent.","split"],
+["Payout","","Prop firms","A withdrawal of your share of profits from a funded account.","withdrawal"],
+["Consistency rule","","Prop firms","A limit on how much of total profit may come from a single day or trade, to filter out lucky gamblers.",""],
+["Breach","","Prop firms","Violating a rule, which ends the account. Usually a drawdown limit.","rule breach,failed challenge"],
+["Static drawdown","","Prop firms","A fixed loss floor that does not move as the account grows.",""],
+["News trading rule","","Prop firms","A restriction on holding positions through scheduled high-impact news releases.",""],
+["Scaling plan","","Prop firms","A firm's schedule for increasing your account size as you stay profitable.",""],
+
+/* ══ Brokers, accounts & platforms ═══════════════════════════════════ */
+["Broker","","Brokers & platforms","The firm that gives you access to the market and executes your orders.","brokerage"],
+["ECN","Electronic Communication Network","Brokers & platforms","A model where orders are matched against other participants rather than the broker taking the other side.","ecn broker"],
+["STP","Straight Through Processing","Brokers & platforms","A model where the broker passes orders straight to liquidity providers.","straight through processing"],
+["Dealing desk","","Brokers & platforms","A broker model where the broker takes the other side of your trade. Sometimes called a market maker broker.","B-book,market maker broker"],
+["Commission","","Brokers & platforms","A per-trade fee charged by the broker, separate from the spread.","commissions"],
+["Swap-free account","","Brokers & platforms","An account with no overnight interest, offered for religious reasons.","islamic account"],
+["Demo account","","Brokers & platforms","A practice account using simulated money and, usually, simulated fills.","paper trading,practice account"],
+["Live account","","Brokers & platforms","An account trading with real money.","real account"],
+["MT4","MetaTrader 4","Brokers & platforms","A long-established retail forex trading platform.","metatrader 4"],
+["MT5","MetaTrader 5","Brokers & platforms","The successor to MT4, supporting more asset classes and order types.","metatrader 5"],
+["cTrader","","Brokers & platforms","A retail trading platform known for its order book depth and clean execution model.","ctrader"],
+["EA","Expert Advisor","Brokers & platforms","An automated trading program running inside MetaTrader.","expert advisor,bot,robot"],
+["API","Application Programming Interface","Brokers & platforms","A programmatic interface for placing orders and pulling data without a user interface.",""],
+["Slippage tolerance","","Brokers & platforms","The maximum price deviation you will accept on a market order before it is rejected.","max deviation"],
+["Server time","","Brokers & platforms","The clock your broker's platform uses, often different from your own. A frequent source of confusion when reading trade times.","broker time"],
+["Symbol suffix","","Brokers & platforms","Extra characters a broker appends to instrument names, such as EURUSD.pro. Must be handled when importing trade history.",""],
+
+/* ══ Trading styles ══════════════════════════════════════════════════ */
+["Scalping","","Trading styles","Taking many very short trades for small gains. Costs and execution quality dominate the outcome.","scalp,scalper"],
+["Day trading","","Trading styles","Opening and closing all positions within the same day, with nothing held overnight.","daytrading,intraday"],
+["Swing trading","","Trading styles","Holding positions for days to weeks to capture a larger move.","swing trader"],
+["Position trading","","Trading styles","Holding for weeks to months, driven by longer-term trend or fundamentals.",""],
+["Algorithmic trading","","Trading styles","Trading rules executed automatically by software.","algo trading,systematic trading,automated trading"],
+["Discretionary trading","","Trading styles","Trading where the final decision is made by the trader rather than a fixed rule set.",""],
+["Mean reversion","","Trading styles","Trading on the expectation that price returns to an average after stretching away from it.","reversion"],
+["Momentum trading","","Trading styles","Trading in the direction of a strong existing move, expecting it to continue.","momo"],
+["Arbitrage","","Trading styles","Profiting from the same asset being priced differently in two places, with little or no directional risk.","arb"],
+["News trading","","Trading styles","Trading around scheduled economic releases, where spreads widen and slippage is largest.",""],
+["Copy trading","","Trading styles","Automatically mirroring another trader's positions in your own account.","social trading,mirror trading"],
+["Backtest","","Trading styles","Testing a set of rules against historical data. Only meaningful if costs, slippage and a realistic fill model are included.","backtesting"],
+["Forward test","","Trading styles","Running a strategy on live or unseen data after backtesting, before committing real size.","paper test,walk forward"],
+["Overfitting","","Trading styles","Tuning a strategy so tightly to past data that it captures noise instead of a real edge. It always looks brilliant in the backtest.","curve fitting,curve-fitting"],
+["Edge","","Trading styles","A statistical advantage that makes expectancy positive over many trades. Without one, risk management only slows the loss.",""],
+["Setup","","Trading styles","The specific, repeatable conditions that make you take a trade.","trade setup"],
+["Trading plan","","Trading styles","The written rules covering what you trade, when, at what size, and when you stop.","plan"],
+["Journal","","Trading styles","A record of every trade with its reasoning and outcome. The only way to find out what actually works for you.","trading journal"],
+
+/* ══ Psychology ══════════════════════════════════════════════════════ */
+["FOMO","Fear Of Missing Out","Psychology","Entering because price is moving without you, rather than because your conditions were met. Usually the worst entry of the move.","fear of missing out"],
+["Revenge trading","","Psychology","Trading immediately after a loss to win it back. Size goes up, rules go out, and the day gets much worse.","revenge trade"],
+["Tilt","","Psychology","An emotional state in which you keep trading while no longer following your process.","on tilt,tilted"],
+["Overtrading","","Psychology","Taking more trades than the plan calls for, usually out of boredom or frustration.","over trading"],
+["Analysis paralysis","","Psychology","Gathering so much information that no decision is ever made.",""],
+["Confirmation bias","","Psychology","Noticing only the evidence that supports the trade you already want to take.",""],
+["Recency bias","","Psychology","Weighting the last few trades far more heavily than the full sample.",""],
+["Loss aversion","","Psychology","Feeling a loss roughly twice as strongly as an equal gain. Why traders cut winners early and let losers run.",""],
+["Sunk cost fallacy","","Psychology","Holding a losing trade because of what has already been lost rather than what is likely next.","sunk cost"],
+["Gambler's fallacy","","Psychology","Believing a loss makes the next win more likely. Independent trades have no memory.","gamblers fallacy"],
+["Hindsight bias","","Psychology","Reviewing a chart and being certain the move was obvious, once the right edge is visible.",""],
+["Discipline","","Psychology","Doing what the plan says on the day you least want to. The only part of trading that is fully in your control.",""],
+["Process over outcome","","Psychology","Judging a trade by whether it followed the rules, not by whether it won. A good trade can lose.",""],
+["Drawdown fatigue","","Psychology","The erosion of confidence during a long losing stretch, which usually causes rule-breaking at exactly the wrong time.",""],
+["Blown account","","Psychology","An account lost through excessive risk or rule-breaking. Almost always a sizing failure, not a prediction failure.","blow up,blowup"],
+
+/* ══ Macro & economics ═══════════════════════════════════════════════ */
+["CPI","Consumer Price Index","Macro & economics","The main inflation measure. A high-impact scheduled release that moves currencies, bonds and indices.","consumer price index,inflation data"],
+["NFP","Non-Farm Payrolls","Macro & economics","The US monthly employment report, released the first Friday of each month. One of the highest-impact scheduled events in forex.","non farm payrolls,nonfarm"],
+["GDP","Gross Domestic Product","Macro & economics","The total value of goods and services an economy produces.","gross domestic product"],
+["PMI","Purchasing Managers' Index","Macro & economics","A survey-based indicator of business activity. Above 50 means expansion.","purchasing managers index"],
+["FOMC","Federal Open Market Committee","Macro & economics","The US Federal Reserve body that sets interest rates. Its announcements routinely move every market.","fed meeting,fomc meeting"],
+["Fed","Federal Reserve","Macro & economics","The central bank of the United States. Because the dollar is on one side of most currency pairs, its decisions move nearly every market.","federal reserve,the fed"],
+["ECB","European Central Bank","Macro & economics","The central bank of the eurozone. Sets interest rates for all euro member states at once.","european central bank"],
+["BOE","Bank of England","Macro & economics","The central bank of the United Kingdom. Its rate decisions are the main scheduled driver of the pound.","bank of england"],
+["BOJ","Bank of Japan","Macro & economics","The central bank of Japan, long associated with ultra-low interest rates and occasional direct intervention in the yen.","bank of japan"],
+["Interest rate","","Macro & economics","The central bank's policy rate. The main driver of currency valuation over the long term.","policy rate,base rate"],
+["Hawkish","","Macro & economics","A central bank stance leaning towards higher rates to fight inflation. Usually strengthens the currency.","hawk"],
+["Dovish","","Macro & economics","A central bank stance leaning towards lower rates to support growth. Usually weakens the currency.","dove"],
+["QE","Quantitative Easing","Macro & economics","A central bank buying assets to inject money into the economy.","quantitative easing"],
+["QT","Quantitative Tightening","Macro & economics","The reverse of QE: the central bank shrinking its balance sheet.","quantitative tightening"],
+["Yield","","Macro & economics","The return on a bond. Rising yields usually strengthen a currency and pressure growth stocks.","bond yield,yields"],
+["Yield curve","","Macro & economics","Bond yields plotted across maturities. An inverted curve has historically preceded recessions.","inverted yield curve"],
+["Risk-on","","Macro & economics","A market mood favouring higher-risk assets: stocks and commodity currencies up, safe havens down.","risk on"],
+["Risk-off","","Macro & economics","A market mood favouring safety: bonds, gold, yen and franc up, stocks down.","risk off"],
+["Safe haven","","Macro & economics","An asset investors move into during stress, typically gold, the US dollar, the yen and the Swiss franc.","safe havens"],
+["Economic calendar","","Macro & economics","The schedule of upcoming data releases with their expected impact. Checking it before the session is basic risk control.","eco calendar,news calendar"],
+["Consensus","","Macro & economics","The forecast economists expect for a data release. Price reacts to the surprise against it, not the number itself.","forecast,expected"],
+["Volatility","","Macro & economics","How much and how fast price moves. Higher volatility means wider stops and smaller position sizes for the same risk.","vol"],
+["VIX","Volatility Index","Macro & economics","The index of expected S&P 500 volatility, widely read as a fear gauge.","fear index,vix index"],
+["Black swan","","Macro & economics","A rare, unforeseeable event with extreme market impact. The reason a hard stop and a position limit exist.",""],
+["Correlation","","Macro & economics","How closely two instruments move together, from +1 to −1.",""],
+["Seasonality","","Macro & economics","A recurring calendar tendency in an instrument's behaviour.",""],
+
+/* ══ Slang & shorthand ═══════════════════════════════════════════════ */
+["Bull","","Slang & shorthand","Someone expecting prices to rise; a bull market is a sustained rise.","bullish,bull market"],
+["Bear","","Slang & shorthand","Someone expecting prices to fall; a bear market is a sustained decline, usually defined as 20 percent or more.","bearish,bear market"],
+["Bagholder","","Slang & shorthand","Someone still holding a position long after it collapsed.","bag holder"],
+["Bid up","","Slang & shorthand","Buyers repeatedly raising their bids, pushing price higher.",""],
+["Print","","Slang & shorthand","A completed trade at a given price, as shown on the tape.","prints"],
+["Chop","","Slang & shorthand","Directionless, erratic price movement that stops out both sides.","choppy market"],
+["Melt-up","","Slang & shorthand","A rapid rise driven by buyers chasing rather than by fundamentals.","melt up"],
+["Capitulation","","Slang & shorthand","A final wave of panic selling that often marks a low.",""],
+["Sideline","","Slang & shorthand","Being deliberately out of the market, waiting for conditions to return.","on the sidelines"],
+["Paper hands","","Slang & shorthand","Exiting a position at the first sign of trouble.","diamond hands"],
+["Size up","","Slang & shorthand","Increasing position size, usually after a run of wins. A common route to giving it all back.",""],
+["Full port","","Slang & shorthand","Putting the entire account into one position. Not a strategy.","full portfolio,all in"],
+["Ape in","","Slang & shorthand","Entering a position impulsively and without analysis.","aping"],
+["Moon","","Slang & shorthand","Slang for a very large upward move.","mooning,to the moon"],
+["Rekt","","Slang & shorthand","Slang for suffering a severe loss.","wrecked"],
+["HODL","Hold On for Dear Life","Slang & shorthand","Crypto slang for holding through volatility instead of trading it. Originally a typo for hold.","hodling"],
+["DYOR","Do Your Own Research","Slang & shorthand","A disclaimer that the reader should verify claims themselves.","do your own research"],
+["NFA","Not Financial Advice","Slang & shorthand","A disclaimer attached to opinions shared publicly.","not financial advice"],
+["TA","Technical Analysis","Slang & shorthand","Analysing price and volume history to make trading decisions.","technical analysis"],
+["FA","Fundamental Analysis","Slang & shorthand","Analysing economic data, earnings and valuation rather than price history.","fundamental analysis"],
+["HTF","Higher Time Frame","Slang & shorthand","A longer chart interval used for context, such as daily or 4-hour.","higher timeframe"],
+["LTF","Lower Time Frame","Slang & shorthand","A shorter chart interval used for entries, such as 5-minute or 1-minute.","lower timeframe"],
+["MTF","Multi Time Frame","Slang & shorthand","Analysis that combines several chart intervals — direction from the higher, timing from the lower.","multi timeframe"],
+["TF","Time Frame","Slang & shorthand","The interval each candle on a chart represents.","timeframe"],
+["EOD","End Of Day","Slang & shorthand","The close of the trading session.","end of day"],
+["YTD","Year To Date","Slang & shorthand","Performance measured from the start of the calendar year.","year to date"],
+["AUM","Assets Under Management","Slang & shorthand","The total capital a fund or manager controls.","assets under management"],
+["ROI","Return On Investment","Slang & shorthand","Profit expressed as a percentage of the capital committed.","return on investment"],
+["KYC","Know Your Customer","Slang & shorthand","The identity verification a regulated broker must perform before you can trade or withdraw.","know your customer"],
+["SL/TP","Stop Loss / Take Profit","Slang & shorthand","The pair of exit orders that define a trade's downside and upside before it is opened.","sltp"],
+["BE","Break Even","Slang & shorthand","A trade closed at its entry price, with no profit or loss beyond costs.","break even,breakeven"],
+["DCA","Dollar Cost Averaging","Slang & shorthand","Buying fixed amounts at regular intervals regardless of price. An investing method, not a way to rescue a losing trade.","dollar cost averaging"],
+["ROE","Return On Equity","Slang & shorthand","Profit as a percentage of equity. In leveraged trading platforms it often refers to return on margin used.","return on equity"]
+
+];
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     GLOSSARY — trading terms, written out and explained
+     Local dictionary first; Gemini only when the local one has nothing.
+     ═══════════════════════════════════════════════════════════════════ -->
+<style>
+/* Uses the app's real palette variables (--elevated, --ink, --rim …) with
+   no hardcoded colour fallbacks. The first build invented names that do
+   not exist — --card, --text, --muted, --border — so every fallback was
+   what actually rendered: fine in dark by coincidence, dark-on-light in
+   light mode. Anything added here must resolve through the palette, or it
+   will look correct in exactly one theme. */
+#page-glossary .gl-wrap { max-width: 900px; margin: 0 auto; }
+#page-glossary .gl-search { position: relative; margin: 18px 0 6px; }
+#page-glossary .gl-input {
+  width: 100%; padding: 15px 46px 15px 44px; font-size: 16px;
+  font-family: var(--font-body);
+  background: var(--elevated); color: var(--ink);
+  border: 1px solid var(--rim2); border-radius: var(--r-md); outline: none;
+}
+#page-glossary .gl-input::placeholder { color: var(--ink3); }
+#page-glossary .gl-input:focus { border-color: var(--gold); }
+#page-glossary .gl-mag { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); opacity: .45; font-size: 15px; pointer-events: none; }
+#page-glossary .gl-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: 0; color: var(--ink3); font-size: 19px;
+  cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+#page-glossary .gl-clear:hover { color: var(--ink); }
+#page-glossary .gl-hint { font-size: 12px; color: var(--ink3); margin: 0 0 16px 2px; }
+#page-glossary .gl-chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 18px; }
+#page-glossary .gl-chip {
+  padding: 6px 12px; font-size: 12px; border-radius: 999px; cursor: pointer;
+  background: var(--elevated); color: var(--ink2);
+  border: 1px solid var(--rim2); white-space: nowrap;
+}
+#page-glossary .gl-chip:hover { color: var(--ink); border-color: var(--rim3); }
+#page-glossary .gl-chip.on { background: var(--gold); color: var(--void); border-color: var(--gold); font-weight: 600; }
+#page-glossary .gl-card {
+  background: var(--elevated); border: 1px solid var(--rim);
+  border-radius: var(--r-md); padding: 15px 17px; margin-bottom: 10px;
+}
+#page-glossary .gl-term { font-size: 17px; font-weight: 700; color: var(--ink); }
+#page-glossary .gl-full { font-size: 13px; color: var(--gold); margin-top: 2px; font-weight: 500; }
+#page-glossary .gl-cat {
+  display: inline-block; font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink3); border: 1px solid var(--rim2);
+  border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: 3px; font-weight: 600;
+}
+#page-glossary .gl-def { font-size: 14px; line-height: 1.62; color: var(--ink2); margin-top: 9px; }
+#page-glossary .gl-alias { font-size: 11px; color: var(--ink3); margin-top: 8px; }
+#page-glossary mark { background: var(--gold-glow); color: var(--ink); border-radius: 3px; padding: 0 1px; }
+#page-glossary .gl-count { font-size: 12px; color: var(--ink3); margin: 0 0 12px 2px; }
+#page-glossary .gl-empty {
+  text-align: center; padding: 34px 20px; background: var(--elevated);
+  border: 1px dashed var(--rim2); border-radius: var(--r-md);
+}
+#page-glossary .gl-empty h3 { margin: 0 0 6px; font-size: 16px; color: var(--ink); }
+#page-glossary .gl-empty p { margin: 0 0 16px; font-size: 13px; color: var(--ink3); }
+#page-glossary .gl-b {
+  padding: 9px 17px; border-radius: var(--r-sm); font-size: 13px; cursor: pointer; font-weight: 600;
+  font-family: var(--font-body);
+  background: var(--raised); color: var(--ink); border: 1px solid var(--rim2);
+}
+#page-glossary .gl-b:hover { border-color: var(--rim3); }
+#page-glossary .gl-b.primary { background: var(--gold); color: var(--void); border-color: var(--gold); }
+#page-glossary .gl-b:disabled { opacity: .5; cursor: default; }
+#page-glossary .gl-ai { border-color: var(--gold-line); }
+#page-glossary .gl-aibadge {
+  display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--gold);
+  border: 1px solid var(--gold-line); border-radius: 999px; padding: 2px 9px;
+}
+#page-glossary .gl-warn {
+  font-size: 12.5px; line-height: 1.55; color: var(--ink2);
+  background: var(--gold-dim); border-left: 2px solid var(--gold-line);
+  padding: 9px 12px; border-radius: 0 var(--r-sm) var(--r-sm) 0; margin-top: 11px;
+}
+#page-glossary .gl-warn b { color: var(--ink); }
+#page-glossary .gl-sec { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink3); margin: 22px 0 9px 2px; }
+#page-glossary .gl-recent { display: flex; flex-wrap: wrap; gap: 7px; }
+#page-glossary .gl-recent button {
+  background: none; border: 1px solid var(--rim2); color: var(--ink2);
+  border-radius: 999px; padding: 5px 12px; font-size: 12px; cursor: pointer;
+  font-family: var(--font-body);
+}
+#page-glossary .gl-recent button:hover { border-color: var(--gold); color: var(--ink); }
+
+/* Light mode: the same treatment the app's other cards get — solid white
+   with a soft shadow, because --elevated in light is a near-white grey
+   that disappears against the page. */
+body.light #page-glossary .gl-card,
+body.light #page-glossary .gl-empty,
+body.light #page-glossary .gl-input {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.09);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+body.light #page-glossary .gl-empty { border-style: dashed; box-shadow: none; }
+/* Restated after the .gl-card rule above, which otherwise outranks it and
+   strips the gold edge that marks a card as AI-generated rather than
+   curated. That edge is the distinction the whole fallback rests on. */
+body.light #page-glossary .gl-ai { border-color: var(--gold-line); }
+/* :not(.on) matters — without it this rule outranks .gl-chip.on on
+   specificity and paints the selected category white on white. */
+body.light #page-glossary .gl-chip:not(.on) { background: #ffffff; border-color: rgba(0,0,0,0.09); }
+body.light #page-glossary .gl-chip.on,
+body.light #page-glossary .gl-b.primary { color: #ffffff; }
+body.light #page-glossary .gl-b:not(.primary) { background: #ffffff; border-color: rgba(0,0,0,0.12); }
+body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
+
+/* Wrapped over 21 categories, the chip block filled a whole phone screen
+   and pushed every result below the fold. One scrolling row instead. */
+@media (max-width: 700px) {
+  #page-glossary .gl-chips {
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch; padding-bottom: 4px;
+  }
+  #page-glossary .gl-chips::-webkit-scrollbar { display: none; }
+  #page-glossary .gl-chip { flex: 0 0 auto; }
+}
+</style>
+
+<div class="page" id="page-glossary">
+  <div class="gl-wrap">
+    <h1>Trading <span style="color:var(--gold)">Glossary</span></h1>
+    <div id="glRoot"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   Evidence — Glossary  (window.ApexGlossary)
+
+   Local-first on purpose. 429 curated terms answer instantly, offline,
+   at no cost, and with wording nobody can hallucinate. The model is the
+   fallback for the long tail only — and its answers are labelled as such,
+   because a definition a beginner cannot verify is exactly the thing that
+   must not look identical to a checked one.
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var WORKER = function () { return window.APEX_COACH_URL || 'https://spring-fire-06a2.4kjyyyftv6.workers.dev'; };
+  var AI_CACHE_KEY = 'apexGlossaryAI';
+  var RECENT_KEY   = 'apexGlossaryRecent';
+
+  var q = '', cat = '', aiState = null, aiBusy = false;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ── Matching ──────────────────────────────────────────────────────
+     Two normal forms per string. `norm` keeps word boundaries so that
+     "moving average" can prefix-match; `tight` strips everything but
+     letters and digits so "R:R", "R/R" and "risk reward" all collapse to
+     the same key as the "RR" entry. Without the tight form every
+     punctuated abbreviation — and abbreviations are half the point of
+     this tool — would miss.                                            */
+  function norm(s) {
+    return String(s || '').toLowerCase().replace(/[‐-―]/g, '-').replace(/\s+/g, ' ').trim();
+  }
+  function tight(s) { return norm(s).replace(/[^a-z0-9]/g, ''); }
+
+  /* Edit distance capped at 1, counting an adjacent transposition as one
+     edit (Damerau, not plain Levenshtein). The transposition case is not
+     an optional refinement here: "drawdwon" and "candel" are the typos
+     people actually make, and plain Levenshtein scores a swap as 2 and
+     misses every one of them. Bails out as soon as the answer cannot be
+     0 or 1, so this stays cheap across the whole set on every keystroke. */
+  function near(a, b) {
+    if (a === b) return true;
+    var la = a.length, lb = b.length;
+    if (Math.abs(la - lb) > 1) return false;
+    var i = 0, j = 0, diff = 0;
+    while (i < la && j < lb) {
+      if (a[i] === b[j]) { i++; j++; continue; }
+      if (++diff > 1) return false;
+      if (la > lb) { i++; }
+      else if (lb > la) { j++; }
+      else if (a[i + 1] === b[j] && a[i] === b[j + 1]) { i += 2; j += 2; }  // swap
+      else { i++; j++; }                                                    // substitution
+    }
+    return true;
+  }
+
+  function fields(row) {
+    var out = [{ v: row[0], w: 0 }];
+    if (row[1]) out.push({ v: row[1], w: 6 });
+    (row[4] ? row[4].split(',') : []).forEach(function (a) {
+      if (a.trim()) out.push({ v: a.trim(), w: 10 });
+    });
+    return out;
+  }
+
+  /* Score a row against a query. Higher is better; 0 means no match.
+     Exposed for the test harness — the ranking is the part that breaks
+     silently when terms are added, so it is tested, not eyeballed. */
+  function score(row, query) {
+    var nq = norm(query), tq = tight(query);
+    if (!tq) return 0;
+    var best = 0;
+    fields(row).forEach(function (f) {
+      var nf = norm(f.v), tf = tight(f.v), s = 0;
+      if (tf === tq) s = 100;
+      else if (nf.indexOf(nq) === 0 || tf.indexOf(tq) === 0) s = 74;
+      else if ((' ' + nf).indexOf(' ' + nq) > 0) s = 58;          // matches a later word
+      else if (nf.indexOf(nq) >= 0) s = 44;
+      else if (tq.length >= 4 && near(tf, tq)) s = 40;            // one typo
+      if (s) s -= f.w;
+      if (s > best) best = s;
+    });
+    /* Definition text is a last resort: it finds "the term for when price
+       gaps" but must never outrank an actual term match. */
+    if (!best && nq.length >= 4 && norm(row[3]).indexOf(nq) >= 0) best = 14;
+    return best;
+  }
+
+  function search(query, category) {
+    var rows = window.APEX_GLOSSARY || [];
+    if (category) rows = rows.filter(function (r) { return r[2] === category; });
+    if (!norm(query)) {
+      return rows.slice().sort(function (a, b) { return a[0].localeCompare(b[0]); });
+    }
+    var hits = [];
+    rows.forEach(function (r) { var s = score(r, query); if (s > 0) hits.push({ r: r, s: s }); });
+    hits.sort(function (a, b) { return b.s - a.s || a.r[0].localeCompare(b.r[0]); });
+    return hits.map(function (h) { return h.r; });
+  }
+
+  /* A local answer is "good enough to not bother the model" only if
+     something actually matched the term itself. A stray definition hit
+     (score 14) does not count — otherwise the AI fallback would almost
+     never fire, which is the whole feature the user asked for. */
+  function hasStrongHit(query) {
+    var rows = window.APEX_GLOSSARY || [];
+    for (var i = 0; i < rows.length; i++) if (score(rows[i], query) >= 40) return true;
+    return false;
+  }
+
+  function categories() {
+    var seen = [], rows = window.APEX_GLOSSARY || [];
+    rows.forEach(function (r) { if (seen.indexOf(r[2]) < 0) seen.push(r[2]); });
+    return seen;
+  }
+
+  function highlight(text, query) {
+    var t = esc(text), nq = norm(query);
+    if (!nq || nq.length < 2) return t;
+    try {
+      var re = new RegExp('(' + nq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+      return t.replace(re, '<mark>$1</mark>');
+    } catch (e) { return t; }
+  }
+
+  /* ── Local storage helpers ─────────────────────────────────────── */
+  function readJSON(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (e) { return fallback; }
+  }
+  function writeJSON(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+
+  function recents() { return readJSON(RECENT_KEY, []); }
+  function pushRecent(term) {
+    var list = recents().filter(function (x) { return norm(x) !== norm(term); });
+    list.unshift(term);
+    writeJSON(RECENT_KEY, list.slice(0, 12));
+  }
+  function aiCache() { return readJSON(AI_CACHE_KEY, {}); }
+  /* Validated on read as well as on write. The cache outlives any fix we
+     ship, so one bad answer stored before a worker deploy would otherwise
+     keep rendering an empty card forever on that device. */
+  function aiCacheGet(term) {
+    var hit = aiCache()[tight(term)];
+    return (hit && typeof hit.definition === 'string' && hit.definition.trim()) ? hit : null;
+  }
+  function aiCachePut(term, obj) {
+    var c = aiCache(), keys = Object.keys(c);
+    /* Keep the cache from growing without bound — oldest out first. */
+    if (keys.length > 200) delete c[keys[0]];
+    c[tight(term)] = obj;
+    writeJSON(AI_CACHE_KEY, c);
+  }
+
+  /* ── Rendering ─────────────────────────────────────────────────── */
+  function cardHTML(row, query) {
+    return '<div class="gl-card">'
+      + '<div><span class="gl-term">' + highlight(row[0], query) + '</span>'
+      + '<span class="gl-cat">' + esc(row[2]) + '</span></div>'
+      + (row[1] ? '<div class="gl-full">' + highlight(row[1], query) + '</div>' : '')
+      + '<div class="gl-def">' + highlight(row[3], query) + '</div>'
+      + (row[4] ? '<div class="gl-alias">Also written: ' + esc(row[4].split(',').join(' · ')) + '</div>' : '')
+      + '</div>';
+  }
+
+  function aiCardHTML(a) {
+    var isTrading = a.isTrading !== false;
+    return '<div class="gl-card gl-ai">'
+      + '<div><span class="gl-term">' + esc(a.term || q) + '</span>'
+      + '<span class="gl-cat">' + esc(a.category || (isTrading ? 'AI answer' : 'Not a trading term')) + '</span></div>'
+      + (a.full ? '<div class="gl-full">' + esc(a.full) + '</div>' : '')
+      + (!isTrading
+          ? '<div class="gl-warn"><b>This is not a trading term.</b> '
+            + esc(a.notTradingNote || 'It was not recognised as part of trading vocabulary.')
+            + '</div>'
+          : '')
+      + '<div class="gl-def">' + esc(a.definition || '') + '</div>'
+      + '<div class="gl-alias" style="margin-top:12px"><span class="gl-aibadge">AI answer</span> '
+      + 'Generated on request because this term is not in the curated glossary. Not checked by a human.</div>'
+      + '</div>';
+  }
+
+  function emptyHTML() {
+    var cached = aiCacheGet(q);
+    if (cached) return aiCardHTML(cached);
+    if (aiState && norm(aiState.forTerm) === norm(q)) {
+      if (aiState.error) {
+        return '<div class="gl-empty"><h3>Could not reach the AI</h3><p>' + esc(aiState.error) + '</p>'
+          + '<button class="gl-b" onclick="ApexGlossary.ask()">Try again</button></div>';
+      }
+      if (aiState.data) return aiCardHTML(aiState.data);
+    }
+    return '<div class="gl-empty">'
+      + '<h3>Not in the glossary</h3>'
+      + '<p>No entry for &ldquo;' + esc(q) + '&rdquo;. Ask the AI to look it up &mdash; '
+      + 'it will explain the term, or tell you it is not a trading term at all.</p>'
+      + '<button class="gl-b primary" id="glAskBtn" onclick="ApexGlossary.ask()"' + (aiBusy ? ' disabled' : '') + '>'
+      + (aiBusy ? 'Looking it up…' : 'Ask AI about &ldquo;' + esc(q) + '&rdquo;') + '</button>'
+      + '</div>';
+  }
+
+  function render() {
+    var root = document.getElementById('glRoot');
+    if (!root) return;
+
+    var results = search(q, cat);
+    var total = (window.APEX_GLOSSARY || []).length;
+
+    var html = '<div class="gl-search">'
+      + '<span class="gl-mag">&#128269;</span>'
+      /* type=text, not type=search: the native search field draws its own
+         clear button, which sits next to ours and looks like a bug. */
+      + '<input class="gl-input" id="glInput" type="text" autocomplete="off" spellcheck="false"'
+      + ' placeholder="Search a term, an abbreviation, or describe it&hellip;" value="' + esc(q) + '">'
+      + (q ? '<button class="gl-clear" onclick="ApexGlossary.clear()" title="Clear">&times;</button>' : '')
+      + '</div>'
+      + '<div class="gl-hint">' + total + ' terms, written out and explained. '
+      + 'Abbreviations, chart patterns, order types, prop firm rules, slang. '
+      + 'Anything missing gets looked up by AI.</div>';
+
+    html += '<div class="gl-chips"><span class="gl-chip' + (cat ? '' : ' on') + '" onclick="ApexGlossary.cat(\'\')">All</span>';
+    categories().forEach(function (c) {
+      html += '<span class="gl-chip' + (cat === c ? ' on' : '') + '" onclick="ApexGlossary.cat(\''
+        + esc(c).replace(/'/g, "\\'") + '\')">' + esc(c) + '</span>';
+    });
+    html += '</div>';
+
+    if (!q) {
+      var rec = recents();
+      if (rec.length) {
+        html += '<div class="gl-sec">Recently looked up</div><div class="gl-recent">'
+          + rec.map(function (t) {
+              return '<button onclick="ApexGlossary.go(\'' + esc(t).replace(/'/g, "\\'") + '\')">' + esc(t) + '</button>';
+            }).join('') + '</div>';
+      }
+      html += '<div class="gl-sec">' + (cat ? esc(cat) : 'All terms') + ' &middot; ' + results.length + '</div>';
+      html += results.map(function (r) { return cardHTML(r, ''); }).join('');
+    } else if (results.length) {
+      /* "results", not "matches": Google Translate reads the noun "matches"
+         as the sporting sense and renders it "Spiele" in German. The
+         translation layer is the reader's only view of this text in most
+         languages, so an ambiguous English word is a real defect here. */
+      html += '<div class="gl-count">' + results.length + ' result' + (results.length === 1 ? '' : 's') + '</div>';
+      html += results.map(function (r) { return cardHTML(r, q); }).join('');
+    } else {
+      html += emptyHTML();
+    }
+
+    root.innerHTML = html;
+
+    /* Rebuilding innerHTML destroys the focused input, so restore focus and
+       caret. Without this, typing a second character loses the field. */
+    var inp = document.getElementById('glInput');
+    if (inp) {
+      inp.oninput = function () { q = inp.value; aiState = null; render(); };
+      if (q) { inp.focus(); try { inp.setSelectionRange(q.length, q.length); } catch (e) {} }
+    }
+  }
+
+  /* ── AI fallback ───────────────────────────────────────────────── */
+  function ask() {
+    var term = q.trim();
+    if (!term || aiBusy) return;
+    var cached = aiCacheGet(term);
+    if (cached) { aiState = { forTerm: term, data: cached }; render(); return; }
+
+    aiBusy = true; aiState = { forTerm: term }; render();
+
+    fetch(WORKER() + '/glossary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ term: term })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        aiBusy = false;
+        /* Shape check, not just an error check. A worker that has not been
+           redeployed yet has no /glossary route, so the request falls
+           through to the coach handler and comes back as a perfectly
+           successful 200 in chat format — which rendered as a blank AI
+           card with no error anywhere. Anything without a definition is
+           treated as a failure. */
+        if (!d || d.error || typeof d.definition !== 'string' || !d.definition.trim()) {
+          aiState = {
+            forTerm: term,
+            error: (d && d.error) || 'The lookup service returned an unexpected answer.'
+          };
+        } else {
+          aiCachePut(term, d);
+          pushRecent(d.term || term);
+          aiState = { forTerm: term, data: d };
+        }
+        render();
+      })
+      .catch(function (e) {
+        aiBusy = false;
+        aiState = { forTerm: term, error: String(e && e.message || e) };
+        render();
+      });
+  }
+
+  window.ApexGlossary = {
+    render: render,
+    search: search,
+    score: score,
+    hasStrongHit: hasStrongHit,
+    categories: categories,
+    ask: ask,
+    clear: function () { q = ''; aiState = null; render(); },
+    cat: function (c) { cat = (cat === c ? '' : c); render(); },
+    go: function (t) { q = t; cat = ''; aiState = null; render(); },
+    /* Used by the rest of the app to explain a term in place. */
+    lookup: function (t) {
+      var hits = search(t, '');
+      return hits.length && score(hits[0], t) >= 58 ? hits[0] : null;
+    }
+  };
+
+  /* Appended at the end of the document, so the page starts life in
+     <body> while every other .page lives in #shell. Outside the shell it
+     goes active and stays invisible with no error at all — the same trap
+     the Academy build hit. */
+  (function mountPage() {
+    var pg = document.getElementById('page-glossary'), shell = document.getElementById('shell');
+    if (pg && shell && pg.parentElement !== shell) shell.appendChild(pg);
+    else if (!pg || !shell) setTimeout(mountPage, 400);
+  })();
+
+  if (typeof window.nav === 'function' && !window._glNavHook) {
+    window._glNavHook = true;
+    var prev = window.nav;
+    window.nav = function (id) {
+      var r = prev.apply(this, arguments);
+      if (id === 'glossary') { try { render(); } catch (e) { console.warn('[glossary]', e); } }
       return r;
     };
   }
