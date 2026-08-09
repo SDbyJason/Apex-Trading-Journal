@@ -335,8 +335,9 @@
         'Abonnement.</p>' +
 
         '<h3>§ 4 Preise, Zahlung, Laufzeit</h3>' +
-        '<p>Es gelten die bei Bestellung angegebenen Preise: Monatsabo 24,99 €, Jahresabo 179,00 €, ' +
-        'Founding Lifetime 299,00 € einmalig. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. ' +
+        '<p>Es gelten die bei Bestellung angegebenen Preise: Monatsabo 29,99 USD, Jahresabo 279,99 USD, ' +
+        'Founding Lifetime 419,99 USD einmalig. Alle Preise verstehen sich in US-Dollar; ' +
+        'die Abrechnung erfolgt in US-Dollar. ' Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. ' +
         'Die Zahlung erfolgt über Stripe; ergänzend gelten dessen Bedingungen.</p>' +
         '<p>Das Abonnement verlängert sich jeweils um die gewählte Laufzeit, sofern es nicht bis zum ' +
         'Ende der laufenden Periode gekündigt wird. Die Kündigung ist jederzeit zum Ende der laufenden ' +
@@ -412,7 +413,7 @@
         '<h3>§ 13 Founding Lifetime — Umfang und Begrenzung</h3>' +
         '<p>„Founding Lifetime" ist eine Einmalzahlung und begründet <b>kein Abonnement</b>; es ' +
         'entstehen keine Folgekosten und es findet keine Verlängerung statt.</p>' +
-        '<p>Das Angebot ist auf <b>500 Plätze</b> begrenzt. Diese Zahl wird nicht nachträglich ' +
+        '<p>Das Angebot ist auf <b>50 Plätze</b> begrenzt. Diese Zahl wird nicht nachträglich ' +
         'erhöht. Nach Erreichen der Grenze wird der Zugang nur noch als Abonnement angeboten; ' +
         'bereits erworbene Lifetime-Zugänge bleiben davon unberührt.</p>' +
         '<p>Der Zugang gilt für die Lebensdauer des Dienstes, nicht für die Lebensdauer des ' +
@@ -6225,6 +6226,112 @@ body.light .apex-banner-text h4 { color: #1a7a4a; }
 body.light .apex-banner-text p { color: rgba(0,0,0,0.55); }
 body.light .apex-banner-close { border-color: rgba(26,122,74,0.2); color: rgba(26,122,74,0.6); }
 
+/* ══════════════════════════════════════
+   FULL SCREEN (Market Replay / Trade Replay)
+   A chart you are trading on wants the whole screen — especially on a phone,
+   where the cockpit otherwise gets ~300px of candles. The panel is pinned over
+   everything and the chart inside it stretches to fill what is left. Native
+   fullscreen is requested on top where the browser supports it (so the browser
+   chrome goes too); iOS Safari does not allow it on a div, and there the fixed
+   overlay alone does the job — which is why the exit button always stays put.
+══════════════════════════════════════ */
+.apex-fs {
+  position: fixed !important;
+  top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important;
+  z-index: 100000 !important;
+  margin: 0 !important;
+  width: auto !important; max-width: none !important;
+  height: auto !important; max-height: none !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: var(--surface) !important;
+  overflow: auto !important;
+  overscroll-behavior: contain;
+  display: flex !important; flex-direction: column;
+  padding: calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right))
+           calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left)) !important;
+}
+body.apex-fs-on { overflow: hidden !important; }
+/* The bottom nav and the floating theme dot must not sit on top of the chart. */
+body.apex-fs-on .mobile-bottom-nav,
+body.apex-fs-on #modeToggleBtn { display: none !important; }
+
+/* The chart takes whatever height the toolbars leave over. */
+.apex-fs .arp-chart,
+.apex-fs .el-rpchart,
+.apex-fs .el-chartwrap {
+  flex: 1 1 auto;
+  height: auto !important;
+  min-height: 240px;
+}
+/* Keyboard-shortcut footnote is nice on desktop, pure noise on a phone in
+   full screen where every pixel is chart. */
+@media (max-width: 760px) { .apex-fs .arp-keys { display: none; } }
+
+.apex-fsbtn { line-height: 1; }
+.apex-fsbtn.on { color: var(--gold); border-color: var(--rim3); }
+
+/* ══════════════════════════════════════
+   SCROLLABLE TAB ROWS
+   Long tab bars used to wrap into three or four stacked rows, which ate half
+   the screen on the phone and looked broken on desktop (Edge Lab). They now
+   stay on one line and scroll sideways instead. When everything fits, nothing
+   changes — there is simply no overflow to scroll.
+══════════════════════════════════════ */
+.settings-tab-nav.settings-tab-nav,
+#page-edgelab .el-subtabs.el-subtabs,
+.stats-subtabs.stats-subtabs,
+.acx-tabs.acx-tabs,
+.mt-tabs.mt-tabs,
+.lgl-tabs.lgl-tabs,
+.csv-format-tabs.csv-format-tabs,
+.profile-timeframe-tabs.profile-timeframe-tabs,
+.acs-pills.acs-pills,
+#page-glossary .gl-chips.gl-chips,
+.tabscroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.settings-tab-nav.settings-tab-nav::-webkit-scrollbar,
+#page-edgelab .el-subtabs.el-subtabs::-webkit-scrollbar,
+.stats-subtabs.stats-subtabs::-webkit-scrollbar,
+.acx-tabs.acx-tabs::-webkit-scrollbar,
+.mt-tabs.mt-tabs::-webkit-scrollbar,
+.lgl-tabs.lgl-tabs::-webkit-scrollbar,
+.csv-format-tabs.csv-format-tabs::-webkit-scrollbar,
+.profile-timeframe-tabs.profile-timeframe-tabs::-webkit-scrollbar,
+.acs-pills.acs-pills::-webkit-scrollbar,
+#page-glossary .gl-chips.gl-chips::-webkit-scrollbar,
+.tabscroll::-webkit-scrollbar { height: 0; width: 0; display: none; }
+
+/* Flex children shrink by default — without this the tabs squeeze together
+   instead of overflowing, and the labels wrap inside the buttons. */
+.settings-tab-nav.settings-tab-nav > *,
+#page-edgelab .el-subtabs.el-subtabs > *,
+.stats-subtabs.stats-subtabs > *,
+.acx-tabs.acx-tabs > *,
+.mt-tabs.mt-tabs > *,
+.lgl-tabs.lgl-tabs > *,
+.csv-format-tabs.csv-format-tabs > *,
+.profile-timeframe-tabs.profile-timeframe-tabs > *,
+.acs-pills.acs-pills > *,
+#page-glossary .gl-chips.gl-chips > *,
+.tabscroll > * { flex: 0 0 auto; white-space: nowrap; }
+
+/* Fade hint on the edge that still has content behind it. The .tsc-* classes
+   are set by the small watcher in ApexTabScroll. */
+.tsc-r { -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 34px), transparent 100%);
+         mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 34px), transparent 100%); }
+.tsc-l { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 34px, #000 100%);
+         mask-image: linear-gradient(90deg, transparent 0, #000 34px, #000 100%); }
+.tsc-l.tsc-r { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 34px, #000 calc(100% - 34px), transparent 100%);
+               mask-image: linear-gradient(90deg, transparent 0, #000 34px, #000 calc(100% - 34px), transparent 100%); }
+
 </style>
 
 </style>
@@ -7613,13 +7720,13 @@ body.light #landingPage * {
         "Read-only REST API"
       ],
       "offers": [
-        { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR",
+        { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD",
           "category": "free", "url": "https://evidencetrading.com/" },
-        { "@type": "Offer", "name": "Pro Monthly", "price": "24.99", "priceCurrency": "EUR",
+        { "@type": "Offer", "name": "Pro Monthly", "price": "29.99", "priceCurrency": "USD",
           "url": "https://evidencetrading.com/" },
-        { "@type": "Offer", "name": "Pro Yearly", "price": "179.00", "priceCurrency": "EUR",
+        { "@type": "Offer", "name": "Pro Yearly", "price": "279.99", "priceCurrency": "USD",
           "url": "https://evidencetrading.com/" },
-        { "@type": "Offer", "name": "Founding Lifetime", "price": "299.00", "priceCurrency": "EUR",
+        { "@type": "Offer", "name": "Founding Lifetime", "price": "419.99", "priceCurrency": "USD",
           "url": "https://evidencetrading.com/" }
       ]
     }
@@ -8187,7 +8294,7 @@ body.light #landingPage * {
     <div class="lp-price-card reveal d1">
       <div class="lp-price-badge">Free Forever</div>
       <div class="lp-price-name">Evidence Free</div>
-      <div class="lp-price-amt">€0 <span>/ month</span></div>
+      <div class="lp-price-amt"><span translate="no" class="notranslate">$0</span>&nbsp;<span>/ month</span></div>
       <div class="lp-price-desc">The essentials to start journaling and tracking your trades manually.</div>
       <ul class="lp-price-feats">
         <li>Manual trade entry &amp; journal</li>
@@ -8207,7 +8314,7 @@ body.light #landingPage * {
     <div class="lp-price-card featured reveal d2">
       <div class="lp-price-badge">⚡ Most Popular</div>
       <div class="lp-price-name">Evidence Pro</div>
-      <div class="lp-price-amt">€24.99 <span>/ month</span></div>
+      <div class="lp-price-amt"><span translate="no" class="notranslate">$29.99</span>&nbsp;<span>/ month</span></div>
       <div class="lp-price-desc">The full Evidence experience — AI coaching, automatic sync, and pro analytics.</div>
       <ul class="lp-price-feats">
         <li>Everything in Free</li>
@@ -9265,29 +9372,32 @@ body.light #landingPage * {
       </div>
     </div>
 
-    <!-- Plans -->
+    <!-- Plans — deliberately in commitment order: monthly, yearly, one-off.
+         The cheapest entry comes first; nobody should have to read past a
+         €400 line to find the €30 one. Yearly keeps the gold frame because it
+         is the better deal, not because it is meant to be picked first. -->
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div onclick="startProCheckout('annual')" style="cursor:pointer;border:1px solid var(--gold-line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--gold-dim)">
-        <div>
-          <div style="font-weight:700;color:var(--ink);font-size:14px">Yearly <span style="font-size:9.5px;font-weight:700;background:var(--gold);color:#07080b;padding:2px 7px;border-radius:6px;margin-left:6px">2 MONTHS FREE</span></div>
-          <div style="font-size:11px;color:var(--ink3);margin-top:3px">€179 / year — just €14.92 / month</div>
-        </div>
-        <div style="font-family:var(--font-display);font-weight:800;color:var(--gold);font-size:16px">€179</div>
-      </div>
       <div onclick="startProCheckout('monthly')" style="cursor:pointer;border:0.5px solid var(--rim2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--elevated)">
         <div>
           <div style="font-weight:700;color:var(--ink);font-size:14px">Monthly</div>
           <div style="font-size:11px;color:var(--ink3);margin-top:3px">Flexible, cancel any time</div>
         </div>
-        <div style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px">€24.99<span style="font-size:11px;color:var(--ink3);font-weight:500">/mo</span></div>
+        <div translate="no" class="notranslate" style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px">$29.99<span style="font-size:11px;color:var(--ink3);font-weight:500">/mo</span></div>
+      </div>
+      <div onclick="startProCheckout('annual')" style="cursor:pointer;border:1px solid var(--gold-line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--gold-dim)">
+        <div>
+          <div style="font-weight:700;color:var(--ink);font-size:14px">Yearly <span style="font-size:9.5px;font-weight:700;background:var(--gold);color:#07080b;padding:2px 7px;border-radius:6px;margin-left:6px">SAVE 22%</span></div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:3px"><span translate="no" class="notranslate">$279.99</span>&nbsp;/ year — just&nbsp;<span translate="no" class="notranslate">$23.33</span>&nbsp;/ month</div>
+        </div>
+        <div translate="no" class="notranslate" style="font-family:var(--font-display);font-weight:800;color:var(--gold);font-size:16px">$279.99</div>
       </div>
       <div id="lifetimeOption" onclick="startProCheckout('lifetime')" style="cursor:pointer;border:0.5px solid var(--rim2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--elevated)">
         <div>
           <div style="font-weight:700;color:var(--ink);font-size:14px">Founding Lifetime <span style="font-size:9.5px;font-weight:700;background:var(--profit-dim);color:var(--profit);padding:2px 7px;border-radius:6px;margin-left:6px">ONE-TIME</span></div>
-          <div style="font-size:11px;color:var(--ink3);margin-top:3px">Pay once, Pro forever — limited to <span id="lifetimeCapLabel">500</span> seats</div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:3px">Pay once, Pro forever — limited to <span id="lifetimeCapLabel">50</span> seats</div>
           <div id="lifetimeSeats" style="font-size:11px;color:var(--gold);margin-top:3px;font-weight:600"></div>
         </div>
-        <div style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px">€299</div>
+        <div translate="no" class="notranslate" style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px">$419.99</div>
       </div>
     </div>
 
@@ -23905,9 +24015,9 @@ const ORDER_I18N = {
     cancel:  'Abbrechen',
     submit:  'Zahlungspflichtig bestellen',
     plans: {
-      monthly:  { label: 'Evidence Pro — Monatsabo',  price: '24,99 €',  term: 'Laufzeit 1 Monat, verlängert sich automatisch um je 1 Monat' },
-      annual:   { label: 'Evidence Pro — Jahresabo',  price: '179,00 €', term: 'Laufzeit 12 Monate, verlängert sich automatisch um je 12 Monate' },
-      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '299,00 €', term: 'Einmalzahlung, keine Verlängerung' }
+      monthly:  { label: 'Evidence Pro — Monatsabo',  price: '29,99 USD',  term: 'Laufzeit 1 Monat, verlängert sich automatisch um je 1 Monat' },
+      annual:   { label: 'Evidence Pro — Jahresabo',  price: '279,99 USD', term: 'Laufzeit 12 Monate, verlängert sich automatisch um je 12 Monate' },
+      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '419,99 USD', term: 'Einmalzahlung, keine Verlängerung' }
     }
   },
   en: {
@@ -23923,9 +24033,9 @@ const ORDER_I18N = {
     cancel:  'Cancel',
     submit:  'Buy now — payment required',
     plans: {
-      monthly:  { label: 'Evidence Pro — Monthly',  price: '€24.99',  term: '1-month term, renews automatically for 1 month at a time' },
-      annual:   { label: 'Evidence Pro — Yearly',   price: '€179.00', term: '12-month term, renews automatically for 12 months at a time' },
-      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '€299.00', term: 'One-off payment, no renewal' }
+      monthly:  { label: 'Evidence Pro — Monthly',  price: '$29.99',  term: '1-month term, renews automatically for 1 month at a time' },
+      annual:   { label: 'Evidence Pro — Yearly',   price: '$279.99', term: '12-month term, renews automatically for 12 months at a time' },
+      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '$419.99', term: 'One-off payment, no renewal' }
     }
   }
 };
@@ -23993,7 +24103,7 @@ function confirmOrder(plan) {
 
    The counter is written by the Stripe webhook and is world-readable. The
    real gate lives in the checkout worker — this only keeps the UI truthful.  */
-var LIFETIME_SEAT_CAP = 500;
+var LIFETIME_SEAT_CAP = 50;
 window.lifetimeSeatsSold = null;
 
 async function refreshLifetimeSeats() {
@@ -28211,6 +28321,8 @@ function goToAuthPro(screen) {
       '<div style="display:flex;gap:6px;margin-bottom:14px">'+
         '<button class="el-pill '+(RP.mode==='equity'?'on':'')+'" onclick="EdgeLab.rpMode(\'equity\')">📈 Equity Curve</button>'+
         '<button class="el-pill '+(RP.mode==='chart'?'on':'')+'" onclick="EdgeLab.rpMode(\'chart\')">🕯 Chart Replay</button>'+
+        '<div style="flex:1"></div>'+
+        '<button class="el-btn apex-fsbtn" data-apex-fs=".el-card" title="Full screen" aria-label="Full screen">⛶</button>'+
       '</div>';
     var sub = RP.mode==='chart'
       ? '<p class="el-sub">Play through your trades on a live candle chart — watch each entry &amp; exit unfold</p>'
@@ -40096,6 +40208,7 @@ self.addEventListener('message', async (ev) => {
             '<p class="el-sub" style="margin:2px 0 0" id="arpClock">—</p></div>' +
           '<div class="arp-quote" id="arpQuote"></div>' +
           '<button class="el-btn gold" id="arpSave" title="Keep this backtest — trades, stops, targets and drawings">💾 Save</button>' +
+          '<button class="el-btn apex-fsbtn" data-apex-fs=".el-card" title="Full screen" aria-label="Full screen">⛶</button>' +
           '<button class="el-btn" id="arpExit">✕ End session</button>' +
         '</div>' +
         toolbarHtml() +
@@ -46835,6 +46948,13 @@ self.addEventListener('message', async (ev) => {
   color: var(--ink); padding: 9px 11px; font-family: var(--font-mono); font-size: 13px;
 }
 #page-propfirm .pf-field input:focus, #page-propfirm .pf-field select:focus { outline: none; border-color: var(--gold-line); }
+/* The rule above is meant for the text/number/date boxes. A checkbox picked up
+   the width:100% too, stretched across the whole row and shoved its label off
+   the right edge of the card, where it wrapped one word per line. */
+#page-propfirm .pf-field input[type="checkbox"] {
+  width: auto; flex: 0 0 auto;
+  padding: 0; background: none; border: 0; border-radius: 0;
+}
 #page-propfirm .pf-hint { font-size: 10px; color: var(--ink3); opacity: 0.78; margin-top: 4px; line-height: 1.45; }
 #page-propfirm .pf-empty { text-align: center; padding: 34px 14px; color: var(--ink3); font-size: 13.5px; line-height: 1.7; }
 #page-propfirm .pf-empty .big { font-size: 32px; margin-bottom: 10px; }
@@ -51504,6 +51624,207 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       return r;
     };
   }
+})();
+</script>
+
+<!-- ══════════════════════════════════════
+     FULL SCREEN — window.ApexFullscreen
+     Drives the ⛶ buttons in Market Replay and Trade Replay. Any element can be
+     opted in with `data-apex-fs="<selector of the panel to blow up>"`; leaving
+     the attribute empty takes the button's own .el-card.
+══════════════════════════════════════ -->
+<script>
+(function(){
+  var cur = null, obs = null;
+
+  function nativeEl(){
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+  function reqNative(el){
+    var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if(!fn) return false;
+    try { var p = fn.call(el); if(p && p.catch) p.catch(function(){}); } catch(e){ return false; }
+    return true;
+  }
+  function exitNative(){
+    if(!nativeEl()) return;
+    var fn = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if(fn) try { var p = fn.call(document); if(p && p.catch) p.catch(function(){}); } catch(e){}
+  }
+
+  // Charts size themselves off their host, and the host just changed shape.
+  // Three passes: now, after the layout settles, and after a native
+  // fullscreen transition (which animates on macOS).
+  function relayout(){
+    [0, 140, 420].forEach(function(ms){
+      setTimeout(function(){
+        try { window.dispatchEvent(new Event('resize')); } catch(e){}
+      }, ms);
+    });
+  }
+
+  function paintBtns(){
+    var b = document.querySelectorAll('[data-apex-fs]');
+    for(var i=0;i<b.length;i++){
+      var on = !!(cur && cur.contains(b[i]));
+      b[i].textContent = on ? '✕' : '⛶';
+      b[i].title = on ? 'Leave full screen' : 'Full screen';
+      b[i].setAttribute('aria-label', b[i].title);
+      b[i].classList.toggle('on', on);
+    }
+  }
+
+  // A panel can be thrown away underneath us — switching Edge Lab tabs
+  // rebuilds the whole body. Leaving the body locked with nothing on screen
+  // would look like a freeze, so follow the node and bail out with it.
+  function watch(){
+    if(obs || !window.MutationObserver) return;
+    obs = new MutationObserver(function(){
+      if(cur && !document.body.contains(cur)) exit();
+    });
+    obs.observe(document.body, {childList:true, subtree:true});
+  }
+  function unwatch(){ if(obs){ try{ obs.disconnect(); }catch(e){} obs = null; } }
+
+  function enter(el){
+    if(!el) return;
+    if(cur === el) return;
+    if(cur) exit();
+    cur = el;
+    el.classList.add('apex-fs');
+    document.body.classList.add('apex-fs-on');
+    reqNative(el);
+    watch(); paintBtns(); relayout();
+  }
+
+  function exit(){
+    if(!cur) return;
+    var el = cur;
+    cur = null;                       // set first: exitNative() re-enters via the change event
+    el.classList.remove('apex-fs');
+    document.body.classList.remove('apex-fs-on');
+    exitNative();
+    unwatch(); paintBtns(); relayout();
+  }
+
+  function toggle(el){ if(cur && cur === el) exit(); else enter(el); }
+
+  // Esc / the browser's own exit button leaves native fullscreen without
+  // telling us — the overlay class has to come off with it.
+  ['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){
+    document.addEventListener(ev, function(){ if(!nativeEl() && cur) exit(); });
+  });
+
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('[data-apex-fs]') : null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var sel = b.getAttribute('data-apex-fs');
+    var panel = sel ? (b.closest(sel) || document.querySelector(sel)) : b.closest('.el-card');
+    if(panel) toggle(panel);
+  }, true);
+
+  // Buttons are rendered long after this script runs, and re-rendered on every
+  // tab switch — so re-label whatever is on screen when the DOM settles.
+  if(window.MutationObserver){
+    var pending = 0;
+    new MutationObserver(function(){
+      if(pending) return;
+      pending = setTimeout(function(){ pending = 0; paintBtns(); }, 150);
+    }).observe(document.documentElement, {childList:true, subtree:true});
+  }
+
+  window.ApexFullscreen = { enter: enter, exit: exit, toggle: toggle,
+                            isOn: function(el){ return el ? cur === el : !!cur; } };
+})();
+</script>
+
+<!-- ══════════════════════════════════════
+     TAB SCROLL — keeps long tab rows on one line
+     The CSS does the scrolling; this only adds the edge fades and makes sure
+     the active tab is visible after a tab switch or a rebuild (Edge Lab and
+     friends re-render their whole row on every click).
+══════════════════════════════════════ -->
+<script>
+(function(){
+  var SEL = '.settings-tab-nav, #page-edgelab .el-subtabs, .stats-subtabs, .acx-tabs, .mt-tabs,'
+          + ' .lgl-tabs, .csv-format-tabs, .profile-timeframe-tabs, .acs-pills,'
+          + ' #page-glossary .gl-chips, .tabscroll';
+
+  function rows(){ try { return document.querySelectorAll(SEL); } catch(e){ return []; } }
+
+  function fades(el){
+    var max = el.scrollWidth - el.clientWidth;
+    // 2px of slack: sub-pixel layout leaves a phantom overflow on most rows.
+    el.classList.toggle('tsc-l', el.scrollLeft > 2);
+    el.classList.toggle('tsc-r', max > 2 && el.scrollLeft < max - 2);
+  }
+
+  // Only ever scrolls when the ACTIVE tab changed. Running it on every tick
+  // snapped the row back to the active tab the moment anything re-rendered,
+  // so scrolling to the end and letting go bounced you back to the start.
+  // A manual scroll also parks it for a moment, in case a click lands mid-swipe.
+  function reveal(el, force){
+    var a = el.querySelector('.active, [aria-selected="true"], .sel, .on');
+    if(!a) return;
+    // Rebuilt rows are new nodes, so compare by label, not by identity.
+    var key = (a.getAttribute('id') || '') + '|' + (a.textContent || '').trim();
+    if(!force && key === el.__tscKey) return;
+    el.__tscKey = key;
+    if(!force && Date.now() - (el.__tscTouched || 0) < 1200) return;
+    var l = a.offsetLeft, r = l + a.offsetWidth;
+    if(l < el.scrollLeft + 12) el.scrollLeft = Math.max(0, l - 12);
+    else if(r > el.scrollLeft + el.clientWidth - 12) el.scrollLeft = r - el.clientWidth + 12;
+  }
+
+  function sync(){ var n = rows(); for(var i=0;i<n.length;i++){ reveal(n[i]); fades(n[i]); } }
+
+  // Rows are created long after load (Edge Lab, the account modal, the
+  // glossary), so wire each one exactly once, whenever it first shows up.
+  function wire(){
+    var n = rows();
+    for(var i=0;i<n.length;i++){
+      var el = n[i];
+      if(el.__tscWired) continue;
+      el.__tscWired = true;
+      el.addEventListener('scroll', (function(e){ return function(){ fades(e); }; })(el), {passive:true});
+      // Note the user's own swipes/wheels only — a programmatic scroll must
+      // not count, or a second tab click right after would be ignored.
+      var touched = (function(e){ return function(){ e.__tscTouched = Date.now(); }; })(el);
+      el.addEventListener('touchmove', touched, {passive:true});
+      el.addEventListener('pointermove', (function(e){ return function(ev){
+        if(ev.buttons) e.__tscTouched = Date.now();
+      }; })(el), {passive:true});
+      // Tapping a tab is a deliberate "go there" — it outranks a swipe just before.
+      el.addEventListener('click', (function(e){ return function(){ e.__tscTouched = 0; }; })(el), true);
+      // Horizontal wheel/trackpad is native; a plain vertical wheel over a
+      // tab row should scroll it sideways instead of the page.
+      el.addEventListener('wheel', (function(e){ return function(ev){
+        e.__tscTouched = Date.now();
+        if(Math.abs(ev.deltaY) <= Math.abs(ev.deltaX)) return;
+        if(e.scrollWidth - e.clientWidth < 3) return;
+        e.scrollLeft += ev.deltaY; ev.preventDefault();
+      }; })(el), {passive:false});
+      fades(el); reveal(el, true);
+    }
+  }
+
+  function tick(){ wire(); sync(); }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tick);
+  else tick();
+
+  window.addEventListener('resize', tick);
+  document.addEventListener('click', function(){ setTimeout(tick, 0); }, true);
+  if(window.MutationObserver){
+    var pending = 0;
+    new MutationObserver(function(){
+      if(pending) return;
+      pending = setTimeout(function(){ pending = 0; tick(); }, 120);
+    }).observe(document.body, {childList:true, subtree:true});
+  }
+
+  window.ApexTabScroll = { refresh: tick };
 })();
 </script>
 
