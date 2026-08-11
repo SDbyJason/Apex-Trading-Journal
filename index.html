@@ -12285,14 +12285,20 @@ const POSITIVES = ['Followed Plan','Patient Entry','Good R:R','Correct SL','Cut 
    Die App selbst braucht die Kopie nie: die eigene Adresse steht in
    auth.currentUser.email. Sie existiert allein für das Admin-Panel
    (Zuordnung von Stripe-Kunden und Kündigungen zu Konten). */
+/** Gibt true zurück, wenn die Adresse WIRKLICH geschrieben wurde. Der
+    Rückgabewert ist kein Beiwerk: der Aufrufer löscht danach das Original. */
 async function saveAccountEmail(uid, email) {
-  if (!(window.db && uid && email)) return;
+  if (!(window.db && uid && email)) return false;
   try {
     await db.collection('apexUserEmails').doc(uid).set({
       email: String(email).trim().toLowerCase(),
       updatedAt: Date.now()
     }, { merge: true });
-  } catch (e) { console.warn('[email] konnte nicht gespeichert werden', e); }
+    return true;
+  } catch (e) {
+    console.warn('[email] konnte nicht gespeichert werden', e);
+    return false;
+  }
 }
 
 /* Altkonten heilen sich beim nächsten Login selbst: Adresse umziehen, dann das
@@ -12305,8 +12311,16 @@ async function migrateAccountEmail(user) {
   var snap = await ref.get();
   var d = snap.exists ? (snap.data() || {}) : {};
   // Die Adresse aus Auth ist die verlässliche; das Feld im Dokument kann alt sein.
-  await saveAccountEmail(user.uid, user.email || d.email || '');
+  var ok = await saveAccountEmail(user.uid, user.email || d.email || '');
   if (d.email === undefined) return;
+  /* ERST sichern, DANN löschen — und nur, wenn das Sichern bestätigt ist.
+     Andersherum ist die Adresse weg: genau das ist am 11.08.2026 passiert, weil
+     saveAccountEmail seinen Fehler selbst verschluckt hat und hier trotzdem
+     weitergelöscht wurde. Solange die Firestore-Regeln für apexUserEmails nicht
+     ausgerollt sind, schlägt der Schreibvorgang fehl — dann bleibt das alte
+     Feld eben stehen, bis es klappt. Ein Datenleck einen Tag länger ist besser
+     als eine Adresse dauerhaft verloren. */
+  if (!ok) { console.warn('[email] Kopie fehlgeschlagen — Profilfeld bleibt vorerst stehen'); return; }
   await ref.update({ email: firebase.firestore.FieldValue.delete() });
   console.info('[email] aus dem öffentlichen Profil entfernt');
 }
