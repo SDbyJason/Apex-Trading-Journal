@@ -113,6 +113,100 @@
 
 <script>
 /* ════════════════════════════════════════════════════════════════
+   Evidence — PREISE, eine einzige Quelle  (window.APEX_PRICES)
+   ────────────────────────────────────────────────────────────────
+   Beim Wechsel von Euro auf Dollar am 09.08.2026 mussten dieselben drei
+   Zahlen an sieben Stellen einzeln geändert werden: Kaufdialog, Landingpage,
+   schema.org, AGB § 4, Bestellbestätigung auf Deutsch und Englisch, und zwei
+   Worker. Eine vergessene Stelle ist bei einer AGB kein Schönheitsfehler,
+   sondern ein falsch ausgezeichneter Preis.
+
+   Ab jetzt steht jede Zahl genau hier. Was daraus gefüttert wird:
+     · Kaufdialog und Landingpage   → applyPrices() unten in der Datei
+     · AGB § 4 / § 13               → ApexLegal (nächster Script-Block)
+     · Bestellbestätigung § 312j    → ORDER_I18N
+   Zwei Stellen bleiben notgedrungen statisch, weil sie gelesen werden, bevor
+   JavaScript läuft: der schema.org-Block im <head> und die Preise, die als
+   Rückfalltext im HTML stehen. Beide vergleicht `.claude/tests/prices.js`
+   gegen dieses Objekt — vergisst man sie, schlägt der Test fehl.
+
+   Die Stripe-Preis-IDs stehen hier nur zur Dokumentation. Verbindlich sind
+   sie im `checkout-worker.js`; der Test prüft, dass beide übereinstimmen.
+   ════════════════════════════════════════════════════════════════ */
+window.APEX_PRICES = (function () {
+  var P = {
+    currency: 'USD',
+    symbol:   '$',
+    monthly: {
+      amount: 29.99,  stripe: 'price_1U2WFkV05zDjqollCr86i3X0',
+      en: 'Monthly', de: 'Monatsabo'
+    },
+    annual: {
+      amount: 279.99, stripe: 'price_1U2WGKV05zDjqollddgpYugw',
+      en: 'Yearly',   de: 'Jahresabo'
+    },
+    lifetime: {
+      amount: 419.99, stripe: 'price_1U2WI1V05zDjqollaOTbKJrU',
+      en: 'Founding Lifetime', de: 'Founding Lifetime',
+      /* Obergrenze der Founding-Plätze. Steht als Zusage in AGB § 13 und wird
+         im checkout-worker.js hart durchgesetzt — beide müssen mitziehen. */
+      seatCap: 50
+    }
+  };
+
+  /* "$29.99" — die Anzeige in der App. Immer mit Punkt und Symbol, egal in
+     welcher Sprache die Oberfläche gerade steht: ein Preis ist eine Zahl mit
+     Währung, keine Übersetzung. */
+  function fmt(a) { return P.symbol + a.toFixed(2); }
+  /* "29,99 USD" — für die deutschen Rechtstexte. Bewusst mit dem Kürzel USD
+     statt mit "$": Google Translate rechnet ein Dollarzeichen im deutschen
+     Text in Euro um, ein Währungskürzel lässt es in Ruhe. */
+  function fmtDe(a) { return a.toFixed(2).replace('.', ',') + ' ' + P.currency; }
+
+  ['monthly', 'annual', 'lifetime'].forEach(function (k) {
+    P[k].key     = k;
+    P[k].display = fmt(P[k].amount);
+    P[k].displayDe = fmtDe(P[k].amount);
+  });
+
+  // Was das Jahresabo gegenüber zwölf Einzelmonaten spart — nie von Hand
+  // ausrechnen, sonst wirbt man nach der nächsten Preisänderung mit Unsinn.
+  var full = P.monthly.amount * 12;
+  P.annual.perMonth   = fmt(P.annual.amount / 12);
+  P.annual.savePercent = Math.round((1 - P.annual.amount / full) * 100);
+
+  P.fmt = fmt; P.fmtDe = fmtDe;
+  return P;
+})();
+
+/* Trägt die Preise in die Oberfläche ein. Im HTML stehen dieselben Zahlen
+   noch einmal als Rückfalltext — bewusst: ein Kaufbildschirm ohne Preis wäre
+   schlimmer als ein kurz veralteter. `.claude/tests/prices.js` sorgt dafür,
+   dass dieser Rückfalltext nicht auseinanderläuft. */
+(function () {
+  function put(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+  function apply() {
+    var P = window.APEX_PRICES;
+    put('prMonthlyAmt',  P.monthly.display);
+    put('prAnnualAmt',   P.annual.display);
+    put('prAnnualAmt2',  P.annual.display);
+    put('prAnnualPerMo', P.annual.perMonth);
+    put('prAnnualSave',  'SAVE ' + P.annual.savePercent + '%');
+    put('prLifetimeAmt', P.lifetime.display);
+    put('lifetimeCapLabel', String(P.lifetime.seatCap));
+    put('lpProAmt',      P.monthly.display);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
+  window.APEX_PRICES.apply = apply;
+})();
+</script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
    Evidence — legal pages & cancellation  (window.ApexLegal)
    ────────────────────────────────────────────────────────────────
    Impressum, Datenschutzerklärung, AGB and Widerrufsbelehrung, plus
@@ -129,6 +223,13 @@
    ════════════════════════════════════════════════════════════════ */
 (function apexLegal() {
   'use strict';
+
+  /* Preise kommen aus der einen Quelle (window.APEX_PRICES, Block darüber).
+     Der Rückfall auf leere Strings ist Absicht: sollte das Objekt einmal
+     fehlen, darf die AGB nicht mit "undefined" als Preis erscheinen. */
+  var PRICE = window.APEX_PRICES || {
+    monthly:{displayDe:''}, annual:{displayDe:''}, lifetime:{displayDe:'', seatCap:''}
+  };
 
   var PROVIDER = {
     name:   'Jason Ziborius',
@@ -265,6 +366,10 @@
         'Standardvertragsklauseln.</p>' +
         '<p><b>Stripe Payments Europe, Ltd. — Zahlungen:</b> verarbeitet Zahlungsdaten ' +
         'eigenverantwortlich. Wir erhalten keine vollständigen Karten- oder Kontodaten.</p>' +
+        '<p><b>Resend, Inc. — E-Mail-Versand:</b> versendet die gesetzlich vorgeschriebene ' +
+        'Bestellbestätigung, die Kündigungsbestätigung und — sofern nicht abgeschaltet — den ' +
+        'Wochenrückblick. Übermittelt werden deine E-Mail-Adresse und der Inhalt der jeweiligen ' +
+        'Nachricht. Drittlandtransfer auf Grundlage der Standardvertragsklauseln.</p>' +
         '<p><b>Anthropic PBC — KI-Coach:</b> für die Analyse werden die dafür nötigen Journaldaten ' +
         'übermittelt. Die Nutzung ist freiwillig; ohne Nutzung des KI-Coachs findet keine ' +
         'Übermittlung statt. Drittlandtransfer auf Grundlage der Standardvertragsklauseln.</p>' +
@@ -301,7 +406,17 @@
 
         '<h3>8. Push-Benachrichtigungen</h3>' +
         '<p>Stimmst du Benachrichtigungen zu, speichern wir eine Gerätekennung zur Zustellung. Die ' +
-        'Zustimmung kannst du jederzeit im Browser oder in der App widerrufen.</p>'
+        'Zustimmung kannst du jederzeit im Browser oder in der App widerrufen.</p>' +
+
+        '<h3>9. Wochenrückblick per E-Mail</h3>' +
+        '<p>Sofern nicht abgeschaltet, senden wir dir sonntags eine Zusammenfassung deiner ' +
+        'Handelswoche an deine Kontoadresse. Die Kennzahlen werden dafür beim Versand aus deinem ' +
+        'Journal berechnet; gespeichert wird davon nichts, sondern nur der Zeitpunkt des letzten ' +
+        'Versands. In einer Woche ohne Trades senden wir nichts. Rechtsgrundlage: Art. 6 Abs. 1 ' +
+        'lit. b DSGVO (Erbringung der von dir gebuchten Journalfunktion) sowie § 7 Abs. 3 UWG.</p>' +
+        '<p>Du kannst den Rückblick jederzeit abschalten: in der App unter Einstellungen → ' +
+        'Community oder über den Abmeldelink in jeder dieser E-Mails, der ohne Anmeldung ' +
+        'funktioniert. Zum Versanddienstleister siehe Abschnitt 4.</p>'
     },
 
     agb: {
@@ -335,9 +450,10 @@
         'Abonnement.</p>' +
 
         '<h3>§ 4 Preise, Zahlung, Laufzeit</h3>' +
-        '<p>Es gelten die bei Bestellung angegebenen Preise: Monatsabo 29,99 USD, Jahresabo 279,99 USD, ' +
-        'Founding Lifetime 419,99 USD einmalig. Alle Preise verstehen sich in US-Dollar; ' +
-        'die Abrechnung erfolgt in US-Dollar. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. ' +
+        '<p>Es gelten die bei Bestellung angegebenen Preise: Monatsabo ' + PRICE.monthly.displayDe +
+        ', Jahresabo ' + PRICE.annual.displayDe + ', Founding Lifetime ' + PRICE.lifetime.displayDe +
+        ' einmalig. Alle Preise verstehen sich in US-Dollar; die Abrechnung erfolgt in US-Dollar. ' +
+        'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. ' +
         'Die Zahlung erfolgt über Stripe; ergänzend gelten dessen Bedingungen.</p>' +
         '<p>Das Abonnement verlängert sich jeweils um die gewählte Laufzeit, sofern es nicht bis zum ' +
         'Ende der laufenden Periode gekündigt wird. Die Kündigung ist jederzeit zum Ende der laufenden ' +
@@ -413,7 +529,7 @@
         '<h3>§ 13 Founding Lifetime — Umfang und Begrenzung</h3>' +
         '<p>„Founding Lifetime" ist eine Einmalzahlung und begründet <b>kein Abonnement</b>; es ' +
         'entstehen keine Folgekosten und es findet keine Verlängerung statt.</p>' +
-        '<p>Das Angebot ist auf <b>50 Plätze</b> begrenzt. Diese Zahl wird nicht nachträglich ' +
+        '<p>Das Angebot ist auf <b>' + PRICE.lifetime.seatCap + ' Plätze</b> begrenzt. Diese Zahl wird nicht nachträglich ' +
         'erhöht. Nach Erreichen der Grenze wird der Zugang nur noch als Abonnement angeboten; ' +
         'bereits erworbene Lifetime-Zugänge bleiben davon unberührt.</p>' +
         '<p>Der Zugang gilt für die Lebensdauer des Dienstes, nicht für die Lebensdauer des ' +
@@ -8314,7 +8430,7 @@ body.light #landingPage * {
     <div class="lp-price-card featured reveal d2">
       <div class="lp-price-badge">⚡ Most Popular</div>
       <div class="lp-price-name">Evidence Pro</div>
-      <div class="lp-price-amt"><span translate="no" class="notranslate">$29.99</span>&nbsp;<span>/ month</span></div>
+      <div class="lp-price-amt"><span translate="no" class="notranslate" id="lpProAmt">$29.99</span>&nbsp;<span>/ month</span></div>
       <div class="lp-price-desc">The full Evidence experience — AI coaching, automatic sync, and pro analytics.</div>
       <ul class="lp-price-feats">
         <li>Everything in Free</li>
@@ -9382,14 +9498,14 @@ body.light #landingPage * {
           <div style="font-weight:700;color:var(--ink);font-size:14px">Monthly</div>
           <div style="font-size:11px;color:var(--ink3);margin-top:3px">Flexible, cancel any time</div>
         </div>
-        <div translate="no" class="notranslate" style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px">$29.99<span style="font-size:11px;color:var(--ink3);font-weight:500">/mo</span></div>
+        <div translate="no" class="notranslate" style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px"><span id="prMonthlyAmt">$29.99</span><span style="font-size:11px;color:var(--ink3);font-weight:500">/mo</span></div>
       </div>
       <div onclick="startProCheckout('annual')" style="cursor:pointer;border:1px solid var(--gold-line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--gold-dim)">
         <div>
-          <div style="font-weight:700;color:var(--ink);font-size:14px">Yearly <span style="font-size:9.5px;font-weight:700;background:var(--gold);color:#07080b;padding:2px 7px;border-radius:6px;margin-left:6px">SAVE 22%</span></div>
-          <div style="font-size:11px;color:var(--ink3);margin-top:3px"><span translate="no" class="notranslate">$279.99</span>&nbsp;/ year — just&nbsp;<span translate="no" class="notranslate">$23.33</span>&nbsp;/ month</div>
+          <div style="font-weight:700;color:var(--ink);font-size:14px">Yearly <span style="font-size:9.5px;font-weight:700;background:var(--gold);color:#07080b;padding:2px 7px;border-radius:6px;margin-left:6px" id="prAnnualSave">SAVE 22%</span></div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:3px"><span translate="no" class="notranslate" id="prAnnualAmt2">$279.99</span>&nbsp;/ year — just&nbsp;<span translate="no" class="notranslate" id="prAnnualPerMo">$23.33</span>&nbsp;/ month</div>
         </div>
-        <div translate="no" class="notranslate" style="font-family:var(--font-display);font-weight:800;color:var(--gold);font-size:16px">$279.99</div>
+        <div translate="no" class="notranslate" id="prAnnualAmt" style="font-family:var(--font-display);font-weight:800;color:var(--gold);font-size:16px">$279.99</div>
       </div>
       <div id="lifetimeOption" onclick="startProCheckout('lifetime')" style="cursor:pointer;border:0.5px solid var(--rim2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--elevated)">
         <div>
@@ -9397,7 +9513,7 @@ body.light #landingPage * {
           <div style="font-size:11px;color:var(--ink3);margin-top:3px">Pay once, Pro forever — limited to <span id="lifetimeCapLabel">50</span> seats</div>
           <div id="lifetimeSeats" style="font-size:11px;color:var(--gold);margin-top:3px;font-weight:600"></div>
         </div>
-        <div translate="no" class="notranslate" style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px">$419.99</div>
+        <div translate="no" class="notranslate" id="prLifetimeAmt" style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px">$419.99</div>
       </div>
     </div>
 
@@ -11356,6 +11472,21 @@ function _authAction(type) {
               </label>
             </div>
 
+            <!-- Die einzige E-Mail, die Evidence von sich aus verschickt (neben
+                 den gesetzlich vorgeschriebenen zur Bestellung). Standardmässig
+                 an, mit einem Klick aus — hier und über den Abmeldelink in
+                 jeder Mail, der ohne Anmeldung funktioniert. -->
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:2px">📬 Weekly review by e-mail</div>
+                <div style="font-size:11px;color:var(--ink3)">Sunday summary of your trading week. Nothing is sent in a week you did not trade.</div>
+              </div>
+              <label class="apex-toggle">
+                <input type="checkbox" id="setting-weeklyReview2" checked onchange="setWeeklyReview(this.checked)">
+                <span class="apex-toggle-slider"></span>
+              </label>
+            </div>
+
             <div style="display:flex;align-items:center;justify-content:space-between">
               <div>
                 <div style="font-size:13px;font-weight:500;margin-bottom:2px">Pip Reference Banner</div>
@@ -12146,6 +12277,40 @@ const SETUPS   = ['Supply Zone','Demand Zone','BOS Retest','CHoCH','FVG Fill','O
 const MISTAKES  = ['FOMO','Revenge Trade','Overtrading','Early Exit','No Stop Loss','Moving SL','Emotional Entry','Impulsive Trade','Fear','Greed','No Confirmation','Bad Timing'];
 const POSITIVES = ['Followed Plan','Patient Entry','Good R:R','Correct SL','Cut Loss Fast','Let Winner Run','Disciplined','No Emotions','Waited Confirmation','Good Timing','Sized Correctly','Took Profits'];
 
+/* ── E-Mail-Adresse: raus aus dem öffentlichen Profil ─────────────────────
+   apexUsers/<uid> ist weltlesbar. Die Adresse liegt deshalb in
+   apexUserEmails/<uid>, das nur der Admin lesen darf — der Nutzer darf dort
+   ausschliesslich seine eigene schreiben (siehe firestore.rules).
+
+   Die App selbst braucht die Kopie nie: die eigene Adresse steht in
+   auth.currentUser.email. Sie existiert allein für das Admin-Panel
+   (Zuordnung von Stripe-Kunden und Kündigungen zu Konten). */
+async function saveAccountEmail(uid, email) {
+  if (!(window.db && uid && email)) return;
+  try {
+    await db.collection('apexUserEmails').doc(uid).set({
+      email: String(email).trim().toLowerCase(),
+      updatedAt: Date.now()
+    }, { merge: true });
+  } catch (e) { console.warn('[email] konnte nicht gespeichert werden', e); }
+}
+
+/* Altkonten heilen sich beim nächsten Login selbst: Adresse umziehen, dann das
+   Feld aus dem öffentlichen Dokument löschen. Konten, die sich nie wieder
+   anmelden, erreicht das nicht — dafür gibt es .claude/tools/migrate-emails.js,
+   das einmalig über alle läuft. */
+async function migrateAccountEmail(user) {
+  if (!(window.db && user && user.uid)) return;
+  var ref = db.collection('apexUsers').doc(user.uid);
+  var snap = await ref.get();
+  var d = snap.exists ? (snap.data() || {}) : {};
+  // Die Adresse aus Auth ist die verlässliche; das Feld im Dokument kann alt sein.
+  await saveAccountEmail(user.uid, user.email || d.email || '');
+  if (d.email === undefined) return;
+  await ref.update({ email: firebase.firestore.FieldValue.delete() });
+  console.info('[email] aus dem öffentlichen Profil entfernt');
+}
+
 // ─── FIREBASE INIT ────────────────────
 window.addEventListener('load', () => {
   firebase.initializeApp(FB_CONFIG);
@@ -12159,6 +12324,8 @@ window.addEventListener('load', () => {
       currentUser = user;
       currentUID  = user.uid;
       await loadUserProfile();
+      /* Läuft im Hintergrund und darf den Start nicht aufhalten. */
+      migrateAccountEmail(user).catch(function(){});
       document.getElementById('onboard').style.display = 'none';
       document.getElementById('landingPage').style.display = 'none';
       // Splash sanft ausblenden
@@ -12279,8 +12446,10 @@ async function _doRegister() {
 
     const cred = await auth.createUserWithEmailAndPassword(email, pw);
     await db.collection('apexUsers').doc(cred.user.uid).set({
+      /* KEIN `email` hier: dieses Dokument ist weltlesbar (Profile, Rangliste,
+         Community). Die Adresse geht nach apexUserEmails/<uid>, das nur der
+         Admin lesen darf. Siehe saveAccountEmail() weiter unten. */
       username:           name,
-      email:              email,
       totalTrades:        0,
       netPips:            0,
       winRate:            0,
@@ -12293,6 +12462,7 @@ async function _doRegister() {
       createdAt:          firebase.firestore.FieldValue.serverTimestamp(),
       lastUpdated:        firebase.firestore.FieldValue.serverTimestamp()
     });
+    await saveAccountEmail(cred.user.uid, email);
     // onAuthStateChanged fires and boots the app
   } catch(e) {
     console.error('Register error:', e);
@@ -13310,6 +13480,16 @@ function switchSettingsTab(tab) {
     var ns2 = document.getElementById('notif-sound-toggle2');
     var ns1 = document.getElementById('notif-sound-toggle');
     if (ns2 && ns1) ns2.checked = ns1.checked;
+    /* Der Wochenrückblick lebt NUR in Firestore, nicht in appSettings: den
+       Versand macht ein Worker, der den localStorage dieses Geräts nie sieht.
+       Deshalb wird der Schalter aus dem Konto gelesen, nicht aus den lokalen
+       Einstellungen — sonst zeigt ein zweites Gerät etwas anderes an. */
+    var wr = document.getElementById('setting-weeklyReview2');
+    if (wr && window.db && window.currentUID) {
+      db.collection('apexUsers').doc(currentUID).get().then(function(d){
+        wr.checked = !(d.exists && d.data() && d.data().weeklyReview === false);
+      }).catch(function(){});
+    }
   }
   if (tab === 'privacy') {
     ['profileVisibility','dmVisibility'].forEach(function(k) {
@@ -13411,6 +13591,29 @@ function saveSetting(key, val) {
   }
   applySettings();
 }
+/* Wochenrückblick an/aus. Fehlt das Feld, gilt "an" — Altkonten sollen den
+   Rückblick bekommen, ohne dass jemand nachträglich Felder setzen muss. Ein
+   fehlgeschlagener Schreibvorgang stellt den Schalter zurück, statt einen
+   Stand vorzutäuschen, den der Server nicht kennt. */
+function setWeeklyReview(on) {
+  var el = document.getElementById('setting-weeklyReview2');
+  if (!(window.db && window.currentUID)) {
+    if (el) el.checked = !on;
+    if (window.showToast) showToast('Please sign in first.');
+    return;
+  }
+  db.collection('apexUsers').doc(currentUID).set({ weeklyReview: !!on }, { merge: true })
+    .then(function () {
+      if (window.showToast) showToast(on ? '📬 Weekly review on' : 'Weekly review off');
+    })
+    .catch(function (e) {
+      console.warn('weeklyReview', e);
+      if (el) el.checked = !on;
+      if (window.showToast) showToast('⚠ Could not save that setting');
+    });
+}
+window.setWeeklyReview = setWeeklyReview;
+
 function applySettings() {
   var banner = document.getElementById('pipInfoBanner');
   if (banner) banner.style.display = appSettings.pipbanner ? 'flex' : 'none';
@@ -24015,9 +24218,9 @@ const ORDER_I18N = {
     cancel:  'Abbrechen',
     submit:  'Zahlungspflichtig bestellen',
     plans: {
-      monthly:  { label: 'Evidence Pro — Monatsabo',  price: '29,99 USD',  term: 'Laufzeit 1 Monat, verlängert sich automatisch um je 1 Monat' },
-      annual:   { label: 'Evidence Pro — Jahresabo',  price: '279,99 USD', term: 'Laufzeit 12 Monate, verlängert sich automatisch um je 12 Monate' },
-      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '419,99 USD', term: 'Einmalzahlung, keine Verlängerung' }
+      monthly:  { label: 'Evidence Pro — Monatsabo',  price: APEX_PRICES.monthly.displayDe,  term: 'Laufzeit 1 Monat, verlängert sich automatisch um je 1 Monat' },
+      annual:   { label: 'Evidence Pro — Jahresabo',  price: APEX_PRICES.annual.displayDe, term: 'Laufzeit 12 Monate, verlängert sich automatisch um je 12 Monate' },
+      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: APEX_PRICES.lifetime.displayDe, term: 'Einmalzahlung, keine Verlängerung' }
     }
   },
   en: {
@@ -24033,9 +24236,9 @@ const ORDER_I18N = {
     cancel:  'Cancel',
     submit:  'Buy now — payment required',
     plans: {
-      monthly:  { label: 'Evidence Pro — Monthly',  price: '$29.99',  term: '1-month term, renews automatically for 1 month at a time' },
-      annual:   { label: 'Evidence Pro — Yearly',   price: '$279.99', term: '12-month term, renews automatically for 12 months at a time' },
-      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: '$419.99', term: 'One-off payment, no renewal' }
+      monthly:  { label: 'Evidence Pro — Monthly',  price: APEX_PRICES.monthly.display,  term: '1-month term, renews automatically for 1 month at a time' },
+      annual:   { label: 'Evidence Pro — Yearly',   price: APEX_PRICES.annual.display, term: '12-month term, renews automatically for 12 months at a time' },
+      lifetime: { label: 'Evidence Pro — Founding Lifetime', price: APEX_PRICES.lifetime.display, term: 'One-off payment, no renewal' }
     }
   }
 };
@@ -24103,7 +24306,9 @@ function confirmOrder(plan) {
 
    The counter is written by the Stripe webhook and is world-readable. The
    real gate lives in the checkout worker — this only keeps the UI truthful.  */
-var LIFETIME_SEAT_CAP = 50;
+/* Eine Quelle: die Zahl steht in window.APEX_PRICES. Der Rückfall auf 50
+   greift nur, falls dieser Block je vor dem Preis-Objekt geladen wird. */
+var LIFETIME_SEAT_CAP = (window.APEX_PRICES && window.APEX_PRICES.lifetime.seatCap) || 50;
 window.lifetimeSeatsSold = null;
 
 async function refreshLifetimeSeats() {
@@ -33903,6 +34108,10 @@ body.light .pt-sugg{background:var(--layer)}
     }
     // 2. Delete the user's Firestore document (best effort)
     try { if(window.db) await db.collection('apexUsers').doc(u.uid).delete(); } catch(e){ console.warn('[delete] firestore', e); }
+    /* Die E-Mail-Adresse liegt getrennt in apexUserEmails (siehe
+       saveAccountEmail) und muss mit gelöscht werden — sonst bliebe nach einer
+       Löschung nach Art. 17 DSGVO genau der personenbezogene Teil übrig. */
+    try { if(window.db) await db.collection('apexUserEmails').doc(u.uid).delete(); } catch(e){ console.warn('[delete] email', e); }
     // 3. Clear local data for this account
     try { localStorage.removeItem('apexJournal_' + u.uid); } catch(e){}
     // 4. Delete the auth account
