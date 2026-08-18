@@ -10995,7 +10995,7 @@ function _authAction(type) {
     <div class="ph">
       <div class="ph-eyebrow">Market Intelligence</div>
       <h1>Economic <span style="color:var(--gold)">Calendar</span></h1>
-      <p>High-impact news events — powered by Finnhub</p>
+      <p>High-impact news events on your instruments</p>
     </div>
 
     <!-- LOCKED STATE (Free Users) -->
@@ -21949,12 +21949,17 @@ function joinChallenge(id) {
 
 
 // ══════════════════════════════════════════════
-// ECONOMIC NEWS CALENDAR (Finnhub)
+// ECONOMIC NEWS CALENDAR
 // ══════════════════════════════════════════════
 (function() {
-  // Economic calendar now comes from the free ForexFactory feed via a
-  // Cloudflare Worker proxy (handles CORS + caching). Set this ONCE to
-  // your deployed worker URL (see econcal-worker.js).
+  /* Der Kalender kommt aus einem eigenen Cloudflare-Worker, der den Feed per
+     Cron alle 15 Minuten einmal holt und in KV ablegt — die App liest nur
+     diese Kopie. Vorher lief der Abruf pro Nutzeranfrage nach draußen, was
+     den Anbieter irgendwann mit 429 antworten ließ und den Kalender in der
+     Produktion abschaltete. Siehe econcal-worker.js.
+     Die Anbieterquelle wird in der Oberfläche bewusst nicht genannt: sie hat
+     schon einmal gewechselt, und ein Name im Text ist eine zweite Stelle, die
+     dann falsch dasteht. */
   window.APEX_ECO_WORKER = window.APEX_ECO_WORKER || 'https://econal.4kjyyyftv6.workers.dev';
   var _ecoRange    = 'week';
   var _ecoImpact   = { high: true, medium: true, low: true };
@@ -21988,7 +21993,7 @@ function joinChallenge(id) {
     return 'low';
   }
 
-  // Finnhub uses country codes (US, EU, GB…) — map to currency labels for display & filter
+  // The feed carries country codes (US, EU, GB…) — map to currency labels for display & filter
   var COUNTRY_TO_CURRENCY = {
     'US':'USD','EU':'EUR','GB':'GBP','JP':'JPY',
     'AU':'AUD','CA':'CAD','CH':'CHF','NZ':'NZD',
@@ -22067,7 +22072,23 @@ function joinChallenge(id) {
       .then(function(data){
         _ecoLoading = false;
         var events = (data && data.economicCalendar) ? data.economicCalendar : [];
-        if (events.length) { _ecoCache[cacheKey] = events; ecoSaveCache(events); renderEcoNews(events); return; }
+        if (events.length) {
+          _ecoCache[cacheKey] = events; ecoSaveCache(events); renderEcoNews(events);
+          /* Der Worker liefert jetzt mit, wie alt seine Kopie ist. Wenn der
+             Anbieter blockt, laufen die Termine nicht mehr ins Leere — sie
+             werden weiter angezeigt, und hier steht dazu, von wann sie sind.
+             Unter anderthalb Stunden ist das Rauschen und wird nicht erwähnt. */
+          if (data.stale && data.ageMinutes != null) {
+            var f = document.getElementById('econewsFeed');
+            var h = Math.round(data.ageMinutes / 60);
+            if (f) f.insertAdjacentHTML('afterbegin',
+              '<div style="background:rgba(232,163,58,0.10);border:0.5px solid rgba(232,163,58,0.30);' +
+              'color:var(--caution,#e8a33a);border-radius:10px;padding:9px 12px;font-size:12px;margin-bottom:12px">' +
+              '⚠ Stand von vor ' + (h >= 1 ? h + ' Std' : data.ageMinutes + ' Min') +
+              ' — der Termin-Feed antwortet gerade nicht. Die Zeiten stimmen, kurzfristige Änderungen fehlen.</div>');
+          }
+          return;
+        }
         ecoFallback((data && data.error) ? data.error : 'No events returned');
       })
       .catch(function(err){ _ecoLoading = false; ecoFallback(err.message); });
