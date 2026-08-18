@@ -8107,7 +8107,7 @@ body.light #landingPage * {
     <div class="lp-claim reveal d2">Other journals show you what happened.<br><b>Evidence measures whether you changed.</b></div>
     <div class="lp-badges reveal d3">
       <span class="lp-badge"><span class="dot"></span> Read-Only Broker Access</span>
-      <span class="lp-badge gold">cTrader · Tradovate · MT5 · ATAS · Quantower · TradingView</span>
+      <span class="lp-badge gold">cTrader · MT5 · ATAS · Quantower · TradingView · Binance · Bybit · IBKR</span>
       <span class="lp-badge blue">No Trade Execution</span>
     </div>
     <p class="lp-desc reveal d4">
@@ -8590,7 +8590,7 @@ body.light #landingPage * {
         <li><b>Strategy Lab</b> — automated indicator backtesting + optimiser</li>
         <li><b>Evidence Score</b> — one number for how well you are trading, four fifths of it process not P&amp;L</li>
         <li><b>Start my day</b> — pre-market brief: today's events and how you actually trade this weekday</li>
-        <li><b>Tradovate Auto-Sync</b> — prop futures (Topstep, Apex, MyFundedFutures) journalled on their own</li>
+        <li><b>Futures &amp; prop accounts</b> — Topstep, Apex, MyFundedFutures, NinjaTrader, Rithmic and Tradovate statements imported and mapped once</li>
         <li><b>Strategy in plain words</b> — describe your setup and get testable rules, shown to you before anything runs</li>
         <li><b>Smart-money rules</b> — FVG, iFVG, CHoCH, BOS, sweeps, OTE, Power of Three, ADR &amp; SMT divergence</li>
         <li><b>61 instruments in the replay</b> — gold, silver, 43 FX pairs, 10 indices, WTI, Brent &amp; crypto</li>
@@ -8689,7 +8689,7 @@ body.light #landingPage * {
         <tr><td>Session review — give-back, size drift, revenge windows &amp; rule adherence</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Market Replay — trade any past day candle by candle</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Evidence Score — a single 0–100 read on your trading, weighted to process over profit, with the full breakdown</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>Tradovate Auto-Sync — live futures fills, including while the app is closed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Tradovate Auto-Sync — live futures fills, including while the app is closed <span style="opacity:.65">· in progress, see below</span></td><td class="c no">—</td><td class="c no">soon</td></tr>
         <tr><td>Replay across 61 instruments — metals, 43 FX pairs, 10 indices, oil and crypto</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Replay timeframes from 1 minute to weekly, with session jumps and 0.5×–10× playback</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Share a replay session — review mode, or the same day with an empty account for a student</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -9528,7 +9528,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎖️</div><div><div class="apex-feat-label">The Evidence Score — one number, and it is not your P&amp;L</div><div class="apex-feat-desc">Rule adherence, risk consistency, tilt control and expectancy, combined into a single 0–100 read. Four fifths of the weight is process: a losing week traded by your own rules barely moves it, and a winning week of broken ones drops it. Every component is shown with its sample size and its arithmetic — and anything there is not enough data for is left out of the calculation rather than counted as zero</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🏛</div><div><div class="apex-feat-label">Prop firm cockpit — the drawdown model your firm really uses</div><div class="apex-feat-desc">Most trackers know one kind of drawdown. Firms use three, and the difference is where accounts die: at Apex Trader Funding your trailing threshold climbs with your equity and then <b>stops the moment it reaches your starting balance</b> — this one models that, along with end-of-day trailing and static floors, measured against your intraday low rather than your closing balance. The consistency rule is reported as headroom in money, not a progress bar: the largest single day you can still book without a payout being refused. Every prop and funded account keeps its own rules, so a Topstep and an Apex Trader Funding challenge run side by side without one overwriting the other</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🧾</div><div><div class="apex-feat-label">What the whole prop business actually cost you</div><div class="apex-feat-desc">Entry fees, resets, activation fees and payouts per challenge, entered once and turned into the numbers nobody can otherwise answer: total spent against total received, return on everything spent, and a pass rate per firm — counted only over attempts you have marked decided, so a challenge still running never counts as a failure. No bank connection, because four fields once a month do not justify handing over a bank account</div></div></div>
-      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎲</div><div><div class="apex-feat-label">Tradovate Auto-Sync — for the prop futures desks</div><div class="apex-feat-desc">Topstep, Apex Trader Funding and MyFundedFutures all run on Tradovate. Connect once through Tradovate's own consent screen and your fills arrive on their own, including while the app is closed. Read-only, no broker password ever reaches Evidence, and the access token is stored where the app itself cannot read it</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎲</div><div><div class="apex-feat-label">Tradovate Auto-Sync — built, not yet switched on</div><div class="apex-feat-desc">The connection is written and waiting: read-only, through Tradovate's own consent screen, with the access token stored where the app itself cannot read it. What is holding it up is not on our side — Tradovate does not currently grant API access to prop-firm accounts (Topstep, Apex, MyFundedFutures), which is exactly the group it was built for, and we are not shipping a Connect button that fails for most of the people who would press it. <b>Until then, and this works today:</b> futures fills come in by CSV — map the columns once and Evidence recognises that format by itself afterwards, prop accounts included</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🌍</div><div><div class="apex-feat-label">61 instruments, every one of them checked</div><div class="apex-feat-desc">Gold and silver, the seven FX majors with 21 crosses and 15 minors, ten indices from the Nasdaq to the Hang Seng, WTI, Brent and four crypto. Each was fetched from the feed before it was listed — so nothing in the dropdown opens an empty chart. Futures, stocks and options are journalled and analysed in full but deliberately not replayed: that is a data-licensing wall, and we say so rather than let you find it after subscribing</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">📆</div><div><div class="apex-feat-label">Daily and weekly replay, with real navigation</div><div class="apex-feat-desc">Every timeframe from one minute to weekly, so the higher-timeframe read happens in the replay instead of beside it — plus 0.5× to 10× playback and jumps straight to the Asian, London, New York or US cash open, or to any date in the session</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">↗️</div><div><div class="apex-feat-label">Share a replay session</div><div class="apex-feat-desc">Send a session as a link. Either they watch your orders, stops and targets play out — or they get the same instrument, the same dates and an empty account and trade that day themselves. Your entries do not travel in that mode, on purpose</div></div></div>
@@ -11542,7 +11542,7 @@ function _authAction(type) {
           <button class="at-plat-btn"        data-plat="tradingview" onclick="ApexAutoTrack.select('tradingview')">📈 TradingView</button>
           <button class="at-plat-btn"        data-plat="atas"       onclick="ApexAutoTrack.select('atas')">🎯 ATAS</button>
           <button class="at-plat-btn"        data-plat="quantower"  onclick="ApexAutoTrack.select('quantower')">🧊 Quantower</button>
-          <button class="at-plat-btn"        data-plat="tradovate"  onclick="ApexAutoTrack.select('tradovate')">🎲 Tradovate</button>
+          <button class="at-plat-btn"        data-plat="tradovate"  onclick="ApexAutoTrack.select('tradovate')">🎲 Tradovate <span class="at-soon">soon</span></button>
           <button class="at-plat-btn"        data-plat="exchange"   onclick="ApexAutoTrack.select('exchange')">🪙 Crypto &amp; IBKR</button>
         </div>
 
@@ -33780,6 +33780,10 @@ body.light .pt-sugg{background:var(--layer)}
       '.at-plat-btn{padding:9px 15px;border-radius:10px;border:0.5px solid var(--rim2);background:var(--elevated);color:var(--ink2);font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:.15s}'+
       '.at-plat-btn:hover{border-color:var(--gold-line);color:var(--ink)}'+
       '.at-plat-btn.active{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold)}'+
+      /* Am Reiter selbst, damit niemand erst klicken muss, um zu sehen, dass
+         hier noch nichts zu holen ist. */
+      '.at-soon{font-size:9px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;opacity:.6;'+
+        'border:0.5px solid currentColor;border-radius:20px;padding:1px 6px;margin-left:5px;vertical-align:1px}'+
       '.at-card{background:var(--elevated);border:0.5px solid var(--rim);border-radius:14px;padding:20px 22px;max-width:760px}'+
       '.at-head{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:8px}'+
       '.at-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--ink)}'+
@@ -35725,10 +35729,44 @@ body.light .pt-sugg{background:var(--layer)}
   var _st = null;
 
   function html() {
+    /* Solange APEX_TRADOVATE_URL leer ist, gibt es keinen Anschluss — und ein
+       Verbinden-Knopf, der auf eine Fehlerseite bei Tradovate führt, ist
+       schlimmer als kein Knopf. Hier stand vorher eine Entwicklermeldung
+       ("window.APEX_TRADOVATE_URL is unset"), die echten Nutzern angezeigt
+       wurde; das war ein Versehen.
+
+       Der Text sagt bewusst, WORAN es hängt: Tradovate gibt Prop-Firm-Konten
+       nach allem, was ihr eigenes Forum hergibt, keinen API-Zugriff, und das
+       ist genau die Gruppe, für die dieser Anschluss gedacht ist. Ein "kommt
+       bald" ohne Grund wird zu einem Versprechen, an das sich Leute erinnern.
+       Sobald der Zugang steht, macht das Setzen von APEX_TRADOVATE_URL diesen
+       Block wieder unsichtbar — es ist keine zweite Stelle zu pflegen. */
     if (!base()) {
-      return '<div class="glass-card"><div class="gc-title">🎲 Tradovate</div>' +
-        '<div style="font-size:12px;color:var(--ink3);margin-top:6px">The Tradovate sync worker is not configured on this deployment yet ' +
-        '(<code>window.APEX_TRADOVATE_URL</code> is unset).</div></div>';
+      return '<div class="glass-card">' +
+        '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">' +
+          '<div class="gc-title" style="margin:0;flex:1">🎲 Tradovate</div>' +
+          '<span style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;' +
+            'color:var(--ink3);border:0.5px solid var(--rim2);border-radius:20px;padding:3px 10px">In Arbeit</span>' +
+        '</div>' +
+        '<div style="font-size:12.5px;color:var(--ink3);margin-top:9px;line-height:1.65">' +
+          'Der direkte Tradovate-Anschluss ist gebaut, aber noch nicht freigeschaltet. Der Grund liegt nicht bei uns: ' +
+          'Tradovate gibt <b>Konten von Prop-Firmen</b> — Topstep, Apex, MyFundedFutures — nach derzeitigem Stand ' +
+          'keinen API-Zugriff, und das ist genau die Gruppe, um die es hier geht. Wir klären das mit den Firmen, ' +
+          'bevor wir einen Knopf anbieten, der bei den meisten ins Leere läuft.' +
+        '</div>' +
+        '<div style="font-size:12.5px;color:var(--ink2);margin-top:11px;line-height:1.65">' +
+          '<b>Was heute schon geht:</b> Deine Futures-Fills per CSV importieren. Einmal die Spalten zuordnen, ' +
+          'danach erkennt Evidence das Format von selbst wieder — inklusive Prop-Konten.' +
+        '</div>' +
+        /* openCsvImport() ist die echte Einstiegsstelle — es gibt keine
+           eigene Import-Seite, der Import ist ein Modal über dem Journal. */
+        '<div style="margin-top:13px">' +
+          '<button onclick="nav(\'journal\');setTimeout(openCsvImport,300)" ' +
+            'style="padding:9px 16px;background:var(--elevated);border:0.5px solid var(--rim2);' +
+            'color:var(--ink2);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;' +
+            'font-family:var(--font-body)">📂 Trades per CSV importieren</button>' +
+        '</div>' +
+      '</div>';
     }
 
     var connected = _st && _st.status;
