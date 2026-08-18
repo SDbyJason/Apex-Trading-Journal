@@ -1,0 +1,90 @@
+# ══════════════════════════════════════════════════════════════════
+# Evidence — Wirtschaftskalender befüllen
+# ──────────────────────────────────────────────────────────────────
+# WARUM DAS HIER LIEGT UND NICHT IN CLOUDFLARE
+# Zwei Gründe, und beide sind hart:
+#
+#   1. ForexFactory blockt die geteilten Cloudflare-Ausgangs-IPs.
+#      Derselbe Feed antwortet einer normalen Verbindung mit 200 und
+#      dem Worker mit 429 (geprüft 18.08.2026). Der Worker kann sich
+#      also nicht selbst befüllen — egal wie oft er es versucht.
+#      GitHub-Runner laufen auf anderen IPs und kommen durch.
+#
+#   2. Cloudflares Free-Plan erlaubt fünf Cron-Trigger pro Konto, und
+#      dieses Projekt hat schon sechs Worker, die einen wollen. Hier
+#      ist der Cron kostenlos und zählt gegen kein Limit.
+#
+# EINRICHTUNG (einmalig)
+#   Repo → Settings → Secrets and variables → Actions → New secret:
+#     ECOCAL_SECRET   = derselbe Wert wie CRON_SECRET im Worker
+#     ECOCAL_URL      = https://econal.4kjyyyftv6.workers.dev
+#
+# Der Worker prüft das Secret; ohne gültigen Header antwortet /seed
+# mit 403. Ohne diesen Schutz könnte jeder allen Nutzern erfundene
+# Termine in den Kalender schreiben.
+# ══════════════════════════════════════════════════════════════════
+name: Economic calendar
+
+on:
+  schedule:
+    # Alle 30 Minuten. Der Feed ändert sich seltener, aber die Termine
+    # sind zeitkritisch genug, dass eine halbe Stunde die Obergrenze
+    # dessen ist, was man verpassen darf. GitHub führt Cron-Jobs unter
+    # Last verspätet aus — deshalb nicht enger takten, das bringt nichts.
+    - cron: '*/30 * * * *'
+  workflow_dispatch:        # Knopf zum Sofort-Auslösen im Actions-Tab
+
+# Zwei gleichzeitige Läufe wären nur doppelte Last auf einer Quelle,
+# die ohnehin drosselt.
+concurrency:
+  group: econcal
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Feed holen
+        id: fetch
+        run: |
+          set -euo pipefail
+          # Browser-User-Agent: der Feed antwortet nackten Clients nicht.
+          code=$(curl -sS -m 30 -o feed.json -w '%{http_code}' \
+            -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' \
+            -H 'Accept: application/json, text/plain, */*' \
+            -H 'Referer: https://www.forexfactory.com/' \
+            https://nfs.faireconomy.media/ff_calendar_thisweek.json)
+          echo "HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "::warning::Feed antwortete $code — Lauf wird übersprungen, der Worker behält seine letzte gute Kopie."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Plausibilität, bevor irgendetwas weitergeschickt wird: eine
+          # leere oder kaputte Antwort darf eine gute Kopie nicht ersetzen.
+          n=$(python3 -c "import json;d=json.load(open('feed.json'));print(len(d) if isinstance(d,list) else 0)")
+          echo "Zeilen: $n"
+          if [ "$n" -lt 10 ]; then
+            echo "::warning::Nur $n Zeilen — sieht nicht nach einer vollen Woche aus, wird verworfen."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: An den Worker schicken
+        if: steps.fetch.outputs.ok == 'true'
+        env:
+          URL: ${{ secrets.ECOCAL_URL }}
+          SECRET: ${{ secrets.ECOCAL_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${URL:-}" ] || [ -z "${SECRET:-}" ]; then
+            echo "::error::ECOCAL_URL oder ECOCAL_SECRET fehlt in den Repository-Secrets."
+            exit 1
+          fi
+          # --fail-with-body: bei 4xx/5xx die Antwort zeigen UND rot werden,
+          # sonst läuft ein 403 monatelang grün durch.
+          curl -sS --fail-with-body -m 30 -X POST "$URL/seed" \
+            -H "X-Cron-Secret: $SECRET" \
+            -H 'Content-Type: application/json' \
+            --data-binary @feed.json
+          echo
