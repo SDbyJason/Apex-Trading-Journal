@@ -8749,7 +8749,7 @@ body.light #landingPage * {
         <tr><td>Day Replay — a whole session, every trade in the order you took them</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Higher timeframe alongside the entry, running on the same clock</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Notes, tags &amp; chart snapshots written during the replay</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>10-second and 30-second candles rebuilt from raw ticks</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Stop-vs-target collisions resolved from real ticks, not guessed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Candlestick charts — drag entry / SL / TP</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto MFE / MAE from price data</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Risk of Ruin, Sharpe &amp; Expectancy / setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -9541,7 +9541,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">📚</div><div><div class="apex-feat-label">Four courses, and they check whether it worked</div><div class="apex-feat-desc">Twenty-seven written chapters on psychology, risk and position size, reading an edge, and backtesting without fooling yourself — all free to read publicly. What Pro adds is the part no course can do from an article: your own figures under every chapter, one commitment you pick and Evidence measures against your journal weeks later, questions you got wrong coming back after 7 and 30 days, and a chapter that surfaces itself when your own numbers cross a line</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🛰</div><div><div class="apex-feat-label">Run your own Space</div><div class="apex-feat-desc">Joining a community is free. Pro is what lets you run one: your own server with chat, voice rooms and real moderation, a feed where every post can carry the actual trades with a replay button on each, a board ranked by Evidence Score rather than profit, and a library you publish your playbooks and courses into — courses that appear in your members' Academy with the same progress tracking as the built-in ones. Plus the owner view no ranking gives you: who has not journalled in over a week, and whose process is slipping</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎯</div><div><div class="apex-feat-label">Strategy Drills — recognition, not reading</div><div class="apex-feat-desc">Describe your strategy, confirm the rules Evidence proposes, and it finds every place in years of real history where they applied. Then it shows them one at a time with the right-hand side of the chart hidden and asks what you would do. Four kinds of location, and the important one is the setup that was <em>valid and lost</em> — a trainer built only from winners teaches that a correct setup wins, and the first real loss then reads as a broken strategy. Scored on whether you followed the rules; the money is shown afterwards and counts for nothing</div></div></div>
-      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🔎</div><div><div class="apex-feat-label">10-second candles, rebuilt from ticks</div><div class="apex-feat-desc">Below a minute there is nothing to aggregate, so 10s and 30s bars are built from the raw tick stream — with the real bid and ask of that second. A quiet second that traded nothing is left as a gap rather than filled with a candle nobody printed</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🔎</div><div><div class="apex-feat-label">Tick-precise fills, not guessed ones</div><div class="apex-feat-desc">When a candle contains both your stop and your target, most replays pick one and move on. Evidence resolves it from the real tick stream of that minute — the bid and the ask as they actually printed — so the trade closes where it would have closed</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🔬</div><div><div class="apex-feat-label">Stat Lab — 68 metrics, sliced any way</div><div class="apex-feat-desc">The full catalogue — edge, risk, R, timing and execution — broken down by setup, symbol, session, timeframe, entry hour, account or month, and exportable as CSV</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🧮</div><div><div class="apex-feat-label">Build your own metrics</div><div class="apex-feat-desc">Write a formula over any statistic — your metric then appears everywhere the built-in ones do, and can be used inside other formulas</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">⏱️</div><div><div class="apex-feat-label">Tick-precision replay fills</div><div class="apex-feat-desc">When a stop and a target fall in the same candle, the real Dukascopy tick order decides which came first — instead of always assuming the stop won</div></div></div>
@@ -20680,26 +20680,26 @@ function showCsvError(msg) {
       '#recOverlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);' +
         'z-index:100000;display:none;align-items:center;justify-content:center;padding:16px}' +
       '#recOverlay.open{display:flex}' +
-      '#recBox{background:var(--card,#14161c);border:1px solid var(--line,#2a2d36);border-radius:16px;' +
+      '#recBox{background:var(--elevated);border:1px solid var(--rim2);border-radius:16px;' +
         'width:min(620px,100%);max-height:90vh;overflow:auto;padding:22px}' +
       '#recBox h3{margin:0 0 4px;font-size:17px}' +
       '.rec-sub{color:var(--ink3);font-size:12px;margin-bottom:16px}' +
       '.rec-grid{display:flex;flex-direction:column;gap:2px}' +
       '.rec-row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:9px 0;' +
-        'border-bottom:1px solid var(--line,#2a2d36)}' +
+        'border-bottom:1px solid var(--rim2)}' +
       '.rec-lbl{font-size:13px;color:var(--ink2)}' +
       '.rec-val{font-size:14px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}' +
       '.rec-note{grid-column:1/-1;font-size:11px;color:var(--ink3)}' +
       '.rec-tz{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;' +
-        'margin-top:16px;padding:12px;border:1px solid var(--line,#2a2d36);border-radius:10px}' +
-      '.rec-tz select{background:var(--bg2,#0f1116);color:var(--ink);border:1px solid var(--line,#2a2d36);' +
+        'margin-top:16px;padding:12px;border:1px solid var(--rim2);border-radius:10px}' +
+      '.rec-tz select{background:var(--surface);color:var(--ink);border:1px solid var(--rim2);' +
         'border-radius:8px;padding:7px 9px;font-size:13px}' +
       '.rec-range{margin-top:12px;font-size:12px;color:var(--ink2)}' +
       '.rec-check{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:12px;color:var(--ink2)}' +
       '.rec-btns{display:flex;gap:10px;margin-top:18px}' +
       '.rec-btns button{flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;' +
-        'border:1px solid var(--line,#2a2d36);background:transparent;color:var(--ink2)}' +
-      '#recConfirm{background:var(--gold,#d4af37);color:#000;border-color:transparent}' +
+        'border:1px solid var(--rim2);background:transparent;color:var(--ink2)}' +
+      '#recConfirm{background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;border-color:transparent}' +
       '#recConfirm:disabled{opacity:.45;cursor:not-allowed}';
     document.head.appendChild(css);
 
@@ -39222,7 +39222,7 @@ body.light .pt-sugg{background:var(--layer)}
       '.mt-flag.idle{background:rgba(255,255,255,.05);color:var(--ink3);border-color:rgba(255,255,255,.08)}',
       '.mt-flag.ok{background:rgba(60,190,130,.12);color:var(--profit);border-color:rgba(60,190,130,.22)}',
       '.mt-team{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;color:var(--gold);background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.22);padding:2px 8px;border-radius:7px}',
-      '.mt-sw{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.045)}',
+      '.mt-sw{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--layer)}',
       '.mt-sw:last-child{border-bottom:none}',
       '.mt-sw input{margin-top:3px;width:16px;height:16px;accent-color:var(--gold);cursor:pointer}',
       '.mt-sw .t{font-size:13px;font-weight:700;color:var(--ink)}',
@@ -39243,7 +39243,7 @@ body.light .pt-sugg{background:var(--layer)}
       '.mt-fb .who{font-size:11px;font-weight:800;color:var(--gold);margin-bottom:4px}',
       '.mt-fb .txt{font-size:13px;color:var(--ink2);line-height:1.55;white-space:pre-wrap}',
       '.mt-fb .when{font-size:10.5px;color:var(--ink3);margin-top:6px}',
-      '.mt-goal{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.045)}',
+      '.mt-goal{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--layer)}',
       '.mt-goal input{margin-top:2px;width:16px;height:16px;accent-color:var(--gold);cursor:pointer}',
       '.mt-goal.done .g-t{text-decoration:line-through;opacity:.5}',
       '.mt-goal .g-t{font-size:13px;color:var(--ink);font-weight:600}',
@@ -39642,7 +39642,7 @@ body.light .pt-sugg{background:var(--layer)}
             curveSVG(s.curve)+
           '</div>'+
           (flags.length?'<div class="mt-card"><h3>Warning signals</h3><p class="mt-sub">Detected automatically from the data this student shared.</p>'+
-            flags.map(function(f){ return '<div style="display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.045)">'+
+            flags.map(function(f){ return '<div style="display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--layer)">'+
               '<span class="mt-flag '+f.lvl+'">'+esc(f.t)+'</span><span style="font-size:12.5px;color:var(--ink2)">'+esc(f.d)+'</span></div>'; }).join('')+
             '</div>':'')+
           breakdownCard(snap)+
@@ -43940,6 +43940,11 @@ self.addEventListener('message', async (ev) => {
     days: 1,
     tf: '5m',
     balance: 10000,
+    /* Funded mode: when on, the replay account IS a prop account — its size,
+       its floor and its rules. Off is a plain backtest on own capital. */
+    funded: false,
+    fundedFirm: 'topstep',
+    fundedSize: 50000,
     lots: 0.10,
     slPips: 30,
     targets: [{ pips: 60, pct: 100 }],   // scale-out ladder: TP1, TP2, TP3
@@ -43955,6 +43960,54 @@ self.addEventListener('message', async (ev) => {
     busy: false,
     err: null
   };
+
+  /* ── funded mode helpers ──
+     The firm list is ApexPropPlus's, not a copy: one place in this codebase
+     knows what Topstep requires. */
+  function fundedPresets() {
+    try { return (window.ApexPropPlus && ApexPropPlus.PRESETS) || {}; } catch (e) { return {}; }
+  }
+  function fundedFirmOptions() {
+    var P = fundedPresets();
+    return Object.keys(P).filter(function (k) { return k !== 'custom'; })
+      .map(function (k) {
+        return '<option value="' + k + '"' + (k === S.fundedFirm ? ' selected' : '') + '>' +
+               esc(P[k].label) + '</option>';
+      }).join('');
+  }
+  function fundedSizeOptions() {
+    var sizes = [];
+    try { sizes = (window.ApexPropPlus && ApexPropPlus.SIZES) || []; } catch (e) {}
+    if (!sizes.length) sizes = [25000, 50000, 100000, 150000, 250000];
+    return sizes.map(function (n) {
+      return '<option value="' + n + '"' + (n === S.fundedSize ? ' selected' : '') + '>' +
+             '$' + n.toLocaleString('en-US') + '</option>';
+    }).join('');
+  }
+  /* The rules in one sentence, so nobody has to open the prop cockpit to find
+     out what they just agreed to trade under. */
+  function fundedRuleLine() {
+    var p = fundedPresets()[S.fundedFirm];
+    if (!p) return '';
+    var dd = p.dd === 'trailing' ? 'intraday trailing'
+           : p.dd === 'eod' ? 'end-of-day trailing' : 'static';
+    return '<b>' + esc(p.label) + '</b> on $' + S.fundedSize.toLocaleString('en-US') + ': ' +
+      p.target + '% target · ' + (p.daily ? p.daily + '% daily loss · ' : 'no daily limit · ') +
+      p.max + '% max drawdown (' + dd + ')' +
+      (p.consistency ? ' · ' + p.consistency + '% consistency' : '') +
+      (p.minDays ? ' · min ' + p.minDays + ' trading days' : '');
+  }
+
+  /* The rules are checked on the replay's own clock, so a breach lands on the
+     bar it happened on — not whenever the UI next repaints. */
+  function challengeTick(st) {
+    if (!window.ApexChallenge) return;
+    try { ApexChallenge.onBar(st || (S.session && S.session.state())); } catch (e) {}
+  }
+  function startFundedIfChosen() {
+    if (!S.funded || !window.ApexChallenge) return;
+    try { ApexChallenge.start(S.fundedFirm, S.fundedSize); } catch (e) {}
+  }
 
   var MAX_TARGETS = 3;
 
@@ -43977,16 +44030,20 @@ self.addEventListener('message', async (ev) => {
      cost more to load (a year of Daily candles is a year of day files), which
      is why the length picker below offers months and years once one is
      chosen, and why load shows a progress bar. */
-  /* 10s and 30s are not aggregated from the M1 files like every other step —
-     they are rebuilt from raw ticks (ApexMarketData.secondBars), which is a
-     far heavier fetch. That is why they only offer hour-sized lengths and
-     why they ask for a start TIME: a 3-hour window of 10-second candles
-     opened at midnight UTC is three hours of a dead tape. */
-  var TFS = [['10s', '10s'], ['30s', '30s'],
-             ['1m', '1m'], ['5m', '5m'], ['15m', '15m'], ['30m', '30m'],
+  /* 10s and 30s were offered here and are NOT any more (29.08.2026). They were
+     rebuilt from the raw tick stream rather than aggregated from the M1 files,
+     and in practice the replay did not work on them. An option that is there
+     and broken costs more trust than one that is missing.
+
+     The machinery is deliberately left standing — ApexMarketData.secondBars,
+     TF_MS and SESSION_TF_MS still know both steps — so re-enabling them is
+     putting two entries back in this list once the tick path is fixed. SUBMIN
+     stays too, with nothing in it: the setup screen and the length picker both
+     branch on it, and removing the branch would have to be undone as well. */
+  var TFS = [['1m', '1m'], ['5m', '5m'], ['15m', '15m'], ['30m', '30m'],
              ['1h', '1h'], ['4h', '4h'], ['1d', '1D'], ['1w', '1W']];
   var HTF = { '1d': 1, '1w': 1 };      // timeframes that need a long range
-  var SUBMIN = { '10s': 1, '30s': 1 }; // timeframes rebuilt from ticks
+  var SUBMIN = {};                     // was 10s/30s — see the note above
 
   /* Below 1× so a fast market can be watched candle by candle without
      reaching for the step button, up to 10× so a quiet Asian session can be
@@ -44167,6 +44224,14 @@ self.addEventListener('message', async (ev) => {
       '.arp-scrub:hover .arp-tip,.arp-scrub.dragging .arp-tip{opacity:1}',
       /* jump bar — sessions, next day, calendar */
       '.arp-jump{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-4px 0 10px}',
+      /* Funded mode spans the setup grid: the rule line under it is a whole
+         sentence and must not be squeezed into one column. */
+      '.arp-funded{grid-column:1/-1}',
+      '.arp-funded > label{display:flex;align-items:center;gap:7px;cursor:pointer;color:var(--ink2);font-size:12.5px}',
+      '.arp-funded-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}',
+      '.arp-funded-row select{background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;' +
+        'color:var(--ink);padding:6px 9px;font-size:12px;font-family:var(--font-body)}',
+      '.arp-funded-note{font-size:11.5px;color:var(--ink3);margin-top:7px;line-height:1.6}',
       '.arp-jump-l{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);margin-right:2px}',
       '.arp-jump-sep{width:1px;height:16px;background:var(--rim);margin:0 4px}',
       '.arp-jump-date{background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);' +
@@ -44338,8 +44403,27 @@ self.addEventListener('message', async (ev) => {
           }).join('') +
         '</select></div>' +
         '<div class="el-fld"><label>Timeframe</label><select id="arpTf">' + opt(TFS, S.tf) + '</select></div>' +
-        '<div class="el-fld"><label>Start balance</label><input id="arpBal" type="number" value="' + S.balance + '" min="100" step="100"></div>' +
-        '<button class="el-btn gold" id="arpStart">▶ Start replay</button>' +
+        '<div class="el-fld"><label>Start balance</label><input id="arpBal" type="number" value="' + S.balance + '" min="100" step="100"' +
+          (S.funded ? ' disabled title="Set by the funded account size"' : '') + '></div>' +
+        /* Funded mode is decided HERE, before the first candle — not halfway
+           through. A challenge that starts mid-session has to reset the
+           account to the firm's size, which throws away whatever was traded
+           up to that point; asking first avoids that entirely. */
+        '<div class="el-fld arp-funded"><label>' +
+          '<input type="checkbox" id="arpFunded"' + (S.funded ? ' checked' : '') + '> Funded mode' +
+        '</label>' +
+          (S.funded
+            ? '<div class="arp-funded-row">' +
+                '<select id="arpFundedFirm">' + fundedFirmOptions() + '</select>' +
+                '<select id="arpFundedSize">' + fundedSizeOptions() + '</select>' +
+              '</div>' +
+              '<div class="arp-funded-note">' + fundedRuleLine() + '</div>'
+            : '<div class="arp-funded-note">Off: a normal backtest on your own capital. ' +
+              'On: the account size, the drawdown floor, the daily loss limit and the profit target ' +
+              'of a real prop firm are enforced while you trade — and the account is closed the ' +
+              'moment you breach one, exactly as the firm would.</div>') +
+        '</div>' +
+        '<button class="el-btn gold" id="arpStart">▶ ' + (S.funded ? 'Start challenge' : 'Start replay') + '</button>' +
         '<button class="el-btn" id="arpRand" title="Jump to a random past weekday — no peeking">🎲 Random date</button>' +
       '</div>' +
       '<div class="el-note" id="arpHist">' +
@@ -45801,12 +45885,7 @@ self.addEventListener('message', async (ev) => {
           enabled: function () { return !S.draw || S.draw.tool === 'cursor'; },
           onDrag: dragLabel, onCommit: commitDrag
         });
-        S.session.on('state', function (st) {
-          paint();
-          /* The rules are checked on the replay's own clock, so a stop-out
-             happens on the bar it happened on — not when the UI repaints. */
-          try { if (window.ApexChallenge) ApexChallenge.onBar(st || S.session.state()); } catch (e) {}
-        });
+        S.session.on('state', function (st) { paint(); challengeTick(st); });
         S.session.on('end', function () { toast('Replay finished — end of data'); });
         bindCockpit(body);
         restoreTickMode();
@@ -45873,7 +45952,7 @@ self.addEventListener('message', async (ev) => {
           enabled: function () { return !S.draw || S.draw.tool === 'cursor'; },
           onDrag: dragLabel, onCommit: commitDrag
         });
-        S.session.on('state', function () { paint(); });
+        S.session.on('state', function (st) { paint(); challengeTick(st); });
         S.session.on('end', function () { toast('Replay finished — end of data'); });
         S.session.on('stopout', function () { toast('💀 Margin stop-out'); });
         bindCockpit(body);
@@ -45963,7 +46042,19 @@ self.addEventListener('message', async (ev) => {
     S.days = parseFloat((document.getElementById('arpDays') || {}).value) || 1;
     S.tf = (document.getElementById('arpTf') || {}).value || S.tf;
     S.time = (document.getElementById('arpTime') || {}).value || S.time || '08:00';
-    S.balance = parseFloat((document.getElementById('arpBal') || {}).value) || 10000;
+    /* In funded mode the account size is the firm's, not a free-text field —
+       a challenge measured against a balance the firm never granted is
+       meaningless, which is exactly the bug this replaces. */
+    S.funded = !!(document.getElementById('arpFunded') || {}).checked;
+    if (S.funded) {
+      var ffSel = document.getElementById('arpFundedFirm');
+      var fsSel = document.getElementById('arpFundedSize');
+      if (ffSel) S.fundedFirm = ffSel.value;
+      if (fsSel) S.fundedSize = parseFloat(fsSel.value) || 50000;
+      S.balance = S.fundedSize;
+    } else {
+      S.balance = parseFloat((document.getElementById('arpBal') || {}).value) || 10000;
+    }
     S.err = null;
     // A fresh run is a fresh backtest — never write over the one last opened.
     S.savedId = null; S.savedName = null;
@@ -46008,10 +46099,14 @@ self.addEventListener('message', async (ev) => {
       });
       // Wrapped, not passed directly: the event hands over a state object which
       // would arrive as paint(force) and defeat the throttle on every bar.
-      S.session.on('state', function () { paint(); });
+      S.session.on('state', function (st) { paint(); challengeTick(st); });
       S.session.on('end', function () { toast('Replay finished — end of data'); });
       S.session.on('stopout', function () { toast('💀 Margin stop-out'); });
       bindCockpit(body);
+      /* Funded mode was chosen on the setup screen, so the challenge starts
+         with the first candle rather than being armed later — that is the
+         whole point of deciding it up front. */
+      startFundedIfChosen();
       restoreTickMode();
       /* A 5-minute session is one day file and lands instantly. A 2-year
          Daily session is a thousand of them, and a cockpit that simply sits
@@ -46116,6 +46211,24 @@ self.addEventListener('message', async (ev) => {
     var symSel = document.getElementById('arpSym');
     if (symSel) symSel.addEventListener('change', function () { S.symbol = this.value; showHistory(); });
     showHistory();
+
+    /* Toggling funded mode re-renders the setup: the balance field becomes
+       read-only and the firm's rules appear, so the trader sees what they are
+       about to be measured against before the first candle. */
+    var fk = document.getElementById('arpFunded');
+    if (fk) fk.addEventListener('change', function () {
+      S.funded = this.checked;
+      if (S.funded) S.balance = S.fundedSize;
+      render(body);
+    });
+    var ff = document.getElementById('arpFundedFirm');
+    if (ff) ff.addEventListener('change', function () { S.fundedFirm = this.value; render(body); });
+    var fs = document.getElementById('arpFundedSize');
+    if (fs) fs.addEventListener('change', function () {
+      S.fundedSize = parseFloat(this.value) || 50000;
+      S.balance = S.fundedSize;
+      render(body);
+    });
 
     var rd = document.getElementById('arpRand');
     if (rd) rd.addEventListener('click', function () {
@@ -59685,7 +59798,7 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       '.sh-meta{font-size:11.5px;color:var(--ink3);margin-top:2px}' +
       '.sh-err{font-size:11.5px;color:var(--loss);margin-top:4px;line-height:1.5}' +
       '.sh-act{display:flex;gap:6px;flex:none}' +
-      '.sh-btn{padding:6px 11px;background:var(--elevated);border:0.5px solid var(--rim2);' +
+      '.sh-btn{padding:6px 11px;background:var(--layer);border:0.5px solid var(--rim2);' +
         'color:var(--ink2);border-radius:8px;cursor:pointer;font-size:11.5px;font-weight:600;' +
         'font-family:var(--font-body)}' +
       '.sh-banner{margin-top:10px;padding:9px 11px;border-radius:9px;font-size:12px;' +
@@ -59937,7 +60050,7 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       '#jsOverlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);' +
         'z-index:99990;display:none;align-items:flex-start;justify-content:center;padding:8vh 16px 16px}' +
       '#jsOverlay.open{display:flex}' +
-      '#jsBox{background:var(--card,#14161c);border:0.5px solid var(--rim2,#2a2d36);border-radius:16px;' +
+      '#jsBox{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:16px;' +
         'width:min(780px,100%);max-height:80vh;display:flex;flex-direction:column;overflow:hidden}' +
       '#jsInput{width:100%;padding:16px 18px;background:transparent;border:0;outline:none;' +
         'color:var(--ink);font-size:16px;font-family:var(--font-body)}' +
@@ -59950,7 +60063,7 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
          classes, and one of them was turning this into a grid, which
          stacked the note on top of the P&L. */
       '#jsBody .js-row{display:block;padding:10px 8px;border-radius:10px;cursor:pointer}' +
-      '#jsBody .js-row:hover{background:rgba(255,255,255,.045)}' +
+      '#jsBody .js-row:hover{background:var(--layer)}' +
       '#jsBody .js-row-top{display:flex;gap:8px;align-items:baseline;font-size:12.5px}' +
       '#jsBody .js-sym{font-weight:700;color:var(--ink)}' +
       '#jsBody .js-dir{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}' +
@@ -59961,8 +60074,8 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       '#jsBody .js-pnl{font-weight:700;font-variant-numeric:tabular-nums}' +
       '#jsBody .js-note{font-size:12px;color:var(--ink2);margin-top:4px;line-height:1.55}' +
       '#jsBody .js-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}' +
-      '#jsBody .js-chip{font-size:10.5px;padding:2px 7px;border-radius:20px;background:var(--elevated);color:var(--ink3)}' +
-      '.js-hit{background:rgba(201,168,76,.28);color:inherit;border-radius:3px;padding:0 1px}' +
+      '#jsBody .js-chip{font-size:10.5px;padding:2px 7px;border-radius:20px;background:var(--layer);color:var(--ink3)}' +
+      '.js-hit{background:var(--gold-glow);color:inherit;border-radius:3px;padding:0 1px}' +
       '.js-empty{padding:22px 12px;font-size:12.5px;color:var(--ink3);text-align:center;line-height:1.65}';
     document.head.appendChild(css);
 
@@ -60177,20 +60290,20 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       document.body.appendChild(ov);
     }
     ov.innerHTML =
-      '<div style="background:var(--card,#14161c);border:0.5px solid var(--rim2,#2a2d36);' +
+      '<div style="background:var(--elevated);border:0.5px solid var(--rim2);' +
         'border-radius:16px;padding:18px;max-width:min(460px,100%)">' +
         '<img src="' + url + '" style="width:100%;border-radius:12px;display:block">' +
         '<div style="display:flex;gap:8px;margin-top:14px">' +
           '<button id="proofSave" style="flex:1;padding:11px;border-radius:10px;border:none;' +
-            'background:var(--gold,#c9a84c);color:#07080b;font-weight:700;font-size:13px;cursor:pointer">Save image</button>' +
+            'background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;font-weight:700;font-size:13px;cursor:pointer">Save image</button>' +
           '<button id="proofCopy" style="flex:1;padding:11px;border-radius:10px;cursor:pointer;' +
-            'border:0.5px solid var(--rim2,#2a2d36);background:transparent;color:var(--ink2,#c7cad1);' +
+            'border:0.5px solid var(--rim2);background:transparent;color:var(--ink2);' +
             'font-weight:600;font-size:13px">Copy</button>' +
           '<button onclick="document.getElementById(\'proofOverlay\').remove()" ' +
-            'style="padding:11px 14px;border-radius:10px;cursor:pointer;border:0.5px solid var(--rim2,#2a2d36);' +
-            'background:transparent;color:var(--ink3,#8b8f99);font-size:13px">Close</button>' +
+            'style="padding:11px 14px;border-radius:10px;cursor:pointer;border:0.5px solid var(--rim2);' +
+            'background:transparent;color:var(--ink3);font-size:13px">Close</button>' +
         '</div>' +
-        '<div style="font-size:11px;color:var(--ink4,#6b6f78);margin-top:10px;line-height:1.55">' +
+        '<div style="font-size:11px;color:var(--ink4);margin-top:10px;line-height:1.55">' +
           'Nothing is posted anywhere. The image contains only what you see here — no account size, ' +
           'no P&amp;L, no broker.</div>' +
       '</div>';
@@ -60409,7 +60522,7 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
     var el = document.createElement('style');
     el.textContent =
       '.tc-payoff{margin-top:10px;padding:10px;border:0.5px solid var(--rim2);border-radius:10px;' +
-        'background:var(--elevated)}' +
+        'background:var(--layer)}' +
       '.tc-payoff-head{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;' +
         'font-weight:700;color:var(--ink3);margin-bottom:6px}' +
       '.tc-payoff-nums{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);margin-top:7px}' +
@@ -60672,7 +60785,28 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
   C.start = function(presetKey, balance){
     var p = presets()[presetKey];
     if (!p || !(balance > 0)) return null;
+
+    /* THE BUG THIS FIXES: the badge read the replay account's equity straight
+       out of the session and compared it to the firm's floor. In funded mode
+       the two now agree, because the session is created with the challenge
+       size. But a challenge started mid-replay sits on whatever balance that
+       session already had — a $10,000 practice account measured against a
+       $45,000 floor showed a $35,000 loss before a single trade.
+
+       So the session's equity at this moment is the zero point, and the
+       challenge tracks the CHANGE from it. When funded mode set the account
+       size the baseline equals the start and the mapping is one to one;
+       started mid-session it measures from here, which is the only honest
+       reading of "start a challenge now". */
+    var baseline = balance;
+    try {
+      var sess0 = window.ApexReplayUI && ApexReplayUI._state && ApexReplayUI._state.session;
+      var st0 = sess0 && sess0.state();
+      if (st0 && isFinite(Number(st0.equity))) baseline = Number(st0.equity);
+    } catch(e){}
+
     S = {
+      baseline: baseline,
       key: presetKey, label: p.label, rules: p,
       start: balance,
       maxDD: balance * (p.max || 0) / 100,
@@ -60719,9 +60853,13 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
   C.onBar = function(st){
     if (!S || S.status !== 'running' || !st) return;
 
-    var eq  = Number(st.equity);
-    var bal = Number(st.balance);
-    if (!isFinite(eq) || !isFinite(bal)) return;
+    var rawEq  = Number(st.equity);
+    var rawBal = Number(st.balance);
+    if (!isFinite(rawEq) || !isFinite(rawBal)) return;
+    // Into challenge space: the account started at S.start, and has moved by
+    // whatever the replay account has moved since the challenge began.
+    var eq  = S.start + (rawEq  - S.baseline);
+    var bal = S.start + (rawBal - S.baseline);
 
     var d = dayOf(st.time);
     if (S.day == null) { S.day = d; S.dayOpen = bal; }
@@ -60799,7 +60937,9 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
     var sess = null;
     try { sess = window.ApexReplayUI && ApexReplayUI._state && ApexReplayUI._state.session; } catch(e){}
     var st = sess ? sess.state() : null;
-    var eq = st ? Number(st.equity) : S.start;
+    var eq = (st && isFinite(Number(st.equity)))
+      ? S.start + (Number(st.equity) - S.baseline)
+      : S.start;
     var buffer = eq - S.floor;
     var bufPct = S.maxDD > 0 ? Math.max(0, Math.min(100, buffer / S.maxDD * 100)) : null;
     var prog = S.target > 0 ? Math.max(0, Math.min(100, (eq - S.start) / S.target * 100)) : null;
@@ -60836,8 +60976,12 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
     var sizes = [25000, 50000, 100000, 150000, 250000]
       .map(function(n){ return '<option value="' + n + '"' + (n === 50000 ? ' selected' : '') +
                                '>' + money(n) + '</option>'; }).join('');
-    return '<div class="chal-picker">' +
-      '<span class="chal-picker-l">Challenge mode</span>' +
+    /* Starting one here measures from the account's CURRENT equity, not from
+       the beginning of the session — the honest reading of "start now". To
+       trade a whole challenge from the first candle, tick Funded mode on the
+       setup screen instead. */
+    return '<div class="chal-picker" title="Measures from the account\'s current equity. For a full challenge, use Funded mode on the setup screen.">' +
+      '<span class="chal-picker-l">Challenge from here</span>' +
       '<select id="chalPreset">' + opts + '</select>' +
       '<select id="chalSize">' + sizes + '</select>' +
       '<button onclick="ApexChallenge.startFromPicker()">Start</button>' +
@@ -60869,7 +61013,7 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       '.chal-picker select{background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;' +
         'color:var(--ink);padding:4px 7px;font-size:11.5px;font-family:var(--font-body)}' +
       '.chal-picker button{padding:4px 11px;border-radius:8px;border:0.5px solid var(--rim2);' +
-        'background:var(--elevated);color:var(--ink2);font-size:11.5px;font-weight:600;cursor:pointer}';
+        'background:var(--layer);color:var(--ink2);font-size:11.5px;font-weight:600;cursor:pointer}';
     document.head.appendChild(el);
   });
 })();
@@ -61113,7 +61257,7 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.createElement('style');
     el.textContent =
-      '.cf-card{background:var(--card,#14161c);border:0.5px solid var(--rim2);border-radius:14px;padding:16px;margin-top:16px}' +
+      '.cf-card{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:14px;padding:16px;margin-top:16px}' +
       '.cf-card h3{margin:0 0 8px;font-size:15px}' +
       '.cf-note{font-size:12px;color:var(--ink3);line-height:1.6}' +
       '.cf-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}' +
@@ -61126,7 +61270,7 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       '.cf-table td{padding:8px;border-bottom:0.5px solid var(--rim);color:var(--ink2);vertical-align:top}' +
       '.cf-table .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}' +
       '.cf-table .pos{color:var(--profit)}.cf-table .neg{color:var(--loss)}' +
-      '.cf-cond{display:inline-block;background:var(--elevated);border-radius:7px;padding:2px 8px;margin:1px 0}' +
+      '.cf-cond{display:inline-block;background:var(--layer);border-radius:7px;padding:2px 8px;margin:1px 0}' +
       '.cf-cond i{display:block;font-style:normal;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4)}' +
       '.cf-and{color:var(--ink4);margin:0 5px;font-weight:700}';
     document.head.appendChild(el);
@@ -61311,7 +61455,8 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       '.mt-in{background:var(--surface);border:0.5px solid var(--rim);border-radius:9px;color:var(--ink);' +
         'padding:8px 10px;font-size:12.5px;font-family:var(--font-body);min-width:150px}' +
       '.mt-in.wide{flex:1;min-width:220px}' +
-      '.mt-connect{padding:8px 20px;border-radius:9px;border:none;background:var(--gold);color:#07080b;' +
+      '.mt-connect{padding:8px 20px;border-radius:9px;border:none;' +
+        'background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;' +
         'font-weight:700;font-size:12.5px;cursor:pointer}' +
       '.mt-connect:disabled{opacity:.5;cursor:default}' +
       '.mt-hint{font-size:11px;color:var(--ink4);margin-top:9px;line-height:1.6}' +
