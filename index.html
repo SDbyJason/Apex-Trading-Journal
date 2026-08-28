@@ -28014,7 +28014,7 @@ function goToAuthPro(screen) {
 
   /* ───────────────────── PAGE shell ───────────────────── */
   var TABS=[
-    ['metrics','Metrics'],['stats','Stat Lab'],['options','Options'],['rrisk','R & Risk'],['timing','Timing & Exits'],
+    ['metrics','Metrics'],['dash','Dashboards'],['stats','Stat Lab'],['options','Options'],['rrisk','R & Risk'],['timing','Timing & Exits'],
     ['mfemae','MFE / MAE'],['whatif','What-If'],['replay','Replay'],
     ['sim','Market Replay'],
     /* Strategy Lab is the automated counterpart of Market Replay: rules over
@@ -28085,7 +28085,7 @@ function goToAuthPro(screen) {
       body.innerHTML='<div class="el-card"><div class="el-empty"><div class="big">⚡</div>No trades with a determinable result yet.<br>Log trades with pips or P&L to unlock Edge Lab analytics.</div></div>';
       return;
     }
-    ({ metrics:renderMetrics, stats:renderStatLab, options:renderOptions, rrisk:renderRRisk, timing:renderTiming,
+    ({ metrics:renderMetrics, dash:renderDashboards, stats:renderStatLab, options:renderOptions, rrisk:renderRRisk, timing:renderTiming,
        mfemae:renderMfeMae, whatif:renderWhatIf, replay:renderReplay,
        sim:renderMarketReplay, strategy:renderStrategyLab,
        backtest:renderBacktest, gallery:renderGallery, missed:renderMissed, share:renderShare }[EL.tab]||renderMetrics)(body, rows);
@@ -28278,6 +28278,11 @@ function goToAuthPro(screen) {
   var SL_STATE = { q:'', group:'', dim:'', sortCol:null, sortDir:-1 };
 
   function slRows(){ return sortedValued().map(function(r){ return { t:r.t, v:r.v, R:rOf(r.t, r.v) }; }); }
+  /* Published so the Dashboards tab feeds ApexStats the IDENTICAL rows the
+     Stat Lab does — same trade values, same R. Rebuilding them over there
+     would be a second definition of "what a trade is worth", and the two
+     would drift the first time either side changed. */
+  EL.statRows = slRows;
 
   function renderStatLab(body, rows){
     var S = window.ApexStats;
@@ -30362,6 +30367,20 @@ function goToAuthPro(screen) {
       return;
     }
     window.ApexReplayUI.render(body);
+  }
+
+  /* ═══════════════ TAB: DASHBOARDS ═══════════════
+     One level above the fixed tabs: the trader assembles the view instead of
+     picking from ours. Lives in its own module so this file's Edge Lab does
+     not grow a third rendering style. */
+  function renderDashboards(body){
+    if (!window.ApexDash){
+      body.innerHTML = '<div class="el-card"><div class="el-empty"><div class="big">⏳</div>' +
+        'Dashboard module not loaded.</div></div>';
+      return;
+    }
+    body.innerHTML = '<div class="el-card"><div id="dashHost"></div></div>';
+    ApexDash.pull().then(function(){ ApexDash.render(); });
   }
 
   /* ═══════════════ TAB: STRATEGY LAB (rules over historical market data) ═══════════════ */
@@ -34724,6 +34743,29 @@ body.light .pt-sugg{background:var(--layer)}
     try { if (window.apexFillTradeTimes) window.apexFillTradeTimes(t); } catch(_){}
     try { if(window.ApexLiveCoach) ApexLiveCoach.reviewTrade(t); } catch(_){}
   }
+  /* Duplicate guard for the SYNC paths.
+
+     The event stream already keys on posId, which catches a redelivery of the
+     same event. It does not catch the other case: the same fill arriving twice
+     through two different doors — a cTrader background poll and a CSV import
+     of the same statement, or a webhook and a manual entry. The CSV import has
+     had a proper test for that since the reconciliation screen was built, and
+     it was exported precisely so the sync paths could use the identical rule
+     instead of growing a second, subtly different one.
+
+     Recomputed per drain, not cached: a drain can be minutes after the last. */
+  var _known = null;
+  function alreadyJournalled(t){
+    try {
+      if (!window.ApexReconcile) return false;
+      if (!_known) _known = ApexReconcile.knownHashes();
+      var h = ApexReconcile.hashOf(t);
+      if (_known[h]) return true;
+      _known[h] = 1;               // so two events in one drain cannot both land
+      return false;
+    } catch(e){ return false; }
+  }
+
   function openTrade(e){
     var ot = e.time || Date.now();
     var t = { symbol:e.symbol||'', dir:e.dir||'', entry:(e.price!=null?String(e.price):''),
@@ -34741,6 +34783,7 @@ body.light .pt-sugg{background:var(--layer)}
     // Same id under the name the browser sync uses, so a later /api/deals
     // run updates this row instead of appending a second one.
     if (e.source === 'ctrader' && e.posId) t.ctraderId = String(e.posId);
+    if (alreadyJournalled(t)) { _dupes++; return null; }
     ensureDay(dayKey(ot)).trades.push(t);
     try { if(window.ApexSnapshot) ApexSnapshot.onTradeOpened({ symbol:t.symbol, dir:t.dir, entry:t.entry, sl:t.sl, tp:t.tp, openTime:ot, snapKey:t.extId }); } catch(_){}
     try { if(window.ApexLiveCoach) ApexLiveCoach.onTradeOpened(t); } catch(_){}
@@ -34781,6 +34824,7 @@ body.light .pt-sugg{background:var(--layer)}
         manuallyEdited:false, pnl:(e.pnl!=null?e.pnl:''),
         commission:(e.commission!=null?e.commission:''), swap:(e.swap!=null?e.swap:'') };
       if (e.source === 'ctrader' && e.posId) orphan.ctraderId = String(e.posId);
+      if (alreadyJournalled(orphan)) { _dupes++; return; }
       ensureDay(dayKey(ct)).trades.push(orphan);
       return;
     }
@@ -34802,11 +34846,12 @@ body.light .pt-sugg{background:var(--layer)}
     openTrade(e);
   }
 
-  var _draining=false;
+  var _draining=false, _dupes=0;
   function drain(){
     if(_draining || !window.db || !window.currentUID) return;
     if(window.currentPlan !== 'pro') return;   // auto-tracking import is a Pro feature
     _draining=true;
+    _dupes=0; _known=null;                     // fresh view of the journal per drain
     var ref=window.db.collection('apexUsers').doc(window.currentUID).collection('inbox');
     ref.orderBy('receivedAt').limit(100).get().then(function(snap){
       var n=0;
@@ -34816,12 +34861,24 @@ body.light .pt-sugg{background:var(--layer)}
         try{ if(window.pushToCloud) pushToCloud(); }catch(e){}
         try{ if(window.renderTrades && window.currentJournalKey) renderTrades(); }catch(e){}
         try{ if(window.updateOverview) updateOverview(); }catch(e){}
-        if(window.showToast) showToast('📥 Imported '+n+' trade event'+(n!==1?'s':''));
+        /* Say what happened, including what was NOT written. A silent skip is
+           indistinguishable from a lost trade the first time somebody counts
+           their rows against the broker statement — and that is exactly the
+           moment they stop trusting the numbers. */
+        if(window.showToast) showToast('📥 Imported '+n+' trade event'+(n!==1?'s':'')+
+          (_dupes ? ' · '+_dupes+' duplicate'+(_dupes!==1?'s':'')+' skipped' : ''));
+        if(_dupes && window.pushNotif){
+          try {
+            pushNotif('trade', '<strong>'+_dupes+' duplicate trade'+(_dupes!==1?'s':'')+
+              '</strong> skipped — they were already in your journal',
+              "nav('journal');");
+          } catch(e){}
+        }
       }
     }).catch(function(e){ console.warn('[inbox] drain', e); }).then(function(){ _draining=false; });
   }
 
-  window.ApexInbox = { drain: drain };
+  window.ApexInbox = { drain: drain, _dupes: function(){ return _dupes; } };
 
   // Start once the user is known; poll every 30s + an initial pull
   var started=false;
@@ -35069,7 +35126,10 @@ body.light .pt-sugg{background:var(--layer)}
       '<div class="rpt-tiles" id="rptTiles"></div>'+
       '<div class="rpt-chartwrap"><canvas id="rptChart"></canvas></div>'+
       '<div style="overflow-x:auto"><table class="rpt-table" id="rptTable"></table></div>'+
-      '<div id="rptDrill"></div>';
+      '<div id="rptDrill"></div>'+
+      /* Next to the CSV and PDF buttons in spirit, but its own card: it
+         exports the JOURNAL, not the report currently on screen. */
+      '<div id="rptNotion"></div>';
     ref.parentNode.appendChild(page);
 
     // nav entry after Statistics
@@ -35130,6 +35190,12 @@ body.light .pt-sugg{background:var(--layer)}
         '<div class="rpt-tile"><b>'+(a.winrate==null?'—':a.winrate.toFixed(0)+'%')+'</b><span>'+label+'Winrate</span></div>';
     }
     document.getElementById('rptTiles').innerHTML = tiles(aggA, S.cmp?'A · ':'') + (S.cmp ? tiles(aggB,'B · ') : '');
+
+    /* Painted once per render rather than at build time: the module loads
+       from the appended block at the end of the file, which is after this
+       page is first constructed. */
+    var nx = document.getElementById('rptNotion');
+    if (nx && window.ApexNotion && !nx.innerHTML) nx.innerHTML = ApexNotion.html();
 
     // union of keys, sorted by |metric A| desc
     var keys={};
@@ -51858,28 +51924,121 @@ self.addEventListener('message', async (ev) => {
 
   /* Published rule sets, as of the last review. Firms change terms, so every
      field stays editable and the preset only fills the form in. */
+  /* WHEN a trading day starts matters as much as the limits themselves. A
+     daily loss limit is measured from the firm's own daily reset — the
+     futures firms roll at the 17:00 close of their exchange's timezone, the
+     forex firms at midnight on a European server. Measuring both against
+     midnight UTC puts a late New York trade on the wrong day, and therefore
+     under the wrong daily limit.
+
+     `tz` is an IANA zone so daylight saving is handled by the browser rather
+     than by a fixed offset that is wrong half the year. `reset` is the local
+     hour at which the next trading day begins.
+
+     These are the published close times as of the last review. Firms change
+     terms, and the fields stay editable everywhere they are used. */
   var PRESETS = {
-    custom:      { label: 'Custom / other',            target: 0,  daily: 0,  max: 0,  dd: 'static',   consistency: 0,  minDays: 0 },
-    ftmo:        { label: 'FTMO — 2-step',             target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 4 },
-    ftmoswing:   { label: 'FTMO — Swing',              target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 4 },
-    the5ers:     { label: 'The5ers — High Stakes',     target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 3 },
-    fundednext:  { label: 'FundedNext — Evaluation',   target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 5 },
-    e8:          { label: 'E8 Markets',                target: 8,  daily: 5,  max: 8,  dd: 'static',   consistency: 0,  minDays: 0 },
-    apex:        { label: 'Apex Trader Funding',       target: 6,  daily: 0,  max: 6,  dd: 'trailing', consistency: 30, minDays: 7 },
-    topstep:     { label: 'Topstep — Trading Combine', target: 6,  daily: 2,  max: 4,  dd: 'eod',      consistency: 50, minDays: 2 },
-    takeprofit:  { label: 'TakeProfit Trader',         target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 0,  minDays: 5 },
-    mff:         { label: 'MyFundedFutures — Starter',  target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 40, minDays: 1 },
-    mffexpert:   { label: 'MyFundedFutures — Expert',   target: 6,  daily: 2,  max: 3,  dd: 'eod',      consistency: 0,  minDays: 1 },
-    alphafut:    { label: 'Alpha Futures — Evaluation', target: 6,  daily: 0,  max: 5,  dd: 'eod',      consistency: 0,  minDays: 3 },
-    bulenox:     { label: 'Bulenox — Evaluation',       target: 6,  daily: 0,  max: 4,  dd: 'trailing', consistency: 0,  minDays: 0 },
-    fundingpips: { label: 'Funding Pips — 2-step',      target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 0 },
-    alphacap:    { label: 'Alpha Capital Group',        target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 0 },
-    generic1:    { label: 'Generic 1-step',             target: 10, daily: 5,  max: 6,  dd: 'static',   consistency: 0,  minDays: 0 }
+    custom:      { label: 'Custom / other',            target: 0,  daily: 0,  max: 0,  dd: 'static',   consistency: 0,  minDays: 0,  tz: 'UTC',              reset: 0 },
+    ftmo:        { label: 'FTMO — 2-step',             target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 4,  tz: 'Europe/Prague',    reset: 0 },
+    ftmoswing:   { label: 'FTMO — Swing',              target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 4,  tz: 'Europe/Prague',    reset: 0 },
+    the5ers:     { label: 'The5ers — High Stakes',     target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 3,  tz: 'Europe/Prague',    reset: 0 },
+    fundednext:  { label: 'FundedNext — Evaluation',   target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 5,  tz: 'Europe/Prague',    reset: 0 },
+    e8:          { label: 'E8 Markets',                target: 8,  daily: 5,  max: 8,  dd: 'static',   consistency: 0,  minDays: 0,  tz: 'Europe/Prague',    reset: 0 },
+    apex:        { label: 'Apex Trader Funding',       target: 6,  daily: 0,  max: 6,  dd: 'trailing', consistency: 30, minDays: 7,  tz: 'America/New_York', reset: 17 },
+    topstep:     { label: 'Topstep — Trading Combine', target: 6,  daily: 2,  max: 4,  dd: 'eod',      consistency: 50, minDays: 2,  tz: 'America/Chicago',  reset: 17 },
+    takeprofit:  { label: 'TakeProfit Trader',         target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 0,  minDays: 5,  tz: 'America/Chicago',  reset: 17 },
+    mff:         { label: 'MyFundedFutures — Starter',  target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 40, minDays: 1, tz: 'America/New_York', reset: 17 },
+    mffexpert:   { label: 'MyFundedFutures — Expert',   target: 6,  daily: 2,  max: 3,  dd: 'eod',      consistency: 0,  minDays: 1, tz: 'America/New_York', reset: 17 },
+    alphafut:    { label: 'Alpha Futures — Evaluation', target: 6,  daily: 0,  max: 5,  dd: 'eod',      consistency: 0,  minDays: 3, tz: 'America/New_York', reset: 17 },
+    bulenox:     { label: 'Bulenox — Evaluation',       target: 6,  daily: 0,  max: 4,  dd: 'trailing', consistency: 0,  minDays: 0, tz: 'America/Chicago',  reset: 17 },
+    fundingpips: { label: 'Funding Pips — 2-step',      target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 0, tz: 'Europe/Prague',    reset: 0 },
+    alphacap:    { label: 'Alpha Capital Group',        target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 0, tz: 'Europe/Prague',    reset: 0 },
+    generic1:    { label: 'Generic 1-step',             target: 10, daily: 5,  max: 6,  dd: 'static',   consistency: 0,  minDays: 0, tz: 'UTC',              reset: 0 }
   };
+
+  /* The firm's trading day for a moment in time, as 'YYYY-MM-DD'.
+
+     Reads the wall clock in the firm's own zone — so daylight saving is the
+     browser's problem, not ours — and rolls to the next day once the reset
+     hour has passed. Topstep's 16:30 CT trade and its 17:30 CT trade belong
+     to different trading days, and only this tells them apart.
+
+     Exported because the replay's challenge mode needs the identical answer;
+     two implementations of "which day is this" would drift within a week. */
+  function firmDayKey(ms, tz, resetHour) {
+    var d = new Date(Number(ms));
+    if (isNaN(d.getTime())) return null;
+    var parts;
+    try {
+      parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: tz || 'UTC', hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit'
+      }).formatToParts(d);
+    } catch (e) {
+      // An unknown zone must not break the cockpit — fall back to UTC.
+      return new Date(d.getTime()).toISOString().slice(0, 10);
+    }
+    var get = function (t) { return (parts.filter(function (p) { return p.type === t; })[0] || {}).value; };
+    var y = +get('year'), mo = +get('month'), da = +get('day');
+    var hr = +get('hour');
+    if (hr === 24) hr = 0;                       // some engines report 24 for midnight
+    var key = new Date(Date.UTC(y, mo - 1, da));
+    if (resetHour > 0 && hr >= resetHour) key = new Date(key.getTime() + 86400000);
+    return key.toISOString().slice(0, 10);
+  }
+  P.firmDayKey = firmDayKey;
 
   /* Common account sizes per firm family, so the retroactive check can offer
      "Topstep 50k" rather than asking for a number nobody remembers. */
   var SIZES = [25000, 50000, 100000, 150000, 200000, 250000];
+
+  /* ═══════════════ POSITION SIZE LIMITS ═══════════════
+
+     The futures firms cap how many contracts an account may hold at once,
+     and the cap scales with the account size. Without this the retroactive
+     check answered a question nobody asked: "would these trades have passed,
+     assuming you were allowed to take them at that size?" On a 50k Topstep
+     account a 12-contract trade is not a trade that loses — it is a trade the
+     platform refuses, or one that gets auto-liquidated.
+
+     Reported as a WARNING, never as a failure, and that restraint is
+     deliberate: the journal records size in `lots`, which is contracts for
+     futures but a completely different unit for forex, and it does not
+     reliably distinguish an E-mini from a Micro (a 10-micro position is one
+     tenth of 10 minis). Turning an uncertain reading into "you failed" would
+     be a confident wrong answer. Saying "N trades were above the limit for
+     this account, check whether those were micros" is the honest one.
+
+     Forex firms cap risk by percentage rather than by contract count, so they
+     have no entry here and nothing is flagged for them.
+
+     Published figures as of the last review; firms change them. */
+  var SIZE_LIMITS = {
+    topstep:   { 50000: 5,  100000: 10, 150000: 15 },
+    apex:      { 25000: 4,  50000: 10,  100000: 14, 150000: 17, 250000: 27 },
+    takeprofit:{ 25000: 3,  50000: 6,   100000: 12, 150000: 15 },
+    mff:       { 50000: 5,  100000: 10, 150000: 15 },
+    mffexpert: { 50000: 5,  100000: 10, 150000: 15 },
+    alphafut:  { 50000: 5,  100000: 10, 150000: 15 },
+    bulenox:   { 25000: 3,  50000: 6,   100000: 12, 150000: 15 }
+  };
+
+  /** Max contracts for a firm at an account size, or null when the firm does
+      not work that way (or we have no published figure for that size). */
+  function contractLimit(presetKey, balance) {
+    var tbl = SIZE_LIMITS[presetKey];
+    if (!tbl) return null;
+    if (tbl[balance] != null) return tbl[balance];
+    /* An unlisted size gets the next size DOWN — never the next one up. The
+       consequence of guessing too generously is telling somebody a trade was
+       allowed when it was not, and that is the mistake this whole feature
+       exists to stop making. */
+    var sizes = Object.keys(tbl).map(Number).sort(function (a, b) { return a - b; });
+    var best = null;
+    sizes.forEach(function (n) { if (n <= balance) best = tbl[n]; });
+    return best;
+  }
+  P.contractLimit = contractLimit;
 
   var DEFAULTS = {
     preset: 'custom',
@@ -52169,14 +52328,38 @@ self.addEventListener('message', async (ev) => {
       if (cfg.cycleStart && k < cfg.cycleStart) return false;
       return true;
     }).sort();
-    var out = [];
+
+    /* Regrouped onto the FIRM's trading day, not the calendar day the journal
+       files a trade under. Topstep rolls at 17:00 Chicago: a trade at 16:55
+       and one at 17:05 fall on different trading days and are measured against
+       two separate daily loss limits. Counting both against one calendar day
+       reports a breach that never happened — or hides one that did.
+
+       Only trades that carry a timestamp can be reassigned; anything imported
+       without one keeps the journal's day, which is the best information that
+       exists for it. */
+    var p = PRESETS[cfg.preset] || {};
+    var useFirmDay = !!(p.reset || (p.tz && p.tz !== 'UTC'));
+    var buckets = {};
     days.forEach(function (k) {
-      var trades = (jd[k] && jd[k].trades) || [];
-      var vals = trades.map(valueOf).filter(function (v) { return v != null; });
-      if (!vals.length) return;
-      out.push({ date: k, pnl: vals.reduce(function (a, b) { return a + b; }, 0), trades: vals.length, vals: vals });
+      ((jd[k] && jd[k].trades) || []).forEach(function (t) {
+        var v = valueOf(t);
+        if (v == null) return;
+        var key = k;
+        if (useFirmDay) {
+          var ms = Number(t.closeTime || t.openTime || 0);
+          if (ms > 0) key = firmDayKey(ms, p.tz, p.reset || 0) || k;
+        }
+        if (cfg.cycleStart && key < cfg.cycleStart) return;
+        (buckets[key] || (buckets[key] = [])).push(v);
+      });
     });
-    return out;
+
+    return Object.keys(buckets).sort().map(function (k) {
+      var vals = buckets[k];
+      return { date: k, pnl: vals.reduce(function (a, b) { return a + b; }, 0),
+               trades: vals.length, vals: vals };
+    });
   }
 
   /* The heart of it: walk the cycle day by day, tracking the balance and the
@@ -52338,10 +52521,31 @@ self.addEventListener('message', async (ev) => {
             ' trading days, no rule broken.';
     }
 
+    /* Was the SIZE even allowed on this account? A verdict that ignores the
+       contract cap flatters the trader: on a 50k Topstep account a
+       12-contract position is not a losing trade, it is a trade the platform
+       would have refused. Counted and reported, never used to fail the run —
+       see the note on SIZE_LIMITS for why that restraint is deliberate. */
+    var limit = contractLimit(presetKey, balance);
+    var over = null;
+    if (limit) {
+      var oversized = [], worst = 0;
+      var jd = window.journalData || {};
+      try { if (window.ApexAccounts && ApexAccounts.filteredJournal) jd = ApexAccounts.filteredJournal(); } catch (e) {}
+      Object.keys(jd).forEach(function (k) {
+        if (cfg.cycleStart && k < cfg.cycleStart) return;
+        ((jd[k] && jd[k].trades) || []).forEach(function (t) {
+          var q = parseFloat(t.lots);
+          if (!isNaN(q) && q > limit) { oversized.push(k); if (q > worst) worst = q; }
+        });
+      });
+      if (oversized.length) over = { limit: limit, count: oversized.length, worst: worst };
+    }
+
     return {
       verdict: verdict, why: why, cfg: cfg, label: p.label,
       firstBreach: first, daysSurvived: upto.length,
-      profit: profitAt, result: r,
+      profit: profitAt, result: r, sizeLimit: limit, oversized: over,
       thin: r.series.length > 0 && r.series.length < 10
     };
   };
@@ -52554,6 +52758,18 @@ self.addEventListener('message', async (ev) => {
               sim.cfg.target + '% target · ' + (sim.cfg.daily ? sim.cfg.daily + '% daily · ' : '') +
               sim.cfg.max + '% max' + (sim.cfg.consistency ? ' · ' + sim.cfg.consistency + '% consistency' : '')) +
         '</div>' +
+        (sim.oversized
+          ? '<div class="pf-hint" style="color:var(--gold)">⚠ ' + sim.oversized.count + ' trade' +
+            (sim.oversized.count === 1 ? '' : 's') + ' used more than the <b>' + sim.oversized.limit +
+            ' contract' + (sim.oversized.limit === 1 ? '' : 's') + '</b> this account size allows ' +
+            '(largest: ' + sim.oversized.worst + '). On a real account those would have been ' +
+            'refused or liquidated, so the verdict above is optimistic. If you trade Micros, ' +
+            'the limit is higher and this warning does not apply.</div>'
+          : '') +
+        (sim.sizeLimit
+          ? '<div class="pf-hint">Size cap for this account: <b>' + sim.sizeLimit +
+            ' contracts</b>' + (sim.oversized ? '' : ' — every trade in this period fits inside it') + '.</div>'
+          : '') +
         (sim.thin
           ? '<div class="pf-hint">Only ' + sim.result.series.length + ' trading days in this period — ' +
             'treat this as an indication, not a verdict.</div>'
@@ -59598,23 +59814,87 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
   var H = {}; window.ApexSyncHealth = H;
 
   /* Webhook platforms (MT5, TradingView, ATAS, Quantower) push into the
-     inbox and the inbox is emptied as it is read, so there is nothing
-     left to query afterwards. The drainer therefore stamps the arrival
-     here as it goes. Local storage is the right home: it is a per-device
-     observation, not account state. */
+     inbox and the inbox is emptied as it is read, so there is nothing left
+     to query afterwards. The drainer stamps the arrival here as it goes.
+
+     This used to live ONLY in local storage, on the theory that it is a
+     per-device observation. That was wrong in the way that matters: the
+     events arrive on whichever device happens to be open, so a trader who
+     journals on a laptop and checks the status on a desktop was told
+     "never synced" about a connection that had been working all week —
+     the exact false alarm this screen exists to prevent.
+
+     So it is mirrored into the user's own private document, and the two
+     are merged on read with the newer timestamp winning. Local storage
+     stays as the fast path and as the answer when offline. The write is
+     throttled: an event per trade would otherwise mean a Firestore write
+     per trade purely for a timestamp nobody reads that often. */
   function seenKey(){ return 'apexSyncSeen_' + (window.currentUID || 'guest'); }
-  function seen(){
+  function localSeen(){
     try { return JSON.parse(localStorage.getItem(seenKey()) || '{}'); } catch(e){ return {}; }
   }
+  function saveLocal(m){
+    try { localStorage.setItem(seenKey(), JSON.stringify(m)); } catch(e){}
+  }
+  /* Filled once per app start from Firestore, then kept in step by our own
+     writes — a screen that reads it re-renders after the fetch resolves. */
+  var _remoteSeen = {};
+
+  function seenRef(){
+    if (!window.db || !window.currentUID) return null;
+    return window.db.collection('apexUsers').doc(window.currentUID)
+      .collection('private').doc('syncSeen');
+  }
+  function pullRemote(){
+    var ref = seenRef();
+    if (!ref) return Promise.resolve({});
+    return ref.get().then(function(d){
+      _remoteSeen = (d.exists && d.data()) || {};
+      return _remoteSeen;
+    }).catch(function(){ return {}; });
+  }
+  /** Local and remote merged, newest timestamp per source wins. */
+  function seen(){
+    var out = {}, l = localSeen();
+    Object.keys(_remoteSeen).forEach(function(k){ out[k] = _remoteSeen[k]; });
+    Object.keys(l).forEach(function(k){
+      var a = l[k], b = out[k];
+      if (typeof a === 'number' && typeof b === 'number') out[k] = Math.max(a, b);
+      else if (out[k] === undefined) out[k] = a;
+      else if (k === '!fail') {
+        // objects, not timestamps — keep whichever failure is more recent
+        var at1 = (a && a.at) || 0, at2 = (b && b.at) || 0;
+        out[k] = at1 >= at2 ? a : b;
+      }
+    });
+    return out;
+  }
+
+  var THROTTLE_MS = 10 * 60000;   // one write per source per ten minutes
+  var _lastPush = {};
+  function pushRemote(patch, force){
+    var ref = seenRef();
+    if (!ref) return;
+    var k = Object.keys(patch)[0] || '_';
+    if (!force && (Date.now() - (_lastPush[k] || 0)) < THROTTLE_MS) return;
+    _lastPush[k] = Date.now();
+    Object.keys(patch).forEach(function(x){ _remoteSeen[x] = patch[x]; });
+    ref.set(patch, { merge: true }).catch(function(){});
+  }
+
   H.noteEvent = function(source){
     if (!source) return;
-    var m = seen(); m[source] = Date.now();
-    try { localStorage.setItem(seenKey(), JSON.stringify(m)); } catch(e){}
+    var m = localSeen(); m[source] = Date.now();
+    saveLocal(m);
+    var p = {}; p[source] = m[source];
+    pushRemote(p, false);
   };
   H.noteFailure = function(ev){
-    var m = seen();
+    var m = localSeen();
     m['!fail'] = { at: ev.at || Date.now(), account: ev.account || '', error: ev.error || '' };
-    try { localStorage.setItem(seenKey(), JSON.stringify(m)); } catch(e){}
+    saveLocal(m);
+    // Never throttled: a failure has to reach the other device immediately.
+    pushRemote({ '!fail': m['!fail'] }, true);
     try {
       if (window.pushNotif)
         pushNotif('warn', '<strong>' + esc(ev.account || 'A broker connection') +
@@ -59759,7 +60039,9 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
   function render(){
     var host = document.getElementById('syncHealthHost');
     if (!host) return;
-    collect().then(function(rows){
+    /* Pull the shared record first, so a connection that last delivered on
+       another device is reported as working rather than as never synced. */
+    pullRemote().then(collect).then(function(rows){
       if (!rows.length){
         host.innerHTML = '<div class="glass-card"><div class="gc-title">Connection status</div>' +
           '<div style="font-size:12.5px;color:var(--ink3);margin-top:8px;line-height:1.6">' +
@@ -59778,7 +60060,9 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
                (bad===1?'it':'them') + '.</div>' : '') +
         '<div class="sh-list">' + rows.map(rowHtml).join('') + '</div>' +
         '<div class="sh-foot">We also email you if a connection fails three times in a row, ' +
-          'so a broken link cannot sit unnoticed for weeks.</div>' +
+          'so a broken link cannot sit unnoticed for weeks. Last-delivery times are shared ' +
+          'across your devices — a platform that delivered on your laptop is not reported ' +
+          'as silent here.</div>' +
       '</div>';
     });
   }
@@ -60643,7 +60927,74 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
 
     // ── options payoff ──
     'Payoff at expiry': ['Auszahlung bei Verfall', 'Pago al vencimiento', 'Retorno no vencimento', 'Gain à l’échéance'],
-    'unlimited':        ['unbegrenzt', 'ilimitado', 'ilimitado', 'illimité']
+    'unlimited':        ['unbegrenzt', 'ilimitado', 'ilimitado', 'illimité'],
+
+    // ── prop firm & funded mode ──
+    // Brazil is one of the largest prop-firm markets in the world and almost
+    // nothing in this category is localised for it, so the Portuguese column
+    // gets the same care as the German one rather than a literal rendering.
+    'Funded mode':       ['Funded-Modus', 'Modo fondeado', 'Modo fundado', 'Mode financé'],
+    'Start challenge':   ['Challenge starten', 'Iniciar el desafío', 'Iniciar o desafio', 'Démarrer le challenge'],
+    'Start replay':      ['Replay starten', 'Iniciar la repetición', 'Iniciar o replay', 'Démarrer le replay'],
+    'Challenge from here': ['Challenge ab hier', 'Desafío desde aquí', 'Desafio a partir daqui', 'Challenge à partir d’ici'],
+    'Account size':      ['Kontogröße', 'Tamaño de la cuenta', 'Tamanho da conta', 'Taille du compte'],
+    'Start balance':     ['Startkapital', 'Saldo inicial', 'Saldo inicial', 'Solde de départ'],
+    'Profit Target':     ['Gewinnziel', 'Objetivo de beneficio', 'Meta de lucro', 'Objectif de gain'],
+    'Trading Days':      ['Handelstage', 'Días operados', 'Dias operados', 'Jours de trading'],
+    'Drawdown Floor':    ['Drawdown-Grenze', 'Límite de drawdown', 'Limite de drawdown', 'Plancher de drawdown'],
+    'Buffer to Floor':   ['Abstand zur Grenze', 'Margen hasta el límite', 'Margem até o limite', 'Marge avant le plancher'],
+    'Daily Loss Limit':  ['Tagesverlustlimit', 'Límite de pérdida diaria', 'Limite de perda diária', 'Limite de perte quotidienne'],
+    'Would these trades have passed a challenge?':
+      ['Hätten diese Trades eine Challenge bestanden?',
+       '¿Estas operaciones habrían superado un desafío?',
+       'Estas operações teriam passado em um desafio?',
+       'Ces trades auraient-ils passé un challenge ?'],
+    'You would have passed': ['Du hättest bestanden', 'Habrías aprobado', 'Você teria passado', 'Vous auriez réussi'],
+    'You would have failed': ['Du wärst gescheitert', 'Habrías fallado', 'Você teria falhado', 'Vous auriez échoué'],
+
+    // ── dashboards ──
+    'Dashboards':        ['Dashboards', 'Paneles', 'Painéis', 'Tableaux de bord'],
+    'Add widget':        ['Widget hinzufügen', 'Añadir widget', 'Adicionar widget', 'Ajouter un widget'],
+    'Single number':     ['Einzelwert', 'Valor único', 'Valor único', 'Valeur unique'],
+    'Bars':              ['Balken', 'Barras', 'Barras', 'Barres'],
+    'Table':             ['Tabelle', 'Tabla', 'Tabela', 'Tableau'],
+    'Rename':            ['Umbenennen', 'Renombrar', 'Renomear', 'Renommer'],
+    'Reset':             ['Zurücksetzen', 'Restablecer', 'Redefinir', 'Réinitialiser'],
+    'My dashboard':      ['Mein Dashboard', 'Mi panel', 'Meu painel', 'Mon tableau de bord'],
+
+    // ── confluence ──
+    'Single conditions': ['Einzelne Bedingungen', 'Condiciones individuales', 'Condições individuais', 'Conditions seules'],
+    'Up to pairs':       ['Bis zu Paaren', 'Hasta pares', 'Até pares', 'Jusqu’aux paires'],
+    'Up to triples':     ['Bis zu Dreiergruppen', 'Hasta tríos', 'Até trios', 'Jusqu’aux triplets'],
+    'What helps most':   ['Was am meisten hilft', 'Lo que más ayuda', 'O que mais ajuda', 'Ce qui aide le plus'],
+    'What costs most':   ['Was am meisten kostet', 'Lo que más cuesta', 'O que mais custa', 'Ce qui coûte le plus'],
+    'Conditions':        ['Bedingungen', 'Condiciones', 'Condições', 'Conditions'],
+    'Trades':            ['Trades', 'Operaciones', 'Operações', 'Trades'],
+    'Win rate':          ['Trefferquote', 'Tasa de acierto', 'Taxa de acerto', 'Taux de réussite'],
+    'Profit factor':     ['Profitfaktor', 'Factor de beneficio', 'Fator de lucro', 'Facteur de profit'],
+    'Net':               ['Netto', 'Neto', 'Líquido', 'Net'],
+
+    // ── export ──
+    'Export to Notion':  ['Export nach Notion', 'Exportar a Notion', 'Exportar para o Notion', 'Exporter vers Notion'],
+    'Export':            ['Exportieren', 'Exportar', 'Exportar', 'Exporter'],
+    'Compare':           ['Vergleichen', 'Comparar', 'Comparar', 'Comparer'],
+    'Save preset':       ['Vorlage speichern', 'Guardar plantilla', 'Salvar predefinição', 'Enregistrer le modèle'],
+
+    // ── the sentences a new user meets first ──
+    'Sign in':           ['Anmelden', 'Iniciar sesión', 'Entrar', 'Se connecter'],
+    'Sign up':           ['Registrieren', 'Crear cuenta', 'Criar conta', 'S’inscrire'],
+    'Log out':           ['Abmelden', 'Cerrar sesión', 'Sair', 'Se déconnecter'],
+    'Skip':              ['Überspringen', 'Omitir', 'Pular', 'Passer'],
+    'Continue':          ['Weiter', 'Continuar', 'Continuar', 'Continuer'],
+    'Done':              ['Fertig', 'Listo', 'Concluído', 'Terminé'],
+    'Back':              ['Zurück', 'Atrás', 'Voltar', 'Retour'],
+    'Next':              ['Weiter', 'Siguiente', 'Próximo', 'Suivant'],
+    'Loading…':          ['Wird geladen…', 'Cargando…', 'Carregando…', 'Chargement…'],
+    'No trades yet':     ['Noch keine Trades', 'Aún no hay operaciones', 'Ainda não há operações', 'Aucun trade pour l’instant'],
+    'Today':             ['Heute', 'Hoy', 'Hoje', 'Aujourd’hui'],
+    'This week':         ['Diese Woche', 'Esta semana', 'Esta semana', 'Cette semaine'],
+    'This month':        ['Dieser Monat', 'Este mes', 'Este mês', 'Ce mois-ci'],
+    'All time':          ['Gesamt', 'Histórico', 'Desde o início', 'Depuis le début']
   };
 
   function lang(){
@@ -60947,9 +61298,17 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
     var cls = S.status === 'failed' ? 'bad' : S.status === 'passed' ? 'good'
             : (bufPct != null && bufPct < 25) ? 'warn' : '';
 
+    /* Say which clock the daily reset follows. A trader who takes a loss at
+       16:55 CT and another at 17:05 CT has used two daily limits, and that
+       is only obvious if the screen names the boundary. */
+    var zone = String(S.rules.tz || 'UTC').split('/').pop().replace(/_/g, ' ');
+    var resetTxt = S.rules.reset ? zone + ' ' + S.rules.reset + ':00' : 'midnight ' + zone;
+
     host.className = 'chal-bar ' + cls;
     host.innerHTML =
-      '<div class="chal-name">' + esc(S.label) + ' · ' + money(S.start) + '</div>' +
+      '<div class="chal-name" title="The trading day resets at ' + esc(resetTxt) + '">' +
+        esc(S.label) + ' · ' + money(S.start) +
+        '<span class="chal-tz">day resets ' + esc(resetTxt) + '</span></div>' +
       (S.status === 'running'
         ? '<div class="chal-metrics">' +
             '<span>Equity <b>' + money(eq) + '</b></span>' +
@@ -61003,6 +61362,7 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       '.chal-bar.bad{border-color:rgba(240,99,106,.5);background:rgba(240,99,106,.08)}' +
       '.chal-bar.good{border-color:rgba(62,207,142,.5);background:rgba(62,207,142,.08)}' +
       '.chal-name{font-weight:700;color:var(--ink)}' +
+      '.chal-tz{display:block;font-weight:400;font-size:10.5px;color:var(--ink4);margin-top:1px}' +
       '.chal-metrics{display:flex;gap:14px;flex-wrap:wrap;color:var(--ink3);flex:1}' +
       '.chal-metrics b{color:var(--ink2);font-variant-numeric:tabular-nums}' +
       '.chal-metrics b.warn{color:var(--gold)}' +
@@ -61497,6 +61857,591 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
       };
       ApexAutoTrack._metaWrapped = true;
     }, 1500);
+  });
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   NOTION EXPORT  —  ApexNotion
+
+   A lot of traders run everything around the trading in Notion —
+   weekly planning, their rules, research — and then keep the trades
+   somewhere else, which means the two never meet. TradeZella has no
+   export at all and gets criticised for it in reviews.
+
+   Two files, because Notion imports two different things well:
+
+     · a CSV that becomes a Notion DATABASE. Notion infers a column
+       type from the values it sees, so the columns are formatted for
+       what we want them to become: ISO dates stay dates, plain numbers
+       stay numbers, and the tag column is comma-separated, which is
+       exactly what Notion turns into a multi-select.
+     · a Markdown summary page, so the database arrives with a page
+       that says what it is and what the numbers were.
+
+   Deliberately files rather than an API connection. A real integration
+   means registering a Notion app, an OAuth round trip and a token we
+   would then be holding on someone's behalf — for a feature whose
+   whole job is to hand over data the user already has. The import is
+   two clicks in Notion. If it is ever worth an API, the row builder
+   below is already the right shape to post.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var N = {}; window.ApexNotion = N;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+  }
+  function valueOf(t){
+    try {
+      var c = window.calcTradePnl ? calcTradePnl(t) : null;
+      if (c && c.pnlUsd != null && !isNaN(c.pnlUsd)) return c.pnlUsd;
+    } catch(e){}
+    return null;
+  }
+
+  /* One row per trade, in the order the columns should appear in Notion.
+     The first column becomes the page title, so it has to be the thing you
+     would want to read in a list view — symbol and date, not an id. */
+  function rows(from, to){
+    var out = [];
+    var jd = window.journalData || {};
+    try { if (window.ApexAccounts && ApexAccounts.filteredJournal) jd = ApexAccounts.filteredJournal(); } catch(e){}
+
+    Object.keys(jd).sort().forEach(function(k){
+      if (from && k < from) return;
+      if (to && k > to) return;
+      ((jd[k] && jd[k].trades) || []).forEach(function(t){
+        var pnl = valueOf(t);
+        var tags = (t.tags || []).concat(t.autoTags || []);
+        out.push({
+          Name: (t.symbol || '—') + ' ' + k,
+          Date: k,
+          Symbol: t.symbol || '',
+          Direction: t.dir || '',
+          Entry: t.entry || '',
+          Stop: t.sl || '',
+          Target: t.tp || '',
+          Exit: t.exit || '',
+          Size: t.lots || '',
+          Pips: t.pips || '',
+          'R:R': t.rr || '',
+          'P&L': pnl == null ? '' : pnl.toFixed(2),
+          Session: t.session || '',
+          Timeframe: t.tf || '',
+          Setup: t.setup || '',
+          Grade: t.grade || '',
+          Tags: tags.join(', '),
+          Mistakes: (t.mistakes || []).join(', '),
+          'Did well': (t.positives || []).join(', '),
+          Note: String(t.note || '').replace(/\s+/g, ' ').trim(),
+          Source: t.source || 'manual'
+        });
+      });
+    });
+    return out;
+  }
+  N.rows = rows;
+
+  /* Notion's CSV import is comma-separated and expects quotes around any
+     field containing a comma, a quote or a newline — the German semicolon
+     convention the app uses elsewhere would import as one single column. */
+  function toCsv(list){
+    if (!list.length) return '';
+    var cols = Object.keys(list[0]);
+    function cell(v){
+      var s = String(v == null ? '' : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    return [cols.join(',')].concat(list.map(function(r){
+      return cols.map(function(c){ return cell(r[c]); }).join(',');
+    })).join('\n');
+  }
+
+  function summary(list){
+    var priced = list.filter(function(r){ return r['P&L'] !== ''; })
+                     .map(function(r){ return parseFloat(r['P&L']); });
+    var wins = priced.filter(function(v){ return v > 0; });
+    var net = priced.reduce(function(a,b){ return a+b; }, 0);
+    var days = {};
+    list.forEach(function(r){ days[r.Date] = 1; });
+    return {
+      trades: list.length,
+      days: Object.keys(days).length,
+      net: net,
+      wr: priced.length ? Math.round(wins.length / priced.length * 100) : null,
+      first: list.length ? list[0].Date : '',
+      last: list.length ? list[list.length-1].Date : ''
+    };
+  }
+
+  /* The page that arrives alongside the database. Markdown, because Notion
+     pastes and imports it natively and it stays readable if it never gets
+     that far. */
+  function toMarkdown(list){
+    var s = summary(list);
+    var count = {};
+    list.forEach(function(r){
+      (r.Tags ? r.Tags.split(', ') : []).forEach(function(t){ if (t) count[t] = (count[t]||0)+1; });
+    });
+    var top = Object.keys(count).sort(function(a,b){ return count[b]-count[a]; }).slice(0, 8);
+
+    return '# Trading journal — ' + (s.first || '') + ' to ' + (s.last || '') + '\n\n' +
+      'Exported from Evidence Trading on ' + new Date().toISOString().slice(0,10) + '.\n\n' +
+      '## The numbers\n\n' +
+      '| | |\n|---|---|\n' +
+      '| Trades | ' + s.trades + ' |\n' +
+      '| Trading days | ' + s.days + ' |\n' +
+      '| Net P&L | ' + (s.net < 0 ? '-' : '') + '$' + Math.abs(s.net).toFixed(2) + ' |\n' +
+      '| Win rate | ' + (s.wr == null ? '—' : s.wr + '%') + ' |\n\n' +
+      (top.length ? '## Most used tags\n\n' + top.map(function(t){
+        return '- ' + t + ' — ' + count[t] + '×'; }).join('\n') + '\n\n' : '') +
+      '## How to import the database\n\n' +
+      '1. In Notion, open the page where this should live.\n' +
+      '2. Type `/import` and choose **CSV**.\n' +
+      '3. Pick `evidence-trades.csv`.\n' +
+      '4. Notion creates a database. Open **Tags** and **Mistakes** and switch ' +
+      'their type to *Multi-select* — the values are already comma-separated, ' +
+      'so they split by themselves.\n\n' +
+      '> These figures come from your own journal. They are a record of what you ' +
+      'did, not advice about what to do.\n';
+  }
+
+  function download(name, text, mime){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: mime + ';charset=utf-8' }));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  N.exportNow = function(){
+    var from = (document.getElementById('nxFrom') || {}).value || '';
+    var to   = (document.getElementById('nxTo') || {}).value || '';
+    var list = rows(from, to);
+    if (!list.length){ if (window.showToast) showToast('⚠ No trades in this period'); return; }
+    var stamp = new Date().toISOString().slice(0,10);
+    download('evidence-trades.csv', toCsv(list), 'text/csv');
+    // A moment apart: two downloads fired in the same tick get one blocked.
+    setTimeout(function(){
+      download('evidence-journal-' + stamp + '.md', toMarkdown(list), 'text/markdown');
+    }, 400);
+    if (window.showToast) showToast('✓ ' + list.length + ' trades exported — two files');
+  };
+
+  N.html = function(){
+    return '<div class="glass-card" style="margin-top:16px">' +
+      '<div class="gc-title">Export to Notion</div>' +
+      '<div style="font-size:12.5px;color:var(--ink3);line-height:1.65;margin-top:6px">' +
+        'Two files: a CSV that Notion imports as a database — one row per trade, with your ' +
+        'tags, mistakes and notes — and a Markdown page with the summary and the import steps. ' +
+        'Nothing is sent anywhere; both files are built in your browser and land in your downloads.' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">' +
+        '<input type="date" id="nxFrom" class="nx-in" title="From">' +
+        '<input type="date" id="nxTo" class="nx-in" title="To">' +
+        '<button class="nx-btn" onclick="ApexNotion.exportNow()">Export</button>' +
+        '<span style="font-size:11px;color:var(--ink4)">Leave the dates empty for everything</span>' +
+      '</div>' +
+    '</div>';
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.createElement('style');
+    el.textContent =
+      '.nx-in{background:var(--surface);border:0.5px solid var(--rim);border-radius:9px;' +
+        'color:var(--ink);padding:7px 10px;font-size:12.5px;font-family:var(--font-body)}' +
+      '.nx-btn{padding:8px 18px;border-radius:9px;border:none;' +
+        'background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;' +
+        'font-weight:700;font-size:12.5px;cursor:pointer}';
+    document.head.appendChild(el);
+  });
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   DASHBOARDS  —  ApexDash
+
+   Chasing widget count is a losing game: the competitor with 600 of
+   them will always have 601. The move is one level up. This app
+   already has 68 computed metrics, a custom-formula language and 12
+   dimensions to slice by — what it lacked was letting a trader put
+   those together themselves.
+
+   Six metrics × twelve dimensions × three shapes is already more
+   distinct views than any fixed catalogue, and every one of them is a
+   view somebody actually wanted rather than one we guessed at.
+
+   Nothing here computes anything: every number comes from ApexStats,
+   the same engine the Stat Lab reads. A dashboard that disagreed with
+   the Stat Lab would be worse than no dashboard.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var D = {}; window.ApexDash = D;
+
+  var MAX_WIDGETS = 24;   // past this the page stops being a dashboard
+  var TOP_N = 8;          // rows in a breakdown before it becomes a list
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+  }
+  function stats(){ return window.ApexStats || null; }
+
+  /* ── storage ──
+     Local first so the layout is there before the network is, mirrored to
+     the user's private document so it follows them to another device. */
+  function key(){ return 'apexDash_' + (window.currentUID || 'guest'); }
+  var _boards = null;
+
+  function blank(){
+    /* A first-run layout that is worth looking at. An empty grid with an
+       "add widget" button is technically correct and tells a new user
+       nothing about what this page is for. */
+    return [{ id: 'd1', name: 'My dashboard', widgets: [
+      { i: 'w1', metric: 'net',        dim: '',        type: 'tile' },
+      { i: 'w2', metric: 'winRate',    dim: '',        type: 'tile' },
+      { i: 'w3', metric: 'expectancy', dim: '',        type: 'tile' },
+      { i: 'w4', metric: 'pf',         dim: '',        type: 'tile' },
+      { i: 'w5', metric: 'net',        dim: 'session', type: 'bar' },
+      { i: 'w6', metric: 'expectancy', dim: 'setup',   type: 'bar' }
+    ] }];
+  }
+
+  function load(){
+    if (_boards) return _boards;
+    try {
+      var raw = JSON.parse(localStorage.getItem(key()) || 'null');
+      _boards = (Array.isArray(raw) && raw.length) ? raw : blank();
+    } catch(e){ _boards = blank(); }
+    return _boards;
+  }
+  function persist(){
+    try { localStorage.setItem(key(), JSON.stringify(_boards)); } catch(e){}
+    try {
+      if (window.db && window.currentUID)
+        window.db.collection('apexUsers').doc(window.currentUID)
+          .collection('private').doc('dashboards')
+          .set({ boards: _boards, updatedAt: Date.now() }, { merge: true })
+          .catch(function(){});
+    } catch(e){}
+  }
+  /* Pulled once per session. A local layout that is newer wins — the user
+     was just editing it, and losing that to a stale copy would be the worst
+     possible behaviour for a feature whose whole point is arranging things. */
+  D.pull = function(){
+    if (!window.db || !window.currentUID) return Promise.resolve();
+    return window.db.collection('apexUsers').doc(window.currentUID)
+      .collection('private').doc('dashboards').get()
+      .then(function(d){
+        var remote = d.exists && d.data() && d.data().boards;
+        if (Array.isArray(remote) && remote.length && !localStorage.getItem(key())){
+          _boards = remote;
+        }
+      }).catch(function(){});
+  };
+
+  var _active = 0;
+
+  /* ── data ── */
+  /* The Stat Lab's own rows — { t, v, R } — not a second construction of
+     them. ApexStats expects that shape, and building it here would mean two
+     answers to "what is this trade worth". */
+  function rows(){
+    try { return (window.EdgeLab && EdgeLab.statRows) ? EdgeLab.statRows() : []; }
+    catch(e){ return []; }
+  }
+
+  function metricValue(metricId, list){
+    var S = stats();
+    if (!S) return null;
+    try {
+      var m = S.byId(metricId);
+      if (!m) return null;
+      var ctx = S.context(list);
+      var v = m.calc(ctx);
+      return { value: v, unit: m.unit, label: m.label, hint: m.hint };
+    } catch(e){ return null; }
+  }
+
+  function breakdown(metricId, dimKey, list){
+    var S = stats();
+    if (!S || !S.groupRows) return [];
+    var groups;
+    try { groups = S.groupRows(list, dimKey) || {}; } catch(e){ return []; }
+    var out = [];
+    Object.keys(groups).forEach(function(k){
+      var r = metricValue(metricId, groups[k]);
+      if (!r || r.value == null || !isFinite(r.value)) return;
+      out.push({ key: k, value: r.value, unit: r.unit, n: groups[k].length });
+    });
+    out.sort(function(a,b){ return Math.abs(b.value) - Math.abs(a.value); });
+    return out.slice(0, TOP_N);
+  }
+
+  function fmt(v, unit){
+    var S = stats();
+    if (v == null || !isFinite(v)) return '—';
+    try { return S.format(v, unit); } catch(e){ return String(Math.round(v * 100) / 100); }
+  }
+
+  /* ── widgets ── */
+  function tileHtml(w, list){
+    var r = metricValue(w.metric, list);
+    if (!r) return '<div class="dw-empty">This metric is no longer available.</div>';
+    var cls = r.value > 0 ? 'pos' : r.value < 0 ? 'neg' : '';
+    return '<div class="dw-label">' + esc(r.label) + '</div>' +
+      '<div class="dw-value ' + cls + ' notranslate" translate="no">' + esc(fmt(r.value, r.unit)) + '</div>' +
+      (r.hint ? '<div class="dw-hint">' + esc(r.hint) + '</div>' : '');
+  }
+
+  function barHtml(w, list){
+    var S = stats();
+    var rowsB = breakdown(w.metric, w.dim, list);
+    var m = S && S.byId(w.metric);
+    var dimLabel = (S && S.DIMENSIONS && S.DIMENSIONS[w.dim] && S.DIMENSIONS[w.dim].label) || w.dim;
+    if (!rowsB.length)
+      return '<div class="dw-label">' + esc((m && m.label) || w.metric) + ' by ' + esc(dimLabel) + '</div>' +
+             '<div class="dw-empty">Not enough trades carry this dimension yet.</div>';
+
+    var max = Math.max.apply(null, rowsB.map(function(r){ return Math.abs(r.value); })) || 1;
+    return '<div class="dw-label">' + esc((m && m.label) || w.metric) + ' by ' + esc(dimLabel) + '</div>' +
+      '<div class="dw-bars">' + rowsB.map(function(r){
+        var pct = Math.max(2, Math.abs(r.value) / max * 100);
+        var neg = r.value < 0;
+        return '<div class="dw-bar">' +
+          '<span class="dw-bar-k notranslate" translate="no">' + esc(r.key) + '</span>' +
+          '<span class="dw-bar-t"><i class="' + (neg ? 'neg' : 'pos') + '" style="width:' + pct.toFixed(1) + '%"></i></span>' +
+          '<span class="dw-bar-v notranslate" translate="no">' + esc(fmt(r.value, r.unit)) +
+            '<em>' + r.n + '</em></span>' +
+        '</div>';
+      }).join('') + '</div>';
+  }
+
+  function tableHtml(w, list){
+    var S = stats();
+    var rowsB = breakdown(w.metric, w.dim, list);
+    var m = S && S.byId(w.metric);
+    var dimLabel = (S && S.DIMENSIONS && S.DIMENSIONS[w.dim] && S.DIMENSIONS[w.dim].label) || w.dim;
+    if (!rowsB.length)
+      return '<div class="dw-label">' + esc((m && m.label) || w.metric) + ' by ' + esc(dimLabel) + '</div>' +
+             '<div class="dw-empty">Not enough trades carry this dimension yet.</div>';
+    return '<div class="dw-label">' + esc((m && m.label) || w.metric) + ' by ' + esc(dimLabel) + '</div>' +
+      '<table class="dw-table"><tbody>' + rowsB.map(function(r){
+        return '<tr><td class="notranslate" translate="no">' + esc(r.key) + '</td>' +
+          '<td class="n">' + r.n + '</td>' +
+          '<td class="n ' + (r.value >= 0 ? 'pos' : 'neg') + ' notranslate" translate="no">' +
+            esc(fmt(r.value, r.unit)) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+
+  function widgetHtml(w, idx, list){
+    var body = w.type === 'bar' ? barHtml(w, list)
+             : w.type === 'table' ? tableHtml(w, list)
+             : tileHtml(w, list);
+    return '<div class="dw ' + (w.type === 'tile' ? 'sm' : '') + '" draggable="true" data-idx="' + idx + '">' +
+      '<button class="dw-x" onclick="ApexDash.remove(' + idx + ')" title="Remove" aria-label="Remove">✕</button>' +
+      body +
+    '</div>';
+  }
+
+  /* ── drag and drop ──
+     Plain HTML5 drag events rather than a library: reordering a list of a
+     dozen tiles is exactly what they are for, and a dependency here would
+     be a dependency in a 3 MB single file. */
+  var _drag = null;
+  function bindDrag(host){
+    host.querySelectorAll('.dw').forEach(function(el){
+      el.addEventListener('dragstart', function(e){
+        _drag = +el.dataset.idx;
+        el.classList.add('dragging');
+        try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(_drag)); } catch(_){}
+      });
+      el.addEventListener('dragend', function(){ el.classList.remove('dragging'); _drag = null; });
+      el.addEventListener('dragover', function(e){
+        e.preventDefault();
+        if (_drag == null || +el.dataset.idx === _drag) return;
+        el.classList.add('over');
+      });
+      el.addEventListener('dragleave', function(){ el.classList.remove('over'); });
+      el.addEventListener('drop', function(e){
+        e.preventDefault();
+        el.classList.remove('over');
+        var to = +el.dataset.idx;
+        if (_drag == null || to === _drag) return;
+        var ws = board().widgets;
+        var moved = ws.splice(_drag, 1)[0];
+        ws.splice(to, 0, moved);
+        persist();
+        D.render();
+      });
+    });
+  }
+
+  function board(){
+    var b = load();
+    if (!b[_active]) _active = 0;
+    return b[_active];
+  }
+
+  /* ── editing ── */
+  D.add = function(){
+    var b = board();
+    if (b.widgets.length >= MAX_WIDGETS){
+      if (window.showToast) showToast('⚠ ' + MAX_WIDGETS + ' widgets is the limit for one dashboard');
+      return;
+    }
+    var metric = (document.getElementById('dashMetric') || {}).value || 'net';
+    var dim    = (document.getElementById('dashDim') || {}).value || '';
+    var type   = (document.getElementById('dashType') || {}).value || 'tile';
+    if (type !== 'tile' && !dim){
+      if (window.showToast) showToast('⚠ Pick a dimension to break it down by');
+      return;
+    }
+    b.widgets.push({ i: 'w' + Date.now(), metric: metric, dim: dim, type: type });
+    persist(); D.render();
+  };
+  D.remove = function(i){
+    board().widgets.splice(i, 1);
+    persist(); D.render();
+  };
+  D.newBoard = function(){
+    var name = prompt('Name for this dashboard');
+    if (!name) return;
+    load().push({ id: 'd' + Date.now(), name: name, widgets: [] });
+    _active = load().length - 1;
+    persist(); D.render();
+  };
+  D.pick = function(i){ _active = +i; D.render(); };
+  D.rename = function(){
+    var b = board();
+    var n = prompt('Rename dashboard', b.name);
+    if (!n) return;
+    b.name = n; persist(); D.render();
+  };
+  D.del = function(){
+    var b = load();
+    if (b.length <= 1){ if (window.showToast) showToast('⚠ Keep at least one dashboard'); return; }
+    if (!confirm('Delete "' + board().name + '"?')) return;
+    b.splice(_active, 1); _active = 0; persist(); D.render();
+  };
+  D.reset = function(){
+    if (!confirm('Reset this dashboard to the starting layout?')) return;
+    _boards[_active].widgets = blank()[0].widgets.slice();
+    persist(); D.render();
+  };
+
+  /* ── render ── */
+  function controls(){
+    var S = stats();
+    if (!S) return '';
+    var groups = {};
+    S.catalogue().forEach(function(m){ (groups[m.group] || (groups[m.group] = [])).push(m); });
+    var metricOpts = Object.keys(groups).map(function(g){
+      return '<optgroup label="' + esc(g) + '">' + groups[g].map(function(m){
+        return '<option value="' + esc(m.id) + '">' + esc(m.label) + '</option>';
+      }).join('') + '</optgroup>';
+    }).join('');
+
+    var dims = S.DIMENSIONS || {};
+    var dimOpts = '<option value="">— no breakdown —</option>' + Object.keys(dims).map(function(k){
+      return '<option value="' + esc(k) + '">' + esc(dims[k].label || k) + '</option>';
+    }).join('');
+
+    var boards = load();
+    return '<div class="dash-bar">' +
+      '<select class="dash-f" onchange="ApexDash.pick(this.value)">' +
+        boards.map(function(b, i){
+          return '<option value="' + i + '"' + (i === _active ? ' selected' : '') + '>' + esc(b.name) + '</option>';
+        }).join('') +
+      '</select>' +
+      '<button class="dash-btn" onclick="ApexDash.newBoard()">+ New</button>' +
+      '<button class="dash-btn" onclick="ApexDash.rename()">Rename</button>' +
+      '<button class="dash-btn" onclick="ApexDash.del()">Delete</button>' +
+      '<button class="dash-btn" onclick="ApexDash.reset()">Reset</button>' +
+      '<span class="dash-sep"></span>' +
+      '<select class="dash-f" id="dashMetric">' + metricOpts + '</select>' +
+      '<select class="dash-f" id="dashDim">' + dimOpts + '</select>' +
+      '<select class="dash-f" id="dashType">' +
+        '<option value="tile">Single number</option>' +
+        '<option value="bar">Bars</option>' +
+        '<option value="table">Table</option>' +
+      '</select>' +
+      '<button class="dash-btn gold" onclick="ApexDash.add()">Add widget</button>' +
+    '</div>';
+  }
+
+  D.render = function(host){
+    host = host || document.getElementById('dashHost');
+    if (!host) return;
+    var S = stats();
+    if (!S){
+      host.innerHTML = '<div class="el-note">The stat engine did not load — check the console.</div>';
+      return;
+    }
+    var list = rows();
+    var b = board();
+
+    host.innerHTML = controls() +
+      (list.length
+        ? (b.widgets.length
+            ? '<div class="dash-grid" id="dashGrid">' +
+                b.widgets.map(function(w, i){ return widgetHtml(w, i, list); }).join('') +
+              '</div>'
+            : '<div class="el-note">This dashboard is empty. Pick a metric above and add it.</div>')
+        : '<div class="el-note">No trades yet — every widget here is computed from your own journal.</div>') +
+      '<div class="el-note" style="margin-top:12px">Drag any card to reorder. ' +
+        'Every figure comes from the same engine as the Stat Lab, so the two can never disagree — ' +
+        'including the metrics you defined yourself.</div>';
+
+    var grid = document.getElementById('dashGrid');
+    if (grid) bindDrag(grid);
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.createElement('style');
+    el.textContent =
+      '.dash-bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:14px}' +
+      '.dash-f{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:8px;' +
+        'color:var(--ink2);padding:6px 9px;font-size:11.5px;font-family:var(--font-body);max-width:210px}' +
+      '.dash-btn{padding:6px 12px;border-radius:8px;border:0.5px solid var(--rim2);background:var(--layer);' +
+        'color:var(--ink2);font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body)}' +
+      '.dash-btn.gold{background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;border-color:transparent}' +
+      '.dash-sep{flex:1;min-width:10px}' +
+      '.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}' +
+      '@media(max-width:620px){.dash-grid{grid-template-columns:1fr}}' +
+      '.dw{position:relative;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:13px;' +
+        'padding:14px;cursor:grab}' +
+      '.dw.sm{min-height:96px}' +
+      '.dw.dragging{opacity:.4}' +
+      '.dw.over{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}' +
+      '.dw-x{position:absolute;top:8px;right:9px;background:none;border:0;color:var(--ink4);' +
+        'font-size:12px;cursor:pointer;padding:2px 4px;opacity:0;transition:opacity .15s}' +
+      '.dw:hover .dw-x{opacity:1}' +
+      '.dw-x:hover{color:var(--loss)}' +
+      '.dw-label{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);' +
+        'font-weight:700;margin-bottom:7px;padding-right:16px}' +
+      '.dw-value{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--ink);' +
+        'font-variant-numeric:tabular-nums}' +
+      '.dw-value.pos{color:var(--profit)}.dw-value.neg{color:var(--loss)}' +
+      '.dw-hint{font-size:10.5px;color:var(--ink4);margin-top:5px;line-height:1.5}' +
+      '.dw-empty{font-size:11.5px;color:var(--ink4);line-height:1.55}' +
+      '.dw-bars{display:flex;flex-direction:column;gap:6px}' +
+      '.dw-bar{display:grid;grid-template-columns:78px 1fr auto;gap:7px;align-items:center;font-size:11px}' +
+      '.dw-bar-k{color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      '.dw-bar-t{background:var(--layer);border-radius:3px;height:7px;overflow:hidden}' +
+      '.dw-bar-t i{display:block;height:100%;border-radius:3px}' +
+      '.dw-bar-t i.pos{background:var(--profit)}.dw-bar-t i.neg{background:var(--loss)}' +
+      '.dw-bar-v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}' +
+      '.dw-bar-v em{font-style:normal;color:var(--ink4);margin-left:5px;font-size:10px}' +
+      '.dw-table{width:100%;border-collapse:collapse;font-size:11.5px}' +
+      '.dw-table td{padding:5px 4px;border-bottom:0.5px solid var(--rim);color:var(--ink2)}' +
+      '.dw-table td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}' +
+      '.dw-table td.pos{color:var(--profit)}.dw-table td.neg{color:var(--loss)}';
+    document.head.appendChild(el);
   });
 })();
 </script>
