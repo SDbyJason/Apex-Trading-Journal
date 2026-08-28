@@ -56,6 +56,10 @@
      Set this to the deployed tradovate-worker.js URL; until then the settings
      panel says so plainly instead of offering a button that cannot work. -->
 <script>window.APEX_TRADOVATE_URL = '';</script>
+<!-- MetaTrader auto-sync worker (metaapi-worker.js). Empty until it is
+     deployed and a MetaApi token exists: the card then shows the Expert
+     Advisor route instead of a button that cannot work. -->
+<script>window.APEX_METAAPI_URL = '';</script>
 <!-- Evidence public REST API worker (read-only journal access via user API keys) -->
 <script>window.APEX_API_URL = 'https://apexapi.4kjyyyftv6.workers.dev';</script>
 
@@ -481,6 +485,15 @@ window.APEX_PRICES = (function () {
         '<p>Der Nutzer erhält für die Vertragslaufzeit ein einfaches, nicht übertragbares Recht zur ' +
         'bestimmungsgemäßen Nutzung. Untersagt sind insbesondere die Weitergabe der Zugangsdaten, das ' +
         'automatisierte Auslesen des Dienstes und das Umgehen technischer Beschränkungen.</p>' +
+        /* Die Grundlage für die serverseitige Tagesobergrenze der KI-Funktionen.
+           Sie liegt bewusst so hoch, dass ein echter Handelstag sie nicht
+           erreicht — sie greift gegen Automatisierung und geteilte Konten. Ohne
+           diesen Absatz gäbe es eine Beschränkung ohne Grundlage. */
+        '<p><b>Faire Nutzung der KI-Funktionen:</b> Die KI-Funktionen sind ohne Guthaben oder ' +
+        'Nachrichtenpakete nutzbar. Sie sind für die persönliche Nutzung durch eine Person bestimmt. ' +
+        'Bei automatisierter Nutzung oder einer Nutzung, die den üblichen persönlichen Gebrauch um ein ' +
+        'Vielfaches übersteigt, kann der Anbieter die KI-Funktionen für den Rest des Tages ' +
+        'aussetzen; alle übrigen Funktionen bleiben verfügbar.</p>' +
 
         '<h3>§ 6 Daten des Nutzers</h3>' +
         '<p>Alle eingegebenen oder importierten Journaldaten bleiben Daten des Nutzers. Der Anbieter ' +
@@ -550,6 +563,18 @@ window.APEX_PRICES = (function () {
         '<p>Der Zugang gilt für die Lebensdauer des Dienstes, nicht für die Lebensdauer des ' +
         'Nutzers; er ist nicht übertragbar und an das erwerbende Konto gebunden. Für den Fall der ' +
         'Einstellung des Dienstes gilt § 12.</p>' +
+        /* Ohne diesen Absatz heißt „Lifetime" im Zweifel: jede künftige Funktion,
+           für immer, zum Einmalpreis. Bei einem Produkt mit laufenden Kosten pro
+           Nutzer — KI-Analysen, Kursdaten, Broker-Anbindung — ist das genau die
+           Zusage, die man zwei Jahre später nicht mehr halten kann. Deshalb steht
+           hier ausdrücklich, was enthalten ist: der Funktionsumfang von Evidence
+           Pro, wie er jeweils betrieben wird. */
+        '<p><b>Umfang:</b> Enthalten ist der Zugang zu Evidence Pro in dem Funktionsumfang, in dem ' +
+        'der Dienst jeweils betrieben wird, einschließlich laufender Verbesserungen und Korrekturen. ' +
+        'Nicht enthalten ist ein Anspruch auf jede künftige Funktion: eigenständige Zusatzprodukte, ' +
+        'die wir separat anbieten, sowie Funktionen mit erheblichen laufenden Kosten Dritter können ' +
+        'kostenpflichtig sein. In diesem Fall bleibt der bisherige Funktionsumfang für Lifetime-Zugänge ' +
+        'ohne Zusatzkosten erhalten. Für die faire Nutzung der KI-Funktionen gilt § 5.</p>' +
 
         '<h3>§ 14 Schlussbestimmungen</h3>' +
         '<p>Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts. Bei Verbrauchern gilt diese ' +
@@ -1037,7 +1062,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-08-18a';
+  window.APEX_BUILD = '2026-08-28a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -8253,9 +8278,14 @@ body.light #landingPage * {
     </div>
     <div class="lp-card reveal d3">
       <span class="lp-card-icon">📥</span>
-      <div class="lp-card-title">Import &amp; Multiple Accounts</div>
-      <div class="lp-card-desc">Drop in a statement from Pepperstone, IC Markets, FTMO, Topstep, NinjaTrader, Tradovate, Rithmic, Interactive Brokers, tastytrade, Binance, Bybit and 70+ more — search yours by name, or map any other CSV yourself, or write a trade by hand. Every broker, prop challenge and demo account sits side by side, with overlaid equity curves.</div>
-      <span class="lp-tag">Import · Multi-account</span>
+      <div class="lp-card-title">Auto-Sync &mdash; or import anything else</div>
+      <!-- These two are NOT equivalent and the page must stop implying they
+           are. A live connection carries the stop and target of an open
+           position; a statement is written after the fact and those fields are
+           simply gone. Saying so costs a sentence and buys the trust that the
+           rest of the product runs on. -->
+      <div class="lp-card-desc"><strong>Connected automatically:</strong> cTrader and Interactive Brokers directly, MetaTrader&nbsp;5, TradingView, ATAS and Quantower over a live link, Binance and Bybit by read-only key. Trades arrive on their own &mdash; <strong>including the stop and target</strong>, which only exist while a position is open.<br><br><strong>Everything else by statement:</strong> Pepperstone, IC Markets, FTMO, Topstep, NinjaTrader, Tradovate, Rithmic, tastytrade and 70+ more &mdash; search yours by name, or map any CSV yourself. Honest caveat: a statement is written after the trade closed, so it carries prices and P&amp;L but <em>not</em> the stop you actually had on. Every broker, prop challenge and demo account then sits side by side.</div>
+      <span class="lp-tag green">Auto-Sync</span> <span class="lp-tag">Import · Multi-account</span>
     </div>
   </div>
 
@@ -9710,6 +9740,9 @@ body.light #landingPage * {
         <div>
           <div style="font-weight:700;color:var(--ink);font-size:14px">Founding Lifetime <span style="font-size:9.5px;font-weight:700;background:var(--profit-dim);color:var(--profit);padding:2px 7px;border-radius:6px;margin-left:6px">ONE-TIME</span></div>
           <div style="font-size:11px;color:var(--ink3);margin-top:3px">Pay once, Pro forever — limited to <span id="lifetimeCapLabel">50</span> seats</div>
+          <!-- Says the same thing as AGB § 13. A "lifetime" that is defined
+               only in the terms is a promise the buyer never read. -->
+          <div style="font-size:10.5px;color:var(--ink4);margin-top:3px;line-height:1.5">Access to Evidence Pro for as long as the service runs, with every improvement to it. Separate future products may be sold separately.</div>
           <div id="lifetimeSeats" style="font-size:11px;color:var(--gold);margin-top:3px;font-weight:600"></div>
         </div>
         <div translate="no" class="notranslate" id="prLifetimeAmt" style="font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:16px">$419.99</div>
@@ -10181,6 +10214,17 @@ function _authAction(type) {
             </div>
           </div>
         </div>
+
+        <!-- Journal search. The shortcut is on the button because a
+             keyboard-only feature is a feature most users never find. -->
+        <!-- .show because the chip class hides itself by default: it was
+             built for the cTrader status, which only appears once connected. -->
+        <button class="ct-sync-chip show" id="jsOpenBtn" style="cursor:pointer;display:flex"
+                title="Search your journal (Ctrl/Cmd + K)"
+                onclick="ApexJournalSearch.open()">
+          <span class="ct-chip-ico">🔍</span>
+          <span>Search</span>
+        </button>
 
         <div class="sync-pill">
           <div class="pulse-dot"></div>
@@ -11114,7 +11158,10 @@ function _authAction(type) {
   <div class="page" id="page-playbooks">
     <div class="ph">
       <div class="ph-eyebrow">Analysis</div>
-      <h1>Play<span style="color:var(--gold)">books</span></h1>
+      <!-- Als Ganzes geschützt: der Name ist auf zwei Elemente aufgeteilt
+           („Play" + „books"), also sieht die Wortschutz-Logik ihn nie als ein
+           Wort. Google Translate übersetzte die Hälften einzeln. -->
+      <h1 translate="no" class="notranslate">Play<span style="color:var(--gold)">books</span></h1>
       <p>Define your strategies with a checklist and rules — then see which ones actually make money.</p>
     </div>
     <div class="glass-card" style="margin-bottom:1.5rem">
@@ -11134,6 +11181,10 @@ function _authAction(type) {
       </div>
     </div>
     <div id="playbookList"></div>
+    <!-- Confluence sits under the playbooks because the checklist items above
+         are its main input: this is where you find out which of the boxes you
+         tick are actually doing the work. -->
+    <div id="confluenceHost"></div>
   </div>
 
   <div class="page" id="page-setups">
@@ -11534,6 +11585,9 @@ function _authAction(type) {
         <div style="font-size:13px;color:var(--ink3);margin-bottom:16px;line-height:1.6">
           Auto-import your trades from any of these platforms. Pick your platform — each connects a different way, but they all land in the same journal with chart snapshots, timestamps and SL/TP.
         </div>
+
+        <!-- Connection health — every link at a glance, filled by ApexSyncHealth -->
+        <div id="syncHealthHost" style="margin-bottom:16px"></div>
 
         <!-- Platform selector -->
         <div class="at-selector" id="atSelector">
@@ -12283,6 +12337,9 @@ function _authAction(type) {
           <div class="csv-drop-icon">📄</div>
           <div class="csv-drop-title">Drop your CSV file here</div>
           <div class="csv-drop-sub">or click to select · MT4/MT5, cTrader, NinjaTrader, Tradovate, Rithmic, IBKR, tastytrade, Binance, Bybit, TradingView and more — plus free column mapping for everything else</div>
+          <!-- Said at the moment of importing, not only on the landing page:
+               this is where someone decides whether CSV is good enough. -->
+          <div class="csv-drop-sub" style="margin-top:8px;opacity:.85">A statement carries prices and P&amp;L, but not the stop you had on — brokers do not write it out once the position is closed. If your broker is one we connect to directly, <b>Auto-Sync</b> keeps the stops.</div>
         </div>
         <div id="csvMapArea" class="csv-map-area" style="display:none"></div>
         <div id="csvPreviewArea" style="display:none">
@@ -13353,6 +13410,9 @@ function nav(id) {
   if (id === 'econews')    { initEcoNews(); }
   if (id === 'indicator')   { initSDZonePage(); }
   if (id === 'propfirm')    { if (window.ApexPropPlus) ApexPropPlus.render(); }
+  /* Recomputed on entry rather than cached: it reads the whole journal, and a
+     stale confluence table is worse than a half-second wait. */
+  if (id === 'playbooks')   { if (window.ApexConfluence) setTimeout(ApexConfluence.render, 30); }
   if (id === 'developer')   { if (window.ApexDev) { ApexDev.render(); ApexDev.loadKeys(); } }
 
   // Mobile bottom nav active state
@@ -15113,6 +15173,7 @@ function optionsBlock(t, i) {
         <span class="tc-partials-rest">×${mult} per contract${summary.length ? ' · ' + summary.join(' · ') : ''}</span>
       </div>
       ${rows}
+      ${(window.ApexPayoff ? ApexPayoff.block(t) : '')}
     </div>`;
 }
 function addLeg(i) {
@@ -15299,6 +15360,10 @@ function setPsych(dim, val) {
 }
 
 function save() {
+  /* Every write goes through here, so this is the one place that can be
+     sure the flattened-trade cache is stale — an edited note or grade
+     changes no count and would otherwise survive the fingerprint. */
+  try { invalidateTradeCache(); } catch (e) {}
   // 1. Collect psych from sliders
   const key = currentJournalKey;
   if (journalData[key]) {
@@ -16580,7 +16645,42 @@ function renderIndicatorSettings(filter) {
 function filterIndicatorSettings(val) { renderIndicatorSettings(val); }
 
 // ─── HELPERS ──────────────────────────
+/* The flattened journal, memoised.
+
+   This is the single hottest function in the app: more than fifty call
+   sites ask for "every trade" — the overview, the calendar, each stat,
+   every heatmap — and one navigation triggers most of them. Rebuilding
+   it copies every trade object each time, which is invisible at 200
+   trades and is the whole render budget at 6,000. A scalper's journal
+   is exactly the account we least want to feel slow.
+
+   Invalidation is deliberately crude and cheap: a fingerprint that
+   counts days and trades (no object copying) plus a short time to live.
+   Within one render burst every caller shares one computation; a
+   fraction of a second later it is rebuilt regardless. That is the safe
+   direction to be wrong in — journalData is mutated from many places
+   and none of them would reliably announce it.
+
+   Callers get their own array (slice), so the ones that sort in place
+   cannot disturb the others. */
+var _gatCache = null, _gatKey = '', _gatAt = 0;
+var GAT_TTL_MS = 300;
+
+function _gatFingerprint() {
+  var keys = Object.keys(journalData), n = 0;
+  for (var i = 0; i < keys.length; i++) {
+    var d = journalData[keys[i]];
+    if (d && d.trades) n += d.trades.length;
+  }
+  var acct = '';
+  try { acct = window.ApexAccounts ? String(ApexAccounts.active()) : ''; } catch (e) {}
+  return keys.length + ':' + n + ':' + acct;
+}
+
 function getAllTrades() {
+  var key = _gatFingerprint();
+  if (_gatCache && key === _gatKey && (Date.now() - _gatAt) < GAT_TTL_MS) return _gatCache.slice();
+
   const all = [];
   const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   Object.keys(journalData).forEach(k => {
@@ -16592,8 +16692,15 @@ function getAllTrades() {
       all.push({ ...t, _date: k, _idx: i, _dow: dayNames[dateObj.getDay()] });
     });
   });
-  return all;
+  _gatCache = all; _gatKey = key; _gatAt = Date.now();
+  return all.slice();
 }
+
+/* Anything that edits a trade in place — a note, a grade, a tag — changes
+   no count, so the fingerprint alone would not notice within the window.
+   The edit paths call this. */
+function invalidateTradeCache() { _gatCache = null; _gatKey = ''; }
+window.invalidateTradeCache = invalidateTradeCache;
 function calcWR() {
   const all = getAllTrades();
   const valid = all.filter(t => t.pips !== '' && t.pips !== undefined);
@@ -20368,29 +20475,303 @@ function showCsvError(msg) {
   document.getElementById('csvImportBtn').disabled = true;
 }
 
-function importCsvTrades() {
-  if (!_csvParsedTrades.length) { showToast('⚠ No trades to import'); return; }
+/* ══════════════════════════════════════════════════════════════════
+   IMPORT RECONCILIATION  —  ApexReconcile
 
-  const fallbackKey = currentJournalKey;
-  let added = 0;
+   Every journal that quietly imports a statement is one bad column away
+   from being confidently wrong: half the executions dropped, the P&L off
+   by the commission, every trade landing on the wrong day because the
+   broker reports in its own server time. The analysis on top of that
+   still looks convincing, which is what makes it dangerous.
 
-  for (const trade of _csvParsedTrades) {
-    // Use the date parsed from the CSV, fall back to currently open journal day
-    const key = trade._importDate || fallbackKey;
-    if (!journalData[key]) journalData[key] = { trades:[], notes:'', disc:5, conf:5, focus:5, pat:5 };
+   So nothing is written until the trader has seen, once, what actually
+   came out of the file: executions read → positions built, the file's own
+   net P&L against what the journal computed, which rows are duplicates of
+   trades already in the journal, how many arrived without a stop, and
+   what timezone we assumed — with a switch to correct it.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var R = {}; window.ApexReconcile = R;
 
-    // Strip internal key before storing
-    const { _importDate, ...cleanTrade } = trade;
-    journalData[key].trades.push(cleanTrade);
-    added++;
+  var S = null;           // { trades, report, shift, dupMode }
+
+  /* Identity of a trade, for "have I already imported this?".
+
+     Ticket ID first when the broker gives one — it is the only field that
+     is genuinely unique. Otherwise symbol + open minute + size, which is
+     as close to unique as a statement gets: the same instrument, opened in
+     the same minute, at the same size, is the same position. Rounding to
+     the minute matters — re-exports of the same statement often differ in
+     the seconds column. */
+  function hashOf(t){
+    var tid = t.tradeId || t.ticket || t.id;
+    if (tid) return 'id:' + String(tid).trim();
+    var ms  = Number(t.openTime || t.closeTime || 0);
+    var min = ms ? Math.round(ms / 60000) : (t._importDate || '');
+    return 'k:' + String(t.symbol||'').toUpperCase() + '|' + min + '|' +
+           (parseFloat(t.lots) || 0) + '|' + (t.dir || '');
   }
 
-  save();
-  renderTrades();
-  closeCsvImport();
-  showToast(`✓ ${added} trade${added!==1?'s':''} imported!`);
-  pushNotif('trade', `<strong>${added} trades</strong> imported via CSV`, `nav('journal');`);
-  _csvParsedTrades = [];
+  /* Every hash already in the journal. Built fresh each time the screen
+     opens — a background sync may have added trades since the last run. */
+  function existingHashes(){
+    var set = {};
+    try {
+      Object.keys(window.journalData || {}).forEach(function(k){
+        var d = journalData[k];
+        if (!d || !d.trades) return;
+        d.trades.forEach(function(t){ set[hashOf(t)] = k; });
+      });
+    } catch(e){}
+    return set;
+  }
+
+  function usd(t){
+    try {
+      var r = calcTradePnl(t);
+      return (r && isFinite(r.pnlUsd)) ? r.pnlUsd : 0;
+    } catch(e){ return 0; }
+  }
+
+  function money(n){
+    var s = (n < 0 ? '-' : '') + '$' + Math.abs(n).toFixed(2);
+    return s;
+  }
+
+  /* Shift every timestamp by N hours and re-derive the journal day and the
+     session from the corrected time. A broker that reports in GMT+3 puts a
+     22:30 New-York entry on the following day otherwise — and then the
+     whole day-of-week and session breakdown is quietly wrong. */
+  function applyShift(trades, hours){
+    var ms = hours * 3600000;
+    return trades.map(function(src){
+      var t = {};
+      for (var k in src) if (src.hasOwnProperty(k)) t[k] = src[k];
+      if (!ms) return t;
+      if (t.openTime)  t.openTime  = Number(t.openTime)  + ms;
+      if (t.closeTime) t.closeTime = Number(t.closeTime) + ms;
+      var base = t.closeTime || t.openTime;
+      if (base){
+        var d = new Date(base);
+        t._importDate = csvDateKey(d);
+        t.session = csvSession(d);
+        try { if (window.apexFillTradeTimes){ delete t.timeIn; delete t.timeOut; apexFillTradeTimes(t); } } catch(e){}
+      }
+      return t;
+    });
+  }
+
+  /* Everything the screen shows, recomputed whenever the trader changes
+     the timezone or the duplicate handling. */
+  function analyse(){
+    var trades = applyShift(S.trades, S.shift);
+    var have   = existingHashes();
+    var seen   = {};
+    var dups = [], fresh = [], noSl = 0, noPnl = 0, fileSum = 0, journalSum = 0;
+    var days = {};
+
+    trades.forEach(function(t){
+      var h = hashOf(t);
+      /* Two kinds of duplicate: already in the journal, and repeated
+         inside this same file. Both are silent damage. */
+      if (have[h] || seen[h]) dups.push(t); else { seen[h] = 1; fresh.push(t); }
+      if (!t.sl) noSl++;
+      var rawPnl = (t.pnl !== undefined && t.pnl !== null && t.pnl !== '') ? parseFloat(t.pnl) : null;
+      if (rawPnl === null || isNaN(rawPnl)) noPnl++; else fileSum += rawPnl;
+      journalSum += usd(t);
+      if (t._importDate) days[t._importDate] = 1;
+    });
+
+    var dayList = Object.keys(days).sort();
+    return { trades: trades, fresh: fresh, dups: dups, noSl: noSl, noPnl: noPnl,
+             fileSum: fileSum, journalSum: journalSum,
+             days: dayList, first: dayList[0], last: dayList[dayList.length-1] };
+  }
+
+  function row(label, value, tone, note){
+    var col = tone === 'bad' ? 'var(--loss)' : tone === 'good' ? 'var(--profit)' :
+              tone === 'warn' ? 'var(--gold)' : 'var(--ink)';
+    return '<div class="rec-row">' +
+      '<div class="rec-lbl">' + label + '</div>' +
+      '<div class="rec-val" style="color:' + col + '">' + value + '</div>' +
+      (note ? '<div class="rec-note">' + note + '</div>' : '') +
+      '</div>';
+  }
+
+  function render(){
+    var a = analyse();
+    var rep = S.report || {};
+    var body = document.getElementById('recBody');
+    if (!body) return;
+
+    /* The one number that matters: does the journal agree with the file.
+       A cent of float noise is not a discrepancy; anything above it is. */
+    var delta = a.journalSum - a.fileSum;
+    var mismatch = a.noPnl === 0 && Math.abs(delta) > 0.01;
+
+    var skipTxt = '';
+    if (rep.reasons) skipTxt = Object.keys(rep.reasons).map(function(k){
+      return rep.reasons[k] + '× ' + k; }).join(' · ');
+
+    var html = '';
+
+    html += '<div class="rec-grid">';
+    html += row('Rows read from the file',
+                (rep.rows != null ? rep.rows : a.trades.length) + '',
+                '', rep.skipped ? rep.skipped + ' skipped — ' + csvEsc(skipTxt) : 'none skipped');
+    html += row('Positions built', a.trades.length + '', '',
+                rep.presetId ? 'via ' + csvEsc((CSV_PRESETS[rep.presetId]||{}).label || rep.presetId) : '');
+    html += row('Net P&amp;L in the file',
+                a.noPnl === a.trades.length ? '— not in file' : money(a.fileSum),
+                '', a.noPnl && a.noPnl < a.trades.length ? a.noPnl + ' trade(s) without a P&L column' : '');
+    html += row('Net P&amp;L in the journal', money(a.journalSum),
+                mismatch ? 'bad' : 'good',
+                mismatch ? 'off by ' + money(delta) + ' — check commissions and the contract size'
+                         : (a.noPnl === a.trades.length ? 'computed from pips × size'
+                                                        : 'matches the statement'));
+    html += row('Already in your journal', a.dups.length + '',
+                a.dups.length ? 'warn' : 'good',
+                a.dups.length ? 'these are duplicates — skipped by default' : 'nothing imported twice');
+    html += row('Trades without a stop loss', a.noSl + '',
+                a.noSl ? 'warn' : 'good',
+                a.noSl ? 'risk-per-trade and R multiples will be blank for these' : '');
+    html += '</div>';
+
+    /* Timezone. Shown as a real question rather than an assumption,
+       because the file almost never says which zone it means. */
+    var opts = '';
+    for (var h = -12; h <= 14; h++)
+      opts += '<option value="' + h + '"' + (h === S.shift ? ' selected' : '') + '>' +
+              (h > 0 ? '+' + h : h) + ' h</option>';
+    html += '<div class="rec-tz">' +
+      '<div><strong>Timezone</strong><div class="rec-note">Times are read exactly as the file writes them. ' +
+        'If your broker reports in its own server time, correct it here — the journal day and the session ' +
+        'are derived from it.</div></div>' +
+      '<select id="recTz" onchange="ApexReconcile.setShift(this.value)">' + opts + '</select>' +
+      '</div>';
+
+    html += '<div class="rec-range">' +
+      (a.days.length ? a.days.length + ' trading day' + (a.days.length===1?'':'s') +
+        ' · ' + a.first + (a.first !== a.last ? ' – ' + a.last : '')
+      : 'No dates found — everything lands on ' + (window.currentJournalKey || 'the open day')) +
+      '</div>';
+
+    if (a.dups.length){
+      html += '<label class="rec-check"><input type="checkbox" ' +
+        (S.dupMode === 'import' ? 'checked' : '') +
+        ' onchange="ApexReconcile.setDupMode(this.checked?\'import\':\'skip\')"> ' +
+        'Import the ' + a.dups.length + ' duplicate' + (a.dups.length===1?'':'s') + ' anyway</label>';
+    }
+
+    var willAdd = S.dupMode === 'import' ? a.trades.length : a.fresh.length;
+    var btn = document.getElementById('recConfirm');
+    if (btn){
+      btn.textContent = willAdd ? 'Everything checks out — import ' + willAdd + ' trade' + (willAdd===1?'':'s')
+                                : 'Nothing new to import';
+      btn.disabled = !willAdd;
+    }
+    body.innerHTML = html;
+  }
+
+  function ensureDom(){
+    if (document.getElementById('recOverlay')) return;
+    var css = document.createElement('style');
+    css.textContent =
+      '#recOverlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);' +
+        'z-index:100000;display:none;align-items:center;justify-content:center;padding:16px}' +
+      '#recOverlay.open{display:flex}' +
+      '#recBox{background:var(--card,#14161c);border:1px solid var(--line,#2a2d36);border-radius:16px;' +
+        'width:min(620px,100%);max-height:90vh;overflow:auto;padding:22px}' +
+      '#recBox h3{margin:0 0 4px;font-size:17px}' +
+      '.rec-sub{color:var(--ink3);font-size:12px;margin-bottom:16px}' +
+      '.rec-grid{display:flex;flex-direction:column;gap:2px}' +
+      '.rec-row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:9px 0;' +
+        'border-bottom:1px solid var(--line,#2a2d36)}' +
+      '.rec-lbl{font-size:13px;color:var(--ink2)}' +
+      '.rec-val{font-size:14px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}' +
+      '.rec-note{grid-column:1/-1;font-size:11px;color:var(--ink3)}' +
+      '.rec-tz{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;' +
+        'margin-top:16px;padding:12px;border:1px solid var(--line,#2a2d36);border-radius:10px}' +
+      '.rec-tz select{background:var(--bg2,#0f1116);color:var(--ink);border:1px solid var(--line,#2a2d36);' +
+        'border-radius:8px;padding:7px 9px;font-size:13px}' +
+      '.rec-range{margin-top:12px;font-size:12px;color:var(--ink2)}' +
+      '.rec-check{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:12px;color:var(--ink2)}' +
+      '.rec-btns{display:flex;gap:10px;margin-top:18px}' +
+      '.rec-btns button{flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;' +
+        'border:1px solid var(--line,#2a2d36);background:transparent;color:var(--ink2)}' +
+      '#recConfirm{background:var(--gold,#d4af37);color:#000;border-color:transparent}' +
+      '#recConfirm:disabled{opacity:.45;cursor:not-allowed}';
+    document.head.appendChild(css);
+
+    var ov = document.createElement('div');
+    ov.id = 'recOverlay';
+    ov.innerHTML =
+      '<div id="recBox">' +
+        '<h3>Check the import</h3>' +
+        '<div class="rec-sub">Nothing is saved yet. This is the one moment where a wrong column, ' +
+          'a missing commission or the broker&rsquo;s timezone is still cheap to fix.</div>' +
+        '<div id="recBody"></div>' +
+        '<div class="rec-btns">' +
+          '<button type="button" onclick="ApexReconcile.close()">Back to the mapping</button>' +
+          '<button type="button" id="recConfirm" onclick="ApexReconcile.commit()"></button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+  }
+
+  R.open = function(trades, report){
+    if (!trades || !trades.length){ showToast('⚠ No trades to import'); return; }
+    ensureDom();
+    S = { trades: trades, report: report || null, shift: 0, dupMode: 'skip' };
+    render();
+    document.getElementById('recOverlay').classList.add('open');
+  };
+  R.close = function(){
+    var ov = document.getElementById('recOverlay');
+    if (ov) ov.classList.remove('open');
+  };
+  R.setShift   = function(v){ S.shift = parseInt(v, 10) || 0; render(); };
+  R.setDupMode = function(m){ S.dupMode = m; render(); };
+
+  R.commit = function(){
+    var a = analyse();
+    var list = S.dupMode === 'import' ? a.trades : a.fresh;
+    if (!list.length) return;
+    var fallbackKey = window.currentJournalKey;
+    var added = 0;
+
+    list.forEach(function(trade){
+      var key = trade._importDate || fallbackKey;
+      if (!journalData[key]) journalData[key] = { trades:[], notes:'', disc:5, conf:5, focus:5, pat:5 };
+      var clean = {};
+      for (var k in trade) if (trade.hasOwnProperty(k) && k !== '_importDate') clean[k] = trade[k];
+      journalData[key].trades.push(clean);
+      added++;
+    });
+
+    save();
+    renderTrades();
+    R.close();
+    if (typeof closeCsvImport === 'function') closeCsvImport();
+    showToast('✓ ' + added + ' trade' + (added!==1?'s':'') + ' imported' +
+              (a.dups.length && S.dupMode === 'skip' ? ' · ' + a.dups.length + ' duplicate' +
+               (a.dups.length===1?'':'s') + ' skipped' : ''));
+    pushNotif('trade', '<strong>' + added + ' trades</strong> imported via CSV', "nav('journal');");
+    _csvParsedTrades = [];
+    S = null;
+  };
+
+  /* Exposed because the sync paths (cTrader, Tradovate, MT5) want the same
+     duplicate test before they write, not just the CSV path. */
+  R.hashOf = hashOf;
+  R.knownHashes = existingHashes;
+})();
+
+/* The import button no longer writes: it opens the reconciliation screen.
+   Confirming there is what actually commits the trades. */
+function importCsvTrades() {
+  if (!_csvParsedTrades.length) { showToast('⚠ No trades to import'); return; }
+  ApexReconcile.open(_csvParsedTrades, _csvReport);
 }
 
 // Drag & drop for CSV zone
@@ -24140,7 +24521,11 @@ var _analyseDebounce = null;
             mimeType:     _gradeMimeType,
             context:      context.trim(),
             multiZone:    multiZone,
-            activeTrade:  activeTrade
+            activeTrade:  activeTrade,
+            /* So the worker can answer a repeated analysis of the same
+               chart from its cache, and count the day's usage per
+               account rather than per network. */
+            uid:          (window.currentUID || '')
           })
         });
 
@@ -25886,6 +26271,14 @@ window.startFreeTrial = startFreeTrial;
           ? 'Active · last server check ' + ctAgo(d.lastPollAt)
           : 'Active · first check within a few minutes';
       }
+      /* Mirror the server's view into the private doc so the connection
+         status screen can show a failing link without re-asking the
+         worker for every connection it lists. */
+      try {
+        ctState.lastError = (d.status === 'active' && !d.errorCount) ? '' : (d.lastError || '');
+        if (window.db && window.currentUID)
+          ctPrivRef().set({ lastError: ctState.lastError, lastPollAt: d.lastPollAt || 0 }, { merge: true });
+      } catch (e) {}
     } catch (e) { st.textContent = ''; }
   }
 
@@ -30460,7 +30853,15 @@ function goToAuthPro(screen) {
   };
   window.apexRefreshLocale = function(){ window.apexLocale=resolve(); updateUI(); };
 
+  /* Published so the authored-translation layer (ApexI18n) reads the SAME
+     answer this module acts on — a second language resolution would be a
+     second source of truth, and they would drift. */
   function resolveLang(){
+    var r = _resolveLang();
+    window.apexResolvedLang = r;
+    return r;
+  }
+  function _resolveLang(){
     var st=loadSt(), l=st.lang||'auto';
     if(l && l!=='auto') return l;
     var R=resolve();
@@ -30572,7 +30973,12 @@ function goToAuthPro(screen) {
     'overtrading','hedging','backtest','backtesting','replay','watchlist',
     'trailing','breakout','pullback','retest','fakeout','stop hunt',
     'bid','ask','swap fee','funding rate','open interest',
-    'prop firm','daily loss limit','trailing drawdown'
+    'prop firm','daily loss limit','trailing drawdown',
+    /* Produktbegriffe der App. „Playbooks" wurde von Google Translate zu
+       „Theaterbücher" — die Überschrift einer ganzen Seite, und für einen
+       Trader schlicht unverständlich. */
+    'playbooks','playbook','confluence','drawdown floor','equity floor',
+    'challenge mode','edge lab','stat lab','killzone','order flow'
   ];
 
   /* Nur als komplettes Label schützen, nie mitten im Satz: Alltagswörter, die
@@ -34343,6 +34749,14 @@ body.light .pt-sugg{background:var(--layer)}
 
   function applyEvent(e){
     if(!e) return;
+    /* Not every inbox event is a trade. The background poller also reports
+       that it could not sync at all — and without this guard that arrived
+       as an "open" event and was journalled as a nameless trade. */
+    if (e.type === 'sync_failed'){
+      try { if (window.ApexSyncHealth) ApexSyncHealth.noteFailure(e); } catch(_){}
+      return;
+    }
+    try { if (window.ApexSyncHealth) ApexSyncHealth.noteEvent(e.source || 'webhook'); } catch(_){}
     var byId = e.posId ? findByExt(extId(e), e) : null;
     // known position that is already closed → duplicate delivery; never fall
     // back to symbol matching or we'd touch an unrelated open trade
@@ -43075,10 +43489,21 @@ self.addEventListener('message', async (ev) => {
     if (this.cursor >= this.data.n) return this;
     var self = this;
     this.playing = true;
+    /* Above ~40× the interval would clamp at one frame and the speed control
+       would quietly stop doing anything — 40× and 100× looked identical.
+       Past the clamp the extra speed comes from advancing several bars per
+       frame instead. Every bar still goes through seek(), so a stop or a
+       target inside a skipped bar is filled exactly as it would be at 1×;
+       only the drawing is coarser, which is the honest trade at 100×. */
+    var interval = BASE_MS / self.speed;
+    var perTick = 1;
+    if (interval < 16) { perTick = Math.max(1, Math.round(16 / interval)); interval = 16; }
     this._timer = setInterval(function () {
-      if (self.cursor >= self.data.n) { self.pause(); self.emit('end', self.state()); return; }
-      self.step(1);
-    }, Math.max(16, BASE_MS / self.speed));
+      for (var b = 0; b < perTick; b++) {
+        if (self.cursor >= self.data.n) { self.pause(); self.emit('end', self.state()); return; }
+        self.step(1);
+      }
+    }, Math.max(16, interval));
     this.emit('state', this.state());
     return this;
   };
@@ -43565,10 +43990,12 @@ self.addEventListener('message', async (ev) => {
 
   /* Below 1× so a fast market can be watched candle by candle without
      reaching for the step button, up to 10× so a quiet Asian session can be
-     skipped through. Above ~10× the chart cannot keep up and you are not
-     reading it anyway — that is what the scrubber and the jump buttons are
-     for. */
-  var SPEEDS = [0.5, 0.75, 1, 2, 4, 8, 10];
+     skipped through — and up to 100× because the workflow this cockpit
+     trains is volume: a scalper wants two hundred sessions in an evening,
+     not two. Past ~40× the chart is no longer readable and is not meant to
+     be; the engine still walks every bar, so fills stay exact and you are
+     simply skipping to the next thing worth stopping at. */
+  var SPEEDS = [0.5, 0.75, 1, 2, 4, 8, 10, 25, 50, 100];
 
   /* Session opens in UTC. Deliberately not the user's display timezone: the
      Tokyo open is the Tokyo open wherever you are sitting. Same reasoning as
@@ -44045,6 +44472,10 @@ self.addEventListener('message', async (ev) => {
             '<button class="arp-oc sell" id="arpOcSell" title="Sell at the bid (S)">SELL</button>' +
           '</div>' +
         '</div>' +
+        /* Challenge mode: the rules sit directly under the chart, because the
+           number that matters (how much buffer is left) has to be visible
+           while the decision to take one more trade is being made. */
+        '<div class="chal-bar" id="challengeBar" style="display:none"></div>' +
         '<div class="arp-bar">' +
           '<button class="arp-pbtn sm" id="arpBack" title="Previous candle (←)" aria-label="Previous candle (←)">⏮</button>' +
           '<button class="arp-pbtn" id="arpPlay" title="Play / pause (Space)" aria-label="Play / pause (Space)">▶</button>' +
@@ -44083,6 +44514,10 @@ self.addEventListener('message', async (ev) => {
           '<span class="arp-jump-l">Date</span>' +
           '<input type="date" id="arpGoDate" class="arp-jump-date" title="Jump to this date inside the loaded range">' +
           '<span class="arp-jump-msg" id="arpJumpMsg"></span>' +
+          '<span class="arp-jump-sep"></span>' +
+          /* Starting a challenge belongs next to the other session controls,
+             not in a settings screen: it is a decision about THIS replay. */
+          (window.ApexChallenge ? ApexChallenge.pickerHtml() : '') +
         '</div>' +
         '<div class="arp-keys"><kbd>Space</kbd> play/pause · <kbd>→</kbd> next candle · <kbd>←</kbd> back · ' +
           '<kbd>B</kbd> buy · <kbd>S</kbd> sell · <kbd>X</kbd> close half · <kbd>E</kbd> break-even · ' +
@@ -45366,7 +45801,12 @@ self.addEventListener('message', async (ev) => {
           enabled: function () { return !S.draw || S.draw.tool === 'cursor'; },
           onDrag: dragLabel, onCommit: commitDrag
         });
-        S.session.on('state', function () { paint(); });
+        S.session.on('state', function (st) {
+          paint();
+          /* The rules are checked on the replay's own clock, so a stop-out
+             happens on the bar it happened on — not when the UI repaints. */
+          try { if (window.ApexChallenge) ApexChallenge.onBar(st || S.session.state()); } catch (e) {}
+        });
         S.session.on('end', function () { toast('Replay finished — end of data'); });
         bindCockpit(body);
         restoreTickMode();
@@ -51315,8 +51755,18 @@ self.addEventListener('message', async (ev) => {
     apex:        { label: 'Apex Trader Funding',       target: 6,  daily: 0,  max: 6,  dd: 'trailing', consistency: 30, minDays: 7 },
     topstep:     { label: 'Topstep — Trading Combine', target: 6,  daily: 2,  max: 4,  dd: 'eod',      consistency: 50, minDays: 2 },
     takeprofit:  { label: 'TakeProfit Trader',         target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 0,  minDays: 5 },
-    mff:         { label: 'Generic 1-step',            target: 10, daily: 5,  max: 6,  dd: 'static',   consistency: 0,  minDays: 0 }
+    mff:         { label: 'MyFundedFutures — Starter',  target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 40, minDays: 1 },
+    mffexpert:   { label: 'MyFundedFutures — Expert',   target: 6,  daily: 2,  max: 3,  dd: 'eod',      consistency: 0,  minDays: 1 },
+    alphafut:    { label: 'Alpha Futures — Evaluation', target: 6,  daily: 0,  max: 5,  dd: 'eod',      consistency: 0,  minDays: 3 },
+    bulenox:     { label: 'Bulenox — Evaluation',       target: 6,  daily: 0,  max: 4,  dd: 'trailing', consistency: 0,  minDays: 0 },
+    fundingpips: { label: 'Funding Pips — 2-step',      target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 0 },
+    alphacap:    { label: 'Alpha Capital Group',        target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 0 },
+    generic1:    { label: 'Generic 1-step',             target: 10, daily: 5,  max: 6,  dd: 'static',   consistency: 0,  minDays: 0 }
   };
+
+  /* Common account sizes per firm family, so the retroactive check can offer
+     "Topstep 50k" rather than asking for a number nobody remembers. */
+  var SIZES = [25000, 50000, 100000, 150000, 200000, 250000];
 
   var DEFAULTS = {
     preset: 'custom',
@@ -51513,6 +51963,10 @@ self.addEventListener('message', async (ev) => {
   }
 
   P.get = load;
+  /* Published so the replay's challenge mode enforces the SAME rule sets the
+     cockpit measures against — two copies of Topstep's terms would drift. */
+  P.PRESETS = PRESETS;
+  P.SIZES = SIZES;
   P.ledger = loadLedger;
   P.portfolio = portfolio;
   P.OUTCOMES = OUTCOMES;
@@ -51657,11 +52111,11 @@ self.addEventListener('message', async (ev) => {
 
       // Daily loss limit — measured from the day's starting balance.
       if (dailyAbs > 0 && (d.pnl <= -dailyAbs)) {
-        breaches.push({ date: d.date, type: 'daily', msg: 'Daily loss limit breached: ' + money(d.pnl) + ' against a limit of ' + money(-dailyAbs) });
+        breaches.push({ date: d.date, type: 'daily', msg: 'Daily loss limit breached: ' + moneyTxt(d.pnl) + ' against a limit of ' + moneyTxt(-dailyAbs) });
       }
       // Drawdown floor — the intraday low is the number that matters.
       if (maxDDAbs > 0 && dayLow <= floor) {
-        breaches.push({ date: d.date, type: 'max', msg: 'Max drawdown breached: balance reached ' + money(dayLow) + ', floor was ' + money(floor) });
+        breaches.push({ date: d.date, type: 'max', msg: 'Max drawdown breached: balance reached ' + moneyTxt(dayLow) + ', floor was ' + moneyTxt(floor) });
       }
 
       if (cfg.dd === 'eod') {
@@ -51712,6 +52166,72 @@ self.addEventListener('message', async (ev) => {
     };
   }
   P.compute = function () { return compute(load()); };
+
+  /* ═══════════════ RETROACTIVE CHECK ═══════════════
+
+     "Would these trades have passed the Topstep 50k?" The whole apparatus to
+     answer it already exists — the rule sets, and an engine that walks a day
+     series against a drawdown floor. The only thing missing was permission to
+     point that engine at history instead of at the running cycle.
+
+     Deliberately honest in two ways. It reports the FIRST breach and stops
+     treating anything after it as real, because in a live challenge the
+     account would have been closed at that moment and the rest of those
+     trades would never have happened. And it says plainly when there is not
+     enough history to judge, rather than printing a confident "passed" from
+     four days of trading. */
+  P.simulate = function (presetKey, balance, fromDate) {
+    var p = PRESETS[presetKey];
+    if (!p || !(balance > 0)) return null;
+
+    var cfg = blankCfg();
+    cfg.preset = presetKey;
+    cfg.balance = balance;
+    cfg.target = p.target; cfg.daily = p.daily; cfg.max = p.max;
+    cfg.dd = p.dd; cfg.consistency = p.consistency; cfg.minDays = p.minDays;
+    cfg.cycleStart = fromDate || '';
+
+    var r = compute(cfg);
+    var first = r.breaches.length ? r.breaches[0] : null;
+
+    /* Everything from the breach onward is fiction: the account was gone.
+       So the verdict is measured on the days up to and including it. */
+    var upto = first ? r.series.filter(function (d) { return d.date <= first.date; }) : r.series;
+    var profitAt = upto.reduce(function (a, d) { return a + d.pnl; }, 0);
+
+    var verdict, why;
+    if (!r.series.length) {
+      verdict = 'nodata';
+      why = 'No trades in this period.';
+    } else if (first) {
+      verdict = 'failed';
+      why = first.msg + ' — on day ' + upto.length + ' of trading.';
+    } else if (!r.targetHit) {
+      verdict = 'running';
+      why = 'No rule broken. The profit target was not reached either: ' +
+            moneyTxt(r.profit) + ' of ' + moneyTxt(r.targetAbs) + '.';
+    } else if (r.daysTraded < (num(cfg.minDays) || 0)) {
+      verdict = 'running';
+      why = 'Target reached, but on ' + r.daysTraded + ' trading days — the firm requires ' +
+            cfg.minDays + '.';
+    } else if (!r.consistencyOk) {
+      verdict = 'failed';
+      why = 'Target reached, but the consistency rule fails: your best day is ' +
+            (r.consistencyPct != null ? r.consistencyPct.toFixed(1) : '?') +
+            '% of total profit, the limit is ' + cfg.consistency + '%.';
+    } else {
+      verdict = 'passed';
+      why = 'Target of ' + moneyTxt(r.targetAbs) + ' reached over ' + r.daysTraded +
+            ' trading days, no rule broken.';
+    }
+
+    return {
+      verdict: verdict, why: why, cfg: cfg, label: p.label,
+      firstBreach: first, daysSurvived: upto.length,
+      profit: profitAt, result: r,
+      thin: r.series.length > 0 && r.series.length < 10
+    };
+  };
 
   /* ── page ── */
   function buildPage() {
@@ -51765,7 +52285,9 @@ self.addEventListener('message', async (ev) => {
         '<div class="pf-card"><div class="pf-empty"><div class="big">🏛</div>' +
         'Set your account size to start tracking drawdown.<br>' +
         '<span style="font-size:12px">Pick your firm below and the rules fill themselves in.</span></div></div>' +
-        ledgerHtml() + portfolioHtml() + setupHtml;
+        /* Shown here too, and on purpose: somebody without a challenge running
+           is exactly the person deciding whether to buy one. */
+        retroHtml() + ledgerHtml() + portfolioHtml() + setupHtml;
       return;
     }
 
@@ -51865,6 +52387,7 @@ self.addEventListener('message', async (ev) => {
           : '<div class="pf-note">No trades in this cycle yet.</div>') +
       '</div>' +
 
+      retroHtml() +
       ledgerHtml() +
       portfolioHtml() +
       setupHtml;
@@ -51873,6 +52396,69 @@ self.addEventListener('message', async (ev) => {
   /* ═══════════════ the cost of this challenge ═══════════════
      Four numbers and two short lists. Everything the competitor's bank
      integration derives, without the bank. */
+  /* ═══════════════ "Would you have passed?" ═══════════════
+     Runs the firm's real rules over the trades already in the journal. The
+     answer costs nothing to produce and is the one screenshot in this whole
+     product that people post unprompted. */
+  var _retro = { preset: 'topstep', size: 50000, from: '' };
+
+  P.setRetro = function (k, v) {
+    _retro[k] = (k === 'size') ? (parseFloat(v) || 0) : v;
+    P.render();
+  };
+
+  function retroHtml() {
+    var opts = Object.keys(PRESETS).filter(function (k) { return k !== 'custom'; })
+      .map(function (k) {
+        return '<option value="' + k + '"' + (k === _retro.preset ? ' selected' : '') + '>' +
+               esc(PRESETS[k].label) + '</option>';
+      }).join('');
+    var sizes = SIZES.map(function (n) {
+      return '<option value="' + n + '"' + (n === _retro.size ? ' selected' : '') + '>' +
+             moneyTxt(n, 0) + '</option>';
+    }).join('');
+
+    var sim = null;
+    try { sim = P.simulate(_retro.preset, _retro.size, _retro.from); } catch (e) {}
+
+    var out = '';
+    if (!sim || sim.verdict === 'nodata') {
+      out = '<div class="pf-note">No trades in this period yet.</div>';
+    } else {
+      var cls = sim.verdict === 'passed' ? 'good' : sim.verdict === 'failed' ? 'bad' : 'warn';
+      var head = sim.verdict === 'passed' ? '✅ You would have passed'
+               : sim.verdict === 'failed' ? '⛔ You would have failed'
+               : '⏳ Still running — no rule broken, no target yet';
+      out = '<div class="pf-status ' + cls + '" style="margin:0 0 10px">' + head +
+            '<span class="pf-status-sub">' + keepName(sim.label) + ' · ' + moneyTxt(_retro.size, 0) + '</span></div>' +
+        '<div class="pf-note">' + esc(sim.why) + '</div>' +
+        '<div class="pf-kpis" style="margin-top:10px">' +
+          kpi('Trading days survived', String(sim.daysSurvived), '',
+              sim.firstBreach ? 'the account would have closed on ' + sim.firstBreach.date : 'no breach') +
+          kpi('Profit at that point', (sim.profit >= 0 ? '+' : '') + money(sim.profit, 0),
+              sim.profit >= 0 ? 'pos' : 'neg') +
+          kpi('Rules applied', esc(DD_LABEL[sim.cfg.dd]), '',
+              sim.cfg.target + '% target · ' + (sim.cfg.daily ? sim.cfg.daily + '% daily · ' : '') +
+              sim.cfg.max + '% max' + (sim.cfg.consistency ? ' · ' + sim.cfg.consistency + '% consistency' : '')) +
+        '</div>' +
+        (sim.thin
+          ? '<div class="pf-hint">Only ' + sim.result.series.length + ' trading days in this period — ' +
+            'treat this as an indication, not a verdict.</div>'
+          : '');
+    }
+
+    return '<div class="pf-card"><h3>Would these trades have passed a challenge?</h3>' +
+      '<div class="pf-note" style="margin-bottom:10px">Your existing trades, run against a firm\'s ' +
+        'published rules. Everything after a breach is ignored — in a real challenge the account ' +
+        'would already have been closed.</div>' +
+      '<div class="pf-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' +
+        '<select onchange="ApexPropPlus.setRetro(\'preset\',this.value)">' + opts + '</select>' +
+        '<select onchange="ApexPropPlus.setRetro(\'size\',this.value)">' + sizes + '</select>' +
+        '<input type="date" value="' + esc(_retro.from) + '" title="Only trades from this date" ' +
+          'onchange="ApexPropPlus.setRetro(\'from\',this.value)">' +
+      '</div>' + out + '</div>';
+  }
+
   function ledgerHtml() {
     var l = loadLedger(), st = ledgerStats(l);
     var accName = '';
@@ -56194,6 +56780,18 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     });
   }
 
+  /* Small, quiet button: this appears inside a sentence about the
+     trader's own behaviour, and a loud share affordance there would read
+     as the product asking for advertising. */
+  (function proofBtnStyle(){
+    var el = document.createElement('style');
+    el.textContent = '.ac-share{margin-left:7px;padding:3px 9px;border-radius:20px;cursor:pointer;' +
+      'border:0.5px solid var(--rim2);background:transparent;color:var(--gold);' +
+      'font-size:10.5px;font-weight:700;font-family:var(--font-body)}' +
+      '.ac-share:hover{background:rgba(201,168,76,.12)}';
+    document.head.appendChild(el);
+  })();
+
   function renderCommitmentsTile() {
     commitmentsDoc().then(function (d) {
       var list = (d && d.list) || [];
@@ -56217,9 +56815,21 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     var a = Math.round(r.after.value * 10) / 10;
     var col = r.better ? 'profit' : (r.worse ? 'loss' : 'ink3');
     var word = r.better ? 'It is working.' : (r.worse ? 'It has gone the other way.' : 'Essentially unchanged.');
+    /* A measured change is the one thing here worth showing anyone else,
+       so the card is offered exactly where the verdict appears — and only
+       once there IS a verdict, never on a pending commitment. */
+    var share = '';
+    if (b != null) {
+      var payload = JSON.stringify({ label: r.m.label, before: b, after: a, unit: u,
+                                     days: r.days, commitment: r.c.text, better: !!r.better })
+                        .replace(/"/g, '&quot;');
+      share = ' <button class="ac-share" onclick="ApexProof.show(JSON.parse(this.dataset.p))" '
+            + 'data-p="' + payload + '">Share this</button>';
+    }
     return '<div class="ac-item-m">' + esc(r.m.label) + ' — before <strong>' + (b == null ? '—' : b + u)
       + '</strong>, since <strong style="color:var(--' + col + ')">' + a + u + '</strong> ('
-      + r.after.detail + ', ' + r.days + ' days). <strong style="color:var(--' + col + ')">' + word + '</strong></div>';
+      + r.after.detail + ', ' + r.days + ' days). <strong style="color:var(--' + col + ')">' + word + '</strong>'
+      + share + '</div>';
   }
 
   /* ═══════════════ opening any authored course ═══════════════
@@ -58852,6 +59462,1897 @@ body.light #page-glossary mark { background: rgba(138,98,0,0.18); }
   }
 
   window.ApexTabScroll = { refresh: tick };
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   SYNC HEALTH  —  ApexSyncHealth
+
+   One page that answers "is my journal still receiving trades?" for
+   every connection at once. Without it a broken link is invisible:
+   nothing errors, nothing is missing on screen, the journal simply
+   stops growing — and the trader finds out weeks later, at which point
+   they stop believing any number in the app.
+
+   Deliberately read-only about state: each connector already records
+   its own last sync and last error (cTrader in its link document,
+   Tradovate and the exchanges in theirs, the webhook platforms through
+   the events they deliver). This screen only collects and shows them,
+   so there is no second version of the truth to keep in step.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var H = {}; window.ApexSyncHealth = H;
+
+  /* Webhook platforms (MT5, TradingView, ATAS, Quantower) push into the
+     inbox and the inbox is emptied as it is read, so there is nothing
+     left to query afterwards. The drainer therefore stamps the arrival
+     here as it goes. Local storage is the right home: it is a per-device
+     observation, not account state. */
+  function seenKey(){ return 'apexSyncSeen_' + (window.currentUID || 'guest'); }
+  function seen(){
+    try { return JSON.parse(localStorage.getItem(seenKey()) || '{}'); } catch(e){ return {}; }
+  }
+  H.noteEvent = function(source){
+    if (!source) return;
+    var m = seen(); m[source] = Date.now();
+    try { localStorage.setItem(seenKey(), JSON.stringify(m)); } catch(e){}
+  };
+  H.noteFailure = function(ev){
+    var m = seen();
+    m['!fail'] = { at: ev.at || Date.now(), account: ev.account || '', error: ev.error || '' };
+    try { localStorage.setItem(seenKey(), JSON.stringify(m)); } catch(e){}
+    try {
+      if (window.pushNotif)
+        pushNotif('warn', '<strong>' + esc(ev.account || 'A broker connection') +
+          '</strong> stopped syncing — reconnect it in Settings',
+          "nav('settings');switchSettingsTab('ctrader');");
+    } catch(e){}
+    try { if (window.showToast) showToast('⚠ A broker connection stopped syncing'); } catch(e){}
+    render();
+  };
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+  }
+  function ago(ms){
+    if (!ms) return 'never';
+    var d = Date.now() - Number(ms);
+    if (d < 0) return 'just now';
+    if (d < 60000) return 'just now';
+    if (d < 3600000) return Math.floor(d/60000) + ' min ago';
+    if (d < 86400000) return Math.floor(d/3600000) + ' h ago';
+    return Math.floor(d/86400000) + ' d ago';
+  }
+  function priv(doc){
+    if (!window.db || !window.currentUID) return Promise.resolve(null);
+    return window.db.collection('apexUsers').doc(window.currentUID)
+      .collection('private').doc(doc).get()
+      .then(function(d){ return d.exists ? d.data() : null; })
+      .catch(function(){ return null; });
+  }
+
+  /* A connection is stale when it has not delivered anything for a day
+     while claiming to be connected. Not an error — brokers are closed at
+     the weekend — but worth saying, because a link that broke on Tuesday
+     and a quiet Sunday look identical until you name the difference. */
+  function grade(c){
+    if (c.error)  return { key:'error', label:'Needs attention', tone:'var(--loss)' };
+    if (!c.connected) return { key:'off', label:'Not connected', tone:'var(--ink3)' };
+    var quiet = Date.now() - Number(c.last || 0);
+    if (c.last && quiet > 36*3600000)
+      return { key:'stale', label:'No data for ' + Math.floor(quiet/86400000) + ' d', tone:'var(--gold)' };
+    return { key:'ok', label:'Live', tone:'var(--profit)' };
+  }
+
+  var _rows = [];
+
+  function collect(){
+    var m = seen();
+    var jobs = [];
+    var out = [];
+
+    jobs.push(priv('ctrader').then(function(d){
+      if (!d) return;
+      out.push({ id:'ctrader', name:'⚡ cTrader', connected: !!d.accessToken,
+                 detail: (d.accountLabel || d.accountId || '') + (d.env ? ' · ' + String(d.env).toUpperCase() : ''),
+                 last: d.lastSync || 0,
+                 error: d.lastError || '',
+                 action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('ctrader')",
+                 sync: 'ctrader' });
+    }));
+
+    jobs.push(priv('tradovate').then(function(d){
+      if (!d) return;
+      out.push({ id:'tradovate', name:'🎲 Tradovate', connected: !!d.status,
+                 detail: (d.env ? String(d.env).toUpperCase() : '') +
+                         (d.lastCount ? ' · ' + d.lastCount + ' fills last run' : ''),
+                 last: d.lastSync || 0,
+                 error: d.status === 'reauth_required'
+                        ? 'Tradovate rejected the stored authorisation — reconnect required.' : '',
+                 action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('tradovate')" });
+    }));
+
+    /* Exchange & IBKR keys — the worker writes its own result back into
+       the key document, and the owner can read it. */
+    if (window.db && window.currentUID){
+      jobs.push(window.db.collection('apexExchangeKeys')
+        .where('uid','==', window.currentUID).get()
+        .then(function(snap){
+          snap.forEach(function(doc){
+            var d = doc.data() || {};
+            out.push({ id:'ex_'+doc.id, name:'🪙 ' + esc(d.exchange || 'Exchange'),
+                       connected: true, detail: d.label || '',
+                       last: d.lastRun || 0,
+                       error: d.lastError === 'pro_required'
+                              ? 'Auto-sync for exchanges is a Pro feature.' : (d.lastError || ''),
+                       action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('exchange')" });
+          });
+        }).catch(function(){}));
+    }
+
+    ['mt5','tradingview','atas','quantower'].forEach(function(p){
+      if (!m[p]) return;   // never delivered anything — not a connection yet
+      var NAMES = { mt5:'📊 MetaTrader 5', tradingview:'📈 TradingView',
+                    atas:'🎯 ATAS', quantower:'🧊 Quantower' };
+      out.push({ id:p, name:NAMES[p], connected:true, detail:'via webhook',
+                 last:m[p], error:'',
+                 action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('" + p + "')" });
+    });
+
+    return Promise.all(jobs).then(function(){
+      /* A failure the server reported by mail and inbox outranks whatever
+         the connector's own document happens to say. */
+      var f = m['!fail'];
+      if (f && f.at && Date.now() - f.at < 7*86400000){
+        out.forEach(function(c){
+          if (c.id === 'ctrader' && !c.error) c.error = f.error || 'Sync failed repeatedly.';
+        });
+      }
+      _rows = out;
+      return out;
+    });
+  }
+
+  function rowHtml(c){
+    var g = grade(c);
+    return '<div class="sh-row">' +
+      '<div class="sh-dot" style="background:' + g.tone + '"></div>' +
+      '<div class="sh-main">' +
+        '<div class="sh-name">' + c.name +
+          ' <span class="sh-state" style="color:' + g.tone + '">' + g.label + '</span></div>' +
+        '<div class="sh-meta">' + (c.detail ? esc(c.detail) + ' · ' : '') +
+          'last sync ' + esc(ago(c.last)) + '</div>' +
+        (c.error ? '<div class="sh-err">' + esc(c.error) + '</div>' : '') +
+      '</div>' +
+      '<div class="sh-act">' +
+        (c.sync === 'ctrader'
+          ? '<button class="sh-btn" onclick="ApexSyncHealth.syncNow(\'ctrader\')">Sync now</button>' : '') +
+        '<button class="sh-btn" onclick="' + c.action + '">Open</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  H.syncNow = function(which){
+    try {
+      if (which === 'ctrader' && window.ctSyncTrades) { window.ctSyncTrades(); showToast('🔄 Syncing…'); }
+      else if (which === 'ctrader' && window.ctManualSync) { window.ctManualSync(); }
+      else showToast('Open the connection below to sync it');
+    } catch(e){ showToast('⚠ Could not start the sync'); }
+    setTimeout(render, 4000);
+  };
+
+  function render(){
+    var host = document.getElementById('syncHealthHost');
+    if (!host) return;
+    collect().then(function(rows){
+      if (!rows.length){
+        host.innerHTML = '<div class="glass-card"><div class="gc-title">Connection status</div>' +
+          '<div style="font-size:12.5px;color:var(--ink3);margin-top:8px;line-height:1.6">' +
+          'No broker connected yet. Once one is, this is where you can see at a glance that it is ' +
+          'still delivering — a connection that quietly stops is the failure worth catching early.</div></div>';
+        return;
+      }
+      var bad = rows.filter(function(c){ return grade(c).key === 'error'; }).length;
+      host.innerHTML = '<div class="glass-card">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div class="gc-title" style="margin:0;flex:1">Connection status</div>' +
+          '<button class="sh-btn" onclick="ApexSyncHealth.render()">Refresh</button>' +
+        '</div>' +
+        (bad ? '<div class="sh-banner">' + bad + ' connection' + (bad===1?'':'s') +
+               ' need' + (bad===1?'s':'') + ' attention — no new trades are arriving from ' +
+               (bad===1?'it':'them') + '.</div>' : '') +
+        '<div class="sh-list">' + rows.map(rowHtml).join('') + '</div>' +
+        '<div class="sh-foot">We also email you if a connection fails three times in a row, ' +
+          'so a broken link cannot sit unnoticed for weeks.</div>' +
+      '</div>';
+    });
+  }
+  H.render = render;
+  H.rows = function(){ return _rows.slice(); };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var css = document.createElement('style');
+    css.textContent =
+      '.sh-list{display:flex;flex-direction:column;margin-top:10px}' +
+      '.sh-row{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-top:0.5px solid var(--rim2)}' +
+      '.sh-row:first-child{border-top:0}' +
+      '.sh-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none}' +
+      '.sh-main{flex:1;min-width:0}' +
+      '.sh-name{font-size:13px;font-weight:600;color:var(--ink)}' +
+      '.sh-state{font-size:11px;font-weight:600;margin-left:6px}' +
+      '.sh-meta{font-size:11.5px;color:var(--ink3);margin-top:2px}' +
+      '.sh-err{font-size:11.5px;color:var(--loss);margin-top:4px;line-height:1.5}' +
+      '.sh-act{display:flex;gap:6px;flex:none}' +
+      '.sh-btn{padding:6px 11px;background:var(--elevated);border:0.5px solid var(--rim2);' +
+        'color:var(--ink2);border-radius:8px;cursor:pointer;font-size:11.5px;font-weight:600;' +
+        'font-family:var(--font-body)}' +
+      '.sh-banner{margin-top:10px;padding:9px 11px;border-radius:9px;font-size:12px;' +
+        'background:rgba(240,99,106,.12);color:var(--loss)}' +
+      '.sh-foot{font-size:11px;color:var(--ink4);margin-top:11px;line-height:1.6}';
+    document.head.appendChild(css);
+  });
+
+  /* Rendered whenever the Auto Tracking tab is opened — the numbers are
+     only useful if they are current. */
+  var _origSwitch = null;
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      if (typeof window.switchSettingsTab === 'function' && !_origSwitch){
+        _origSwitch = window.switchSettingsTab;
+        window.switchSettingsTab = function(tab){
+          var r = _origSwitch.apply(this, arguments);
+          if (tab === 'ctrader') setTimeout(render, 60);
+          return r;
+        };
+      }
+    }, 1200);
+  });
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   JOURNAL SEARCH  —  ApexJournalSearch
+
+   A journal you cannot search is a diary: you write into it and never
+   read back. The moment "every trade where I moved my stop, in London,
+   on EURUSD" is one query away, the same notes become an argument you
+   can win against yourself.
+
+   Deliberately an overlay on Ctrl/Cmd-K rather than a nav page: search
+   is something you do FROM wherever you are, and the navigation exists
+   twice in this app (desktop and mobile), which is exactly the kind of
+   duplication that leaves a new page invisible on a phone.
+
+   Everything runs against the journal already in memory — no index to
+   keep in step, no query that can go stale.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var S = {}; window.ApexJournalSearch = S;
+
+  var Q = { text:'', result:'', dir:'', session:'', grade:'', tag:'', field:'', from:'', to:'' };
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+  }
+
+  /* Everything about a trade that is worth matching words against, as one
+     lowercased haystack. Mistakes and tags are arrays; notes exist both on
+     the trade and on the day, and a day note ("slept badly, revenge traded
+     the open") is often the sentence you are actually looking for. */
+  function haystack(t, day){
+    var parts = [t.symbol, t.dir, t.setup, t.note, t.session, t.tf, t.grade,
+                 t.market, t.source];
+    ['mistakes','positives','tags','autoTags'].forEach(function(k){
+      if (Array.isArray(t[k])) parts = parts.concat(t[k]);
+    });
+    if (day && day.notes) parts.push(day.notes);
+    return parts.join('  ').toLowerCase();
+  }
+
+  function dirOf(v){
+    var d = String(v||'').toLowerCase();
+    if (d === 'buy'  || d === 'long')  return 'buy';
+    if (d === 'sell' || d === 'short') return 'sell';
+    return d;
+  }
+
+  function pnlOf(t){
+    try { var r = calcTradePnl(t); return r && isFinite(r.pnlUsd) ? r.pnlUsd : null; }
+    catch(e){ return null; }
+  }
+
+  /* Quoted phrases stay together, everything else is an AND term, and a
+     leading minus excludes. Nobody has to be told this; it is what people
+     already type. */
+  function terms(q){
+    var out = [], re = /"([^"]+)"|(\S+)/g, m;
+    while ((m = re.exec(q))){
+      var raw = (m[1] || m[2] || '').toLowerCase();
+      if (!raw) continue;
+      if (raw.charAt(0) === '-' && raw.length > 1) out.push({ neg:true, s:raw.slice(1) });
+      else out.push({ neg:false, s:raw });
+    }
+    return out;
+  }
+
+  function run(){
+    var ts = terms(Q.text.trim());
+    var hits = [];
+    var days = Object.keys(window.journalData || {}).sort().reverse();
+
+    days.forEach(function(key){
+      if (Q.from && key < Q.from) return;
+      if (Q.to   && key > Q.to)   return;
+      var day = journalData[key];
+      if (!day || !day.trades) return;
+
+      day.trades.forEach(function(t, i){
+        /* Trades reach the journal as Buy/Sell from one broker and
+           Long/Short from another. To the person searching they are the
+           same thing, so the filter treats them as the same thing. */
+        if (Q.dir && dirOf(t.dir) !== Q.dir) return;
+        if (Q.session && String(t.session||'').toLowerCase() !== Q.session) return;
+        if (Q.grade   && String(t.grade||'').toUpperCase()   !== Q.grade) return;
+        if (Q.tag){
+          var tags = (t.tags||[]).concat(t.autoTags||[]).map(function(x){ return String(x).toLowerCase(); });
+          if (tags.indexOf(Q.tag.toLowerCase()) === -1) return;
+        }
+        if (Q.field === 'nosl'    && t.sl) return;
+        if (Q.field === 'noted'   && !(t.note && t.note.trim())) return;
+        if (Q.field === 'mistake' && !((t.mistakes||[]).length)) return;
+
+        var p = pnlOf(t);
+        if (Q.result === 'win'  && !(p > 0)) return;
+        if (Q.result === 'loss' && !(p < 0)) return;
+
+        if (ts.length){
+          var hay = haystack(t, day);
+          for (var k = 0; k < ts.length; k++){
+            var found = hay.indexOf(ts[k].s) !== -1;
+            if (ts[k].neg ? found : !found) return;
+          }
+        }
+        hits.push({ key:key, i:i, t:t, pnl:p });
+      });
+    });
+    return hits;
+  }
+
+  /* The summary line is the point of searching at all: not "here are 42
+     trades" but what those 42 trades did to the account. */
+  function summary(hits){
+    if (!hits.length) return '';
+    var priced = hits.filter(function(h){ return h.pnl != null; });
+    var wins = priced.filter(function(h){ return h.pnl > 0; });
+    var sum  = priced.reduce(function(a,h){ return a + h.pnl; }, 0);
+    var wr   = priced.length ? Math.round(wins.length / priced.length * 100) : null;
+    return hits.length + ' trade' + (hits.length===1?'':'s') +
+      (priced.length ? ' · net ' + (sum<0?'-':'') + '$' + Math.abs(sum).toFixed(2) +
+                       (wr != null ? ' · ' + wr + '% win rate' : '') : '');
+  }
+
+  function mark(text, ts){
+    var out = esc(text);
+    ts.forEach(function(t){
+      if (t.neg || t.s.length < 2) return;
+      out = out.replace(new RegExp('(' + t.s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'ig'),
+                        '<mark class="js-hit">$1</mark>');
+    });
+    return out;
+  }
+
+  function rowHtml(h, ts){
+    var t = h.t;
+    var money = h.pnl == null ? '—' : (h.pnl < 0 ? '-' : '') + '$' + Math.abs(h.pnl).toFixed(2);
+    var col   = h.pnl == null ? 'var(--ink3)' : h.pnl >= 0 ? 'var(--profit)' : 'var(--loss)';
+    var chips = (t.tags||[]).concat(t.mistakes||[]).slice(0,4)
+      .map(function(x){ return '<span class="js-chip">' + mark(x, ts) + '</span>'; }).join('');
+    var note  = (t.note || '').trim();
+    return '<div class="js-row" onclick="ApexJournalSearch.go(\'' + h.key + '\',' + h.i + ')">' +
+      '<div class="js-row-top">' +
+        '<span class="js-sym">' + mark(t.symbol || '—', ts) + '</span>' +
+        '<span class="js-dir ' + (dirOf(t.dir)==='buy'?'up':'dn') + '">' + esc(t.dir||'') + '</span>' +
+        '<span class="js-date">' + esc(h.key) + (t.session ? ' · ' + esc(t.session) : '') + '</span>' +
+        '<span class="js-pnl" style="color:' + col + '">' + money + '</span>' +
+      '</div>' +
+      (note ? '<div class="js-note">' + mark(note.slice(0, 220), ts) + '</div>' : '') +
+      (chips ? '<div class="js-chips">' + chips + '</div>' : '') +
+    '</div>';
+  }
+
+  /* Tag and mistake vocabulary is whatever this trader actually uses —
+     offering a fixed list would be offering someone else's language. */
+  function vocab(){
+    var seen = {};
+    Object.keys(window.journalData || {}).forEach(function(k){
+      var d = journalData[k];
+      if (!d || !d.trades) return;
+      d.trades.forEach(function(t){
+        (t.tags||[]).concat(t.autoTags||[], t.mistakes||[]).forEach(function(x){
+          if (x) seen[String(x)] = (seen[String(x)]||0) + 1;
+        });
+      });
+    });
+    return Object.keys(seen).sort(function(a,b){ return seen[b]-seen[a]; }).slice(0, 40);
+  }
+
+  function anyFilter(){
+    return !!(Q.result || Q.dir || Q.session || Q.grade || Q.tag || Q.field || Q.from || Q.to);
+  }
+
+  function render(){
+    var body = document.getElementById('jsBody');
+    if (!body) return;
+    var ts = terms(Q.text.trim());
+    var hits = run();
+    var head = document.getElementById('jsSummary');
+    if (head) head.textContent = (Q.text || anyFilter()) ? summary(hits) : '';
+
+    if (!hits.length){
+      body.innerHTML = '<div class="js-empty">' +
+        ((Q.text || anyFilter())
+          ? 'Nothing matches. Try fewer words — every word has to appear, and a leading minus excludes one.'
+          : 'Search your notes, setups, tags and mistakes. Quotes keep a phrase together, ' +
+            '<code>-word</code> excludes it.') +
+        '</div>';
+      return;
+    }
+    body.innerHTML = hits.slice(0, 300).map(function(h){ return rowHtml(h, ts); }).join('') +
+      (hits.length > 300 ? '<div class="js-empty">' + (hits.length-300) +
+        ' more — narrow it down with another word or a filter.</div>' : '');
+  }
+
+  S.set = function(k, v){ Q[k] = v; render(); };
+
+  S.go = function(key, i){
+    S.close();
+    try {
+      var p = key.split('-');
+      window.journalYear  = parseInt(p[0], 10);
+      window.journalMonth = parseInt(p[1], 10) - 1;
+      nav('journal');
+      initJournalDaySelect();
+      var sel = document.getElementById('journalDaySelect');
+      if (sel) sel.value = key;
+      loadJournalDay();
+      setTimeout(function(){
+        var card = document.getElementById('trade-card-' + i);
+        if (!card) return;
+        card.scrollIntoView({ behavior:'smooth', block:'center' });
+        card.style.transition = 'box-shadow .4s';
+        card.style.boxShadow = '0 0 0 2px var(--gold)';
+        setTimeout(function(){ card.style.boxShadow = ''; }, 2200);
+      }, 260);
+    } catch(e){}
+  };
+
+  function ensureDom(){
+    if (document.getElementById('jsOverlay')) return;
+    var css = document.createElement('style');
+    css.textContent =
+      '#jsOverlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);' +
+        'z-index:99990;display:none;align-items:flex-start;justify-content:center;padding:8vh 16px 16px}' +
+      '#jsOverlay.open{display:flex}' +
+      '#jsBox{background:var(--card,#14161c);border:0.5px solid var(--rim2,#2a2d36);border-radius:16px;' +
+        'width:min(780px,100%);max-height:80vh;display:flex;flex-direction:column;overflow:hidden}' +
+      '#jsInput{width:100%;padding:16px 18px;background:transparent;border:0;outline:none;' +
+        'color:var(--ink);font-size:16px;font-family:var(--font-body)}' +
+      '.js-filters{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 12px;border-bottom:0.5px solid var(--rim2)}' +
+      '.js-filters select,.js-filters input{background:var(--elevated);border:0.5px solid var(--rim2);' +
+        'color:var(--ink2);border-radius:8px;padding:5px 8px;font-size:11.5px;font-family:var(--font-body)}' +
+      '#jsSummary{padding:9px 18px;font-size:12px;color:var(--gold);border-bottom:0.5px solid var(--rim2)}' +
+      '#jsBody{overflow:auto;padding:6px 10px 12px}' +
+      /* Scoped and explicit on purpose: the app already has generic row
+         classes, and one of them was turning this into a grid, which
+         stacked the note on top of the P&L. */
+      '#jsBody .js-row{display:block;padding:10px 8px;border-radius:10px;cursor:pointer}' +
+      '#jsBody .js-row:hover{background:rgba(255,255,255,.045)}' +
+      '#jsBody .js-row-top{display:flex;gap:8px;align-items:baseline;font-size:12.5px}' +
+      '#jsBody .js-sym{font-weight:700;color:var(--ink)}' +
+      '#jsBody .js-dir{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}' +
+      '.js-dir.up{color:var(--profit)}.js-dir.dn{color:var(--loss)}' +
+      '#jsBody .js-date{color:var(--ink3);font-size:11.5px;flex:1;white-space:nowrap;overflow:hidden;' +
+        'text-overflow:ellipsis;min-width:0}' +
+      '#jsBody .js-row-top{align-items:center}' +
+      '#jsBody .js-pnl{font-weight:700;font-variant-numeric:tabular-nums}' +
+      '#jsBody .js-note{font-size:12px;color:var(--ink2);margin-top:4px;line-height:1.55}' +
+      '#jsBody .js-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}' +
+      '#jsBody .js-chip{font-size:10.5px;padding:2px 7px;border-radius:20px;background:var(--elevated);color:var(--ink3)}' +
+      '.js-hit{background:rgba(201,168,76,.28);color:inherit;border-radius:3px;padding:0 1px}' +
+      '.js-empty{padding:22px 12px;font-size:12.5px;color:var(--ink3);text-align:center;line-height:1.65}';
+    document.head.appendChild(css);
+
+    var sessions = ['','Asian','London','New York'];
+    var ov = document.createElement('div');
+    ov.id = 'jsOverlay';
+    ov.onclick = function(e){ if (e.target === ov) S.close(); };
+    ov.innerHTML =
+      '<div id="jsBox">' +
+        '<input id="jsInput" type="search" autocomplete="off" placeholder="Search notes, setups, tags, mistakes...">' +
+        '<div class="js-filters">' +
+          '<select onchange="ApexJournalSearch.set(\'result\',this.value)">' +
+            '<option value="">Any result</option><option value="win">Winners</option>' +
+            '<option value="loss">Losers</option></select>' +
+          '<select onchange="ApexJournalSearch.set(\'dir\',this.value)">' +
+            '<option value="">Any direction</option><option value="buy">Buy</option>' +
+            '<option value="sell">Sell</option></select>' +
+          '<select onchange="ApexJournalSearch.set(\'session\',this.value)">' +
+            sessions.map(function(s){ return '<option value="' + s.toLowerCase() + '">' +
+              (s || 'Any session') + '</option>'; }).join('') + '</select>' +
+          '<select onchange="ApexJournalSearch.set(\'grade\',this.value)">' +
+            '<option value="">Any grade</option>' + ['A','B','C','D','F'].map(function(g){
+              return '<option value="' + g + '">Grade ' + g + '</option>'; }).join('') + '</select>' +
+          '<select id="jsTag" onchange="ApexJournalSearch.set(\'tag\',this.value)"></select>' +
+          '<select onchange="ApexJournalSearch.set(\'field\',this.value)">' +
+            '<option value="">Everything</option>' +
+            '<option value="nosl">Without a stop</option>' +
+            '<option value="noted">With a note</option>' +
+            '<option value="mistake">With a mistake logged</option></select>' +
+          '<input type="date" title="From" onchange="ApexJournalSearch.set(\'from\',this.value)">' +
+          '<input type="date" title="To" onchange="ApexJournalSearch.set(\'to\',this.value)">' +
+        '</div>' +
+        '<div id="jsSummary"></div>' +
+        '<div id="jsBody"></div>' +
+      '</div>';
+    document.body.appendChild(ov);
+
+    var inp = document.getElementById('jsInput');
+    var timer = null;
+    inp.addEventListener('input', function(){
+      Q.text = inp.value;
+      clearTimeout(timer);
+      timer = setTimeout(render, 110);      // typing stays smooth on big journals
+    });
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Escape') S.close(); });
+  }
+
+  S.open = function(preset){
+    ensureDom();
+    var tagSel = document.getElementById('jsTag');
+    if (tagSel){
+      tagSel.innerHTML = '<option value="">Any tag</option>' +
+        vocab().map(function(v){ return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
+    }
+    if (preset) Q.text = preset;
+    document.getElementById('jsInput').value = Q.text;
+    document.getElementById('jsOverlay').classList.add('open');
+    render();
+    setTimeout(function(){ var i = document.getElementById('jsInput'); if (i) i.focus(); }, 30);
+  };
+  S.close = function(){
+    var ov = document.getElementById('jsOverlay');
+    if (ov) ov.classList.remove('open');
+  };
+
+  document.addEventListener('keydown', function(e){
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')){
+      e.preventDefault();
+      var ov = document.getElementById('jsOverlay');
+      if (ov && ov.classList.contains('open')) S.close(); else S.open();
+    }
+  });
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   PROOF CARD  —  ApexProof
+
+   The one screenshot in this product category that someone posts out of
+   pride rather than as an advert: "before 38%, now 11%". It is also the
+   part of the Academy nobody else can copy — the chapters can be
+   rewritten by anyone, but chapter → your own number → a commitment →
+   the same number measured weeks later needs the journal underneath it.
+
+   Drawn on a canvas rather than assembled in the DOM, for two reasons:
+   a PNG is what actually survives being pasted into Discord or X, and a
+   canvas cannot accidentally include anything the trader did not choose
+   to show. Only what is passed in is drawn — never the account size,
+   never the P&L, never the broker.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var P = {}; window.ApexProof = P;
+
+  var W = 1080, H = 1080;   // square: the only aspect every network crops kindly
+
+  function rr(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y,   x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x,   y+h, r);
+    ctx.arcTo(x,   y+h, x,   y,   r);
+    ctx.arcTo(x,   y,   x+w, y,   r);
+    ctx.closePath();
+  }
+
+  /* d = { label, before, after, unit, days, commitment, better } */
+  function draw(d){
+    var c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    var x = c.getContext('2d');
+
+    var GOLD = '#c9a84c', INK = '#f2f3f5', INK3 = '#8b8f99';
+    var GOOD = '#3ecf8e', BAD = '#f0636a';
+    var tone = d.better === true ? GOOD : d.better === false ? BAD : GOLD;
+
+    var g = x.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#0b0d12'); g.addColorStop(1, '#14161d');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+
+    x.strokeStyle = 'rgba(201,168,76,.22)'; x.lineWidth = 2;
+    rr(x, 40, 40, W-80, H-80, 34); x.stroke();
+
+    x.textAlign = 'center';
+
+    x.fillStyle = GOLD; x.font = '600 26px Georgia, serif';
+    x.fillText('EVIDENCE TRADING', W/2, 130);
+
+    x.fillStyle = INK3; x.font = '400 30px Georgia, serif';
+    x.fillText('I changed one thing on purpose', W/2, 210);
+
+    /* The commitment in the trader's own words — the sentence they picked
+       weeks ago, which is what makes the number below mean anything. */
+    x.fillStyle = INK; x.font = '600 40px Georgia, serif';
+    wrap(x, d.commitment || '', W/2, 285, W-220, 52, 3);
+
+    var midY = 600;
+    x.fillStyle = INK3; x.font = '400 26px Georgia, serif';
+    x.fillText(String(d.label || '').toUpperCase(), W/2, 470);
+
+    // before → after, the whole point of the card
+    x.font = '700 110px Georgia, serif';
+    var unit = d.unit || '';
+    var beforeTxt = (d.before == null ? '—' : d.before + unit);
+    var afterTxt  = (d.after  == null ? '—' : d.after  + unit);
+
+    var bw = x.measureText(beforeTxt).width;
+    var aw = x.measureText(afterTxt).width;
+    var arrowW = 90;
+    var total = bw + arrowW + aw;
+    var left = W/2 - total/2;
+
+    x.textAlign = 'left';
+    x.fillStyle = INK3;
+    x.fillText(beforeTxt, left, midY);
+    // struck through: it is the number that no longer applies
+    x.strokeStyle = INK3; x.lineWidth = 5;
+    x.beginPath(); x.moveTo(left, midY-32); x.lineTo(left+bw, midY-32); x.stroke();
+
+    x.fillStyle = INK3; x.font = '400 70px Georgia, serif';
+    x.fillText('→', left + bw + 16, midY - 8);
+
+    x.fillStyle = tone; x.font = '700 110px Georgia, serif';
+    x.fillText(afterTxt, left + bw + arrowW, midY);
+
+    x.textAlign = 'center';
+    x.fillStyle = INK3; x.font = '400 27px Georgia, serif';
+    x.fillText('measured over ' + (d.days || 0) + ' days of my own trades', W/2, midY + 70);
+
+    // the honest footer: this is a journal's own measurement, not a claim
+    rr(x, 150, H-235, W-300, 92, 20);
+    x.fillStyle = 'rgba(255,255,255,.04)'; x.fill();
+    x.fillStyle = INK3; x.font = '400 24px Georgia, serif';
+    x.fillText('Counted from my journal, not self-reported', W/2, H-180);
+
+    x.fillStyle = GOLD; x.font = '600 26px Georgia, serif';
+    x.fillText('evidence-trading.com', W/2, H-95);
+
+    return c;
+  }
+
+  /* Wraps to at most `max` lines and puts an ellipsis on the last one
+     rather than silently cutting a sentence in half. */
+  function wrap(ctx, text, cx, y, maxW, lh, max){
+    var words = String(text).split(/\s+/), line = '', lines = [];
+    words.forEach(function(w){
+      var test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; }
+      else line = test;
+    });
+    if (line) lines.push(line);
+    if (lines.length > max){
+      lines = lines.slice(0, max);
+      lines[max-1] = lines[max-1].replace(/\s+\S*$/, '') + '…';
+    }
+    lines.forEach(function(l, i){ ctx.fillText(l, cx, y + i*lh); });
+  }
+
+  /* Shown in a dialog first. Sharing is always the trader's decision —
+     this never posts anything anywhere by itself. */
+  P.show = function(d){
+    var canvas = draw(d);
+    var url = canvas.toDataURL('image/png');
+
+    var ov = document.getElementById('proofOverlay');
+    if (!ov){
+      ov = document.createElement('div');
+      ov.id = 'proofOverlay';
+      ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);' +
+        'z-index:100001;display:flex;align-items:center;justify-content:center;padding:16px';
+      ov.onclick = function(e){ if (e.target === ov) ov.remove(); };
+      document.body.appendChild(ov);
+    }
+    ov.innerHTML =
+      '<div style="background:var(--card,#14161c);border:0.5px solid var(--rim2,#2a2d36);' +
+        'border-radius:16px;padding:18px;max-width:min(460px,100%)">' +
+        '<img src="' + url + '" style="width:100%;border-radius:12px;display:block">' +
+        '<div style="display:flex;gap:8px;margin-top:14px">' +
+          '<button id="proofSave" style="flex:1;padding:11px;border-radius:10px;border:none;' +
+            'background:var(--gold,#c9a84c);color:#07080b;font-weight:700;font-size:13px;cursor:pointer">Save image</button>' +
+          '<button id="proofCopy" style="flex:1;padding:11px;border-radius:10px;cursor:pointer;' +
+            'border:0.5px solid var(--rim2,#2a2d36);background:transparent;color:var(--ink2,#c7cad1);' +
+            'font-weight:600;font-size:13px">Copy</button>' +
+          '<button onclick="document.getElementById(\'proofOverlay\').remove()" ' +
+            'style="padding:11px 14px;border-radius:10px;cursor:pointer;border:0.5px solid var(--rim2,#2a2d36);' +
+            'background:transparent;color:var(--ink3,#8b8f99);font-size:13px">Close</button>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--ink4,#6b6f78);margin-top:10px;line-height:1.55">' +
+          'Nothing is posted anywhere. The image contains only what you see here — no account size, ' +
+          'no P&amp;L, no broker.</div>' +
+      '</div>';
+
+    document.getElementById('proofSave').onclick = function(){
+      var a = document.createElement('a');
+      a.href = url; a.download = 'evidence-proof.png';
+      document.body.appendChild(a); a.click(); a.remove();
+    };
+    document.getElementById('proofCopy').onclick = function(){
+      canvas.toBlob(function(blob){
+        try {
+          navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          showToast('✓ Copied — paste it anywhere');
+        } catch(e){ showToast('Use “Save image” — this browser cannot copy images'); }
+      });
+    };
+  };
+
+  P.canvas = draw;   // exposed for tests
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   OPTIONS PAYOFF  —  ApexPayoff
+
+   The one options feature worth building here. A spread's numbers —
+   max profit, max loss, where it breaks even — are pure arithmetic on
+   the legs the journal already stores, and they are exactly what a
+   trader wants to see written down next to the position they took.
+
+   What is deliberately NOT here: chain replay and options flow. Those
+   need a historical chain feed per strike per minute, which is a
+   product of its own, and this journal's traders are Forex, futures
+   and prop — not US equity options desks.
+
+   Payoff is at EXPIRY. No pricing model, no vol surface, no
+   interpolation of what the spread is worth today: an intrinsic-value
+   curve is exactly true at expiry and honest about being nothing else.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var P = {}; window.ApexPayoff = P;
+
+  function legsOf(trade){
+    return (Array.isArray(trade.legs) ? trade.legs : []).filter(function(l){
+      return l.right && parseFloat(l.strike) > 0 && parseFloat(l.qty) > 0 &&
+             l.entryPremium !== '' && l.entryPremium != null && !isNaN(parseFloat(l.entryPremium));
+    });
+  }
+
+  /* Value of the whole position at expiry if the underlying settles at S,
+     in account currency, net of what was paid or received to open it. */
+  function atExpiry(trade, S){
+    var legs = legsOf(trade);
+    var mult = parseFloat(trade.multiplier) > 0 ? parseFloat(trade.multiplier) : 100;
+    var total = 0;
+    legs.forEach(function(l){
+      var k = parseFloat(l.strike), q = parseFloat(l.qty), prem = parseFloat(l.entryPremium);
+      var isCall = String(l.right).toLowerCase() === 'call';
+      var long   = String(l.side || 'buy').toLowerCase() !== 'sell';
+      var intrinsic = isCall ? Math.max(0, S - k) : Math.max(0, k - S);
+      var sign = long ? 1 : -1;
+      // What it settles for, minus what it cost (or plus what it paid).
+      total += sign * (intrinsic - prem) * q * mult;
+    });
+    return total;
+  }
+
+  /* Max profit, max loss and every break-even, found by walking the curve
+     rather than by pattern-matching the strategy. A shape-based lookup
+     ("this is an iron condor, so…") is wrong the moment somebody builds a
+     spread that does not fit the textbook, and traders do that constantly. */
+  P.analyse = function(trade){
+    var legs = legsOf(trade);
+    if (!legs.length) return null;
+
+    var strikes = legs.map(function(l){ return parseFloat(l.strike); });
+    var lo = Math.min.apply(null, strikes), hi = Math.max.apply(null, strikes);
+    var pad = Math.max((hi - lo) * 1.5, hi * 0.25, 1);
+    /* The scan starts at zero, not at a window around the strikes. A short
+       put looks like unlimited risk if you only look near the strike, and
+       it is not: the underlying can only fall to zero, and the loss there
+       is a real number the trader should be shown. */
+    var from = 0, to = hi + pad;
+    var steps = 800, dx = (to - from) / steps;
+
+    var pts = [], best = -Infinity, worst = Infinity, bestAt = null, worstAt = null;
+    for (var i = 0; i <= steps; i++){
+      var S = from + i * dx;
+      var v = atExpiry(trade, S);
+      pts.push({ s: S, v: v });
+      if (v > best){ best = v; bestAt = S; }
+      if (v < worst){ worst = v; worstAt = S; }
+    }
+
+    // Break-evens: every sign change, refined by bisection so the number
+    // shown is a price, not a pixel.
+    var bes = [];
+    for (var j = 1; j < pts.length; j++){
+      var a = pts[j-1], b = pts[j];
+      if ((a.v <= 0 && b.v > 0) || (a.v >= 0 && b.v < 0)){
+        var x0 = a.s, x1 = b.s;
+        for (var it = 0; it < 40; it++){
+          var mid = (x0 + x1) / 2;
+          if ((atExpiry(trade, x0) <= 0) === (atExpiry(trade, mid) <= 0)) x0 = mid; else x1 = mid;
+        }
+        bes.push((x0 + x1) / 2);
+      }
+    }
+
+    /* Above the highest strike every payoff is linear, so the slope at that
+       edge says whether the curve keeps going — "unlimited" is the true
+       answer for a naked long call and must not be reported as a number.
+       Only the upside can be unbounded; the downside stops at zero, which
+       the scan above now includes. */
+    var slopeHi = pts[pts.length-1].v - pts[pts.length-2].v;
+
+    /* Analysed from zero, but drawn around the strikes: a chart that
+       reserves two thirds of its width for prices the underlying will not
+       see makes the actual shape unreadable. The numbers below the chart
+       still come from the full scan. */
+    return {
+      points: pts, from: from, to: to,
+      viewFrom: Math.max(0, lo - pad),
+      maxProfit: slopeHi > 1e-9 ? null : best,
+      maxLoss:   slopeHi < -1e-9 ? null : worst,
+      bestAt: bestAt, worstAt: worstAt,
+      breakevens: bes,
+      strikes: strikes.slice().sort(function(a,b){ return a-b; })
+    };
+  };
+
+  function fmt(n){
+    if (n == null) return 'unlimited';
+    var s = (n < 0 ? '-' : '') + '$' + Math.abs(n).toFixed(2);
+    return s;
+  }
+  function fmtPx(n){ return Number(n).toFixed(Math.abs(n) < 10 ? 3 : 2); }
+
+  /* Inline SVG rather than a chart library: it has to render inside a trade
+     card that may already be one of hundreds on the page. */
+  P.svg = function(a, w, h){
+    w = w || 520; h = h || 190;
+    var padL = 8, padR = 8, padT = 12, padB = 20;
+    var vf = a.viewFrom != null ? a.viewFrom : a.from;
+    var pts = a.points.filter(function(p){ return p.s >= vf; });
+    var vs = pts.map(function(p){ return p.v; });
+    var vmin = Math.min.apply(null, vs), vmax = Math.max.apply(null, vs);
+    if (vmax - vmin < 1e-9){ vmax += 1; vmin -= 1; }
+    var span = vmax - vmin, m = span * 0.1;
+    vmin -= m; vmax += m;
+
+    function X(s){ return padL + (s - vf) / (a.to - vf) * (w - padL - padR); }
+    function Y(v){ return padT + (vmax - v) / (vmax - vmin) * (h - padT - padB); }
+
+    var zeroY = Y(0);
+
+    // Split fills at the zero line so profit and loss areas read at a glance.
+    var line = pts.map(function(p, i){
+      return (i ? 'L' : 'M') + X(p.s).toFixed(1) + ' ' + Y(p.v).toFixed(1);
+    }).join(' ');
+    var area = line + ' L' + X(a.to).toFixed(1) + ' ' + zeroY.toFixed(1) +
+                      ' L' + X(vf).toFixed(1) + ' ' + zeroY.toFixed(1) + ' Z';
+
+    var strikeLines = a.strikes.map(function(k){
+      return '<line x1="' + X(k).toFixed(1) + '" y1="' + padT + '" x2="' + X(k).toFixed(1) +
+             '" y2="' + (h - padB) + '" stroke="var(--rim2)" stroke-width="1" stroke-dasharray="2 3"/>';
+    }).join('');
+
+    var beMarks = a.breakevens.map(function(b){
+      return '<circle cx="' + X(b).toFixed(1) + '" cy="' + zeroY.toFixed(1) +
+             '" r="3.5" fill="var(--gold)"/>' +
+             '<text x="' + X(b).toFixed(1) + '" y="' + (h - 6) + '" text-anchor="middle" ' +
+             'font-size="9" fill="var(--gold)">' + fmtPx(b) + '</text>';
+    }).join('');
+
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h +
+      '" preserveAspectRatio="none" style="display:block">' +
+      '<defs><clipPath id="pfUp"><rect x="0" y="0" width="' + w + '" height="' + zeroY.toFixed(1) + '"/></clipPath>' +
+      '<clipPath id="pfDn"><rect x="0" y="' + zeroY.toFixed(1) + '" width="' + w + '" height="' + h + '"/></clipPath></defs>' +
+      strikeLines +
+      '<path d="' + area + '" fill="var(--profit)" opacity=".16" clip-path="url(#pfUp)"/>' +
+      '<path d="' + area + '" fill="var(--loss)" opacity=".16" clip-path="url(#pfDn)"/>' +
+      '<line x1="' + padL + '" y1="' + zeroY.toFixed(1) + '" x2="' + (w-padR) +
+        '" y2="' + zeroY.toFixed(1) + '" stroke="var(--ink3)" stroke-width="1"/>' +
+      '<path d="' + line + '" fill="none" stroke="var(--gold)" stroke-width="2"/>' +
+      beMarks +
+      '</svg>';
+  };
+
+  /* The block that goes into the trade card. Returns '' when the legs are
+     not complete enough to say anything true — a payoff drawn from half a
+     spread is worse than no payoff at all. */
+  P.block = function(trade){
+    var a = P.analyse(trade);
+    if (!a) return '';
+    var be = a.breakevens.length
+      ? a.breakevens.map(fmtPx).join(' and ')
+      : 'none — this position never crosses zero at expiry';
+    return '<div class="tc-payoff">' +
+      '<div class="tc-payoff-head">Payoff at expiry</div>' +
+      P.svg(a) +
+      '<div class="tc-payoff-nums">' +
+        '<span>Max profit <b style="color:var(--profit)">' + fmt(a.maxProfit) + '</b></span>' +
+        '<span>Max loss <b style="color:var(--loss)">' + fmt(a.maxLoss) + '</b></span>' +
+        '<span>Break-even <b>' + be + '</b></span>' +
+      '</div>' +
+      '<div class="tc-payoff-note">Intrinsic value at expiry, from the premiums you paid. ' +
+        'It says nothing about what the position is worth today — that needs a live vol surface, ' +
+        'which this journal deliberately does not pretend to have.</div>' +
+    '</div>';
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.createElement('style');
+    el.textContent =
+      '.tc-payoff{margin-top:10px;padding:10px;border:0.5px solid var(--rim2);border-radius:10px;' +
+        'background:var(--elevated)}' +
+      '.tc-payoff-head{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;' +
+        'font-weight:700;color:var(--ink3);margin-bottom:6px}' +
+      '.tc-payoff-nums{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);margin-top:7px}' +
+      '.tc-payoff-nums b{color:var(--ink2)}' +
+      '.tc-payoff-note{font-size:10.5px;color:var(--ink4);margin-top:7px;line-height:1.55}';
+    document.head.appendChild(el);
+  });
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   AUTHORED TRANSLATIONS  —  ApexI18n
+
+   Google Translate stays. What it is bad at is not grammar — it is
+   this domain: a machine translation of trading copy reads like a
+   translated brochure, and a trader who reads "Verlustbegrenzungsauftrag"
+   concludes the product is not finished.
+
+   Two mechanisms already exist and are NOT duplicated here:
+     · trading jargon is wrapped in .notranslate so GT cannot touch it
+       (see the BRAND_TERMS / JARGON lists above);
+     · everything else falls through to GT.
+
+   This layer sits between them: for the strings that carry the most
+   weight — navigation, the main buttons, the sentences a new user reads
+   first — it substitutes a translation a person wrote, and marks it
+   notranslate so GT leaves it alone. Anything not in the table keeps
+   working exactly as before.
+
+   Four languages on purpose. German because it is the home market;
+   Spanish and French because they are large; Portuguese because Brazil
+   is one of the biggest prop-firm markets on earth and essentially no
+   journal is localised for it.
+
+   ── HOW TO ADD A STRING ────────────────────────────────────────────
+   Add the exact English source text as the key, with the four
+   translations. Matching is exact on the trimmed text node, so a key
+   must be the whole visible label — not a fragment of a sentence.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var I = {}; window.ApexI18n = I;
+
+  var LANGS = ['de','es','pt','fr'];
+
+  /* key: en → [de, es, pt, fr] */
+  var T = {
+    // ── navigation ──
+    'Journal':        ['Journal', 'Diario', 'Diário', 'Journal'],
+    'Calendar':       ['Kalender', 'Calendario', 'Calendário', 'Calendrier'],
+    'Statistics':     ['Statistik', 'Estadísticas', 'Estatísticas', 'Statistiques'],
+    'Edge Lab':       ['Edge Lab', 'Edge Lab', 'Edge Lab', 'Edge Lab'],
+    'AI Insights':    ['KI-Analyse', 'Análisis IA', 'Análise de IA', 'Analyse IA'],
+    'Psychology':     ['Psychologie', 'Psicología', 'Psicologia', 'Psychologie'],
+    'Setups':         ['Setups', 'Setups', 'Setups', 'Setups'],
+    'Playbooks':      ['Playbooks', 'Playbooks', 'Playbooks', 'Playbooks'],
+    'Prop Firm':      ['Prop Firm', 'Prop Firm', 'Prop Firm', 'Prop Firm'],
+    'Rules Engine':   ['Regelwerk', 'Motor de reglas', 'Motor de regras', 'Moteur de règles'],
+    'Calculators':    ['Rechner', 'Calculadoras', 'Calculadoras', 'Calculatrices'],
+    'Eco Calendar':   ['Wirtschaftskalender', 'Calendario económico', 'Calendário econômico', 'Calendrier économique'],
+    'Academy':        ['Academy', 'Academia', 'Academia', 'Académie'],
+    'Drills':         ['Übungen', 'Ejercicios', 'Exercícios', 'Exercices'],
+    'Glossary':       ['Glossar', 'Glosario', 'Glossário', 'Glossaire'],
+    'Settings':       ['Einstellungen', 'Ajustes', 'Configurações', 'Paramètres'],
+    'Overview':       ['Übersicht', 'Resumen', 'Visão geral', 'Aperçu'],
+    'Community':      ['Community', 'Comunidad', 'Comunidade', 'Communauté'],
+    'Reports':        ['Berichte', 'Informes', 'Relatórios', 'Rapports'],
+    'Inbox':          ['Posteingang', 'Bandeja de entrada', 'Caixa de entrada', 'Boîte de réception'],
+
+    // ── the buttons people press every day ──
+    'Search':         ['Suchen', 'Buscar', 'Buscar', 'Rechercher'],
+    'Save':           ['Speichern', 'Guardar', 'Salvar', 'Enregistrer'],
+    'Cancel':         ['Abbrechen', 'Cancelar', 'Cancelar', 'Annuler'],
+    'Close':          ['Schließen', 'Cerrar', 'Fechar', 'Fermer'],
+    'Delete':         ['Löschen', 'Eliminar', 'Excluir', 'Supprimer'],
+    'Import':         ['Importieren', 'Importar', 'Importar', 'Importer'],
+    'Export':         ['Exportieren', 'Exportar', 'Exportar', 'Exporter'],
+    'Sync now':       ['Jetzt abgleichen', 'Sincronizar ahora', 'Sincronizar agora', 'Synchroniser'],
+    'Connect':        ['Verbinden', 'Conectar', 'Conectar', 'Connecter'],
+    'Disconnect':     ['Trennen', 'Desconectar', 'Desconectar', 'Déconnecter'],
+    'Refresh':        ['Aktualisieren', 'Actualizar', 'Atualizar', 'Actualiser'],
+    'Open':           ['Öffnen', 'Abrir', 'Abrir', 'Ouvrir'],
+    'Share this':     ['Teilen', 'Compartir', 'Compartilhar', 'Partager'],
+    'Save image':     ['Bild speichern', 'Guardar imagen', 'Salvar imagem', 'Enregistrer l’image'],
+    'Copy':           ['Kopieren', 'Copiar', 'Copiar', 'Copier'],
+    'Add Trade':      ['Trade hinzufügen', 'Añadir operación', 'Adicionar operação', 'Ajouter un trade'],
+    'Upgrade to Pro': ['Auf Pro upgraden', 'Pasar a Pro', 'Mudar para o Pro', 'Passer à Pro'],
+
+    // ── connection status, where a wrong word costs trust ──
+    'Connection status': ['Verbindungsstatus', 'Estado de la conexión', 'Estado da conexão', 'État de la connexion'],
+    'Live':              ['Aktiv', 'Activo', 'Ativo', 'Actif'],
+    'Not connected':     ['Nicht verbunden', 'Sin conexión', 'Sem conexão', 'Non connecté'],
+    'Needs attention':   ['Fehler — bitte prüfen', 'Requiere atención', 'Requer atenção', 'À vérifier'],
+
+    // ── the import check, which has to be unambiguous in every language ──
+    'Check the import':        ['Import prüfen', 'Comprobar la importación', 'Conferir a importação', 'Vérifier l’import'],
+    'Rows read from the file': ['Zeilen aus der Datei gelesen', 'Filas leídas del archivo', 'Linhas lidas do arquivo', 'Lignes lues dans le fichier'],
+    'Positions built':         ['Positionen gebildet', 'Posiciones construidas', 'Posições construídas', 'Positions construites'],
+    'Net P&L in the file':     ['Netto-P&L laut Datei', 'P&L neto en el archivo', 'P&L líquido no arquivo', 'P&L net dans le fichier'],
+    'Net P&L in the journal':  ['Netto-P&L im Journal', 'P&L neto en el diario', 'P&L líquido no diário', 'P&L net dans le journal'],
+    'Already in your journal': ['Bereits im Journal', 'Ya está en tu diario', 'Já está no seu diário', 'Déjà dans votre journal'],
+    'Trades without a stop loss': ['Trades ohne Stop Loss', 'Operaciones sin stop loss', 'Operações sem stop loss', 'Trades sans stop loss'],
+    'Timezone':                ['Zeitzone', 'Zona horaria', 'Fuso horário', 'Fuseau horaire'],
+    'Back to the mapping':     ['Zurück zur Zuordnung', 'Volver a la asignación', 'Voltar ao mapeamento', 'Retour au mappage'],
+
+    // ── search ──
+    'Any result':    ['Alle Ergebnisse', 'Cualquier resultado', 'Qualquer resultado', 'Tous les résultats'],
+    'Winners':       ['Gewinner', 'Ganadoras', 'Vencedoras', 'Gagnants'],
+    'Losers':        ['Verlierer', 'Perdedoras', 'Perdedoras', 'Perdants'],
+    'Any direction': ['Alle Richtungen', 'Cualquier dirección', 'Qualquer direção', 'Toutes directions'],
+    'Any session':   ['Alle Sessions', 'Cualquier sesión', 'Qualquer sessão', 'Toutes les sessions'],
+    'Any grade':     ['Alle Noten', 'Cualquier nota', 'Qualquer nota', 'Toutes les notes'],
+    'Any tag':       ['Alle Tags', 'Cualquier etiqueta', 'Qualquer etiqueta', 'Tous les tags'],
+    'Everything':    ['Alles', 'Todo', 'Tudo', 'Tout'],
+    'Without a stop':          ['Ohne Stop', 'Sin stop', 'Sem stop', 'Sans stop'],
+    'With a note':             ['Mit Notiz', 'Con nota', 'Com anotação', 'Avec note'],
+    'With a mistake logged':   ['Mit erfasstem Fehler', 'Con un error registrado', 'Com um erro registrado', 'Avec une erreur notée'],
+
+    // ── options payoff ──
+    'Payoff at expiry': ['Auszahlung bei Verfall', 'Pago al vencimiento', 'Retorno no vencimento', 'Gain à l’échéance'],
+    'unlimited':        ['unbegrenzt', 'ilimitado', 'ilimitado', 'illimité']
+  };
+
+  function lang(){
+    /* Reuses whatever the existing language switch resolved to — there is
+       one language setting in this app and this is not a second one. */
+    var l = '';
+    try { l = String(window.apexResolvedLang || document.documentElement.lang || '').toLowerCase(); } catch(e){}
+    if (!l){
+      try { l = String((window.apexLocale && window.apexLocale.lang) || '').toLowerCase(); } catch(e){}
+    }
+    l = l.split('-')[0];
+    return LANGS.indexOf(l) >= 0 ? l : null;
+  }
+
+  function lookup(text, code){
+    var row = T[text];
+    if (!row) return null;
+    var v = row[LANGS.indexOf(code)];
+    return v && v !== text ? v : null;
+  }
+
+  /* Walks text nodes and swaps the ones we have authored. The replacement
+     is wrapped in .notranslate for the same reason the jargon is: once a
+     person has written the sentence, a machine must not rewrite it. */
+  function apply(root){
+    var code = lang();
+    if (!code || !document.createTreeWalker) return 0;
+    root = root || document.body;
+    var walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var v = n.nodeValue;
+        if (!v || !v.trim() || v.length > 90) return NodeFilter.FILTER_REJECT;
+        if (!T[v.trim()]) return NodeFilter.FILTER_REJECT;
+        var p = n.parentNode;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        var t = p.nodeName;
+        if (t==='SCRIPT'||t==='STYLE'||t==='TEXTAREA'||t==='TITLE') return NodeFilter.FILTER_REJECT;
+        if (p.closest && p.closest('.notranslate,[translate="no"]')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var todo = [], n;
+    while ((n = walk.nextNode())) todo.push(n);
+    todo.forEach(function(node){
+      var src = node.nodeValue, key = src.trim();
+      var hit = lookup(key, code);
+      if (!hit) return;
+      /* <option> cannot hold an element child, so the text is replaced in
+         place there and the select is marked instead. */
+      var p = node.parentNode;
+      if (p && p.nodeName === 'OPTION'){
+        p.setAttribute('translate','no');
+        p.classList.add('notranslate');
+        node.nodeValue = src.replace(key, hit);
+        return;
+      }
+      var sp = document.createElement('span');
+      sp.className = 'notranslate';
+      sp.setAttribute('translate','no');
+      sp.textContent = src.replace(key, hit);
+      if (p) p.replaceChild(sp, node);
+    });
+    return todo.length;
+  }
+
+  I.apply = apply;
+  I.has   = function(s){ return !!T[s]; };
+  I.t     = function(s){ var c = lang(); return (c && lookup(s, c)) || s; };
+  I.langs = LANGS.slice();
+  I.size  = function(){ return Object.keys(T).length; };
+
+  /* The app rebuilds whole views at runtime, so this runs on the same
+     rhythm as the jargon protection rather than once at load. */
+  function watch(){
+    if (window._i18nWatching) return;
+    window._i18nWatching = true;
+    var queued = false;
+    function run(){ queued = false; try { apply(); } catch(e){} }
+    function schedule(){ if (queued) return; queued = true; setTimeout(run, 500); }
+    try {
+      new MutationObserver(schedule).observe(document.body,
+        { childList:true, subtree:true, characterData:true });
+    } catch(e){ setInterval(run, 2500); }
+    run();
+  }
+
+  if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(watch, 900); });
+  else setTimeout(watch, 900);
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   CHALLENGE MODE  —  ApexChallenge
+
+   Prop-firm rules enforced inside the replay, while it runs. Not a
+   report afterwards: the account is closed at the moment the floor is
+   touched, exactly as the firm would close it, and the session stops.
+
+   This is the one place where two of this product's strengths meet.
+   The replay already fills orders against real bid/ask with real
+   spread; the prop cockpit already knows the four drawdown models the
+   firms actually use. Putting the rules inside the tick loop makes the
+   practice account behave like the real one — including the part
+   people fail on, which is not the entry but the day they were down
+   and kept going.
+
+   Reads its rule sets from ApexPropPlus so there is exactly one place
+   in this codebase where "what does Topstep require" is written down.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var C = {}; window.ApexChallenge = C;
+
+  var S = null;   // active challenge, or null
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+  }
+  function money(v){
+    if (v == null || isNaN(v)) return '—';
+    return (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString(undefined,
+      { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+
+  /* The firm list is not duplicated here — it lives in the prop cockpit and
+     is the same object the retroactive check uses. If a firm changes its
+     terms it is corrected in one place. */
+  function presets(){
+    try { return (window.ApexPropPlus && ApexPropPlus.PRESETS) || {}; } catch(e){ return {}; }
+  }
+
+  /* UTC day of a replay timestamp. The firms measure days on their own
+     server clock, not the trader's — using the replay's own clock is the
+     closest honest approximation and keeps the daily reset deterministic. */
+  function dayOf(ms){ return Math.floor(Number(ms) / 86400000); }
+
+  C.start = function(presetKey, balance){
+    var p = presets()[presetKey];
+    if (!p || !(balance > 0)) return null;
+    S = {
+      key: presetKey, label: p.label, rules: p,
+      start: balance,
+      maxDD: balance * (p.max || 0) / 100,
+      dailyDD: balance * (p.daily || 0) / 100,
+      target: balance * (p.target || 0) / 100,
+      peak: balance,          // highest equity seen (intraday trailing)
+      peakEod: balance,       // highest end-of-day balance (EOD trailing)
+      floor: balance - balance * (p.max || 0) / 100,
+      day: null,              // current UTC day index
+      dayOpen: balance,       // balance at the start of the current day
+      daysTraded: 0,
+      dayHadTrade: false,
+      dayProfits: [],         // realised P&L per completed trading day
+      status: 'running',      // running | failed | passed
+      reason: '',
+      failedAt: null
+    };
+    paint();
+    return S;
+  };
+  C.stop  = function(){ S = null; paint(); };
+  C.state = function(){ return S; };
+  C.active = function(){ return !!S && S.status === 'running'; };
+
+  /* Rolls the day over: books the day's realised result, applies an
+     end-of-day trailing floor, and resets the daily loss reference. */
+  function rollDay(balance){
+    if (S.dayHadTrade){
+      S.daysTraded++;
+      S.dayProfits.push(balance - S.dayOpen);
+    }
+    if (S.rules.dd === 'eod'){
+      if (balance > S.peakEod) S.peakEod = balance;
+      var f = S.peakEod - S.maxDD;
+      if (f > S.start) f = S.start;     // floor locks at the starting balance
+      if (f > S.floor) S.floor = f;
+    }
+    S.dayOpen = balance;
+    S.dayHadTrade = false;
+  }
+
+  /* Called on every replay bar. Everything here has to be cheap: at 100×
+     this runs a hundred times a second. */
+  C.onBar = function(st){
+    if (!S || S.status !== 'running' || !st) return;
+
+    var eq  = Number(st.equity);
+    var bal = Number(st.balance);
+    if (!isFinite(eq) || !isFinite(bal)) return;
+
+    var d = dayOf(st.time);
+    if (S.day == null) { S.day = d; S.dayOpen = bal; }
+    else if (d !== S.day){ rollDay(bal); S.day = d; }
+
+    if (bal !== S.dayOpen || (st.openPositions|0) > 0) S.dayHadTrade = true;
+
+    /* Intraday trailing floors follow EQUITY, not balance — that is the
+       whole point of the model, and the reason traders blow these accounts
+       while showing a positive closed P&L. */
+    if (S.rules.dd === 'trailing'){
+      if (eq > S.peak) S.peak = eq;
+      var f = S.peak - S.maxDD;
+      if (f > S.start) f = S.start;
+      if (f > S.floor) S.floor = f;
+    }
+
+    if (S.maxDD > 0 && eq <= S.floor){
+      fail('Max drawdown breached — equity reached ' + money(eq) +
+           ', the floor was ' + money(S.floor) + '.', st);
+      return;
+    }
+    if (S.dailyDD > 0 && (eq - S.dayOpen) <= -S.dailyDD){
+      fail('Daily loss limit breached — down ' + money(eq - S.dayOpen) +
+           ' on the day, the limit is ' + money(-S.dailyDD) + '.', st);
+      return;
+    }
+
+    /* Passing needs the target AND the minimum days AND consistency — the
+       same three the real payout review checks, in the same order. */
+    if (S.target > 0 && (bal - S.start) >= S.target){
+      var days = S.daysTraded + (S.dayHadTrade ? 1 : 0);
+      if (days >= (S.rules.minDays || 0) && consistencyOk(bal)){
+        S.status = 'passed';
+        S.reason = 'Target of ' + money(S.target) + ' reached over ' + days + ' trading days.';
+        try { if (window.showToast) showToast('🏆 Challenge passed'); } catch(e){}
+      }
+    }
+    paint();
+  };
+
+  function consistencyOk(bal){
+    var lim = S.rules.consistency || 0;
+    if (!lim) return true;
+    var profits = S.dayProfits.concat(S.dayHadTrade ? [bal - S.dayOpen] : [])
+                              .filter(function(v){ return v > 0; });
+    var total = profits.reduce(function(a,b){ return a+b; }, 0);
+    if (total <= 0) return true;
+    var best = Math.max.apply(null, profits);
+    return (best / total * 100) <= lim;
+  }
+
+  function fail(msg, st){
+    S.status = 'failed';
+    S.reason = msg;
+    S.failedAt = st.time;
+    /* Close the account the way the firm would: flatten everything and stop
+       the tape. Letting the replay run on would teach the exact habit this
+       mode exists to break — trading an account that no longer exists. */
+    try {
+      var sess = window.ApexReplayUI && ApexReplayUI._state && ApexReplayUI._state.session;
+      if (sess){ sess.closeAll(); sess.pause(); }
+    } catch(e){}
+    try { if (window.showToast) showToast('⛔ Challenge failed — account closed'); } catch(e){}
+    paint();
+  }
+
+  /* ── the badge that sits over the replay chart ── */
+  function paint(){
+    var host = document.getElementById('challengeBar');
+    if (!host) return;
+    if (!S){ host.innerHTML = ''; host.style.display = 'none'; return; }
+    host.style.display = '';
+
+    var sess = null;
+    try { sess = window.ApexReplayUI && ApexReplayUI._state && ApexReplayUI._state.session; } catch(e){}
+    var st = sess ? sess.state() : null;
+    var eq = st ? Number(st.equity) : S.start;
+    var buffer = eq - S.floor;
+    var bufPct = S.maxDD > 0 ? Math.max(0, Math.min(100, buffer / S.maxDD * 100)) : null;
+    var prog = S.target > 0 ? Math.max(0, Math.min(100, (eq - S.start) / S.target * 100)) : null;
+
+    var cls = S.status === 'failed' ? 'bad' : S.status === 'passed' ? 'good'
+            : (bufPct != null && bufPct < 25) ? 'warn' : '';
+
+    host.className = 'chal-bar ' + cls;
+    host.innerHTML =
+      '<div class="chal-name">' + esc(S.label) + ' · ' + money(S.start) + '</div>' +
+      (S.status === 'running'
+        ? '<div class="chal-metrics">' +
+            '<span>Equity <b>' + money(eq) + '</b></span>' +
+            '<span>Floor <b>' + money(S.floor) + '</b></span>' +
+            '<span>Buffer <b class="' + (bufPct != null && bufPct < 25 ? 'warn' : '') + '">' +
+              money(buffer) + '</b></span>' +
+            (prog != null ? '<span>Target <b>' + prog.toFixed(0) + '%</b></span>' : '') +
+            '<span>Days <b>' + (S.daysTraded + (S.dayHadTrade ? 1 : 0)) +
+              (S.rules.minDays ? ' / ' + S.rules.minDays : '') + '</b></span>' +
+          '</div>'
+        : '<div class="chal-verdict">' +
+            (S.status === 'passed' ? '🏆 Passed' : '⛔ Failed') + ' — ' + esc(S.reason) +
+          '</div>') +
+      '<button class="chal-x" onclick="ApexChallenge.stop()">End</button>';
+  }
+  C.paint = paint;
+
+  /* ── the control that starts one ── */
+  C.pickerHtml = function(){
+    var P = presets();
+    var opts = Object.keys(P).filter(function(k){ return k !== 'custom'; })
+      .map(function(k){ return '<option value="' + k + '">' + esc(P[k].label) + '</option>'; }).join('');
+    if (!opts) return '';
+    var sizes = [25000, 50000, 100000, 150000, 250000]
+      .map(function(n){ return '<option value="' + n + '"' + (n === 50000 ? ' selected' : '') +
+                               '>' + money(n) + '</option>'; }).join('');
+    return '<div class="chal-picker">' +
+      '<span class="chal-picker-l">Challenge mode</span>' +
+      '<select id="chalPreset">' + opts + '</select>' +
+      '<select id="chalSize">' + sizes + '</select>' +
+      '<button onclick="ApexChallenge.startFromPicker()">Start</button>' +
+      '</div>';
+  };
+  C.startFromPicker = function(){
+    var p = document.getElementById('chalPreset'), z = document.getElementById('chalSize');
+    if (!p || !z) return;
+    C.start(p.value, parseFloat(z.value) || 0);
+    try { if (window.showToast) showToast('▶ Challenge started — rules are live'); } catch(e){}
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.createElement('style');
+    el.textContent =
+      '.chal-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0;padding:8px 12px;' +
+        'border:0.5px solid var(--rim2);border-radius:10px;background:var(--elevated);font-size:12px}' +
+      '.chal-bar.warn{border-color:rgba(224,184,76,.45)}' +
+      '.chal-bar.bad{border-color:rgba(240,99,106,.5);background:rgba(240,99,106,.08)}' +
+      '.chal-bar.good{border-color:rgba(62,207,142,.5);background:rgba(62,207,142,.08)}' +
+      '.chal-name{font-weight:700;color:var(--ink)}' +
+      '.chal-metrics{display:flex;gap:14px;flex-wrap:wrap;color:var(--ink3);flex:1}' +
+      '.chal-metrics b{color:var(--ink2);font-variant-numeric:tabular-nums}' +
+      '.chal-metrics b.warn{color:var(--gold)}' +
+      '.chal-verdict{flex:1;color:var(--ink2)}' +
+      '.chal-x{padding:4px 10px;border-radius:8px;border:0.5px solid var(--rim2);background:transparent;' +
+        'color:var(--ink3);font-size:11px;cursor:pointer}' +
+      '.chal-picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3)}' +
+      '.chal-picker select{background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;' +
+        'color:var(--ink);padding:4px 7px;font-size:11.5px;font-family:var(--font-body)}' +
+      '.chal-picker button{padding:4px 11px;border-radius:8px;border:0.5px solid var(--rim2);' +
+        'background:var(--elevated);color:var(--ink2);font-size:11.5px;font-weight:600;cursor:pointer}';
+    document.head.appendChild(el);
+  });
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   CONFLUENCE  —  ApexConfluence
+
+   Everyone in this corner of the market talks about confluence — HTF
+   zone AND fair-value gap AND London open AND above the 200 EMA — and
+   nobody can tell you which of those conditions is actually carrying
+   the result. Usually one is, one is neutral, and one is quietly
+   costing money while getting credit for the wins it happened to
+   attend.
+
+   The data was already here. Playbook checklists record which
+   conditions were true on each trade; tags, session, timeframe and
+   direction record the rest. All that was missing was the arithmetic.
+
+   What it does: builds every condition present in the journal, then
+   scores each single condition and every pair and triple against the
+   trades where all of them held. What it deliberately does NOT do is
+   present a three-condition combination with six trades behind it as a
+   finding — the minimum sample is enforced, and the lift is measured
+   against the baseline of all trades, so "this combination wins 70%"
+   is only interesting when the trader's baseline is not already 70%.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var K = {}; window.ApexConfluence = K;
+
+  var MIN_N = 8;        // below this a combination is an anecdote
+  var MAX_DEPTH = 3;
+  var TOP = 12;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+  }
+  function valueOf(t){
+    try {
+      var c = window.calcTradePnl ? calcTradePnl(t) : null;
+      if (c && c.pnlUsd != null && !isNaN(c.pnlUsd))
+        return window.toDisplayCurrency ? toDisplayCurrency(c.pnlUsd) : c.pnlUsd;
+    } catch(e){}
+    var p = parseFloat(t.pips);
+    return isNaN(p) ? null : p;
+  }
+
+  /* Every condition that was true for a trade, as stable string keys.
+     Prefixed by kind so a tag called "London" and the London session
+     cannot collide into one meaningless bucket. */
+  function conditionsOf(t){
+    var out = [];
+    if (t.session) out.push('Session: ' + t.session);
+    if (t.tf)      out.push('Timeframe: ' + t.tf);
+    if (t.dir)     out.push('Direction: ' + t.dir);
+    if (t.setup)   out.push('Setup: ' + t.setup);
+    (t.tags || []).forEach(function(x){ if (x) out.push('Tag: ' + x); });
+    (t.autoTags || []).forEach(function(x){ if (x) out.push('Tag: ' + x); });
+    /* The checklist items are the real prize: they are the conditions the
+       trader themselves decided matter, recorded at the moment of entry. */
+    (t.pbChecks || []).forEach(function(x){ if (x) out.push('Checklist: ' + x); });
+    if (t.playbook){
+      var pb = (window.playbooks || []).filter(function(p){ return p.id === t.playbook; })[0];
+      if (pb && pb.name) out.push('Playbook: ' + pb.name);
+    }
+    // de-duplicate: a tag can be in both tags and autoTags
+    var seen = {}, uniq = [];
+    out.forEach(function(c){ if (!seen[c]){ seen[c] = 1; uniq.push(c); } });
+    return uniq;
+  }
+
+  function statsOf(vals){
+    if (!vals.length) return null;
+    var wins = vals.filter(function(v){ return v > 0; });
+    var losses = vals.filter(function(v){ return v < 0; });
+    var sum = vals.reduce(function(a,b){ return a+b; }, 0);
+    var gp = wins.reduce(function(a,b){ return a+b; }, 0);
+    var gl = Math.abs(losses.reduce(function(a,b){ return a+b; }, 0));
+    return {
+      n: vals.length,
+      net: sum,
+      exp: sum / vals.length,               // expectancy per trade
+      wr: vals.length ? wins.length / vals.length * 100 : 0,
+      pf: gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0)
+    };
+  }
+
+  function combos(arr, k){
+    var out = [];
+    (function rec(start, cur){
+      if (cur.length === k){ out.push(cur.slice()); return; }
+      for (var i = start; i < arr.length; i++){ cur.push(arr[i]); rec(i+1, cur); cur.pop(); }
+    })(0, []);
+    return out;
+  }
+
+  /* The whole analysis. Returns the baseline plus a ranked list of
+     combinations, each with the lift it adds over that baseline. */
+  K.analyse = function(opts){
+    opts = opts || {};
+    var minN = opts.minN || MIN_N;
+    var depth = Math.min(opts.depth || 2, MAX_DEPTH);
+
+    var trades = [];
+    try { trades = (window.getAllTrades ? getAllTrades() : []); } catch(e){}
+    var rows = [];
+    trades.forEach(function(t){
+      var v = valueOf(t);
+      if (v == null) return;
+      rows.push({ v: v, c: conditionsOf(t) });
+    });
+    if (!rows.length) return { baseline: null, results: [], conditions: 0, trades: 0 };
+
+    var baseline = statsOf(rows.map(function(r){ return r.v; }));
+
+    // Which conditions appear often enough to be worth combining at all.
+    var freq = {};
+    rows.forEach(function(r){ r.c.forEach(function(c){ freq[c] = (freq[c]||0)+1; }); });
+    var pool = Object.keys(freq).filter(function(c){ return freq[c] >= minN; });
+    /* Cap the pool: the triple count grows as the cube, and a browser tab
+       is not the place to enumerate a million combinations. Most frequent
+       first, because a rare condition cannot clear minN in a triple anyway. */
+    pool.sort(function(a,b){ return freq[b]-freq[a]; });
+    pool = pool.slice(0, 26);
+
+    var results = [];
+    for (var k = 1; k <= depth; k++){
+      combos(pool, k).forEach(function(set){
+        var vals = [];
+        for (var i = 0; i < rows.length; i++){
+          var ok = true;
+          for (var j = 0; j < set.length; j++){
+            if (rows[i].c.indexOf(set[j]) === -1){ ok = false; break; }
+          }
+          if (ok) vals.push(rows[i].v);
+        }
+        if (vals.length < minN) return;
+        var st = statsOf(vals);
+        st.set = set;
+        st.k = k;
+        st.lift = st.exp - baseline.exp;         // per-trade edge over baseline
+        st.share = vals.length / rows.length * 100;
+        results.push(st);
+      });
+    }
+
+    /* Ranked by total money the edge is worth, not by the prettiest rate:
+       a combination with a huge expectancy over nine trades is worth less
+       attention than a decent one over ninety. */
+    results.sort(function(a,b){ return (b.lift * b.n) - (a.lift * a.n); });
+
+    return { baseline: baseline, results: results, conditions: pool.length, trades: rows.length };
+  };
+
+  /* ── UI ── */
+  var _opts = { depth: 2, minN: MIN_N, view: 'best' };
+
+  K.set = function(k, v){
+    _opts[k] = (k === 'view') ? v : (parseInt(v, 10) || 1);
+    K.render();
+  };
+
+  function fmt(v, d){
+    if (v == null || !isFinite(v)) return '—';
+    return (v >= 0 ? '+' : '') + v.toFixed(d == null ? 2 : d);
+  }
+
+  function rowHtml(r, baseline){
+    var good = r.lift > 0;
+    return '<tr>' +
+      /* notranslate throughout this row, and not for tidiness: the condition
+         values are the trader's own tag and setup names, and the figures are
+         numbers — Google Translate rewrote "Tag" to "Etikett" and reformatted
+         some decimals and not others, so a column of numbers stopped lining
+         up and two of them changed meaning. Same rule as the money helper. */
+      '<td class="notranslate" translate="no">' + r.set.map(function(c){
+        var parts = String(c).split(': ');
+        return '<span class="cf-cond"><i>' + esc(parts[0]) + '</i>' + esc(parts.slice(1).join(': ')) + '</span>';
+      }).join('<span class="cf-and">+</span>') + '</td>' +
+      '<td class="num notranslate" translate="no">' + r.n + '</td>' +
+      '<td class="num notranslate" translate="no">' + r.wr.toFixed(0) + '%</td>' +
+      '<td class="num notranslate" translate="no">' + (isFinite(r.pf) ? r.pf.toFixed(2) : '∞') + '</td>' +
+      '<td class="num notranslate ' + (good ? 'pos' : 'neg') + '" translate="no">' + fmt(r.lift) + '</td>' +
+      '<td class="num notranslate ' + (r.net >= 0 ? 'pos' : 'neg') + '" translate="no">' + fmt(r.net, 0) + '</td>' +
+    '</tr>';
+  }
+
+  K.render = function(){
+    var host = document.getElementById('confluenceHost');
+    if (!host) return;
+    var a = K.analyse(_opts);
+
+    if (!a.baseline || !a.results.length){
+      host.innerHTML = '<div class="cf-card"><h3>Confluence</h3>' +
+        '<div class="cf-note">Not enough tagged trades yet. This reads the conditions you already ' +
+        'record — playbook checklist items, tags, session, timeframe, setup — and works out which ' +
+        'combinations of them actually carry your results. It needs at least ' + _opts.minN +
+        ' trades sharing a condition before it will say anything.</div></div>';
+      return;
+    }
+
+    var list = a.results.slice();
+    if (_opts.view === 'worst') list.sort(function(x,y){ return (x.lift*x.n) - (y.lift*y.n); });
+    list = list.slice(0, TOP);
+
+    host.innerHTML = '<div class="cf-card">' +
+      '<h3>Confluence — which combinations actually carry</h3>' +
+      '<div class="cf-note">Your baseline across all ' + a.trades + ' valued trades is ' +
+        '<b>' + fmt(a.baseline.exp) + ' per trade</b> at ' + a.baseline.wr.toFixed(0) + '% win rate. ' +
+        '“Lift” below is how much a combination beats that baseline, per trade. ' +
+        'Combinations with fewer than ' + _opts.minN + ' trades are not shown at all.</div>' +
+      '<div class="cf-controls">' +
+        '<select onchange="ApexConfluence.set(\'depth\',this.value)">' +
+          '<option value="1"' + (_opts.depth===1?' selected':'') + '>Single conditions</option>' +
+          '<option value="2"' + (_opts.depth===2?' selected':'') + '>Up to pairs</option>' +
+          '<option value="3"' + (_opts.depth===3?' selected':'') + '>Up to triples</option>' +
+        '</select>' +
+        '<select onchange="ApexConfluence.set(\'minN\',this.value)">' +
+          [5,8,12,20,30].map(function(n){
+            return '<option value="' + n + '"' + (_opts.minN===n?' selected':'') +
+                   '>min ' + n + ' trades</option>'; }).join('') +
+        '</select>' +
+        '<select onchange="ApexConfluence.set(\'view\',this.value)">' +
+          '<option value="best"' + (_opts.view==='best'?' selected':'') + '>What helps most</option>' +
+          '<option value="worst"' + (_opts.view==='worst'?' selected':'') + '>What costs most</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="cf-scroll"><table class="cf-table">' +
+        '<thead><tr><th>Conditions</th><th class="num">Trades</th><th class="num">Win rate</th>' +
+        '<th class="num">Profit factor</th><th class="num">Lift / trade</th><th class="num">Net</th></tr></thead>' +
+        '<tbody>' + list.map(function(r){ return rowHtml(r, a.baseline); }).join('') + '</tbody>' +
+      '</table></div>' +
+      '<div class="cf-note" style="margin-top:10px">A condition that appears in your best combinations ' +
+        'and never on its own is doing the work through something else. Read the single-condition view ' +
+        'next to the pairs before you change anything.</div>' +
+    '</div>';
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.createElement('style');
+    el.textContent =
+      '.cf-card{background:var(--card,#14161c);border:0.5px solid var(--rim2);border-radius:14px;padding:16px;margin-top:16px}' +
+      '.cf-card h3{margin:0 0 8px;font-size:15px}' +
+      '.cf-note{font-size:12px;color:var(--ink3);line-height:1.6}' +
+      '.cf-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}' +
+      '.cf-controls select{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:8px;' +
+        'color:var(--ink2);padding:5px 9px;font-size:11.5px;font-family:var(--font-body)}' +
+      '.cf-scroll{overflow-x:auto}' +
+      '.cf-table{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}' +
+      '.cf-table th{text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;' +
+        'color:var(--ink4);font-weight:700;padding:6px 8px;border-bottom:0.5px solid var(--rim2)}' +
+      '.cf-table td{padding:8px;border-bottom:0.5px solid var(--rim);color:var(--ink2);vertical-align:top}' +
+      '.cf-table .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}' +
+      '.cf-table .pos{color:var(--profit)}.cf-table .neg{color:var(--loss)}' +
+      '.cf-cond{display:inline-block;background:var(--elevated);border-radius:7px;padding:2px 8px;margin:1px 0}' +
+      '.cf-cond i{display:block;font-style:normal;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4)}' +
+      '.cf-and{color:var(--ink4);margin:0 5px;font-weight:700}';
+    document.head.appendChild(el);
+  });
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   METATRADER AUTO-SYNC  —  ApexMeta
+
+   Until now MetaTrader arrived here through an Expert Advisor the
+   trader had to install, which works and is also the step most people
+   never finish. This is the other route: the account's INVESTOR
+   password, handed to a server that keeps a terminal connected and
+   reads it on a schedule.
+
+   Two things about that password are worth saying plainly in the UI,
+   because they are the entire objection: it is read-only at the
+   MetaTrader protocol level — it physically cannot place, modify or
+   close an order, that is MetaQuotes' design and not our promise — and
+   we never store it. It goes straight to the platform that runs the
+   terminal, which hands back an account id, and the id is all we keep.
+
+   Talks to metaapi-worker.js. Pro only, and capped per user, because
+   every connected account costs money every month.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var M = {}; window.ApexMeta = M;
+
+  function base(){ return String(window.APEX_METAAPI_URL || '').replace(/\/$/, ''); }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+  }
+  function toast(m){ try { if (window.showToast) showToast(m); } catch(e){} }
+  function ago(ms){
+    if (!ms) return 'never';
+    var d = Date.now() - Number(ms);
+    if (d < 60000) return 'just now';
+    if (d < 3600000) return Math.floor(d/60000) + ' min ago';
+    if (d < 86400000) return Math.floor(d/3600000) + ' h ago';
+    return Math.floor(d/86400000) + ' d ago';
+  }
+
+  var _state = { links: [], limit: 3, loaded: false, busy: false };
+
+  M.refresh = function(){
+    if (!base() || !window.currentUID) { render(); return Promise.resolve(); }
+    return fetch(base() + '/status?uid=' + encodeURIComponent(window.currentUID))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        _state.links = d.links || [];
+        _state.limit = d.limit || 3;
+        _state.loaded = true;
+        render();
+      })
+      .catch(function(){ _state.loaded = true; render(); });
+  };
+
+  M.connect = function(){
+    if (!window.currentUID) { toast('Sign in first'); return; }
+    if (window.currentPlan !== 'pro') {
+      try { if (typeof openUpgradeModal === 'function') openUpgradeModal(); } catch(e){}
+      return;
+    }
+    var login = (document.getElementById('mtLogin') || {}).value;
+    var pass  = (document.getElementById('mtPass') || {}).value;
+    var srv   = (document.getElementById('mtServer') || {}).value;
+    var plat  = (document.getElementById('mtPlatform') || {}).value || 'mt5';
+    if (!login || !pass || !srv) { toast('⚠ Login, investor password and server are all needed'); return; }
+
+    _state.busy = true; render();
+    fetch(base() + '/link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: window.currentUID, login: login, password: pass,
+                             server: srv, platform: plat, label: srv })
+    })
+      .then(function(r){ return r.json().then(function(b){ return { ok: r.ok, b: b }; }); })
+      .then(function(res){
+        _state.busy = false;
+        if (!res.ok || res.b.error){
+          /* The platform's own error text is usually unhelpful ("Invalid
+             account"), so the worker attaches the two causes that account
+             for nearly all of them. Show that, not the raw message. */
+          var msg = res.b.hint || res.b.message || 'Could not connect';
+          if (res.b.error === 'account_limit')
+            msg = 'You have ' + _state.limit + ' MetaTrader accounts connected, which is the limit. ' +
+                  'Disconnect one to add another.';
+          toast('⚠ ' + msg);
+          render();
+          return;
+        }
+        var p = document.getElementById('mtPass'); if (p) p.value = '';
+        toast('✓ Connected — your trades will start arriving within a few minutes');
+        M.refresh();
+      })
+      .catch(function(){ _state.busy = false; toast('⚠ Could not reach the sync service'); render(); });
+  };
+
+  M.disconnect = function(accountId){
+    if (!window.currentUID) return;
+    fetch(base() + '/unlink', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: window.currentUID, accountId: accountId })
+    }).then(function(){ toast('Disconnected'); M.refresh(); })
+      .catch(function(){ toast('⚠ Could not disconnect'); });
+  };
+
+  function linkRow(l){
+    var bad = l.status !== 'active' || l.errorCount > 0;
+    return '<div class="mt-link">' +
+      '<div class="mt-link-main">' +
+        '<div class="mt-link-name notranslate" translate="no">' + esc(l.label || l.server) +
+          ' <span class="mt-badge">' + esc(String(l.platform).toUpperCase()) + '</span></div>' +
+        '<div class="mt-link-meta">last sync ' + esc(ago(l.lastPollAt)) +
+          (l.lastCount ? ' · ' + l.lastCount + ' event' + (l.lastCount === 1 ? '' : 's') : '') + '</div>' +
+        (bad && l.lastError ? '<div class="mt-link-err">' + esc(l.lastError) + '</div>' : '') +
+      '</div>' +
+      '<button class="mt-btn" onclick="ApexMeta.disconnect(\'' + esc(l.accountId) + '\')">Disconnect</button>' +
+    '</div>';
+  }
+
+  function render(){
+    var host = document.getElementById('mtSyncHost');
+    if (!host) return;
+
+    if (!base()){
+      /* No worker configured yet. Deliberately not a dead "Connect"
+         button: the EA route below this card works today, and pointing at
+         it is more use than a control that fails. */
+      host.innerHTML = '<div class="at-card">' +
+        '<div class="mt-h">🔗 MetaTrader Auto-Sync <span class="mt-soon">in preparation</span></div>' +
+        '<div class="mt-p">Connecting MT4/MT5 with your investor password — no Expert Advisor to install, ' +
+        'and it keeps syncing while the app is closed — is built but not switched on yet. ' +
+        'The Expert Advisor below already does the same job today.</div>' +
+      '</div>';
+      return;
+    }
+
+    var full = _state.links.length >= _state.limit;
+    host.innerHTML = '<div class="at-card">' +
+      '<div class="mt-h">🔗 MetaTrader Auto-Sync</div>' +
+      '<div class="mt-p">Connect MT4 or MT5 with the account\'s <b>investor password</b> — no Expert Advisor, ' +
+        'nothing to install, and it keeps running while the app is closed. ' +
+        '<b>The investor password is read-only in MetaTrader itself:</b> it can view the account and cannot ' +
+        'place, modify or close an order. That is how MetaQuotes built it, not a promise we are making.<br><br>' +
+        'We never store it. It goes to the service that runs the terminal, which returns an account id — ' +
+        'the id is all that is kept here.</div>' +
+
+      (_state.links.length ? '<div class="mt-links">' + _state.links.map(linkRow).join('') + '</div>' : '') +
+
+      (full
+        ? '<div class="mt-p" style="margin-top:10px">You have reached the limit of ' + _state.limit +
+          ' connected MetaTrader accounts. Disconnect one to add another.</div>'
+        : '<div class="mt-form">' +
+            '<select id="mtPlatform" class="mt-in">' +
+              '<option value="mt5">MetaTrader 5</option><option value="mt4">MetaTrader 4</option></select>' +
+            '<input id="mtLogin" class="mt-in" placeholder="Account number" autocomplete="off" inputmode="numeric">' +
+            '<input id="mtPass" class="mt-in" type="password" placeholder="Investor password" autocomplete="off">' +
+            '<input id="mtServer" class="mt-in wide" placeholder="Server — exactly as MetaTrader shows it" autocomplete="off">' +
+            '<button class="mt-connect" onclick="ApexMeta.connect()"' + (_state.busy ? ' disabled' : '') + '>' +
+              (_state.busy ? 'Connecting…' : 'Connect') + '</button>' +
+          '</div>' +
+          '<div class="mt-hint">The server name is in MetaTrader under <b>File → Open an Account</b>, or on the ' +
+            'welcome email from your broker or prop firm. It has to match exactly, including the suffix ' +
+            '(<span class="notranslate" translate="no">ICMarketsSC-Live12</span>, ' +
+            '<span class="notranslate" translate="no">FTMO-Demo</span>).</div>') +
+    '</div>';
+  }
+  M.render = render;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.createElement('style');
+    el.textContent =
+      '.mt-h{font-family:var(--font-display);font-weight:700;color:var(--ink);font-size:14px;margin-bottom:8px}' +
+      '.mt-soon{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);' +
+        'border:0.5px solid var(--rim2);border-radius:20px;padding:2px 8px;margin-left:6px}' +
+      '.mt-p{font-size:12.5px;color:var(--ink3);line-height:1.65}' +
+      '.mt-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}' +
+      '.mt-in{background:var(--surface);border:0.5px solid var(--rim);border-radius:9px;color:var(--ink);' +
+        'padding:8px 10px;font-size:12.5px;font-family:var(--font-body);min-width:150px}' +
+      '.mt-in.wide{flex:1;min-width:220px}' +
+      '.mt-connect{padding:8px 20px;border-radius:9px;border:none;background:var(--gold);color:#07080b;' +
+        'font-weight:700;font-size:12.5px;cursor:pointer}' +
+      '.mt-connect:disabled{opacity:.5;cursor:default}' +
+      '.mt-hint{font-size:11px;color:var(--ink4);margin-top:9px;line-height:1.6}' +
+      '.mt-links{display:flex;flex-direction:column;gap:8px;margin-top:12px}' +
+      '.mt-link{display:flex;gap:10px;align-items:center;padding:9px 11px;border:0.5px solid var(--rim2);' +
+        'border-radius:10px;background:var(--elevated)}' +
+      '.mt-link-main{flex:1;min-width:0}' +
+      '.mt-link-name{font-size:12.5px;font-weight:600;color:var(--ink)}' +
+      '.mt-badge{font-size:9.5px;letter-spacing:.06em;color:var(--ink4);border:0.5px solid var(--rim2);' +
+        'border-radius:20px;padding:1px 6px;margin-left:5px}' +
+      '.mt-link-meta{font-size:11px;color:var(--ink3);margin-top:2px}' +
+      '.mt-link-err{font-size:11px;color:var(--loss);margin-top:3px}' +
+      '.mt-btn{padding:6px 11px;border-radius:8px;border:0.5px solid var(--rim2);background:transparent;' +
+        'color:var(--ink3);font-size:11.5px;cursor:pointer}';
+    document.head.appendChild(el);
+
+    /* The MT5 panel is built by ApexAutoTrack when it is selected, so the
+       card is inserted after that rather than into the static markup. */
+    setTimeout(function(){
+      if (!window.ApexAutoTrack || ApexAutoTrack._metaWrapped) return;
+      var orig = ApexAutoTrack.select;
+      ApexAutoTrack.select = function(plat){
+        var r = orig.apply(this, arguments);
+        if (plat === 'mt5' || plat === 'mt4'){
+          setTimeout(function(){
+            var panel = document.getElementById('atPanel-mt5');
+            if (!panel) return;
+            if (!document.getElementById('mtSyncHost')){
+              var d = document.createElement('div');
+              d.id = 'mtSyncHost';
+              d.style.marginBottom = '14px';
+              panel.insertBefore(d, panel.firstChild);
+            }
+            M.refresh();
+          }, 40);
+        }
+        return r;
+      };
+      ApexAutoTrack._metaWrapped = true;
+    }, 1500);
+  });
 })();
 </script>
 
