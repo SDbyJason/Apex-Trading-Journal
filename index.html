@@ -42236,54 +42236,60 @@ self.addEventListener('message', async (ev) => {
   };
 
   /* ─────────── Zonen-Rechtecke ───────────
-     Lightweight Charts kennt keine Kästen. Gezeichnet wird deshalb auf einer
-     eigenen Ebene über dem Chart, mit den Koordinaten, die die Zeit- und
-     Preisachse gerade liefern — und neu, wenn sich der Ausschnitt bewegt.
+     Lightweight Charts kennt keine Kästen, bietet aber eine eigene
+     Zeichenebene an: ein Series-Primitive wird IM Render-Durchgang des
+     Charts aufgerufen.
 
-     Bewusst Canvas statt hundert DOM-Knoten: bei fünfhundert Zonen über
-     mehreren Jahren wäre jedes Scrollen ein Layout-Durchlauf. */
-  Instance.prototype._zoneCanvas = function () {
-    if (this._zc) return this._zc;
-    var host = this.el;
-    if (!host) return null;
-    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
-    var c = document.createElement('canvas');
-    c.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:1';
-    host.appendChild(c);
-    this._zc = c;
-    var self = this;
-    if (!this._zcBound) {
-      this._zcBound = true;
-      try {
-        this.chart.timeScale().subscribeVisibleLogicalRangeChange(function () { self._paintZones(); });
-      } catch (e) {}
-      try {
-        this._zcRO = new ResizeObserver(function () { self._paintZones(); });
-        this._zcRO.observe(host);
-      } catch (e) {}
-    }
-    return c;
+     Der erste Versuch lief über ein eigenes Canvas über dem Chart, das auf
+     `subscribeVisibleLogicalRangeChange` neu zeichnete. Das funktioniert im
+     Stillstand und ist beim Scrollen sichtbar falsch: der Rückruf kommt
+     NACH dem Bild, das der Chart schon gezeichnet hat, also hing die
+     Zeichenebene beim Ziehen dauerhaft einen Frame hinterher und die Zonen
+     rutschten neben die Kerzen. Sobald man losließ, sprang alles zurück —
+     das klassische Symptom zweier Ebenen, die sich selbst synchronisieren
+     sollen.
+
+     Als Primitive gibt es das Problem nicht mehr: gezeichnet wird mit den
+     Koordinaten desselben Frames. `zOrder: 'bottom'` legt die Zonen hinter
+     die Kerzen, wo sie hingehören. */
+  function ZoneRenderer(inst) { this._i = inst; }
+  ZoneRenderer.prototype.draw = function (target) {
+    var inst = this._i;
+    try {
+      target.useMediaCoordinateSpace(function (scope) {
+        inst._drawZones(scope.context);
+      });
+    } catch (e) { /* ein Zeichenfehler darf den Chart nie mitnehmen */ }
   };
 
+  function ZonePaneView(inst) { this._r = new ZoneRenderer(inst); }
+  ZonePaneView.prototype.update = function () {};
+  ZonePaneView.prototype.renderer = function () { return this._r; };
+  ZonePaneView.prototype.zOrder = function () { return 'bottom'; };
+
+  function ZonePrimitive(inst) { this._views = [new ZonePaneView(inst)]; }
+  ZonePrimitive.prototype.updateAllViews = function () {};
+  ZonePrimitive.prototype.paneViews = function () { return this._views; };
+  /** Primitive anhängen, sobald es Zonen gibt — und nach jedem Seriewechsel. */
   Instance.prototype._paintZones = function () {
-    var c = this._zc || (this._zones && this._zones.length ? this._zoneCanvas() : null);
-    if (!c) return;
-    var host = this.el, dpr = window.devicePixelRatio || 1;
-    var w = host.clientWidth, h = host.clientHeight;
-    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
-      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
-      c.style.width = w + 'px'; c.style.height = h + 'px';
+    if (!this.series || !this._zones || !this._zones.length) return;
+    if (this._zonePrimSeries !== this.series) {
+      if (this._zonePrim && this._zonePrimSeries) {
+        try { this._zonePrimSeries.detachPrimitive(this._zonePrim); } catch (e) {}
+      }
+      this._zonePrim = new ZonePrimitive(this);
+      this._zonePrimSeries = this.series;
+      try { this.series.attachPrimitive(this._zonePrim); } catch (e) { this._zonePrim = null; }
     }
-    var x = c.getContext('2d');
-    x.setTransform(dpr, 0, 0, dpr, 0, 0);
-    x.clearRect(0, 0, w, h);
-    // `this.series` ist die Kerzenserie — an ihr hängt die Preisachse.
+  };
+
+  /** Der eigentliche Strich — läuft im Render-Durchgang des Charts. */
+  Instance.prototype._drawZones = function (x) {
     if (!this._zones || !this._zones.length || !this.series || !this._all) return;
 
     var ts = this.chart.timeScale();
     var series = this.series;
     var shown = this._shown;
-    var self = this;
 
     /* Ein Zeitindex → x. logicalToCoordinate liefert bei gebrochenen Werten
        0 (bekannter Fallstrick dieser Bibliothek), deshalb ganze Indizes. */
@@ -42335,9 +42341,11 @@ self.addEventListener('message', async (ev) => {
 
   Instance.prototype._dropZones = function () {
     this._zones = [];
-    if (this._zc) { try { this._zc.remove(); } catch (e) {} this._zc = null; }
-    if (this._zcRO) { try { this._zcRO.disconnect(); } catch (e) {} this._zcRO = null; }
-    this._zcBound = false;
+    if (this._zonePrim && this._zonePrimSeries) {
+      try { this._zonePrimSeries.detachPrimitive(this._zonePrim); } catch (e) {}
+    }
+    this._zonePrim = null;
+    this._zonePrimSeries = null;
   };
 
   Instance.prototype._dropOverlays = function () {
