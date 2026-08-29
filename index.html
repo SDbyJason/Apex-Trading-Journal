@@ -12012,6 +12012,11 @@ function _authAction(type) {
                 <option value="ui">🎨 UI / Design Problem</option>
                 <option value="performance">⚡ Performance</option>
                 <option value="feature">💡 Feature request</option>
+                <!-- Eigene Kategorie, nicht unter "Feature request" versteckt:
+                     Indikator-Wünsche sind der häufigste konkrete Wunsch und
+                     der am schnellsten umsetzbare. Wenn sie in einem Topf mit
+                     allem anderen landen, gehen sie darin unter. -->
+                <option value="indicator">📐 Indikator-Wunsch</option>
                 <option value="data">📊 Daten / Journal Problem</option>
                 <option value="other">📝 Sonstiges</option>
               </select>
@@ -42151,6 +42156,7 @@ self.addEventListener('message', async (ev) => {
   Instance.prototype.setIndicators = function (specs) {
     this._ovlSpecs = specs || [];
     this._dropOverlays();
+    this._zones = [];
     if (!this.chart || !this.LWC || !this._all || !this._all.n) return this;
 
     var LWC = this.LWC, self = this, th = theme();
@@ -42215,12 +42221,124 @@ self.addEventListener('message', async (ev) => {
       }
     });
 
+    /* Zonen-Rechtecke einsammeln. Sie hängen nicht an einer Serie, sondern
+       werden über den Chart gelegt — deshalb getrennt von den Plots oben. */
+    this._zones = [];
+    this._ovlSpecs.forEach(function (sp) {
+      if (sp && sp.visible !== false && sp.zones && sp.zones.length) {
+        self._zones = self._zones.concat(sp.zones);
+      }
+    });
+    this._paintZones();
+
     this._paintOverlays();
     return this;
   };
 
+  /* ─────────── Zonen-Rechtecke ───────────
+     Lightweight Charts kennt keine Kästen. Gezeichnet wird deshalb auf einer
+     eigenen Ebene über dem Chart, mit den Koordinaten, die die Zeit- und
+     Preisachse gerade liefern — und neu, wenn sich der Ausschnitt bewegt.
+
+     Bewusst Canvas statt hundert DOM-Knoten: bei fünfhundert Zonen über
+     mehreren Jahren wäre jedes Scrollen ein Layout-Durchlauf. */
+  Instance.prototype._zoneCanvas = function () {
+    if (this._zc) return this._zc;
+    var host = this.el;
+    if (!host) return null;
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    var c = document.createElement('canvas');
+    c.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:1';
+    host.appendChild(c);
+    this._zc = c;
+    var self = this;
+    if (!this._zcBound) {
+      this._zcBound = true;
+      try {
+        this.chart.timeScale().subscribeVisibleLogicalRangeChange(function () { self._paintZones(); });
+      } catch (e) {}
+      try {
+        this._zcRO = new ResizeObserver(function () { self._paintZones(); });
+        this._zcRO.observe(host);
+      } catch (e) {}
+    }
+    return c;
+  };
+
+  Instance.prototype._paintZones = function () {
+    var c = this._zc || (this._zones && this._zones.length ? this._zoneCanvas() : null);
+    if (!c) return;
+    var host = this.el, dpr = window.devicePixelRatio || 1;
+    var w = host.clientWidth, h = host.clientHeight;
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+      c.style.width = w + 'px'; c.style.height = h + 'px';
+    }
+    var x = c.getContext('2d');
+    x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    x.clearRect(0, 0, w, h);
+    // `this.series` ist die Kerzenserie — an ihr hängt die Preisachse.
+    if (!this._zones || !this._zones.length || !this.series || !this._all) return;
+
+    var ts = this.chart.timeScale();
+    var series = this.series;
+    var shown = this._shown;
+    var self = this;
+
+    /* Ein Zeitindex → x. logicalToCoordinate liefert bei gebrochenen Werten
+       0 (bekannter Fallstrick dieser Bibliothek), deshalb ganze Indizes. */
+    function xOf(idx) {
+      var v = ts.logicalToCoordinate(idx);
+      return (v == null || !isFinite(v)) ? null : v;
+    }
+    function yOf(price) {
+      var v = series.priceToCoordinate(price);
+      return (v == null || !isFinite(v)) ? null : v;
+    }
+
+    this._zones.forEach(function (z) {
+      // Nichts zeichnen, was der Trader noch nicht gesehen hat.
+      if (z.bornAt != null && z.bornAt >= shown) return;
+      var toIdx = z.to == null ? Math.max(0, shown - 1) : Math.min(z.to, shown - 1);
+      if (toIdx < z.from) return;
+
+      var x1 = xOf(z.from), x2 = xOf(toIdx);
+      var y1 = yOf(z.top), y2 = yOf(z.bot);
+      if (x1 == null || x2 == null || y1 == null || y2 == null) return;
+      if (x2 < x1) { var t = x1; x1 = x2; x2 = t; }
+      if (x2 - x1 < 1) x2 = x1 + 1;
+
+      var broken = !!z.broken;
+      var htf = z.htfLevel || 0;
+      /* Farben wie im Original: Supply rot, Demand grün, gebrochene grau —
+         und HTF-Confluence kräftiger, weil sie dort der Hauptgrund ist,
+         eine Zone überhaupt zu handeln. */
+      var fill = broken ? 'rgba(140,140,140,0.10)'
+               : z.supply ? (htf >= 2 ? 'rgba(240,99,106,0.30)' : 'rgba(240,99,106,0.16)')
+                          : (htf >= 2 ? 'rgba(62,207,142,0.30)' : 'rgba(62,207,142,0.16)');
+      x.fillStyle = fill;
+      x.fillRect(x1, Math.min(y1, y2), x2 - x1, Math.abs(y2 - y1));
+
+      if (!broken && z.entryTop != null) {
+        var e1 = yOf(z.entryTop), e2 = yOf(z.entryBot);
+        if (e1 != null && e2 != null) {
+          x.strokeStyle = 'rgba(90,150,255,0.75)';
+          x.lineWidth = 1;
+          x.strokeRect(x1 + 0.5, Math.min(e1, e2) + 0.5, x2 - x1 - 1, Math.abs(e2 - e1));
+        }
+      }
+    });
+  };
+
   /** Called after setBars(): "your indicator values are stale, recompute". */
   Instance.prototype.onIndicatorsInvalid = function (fn) { this._ovlInvalid = fn; return this; };
+
+  Instance.prototype._dropZones = function () {
+    this._zones = [];
+    if (this._zc) { try { this._zc.remove(); } catch (e) {} this._zc = null; }
+    if (this._zcRO) { try { this._zcRO.disconnect(); } catch (e) {} this._zcRO = null; }
+    this._zcBound = false;
+  };
 
   Instance.prototype._dropOverlays = function () {
     var self = this;
@@ -42237,6 +42355,8 @@ self.addEventListener('message', async (ev) => {
       var o = self._ovl[k];
       try { o.series.setData(n >= o.rows.length ? o.rows : o.rows.slice(0, n)); } catch (e) {}
     });
+    // Zonen enden am aufgedeckten Rand, also mit jedem Schritt neu.
+    try { self._paintZones(); } catch (e) {}
   };
 
   Instance.prototype.indicatorSpecs = function () { return this._ovlSpecs || []; };
@@ -42606,6 +42726,9 @@ self.addEventListener('message', async (ev) => {
 
   Instance.prototype.destroy = function () {
     if (this._ro) { try { this._ro.disconnect(); } catch (e) {} this._ro = null; }
+    // Die Zonen-Ebene hängt am Container, nicht am Chart — sie überlebt
+    // dessen remove() sonst als leeres Canvas über der nächsten Ansicht.
+    try { this._dropZones(); } catch (e) {}
     if (this._dragBound && this.el) {
       this.el.removeEventListener('pointerdown', this._onLvDown, true);
       this.el.removeEventListener('pointermove', this._onLvMove, true);
@@ -48426,6 +48549,375 @@ self.addEventListener('message', async (ev) => {
      `outputs` names are stable — they end up in saved strategies.        */
   var COLORS = ['#c9a84c', '#5aa9e6', '#b98ce0', '#3ecf8e', '#f0636a', '#e8a44c'];
 
+  /* ══════════════════════════════════════════════════════════════
+     SUPPLY & DEMAND ZONES  —  portiert aus „SD Zones VP v2" (Pine v6)
+
+     Nachbau der Zonenlogik aus Jasons eigenem TradingView-Indikator, nicht
+     eine allgemeine S&D-Erkennung. Wo Pine und JavaScript sich unterscheiden,
+     gilt Pine — die Zahlen sollen dieselben sein.
+
+     ── WAS ÜBERNOMMEN IST ────────────────────────────────────────
+     Pivots mit `swingLen`, Zone aus der Pivot-Kerze, Session-Filter,
+     Mindestabstand, Höhen-Korridor über ATR, Verschmelzen überlappender
+     Zonen, Retest-Zählung, Invalidierung per Close oder Docht,
+     HTF-Confluence in drei Stufen, Score 0–10, Wahrscheinlichkeit 10–95 %,
+     Entry-Box bei 50 %, Counter-Candle.
+
+     ── WAS BEWUSST FEHLT ─────────────────────────────────────────
+     · Das Volumenprofil in der Zone. Pine holt es über
+       `request.security_lower_tf(..., "1", ...)`; hier kommen die Kerzen des
+       gewählten Zeitrahmens an, nicht M1. Nachrüstbar, aber nicht erfunden.
+     · BOS, CHoCH, Liquidity, Markt-Struktur, Rejection-Kerzen. Die gibt es
+       in dieser App bereits als eigene Indikatoren (`structure`, `sweep`,
+       `fvg`) — sie hier zu wiederholen wären zwei Wahrheiten über dasselbe.
+     · Farben, Labels und das Analyse-Panel: TradingView-Oberfläche.
+
+     ── EINE ECHTE ABWEICHUNG ─────────────────────────────────────
+     Pine kennt `barstate.isconfirmed` und läuft je Kerze einmal. Hier wird
+     die ganze Serie in einem Durchgang gerechnet. Das Ergebnis ist gleich,
+     solange nichts in die Zukunft schaut — und genau das ist unten die
+     Regel: ein Pivot bei Index i gilt erst ab Kerze i+len als bekannt,
+     nie früher.
+     ══════════════════════════════════════════════════════════════ */
+
+  /* Session aus der UTC-Stunde, gleiche Grenzen wie f_getSession() im Pine.
+     Achtung, die Grenzen überlappen dort absichtlich: 8–13 London,
+     13–22 New York, 0–9 Asian — geprüft wird in dieser Reihenfolge, also
+     gewinnt London zwischen 8 und 9. */
+  function sdSession(ms) {
+    var h = new Date(ms).getUTCHours();
+    if (h >= 8 && h < 13) return 'London';
+    if (h >= 13 && h < 22) return 'New York';
+    if (h >= 0 && h < 9) return 'Asian';
+    return 'Other';
+  }
+
+  /* Pip-Größe wie f_getPips(): Gold 0.1, JPY-Paare 0.01, sonst 0.0001. */
+  function sdPipSize(symbol) {
+    var s = String(symbol || '').toUpperCase();
+    if (s.indexOf('XAU') === 0 || s === 'GOLD') return 0.1;
+    if (s.length >= 6 && s.slice(3, 6) === 'JPY') return 0.01;
+    return 0.0001;
+  }
+
+  /* Score aus f_calcScore — Gewichte unverändert. */
+  function sdScore(sess, age, retests, zoneHeight, distPips, atrVal, htfLevel) {
+    var base = 5.0;
+    var sessScore = (sess === 'London' || sess === 'New York') ? 1.5 : (sess === 'Asian' ? 0.5 : 0.0);
+    var agePenalty = age < 100 ? 0.0 : age < 250 ? 0.5 : age < 500 ? 1.0 : 1.5;
+    var retestPenalty = retests <= 1 ? 0.0 : retests === 2 ? 0.5 : retests === 3 ? 1.0 : 1.5;
+    var heightRatio = atrVal > 0 ? zoneHeight / atrVal : 1.0;
+    var heightScore = (heightRatio >= 0.5 && heightRatio <= 2.0) ? 1.0 : (heightRatio < 0.5 ? 0.5 : 0.0);
+    var distScore = distPips < 30 ? 1.5 : distPips < 100 ? 1.0 : distPips < 300 ? 0.5 : 0.0;
+    var htfScore = htfLevel === 2 ? 1.5 : htfLevel === 1 ? 0.75 : 0.0;
+    var raw = base + sessScore + heightScore + distScore + htfScore - agePenalty - retestPenalty;
+    return Math.round(Math.max(0, Math.min(10, raw)));
+  }
+
+  /* Wahrscheinlichkeit aus f_calcProbability — Gewichte unverändert. */
+  function sdProb(score, htfLevel, retests, sess, age, distPips, freshImpulse) {
+    var raw = 50.0
+      + (score - 5.0) * 4.0
+      + (htfLevel === 2 ? 12.0 : htfLevel === 1 ? 6.0 : 0.0)
+      + (retests === 0 ? 8.0 : retests === 1 ? 4.0 : retests === 2 ? -4.0 : -10.0)
+      + ((sess === 'London' || sess === 'New York') ? 4.0 : 0.0)
+      + (age < 100 ? 3.0 : age < 300 ? 0.0 : -5.0)
+      + (distPips < 50 ? 4.0 : distPips < 200 ? 0.0 : -3.0)
+      + (freshImpulse ? 5.0 : 0.0);
+    return Math.round(Math.max(10.0, Math.min(95.0, raw)));
+  }
+
+  /* Höheren Zeitrahmen aus den vorhandenen Kerzen bilden, statt ihn zu laden.
+     `request.security` holt im Pine echte 60m-Kerzen; hier werden sie aus
+     denselben Daten zusammengefasst, auf die der Indikator ohnehin schaut.
+     Das Ergebnis ist identisch, solange der Chart-Zeitrahmen den höheren
+     teilt — und es kostet keinen einzigen zusätzlichen Abruf. */
+  function sdHtfPivots(bars, htfMinutes, len) {
+    var step = htfMinutes * 60000;
+    var gT = [], gH = [], gL = [], gIdx = [];
+    var curKey = null;
+    for (var i = 0; i < bars.n; i++) {
+      var k = Math.floor(bars.t[i] / step);
+      if (k !== curKey) {
+        curKey = k;
+        gT.push(bars.t[i]); gH.push(bars.h[i]); gL.push(bars.l[i]); gIdx.push(i);
+      } else {
+        var j = gH.length - 1;
+        if (bars.h[i] > gH[j]) gH[j] = bars.h[i];
+        if (bars.l[i] < gL[j]) gL[j] = bars.l[i];
+        gIdx[gH.length - 1] = i;                    // letzte Kerze der Gruppe
+      }
+    }
+    /* Ein HTF-Pivot ist erst bekannt, wenn `len` HTF-Kerzen darauf gefolgt
+       sind — übersetzt auf den Index der Kerze, ab der er sichtbar ist. */
+    var out = [];
+    for (var p = len; p < gH.length - len; p++) {
+      var isH = true, isL = true;
+      for (var q = p - len; q <= p + len; q++) {
+        if (q === p) continue;
+        if (gH[q] >= gH[p]) isH = false;
+        if (gL[q] <= gL[p]) isL = false;
+      }
+      if (!isH && !isL) continue;
+      var known = gIdx[Math.min(gH.length - 1, p + len)];
+      out.push({ supply: isH, top: gH[p], bot: gL[p], knownAt: known });
+    }
+    return out;
+  }
+
+  /**
+   * Supply-/Demand-Zonen nach Jasons Regeln.
+   *
+   * Liefert je Kerze die nächstgelegene aktive Zone beider Seiten plus
+   * Bewertung, und zusätzlich `zoneList` — alle Zonen als Rechtecke für
+   * den Chart.
+   */
+  function sdZonesScan(bars, q, symbol) {
+    var n = bars.n;
+    var swingLen = Math.max(1, q.swingLen | 0);
+    var maxZones = Math.max(1, q.maxZones | 0);
+    var minDist = Math.max(1, q.minDist | 0);
+    var wick = !!q.wickBreak;
+    var useMtf = q.htfMin > 0;
+
+    var atrArr = atr(bars, 20);
+    var pip = sdPipSize(symbol);
+
+    var out = {
+      supplyTop: new Array(n), supplyBot: new Array(n),
+      demandTop: new Array(n), demandBot: new Array(n),
+      entryTop: new Array(n), entryBot: new Array(n),
+      inSupply: new Array(n), inDemand: new Array(n),
+      score: new Array(n), probability: new Array(n),
+      zoneList: []
+    };
+
+    var htf = useMtf ? sdHtfPivots(bars, q.htfMin, Math.max(3, q.htfSwing | 0)) : [];
+    var htfSup = [], htfDem = [], htfPtr = 0;
+
+    /* f_htfConfluence: 2 = die Zone liegt ganz in einer HTF-Zone,
+       1 = sie überschneidet sich nur. */
+    function confluence(top, bot, isSupply) {
+      var arr = isSupply ? htfSup : htfDem, res = 0;
+      for (var i = 0; i < arr.length; i++) {
+        var ht = arr[i].top, hb = arr[i].bot;
+        if (top >= hb && bot <= ht) {
+          if (top <= ht && bot >= hb) return 2;
+          res = 1;
+        }
+      }
+      return res;
+    }
+
+    var zones = [];
+    var lastSupplyBar = 0, lastDemandBar = 0;
+
+    /* f_createZone: erst auf Mindesthöhe aufziehen, dann deckeln, dann
+       prüfen. Die Reihenfolge ist nicht beliebig — ein aufgezogener Kasten
+       kann die Prüfung bestehen, den das Original ebenfalls durchlässt. */
+    function createZone(rawTop, rawBot, a) {
+      var top = rawTop, bot = rawBot;
+      var mid = (top + bot) / 2, zH = top - bot;
+      if (zH < a * q.forceMinAtr) {
+        var forced = a * q.forceMinAtr;
+        top = mid + forced / 2; bot = mid - forced / 2; zH = forced;
+      }
+      if (zH > a * q.maxAtr) {
+        var maxH = a * q.maxAtr;
+        top = mid + maxH / 2; bot = mid - maxH / 2; zH = maxH;
+      }
+      return { top: top, bot: bot, valid: zH >= a * q.minAtr };
+    }
+
+    /* f_findCounterCandle: die letzte Gegenkerze vor dem Pivot. */
+    function counterCandle(i, isSupply) {
+      for (var k = 0; k <= 10; k++) {
+        var idx = i - k;
+        if (idx < 0) break;
+        var c = bars.c[idx], o = bars.o[idx];
+        var red = c < o, green = c > o;
+        if ((isSupply && green) || (!isSupply && red)) {
+          return { bar: idx, top: Math.max(o, c), bot: Math.min(o, c) };
+        }
+      }
+      return null;
+    }
+
+    for (var i = 0; i < n; i++) {
+      var a = atrArr[i];
+
+      // HTF-Pivots freischalten, sobald sie an dieser Kerze bekannt wären.
+      while (htfPtr < htf.length && htf[htfPtr].knownAt <= i) {
+        var hp = htf[htfPtr++];
+        var list = hp.supply ? htfSup : htfDem;
+        list.push(hp);
+        if (list.length > 30) list.shift();
+      }
+
+      /* Ein Pivot bei p ist an Kerze i = p + swingLen bestätigt — genau
+         dann, wenn Pine ihn ausgibt. Früher wäre Blick in die Zukunft. */
+      var p = i - swingLen;
+      if (p >= swingLen && a > 0) {
+        var isPH = true, isPL = true;
+        for (var w = p - swingLen; w <= p + swingLen; w++) {
+          if (w === p) continue;
+          if (bars.h[w] >= bars.h[p]) isPH = false;
+          if (bars.l[w] <= bars.l[p]) isPL = false;
+        }
+        var sess = sdSession(bars.t[i]);
+        if (sess !== 'Other') {
+          for (var side = 0; side < 2; side++) {
+            var supply = side === 0;
+            if (supply ? !isPH : !isPL) continue;
+            var lastBar = supply ? lastSupplyBar : lastDemandBar;
+            if (i - lastBar < minDist) continue;
+
+            var z = createZone(bars.h[p], bars.l[p], a);
+            if (!z.valid) continue;
+
+            // Verschmelzen mit einer überlappenden, offenen Zone derselben Seite
+            var merged = false;
+            for (var m = zones.length - 1; m >= Math.max(0, zones.length - 15); m--) {
+              var e = zones[m];
+              if (e.supply !== supply || e.broken) continue;
+              if (z.top >= e.bot && z.bot <= e.top) {
+                e.top = Math.max(z.top, e.top);
+                e.bot = Math.min(z.bot, e.bot);
+                merged = true;
+                break;
+              }
+            }
+            if (merged) continue;
+
+            var cc = counterCandle(p, supply);
+            zones.push({
+              supply: supply, top: z.top, bot: z.bot,
+              startBar: p, bornAt: i, session: sess,
+              retests: 0, retestCounted: false, broken: false, brokeAt: null,
+              htfLevel: confluence(z.top, z.bot, supply),
+              counterBar: cc ? cc.bar : null,
+              counterTop: cc ? cc.top : null, counterBot: cc ? cc.bot : null
+            });
+            if (supply) lastSupplyBar = i; else lastDemandBar = i;
+            if (zones.length > maxZones * 6) zones.shift();
+          }
+        }
+      }
+
+      // ── Zonen fortschreiben ──
+      var bestSup = null, bestDem = null;
+      var inSup = 0, inDem = 0;
+      for (var zi = 0; zi < zones.length; zi++) {
+        var zz = zones[zi];
+        if (zz.bornAt > i) continue;
+
+        if (!zz.broken) {
+          var inside = bars.h[i] >= zz.bot && bars.l[i] <= zz.top;
+          if (inside && !zz.retestCounted) { zz.retests++; zz.retestCounted = true; }
+          else if (!inside) zz.retestCounted = false;
+
+          var brk = wick ? (zz.supply ? bars.h[i] : bars.l[i])
+                         : bars.c[i];
+          if (zz.supply ? (brk > zz.top) : (brk < zz.bot)) {
+            zz.broken = true; zz.brokeAt = i;
+          }
+        }
+        if (zz.broken) continue;
+
+        /* Pine bestimmt die HTF-Confluence bei JEDER Kerze neu, solange die
+           Zone offen ist — nicht einmal bei der Erzeugung. Das ist kein
+           Detail: die Liste der HTF-Pivots wächst, eine Zone kann also
+           später in Confluence geraten und dann 1,5 Punkte und 12 Prozent
+           dazugewinnen. Vorher stand hier der Wert von der Geburt. */
+        if (useMtf) zz.htfLevel = confluence(zz.top, zz.bot, zz.supply);
+
+        /* Pine trennt zwei Begriffe, und der Unterschied ist nicht kosmetisch:
+           `priceInZone` (Docht berührt) zählt die Retests, `priceInsideNow`
+           (Close liegt drin) entscheidet, in welcher Zone der Kurs gerade
+           steht. Für eine Regel „Einstieg in der Demand-Zone" ist der Close
+           gemeint — ein Docht, der kurz hineinsticht und darüber schließt,
+           ist keine Zone, in der man sitzt. Oben zählt weiter der Docht. */
+        if (bars.c[i] >= zz.bot && bars.c[i] <= zz.top) {
+          if (zz.supply) inSup = 1; else inDem = 1;
+        }
+        // Die nächstgelegene offene Zone je Seite — nach Abstand zum Kurs.
+        var dist = zz.supply ? (zz.bot - bars.c[i]) : (bars.c[i] - zz.top);
+        var cand = { z: zz, d: Math.abs(dist) };
+        if (zz.supply) { if (!bestSup || cand.d < bestSup.d) bestSup = cand; }
+        else           { if (!bestDem || cand.d < bestDem.d) bestDem = cand; }
+      }
+
+      out.supplyTop[i] = bestSup ? bestSup.z.top : null;
+      out.supplyBot[i] = bestSup ? bestSup.z.bot : null;
+      out.demandTop[i] = bestDem ? bestDem.z.top : null;
+      out.demandBot[i] = bestDem ? bestDem.z.bot : null;
+      out.inSupply[i] = inSup;
+      out.inDemand[i] = inDem;
+
+      /* Bewertet wird die Zone, in der der Kurs GERADE steht — sonst die
+         nähere der beiden. Eine Punktzahl für eine Zone, die hundert Pips
+         entfernt liegt, beantwortet keine Frage, die jemand stellt. */
+      var focus = null;
+      if (inDem && bestDem) focus = bestDem.z;
+      else if (inSup && bestSup) focus = bestSup.z;
+      else if (bestDem && bestSup) focus = bestDem.d <= bestSup.d ? bestDem.z : bestSup.z;
+      else focus = (bestDem || bestSup) ? (bestDem || bestSup).z : null;
+
+      if (focus) {
+        var distPips = Math.abs(focus.supply ? (bars.c[i] - focus.bot) : (focus.top - bars.c[i])) / pip;
+        var age = i - focus.startBar;
+        var sc = sdScore(focus.session, age, focus.retests, focus.top - focus.bot, distPips, a, focus.htfLevel);
+        out.score[i] = sc;
+        /* Pine: `isFreshImpulse = age < 50 and z.retests == 0`. Hier stand
+           erst `counterBar != null && age < 50` — geraten und falsch. Eine
+           Zone mit drei Retests hätte damit die Frische-Prämie von 5 Punkten
+           bekommen, die genau das Gegenteil belohnen soll. */
+        out.probability[i] = sdProb(sc, focus.htfLevel, focus.retests, focus.session, age, distPips,
+                                    age < 50 && focus.retests === 0);
+        // Entry-Box: die dem Kurs zugewandte Hälfte der Zone (showEntry, 50 %).
+        var mid2 = (focus.top + focus.bot) / 2;
+        out.entryTop[i] = focus.supply ? focus.top : mid2;
+        out.entryBot[i] = focus.supply ? mid2 : focus.bot;
+      } else {
+        out.score[i] = null; out.probability[i] = null;
+        out.entryTop[i] = null; out.entryBot[i] = null;
+      }
+    }
+
+    /* Für den Chart: jede Zone als Rechteck — aber nur die, die Pine auch
+       zeichnen würde.
+
+       Pine begrenzt die ANZEIGE zweifach, und das ist kein Detail: ohne die
+       Grenzen liegen nach ein paar tausend Kerzen fünfzig Kästen übereinander
+       und der Chart wird unlesbar. Erstens verschwinden Zonen, die zu alt
+       sind (`activeLookback` für offene, `historicBars` für gebrochene).
+       Zweitens werden je Seite höchstens `maxZones` gezeigt — die jüngsten,
+       weil sie die sind, an denen der Kurs noch handelt.
+
+       Gerechnet wird weiterhin auf ALLEN Zonen; das hier betrifft nur, was
+       auf dem Chart landet. */
+    var last = n - 1;
+    var shown = { supply: 0, demand: 0 }, shownHist = { supply: 0, demand: 0 };
+    out.zoneList = zones.slice().reverse().filter(function (z) {
+      var age = last - z.startBar;
+      if (!z.broken && age > q.activeLookback) return false;
+      if (z.broken && age > q.historicBars) return false;
+      var side = z.supply ? 'supply' : 'demand';
+      var bag = z.broken ? shownHist : shown;
+      if (bag[side] >= maxZones) return false;
+      bag[side]++;
+      return true;
+    }).reverse().map(function (z) {
+      return { supply: z.supply, top: z.top, bot: z.bot,
+               from: z.startBar, to: z.brokeAt == null ? null : z.brokeAt,
+               bornAt: z.bornAt, broken: z.broken, retests: z.retests,
+               htfLevel: z.htfLevel, session: z.session,
+               entryTop: z.supply ? z.top : (z.top + z.bot) / 2,
+               entryBot: z.supply ? (z.top + z.bot) / 2 : z.bot };
+    });
+    return out;
+  }
+
   var DEF = {
     ema:   { label: 'EMA', group: 'overlay', params: [['p', 'Period', 20, 1, 500]],
              outputs: ['ema'], calc: function (b, q) { return { ema: ema(source(b, q.src), q.p) }; } },
@@ -48522,6 +49014,23 @@ self.addEventListener('message', async (ev) => {
              params: [['p', 'Days', 14, 2, 90]],
              outputs: ['adr', 'used', 'high', 'low'],
              calc: function (b, q) { return adrScan(b, q.p); } },
+    sd:    { label: 'Supply & Demand zones', group: 'overlay', zones: true,
+             /* Die Vorgaben sind Jasons eigene aus dem Pine-Indikator, nicht
+                allgemeine Richtwerte — wer sie ändert, ändert seine Methode. */
+             params: [['swingLen', 'Swing length', 12, 3, 50],
+                      ['maxZones', 'Max zones per side', 8, 3, 20],
+                      ['maxAtr', 'Max height (× ATR)', 3.0, 0.5, 10],
+                      ['minAtr', 'Min height (× ATR)', 0.3, 0.1, 2],
+                      ['forceMinAtr', 'Force min height (× ATR)', 0.5, 0.1, 3],
+                      ['minDist', 'Min distance (bars)', 10, 1, 100],
+                      ['wickBreak', 'Break on wick (0 = close)', 0, 0, 1],
+                      ['htfMin', 'HTF minutes (0 = off)', 60, 0, 240],
+                      ['htfSwing', 'HTF swing length', 10, 3, 50],
+                      ['activeLookback', 'Show active zones for (bars)', 500, 50, 5000],
+                      ['historicBars', 'Show broken zones for (bars)', 300, 0, 5000]],
+             outputs: ['supplyTop', 'supplyBot', 'demandTop', 'demandBot',
+                       'entryTop', 'entryBot', 'inSupply', 'inDemand', 'score', 'probability'],
+             calc: function (b, q, ctx) { return sdZonesScan(b, q, ctx && ctx.symbol); } },
     smt:   { label: 'SMT divergence', group: 'pane', needsRef: true,
              params: [['left', 'Swing size', 5, 1, 50], ['right', 'Confirm bars', 2, 1, 50]],
              outputs: ['bull', 'bear'],
@@ -48558,7 +49067,10 @@ self.addEventListener('message', async (ev) => {
     var q = fillParams(id, params), k = keyOf(id, q);
     var cache = bars.__ind || (bars.__ind = {});
     if (cache[k]) return cache[k];
-    var res = d.calc(bars, q) || {};
+    /* Der dritte Parameter ist neu und nur für S&D nötig: die Pip-Größe hängt
+       am Instrument (Gold 0.1, JPY 0.01), und die Kerzen tragen den Namen
+       nicht. `bars.__sym` setzt der Aufrufer, der ihn kennt. */
+    var res = d.calc(bars, q, { symbol: bars.__sym }) || {};
     cache[k] = res;
     return res;
   }
@@ -48610,7 +49122,12 @@ self.addEventListener('message', async (ev) => {
       var plots = d.outputs.filter(function (name) {
         // SuperTrend's direction and a pivot's raw arrays are inputs for rules,
         // not lines anybody wants to look at.
-        return !(ch.id === 'supertrend' && name === 'dir');
+        if (ch.id === 'supertrend' && name === 'dir') return false;
+        /* Bei einem Zonen-Indikator sind die Kanten schon der Kasten. Sie
+           zusätzlich als Linien zu ziehen ergäbe acht Linien über dem Chart;
+           die Werte bleiben trotzdem für Regeln und Backtest verfügbar. */
+        if (d.zones) return false;
+        return true;
       }).map(function (name, k) {
         var col = COLORS[(ci + k) % COLORS.length];
         var mid = (name === 'mid');
@@ -48632,6 +49149,10 @@ self.addEventListener('message', async (ev) => {
         kind: isPane ? 'pane' : 'overlay',
         pane: pane,
         label: label(ch.id, q),
+        /* Rechtecke statt Linien. Bisher kannte das Indikator-System nur
+           Serien; eine Supply-Zone IST aber ein Kasten, und sie als zwei
+           Linien zu zeichnen sieht aus wie zwei Linien. */
+        zones: d.zones ? (res.zoneList || []) : null,
         plots: plots,
         guides: d.guides || null,
         range: d.range || null,
@@ -51523,6 +52044,14 @@ self.addEventListener('message', async (ev) => {
       '</div>' +
       (panes >= 2 ? '<div class="aiu-pane-note">Two oscillator panes is the maximum — a third would leave no room for the candles.</div>' : '') +
       '<div class="aiu-pane-note">Indicators follow the replay cursor: they never use a candle you have not been shown yet.</div>' +
+      /* Der Wunsch entsteht GENAU hier — beim Durchsehen der Liste, wenn der
+         eigene Indikator nicht dabei ist. Ein Hinweis in den Einstellungen
+         hätte diesen Moment verpasst. */
+      '<div class="aiu-pane-note">Missing one? Ask for it under ' +
+        '<a href="#" onclick="nav(\'settings\');if(window.switchSettingsTab)switchSettingsTab(\'bugreport\');return false;" ' +
+        'style="color:var(--gold);text-decoration:none;border-bottom:1px dotted var(--gold-line)">' +
+        'Settings &rarr; Bug Report &amp; Rating</a> and pick <b>Indikator-Wunsch</b>. ' +
+        'Name the indicator and, if you have it, paste the Pine source &mdash; that is usually enough to build it.</div>' +
     '</div>';
   }
 
@@ -51530,6 +52059,9 @@ self.addEventListener('message', async (ev) => {
   /** Draw the current choice on a chart. `bars` must be the chart's dataset. */
   function apply(chart, bars) {
     if (!chart || !bars || !bars.n || !window.ApexIndicators) return;
+    /* Die Pip-Größe hängt am Instrument (Gold 0.1, JPY 0.01) und die Kerzen
+       tragen den Namen nicht — S&D braucht ihn für Abstand in Pips. */
+    try { if (chart.symbol && !bars.__sym) bars.__sym = chart.symbol; } catch (e) {}
     try { chart.setIndicators(window.ApexIndicators.chartSpecs(bars, list())); }
     catch (e) { /* a bad parameter must never take the chart down */ }
   }
