@@ -42224,9 +42224,11 @@ self.addEventListener('message', async (ev) => {
     /* Zonen-Rechtecke einsammeln. Sie hängen nicht an einer Serie, sondern
        werden über den Chart gelegt — deshalb getrennt von den Plots oben. */
     this._zones = [];
+    this._zoneOpts = null;
     this._ovlSpecs.forEach(function (sp) {
       if (sp && sp.visible !== false && sp.zones && sp.zones.length) {
         self._zones = self._zones.concat(sp.zones);
+        if (sp.zoneOpts) self._zoneOpts = sp.zoneOpts;
       }
     });
     this._paintZones();
@@ -42302,7 +42304,18 @@ self.addEventListener('message', async (ev) => {
       return (v == null || !isFinite(v)) ? null : v;
     }
 
-    this._zones.forEach(function (z) {
+    /* Gefiltert wird gegen den AUFGEDECKTEN Rand, nicht gegen das Ende der
+       geladenen Datei. Sonst gilt eine Zone dicht am Cursor als „zu alt",
+       weil hinter ihr noch tausend ungezeigte Kerzen liegen — und der Chart
+       bleibt mitten im Replay leer. */
+    var sichtbar = this._zones;
+    try {
+      if (window.ApexIndicators && ApexIndicators.sdVisibleZones) {
+        sichtbar = ApexIndicators.sdVisibleZones(this._zones, Math.max(0, shown - 1), this._zoneOpts);
+      }
+    } catch (e) {}
+
+    sichtbar.forEach(function (z) {
       // Nichts zeichnen, was der Trader noch nicht gesehen hat.
       if (z.bornAt != null && z.bornAt >= shown) return;
       var toIdx = z.to == null ? Math.max(0, shown - 1) : Math.min(z.to, shown - 1);
@@ -48674,6 +48687,40 @@ self.addEventListener('message', async (ev) => {
   }
 
   /**
+   * Welche Zonen an Kerze `atBar` gezeichnet werden.
+   *
+   * Pine begrenzt die Anzeige zweifach — zu alte fallen weg
+   * (`activeLookback` für offene, `historicBars` für gebrochene), und je
+   * Seite werden höchstens `maxZones` gezeigt, die jüngsten zuerst. Ohne die
+   * Grenzen liegen nach ein paar tausend Kerzen dutzende Kästen übereinander.
+   *
+   * `atBar` ist der AUFGEDECKTE Rand, nicht das Ende der geladenen Datei —
+   * das war der Fehler, der dazu führte, dass mitten im Replay gar keine
+   * Zone mehr erschien. Gerechnet wird weiterhin auf allen Zonen.
+   */
+  function sdVisibleZones(list, atBar, opts) {
+    opts = opts || {};
+    var maxZones = opts.maxZones > 0 ? opts.maxZones : 8;
+    var active = opts.activeLookback > 0 ? opts.activeLookback : 500;
+    var hist = opts.historicBars >= 0 ? opts.historicBars : 300;
+    var open = { supply: 0, demand: 0 }, broke = { supply: 0, demand: 0 };
+    // Rückwärts, damit „die jüngsten zuerst" gilt.
+    return (list || []).slice().reverse().filter(function (z) {
+      if (z.bornAt != null && z.bornAt > atBar) return false;
+      var age = atBar - z.from;
+      if (age < 0) return false;
+      var brokenNow = z.broken && z.to != null && z.to <= atBar;
+      if (!brokenNow && age > active) return false;
+      if (brokenNow && age > hist) return false;
+      var side = z.supply ? 'supply' : 'demand';
+      var bag = brokenNow ? broke : open;
+      if (bag[side] >= maxZones) return false;
+      bag[side]++;
+      return true;
+    }).reverse();
+  }
+
+  /**
    * Supply-/Demand-Zonen nach Jasons Regeln.
    *
    * Liefert je Kerze die nächstgelegene aktive Zone beider Seiten plus
@@ -48892,30 +48939,18 @@ self.addEventListener('message', async (ev) => {
       }
     }
 
-    /* Für den Chart: jede Zone als Rechteck — aber nur die, die Pine auch
-       zeichnen würde.
+    /* ALLE Zonen — die Anzeigegrenzen werden bewusst NICHT hier gezogen.
 
-       Pine begrenzt die ANZEIGE zweifach, und das ist kein Detail: ohne die
-       Grenzen liegen nach ein paar tausend Kerzen fünfzig Kästen übereinander
-       und der Chart wird unlesbar. Erstens verschwinden Zonen, die zu alt
-       sind (`activeLookback` für offene, `historicBars` für gebrochene).
-       Zweitens werden je Seite höchstens `maxZones` gezeigt — die jüngsten,
-       weil sie die sind, an denen der Kurs noch handelt.
+       Sie standen erst an dieser Stelle und haben genau das Gegenteil
+       bewirkt: das Alter wurde gegen die letzte Kerze der geladenen DATEI
+       gerechnet. Im Replay steht der Cursor aber mittendrin. Bei 1.400
+       geladenen Kerzen und einem Cursor bei 400 war jede Zone in der Nähe
+       des Cursors „älter als 500 Kerzen" und verschwand — der Chart zeigte
+       gar nichts mehr, obwohl acht Zonen berechnet waren.
 
-       Gerechnet wird weiterhin auf ALLEN Zonen; das hier betrifft nur, was
-       auf dem Chart landet. */
-    var last = n - 1;
-    var shown = { supply: 0, demand: 0 }, shownHist = { supply: 0, demand: 0 };
-    out.zoneList = zones.slice().reverse().filter(function (z) {
-      var age = last - z.startBar;
-      if (!z.broken && age > q.activeLookback) return false;
-      if (z.broken && age > q.historicBars) return false;
-      var side = z.supply ? 'supply' : 'demand';
-      var bag = z.broken ? shownHist : shown;
-      if (bag[side] >= maxZones) return false;
-      bag[side]++;
-      return true;
-    }).reverse().map(function (z) {
+       Gefiltert wird deshalb beim ZEICHNEN, gegen den aufgedeckten Rand.
+       Siehe visibleZones() unten, das beide Seiten benutzen. */
+    out.zoneList = zones.map(function (z) {
       return { supply: z.supply, top: z.top, bot: z.bot,
                from: z.startBar, to: z.brokeAt == null ? null : z.brokeAt,
                bornAt: z.bornAt, broken: z.broken, retests: z.retests,
@@ -49161,6 +49196,10 @@ self.addEventListener('message', async (ev) => {
            Serien; eine Supply-Zone IST aber ein Kasten, und sie als zwei
            Linien zu zeichnen sieht aus wie zwei Linien. */
         zones: d.zones ? (res.zoneList || []) : null,
+        /* Die Anzeigegrenzen wandern mit zum Chart, weil erst dort bekannt
+           ist, wie weit der Replay aufgedeckt ist. */
+        zoneOpts: d.zones ? { maxZones: q.maxZones, activeLookback: q.activeLookback,
+                              historicBars: q.historicBars } : null,
         plots: plots,
         guides: d.guides || null,
         range: d.range || null,
@@ -49200,6 +49239,7 @@ self.addEventListener('message', async (ev) => {
     atr: atr, trueRange: trueRange, rsi: rsi, macd: macd, stoch: stoch,
     adx: adx, cci: cci, bbands: bbands, keltner: keltner, donchian: donchian,
     supertrend: supertrend, vwap: vwap, obv: obv, pivots: pivots,
+    sdVisibleZones: sdVisibleZones,
     fvgScan: fvgScan, structureScan: structureScan, asianScan: asianScan,
     adrScan: adrScan, oteScan: oteScan, po3Scan: po3Scan, smtScan: smtScan,
     attachRef: attachRef
