@@ -26,8 +26,12 @@ a:hover{text-decoration:underline}
 .wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px}
 header.site{display:flex;align-items:center;justify-content:space-between;gap:16px;
      padding:18px 20px;max-width:1100px;margin:0 auto;border-bottom:1px solid var(--rim)}
-header.site .brand{font-weight:800;letter-spacing:.14em;font-size:13px;color:var(--ink);text-transform:uppercase}
+header.site .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.14em;
+     font-size:13px;color:var(--ink);text-transform:uppercase}
 header.site .brand span{color:var(--gold)}
+/* Dasselbe Markenzeichen wie in der App und auf den uebrigen Seiten. Inline,
+   weil diese Seiten eigenstaendig sind und den Sprite der App nicht sehen. */
+header.site .brand svg{width:26px;height:26px;border-radius:7px;display:block;flex:none}
 header.site nav a{font-size:13px;margin-left:18px;color:var(--ink3)}
 header.site nav a:hover{color:var(--ink)}
 .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
@@ -70,7 +74,7 @@ footer.site .in{max-width:1100px;margin:0 auto;display:flex;justify-content:spac
 </head>
 <body>
 <header class="site">
-  <a class="brand" href="https://evidencetrading.com/">Evidence <span>Trading</span></a>
+  <a class="brand" href="https://evidencetrading.com/"><svg viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg><span class="brand-t">Evidence <span>Trading</span></span></a>
   <nav>
     <a href="/academy/">Academy</a>
     <a href="https://evidencetrading.com/">The app</a>
@@ -88,25 +92,25 @@ footer.site .in{max-width:1100px;margin:0 auto;display:flex;justify-content:spac
   backtest lies to the person running it.</p>
   <a class="course-card" href="/academy/psychology.html">
     <span class="pill">Foundation</span>
-    <div class="t">🧠 The psychology of trading</div>
+    <div class="t">The psychology of trading</div>
     <div class="d">Loss aversion, tilt, revenge trading, sizing as a psychological decision, what a win rate does and does not tell you, and how to design a rule you will not break.</div>
     <div class="d" style="margin-top:8px;color:var(--gold)">9 chapters · 27 min →</div>
   </a>
   <a class="course-card" href="/academy/risk.html">
     <span class="pill">Foundation</span>
-    <div class="t">⚖️ Risk and position size</div>
+    <div class="t">Risk and position size</div>
     <div class="d">What risk actually is, how to size a position backwards from it, why a fixed percentage behaves so differently from a fixed lot, and how a daily limit stops a bad day becoming a bad month.</div>
     <div class="d" style="margin-top:8px;color:var(--gold)">6 chapters · 40 min →</div>
   </a>
   <a class="course-card" href="/academy/edge.html">
     <span class="pill">Core</span>
-    <div class="t">📊 Reading an edge</div>
+    <div class="t">Reading an edge</div>
     <div class="d">Expectancy, why a win rate on its own is meaningless, how large a sample has to be before a difference is real, what a losing streak proves, and how to tell a broken edge from an ordinary bad month.</div>
     <div class="d" style="margin-top:8px;color:var(--gold)">6 chapters · 39 min →</div>
   </a>
   <a class="course-card" href="/academy/backtest.html">
     <span class="pill">Advanced</span>
-    <div class="t">🔬 Backtesting without fooling yourself</div>
+    <div class="t">Backtesting without fooling yourself</div>
     <div class="d">Hindsight, overfitting, in-sample versus out-of-sample, the costs people forget, what Monte-Carlo actually tells you, and the conditions under which a backtest is worth believing.</div>
     <div class="d" style="margin-top:8px;color:var(--gold)">6 chapters · 38 min →</div>
   </a>

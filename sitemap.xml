@@ -195,4 +195,9 @@
     <priority>0.7</priority>
   </url>
   <!-- academy:end -->
+  <url>
+    <loc>https://evidencetrading.com/status.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.3</priority>
+  </url>
 </urlset>
