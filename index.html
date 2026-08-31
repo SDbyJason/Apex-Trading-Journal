@@ -1062,7 +1062,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-08-31a';
+  window.APEX_BUILD = '2026-08-31c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -6774,6 +6774,27 @@ body.aw-on #modeToggleBtn { display: none !important; }
   margin: 0 0 1px !important;
   border-bottom: 0.5px solid var(--rim);
 }
+
+/* Ausklappfelder ueber dem Chart (Indikatoren, Darstellung). Sie liegen in
+   der Buehne, nicht in der Karte darunter — sonst verschwinden sie hinter
+   dem Chart-Canvas. Ihre Sichtbarkeit steuert weiterhin der jeweilige
+   Knopf ueber style.display; hier steht nur, WO sie liegen. */
+.aw-stage > [data-aw-panel] {
+  position: absolute;
+  top: 8px; left: 10px; right: 10px;
+  z-index: 9;
+  max-height: calc(100% - 16px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  margin: 0 !important;
+  padding: 12px;
+  background: var(--raised);
+  border: 0.5px solid var(--rim2);
+  border-radius: var(--r-md);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.5);
+}
+/* Auf breiten Fenstern muss so ein Feld nicht die ganze Breite einnehmen. */
+@media (min-width: 1000px) { .aw-stage > [data-aw-panel] { right: auto; width: min(720px, calc(100% - 20px)); } }
 
 /* OHLC-Legende, wie bei TradingView oben links IM Chart. Zeigt die Kerze
    unter dem Zeiger, sonst die letzte sichtbare. */
@@ -30382,6 +30403,14 @@ function goToAuthPro(screen) {
           '<button class="el-btn" onclick="EdgeLab.rpZoom(1.25)" title="Zoom in">+</button>'+
           '<button class="el-btn" onclick="EdgeLab.rpZoomReset()" title="Reset to trade" aria-label="Reset to trade">⟲</button>'+
           '<button class="el-btn" onclick="EdgeLab.rpPan(-220)" title="Later" aria-label="Later">▶</button>'+
+          /* Der Indikator-Knopf stand vorher allein auf einer eigenen Zeile
+             zwischen Werkzeugleiste und Chart. Optisch gleich gestaltet wie
+             jeder andere Knopf, aber ohne Nachbarn und mit einem Rahmen bei
+             8 % Deckkraft las er sich als Beschriftung — mehrfach als "gibt
+             es nicht" gemeldet. Hier steht er bei den uebrigen
+             Chart-Bedienelementen, wie im Market Replay auch. */
+          '<button class="el-btn" onclick="EdgeLab.rpInd()" title="Indicators (EMA, RSI, Bollinger…)">ƒx Indicators'+
+            (window.ApexIndicatorUI && window.ApexIndicatorUI.count() ? ' ('+window.ApexIndicatorUI.count()+')' : '')+'</button>'+
           /* Die Werkstatt: derselbe Aufbau wie im Market Replay — Chart gross,
              Werkzeuge links, Panels angedockt, nichts scrollt. Bewusst ein
              Knopf und nicht der Standard: diesen Reiter blaettert man auch
@@ -30392,10 +30421,6 @@ function goToAuthPro(screen) {
       /* Same drawing toolbar as Market Replay — one implementation, so the
          favourites and the tools are identical on both screens. */
       '<div id="rpTools"></div>'+
-      /* Same indicator picker as Market Replay too, and the same stored
-         choice — switch on an EMA in one place and it is on in both. */
-      '<div style="margin-bottom:8px"><button class="el-btn" onclick="EdgeLab.rpInd()">ƒx Indicators'+
-        (window.ApexIndicatorUI && window.ApexIndicatorUI.count() ? ' ('+window.ApexIndicatorUI.count()+')' : '')+'</button></div>'+
       '<div id="rpIndPanel" style="display:none"></div>'+
       '<div class="el-rpgrid">'+
         '<div>'+
@@ -30621,6 +30646,7 @@ function goToAuthPro(screen) {
       top: [document.getElementById('rpTfBar')].filter(Boolean),
       topRight: ctrlRow ? [ctrlRow.querySelector('div:last-child')].filter(Boolean) : [],
       rail: [document.getElementById('rpTools')].filter(Boolean),
+      panels: [document.getElementById('rpIndPanel')].filter(Boolean),
       dock: [grid.querySelector('.el-rprail')].filter(Boolean),
       bottom: [grid.querySelector('.el-rptransport') || (chart.parentElement && chart.parentElement.lastElementChild)].filter(function(n){ return n && n!==chart && n!==htf; }),
       onExit: function(){ window.ApexWorkspace.unmount(); }
@@ -45715,6 +45741,8 @@ self.addEventListener('message', async (ev) => {
                  document.getElementById('arpSave')].filter(Boolean),
       exit: document.getElementById('arpExit'),
       rail: [toolGroup, swatches, editGroup].filter(Boolean),
+      panels: [document.getElementById('arpInd'),
+               document.getElementById('arpStyle')].filter(Boolean),
       dock: dockNodes,
       bottom: [body.querySelector('.arp-bar'), body.querySelector('.arp-jump')].filter(Boolean),
       onExit: function () {
@@ -62137,6 +62165,22 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var legend = el('div', 'aw-legend');
     stage.appendChild(legend);
 
+    /* Ausklappbare Felder (Indikatoren, Darstellung). Sie MUESSEN mit in die
+       Werkstatt: ihre Knoepfe sitzen in der Kopfleiste, die Felder selbst
+       blieben aber in der Karte darunter — sie gingen auf, lagen jedoch
+       hinter dem Chart-Canvas der Werkstatt. Der Klick tat also etwas,
+       sichtbar war nichts. Ihre eigene display-Steuerung bleibt unangetastet;
+       die Klasse regelt nur Lage und Aussehen. */
+    (opts.panels || []).forEach(function (n) {
+      if (!n) return;
+      take(n, stage);
+      /* Attribut, nicht Klasse: ApexChartStyle.mount() setzt beim ersten
+         Oeffnen `host.className = 'acs-panel'` und wischt damit jede Klasse
+         weg, die wir gesetzt haben. Das Feld stand dann wieder im Fluss
+         statt ueber dem Chart. Ein Attribut fasst className nicht an. */
+      n.setAttribute('data-aw-panel', '');
+    });
+
     /* Rechtes Dock: Ticket, Konto, Positionen, geschlossene Trades. */
     (opts.dock || []).forEach(function (node) { take(node, dock); });
     if (!dock.children.length) root.classList.add('dock-off');
@@ -62175,9 +62219,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var o = W.opts;
     if (o.chart) o.chart.classList.remove('aw-chart-slot');
     if (o.stageTop) o.stageTop.classList.remove('aw-stage-top');
+    (o.panels || []).forEach(function (n) { if (n) n.removeAttribute('data-aw-panel'); });
     [].concat(o.top || [], o.topRight || [], o.exit ? [o.exit] : [],
               o.rail || [], o.stageTop ? [o.stageTop] : [], [o.chart],
-              o.dock || [], o.bottom || [])
+              o.panels || [], o.dock || [], o.bottom || [])
       .forEach(giveBack);
 
     if (W.root.parentNode) W.root.parentNode.removeChild(W.root);
