@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evidence Trading — System Status</title>
+<link rel="canonical" href="https://evidencetrading.com/status.html">
+<meta name="description" content="Live availability of the Evidence Trading API, sync pipeline and payment services.">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{
+    --bg:#0b0d10; --surface:#12151a; --rim:#232830;
+    --ink:#eef1f5; --ink2:#98a1ad; --ink3:#5f6773;
+    --ok:#2fbf71; --warn:#e0a72c; --down:#e0503f; --gold:#c9a227;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f6f7f9; --surface:#fff; --rim:#e3e6ea;
+           --ink:#12151a; --ink2:#5c6570; --ink3:#8d96a1; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 20px 72px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+  .mark{width:30px;height:30px;border-radius:7px;display:block;flex:none}
+  header b{font-size:16px;font-weight:700}
+  header span{color:var(--ink3);font-size:13px}
+
+  .overall{background:var(--surface);border:1px solid var(--rim);border-radius:14px;
+           padding:22px 24px;margin-bottom:22px;display:flex;align-items:center;gap:14px}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 4px rgba(47,191,113,.14)}
+  .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn);box-shadow:0 0 0 4px rgba(224,167,44,.14)}
+  .dot.down{background:var(--down);box-shadow:0 0 0 4px rgba(224,80,63,.14)}
+  .dot.pend{background:var(--ink3);box-shadow:none}
+  .overall h1{margin:0;font-size:19px;font-weight:700}
+  .overall p{margin:2px 0 0;color:var(--ink2);font-size:13px}
+
+  ul.svc{list-style:none;margin:0;padding:0;background:var(--surface);
+         border:1px solid var(--rim);border-radius:14px;overflow:hidden}
+  ul.svc li{display:flex;align-items:center;gap:12px;padding:15px 20px;border-top:1px solid var(--rim)}
+  ul.svc li:first-child{border-top:0}
+  .svc-name{flex:1;min-width:0}
+  .svc-name b{display:block;font-size:14px;font-weight:600}
+  .svc-name small{color:var(--ink3);font-size:12px}
+  .svc-state{font-size:12.5px;font-weight:600;text-align:right;white-space:nowrap}
+  .svc-state .ms{display:block;color:var(--ink3);font-weight:400;font-size:11.5px}
+  .s-ok{color:var(--ok)} .s-warn{color:var(--warn)} .s-down{color:var(--down)} .s-pend{color:var(--ink3)}
+
+  .note{margin-top:22px;color:var(--ink3);font-size:12.5px;line-height:1.7}
+  .note a{color:var(--ink2)}
+  footer{margin-top:30px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+         color:var(--ink3);font-size:12px}
+  button{background:var(--surface);border:1px solid var(--rim);color:var(--ink2);
+         border-radius:8px;padding:7px 14px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  button:hover{border-color:var(--gold);color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <svg class="mark" viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg>
+    <div>
+      <b>Evidence Trading</b><br>
+      <span>System Status</span>
+    </div>
+  </header>
+
+  <div class="overall">
+    <div class="dot pend" id="overallDot"></div>
+    <div>
+      <h1 id="overallText">Checking services…</h1>
+      <p id="overallSub">Probing every endpoint directly from your browser.</p>
+    </div>
+  </div>
+
+  <ul class="svc" id="services"></ul>
+
+  <p class="note">
+    Each row is measured live from <em>your</em> browser when this page loads — this is not a
+    cached dashboard, so what you see is what your own connection sees. Endpoints are probed
+    continuously from outside as well; incidents are posted in-app under
+    <b>Social&nbsp;→&nbsp;News</b>.
+    <br><br>
+    A service marked <span class="s-warn">Degraded</span> is reachable but reporting that it is
+    missing configuration. <span class="s-down">Down</span> means it did not answer at all.
+    Your journal keeps working offline in either case — trades are stored on your device and
+    sync once the connection is back.
+  </p>
+
+  <footer>
+    <span id="stamp">—</span>
+    <button onclick="runChecks()">Re-check now</button>
+  </footer>
+</div>
+
+<script>
+/* ────────────────────────────────────────────────────────────────
+   Every service gets a plain unauthenticated /health endpoint that
+   answers { ok, service, configured, ts }. The probe deliberately
+   carries no credentials: a status page that needs a login is not a
+   status page, and an endpoint that only works when signed in tells
+   you nothing about whether signed-out users can reach it.
+   ──────────────────────────────────────────────────────────────── */
+var SERVICES = [
+  { name: 'Web app',            hint: 'evidencetrading.com',        url: 'https://evidencetrading.com/manifest.webmanifest', mode: 'reachable' },
+  { name: 'Public REST API',    hint: 'v1 — trades, stats, days',    url: 'https://apexapi.4kjyyyftv6.workers.dev/health' },
+  { name: 'Broker ingest',      hint: 'MT4/MT5, ATAS, cTrader sync', url: 'https://apex-ingest.4kjyyyftv6.workers.dev/health' },
+  { name: 'Exchange sync',      hint: 'Binance, Bybit, IBKR Flex',    url: 'https://exchangesync.4kjyyyftv6.workers.dev/health' },
+  { name: 'Market data',        hint: 'candles for chart & replay',  url: 'https://candles-worker.4kjyyyftv6.workers.dev/health' },
+  { name: 'Historical data',    hint: 'Dukascopy tick & M1',         url: 'https://dukascopy-worker.4kjyyyftv6.workers.dev/health' },
+  { name: 'AI coach',           hint: 'trade reviews & auto-tagging',url: 'https://spring-fire-06a2.4kjyyyftv6.workers.dev/health' },
+  { name: 'Economic calendar',  hint: 'news events on the chart',    url: 'https://econal.4kjyyyftv6.workers.dev/health' },
+  { name: 'Payments',           hint: 'checkout & subscriptions',    url: 'https://apex-checkout.4kjyyyftv6.workers.dev/health' },
+  { name: 'Billing webhook',    hint: 'Stripe → account upgrades',   url: 'https://apex-stripe-webhook.4kjyyyftv6.workers.dev/health' },
+  { name: 'Authentication',     hint: 'Firebase sign-in',            url: 'https://identitytoolkit.googleapis.com/v1/projects', mode: 'reachable' }
+];
+
+var TIMEOUT_MS = 8000;
+
+function el(tag, cls, html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+
+function render(states){
+  var list = document.getElementById('services');
+  list.innerHTML = '';
+  SERVICES.forEach(function(s, i){
+    var st = states[i] || { state:'pend', label:'Checking…' };
+    var li = el('li');
+    li.appendChild(el('div', 'dot ' + st.state));
+    var n = el('div','svc-name','<b></b><small></small>');
+    n.querySelector('b').textContent = s.name;
+    n.querySelector('small').textContent = s.hint;
+    li.appendChild(n);
+    li.appendChild(el('div','svc-state s-'+st.state,
+      st.label + (st.ms != null ? '<span class="ms">' + st.ms + ' ms</span>' : '')));
+    list.appendChild(li);
+  });
+
+  var known = states.filter(function(s){ return s && s.state !== 'pend'; });
+  var down  = known.filter(function(s){ return s.state === 'down'; }).length;
+  var warn  = known.filter(function(s){ return s.state === 'warn'; }).length;
+
+  var dot = document.getElementById('overallDot'),
+      txt = document.getElementById('overallText'),
+      sub = document.getElementById('overallSub');
+
+  if (known.length < SERVICES.length) {
+    dot.className = 'dot pend'; txt.textContent = 'Checking services…';
+    sub.textContent = 'Probing every endpoint directly from your browser.';
+  } else if (down) {
+    dot.className = 'dot down';
+    txt.textContent = down === 1 ? 'One service is down' : down + ' services are down';
+    sub.textContent = 'Your journal still works offline and syncs once the service is back.';
+  } else if (warn) {
+    dot.className = 'dot warn'; txt.textContent = 'Partially degraded';
+    sub.textContent = warn + ' service' + (warn>1?'s are':' is') + ' reachable but not fully configured.';
+  } else {
+    dot.className = 'dot ok'; txt.textContent = 'All systems operational';
+    sub.textContent = 'Every service answered normally.';
+  }
+}
+
+function probe(svc){
+  var t0 = performance.now();
+  var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, TIMEOUT_MS);
+
+  /* Origins we do not control cannot send us CORS headers, so those are
+     probed no-cors: we learn "the network reached it", which is exactly
+     what "reachable" claims and nothing more. */
+  var opts = { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined };
+  if (svc.mode === 'reachable') opts.mode = 'no-cors';
+
+  return fetch(svc.url, opts).then(function(res){
+    clearTimeout(timer);
+    var ms = Math.round(performance.now() - t0);
+
+    if (svc.mode === 'reachable') return { state:'ok', label:'Reachable', ms:ms };
+    if (!res.ok) return { state: res.status === 503 ? 'warn' : 'down',
+                          label: res.status === 503 ? 'Degraded' : 'Error ' + res.status, ms:ms };
+
+    return res.json().then(function(j){
+      if (j && j.ok) return { state:'ok', label:'Operational', ms:ms };
+      return { state:'warn', label:'Degraded', ms:ms };
+    }, function(){ return { state:'ok', label:'Operational', ms:ms }; });
+  }).catch(function(e){
+    clearTimeout(timer);
+    return { state:'down',
+             label: (e && e.name === 'AbortError') ? 'Timed out' : 'Unreachable',
+             ms: null };
+  });
+}
+
+function runChecks(){
+  var states = new Array(SERVICES.length);
+  render(states);
+  SERVICES.forEach(function(svc, i){
+    probe(svc).then(function(st){ states[i] = st; render(states); });
+  });
+  document.getElementById('stamp').textContent =
+    'Last checked ' + new Date().toLocaleString();
+}
+
+runChecks();
+setInterval(runChecks, 60000);
+</script>
+</body>
+</html>

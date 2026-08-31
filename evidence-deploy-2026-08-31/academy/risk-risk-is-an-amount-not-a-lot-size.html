@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risk is an amount, not a lot size | Risk and position size | Evidence Trading</title>
+<meta name="description" content="Ask most traders what they risk on a trade and they answer in lots or contracts. That is not a risk, it is a quantity.">
+<link rel="canonical" href="https://evidencetrading.com/academy/risk-risk-is-an-amount-not-a-lot-size.html">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/academy/risk-risk-is-an-amount-not-a-lot-size.html">
+<meta property="og:title" content="Risk is an amount, not a lot size | Risk and position size | Evidence Trading">
+<meta property="og:description" content="Ask most traders what they risk on a trade and they answer in lots or contracts. That is not a risk, it is a quantity.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://evidencetrading.com/favicon.ico" sizes="any">
+<style>:root{--bg:#080a0e;--layer:#0e1116;--rim:#1e232c;--ink:#e8eaee;--ink2:#b8bec9;--ink3:#7c8492;
+      --gold:#c9a84c;--gold-line:rgba(201,168,76,.35);--profit:#3ecf8e;--loss:#f0636a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);
+     font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+     -webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px}
+header.site{display:flex;align-items:center;justify-content:space-between;gap:16px;
+     padding:18px 20px;max-width:1100px;margin:0 auto;border-bottom:1px solid var(--rim)}
+header.site .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.14em;
+     font-size:13px;color:var(--ink);text-transform:uppercase}
+header.site .brand span{color:var(--gold)}
+/* Dasselbe Markenzeichen wie in der App und auf den uebrigen Seiten. Inline,
+   weil diese Seiten eigenstaendig sind und den Sprite der App nicht sehen. */
+header.site .brand svg{width:26px;height:26px;border-radius:7px;display:block;flex:none}
+header.site nav a{font-size:13px;margin-left:18px;color:var(--ink3)}
+header.site nav a:hover{color:var(--ink)}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+h1{font-size:clamp(26px,4.4vw,40px);line-height:1.18;color:var(--ink);margin:12px 0 10px;letter-spacing:-.01em}
+h2{font-size:20px;color:var(--ink);margin:36px 0 10px}
+.lede{font-size:17px;color:var(--ink3);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--ink3);margin:14px 0 30px;padding-bottom:20px;border-bottom:1px solid var(--rim)}
+.pill{display:inline-block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+      color:var(--gold);border:1px solid var(--gold-line);border-radius:999px;padding:3px 10px;margin-right:8px}
+article p{margin:0 0 18px}
+.box{border:1px solid var(--rim);border-radius:14px;padding:18px 20px;margin:26px 0;background:var(--layer)}
+.box h3{margin:0 0 10px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.box.warn h3{color:var(--loss)}
+.box ul{margin:0;padding-left:20px}
+.box li{margin:6px 0}
+.cta{border:1px solid var(--gold-line);background:rgba(201,168,76,.05);border-radius:14px;padding:20px 22px;margin:34px 0 10px}
+.cta h3{margin:0 0 8px;font-size:16px;color:var(--ink)}
+.cta p{margin:0 0 14px;font-size:14px;color:var(--ink3)}
+.btn{display:inline-block;background:var(--gold);color:#0b0c0f;font-weight:700;font-size:14px;
+     border-radius:10px;padding:11px 20px;text-decoration:none}
+.btn:hover{text-decoration:none;opacity:.9}
+.qa{border-top:1px solid var(--rim);padding:16px 0}
+.qa .q{color:var(--ink);font-weight:600;margin-bottom:6px}
+.qa .a{font-size:14px}
+.qa .a b{color:var(--profit)}
+nav.chapters{margin:0;padding:0;list-style:none}
+.chap{display:flex;gap:14px;padding:15px 0;border-top:1px solid var(--rim);align-items:baseline}
+.chap .n{color:var(--ink3);font-size:13px;min-width:22px}
+.chap .t{color:var(--ink);font-weight:600}
+.chap .m{font-size:12.5px;color:var(--ink3)}
+.course-card{display:block;border:1px solid var(--rim);border-radius:15px;padding:19px 21px;margin:14px 0;background:var(--layer)}
+.course-card:hover{border-color:var(--gold-line);text-decoration:none}
+.course-card .t{color:var(--ink);font-weight:700;font-size:17px;margin:6px 0 6px}
+.course-card .d{font-size:14px;color:var(--ink3)}
+.updown{display:flex;justify-content:space-between;gap:16px;margin-top:40px;padding-top:20px;border-top:1px solid var(--rim);font-size:14px}
+footer.site{border-top:1px solid var(--rim);margin-top:60px;padding:24px 20px;font-size:12.5px;color:var(--ink3)}
+footer.site .in{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media(max-width:520px){header.site{flex-direction:column;align-items:flex-start;gap:8px}header.site nav a{margin:0 16px 0 0}}</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"Risk is an amount, not a lot size","description":"Ask most traders what they risk on a trade and they answer in lots or contracts. That is not a risk, it is a quantity.","articleSection":"Risk and position size","inLanguage":"en","isPartOf":{"@type":"Course","name":"Risk and position size","description":"The part of trading that is arithmetic rather than opinion — and the only part you control completely.","provider":{"@type":"Organization","name":"Evidence Trading","url":"https://evidencetrading.com/"}},"publisher":{"@type":"Organization","name":"Evidence Trading","url":"https://evidencetrading.com/"},"mainEntityOfPage":"https://evidencetrading.com/academy/risk-risk-is-an-amount-not-a-lot-size.html"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Your idea invalidates 40 pips away instead of the usual 20. What should change?","acceptedAnswer":{"@type":"Answer","text":"Halve the position size — The stop belongs to the idea. Holding risk constant while the distance doubles means the size halves. Tightening the stop to protect a size is choosing the level for the wrong reason."}},{"@type":"Question","name":"Two traders both buy one lot of the same instrument. Can their risk differ?","acceptedAnswer":{"@type":"Answer","text":"Yes, if their stops are at different distances — Size is one of three factors. With the same instrument and size, the stop distance alone decides the amount at risk."}},{"@type":"Question","name":"Why is it worth recording risk per trade rather than just the size?","acceptedAnswer":{"@type":"Answer","text":"So you can check whether your losses are consistent, which size alone cannot tell you — Consistent loss size is evidence of control. A journal holding only lots cannot answer the question at all."}}]}]}</script>
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="https://evidencetrading.com/"><svg viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg><span class="brand-t">Evidence <span>Trading</span></span></a>
+  <nav>
+    <a href="/academy/">Academy</a>
+    <a href="https://evidencetrading.com/">The app</a>
+  </nav>
+</header>
+<div class="wrap">
+<article>
+  <div class="eyebrow">Risk and position size · Chapter 1 of 6</div>
+  <h1>Risk is an amount, not a lot size</h1>
+  <div class="meta"><span class="pill">Foundation</span>6 min read · part of
+    <a href="/academy/risk.html">Risk and position size</a></div>
+  <p>Ask most traders what they risk on a trade and they answer in lots or contracts. That is not a risk, it is a quantity. Two people can both trade one lot and one of them is risking twenty times more than the other, because risk is the distance to your stop multiplied by what each unit of that distance costs you.</p>
+  <p>Written out: risk = stop distance × value per unit × size. Only the last of those three is yours to set freely. The stop distance belongs to the trade idea, and the value per unit belongs to the instrument. So the sequence has to be: find the level the idea stops being valid, work out what that distance costs at one unit, then choose the size that turns it into the amount you are willing to lose.</p>
+  <p>Doing it the other way round — picking a size first and then hunting for a stop that fits it — is the single most common way accounts die, and it does not feel reckless while it is happening. It feels like discipline, because you are keeping your size constant. What you are actually keeping constant is the one number that was supposed to absorb the variation.</p>
+  <p>The consequence is that a wide stop is not more dangerous than a tight one. It is a smaller position. A trader who says &quot;I do not use wide stops because they risk too much&quot; has confused the stop with the size, and will keep getting stopped out of correct ideas by a level chosen to fit a position rather than a chart.</p>
+  <p>This is also why risk should be recorded per trade rather than assumed. Two trades at the same size on the same instrument can carry different risk simply because one had a tighter invalidation. If your journal only holds the lot size, you cannot later ask whether your losses are consistent — and consistency of loss is a far better sign of control than any win rate.</p>
+  <div class="box"><h3>What to take away</h3><ul><li>Risk = stop distance × value per unit × size. Only size is freely yours.</li><li>Choose the stop from the idea, then let size follow. Never the reverse.</li><li>A wide stop is not more risk — it is a smaller position.</li></ul></div>
+  <div class="box warn"><h3>Where it goes wrong</h3><ul><li>Trading a constant lot size across instruments with very different unit values.</li><li>Moving the stop closer so a preferred size &quot;fits&quot; the risk budget.</li><li>Recording only the size, so risk per trade can never be reviewed.</li></ul></div>
+  <div class="cta">
+  <h3>This chapter, measured against your own trades</h3>
+  <p>In the app the same chapter ends in your figures rather than an example: how often <em>you</em> did the thing
+  it describes, over your last ninety days. You pick one change to make, and Evidence checks afterwards whether it
+  actually changed — from your journal, arithmetic, no opinion involved. Questions you get wrong come back a week
+  later and again a month after that.</p>
+  <a class="btn" href="https://evidencetrading.com/">Open the free plan →</a>
+</div>
+  <h2>Check that it stuck</h2>
+  <p style="font-size:14px;color:var(--ink3)">Answers shown — in the app these are asked before you see them, and
+  the ones you get wrong come back after a week.</p>
+  <div class="qa"><div class="q">Your idea invalidates 40 pips away instead of the usual 20. What should change?</div>
+    <div class="a"><b>Halve the position size</b> — The stop belongs to the idea. Holding risk constant while the distance doubles means the size halves. Tightening the stop to protect a size is choosing the level for the wrong reason.</div></div>
+  <div class="qa"><div class="q">Two traders both buy one lot of the same instrument. Can their risk differ?</div>
+    <div class="a"><b>Yes, if their stops are at different distances</b> — Size is one of three factors. With the same instrument and size, the stop distance alone decides the amount at risk.</div></div>
+  <div class="qa"><div class="q">Why is it worth recording risk per trade rather than just the size?</div>
+    <div class="a"><b>So you can check whether your losses are consistent, which size alone cannot tell you</b> — Consistent loss size is evidence of control. A journal holding only lots cannot answer the question at all.</div></div>
+  <div class="updown">
+    <span><a href="/academy/risk.html">← All chapters</a></span>
+    <span><a href="/academy/risk-sizing-backwards-from-the-loss-you-accept.html">Sizing backwards from the loss you accept →</a></span>
+  </div>
+</article>
+</div>
+<footer class="site"><div class="in">
+  <span>© Evidence Trading — a trading journal that fills itself.</span>
+  <span><a href="https://evidencetrading.com/">evidencetrading.com</a></span>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telling a broken edge from a bad month | Reading an edge | Evidence Trading</title>
+<meta name="description" content="Every edge eventually stops working, and almost every edge occasionally looks like it has when it has not.">
+<link rel="canonical" href="https://evidencetrading.com/academy/edge-telling-a-broken-edge-from-a-bad-month.html">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/academy/edge-telling-a-broken-edge-from-a-bad-month.html">
+<meta property="og:title" content="Telling a broken edge from a bad month | Reading an edge | Evidence Trading">
+<meta property="og:description" content="Every edge eventually stops working, and almost every edge occasionally looks like it has when it has not.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://evidencetrading.com/favicon.ico" sizes="any">
+<style>:root{--bg:#080a0e;--layer:#0e1116;--rim:#1e232c;--ink:#e8eaee;--ink2:#b8bec9;--ink3:#7c8492;
+      --gold:#c9a84c;--gold-line:rgba(201,168,76,.35);--profit:#3ecf8e;--loss:#f0636a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);
+     font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+     -webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px}
+header.site{display:flex;align-items:center;justify-content:space-between;gap:16px;
+     padding:18px 20px;max-width:1100px;margin:0 auto;border-bottom:1px solid var(--rim)}
+header.site .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.14em;
+     font-size:13px;color:var(--ink);text-transform:uppercase}
+header.site .brand span{color:var(--gold)}
+/* Dasselbe Markenzeichen wie in der App und auf den uebrigen Seiten. Inline,
+   weil diese Seiten eigenstaendig sind und den Sprite der App nicht sehen. */
+header.site .brand svg{width:26px;height:26px;border-radius:7px;display:block;flex:none}
+header.site nav a{font-size:13px;margin-left:18px;color:var(--ink3)}
+header.site nav a:hover{color:var(--ink)}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+h1{font-size:clamp(26px,4.4vw,40px);line-height:1.18;color:var(--ink);margin:12px 0 10px;letter-spacing:-.01em}
+h2{font-size:20px;color:var(--ink);margin:36px 0 10px}
+.lede{font-size:17px;color:var(--ink3);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--ink3);margin:14px 0 30px;padding-bottom:20px;border-bottom:1px solid var(--rim)}
+.pill{display:inline-block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+      color:var(--gold);border:1px solid var(--gold-line);border-radius:999px;padding:3px 10px;margin-right:8px}
+article p{margin:0 0 18px}
+.box{border:1px solid var(--rim);border-radius:14px;padding:18px 20px;margin:26px 0;background:var(--layer)}
+.box h3{margin:0 0 10px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.box.warn h3{color:var(--loss)}
+.box ul{margin:0;padding-left:20px}
+.box li{margin:6px 0}
+.cta{border:1px solid var(--gold-line);background:rgba(201,168,76,.05);border-radius:14px;padding:20px 22px;margin:34px 0 10px}
+.cta h3{margin:0 0 8px;font-size:16px;color:var(--ink)}
+.cta p{margin:0 0 14px;font-size:14px;color:var(--ink3)}
+.btn{display:inline-block;background:var(--gold);color:#0b0c0f;font-weight:700;font-size:14px;
+     border-radius:10px;padding:11px 20px;text-decoration:none}
+.btn:hover{text-decoration:none;opacity:.9}
+.qa{border-top:1px solid var(--rim);padding:16px 0}
+.qa .q{color:var(--ink);font-weight:600;margin-bottom:6px}
+.qa .a{font-size:14px}
+.qa .a b{color:var(--profit)}
+nav.chapters{margin:0;padding:0;list-style:none}
+.chap{display:flex;gap:14px;padding:15px 0;border-top:1px solid var(--rim);align-items:baseline}
+.chap .n{color:var(--ink3);font-size:13px;min-width:22px}
+.chap .t{color:var(--ink);font-weight:600}
+.chap .m{font-size:12.5px;color:var(--ink3)}
+.course-card{display:block;border:1px solid var(--rim);border-radius:15px;padding:19px 21px;margin:14px 0;background:var(--layer)}
+.course-card:hover{border-color:var(--gold-line);text-decoration:none}
+.course-card .t{color:var(--ink);font-weight:700;font-size:17px;margin:6px 0 6px}
+.course-card .d{font-size:14px;color:var(--ink3)}
+.updown{display:flex;justify-content:space-between;gap:16px;margin-top:40px;padding-top:20px;border-top:1px solid var(--rim);font-size:14px}
+footer.site{border-top:1px solid var(--rim);margin-top:60px;padding:24px 20px;font-size:12.5px;color:var(--ink3)}
+footer.site .in{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media(max-width:520px){header.site{flex-direction:column;align-items:flex-start;gap:8px}header.site nav a{margin:0 16px 0 0}}</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"Telling a broken edge from a bad month","description":"Every edge eventually stops working, and almost every edge occasionally looks like it has when it has not.","articleSection":"Reading an edge","inLanguage":"en","isPartOf":{"@type":"Course","name":"Reading an edge","description":"What your numbers can and cannot tell you — and how many trades it takes before any of them mean anything.","provider":{"@type":"Organization","name":"Evidence Trading","url":"https://evidencetrading.com/"}},"publisher":{"@type":"Organization","name":"Evidence Trading","url":"https://evidencetrading.com/"},"mainEntityOfPage":"https://evidencetrading.com/academy/edge-telling-a-broken-edge-from-a-bad-month.html"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What should you check first when a method stops making money?","acceptedAnswer":{"@type":"Answer","text":"Whether you actually followed the rules — Far more edges are broken by the trader than by the market, and it is the cheapest thing to check."}},{"@type":"Question","name":"A real regime change most often shows up first as:","acceptedAnswer":{"@type":"Answer","text":"Fewer signals, or the same signals travelling much less far — The mechanics move before the money does. P&L is the noisiest and slowest indicator of the three."}},{"@type":"Question","name":"Why is changing the method and the size at the same time a problem?","acceptedAnswer":{"@type":"Answer","text":"Neither change can then be evaluated — Two simultaneous changes make the result uninterpretable — you cannot attribute the outcome to either."}}]}]}</script>
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="https://evidencetrading.com/"><svg viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg><span class="brand-t">Evidence <span>Trading</span></span></a>
+  <nav>
+    <a href="/academy/">Academy</a>
+    <a href="https://evidencetrading.com/">The app</a>
+  </nav>
+</header>
+<div class="wrap">
+<article>
+  <div class="eyebrow">Reading an edge · Chapter 6 of 6</div>
+  <h1>Telling a broken edge from a bad month</h1>
+  <div class="meta"><span class="pill">Core</span>7 min read · part of
+    <a href="/academy/edge.html">Reading an edge</a></div>
+  <p>Every edge eventually stops working, and almost every edge occasionally looks like it has when it has not. Distinguishing the two is genuinely hard, and there is no test that settles it — but there is a way to be wrong less often, and it starts by refusing to answer the question from the equity curve alone.</p>
+  <p>The equity curve is the last place a real change shows up and the first place noise shows up. A more useful set of questions sits underneath it. Has the win rate moved beyond its historical range, or only within it? Has the average win shrunk, the average loss grown, or both? Is the number of signals per month still normal? Did your own behaviour change — larger size, more trades, later entries — before the results did?</p>
+  <p>That last question catches the most common case by far. Far more edges are broken by the trader than by the market: the setup was tightened after a losing run, or loosened after a winning one, or the sizing crept up, or the trades were taken twenty minutes later than the rule specified. None of that appears as a strategy failure, and all of it is visible in a journal that recorded the plan alongside the trade.</p>
+  <p>When the market really has changed, it usually shows up in the mechanics rather than the money: the signal fires far less often, or fires as often but the distance it used to travel has collapsed. Volatility regimes do exactly this — a mean-reversion method that needs a certain daily range simply stops having anything to work with, and the honest description is &quot;the conditions are gone&quot;, not &quot;the edge is gone&quot;.</p>
+  <p>The practical procedure is unexciting and works. Before concluding anything, check that you followed the rules, check the sample is large enough to say anything at all, check whether the signal count and the average move changed, and only then look at the money. If the first three are unchanged and the money is not, you have a genuine result. If they changed, you have your explanation and it is not the market.</p>
+  <div class="box"><h3>What to take away</h3><ul><li>The equity curve is the last place a real change appears and the first place noise does.</li><li>Most broken edges were broken by the trader, and the journal shows it.</li><li>A real regime change usually shows in signal count or average move, not first in P&amp;L.</li></ul></div>
+  <div class="box warn"><h3>Where it goes wrong</h3><ul><li>Judging an edge from the curve without checking rule adherence first.</li><li>Concluding &quot;the edge is gone&quot; when the conditions it needs are simply absent.</li><li>Changing the method and the size at the same time, so neither can be evaluated.</li></ul></div>
+  <div class="cta">
+  <h3>This chapter, measured against your own trades</h3>
+  <p>In the app the same chapter ends in your figures rather than an example: how often <em>you</em> did the thing
+  it describes, over your last ninety days. You pick one change to make, and Evidence checks afterwards whether it
+  actually changed — from your journal, arithmetic, no opinion involved. Questions you get wrong come back a week
+  later and again a month after that.</p>
+  <a class="btn" href="https://evidencetrading.com/">Open the free plan →</a>
+</div>
+  <h2>Check that it stuck</h2>
+  <p style="font-size:14px;color:var(--ink3)">Answers shown — in the app these are asked before you see them, and
+  the ones you get wrong come back after a week.</p>
+  <div class="qa"><div class="q">What should you check first when a method stops making money?</div>
+    <div class="a"><b>Whether you actually followed the rules</b> — Far more edges are broken by the trader than by the market, and it is the cheapest thing to check.</div></div>
+  <div class="qa"><div class="q">A real regime change most often shows up first as:</div>
+    <div class="a"><b>Fewer signals, or the same signals travelling much less far</b> — The mechanics move before the money does. P&amp;L is the noisiest and slowest indicator of the three.</div></div>
+  <div class="qa"><div class="q">Why is changing the method and the size at the same time a problem?</div>
+    <div class="a"><b>Neither change can then be evaluated</b> — Two simultaneous changes make the result uninterpretable — you cannot attribute the outcome to either.</div></div>
+  <div class="updown">
+    <span><a href="/academy/edge-expectancy-per-setup-not-per-account.html">← Expectancy per setup, not per account</a></span>
+    <span></span>
+  </div>
+</article>
+</div>
+<footer class="site"><div class="in">
+  <span>© Evidence Trading — a trading journal that fills itself.</span>
+  <span><a href="https://evidencetrading.com/">evidencetrading.com</a></span>
+</div></footer>
+</body>
+</html>

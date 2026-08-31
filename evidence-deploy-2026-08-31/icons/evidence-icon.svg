@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="etGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F9E894"/>
+      <stop offset="0.42" stop-color="#E8C24A"/>
+      <stop offset="1" stop-color="#AE801A"/>
+    </linearGradient>
+    <radialGradient id="etShine" cx="0.5" cy="0.45" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.4" stop-color="#FFF8DE" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Der Reflex darf nur innerhalb der Balken leuchten, nicht drumherum -->
+    <clipPath id="etMono">
+      <rect x="98" y="112" width="287" height="84" rx="25"/>
+      <rect x="175" y="112" width="91" height="329" rx="25"/>
+      <rect x="175" y="231" width="189" height="77" rx="25"/>
+      <rect x="175" y="357" width="189" height="84" rx="25"/>
+    </clipPath>
+  </defs>
+  <rect width="512" height="512" rx="118" fill="#131313"/>
+  <rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/>
+  <g clip-path="url(#etMono)">
+    <rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etGold)"/>
+    <rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etGold)"/>
+    <rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etGold)"/>
+    <rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etGold)"/>
+    <circle cx="347" cy="147" r="77" fill="url(#etShine)"/>
+  </g>
+</svg>

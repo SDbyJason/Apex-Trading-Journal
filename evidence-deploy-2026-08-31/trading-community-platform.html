@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run Your Trading Community on Real Trade Data | Evidence Spaces</title>
+<meta name="description" content="For mentors running a Discord, Telegram or Skool trading group: a feed where posts carry the actual trades, a leaderboard that ranks process instead of profit, and a library for your playbooks and courses. Shipped, not a waitlist.">
+<link rel="canonical" href="https://evidencetrading.com/trading-community-platform.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/trading-community-platform.html">
+<meta property="og:title" content="Run Your Trading Community on Real Trade Data | Evidence Spaces">
+<meta property="og:description" content="The same group you already run, with the numbers attached — posts that carry real trades, a board that ranks process, and a library for your playbooks and courses.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400&family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080b;--panel:#0d0f13;--line:rgba(255,255,255,.09);--gold:#c9a84c;
+--gold-hi:#e8c96a;--ink:#f2efe9;--ink2:#c8c2b6;--mute:#8b8578;--pos:#3ecf8e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);
+font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:0 22px}
+header.nav{border-bottom:1px solid var(--line);position:sticky;top:0;
+background:rgba(7,8,11,.9);backdrop-filter:blur(10px);z-index:10}
+header.nav .wrap{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--ink);font-size:15px}
+.brand-mark{width:28px;height:28px;border-radius:8px;display:block;flex:none}
+.nav-cta{margin-left:auto;border:1px solid rgba(201,168,76,.4);border-radius:9px;
+padding:8px 16px;font-size:13.5px;font-weight:600}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3rem);line-height:1.12;
+letter-spacing:-.02em;color:var(--ink);margin:48px 0 14px;font-weight:800}
+h2{font-family:'Syne',sans-serif;font-size:clamp(1.35rem,3vw,1.75rem);color:var(--ink);
+margin:44px 0 12px;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.05rem;color:var(--ink);margin:28px 0 8px;font-weight:700}
+.lede{font-size:1.12rem;color:var(--ink2);margin-bottom:30px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.16em;
+text-transform:uppercase;color:var(--gold);margin-top:44px}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;
+background:rgba(255,255,255,.015)}
+.card.gold{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.05)}
+.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;margin:22px 0;font-size:14.5px;display:block;overflow-x:auto}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:700;font-size:13px}
+td.y{color:var(--pos);font-weight:700}td.n{color:var(--mute)}
+ul{padding-left:20px}li{margin-bottom:9px}
+code{font-family:'DM Mono',monospace;font-size:13.5px;background:rgba(255,255,255,.05);
+padding:2px 6px;border-radius:5px;color:var(--ink)}
+.cta{display:inline-block;background:linear-gradient(135deg,var(--gold-hi),var(--gold));
+color:#07080b;font-weight:800;padding:13px 26px;border-radius:11px;margin:8px 10px 8px 0;
+font-size:15px}
+.cta:hover{text-decoration:none;filter:brightness(1.06)}
+.cta.ghost{background:none;color:var(--gold);border:1px solid rgba(201,168,76,.4)}
+footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0 50px;
+font-size:13px;color:var(--mute)}
+footer a{color:var(--mute)}
+footer .links{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px}
+.related{display:grid;gap:10px;margin:18px 0}
+.related a{border:1px solid var(--line);border-radius:11px;padding:13px 15px;
+color:var(--ink);font-weight:600;font-size:14.5px}
+.related a:hover{border-color:rgba(201,168,76,.4);text-decoration:none}
+.related a span{display:block;color:var(--mute);font-weight:400;font-size:13px;margin-top:2px}
+.note{font-size:13.5px;color:var(--mute);border-left:2px solid var(--line);
+padding-left:14px;margin:20px 0}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="/"><svg class="brand-mark" viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg> Evidence Trading</a>
+  <a class="nav-cta" href="/">Open the app →</a>
+</div></header>
+
+<main class="wrap">
+<h1>Your trading community, on top of everyone's real trade data</h1>
+<p class="lede">If you run a trading group on Discord, Telegram or Skool, you already know the
+problem: nobody can see whether anyone is actually following the plan. Screenshots are curated,
+"what did you trade today?" gets answered by the three people having a good week, and the person
+quietly blowing up is invisible until they leave. Evidence Spaces is the same group, with the
+numbers attached.</p>
+
+<a class="cta" href="/?demo=1">See it running (no sign-up) →</a>
+<a class="cta ghost" href="/">Create a Space</a>
+
+<p class="note">This is shipped and running today — a Space is a live feature inside Evidence, not
+a waitlist. Voice rooms, moderation, feed and leaderboard all work now.</p>
+
+<h2>What a Space actually is</h2>
+<p>One container with your members in it, and four things inside:</p>
+
+<div class="card">
+<h3>Chat and voice</h3>
+<p>Text channels with images and stickers, plus <strong>voice rooms</strong> people can drop into.
+Owner, admin and moderator roles; timed mutes, warnings that auto-kick, bans with an appeals
+process, and an audit log of every moderator action. This part is the reason a community can
+actually live here rather than being a second place nobody opens.</p>
+</div>
+
+<div class="card">
+<h3>A feed where posts carry the trades</h3>
+<p>A member writes their recap and attaches the actual trades — symbol, direction, entry, stop,
+target, exit, planned R, the result. Not a screenshot. Anyone reading can press
+<strong>Replay</strong> on a trade and watch it play back candle by candle from before the entry,
+with the open P&amp;L ticking underneath. That answers "why did you sit through that?" in a way no
+image ever will.</p>
+</div>
+
+<div class="card">
+<h3>A board that ranks process, not profit</h3>
+<p>A P&amp;L leaderboard rewards whoever risked most — the exact behaviour a journal exists to
+catch. The default ranking is the <strong>Evidence Score</strong>, which is 85 % process: did they
+follow their own rules, was the risk consistent, did they protect what they were up. Sort by win
+rate, trade count or net pips if you want; profit is never the default and money figures are never
+published to a board at all.</p>
+<p>As the owner you also get the thing a ranking cannot tell you: who has not journalled in over a
+week, and whose process score is slipping. From the cards members published, and phrased as a
+prompt to ask rather than a verdict.</p>
+</div>
+
+<div class="card">
+<h3>A library you publish into</h3>
+<p>Share a <strong>playbook</strong> — your checklist and rules — and members get an editable copy
+in their own account. Publish a <strong>course</strong> and it appears in their Academy alongside
+the built-in ones, with the same chapter progress and the same spaced repetition: questions they
+got wrong come back after seven days, then after thirty.</p>
+</div>
+
+<h2>Nobody's journal is visible by default</h2>
+<p>This is the part most "shared journal" pitches skip, and it is the part that decides whether
+serious traders will join your group.</p>
+<ul>
+<li>A member's journal lives in a document <strong>only that member can read</strong>. Nothing in a
+Space changes that, and no owner permission grants access to it.</li>
+<li>Everything another member sees was <strong>copied out by its owner on purpose</strong>. A board
+card lists exactly which figures are shared, and unticking one means it is
+<strong>not written at all</strong> — not hidden behind a flag, not stored.</li>
+<li>A card can be taken down in one click, and it disappears from the board immediately.</li>
+<li>A trade attached to a post carries a fixed, small field list. Your notes, mistake tags,
+screenshots and voice notes stay in your journal unless you add them yourself.</li>
+</ul>
+<p>If you are a mentor, this is worth saying out loud when you invite people. "Your journal stays
+yours; you choose what the group sees" is a far easier ask than "connect your account".</p>
+
+<h2>If you already run a group somewhere</h2>
+<p>You do not have to move anyone. Most groups keep the chat where it is at first and use the Space
+for the parts a chat app cannot do — the feed with real trades attached, the process board, and the
+library. The voice rooms and moderation are there when you want the rest.</p>
+
+<table>
+<tr><th>What you have now</th><th>What a Space adds</th></tr>
+<tr><td>Discord / Telegram chat</td><td>The same chat, plus every post able to carry the actual
+trade and a replay of it</td></tr>
+<tr><td>Screenshots of results</td><td>Numbers that came out of a journal, with the fields the
+poster chose</td></tr>
+<tr><td>"Who is doing the work?" — no idea</td><td>A process board and a quiet-this-week list</td></tr>
+<tr><td>Course platform on the side</td><td>Courses inside the app the members already journal in,
+with progress and spaced repetition</td></tr>
+<tr><td>PDFs of your playbook</td><td>A playbook they copy into their own account and tick through
+at the ticket</td></tr>
+</table>
+
+<h2>What it costs</h2>
+<p>Members can join a Space and post on the free plan. Creating a Space is part of Pro, and so are
+the parts that read a member's own journal deeply — the Academy measurement, Edge Lab, the replay
+and the drills. There is a 7-day trial with no card.</p>
+
+<h2>Honest limits</h2>
+<ul>
+<li>A board only shows what members published. If nobody publishes a card, the board is empty —
+that is the design, not a bug.</li>
+<li>Course publishing is plain text with one chapter per block. It renders exactly like the
+built-in courses, but there is no rich editor and no video hosting.</li>
+<li>Replay from a feed post works on the instruments the free tick feed serves — FX, metals,
+indices, crypto. Futures, stocks and options are journalled and analysed in full but not replayed;
+that is a data-licensing wall and we say so here rather than let you find it after moving your
+group.</li>
+<li>Voice rooms are peer-to-peer and sized for a handful of people talking, not a 200-person stage.</li>
+</ul>
+
+<h2>Start one</h2>
+<p>Open Evidence, go to Social → Community, and create a Space. It takes about a minute, and you can
+have it public in the directory or invite-only with a code.</p>
+<a class="cta" href="/">Create a Space →</a>
+<a class="cta ghost" href="/?demo=1">Look around the demo first</a>
+
+<div class="related">
+  <a href="/academy/">The free Academy<span>27 chapters on risk, edge, psychology and backtesting — readable without an account</span></a>
+  <a href="/trading-journal-market-replay.html">Market replay<span>Trade any past day again, candle by candle, on real tick data</span></a>
+  <a href="/prop-firm-trading-journal.html">Prop firm journal<span>Per-account rules, cost book and a drawdown cockpit</span></a>
+</div>
+
+</main>
+
+<footer><div class="wrap">
+  <div class="links">
+    <a href="/">Home</a>
+    <a href="/?demo=1">Live demo</a>
+    <a href="/academy/">Academy</a>
+    <a href="/ctrader-trading-journal.html">cTrader journal</a>
+    <a href="/prop-firm-trading-journal.html">Prop firm journal</a>
+    <a href="/trading-journal-market-replay.html">Market replay</a>
+    <a href="/crypto-trading-journal.html">Crypto journal</a>
+  </div>
+  <div>© 2026 Evidence Trading · Journal, analytics and market replay for traders.
+  Evidence reads your trade history. It never places, changes or closes a trade.</div>
+</div></footer>
+</body>
+</html>

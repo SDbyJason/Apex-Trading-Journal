@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The costs everyone forgets | Backtesting without fooling yourself | Evidence Trading</title>
+<meta name="description" content="A backtest run at the mid price with no commission is not an optimistic estimate of a strategy.">
+<link rel="canonical" href="https://evidencetrading.com/academy/backtest-the-costs-everyone-forgets.html">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/academy/backtest-the-costs-everyone-forgets.html">
+<meta property="og:title" content="The costs everyone forgets | Backtesting without fooling yourself | Evidence Trading">
+<meta property="og:description" content="A backtest run at the mid price with no commission is not an optimistic estimate of a strategy.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://evidencetrading.com/favicon.ico" sizes="any">
+<style>:root{--bg:#080a0e;--layer:#0e1116;--rim:#1e232c;--ink:#e8eaee;--ink2:#b8bec9;--ink3:#7c8492;
+      --gold:#c9a84c;--gold-line:rgba(201,168,76,.35);--profit:#3ecf8e;--loss:#f0636a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);
+     font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+     -webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px}
+header.site{display:flex;align-items:center;justify-content:space-between;gap:16px;
+     padding:18px 20px;max-width:1100px;margin:0 auto;border-bottom:1px solid var(--rim)}
+header.site .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.14em;
+     font-size:13px;color:var(--ink);text-transform:uppercase}
+header.site .brand span{color:var(--gold)}
+/* Dasselbe Markenzeichen wie in der App und auf den uebrigen Seiten. Inline,
+   weil diese Seiten eigenstaendig sind und den Sprite der App nicht sehen. */
+header.site .brand svg{width:26px;height:26px;border-radius:7px;display:block;flex:none}
+header.site nav a{font-size:13px;margin-left:18px;color:var(--ink3)}
+header.site nav a:hover{color:var(--ink)}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+h1{font-size:clamp(26px,4.4vw,40px);line-height:1.18;color:var(--ink);margin:12px 0 10px;letter-spacing:-.01em}
+h2{font-size:20px;color:var(--ink);margin:36px 0 10px}
+.lede{font-size:17px;color:var(--ink3);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--ink3);margin:14px 0 30px;padding-bottom:20px;border-bottom:1px solid var(--rim)}
+.pill{display:inline-block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+      color:var(--gold);border:1px solid var(--gold-line);border-radius:999px;padding:3px 10px;margin-right:8px}
+article p{margin:0 0 18px}
+.box{border:1px solid var(--rim);border-radius:14px;padding:18px 20px;margin:26px 0;background:var(--layer)}
+.box h3{margin:0 0 10px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.box.warn h3{color:var(--loss)}
+.box ul{margin:0;padding-left:20px}
+.box li{margin:6px 0}
+.cta{border:1px solid var(--gold-line);background:rgba(201,168,76,.05);border-radius:14px;padding:20px 22px;margin:34px 0 10px}
+.cta h3{margin:0 0 8px;font-size:16px;color:var(--ink)}
+.cta p{margin:0 0 14px;font-size:14px;color:var(--ink3)}
+.btn{display:inline-block;background:var(--gold);color:#0b0c0f;font-weight:700;font-size:14px;
+     border-radius:10px;padding:11px 20px;text-decoration:none}
+.btn:hover{text-decoration:none;opacity:.9}
+.qa{border-top:1px solid var(--rim);padding:16px 0}
+.qa .q{color:var(--ink);font-weight:600;margin-bottom:6px}
+.qa .a{font-size:14px}
+.qa .a b{color:var(--profit)}
+nav.chapters{margin:0;padding:0;list-style:none}
+.chap{display:flex;gap:14px;padding:15px 0;border-top:1px solid var(--rim);align-items:baseline}
+.chap .n{color:var(--ink3);font-size:13px;min-width:22px}
+.chap .t{color:var(--ink);font-weight:600}
+.chap .m{font-size:12.5px;color:var(--ink3)}
+.course-card{display:block;border:1px solid var(--rim);border-radius:15px;padding:19px 21px;margin:14px 0;background:var(--layer)}
+.course-card:hover{border-color:var(--gold-line);text-decoration:none}
+.course-card .t{color:var(--ink);font-weight:700;font-size:17px;margin:6px 0 6px}
+.course-card .d{font-size:14px;color:var(--ink3)}
+.updown{display:flex;justify-content:space-between;gap:16px;margin-top:40px;padding-top:20px;border-top:1px solid var(--rim);font-size:14px}
+footer.site{border-top:1px solid var(--rim);margin-top:60px;padding:24px 20px;font-size:12.5px;color:var(--ink3)}
+footer.site .in{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media(max-width:520px){header.site{flex-direction:column;align-items:flex-start;gap:8px}header.site nav a{margin:0 16px 0 0}}</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"The costs everyone forgets","description":"A backtest run at the mid price with no commission is not an optimistic estimate of a strategy.","articleSection":"Backtesting without fooling yourself","inLanguage":"en","isPartOf":{"@type":"Course","name":"Backtesting without fooling yourself","description":"Every way a backtest lies, and the handful of habits that stop it.","provider":{"@type":"Organization","name":"Evidence Trading","url":"https://evidencetrading.com/"}},"publisher":{"@type":"Organization","name":"Evidence Trading","url":"https://evidencetrading.com/"},"mainEntityOfPage":"https://evidencetrading.com/academy/backtest-the-costs-everyone-forgets.html"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why is using an average spread systematically wrong for many strategies?","acceptedAnswer":{"@type":"Answer","text":"Spreads widen exactly when many strategies want to trade, so the error is one-directional — A strategy concentrating entries in the widest minutes pays more than average every time, so the bias does not cancel out."}},{"@type":"Question","name":"What is the asymmetry in limit-order fills that backtests miss?","acceptedAnswer":{"@type":"Answer","text":"The ones that touch and reverse fill; the ones that touch and run often do not — The backtest fills every touch, which quietly hands the strategy the good outcomes it would have missed."}},{"@type":"Question","name":"A strategy is profitable at your cost estimate and negative at 1.5× it. What should you conclude?","acceptedAnswer":{"@type":"Answer","text":"It is profitable only to within the error of your assumption, which is not a result — The margin is inside the uncertainty of an input. That is not an edge, it is a rounding artefact."}}]}]}</script>
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="https://evidencetrading.com/"><svg viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg><span class="brand-t">Evidence <span>Trading</span></span></a>
+  <nav>
+    <a href="/academy/">Academy</a>
+    <a href="https://evidencetrading.com/">The app</a>
+  </nav>
+</header>
+<div class="wrap">
+<article>
+  <div class="eyebrow">Backtesting without fooling yourself · Chapter 4 of 6</div>
+  <h1>The costs everyone forgets</h1>
+  <div class="meta"><span class="pill">Advanced</span>6 min read · part of
+    <a href="/academy/backtest.html">Backtesting without fooling yourself</a></div>
+  <p>A backtest run at the mid price with no commission is not an optimistic estimate of a strategy. It is a test of a different strategy — one that trades in a market that does not exist. And the gap between the two grows with frequency, so the methods that look best in a frictionless test are exactly the ones most damaged by reality.</p>
+  <p>The spread is the first cost and the easiest to get wrong, because it is not constant. It widens at the open, around news, in the last hour, and in thin instruments overnight — which is to say, precisely when a lot of strategies want to trade. Using an average spread on a strategy that concentrates its entries in the widest minutes of the day understates the cost systematically rather than randomly.</p>
+  <p>Slippage is the second, and it is asymmetric in a way that is easy to miss. Your stop is more likely to fill worse than requested than better, because stops cluster and get taken out in fast moves. Limit orders have the opposite problem: in the backtest they always fill when price touches, and in reality the ones that touch and reverse are exactly the ones that fill, while the ones that touch and run often do not.</p>
+  <p>Then the boring ones: commission per side, financing on positions held overnight, and currency conversion when the instrument settles in something other than your account currency. Individually small, and on a method taking several trades a day they are frequently the whole margin between profitable and not.</p>
+  <p>The test to apply is a sensitivity check rather than a precise figure. Run the backtest again with costs at, say, one and a half times your estimate. A strategy that survives that has some room; one that turns negative was never really profitable, it was profitable to within the error of your cost assumption — which is not the same thing at all.</p>
+  <div class="box"><h3>What to take away</h3><ul><li>A frictionless backtest tests a different strategy, and higher frequency widens the gap.</li><li>Spread widening correlates with when strategies want to trade — the error is systematic.</li><li>Test at 1.5× your cost estimate; surviving that is the meaningful result.</li></ul></div>
+  <div class="box warn"><h3>Where it goes wrong</h3><ul><li>Using a single average spread for a strategy that trades the open.</li><li>Assuming limit orders fill whenever price touches the level.</li><li>Ignoring overnight financing on a swing method.</li></ul></div>
+  <div class="cta">
+  <h3>This chapter, measured against your own trades</h3>
+  <p>In the app the same chapter ends in your figures rather than an example: how often <em>you</em> did the thing
+  it describes, over your last ninety days. You pick one change to make, and Evidence checks afterwards whether it
+  actually changed — from your journal, arithmetic, no opinion involved. Questions you get wrong come back a week
+  later and again a month after that.</p>
+  <a class="btn" href="https://evidencetrading.com/">Open the free plan →</a>
+</div>
+  <h2>Check that it stuck</h2>
+  <p style="font-size:14px;color:var(--ink3)">Answers shown — in the app these are asked before you see them, and
+  the ones you get wrong come back after a week.</p>
+  <div class="qa"><div class="q">Why is using an average spread systematically wrong for many strategies?</div>
+    <div class="a"><b>Spreads widen exactly when many strategies want to trade, so the error is one-directional</b> — A strategy concentrating entries in the widest minutes pays more than average every time, so the bias does not cancel out.</div></div>
+  <div class="qa"><div class="q">What is the asymmetry in limit-order fills that backtests miss?</div>
+    <div class="a"><b>The ones that touch and reverse fill; the ones that touch and run often do not</b> — The backtest fills every touch, which quietly hands the strategy the good outcomes it would have missed.</div></div>
+  <div class="qa"><div class="q">A strategy is profitable at your cost estimate and negative at 1.5× it. What should you conclude?</div>
+    <div class="a"><b>It is profitable only to within the error of your assumption, which is not a result</b> — The margin is inside the uncertainty of an input. That is not an edge, it is a rounding artefact.</div></div>
+  <div class="updown">
+    <span><a href="/academy/backtest-in-sample-out-of-sample-and-the-one-rule-about-it.html">← In-sample, out-of-sample, and the one rule about it</a></span>
+    <span><a href="/academy/backtest-monte-carlo-the-same-edge-a-different-path.html">Monte-Carlo: the same edge, a different path →</a></span>
+  </div>
+</article>
+</div>
+<footer class="site"><div class="in">
+  <span>© Evidence Trading — a trading journal that fills itself.</span>
+  <span><a href="https://evidencetrading.com/">evidencetrading.com</a></span>
+</div></footer>
+</body>
+</html>
