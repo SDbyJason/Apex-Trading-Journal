@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01m';
+  window.APEX_BUILD = '2026-09-01n';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -26598,6 +26598,7 @@ window.startFreeTrial = startFreeTrial;
         <div id="ctConnectedRow" class="ct-row">
           <select id="ctAccountSelect" class="ct-select"></select>
           <button class="ct-btn" id="ctBtnReloadAccounts" title="Ask cTrader for your trading accounts again">↻ Reload accounts</button>
+          <button class="ct-btn" id="ctBtnSpots" title="Fragt den Kursstrom deines Brokers ab — Geld/Brief in Echtzeit statt Kerzen mit zwei Minuten Rueckstand">⚡ Kursstrom testen</button>
           <button class="ct-btn primary" id="ctBtnSync">↻ Sync Now</button>
           <button class="ct-btn" id="ctBtnSync30">Last 30d</button>
           <button class="ct-btn" id="ctBtnSync180">Full History (180d)</button>
@@ -26626,6 +26627,60 @@ window.startFreeTrial = startFreeTrial;
     card.querySelector('#ctBtnLive').onclick       = () => ctStartOAuth('live');
     card.querySelector('#ctBtnReconnect').onclick  = () => ctStartOAuth(ctState.env || 'demo');
     card.querySelector('#ctBtnSync').onclick       = () => ctSyncNow();
+    /* Prueft den Spot-Abonnement-Pfad der Bruecke Ende zu Ende: abonnieren,
+       kurz warten, Kurse holen. Absichtlich ein eigener Knopf statt einer
+       automatischen Anbindung — solange nicht bewiesen ist, dass der Strom
+       laeuft, soll nichts im Chart davon abhaengen. */
+    var spotsBtn = card.querySelector('#ctBtnSpots');
+    if (spotsBtn) spotsBtn.onclick = async () => {
+      if (!ctState.accessToken || !ctState.accountId) {
+        showToast('Erst ein Konto verbinden'); return;
+      }
+      spotsBtn.disabled = true;
+      var alt = spotsBtn.textContent;
+      spotsBtn.textContent = 'Verbinde…';
+      try {
+        var start = await fetch(WORKER_URL + '/api/spots/start', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_token: ctState.accessToken,
+            refresh_token: ctState.refreshToken,
+            ctidTraderAccountId: ctState.accountId,
+            env: ctState.accountEnv || 'live',
+            symbols: ['XAUUSD', 'EURUSD']
+          })
+        }).then(r => r.json());
+        if (start.error) throw new Error(start.error);
+        spotsBtn.textContent = 'Warte auf Kurse…';
+        await new Promise(r => setTimeout(r, 2500));
+        var q = await fetch(WORKER_URL + '/api/spots?accountId=' + ctState.accountId +
+                            '&symbols=XAUUSD,EURUSD').then(r => r.json());
+        var namen = Object.keys(q.kurse || {});
+        if (!namen.length) {
+          await ApexDialog.alert(
+            'Verbindung steht, aber es kamen keine Kurse an.\n\n' +
+            'Symbole beim Broker bekannt: ' + (start.symboleBekannt || 0) + '\n' +
+            'Abonniert: ' + (start.abonniert || 0) + '\n' +
+            'Nicht gefunden: ' + ((start.nichtGefunden || []).join(', ') || '—') + '\n\n' +
+            'Steht unter „Nicht gefunden" etwas, schreibt dein Broker das Symbol anders.',
+            { title: 'Kursstrom' });
+        } else {
+          var z = namen.map(function (n) {
+            var k = q.kurse[n];
+            return n + ':  ' + k.bid + ' / ' + k.ask + '   (' + Math.round(k.alterMs / 1000) + ' s alt, roh ' + k.raw + ')';
+          }).join('\n');
+          await ApexDialog.alert('Kursstrom laeuft:\n\n' + z +
+            '\n\nStimmen die Zahlen mit deiner Handelsplattform ueberein? Falls sie um eine ' +
+            'Zehnerpotenz danebenliegen, ist der Skalierungsfaktor in der Bruecke anzupassen.',
+            { title: 'Kursstrom' });
+        }
+      } catch (e) {
+        await ApexDialog.alert('Fehlgeschlagen:\n\n' + (e && e.message ? e.message : String(e)),
+          { title: 'Kursstrom' });
+      }
+      spotsBtn.disabled = false; spotsBtn.textContent = alt;
+    };
+
     card.querySelector('#ctBtnReloadAccounts').onclick = async () => {
       try {
         await fetchAccounts();
