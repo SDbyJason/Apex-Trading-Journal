@@ -979,7 +979,9 @@ window.APEX_PRICES = (function () {
       back.innerHTML =
         '<div class="apxd" role="dialog" aria-modal="true">' +
           (opts.title ? '<h4>' + esc(opts.title) + '</h4>' : '') +
-          '<p>' + esc(message) + '</p>' +
+          /* opts.html: NUR fuer Markup, das wir selbst gebaut haben.
+             Alles, was von aussen kommt, laeuft weiter durch esc(). */
+          '<p>' + (opts.html ? message : esc(message)) + '</p>' +
           (isPrompt ? '<input type="text" value="' + esc(opts.value || '') + '">' : '') +
           '<div class="apxd-row">' +
             (kind === 'alert' ? '' :
@@ -1062,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-08-31c';
+  window.APEX_BUILD = '2026-09-01b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -2418,6 +2420,18 @@ nav {
 
 .nav-badge--alert { background: var(--loss); color: #fff; }
 .nav-badge--info  { background: var(--gold); color: var(--on-gold); }
+
+/* Rang-Marke fuer die ersten drei Plaetze. Ersetzt 🥇🥈🥉 — die rendern auf
+   jedem System anders und lassen sich nicht auf die Schriftfarbe abstimmen. */
+.rank-medal {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600;
+  color: var(--on-gold); background: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold-dim);
+}
+.rank-medal.r2 { background: #b9bcc4; color: #14161a; box-shadow: 0 0 0 2px rgba(185,188,196,0.18); }
+.rank-medal.r3 { background: #b07a4a; color: #1a1208; box-shadow: 0 0 0 2px rgba(176,122,74,0.18); }
 
 /* ── UI-Icons ───────────────────────────────────────────────
    Ein Icon ist ein Buchstabe: es nimmt die Schriftgröße seiner Umgebung an
@@ -6751,7 +6765,11 @@ body.aw-on #modeToggleBtn { display: none !important; }
 }
 /* Das Werkzeugmenue klappt zur Seite auf, nicht nach unten aus der Spalte. */
 .aw-rail #arpToolGroup { display: flex; flex-direction: column; gap: 3px; align-items: center; }
-.aw-rail .arp-tmenu { left: calc(100% + 6px) !important; top: 0 !important; right: auto !important; }
+/* Die Lage der Ausklappmenues kommt aus JavaScript (ApexDraw.placeList):
+   sie haengen am Bildschirm, damit die scrollende Werkzeugspalte sie nicht
+   beschneidet. Hier darf KEIN left/top stehen — `calc(100% + 6px)` misst bei
+   position:fixed gegen den Viewport und schob das Menue um eine ganze
+   Bildschirmbreite nach rechts. */
 
 /* ── Buehne ── */
 .aw-main { flex: 1 1 auto; display: flex; min-height: 0; }
@@ -6774,6 +6792,33 @@ body.aw-on #modeToggleBtn { display: none !important; }
   margin: 0 0 1px !important;
   border-bottom: 0.5px solid var(--rim);
 }
+
+/* Beschriftung beim Zeigen — siehe tipsAn() in ApexWorkspace.
+   EIN gemeinsames Element am Werkstatt-Rand, per JavaScript platziert.
+   Nicht als ::after am Knopf: die Werkzeugspalte hat `overflow:auto` und
+   beschneidet alles, was aus ihr herausragt — dieselbe Falle, die schon das
+   Werkzeugmenue und die Zeichnungs-Liste erwischt hat. */
+.aw-tip {
+  position: fixed;
+  z-index: 100020;
+  padding: 5px 9px;
+  background: var(--raised);
+  border: 0.5px solid var(--rim2);
+  border-radius: var(--r-sm);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  max-width: 280px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s;
+}
+.aw-tip.on { opacity: 1; }
+@media (hover: none) { .aw-tip { display: none; } }
 
 /* Ausklappfelder ueber dem Chart (Indikatoren, Darstellung). Sie liegen in
    der Buehne, nicht in der Karte darunter — sonst verschwinden sie hinter
@@ -6901,7 +6946,7 @@ body.light .aw-type { color-scheme: light; }
 .aw-rail .apd-g:nth-child(2) { display: grid; grid-template-columns: repeat(2, auto); gap: 4px; }
 .aw-rail .apd-t { width: 32px; height: 30px; font-size: var(--fs-md); }
 .aw-rail .apd-sw { width: 15px; height: 15px; }
-.aw-rail .apd-menu { left: calc(100% + 6px) !important; top: 0 !important; right: auto !important; }
+/* siehe oben: Menue-Lage kommt aus JavaScript, nicht aus CSS. */
 /* Die Zeichnungs-Liste bekommt ihre Lage in JS (ApexDraw.placeList) und haengt
    am Bildschirm — hier darf KEIN left/top stehen, erst recht nicht mit
    !important: `calc(100% + 6px)` misst bei position:fixed gegen den Viewport
@@ -8524,6 +8569,7 @@ body.light #landingPage * {
     <symbol id="i-ruler" viewBox="0 0 24 24"><rect x="2.2" y="8.4" width="19.6" height="7.2" rx="1.6" transform="rotate(-45 12 12)"/><path d="M9.2 7.4 10.9 9.1M12 4.6l1.7 1.7M6.4 10.2l1.7 1.7"/></symbol>
     <symbol id="i-save" viewBox="0 0 24 24"><path d="M4.5 4.5h11L20 9v10.5a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1z"/><path d="M8 4.5v5h7v-5"/><rect x="7.5" y="13" width="9" height="7.5"/></symbol>
     <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4.4v15.2M7.4 19.6h9.2"/><path d="M12 6.8 4.6 8.6M12 6.8l7.4 1.8"/><path d="M4.6 8.6 2 14.4h5.2zM19.4 8.6 16.8 14.4H22z"/></symbol>
+    <symbol id="i-reply" viewBox="0 0 24 24"><path d="M9 6 3.5 11.5 9 17"/><path d="M3.5 11.5H14a6.5 6.5 0 0 1 6.5 6.5v1"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="M15.8 15.8 21 21"/></symbol>
     <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3 5.5 5.5"/></symbol>
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.9 4.8 5.8v6c0 4.3 3 8 7.2 9.3 4.2-1.3 7.2-5 7.2-9.3v-6z"/><path d="M9 12.1l2.1 2.2L15.3 10"/></symbol>
@@ -10422,6 +10468,25 @@ body.light #landingPage * {
 .forgot-link { font-size: 12px; color: var(--ink3); cursor: pointer; margin-top: -4px; margin-bottom: 14px; display: block; text-align:right; transition: color 0.15s; }
 .forgot-link:hover { color: var(--gold); }
 .auth-error   { color: var(--loss);   font-size: 12px; margin-top: 8px; min-height: 18px; text-align: center; }
+/* Anmeldung ueber Google und Apple. Bewusst zurueckhaltend: die Marken geben
+   ihre Knopffarben vor, aber sie sollen die goldene Haupthandlung nicht
+   ueberstrahlen — deshalb neutral mit farbigem Zeichen. */
+.auth-sep { display:flex; align-items:center; gap:12px; margin:18px 0 14px; color:var(--ink3); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.auth-sep::before, .auth-sep::after { content:""; flex:1; height:1px; background:var(--rim); }
+.auth-oauth { display:flex; flex-direction:column; gap:9px; margin-bottom:4px; }
+.oauth-btn {
+  display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+  padding:11px 14px; border-radius:var(--r-sm); cursor:pointer;
+  background:var(--elevated); border:1px solid var(--rim); color:var(--ink);
+  font-family:var(--font-body); font-size:13.5px; font-weight:600; transition:.16s;
+}
+.oauth-btn:hover:not(:disabled) { border-color:var(--gold-line); background:var(--layer); }
+.oauth-btn:disabled { opacity:.55; cursor:default; }
+.oauth-btn svg { width:17px; height:17px; flex-shrink:0; }
+.oauth-btn .oa-apple { fill:var(--ink); }
+body.light .oauth-btn { background:#fff; border-color:rgba(0,0,0,0.14); }
+body.light .oauth-btn:hover:not(:disabled) { background:#f6f7f9; }
+.oauth-note { font-size:11px; color:var(--ink3); text-align:center; margin-top:10px; line-height:1.5; }
 .auth-success { color: var(--profit); font-size: 12px; margin-top: 8px; min-height: 18px; text-align: center; }
 .auth-spinner {
   display: none; width: 18px; height: 18px; border-radius: 50%;
@@ -10674,6 +10739,24 @@ body.light #landingPage * {
         <div class="auth-spinner"></div>
       </button>
       <div class="auth-error" id="login-error"></div>
+      <div class="auth-sep">or</div>
+      <div class="auth-oauth">
+        <button class="oauth-btn" id="oauth-google-login" onclick="doOAuth('google')">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.1z"/>
+            <path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.7-3.9-12.4-9.1H4.3v5.7C7.9 41.1 15.4 46 24 46z"/>
+            <path fill="#FBBC05" d="M11.6 28.1c-.4-1.3-.7-2.7-.7-4.1s.3-2.8.7-4.1v-5.7H4.3A22 22 0 0 0 2 24c0 3.6.9 6.9 2.3 9.8l7.3-5.7z"/>
+            <path fill="#EA4335" d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.1 30 2 24 2 15.4 2 7.9 6.9 4.3 14.2l7.3 5.7c1.7-5.2 6.6-9.1 12.4-9.1z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+        <button class="oauth-btn" id="oauth-apple-login" onclick="doOAuth('apple')">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path class="oa-apple" d="M16.4 12.8c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.7 2.3 2.9 2.2 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.2 1.2-2.4 1.2-2.5 0 0-2.4-.9-2.4-3.6zM14.2 5.9c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/>
+          </svg>
+          <span>Continue with Apple</span>
+        </button>
+      </div>
     </div>
 
     <!-- REGISTER SCREEN -->
@@ -10699,6 +10782,26 @@ body.light #landingPage * {
         <div class="auth-spinner"></div>
       </button>
       <div class="auth-error" id="reg-error"></div>
+      <div class="auth-sep">or</div>
+      <div class="auth-oauth">
+        <button class="oauth-btn" id="oauth-google-reg" onclick="doOAuth('google')">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.1z"/>
+            <path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.7-3.9-12.4-9.1H4.3v5.7C7.9 41.1 15.4 46 24 46z"/>
+            <path fill="#FBBC05" d="M11.6 28.1c-.4-1.3-.7-2.7-.7-4.1s.3-2.8.7-4.1v-5.7H4.3A22 22 0 0 0 2 24c0 3.6.9 6.9 2.3 9.8l7.3-5.7z"/>
+            <path fill="#EA4335" d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.1 30 2 24 2 15.4 2 7.9 6.9 4.3 14.2l7.3 5.7c1.7-5.2 6.6-9.1 12.4-9.1z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+        <button class="oauth-btn" id="oauth-apple-reg" onclick="doOAuth('apple')">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path class="oa-apple" d="M16.4 12.8c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.7 2.3 2.9 2.2 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.2 1.2-2.4 1.2-2.5 0 0-2.4-.9-2.4-3.6zM14.2 5.9c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/>
+          </svg>
+          <span>Continue with Apple</span>
+        </button>
+      </div>
+      <div class="oauth-note">Google and Apple create your account for you — no password needed.
+      Your trader name is taken from your account, and Apple may hide your email. Both are fine.</div>
     </div>
 
     <!-- RESET SCREEN -->
@@ -12302,7 +12405,7 @@ function _authAction(type) {
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div>
               <div style="font-size:13px;font-weight:500;margin-bottom:6px">Phase</div>
-              <select class="privacy-select" style="width:100%" id="coachProfilePhase2" onchange="syncCoachProfile('phase',this.value)">
+              <select class="privacy-select" style="width:100%" id="coachProfilePhase2" onchange="syncCoachProfile('phase',this.value)" aria-label="Coaching phase">
                 <option value="">— Select phase —</option>
                 <option value="Challenge Phase 1">Challenge Phase 1</option>
                 <option value="Challenge Phase 2">Challenge Phase 2</option>
@@ -12432,7 +12535,7 @@ function _authAction(type) {
                 <div style="font-size:13px;font-weight:500;margin-bottom:2px"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> P&amp;L Anzeigewährung</div>
                 <div style="font-size:11px;color:var(--ink3)">Show monetary P&amp;L in USD or EUR</div>
               </div>
-              <select id="pnlCurrencySelect" onchange="setPnlCurrency(this.value)" style="background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:9px 12px;font-size:13px;min-width:210px">
+              <select id="pnlCurrencySelect" onchange="setPnlCurrency(this.value)" style="background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:9px 12px;font-size:13px;min-width:210px" aria-label="Profit and loss currency">
                 <option value="USD">$ USD — US Dollar</option>
                 <option value="EUR">€ EUR — Euro</option>
                 <option value="GBP">£ GBP — British Pound</option>
@@ -12509,7 +12612,7 @@ function _authAction(type) {
             <div>
               <div style="font-size:13px;font-weight:500;margin-bottom:6px">Profile visible to</div>
               <div style="font-size:11px;color:var(--ink3);margin-bottom:10px">Who can view your profile and stats?</div>
-              <select class="privacy-select" style="width:100%" id="setting-profileVisibility2" onchange="savePrivacySetting('profileVisibility',this.value)">
+              <select class="privacy-select" style="width:100%" id="setting-profileVisibility2" onchange="savePrivacySetting('profileVisibility',this.value)" aria-label="Who can see your profile">
                 <option value="everyone">Everyone (public)</option>
                 <option value="friends">Friends only</option>
                 <option value="nobody">Nobody (private)</option>
@@ -12518,7 +12621,7 @@ function _authAction(type) {
             <div>
               <div style="font-size:13px;font-weight:500;margin-bottom:6px">Receive DMs from</div>
               <div style="font-size:11px;color:var(--ink3);margin-bottom:10px">Who can send you direct messages?</div>
-              <select class="privacy-select" style="width:100%" id="setting-dmVisibility2" onchange="savePrivacySetting('dmVisibility',this.value)">
+              <select class="privacy-select" style="width:100%" id="setting-dmVisibility2" onchange="savePrivacySetting('dmVisibility',this.value)" aria-label="Who can message you">
                 <option value="everyone">Everyone</option>
                 <option value="friends">Friends only</option>
                 <option value="nobody">Nobody</option>
@@ -12573,12 +12676,12 @@ function _authAction(type) {
           <div style="font-size:11px;color:var(--ink3);margin-bottom:12px">Choose your country — time format &amp; timezone, display currency and the app language all adapt automatically (you can override language &amp; currency below / in Trading settings).</div>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
             <label style="font-size:12px;color:var(--ink3);min-width:78px">Country</label>
-            <select id="apexCountrySelect" onchange="apexSetCountry(this.value)" style="background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:9px 12px;font-size:13px;min-width:250px"></select>
+            <select id="apexCountrySelect" onchange="apexSetCountry(this.value)" style="background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:9px 12px;font-size:13px;min-width:250px" aria-label="Country"></select>
             <div id="apexLocaleHint" style="font-size:12px;color:var(--ink2)"></div>
           </div>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
             <label style="font-size:12px;color:var(--ink3);min-width:78px">Language</label>
-            <select id="apexLangSelect" onchange="apexSetLang(this.value)" style="background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:9px 12px;font-size:13px;min-width:250px"></select>
+            <select id="apexLangSelect" onchange="apexSetLang(this.value)" style="background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:9px 12px;font-size:13px;min-width:250px" aria-label="Language"></select>
             <div id="apexLangHint" style="font-size:12px;color:var(--ink2)"></div>
           </div>
           <div class="notranslate" style="font-size:11px;color:var(--ink4);margin-top:10px">Auto-translation is powered by Google Translate (machine translation) — quality varies and it requires an internet connection.</div>
@@ -12613,7 +12716,7 @@ function _authAction(type) {
             <div style="display:flex;flex-direction:column;gap:16px">
               <div>
                 <div style="font-size:13px;font-weight:500;margin-bottom:6px">Experience Level</div>
-                <select class="privacy-select" style="width:100%" id="coachProfileExperience" onchange="saveCoachProfile()">
+                <select class="privacy-select" style="width:100%" id="coachProfileExperience" onchange="saveCoachProfile()" aria-label="Years of experience">
                   <option value="">— Select level —</option>
                   <option value="beginner">Beginner (under 1 year)</option>
                   <option value="intermediate">Intermediate (1–3 years)</option>
@@ -12629,7 +12732,7 @@ function _authAction(type) {
               </div>
               <div>
                 <div style="font-size:13px;font-weight:500;margin-bottom:6px">Trading Strategy</div>
-                <select class="privacy-select" style="width:100%" id="coachProfileStrategy" onchange="saveCoachProfile()">
+                <select class="privacy-select" style="width:100%" id="coachProfileStrategy" onchange="saveCoachProfile()" aria-label="Your strategy">
                   <option value="">— Select strategy —</option>
                   <option value="SMC">Smart Money Concepts (SMC)</option>
                   <option value="Supply &amp; Demand">Supply &amp; Demand</option>
@@ -12647,7 +12750,7 @@ function _authAction(type) {
               </div>
               <div>
                 <div style="font-size:13px;font-weight:500;margin-bottom:6px">Account Phase</div>
-                <select class="privacy-select" style="width:100%" id="coachProfilePhase" onchange="saveCoachProfile()">
+                <select class="privacy-select" style="width:100%" id="coachProfilePhase" onchange="saveCoachProfile()" aria-label="Coaching phase">
                   <option value="">— Select phase —</option>
                   <option value="Challenge Phase 1">Challenge Phase 1</option>
                   <option value="Challenge Phase 2">Challenge Phase 2</option>
@@ -12678,7 +12781,7 @@ function _authAction(type) {
           <div style="display:flex;flex-direction:column;gap:12px">
             <div>
               <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px">Kategorie</div>
-              <select id="bug-category" style="width:100%;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-md);color:var(--ink);padding:10px 14px;font-size:13px;outline:none;font-family:var(--font-body)">
+              <select id="bug-category" style="width:100%;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-md);color:var(--ink);padding:10px 14px;font-size:13px;outline:none;font-family:var(--font-body)" aria-label="Report category">
                 <option value="bug">Bug</option>
                 <option value="ui">UI / Design Problem</option>
                 <option value="performance">⚡ Performance</option>
@@ -13472,6 +13575,165 @@ async function _doReset() {
   setBtnLoading('btn-reset', false);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   Anmelden mit Google und Apple
+
+   Zwei Dinge unterscheiden das von der E-Mail-Anmeldung:
+
+   1. Es gibt keinen Trader-Namen. Der muss aus dem abgeleitet werden,
+      was der Anbieter herausgibt — und er muss eindeutig sein, weil die
+      Rangliste und die Profile darauf laufen. Apple gibt den Namen
+      ausserdem NUR beim allerersten Mal heraus, danach nie wieder.
+
+   2. Bei Apple kann die E-Mail eine Weiterleitungsadresse sein
+      (privaterelay.appleid.com) oder ganz fehlen. Nichts im Code darf
+      annehmen, dass eine Adresse da ist.
+
+   Popup zuerst, Weiterleitung als Rueckfall: in der installierten
+   App (PWA) und in manchen mobilen Browsern wird das Popup blockiert.
+   ═══════════════════════════════════════════════════════════════════ */
+
+function oauthProvider(which) {
+  if (which === 'google') {
+    var p = new firebase.auth.GoogleAuthProvider();
+    p.addScope('email');
+    p.setCustomParameters({ prompt: 'select_account' });
+    return p;
+  }
+  var a = new firebase.auth.OAuthProvider('apple.com');
+  a.addScope('email');
+  a.addScope('name');
+  return a;
+}
+
+function oauthBusy(on) {
+  ['oauth-google-login','oauth-apple-login','oauth-google-reg','oauth-apple-reg']
+    .forEach(function (id) {
+      var b = document.getElementById(id);
+      if (b) b.disabled = !!on;
+    });
+}
+
+function oauthError(code, msg) {
+  // Auf dem gerade sichtbaren Bildschirm melden, nicht irgendwo.
+  var reg = document.getElementById('screen-register');
+  var el  = document.getElementById(
+    reg && reg.classList.contains('active') ? 'reg-error' : 'login-error');
+  var text =
+    code === 'auth/account-exists-with-different-credential'
+      ? 'An account with this email already exists. Please sign in the way you created it — email, Google or Apple.'
+    : code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request'
+      ? 'Your browser blocked the sign-in window. Please allow pop-ups and try again.'
+    : code === 'auth/unauthorized-domain'
+      ? '⚠ This domain is not authorised in Firebase (Authentication → Settings → Authorized domains).'
+    : code === 'auth/operation-not-allowed'
+      ? '⚠ This sign-in provider is not enabled in the Firebase Console.'
+    : fmtAuthError(code) + (code ? '' : (msg ? ' — ' + msg : ''));
+  if (el) el.textContent = text;
+}
+
+async function doOAuth(which) {
+  if (typeof apexDemoBlocked === 'function' && apexDemoBlocked('Sign in')) return;
+  if (!auth) { oauthError('auth/internal-error', 'Firebase not ready'); return; }
+  var errEl = document.getElementById('login-error');
+  if (errEl) errEl.textContent = '';
+  var regErr = document.getElementById('reg-error');
+  if (regErr) regErr.textContent = '';
+
+  oauthBusy(true);
+  try {
+    await auth.signInWithPopup(oauthProvider(which));
+    // onAuthStateChanged uebernimmt ab hier und legt das Profil an.
+  } catch (e) {
+    var c = e && e.code;
+    // Popup ging nicht (installierte App, blockiert, Drittanbieter-Cookies):
+    // ueber eine Weiterleitung versuchen. Die verlaesst die Seite, deshalb
+    // wird der Ladezustand nicht zurueckgesetzt.
+    if (c === 'auth/popup-blocked' || c === 'auth/operation-not-supported-in-this-environment'
+        || c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') {
+      if (c === 'auth/popup-closed-by-user') { oauthBusy(false); return; }  // abgebrochen
+      try {
+        await auth.signInWithRedirect(oauthProvider(which));
+        return;
+      } catch (e2) {
+        console.error('OAuth redirect error:', e2);
+        oauthError(e2 && e2.code, e2 && e2.message);
+      }
+    } else {
+      console.error('OAuth error:', e);
+      oauthError(c, e && e.message);
+    }
+    oauthBusy(false);
+  }
+}
+window.doOAuth = doOAuth;
+
+/* Nach der Weiterleitung zurueck auf der Seite: Fehler sichtbar machen.
+   Der Erfolgsfall laeuft ohnehin ueber onAuthStateChanged. */
+try {
+  auth.getRedirectResult().catch(function (e) {
+    if (e && e.code) { oauthError(e.code, e.message); oauthBusy(false); }
+  });
+} catch (e) {}
+
+/* ── Trader-Namen ableiten und eindeutig machen ─────────────────────
+   Die Rangliste und die Profile laufen ueber den Namen, deshalb darf er
+   nicht doppelt sein. Kandidat aus Anzeigename, sonst aus der Adresse,
+   sonst "Trader" — und bei Kollision eine Zahl anhaengen. */
+function oauthNameCandidate(user) {
+  var n = (user && user.displayName ? String(user.displayName) : '').trim();
+  if (!n && user && user.email) n = String(user.email).split('@')[0];
+  n = n.replace(/[^\p{L}\p{N} _.-]/gu, '').trim().slice(0, 24);
+  return n.length >= 2 ? n : 'Trader';
+}
+
+async function oauthFreeName(base) {
+  for (var i = 0; i < 6; i++) {
+    var kandidat = i === 0 ? base : (base + (i + 1)).slice(0, 28);
+    try {
+      var snap = await db.collection('apexUsers')
+        .where('username', '==', kandidat).limit(1).get();
+      if (snap.empty) return kandidat;
+    } catch (e) {
+      break;                               // Regeln/Netz: nicht ewig probieren
+    }
+  }
+  return (base.slice(0, 22) + Math.floor(1000 + Math.random() * 9000));
+}
+
+/* Legt das Profil an, wenn noch keines da ist. Laeuft fuer JEDEN Anbieter —
+   auch fuer E-Mail-Konten, deren Registrierung damals mittendrin abgebrochen
+   ist. Gibt den Namen zurueck, damit loadUserProfile ihn direkt nutzen kann. */
+async function ensureUserProfile(user) {
+  if (!(window.db && user && user.uid)) return null;
+  var name = await oauthFreeName(oauthNameCandidate(user));
+  try {
+    await db.collection('apexUsers').doc(user.uid).set({
+      /* KEIN `email` hier — apexUsers ist weltlesbar. Die Adresse geht
+         nach apexUserEmails, genau wie bei der E-Mail-Registrierung. */
+      username:          name,
+      totalTrades:       0,
+      netPips:           0,
+      winRate:           0,
+      friends:           [],
+      friendsOutgoing:   [],
+      friendsIncoming:   [],
+      profileVisibility: 'everyone',
+      dmVisibility:      'everyone',
+      dmEnabled:         true,
+      createdAt:         firebase.firestore.FieldValue.serverTimestamp(),
+      lastUpdated:       firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (e) {
+    console.warn('[auth] Profil konnte nicht angelegt werden', e);
+    return name;
+  }
+  // Apple liefert oft gar keine Adresse oder eine Weiterleitung — beides ok,
+  // aber nur speichern, wenn wirklich etwas da ist.
+  if (user.email) { try { await saveAccountEmail(user.uid, user.email); } catch (e) {} }
+  return name;
+}
+
 // ─── LOGOUT ───────────────────────────
 async function logout() {
   if (!await ApexDialog.confirm('Are you sure you want to sign out?')) return;
@@ -13483,21 +13745,37 @@ async function logout() {
 }
 
 // ─── LOAD USER PROFILE ────────────────
+/* Notname. Bei Apple kann `email` null sein — der alte Code rief hier
+   currentUser.email.split('@') auf und warf dann in genau dem Zweig, der
+   den Fehler auffangen sollte. Der Nutzer landete ohne Namen in der App. */
+function fallbackName() {
+  try {
+    if (currentUser && currentUser.displayName) return String(currentUser.displayName).trim();
+    if (currentUser && currentUser.email)       return String(currentUser.email).split('@')[0];
+  } catch (e) {}
+  return 'Trader';
+}
+
 async function loadUserProfile() {
   try {
     const doc = await db.collection('apexUsers').doc(currentUID).get();
     if (doc.exists) {
       const data = doc.data();
-      currentName = data.username || currentUser.email.split('@')[0];
+      currentName = data.username || fallbackName();
       var _trialActive = (data.trialUntil && Number(data.trialUntil) > Date.now());
       window.trialUntil = _trialActive ? Number(data.trialUntil) : null;
       currentPlan = (data.plan === 'pro' || data.subscriptionActive === true || _trialActive) ? 'pro' : 'free';
     } else {
-      currentName = currentUser.email.split('@')[0];
+      /* Kein Profil da: erste Anmeldung ueber Google oder Apple — dort gibt
+         es kein Formular, in dem ein Trader-Name abgefragt wuerde. Also hier
+         anlegen. Faengt nebenbei E-Mail-Registrierungen auf, die damals
+         zwischen Konto und Profil abgebrochen sind. */
+      currentName = (await ensureUserProfile(currentUser)) || fallbackName();
       currentPlan = 'free';
+      window.trialUntil = null;
     }
   } catch(e) {
-    currentName = currentUser.email.split('@')[0];
+    currentName = fallbackName();
     currentPlan = 'free';
   }
 }
@@ -14209,7 +14487,7 @@ function pbTradeBlock(t, i){
   var opts=(window.playbooks||[]).map(function(p){ return '<option value="'+p.id+'" '+(t.playbook===p.id?'selected':'')+'>'+_pbEsc(p.name)+'</option>'; }).join('');
   return '<div style="width:100%;margin-bottom:10px">'+
     '<div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);opacity:0.85;margin-bottom:6px"><svg class=ic aria-hidden=true><use href=#i-clipboard ></use></svg> Playbook</div>'+
-    '<select class="tc-select" style="max-width:280px" onchange="setTradePlaybook('+i+',this.value)"><option value="">— keins —</option>'+opts+'</select>'+
+    '<select class="tc-select" aria-label="Playbook" style="max-width:280px" onchange="setTradePlaybook('+i+',this.value)"><option value="">— keins —</option>'+opts+'</select>'+
     pbChecklistHtml(t, i)+
   '</div>';
 }
@@ -15720,14 +15998,14 @@ function buildTradeCard(t, i) {
       </div>
       <div class="tc-field">
         <div class="tc-field-label">Market</div>
-        <select class="tc-select" onchange="updateTrade(${i},'market',this.value);renderTrades()" title="Choosing Options reveals the multi-leg entry below">
+        <select class="tc-select" aria-label="Market" onchange="updateTrade(${i},'market',this.value);renderTrades()" title="Choosing Options reveals the multi-leg entry below">
           <option value="">—</option>
           ${MARKETS.map(m => `<option ${t.market===m?'selected':''}>${m}</option>`).join('')}
         </select>
       </div>
       <div class="tc-field">
         <div class="tc-field-label">Direction</div>
-        <select class="tc-select dir-select" onchange="updateTrade(${i},'dir',this.value);autoCalcPips(${i});renderTrades()">
+        <select class="tc-select dir-select" aria-label="Direction" onchange="updateTrade(${i},'dir',this.value);autoCalcPips(${i});renderTrades()">
           <option value="">—</option>
           <option value="Buy" ${t.dir && apexIsLong(t.dir) ? 'selected':''}>Buy</option>
           <option value="Sell" ${t.dir && !apexIsLong(t.dir) ? 'selected':''}>Sell</option>
@@ -15786,14 +16064,14 @@ function buildTradeCard(t, i) {
     <div class="tc-body tc-body-2">
       <div class="tc-field">
         <div class="tc-field-label">Session</div>
-        <select class="tc-select" onchange="updateTrade(${i},'session',this.value)">
+        <select class="tc-select" aria-label="Session" onchange="updateTrade(${i},'session',this.value)">
           <option value="">—</option>
           ${SESSIONS.map(s => `<option ${t.session===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </div>
       <div class="tc-field" style="grid-column:span 2">
         <div class="tc-field-label">Setup</div>
-        <select class="tc-select" onchange="updateTrade(${i},'setup',this.value)">
+        <select class="tc-select" aria-label="Setup" onchange="updateTrade(${i},'setup',this.value)">
           <option value="">—</option>
           ${SETUPS.map(s => `<option ${t.setup===s?'selected':''}>${s}</option>`).join('')}
         </select>
@@ -15804,7 +16082,7 @@ function buildTradeCard(t, i) {
       </div>
       <div class="tc-field">
         <div class="tc-field-label">Grade</div>
-        <select class="tc-select" onchange="updateTrade(${i},'grade',this.value);renderTrades()">
+        <select class="tc-select" aria-label="Grade" onchange="updateTrade(${i},'grade',this.value);renderTrades()">
           <option value="">—</option>
           ${GRADES.map(g => `<option ${t.grade===g?'selected':''}>${g}</option>`).join('')}
           ${t.grade && GRADES.indexOf(t.grade) < 0 ? `<option selected>${t.grade}</option>` : ''}
@@ -15819,7 +16097,7 @@ function buildTradeCard(t, i) {
       <div class="tc-body tc-body-3">
         <div class="tc-field">
           <div class="tc-field-label">Timeframe</div>
-          <select class="tc-select" onchange="updateTrade(${i},'tf',this.value);renderTrades()">
+          <select class="tc-select" aria-label="Timeframe" onchange="updateTrade(${i},'tf',this.value);renderTrades()">
             <option value="">—</option>
             ${TFS.map(s => `<option ${t.tf===s?'selected':''}>${s}</option>`).join('')}
           </select>
@@ -17323,7 +17601,9 @@ function renderCommunityStatic(grid) {
 
 function paintCommunity(grid, traders) {
   grid.innerHTML = traders.map((t, idx) => {
-    const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx+1}`;
+    const medal = idx < 3
+      ? `<span class="rank-medal r${idx+1}">${idx+1}</span>`
+      : `#${idx+1}`;
     const pipsFormatted = (typeof t.pips === 'number' ? t.pips : parseFloat(t.pips||0));
     const pipsStr = (pipsFormatted >= 0 ? '+' : '') + pipsFormatted.toFixed(1);
     const status  = t.mine ? '' : getFriendStatus(t.uid||'');
@@ -18268,8 +18548,9 @@ async function openProfile(uid, name) {
     // Meta
     const rank = communityAllTraders.findIndex(t => t.uid === uid);
     if (rank >= 0) {
-      const medals = ['🥇','🥈','🥉'];
-      document.getElementById('pRank').textContent = rank < 3 ? medals[rank] : '#' + (rank+1);
+      var rEl = document.getElementById('pRank');
+      if (rank < 3) rEl.innerHTML = '<span class="rank-medal r' + (rank+1) + '">' + (rank+1) + '</span>';
+      else rEl.textContent = '#' + (rank+1);
     }
     if (d.username) document.getElementById('pName').textContent = d.username;
     if (d.mainSymbol || d.lastSymbol) document.getElementById('pSymbol').textContent = '📈 ' + (d.mainSymbol || d.lastSymbol || '');
@@ -32575,6 +32856,8 @@ body.light .pc-rules{background:var(--layer)}
 #page-channels .cs-rail-div{width:30px;height:1px;background:var(--rim);margin:2px 0}
 #page-channels .cs-rail-btn{background:rgba(var(--gold-rgb),0.08);border:1px dashed var(--gold-line);color:var(--gold)}
 #page-channels .cs-main{display:flex;flex-direction:column;min-width:0}
+#page-channels .cs-more{display:block;margin:6px auto 14px;padding:6px 14px;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:999px;color:var(--ink3);font-family:var(--font-body);font-size:11.5px;cursor:pointer}
+#page-channels .cs-more:hover{border-color:var(--gold-line);color:var(--gold)}
 /* discover */
 #page-channels .cs-discover{padding:20px 22px;overflow-y:auto}
 #page-channels .cs-dh{font-family:var(--font-display);font-weight:800;font-size:20px;color:var(--ink);margin:0 0 4px}
@@ -32595,11 +32878,111 @@ body.light .pc-rules{background:var(--layer)}
 #page-channels .cs-badge.pub{background:rgba(91,155,213,0.16);color:#7fb2e6}
 #page-channels .cs-badge.vip{background:rgba(var(--gold-rgb),0.18);color:var(--gold)}
 #page-channels .cs-badge.priv{background:rgba(var(--loss-rgb),0.14);color:#f0848a}
-#page-channels .cs-join{background:linear-gradient(135deg,#c9a84c,#e8c96a);border:none;color:#07080b;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;font-size:13px;font-family:var(--font-body)}
-#page-channels .cs-join.in{background:var(--elevated);border:0.5px solid var(--rim);color:var(--ink2)}
+#page-channels .cs-join,.apxd .cs-join{background:linear-gradient(135deg,#c9a84c,#e8c96a);border:none;color:#07080b;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;font-size:13px;font-family:var(--font-body)}
+.apxd .cs-join.in,#page-channels .cs-join.in{background:var(--elevated);border:0.5px solid var(--rim);color:var(--ink2)}
+/* Antworten, Erwaehnungen, Angepinntes */
+#page-channels .cs-msg{position:relative}
+#page-channels .cs-macts{position:absolute;top:2px;right:6px;display:none;gap:4px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:7px;padding:2px}
+#page-channels .cs-msg:hover .cs-macts,#page-channels .cs-msg:focus-within .cs-macts{display:flex}
+#page-channels .cs-msg.me{background:rgba(var(--gold-rgb),0.07);border-left:2px solid var(--gold-line);border-radius:0 8px 8px 0}
+#page-channels .cs-msg.flash{animation:csFlash 1.2s ease-out}
+@keyframes csFlash{0%{background:rgba(var(--gold-rgb),0.22)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){#page-channels .cs-msg.flash{animation:none;outline:1px solid var(--gold-line)}}
+#page-channels .cs-quote{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink3);margin-bottom:3px;cursor:pointer;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;opacity:.85}
+#page-channels .cs-quote:hover{color:var(--ink2)}
+#page-channels .cs-quote b{color:var(--gold);font-weight:600}
+#page-channels .cs-at{color:var(--gold);background:rgba(var(--gold-rgb),0.13);border-radius:4px;padding:0 3px;font-weight:600}
+#page-channels .cs-pinmark{color:var(--gold);display:inline-flex;margin-left:2px}
+#page-channels .cs-inrow{flex-wrap:wrap}
+#page-channels .cs-replybar{flex:0 0 100%;order:-1;margin:0 0 8px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);background:var(--layer);border:0.5px solid var(--rim);border-radius:8px;padding:6px 10px}
+#page-channels .cs-replybar span{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#page-channels .cs-replybar b{color:var(--gold)}
+.apxd .cs-join{width:auto}
+.apxd code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--gold)}
+#page-channels .cs-find{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink);border-radius:7px;padding:5px 10px;font-size:11.5px;font-family:var(--font-body);width:150px;transition:width .18s}
+#page-channels .cs-find:focus{outline:none;border-color:var(--gold-line);width:220px}
+#page-channels .cs-findnote{font-size:11.5px;color:var(--ink3);padding:8px 4px 12px;border-bottom:0.5px solid var(--rim);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#page-channels .cs-pinbtn{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink2);border-radius:7px;padding:5px 10px;font-size:11.5px;font-family:var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+#page-channels .cs-pinlist{display:none;position:absolute;top:100%;right:0;width:340px;z-index:30;margin-top:6px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:10px;padding:6px;max-height:260px;overflow:auto;box-shadow:0 12px 30px rgba(0,0,0,0.35)}
+#page-channels .cs-pinlist.open{display:block}
+#page-channels .cs-pinrow{font-size:12px;color:var(--ink2);padding:7px 9px;border-radius:6px;cursor:pointer;line-height:1.4}
+#page-channels .cs-pinrow:hover{background:var(--layer)}
+#page-channels .cs-pinrow b{color:var(--ink);margin-right:4px}
+/* Uebersicht: Filterleiste, Aktivitaetsmarke, Themen-Tags */
+#page-channels .cs-search-ic{display:flex;align-items:center;color:var(--ink3)}
+#page-channels .cs-filters{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px}
+#page-channels .cs-chips,#csCreateModal .cs-chips{display:flex;gap:6px;flex-wrap:wrap}
+#page-channels .cs-chip,#csCreateModal .cs-chip{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink2);border-radius:999px;padding:6px 12px;font-size:12px;font-family:var(--font-body);cursor:pointer;transition:.15s}
+#page-channels .cs-chip:hover,#csCreateModal .cs-chip:hover{border-color:var(--gold-line);color:var(--ink)}
+#page-channels .cs-chip.on,#csCreateModal .cs-chip.on{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}
+#page-channels .cs-sorts{display:flex;gap:2px;background:var(--layer);border:0.5px solid var(--rim);border-radius:8px;padding:2px}
+#page-channels .cs-sortb{background:none;border:none;color:var(--ink3);border-radius:6px;padding:5px 10px;font-size:11.5px;font-family:var(--font-body);cursor:pointer}
+#page-channels .cs-sortb.on{background:var(--elevated);color:var(--ink);font-weight:600}
+#page-channels .cs-c-badges{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#page-channels .cs-live{font-size:10.5px;color:var(--ink3);display:inline-flex;align-items:center;gap:5px}
+#page-channels .cs-live.hot{color:var(--profit)}
+#page-channels .cs-dot{width:6px;height:6px;border-radius:50%;background:var(--profit);display:inline-block;box-shadow:0 0 0 3px rgba(var(--profit-rgb),0.16)}
+#page-channels .cs-ttags{display:flex;gap:5px;flex-wrap:wrap}
+#page-channels .cs-ttag{font-size:10px;color:var(--ink3);background:var(--layer);border:0.5px solid var(--rim);border-radius:4px;padding:2px 6px}
+#page-channels .cs-card.joined{border-color:var(--gold-line)}
+@media (prefers-reduced-motion:reduce){#page-channels .cs-card{transition:none}}
 #page-channels .cs-rank{position:absolute;top:10px;right:12px;font-family:var(--font-display);font-weight:800;font-size:22px;color:rgba(var(--gold-rgb),0.25)}
 /* server view */
 #page-channels .cs-server{display:grid;grid-template-columns:210px 1fr;height:100%;min-width:0}
+/* ── Arbeitsbereich statt Seitenabschnitt ────────────────────────────────
+   Die Huelle war auf height:min(74vh,680px) begrenzt und begann bei 1440x900
+   erst bei y=251 — unter Seitenkopf, Ueberschrift und Untertitel. Der untere
+   Rand lag damit unterhalb der Falz, die Seite scrollte. Ein Chat ist aber
+   ein Arbeitsplatz, kein Abschnitt einer Marketingseite; Discord, Slack und
+   Teams geben dem Fenster alles.
+
+   Nur beim geoeffneten Server — die Serveruebersicht bleibt eine normale
+   Seite, weil man dort blaettert statt arbeitet. */
+#page-channels .cs-wrap.cs-focus{
+  position:fixed; inset:0; z-index:9000;
+  height:auto; max-height:none; border:0; border-radius:0; margin:0;
+  /* Die Huelle ist selbst ein direktes Kind von .page und traegt damit die
+     apexRise-Animation — deren translateY schob den fixierten Rahmen um 14px
+     nach unten. Auf sich selbst wirkt ein transform nicht als Bezugsrahmen,
+     aber verschieben tut er trotzdem. */
+  transform:none !important; animation:none !important;
+  /* Undurchsichtig: die Huelle hat sonst den halbtransparenten Verlauf der
+     Karten-Ansicht, und die App-Navigation scheint durch den Chat. */
+  background:var(--void) !important;
+}
+body.cs-focus-on{overflow:hidden !important}
+body.cs-focus-on .mobile-bottom-nav,
+body.cs-focus-on #modeToggleBtn{display:none !important}
+/* Siehe .aw-flat: .page.active > * traegt eine Einblend-Animation mit
+   transform, und die stellt sonst den Bezugsrahmen fuer position:fixed. */
+#page-channels .cs-flat{transform:none !important;animation:none !important;filter:none !important}
+
+#page-channels .cs-focus .cs-server{grid-template-columns:232px 1fr 232px}
+#page-channels .cs-focus .cs-shead .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#page-channels .cs-focus .cs-chat{min-height:0}
+
+/* ── Mitgliederspalte ── */
+#page-channels .cs-members{border-left:0.5px solid var(--rim);background:rgba(0,0,0,0.12);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+#page-channels .cs-mem-h{padding:12px 14px 9px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);border-bottom:0.5px solid var(--rim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-channels .cs-mem-list{flex:1;overflow-y:auto;padding:8px}
+#page-channels .cs-mem-empty{padding:14px;font-size:12px;color:var(--ink4);line-height:1.6}
+#page-channels .cs-mem{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer;min-width:0}
+#page-channels .cs-mem:hover{background:var(--elevated)}
+#page-channels .cs-mem-av{flex:none;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--raised);border:0.5px solid var(--rim2);font-family:var(--font-display);font-size:11px;font-weight:700;color:var(--ink2)}
+#page-channels .cs-mem-nm{flex:1;min-width:0;font-size:12.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-channels .cs-mem-tag{flex:none;display:inline-flex;color:var(--ink4);font-size:11px}
+#page-channels .cs-mem-tag.voice{color:var(--gold)}
+#page-channels .cs-mem-tag.traded{color:var(--profit)}
+body.light #page-channels .cs-members{background:rgba(0,0,0,0.025)}
+
+@media(max-width:1100px){ #page-channels .cs-focus .cs-server{grid-template-columns:200px 1fr} #page-channels .cs-members{display:none} }
+@media(max-width:760px){
+  #page-channels .cs-focus .cs-server{grid-template-columns:1fr}
+  /* Auf dem Handy ist die Kanalliste eine Schublade, nicht eine Spalte. */
+  #page-channels .cs-focus .cs-chans{position:absolute;left:0;top:0;bottom:0;width:76%;max-width:280px;z-index:5;transform:translateX(-102%);transition:transform .22s;background:var(--surface);border-right:0.5px solid var(--rim2);box-shadow:18px 0 40px rgba(0,0,0,.45)}
+  #page-channels .cs-focus.chans-open .cs-chans{transform:none}
+  #page-channels .cs-focus .cs-chat{display:flex}
+}
 #page-channels .cs-chans{border-right:0.5px solid var(--rim);overflow-y:auto;padding:0;background:rgba(0,0,0,0.12)}
 #page-channels .cs-shead{padding:15px 14px;border-bottom:0.5px solid var(--rim);display:flex;align-items:center;gap:8px}
 #page-channels .cs-shead .nm{font-family:var(--font-display);font-weight:800;color:var(--ink);font-size:14px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -32614,8 +32997,8 @@ body.light .pc-rules{background:var(--layer)}
 #page-channels .cs-chathead{padding:13px 18px;border-bottom:0.5px solid var(--rim);display:flex;align-items:center;gap:10px;flex-shrink:0}
 #page-channels .cs-chathead .nm{font-family:var(--font-display);font-weight:700;color:var(--ink);font-size:14px}
 #page-channels .cs-chathead .actions{margin-left:auto;display:flex;gap:6px}
-#page-channels .cs-mini{background:var(--elevated);border:0.5px solid var(--rim);color:var(--ink2);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer}
-#page-channels .cs-mini:hover{border-color:var(--gold-line);color:var(--ink)}
+#page-channels .cs-mini,.apxd .cs-mini{background:var(--elevated);border:0.5px solid var(--rim);color:var(--ink2);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer}
+#page-channels .cs-mini:hover,.apxd .cs-mini:hover{border-color:var(--gold-line);color:var(--ink)}
 #page-channels .cs-mini.on{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold)}
 #page-channels .cs-msgs{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:11px}
 #page-channels .cs-msg{display:flex;gap:10px;align-items:flex-start}
@@ -32675,7 +33058,7 @@ body.light .pc-rules{background:var(--layer)}
   #page-channels .cs-grid{grid-template-columns:1fr}
   #page-channels .cs-shead{padding:16px 14px}
 }
-body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-channels .cs-rail{background:var(--layer);border-right-color:rgba(0,0,0,0.08)}body.light #page-channels .cs-srv-ico{background:#fff;border-color:rgba(0,0,0,0.12);color:var(--ink)}body.light #page-channels .cs-rail-btn{background:var(--gold-dim);border-color:var(--gold-line)}body.light #page-channels .cs-chans{background:rgba(0,0,0,0.025)}body.light #page-channels .cs-shead,body.light #page-channels .cs-chathead,body.light #page-channels .cs-inrow{border-color:rgba(0,0,0,0.08)}body.light #page-channels .cs-card{background:#fff;border-color:rgba(0,0,0,0.09);box-shadow:0 2px 10px rgba(0,0,0,0.06)}body.light #page-channels .cs-card:hover{box-shadow:0 10px 24px rgba(0,0,0,0.11)}body.light #page-channels .cs-rank{color:rgba(var(--gold-rgb),0.20)}body.light #page-channels .cs-dsub,body.light #page-channels .cs-c-meta{color:#6b7280}body.light #page-channels .cs-badge.pub{background:rgba(43,108,176,0.12);color:#2b6cb0}body.light #page-channels .cs-badge.vip{background:rgba(var(--gold-rgb),0.14);color:#8a6200}body.light #page-channels .cs-badge.priv{background:rgba(192,57,43,0.12);color:#c0392b}body.light #page-channels .cs-c-ico{background:rgba(var(--gold-rgb),0.12);border-color:rgba(var(--gold-rgb),0.28);color:#8a6200}body.light #page-channels .cs-iconbtn,body.light #page-channels .cs-mini{background:#fff;border-color:rgba(0,0,0,0.12)}body.light #page-channels .cs-srv-ico.active{box-shadow:0 0 0 2px var(--gold-dim),0 0 14px rgba(var(--gold-rgb),0.18)}
+body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-channels .cs-rail{background:var(--layer);border-right-color:rgba(0,0,0,0.08)}body.light #page-channels .cs-srv-ico{background:#fff;border-color:rgba(0,0,0,0.12);color:var(--ink)}body.light #page-channels .cs-rail-btn{background:var(--gold-dim);border-color:var(--gold-line)}body.light #page-channels .cs-chans{background:rgba(0,0,0,0.025)}body.light #page-channels .cs-shead,body.light #page-channels .cs-chathead,body.light #page-channels .cs-inrow{border-color:rgba(0,0,0,0.08)}body.light #page-channels .cs-chip,body.light #csCreateModal .cs-chip,body.light #page-channels .cs-sorts,body.light #page-channels .cs-ttag{background:#fff;border-color:rgba(0,0,0,0.12)}body.light #page-channels .cs-sortb.on{background:rgba(0,0,0,0.05)}body.light #page-channels .cs-chip.on,body.light #csCreateModal .cs-chip.on{background:rgba(var(--gold-rgb),0.14);border-color:rgba(var(--gold-rgb),0.4);color:#8a6200}body.light .apxd .cs-join.in,body.light #page-channels .cs-join.in{background:rgba(0,0,0,0.045);border-color:rgba(0,0,0,0.14);color:#374151}body.light #page-channels .cs-join.in:hover{background:rgba(0,0,0,0.075)}body.light #page-channels .cs-pinlist{box-shadow:0 12px 30px rgba(0,0,0,0.13)}body.light #page-channels .cs-macts{background:#fff;border-color:rgba(0,0,0,0.12)}body.light #page-channels .cs-msg.me{background:rgba(var(--gold-rgb),0.09)}body.light #page-channels .cs-card{background:#fff;border-color:rgba(0,0,0,0.09);box-shadow:0 2px 10px rgba(0,0,0,0.06)}body.light #page-channels .cs-card:hover{box-shadow:0 10px 24px rgba(0,0,0,0.11)}body.light #page-channels .cs-rank{color:rgba(var(--gold-rgb),0.20)}body.light #page-channels .cs-dsub,body.light #page-channels .cs-c-meta{color:#6b7280}body.light #page-channels .cs-badge.pub{background:rgba(43,108,176,0.12);color:#2b6cb0}body.light #page-channels .cs-badge.vip{background:rgba(var(--gold-rgb),0.14);color:#8a6200}body.light #page-channels .cs-badge.priv{background:rgba(192,57,43,0.12);color:#c0392b}body.light #page-channels .cs-c-ico{background:rgba(var(--gold-rgb),0.12);border-color:rgba(var(--gold-rgb),0.28);color:#8a6200}body.light #page-channels .cs-iconbtn,body.light .apxd .cs-mini,body.light #page-channels .cs-mini{background:#fff;border-color:rgba(0,0,0,0.12)}body.light #page-channels .cs-srv-ico.active{box-shadow:0 0 0 2px var(--gold-dim),0 0 14px rgba(var(--gold-rgb),0.18)}
 `;
     document.head.appendChild(s);
     if(!document.getElementById('apex-mod-css')){
@@ -32754,7 +33137,7 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
     var p=document.createElement('div'); p.className='page'; p.id='page-channels';
     p.innerHTML=
       '<div class="ph"><div class="ph-eyebrow">Community</div><h1 data-i18n-head="Community Servers">Community <span style="color:var(--gold)">Servers</span></h1>'+
-      '<p>Join the public hub, the Pro VIP lounge, or discover &amp; build your own servers.</p></div>'+
+      '<p>Trading rooms where claims come with the trades behind them.</p></div>'+
       '<div class="cs-wrap"><div class="cs-rail" id="csRail"></div><div class="cs-main" id="csMain"></div></div>';
     host.parentNode.appendChild(p);
     // modals
@@ -32763,6 +33146,11 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
       m.innerHTML='<div class="csm-card"><h3>Create your Server</h3>'+
         '<label>Server name</label><input id="csName" maxlength="40" placeholder="e.g. Smart-Money Crew">'+
         '<label>Tagline</label><input id="csTag" maxlength="80" placeholder="What is it about?">'+
+        '<label>Topics <span style="color:var(--ink3);font-weight:400">(helps people find it)</span></label>'+
+        '<div class="cs-chips" id="csTopics" style="margin-bottom:12px">'+
+          [['forex','Forex'],['indices','Indices'],['crypto','Crypto'],['futures','Futures'],['stocks','Stocks'],['prop','Prop firms'],['de','Deutsch']]
+            .map(function(t){ return '<button type="button" class="cs-chip" data-tag="'+t[0]+'" onclick="this.classList.toggle(\'on\')">'+t[1]+'</button>'; }).join('')+
+        '</div>'+
         '<label>Visibility</label><div class="csm-row" id="csVis">'+
           '<div class="csm-seg on" data-v="public" onclick="ApexServers.pickVis(this)"><svg class=ic aria-hidden=true><use href=#i-globe ></use></svg> Public (listed)</div>'+
           '<div class="csm-seg" data-v="private" onclick="ApexServers.pickVis(this)"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg> Private (invite only)</div>'+
@@ -32807,13 +33195,13 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
   function ensureOfficial(){
     if(!ready()) return;
     var defs=[
-      {id:'apex-public', name:'Evidence Community', icon:'<svg class=ic aria-hidden=true><use href=#i-globe ></use></svg>', type:'public', tagline:'The open hub for every Evidence trader.'},
-      {id:'apex-vip',    name:'Evidence Pro Lounge', icon:'⭐', type:'vip',  tagline:'Exclusive room for Pro members.'}
+      {id:'apex-public', name:'Evidence Community', icon:'<svg class=ic aria-hidden=true><use href=#i-globe ></use></svg>', type:'public', tagline:'The open hub for every Evidence trader.', tags:['forex','indices','crypto','futures']},
+      {id:'apex-vip',    name:'Evidence Pro Lounge', icon:'<svg class=ic aria-hidden=true><use href=#i-star ></use></svg>', type:'vip', tagline:'Exclusive room for Pro members.', tags:['forex','indices','prop']}
     ];
     var chans=[['chat','💬','chat'],['analysis','📊','analysis'],['setups','📈','setups'],['signals','🔔','signals']];
     defs.forEach(function(d){
       var ref=db.collection('apexServers').doc(d.id);
-      ref.set({ name:d.name, icon:d.icon, type:d.type, tagline:d.tagline, official:true, discoverable:true,
+      ref.set({ name:d.name, icon:d.icon, type:d.type, tagline:d.tagline, tags:d.tags||[], official:true, discoverable:true,
         ownerUid:'apex', ownerName:'Evidence', admins:[] }, {merge:true}).catch(function(){});
       chans.forEach(function(c,i){ ref.collection('channels').doc(c[0]).set({ name:c[0], icon:c[1], kind:c[2], order:i }, {merge:true}).catch(function(){}); });
     });
@@ -32876,17 +33264,157 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
   }
 
   /* ───────── discover ───────── */
-  CS.explore=function(){ if(CS.voice.room) leaveVoiceInternal(); if(CS.voice.presUnsub){CS.voice.presUnsub();CS.voice.presUnsub=null;} CS.view='discover'; CS.cur=null; if(CS.msgUnsub){CS.msgUnsub();CS.msgUnsub=null;} renderRail(); renderDiscover(); };
+  CS.explore=function(){ if(CS.voice.room) leaveVoiceInternal(); if(CS.voice.presUnsub){CS.voice.presUnsub();CS.voice.presUnsub=null;} CS.view='discover'; CS.cur=null; if(CS.msgUnsub){CS.msgUnsub();CS.msgUnsub=null;} stopPresence(); CS._focus(false); renderRail(); renderDiscover(); };
+  /* ───────── Serveruebersicht ────────────────────────────────────────
+     Vorher: zwei Raster ("Top 5" und "Alle"), beide nach Mitgliederzahl
+     sortiert. Mitgliederzahl ist aber die Eitelkeitszahl — ein Server mit
+     400 Karteileichen ist schlechter als einer mit 30 Leuten, die taeglich
+     schreiben. Standard ist deshalb ZULETZT AKTIV, und die Karte zeigt es.
+
+     Dieselbe Haltung wie beim Board: was jemand tut, zaehlt mehr als was
+     jemand angesammelt hat. */
+  var DISC_TAGS = [
+    ['', 'All'], ['forex','Forex'], ['indices','Indices'], ['crypto','Crypto'],
+    ['futures','Futures'], ['stocks','Stocks'], ['prop','Prop firms'], ['de','Deutsch']
+  ];
+  CS._dq = { q:'', tag:'', sort:'active' };
+
   function renderDiscover(){
     var m=document.getElementById('csMain'); if(!m) return;
     m.innerHTML='<div class="cs-discover">'+
-      '<div class="cs-dh">Discover Servers</div><div class="cs-dsub">Find a community and join the ones you like.</div>'+
-      '<div class="cs-search"><input id="csSearch" placeholder="🔍 Search servers…" oninput="ApexServers.filter(this.value)">'+
-        '<input id="csCode" placeholder="Join private by code…" style="max-width:220px"><button class="cs-join" style="width:auto;padding:10px 16px" onclick="ApexServers.joinByCode()">Join</button></div>'+
-      '<div class="cs-sec"><svg class=ic aria-hidden=true><use href=#i-flame ></use></svg> Top 5 servers</div><div class="cs-grid" id="csTop"></div>'+
-      '<div class="cs-sec">All public servers</div><div class="cs-grid" id="csAll"></div></div>';
+
+      '<div class="cs-search">'+
+        '<span class="cs-search-ic"><svg class=ic aria-hidden=true><use href=#i-search ></use></svg></span>'+
+        '<input id="csSearch" placeholder="Search by name or topic…" aria-label="Search servers" oninput="ApexServers.filter(this.value)">'+
+        '<input id="csCode" placeholder="Invite code" aria-label="Join by invite code" style="max-width:170px">'+
+        '<button class="cs-join" style="width:auto;padding:10px 16px" onclick="ApexServers.joinByCode()">Join</button>'+
+      '</div>'+
+
+      '<div class="cs-filters">'+
+        '<div class="cs-chips" role="group" aria-label="Filter by topic">'+
+          DISC_TAGS.map(function(t){
+            return '<button class="cs-chip'+(CS._dq.tag===t[0]?' on':'')+'" data-tag="'+t[0]+'" '+
+                   'onclick="ApexServers.setTag(\''+t[0]+'\')">'+esc(t[1])+'</button>';
+          }).join('')+
+        '</div>'+
+        '<div class="cs-sorts">'+
+          [['active','Most active'],['members','Largest'],['new','Newest']].map(function(o){
+            return '<button class="cs-sortb'+(CS._dq.sort===o[0]?' on':'')+'" '+
+                   'onclick="ApexServers.setSort(\''+o[0]+'\')">'+esc(o[1])+'</button>';
+          }).join('')+
+        '</div>'+
+      '</div>'+
+
+      '<div id="csMineSec"></div>'+
+      '<div class="cs-sec" id="csAllSec">All servers</div><div class="cs-grid" id="csAll"></div>'+
+    '</div>';
     loadDiscover();
   }
+
+  CS.setTag=function(t){ CS._dq.tag=t; paintDiscover(CS._dq.q); repaintChips(); };
+  CS.setSort=function(k){ CS._dq.sort=k; paintDiscover(CS._dq.q); repaintChips(); };
+  function repaintChips(){
+    document.querySelectorAll('#page-channels .cs-chip').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-tag')===CS._dq.tag);
+    });
+    document.querySelectorAll('#page-channels .cs-sortb').forEach(function(b){
+      b.classList.toggle('on', (b.getAttribute('onclick')||'').indexOf("'"+CS._dq.sort+"'")>0);
+    });
+  }
+
+  /* "vor 4 Min" statt eines Zeitstempels: bei einer Uebersicht will man
+     wissen, ob dort GERADE etwas passiert, nicht wann genau. */
+  function seit(ms){
+    if(!ms) return null;
+    var d=Date.now()-ms;
+    if(d<0) return 'just now';
+    if(d<120000) return 'active now';
+    if(d<3600000) return 'active '+Math.round(d/60000)+' min ago';
+    if(d<86400000) return 'active '+Math.round(d/3600000)+' h ago';
+    var t=Math.round(d/86400000);
+    return t<=30 ? 'active '+t+' d ago' : 'quiet';
+  }
+  function msVon(v){
+    if(!v) return 0;
+    if(typeof v==='number') return v;
+    if(v.toMillis) { try{ return v.toMillis(); }catch(e){ return 0; } }
+    return 0;
+  }
+
+  /* Die offiziellen Server tragen unser Sprite-Symbol als Markup im
+     icon-Feld, alle anderen einen Buchstaben. Markup wird deshalb NUR
+     durchgelassen, wenn es exakt unser Sprite-Muster ist — sonst koennte
+     jeder Serverbesitzer beliebiges HTML in die Uebersicht schreiben. */
+  function srvIco(s){
+    var i=String(s.icon||(s.name||'?')[0]);
+    return /^<svg class=ic aria-hidden=true><use href=#i-[a-z0-9-]+ ><\/use><\/svg>$/.test(i) ? i : esc(i);
+  }
+  function card(s, rank){
+    var joined=(s.members||[]).indexOf(window.currentUID)>=0;
+    var typ = s.type==='vip'
+      ? '<span class="cs-badge vip"><svg class=ic aria-hidden=true><use href=#i-star ></use></svg> Pro</span>'
+      : s.type==='public'
+        ? '<span class="cs-badge pub"><svg class=ic aria-hidden=true><use href=#i-globe ></use></svg> Public</span>'
+        : '<span class="cs-badge priv"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg> Private</span>';
+    var akt = seit(msVon(s.lastTs));
+    var frisch = akt && akt.indexOf('min')>=0 || akt==='active now';
+    var tags = (s.tags||[]).slice(0,3).map(function(t){ return '<span class="cs-ttag">'+esc(t)+'</span>'; }).join('');
+
+    return '<div class="cs-card'+(joined?' joined':'')+'">'+
+      (rank?'<div class="cs-rank">#'+rank+'</div>':'')+
+      '<div class="cs-c-top">'+
+        '<div class="cs-c-ico">'+srvIco(s)+'</div>'+
+        '<div style="min-width:0">'+
+          '<div class="cs-c-name">'+esc(s.name)+'</div>'+
+          '<div class="cs-c-meta">'+((s.memberCount||0)+' member'+((s.memberCount||0)===1?'':'s'))+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="cs-c-badges">'+typ+
+        (akt?'<span class="cs-live'+(frisch?' hot':'')+'">'+
+             (frisch?'<i class="cs-dot"></i>':'')+esc(akt)+'</span>':'')+
+      '</div>'+
+      '<div class="cs-c-tag">'+esc(s.tagline||'')+'</div>'+
+      (tags?'<div class="cs-ttags">'+tags+'</div>':'')+
+      (joined
+        ? '<button class="cs-join in" onclick="ApexServers.open(\''+s.id+'\')">Open</button>'
+        : '<button class="cs-join" onclick="ApexServers.join(\''+s.id+'\')">'+(s.type==='vip'?'Join with Pro':'Join')+'</button>')+
+    '</div>';
+  }
+
+  function paintDiscover(q){
+    CS._dq.q = q = (q||'').toLowerCase();
+    var all=document.getElementById('csAll'); if(!all) return;
+    var mine=document.getElementById('csMineSec');
+
+    function passt(s){
+      if(q && (s.name||'').toLowerCase().indexOf(q)<0 && (s.tagline||'').toLowerCase().indexOf(q)<0) return false;
+      if(CS._dq.tag && (s.tags||[]).indexOf(CS._dq.tag)<0) return false;
+      return true;
+    }
+    var liste=CS.discover.filter(passt);
+    liste.sort(function(a,b){
+      if(CS._dq.sort==='members') return (b.memberCount||0)-(a.memberCount||0);
+      if(CS._dq.sort==='new')     return msVon(b.createdAt)-msVon(a.createdAt);
+      return msVon(b.lastTs)-msVon(a.lastTs);       // Standard: zuletzt aktiv
+    });
+
+    /* Eigene Server zuerst und getrennt — man kommt meistens zurueck, nicht
+       zum Stoebern. */
+    var meine=liste.filter(function(s){ return (s.members||[]).indexOf(window.currentUID)>=0; });
+    var rest =liste.filter(function(s){ return (s.members||[]).indexOf(window.currentUID)<0; });
+    if(mine){
+      mine.innerHTML = meine.length
+        ? '<div class="cs-sec">Your servers</div><div class="cs-grid">'+meine.map(function(s){return card(s);}).join('')+'</div>'
+        : '';
+    }
+    var kopf=document.getElementById('csAllSec');
+    if(kopf) kopf.textContent = meine.length ? 'More servers' : 'All servers';
+
+    all.innerHTML = rest.map(function(s){ return card(s); }).join('')
+      || '<div class="cs-empty" style="grid-column:1/-1"><div class="big"><svg class=ic aria-hidden=true><use href=#i-search ></use></svg></div>'+
+         (q||CS._dq.tag ? 'Nothing matches that filter.' : 'No other servers yet.')+'</div>';
+  }
+
   function loadDiscover(){
     if(!ready()){ var a=document.getElementById('csAll'); if(a) a.innerHTML='<div class="cs-empty" style="grid-column:1/-1">Sign in to browse servers.</div>'; return; }
     db.collection('apexServers').where('discoverable','==',true).limit(80).get().then(function(snap){
@@ -32910,22 +33438,6 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
     });
   }
   CS.filter=function(q){ paintDiscover(q); };
-  function card(s, rank){
-    var joined=(s.members||[]).indexOf(window.currentUID)>=0;
-    var badge=s.type==='vip'?'<span class="cs-badge vip"><svg class=ic aria-hidden=true><use href=#i-star ></use></svg> VIP · Pro</span>':s.type==='public'?'<span class="cs-badge pub"><svg class=ic aria-hidden=true><use href=#i-globe ></use></svg> Public</span>':'<span class="cs-badge pub"><svg class=ic aria-hidden=true><use href=#i-globe ></use></svg> Community</span>';
-    return '<div class="cs-card">'+(rank?'<div class="cs-rank">#'+rank+'</div>':'')+
-      '<div class="cs-c-top"><div class="cs-c-ico">'+(s.icon||(s.name||'?')[0])+'</div><div><div class="cs-c-name">'+esc(s.name)+'</div><div class="cs-c-meta">'+((s.memberCount||(s.members||[]).length||0))+' members'+(s.official?' · official':'')+'</div></div></div>'+
-      badge+'<div class="cs-c-tag">'+esc(s.tagline||'')+'</div>'+
-      (joined?'<button class="cs-join in" onclick="ApexServers.open(\''+s.id+'\')">Open</button>':'<button class="cs-join" onclick="ApexServers.join(\''+s.id+'\')">'+(s.type==='vip'?'⭐ Join (Pro)':'Join')+'</button>')+
-    '</div>';
-  }
-  function paintDiscover(q){
-    q=(q||'').toLowerCase();
-    var top=document.getElementById('csTop'), all=document.getElementById('csAll'); if(!all) return;
-    var list=CS.discover.filter(function(s){ return !q || (s.name||'').toLowerCase().indexOf(q)>=0 || (s.tagline||'').toLowerCase().indexOf(q)>=0; });
-    if(top){ top.innerHTML=CS.discover.slice(0,5).map(function(s,i){return card(s,i+1);}).join('')||'<div class="cs-empty" style="grid-column:1/-1">No servers yet.</div>'; }
-    all.innerHTML=list.map(function(s){return card(s);}).join('')||'<div class="cs-empty" style="grid-column:1/-1">No servers match.</div>';
-  }
 
   /* ───────── join / leave ───────── */
   CS.join=function(sid){
@@ -32942,7 +33454,84 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
         .catch(function(e){ toast('⚠ '+(e.message||'join failed')); });
     });
   };
-  CS.joinByCode=function(){ var c=(document.getElementById('csCode').value||'').trim(); if(!c){toast('Enter an invite code');return;} CS.join(c); };
+  /* ───────── Einladungen mit Ablauf ──────────────────────────────────
+     Der Einladungscode war bisher die Server-Kennung selbst: unbegrenzt
+     gueltig, unbegrenzt oft nutzbar und nicht zurueckziehbar. Wer einmal
+     in einer Gruppe geteilt wurde, konnte auf ewig weitergereicht werden.
+     Jetzt sind es eigene Codes mit Ablauf und Nutzungszahl. Die alte
+     Kennung funktioniert weiter, damit bereits verschickte Links nicht
+     brechen. */
+  CS.invites=function(){
+    if(!CS.cur||!isServerAdmin(CS.cur)) return;
+    var sid=CS.cur.id;
+    db.collection('apexServers').doc(sid).collection('invites').orderBy('createdAt','desc').limit(20).get()
+      .then(function(snap){
+        var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({id:d.id}, d.data())); });
+        var jetzt=Date.now();
+        ApexDialog.alert(
+          '<div style="text-align:left">'+
+          (rows.length? rows.map(function(r){
+            var ab=r.expiresAt?msVon(r.expiresAt):0;
+            var tot = (ab && ab<jetzt) || (r.maxUses>0 && (r.uses||0)>=r.maxUses);
+            return '<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--rim);'+(tot?'opacity:.45':'')+'">'+
+              '<code style="flex:1">'+esc(r.id)+'</code>'+
+              '<span style="font-size:11px;color:var(--ink3)">'+(r.uses||0)+(r.maxUses>0?'/'+r.maxUses:'')+' used · '+
+                (ab? (tot?'expired':'until '+new Date(ab).toLocaleDateString()) : 'no expiry')+'</span>'+
+              '<button class="cs-mini" onclick="ApexServers.revoke(\''+esc(r.id)+'\')">Revoke</button></div>';
+          }).join('') : '<div style="color:var(--ink3);font-size:13px">No invite links yet.</div>')+
+          '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'+
+            '<button class="cs-join" style="width:auto;padding:8px 14px" onclick="ApexServers.newInvite(7,0)">New · 7 days</button>'+
+            '<button class="cs-join" style="width:auto;padding:8px 14px" onclick="ApexServers.newInvite(1,1)">New · 1 day, single use</button>'+
+            '<button class="cs-join in" style="width:auto;padding:8px 14px" onclick="ApexServers.newInvite(0,0)">New · never expires</button>'+
+          '</div></div>', { title:'Invite links', html:true });
+      })
+      .catch(function(e){ toast('⚠ '+(e.message||'cannot load invites')); });
+  };
+  function code(){
+    var z='abcdefghjkmnpqrstuvwxyz23456789', o='';
+    for(var i=0;i<8;i++) o+=z[Math.floor(Math.random()*z.length)];
+    return o;
+  }
+  CS.newInvite=function(tage, maxUses){
+    if(!CS.cur||!isServerAdmin(CS.cur)) return;
+    var c=code();
+    var doc={ code:c, serverId:CS.cur.id, createdBy:window.currentUID, createdAt:FV().serverTimestamp(),
+              uses:0, maxUses:maxUses||0, revoked:false };
+    if(tage>0) doc.expiresAt = Date.now() + tage*86400000;
+    db.collection('apexServers').doc(CS.cur.id).collection('invites').doc(c).set(doc)
+      .then(function(){
+        try{ navigator.clipboard.writeText(c); }catch(e){}
+        toast('Invite '+c+' copied');
+        CS.invites();
+      })
+      .catch(function(e){ toast('⚠ '+(e.message||'failed')); });
+  };
+  CS.revoke=function(c){
+    if(!CS.cur||!isServerAdmin(CS.cur)) return;
+    db.collection('apexServers').doc(CS.cur.id).collection('invites').doc(c).delete()
+      .then(function(){ toast('Revoked'); CS.invites(); })
+      .catch(function(e){ toast('⚠ '+(e.message||'failed')); });
+  };
+
+  /* Ein Code kann beides sein: eine Server-Kennung (alte Links) oder ein
+     Einladungscode. Erst als Einladung nachschlagen, sonst direkt oeffnen. */
+  CS.joinByCode=function(){
+    var c=(document.getElementById('csCode').value||'').trim();
+    if(!c){ toast('Enter an invite code'); return; }
+    if(!ready()){ toast('Sign in first'); return; }
+    db.collectionGroup('invites').where('code','==',c).limit(1).get().then(function(snap){
+      var tref=null;
+      snap.forEach(function(d){ tref=Object.assign({id:d.id}, d.data()); });
+      if(!tref){ CS.join(c); return; }                       // alter Link = Server-Kennung
+      var ab=msVon(tref.expiresAt);
+      if(tref.revoked)                                { toast('That invite was revoked'); return; }
+      if(ab && ab<Date.now())                         { toast('That invite has expired'); return; }
+      if(tref.maxUses>0 && (tref.uses||0)>=tref.maxUses){ toast('That invite is used up'); return; }
+      db.collection('apexServers').doc(tref.serverId).collection('invites').doc(c)
+        .set({ uses:FV().increment(1) },{merge:true}).catch(function(){});
+      CS.join(tref.serverId);
+    }).catch(function(){ CS.join(c); });                     // ohne Index: alter Weg
+  };
   CS.leave=function(){
     if(!CS.cur||!ready()) return;
     if(CS.cur.ownerUid===window.currentUID){ toast('Owners can’t leave their own server (delete it in Manage).'); return; }
@@ -32989,10 +33578,114 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
           '<input class="cs-txt" id="csTxt" placeholder="Message…" onkeydown="if(event.key===\'Enter\')ApexServers.send()" disabled>'+
           '<button class="cs-send" onclick="ApexServers.send()">Send</button>'+
           '<div class="cs-stickpop" id="csStick">'+STICKERS().map(function(x){return '<span onclick="ApexServers.sendSticker(\''+x+'\')">'+x+'</span>';}).join('')+'</div>'+
-        '</div></div></div></div>';
+        '</div></div></div>'+
+      /* Dritte Spalte: wer ist da. In einem Chat ist das nicht Kosmetik —
+         ohne sichtbare Anwesenheit schreibt niemand als Erster, und ein Raum,
+         der leer wirkt, bleibt leer. */
+      '<div class="cs-members" id="csMembers"><div class="cs-mem-h">Members</div>'+
+        '<div class="cs-mem-list" id="csMemList"></div></div>'+
+    '</div>';
     if(window.ApexSpaces) window.ApexSpaces.reset();
-    listenChannels(s.id); listenVoice(s.id);
+    listenChannels(s.id); listenVoice(s.id); listenPresence(s.id);
   }
+
+  /* ───────── Anwesenheit ────────────────────────────────────────────
+     Drei Signale, absteigend nach Wert:
+
+       im Sprachkanal   — jemand ist ansprechbar, sofort
+       online           — jemand ist da
+       hat heute gehandelt — der einzige Zustand, den ein Trading-Raum
+                             kennt und ein Chat-Programm nicht
+
+     Der Herzschlag laeuft alle 45 Sekunden. Als "online" gilt, wessen
+     letzter Schlag unter 2 Minuten her ist — kurz genug, dass ein
+     geschlossener Tab schnell verschwindet, lang genug, dass ein kurzer
+     Netzaussetzer niemanden ausblendet. */
+  var PRES_TAKT = 45000, PRES_FRIST = 120000;
+
+  function presRef(sid){ return db.collection('apexServers').doc(sid).collection('presence'); }
+
+  function heuteGehandelt(){
+    try {
+      var heute = new Date().toISOString().slice(0, 10);
+      var d = window.journalData && window.journalData[heute];
+      return !!(d && d.trades && d.trades.length);
+    } catch (e) { return false; }
+  }
+
+  function schlagen(sid){
+    if(!window.currentUID || !db) return;
+    presRef(sid).doc(window.currentUID).set({
+      uid: window.currentUID,
+      name: window.currentName || 'Trader',
+      ts: Date.now(),
+      traded: heuteGehandelt(),
+      voice: (CS.voice && CS.voice.room) ? CS.voice.room : null
+    }, { merge: true }).catch(function(){});
+  }
+
+  function listenPresence(sid){
+    if(CS.presUnsub){ CS.presUnsub(); CS.presUnsub=null; }
+    if(CS.presTimer){ clearInterval(CS.presTimer); CS.presTimer=null; }
+    if(!db || !window.currentUID) { renderMembers([]); return; }
+
+    schlagen(sid);
+    CS.presTimer = setInterval(function(){ schlagen(sid); }, PRES_TAKT);
+
+    CS.presUnsub = presRef(sid).onSnapshot(function(snap){
+      var jetzt = Date.now(), da = [];
+      snap.forEach(function(d){
+        var p = d.data();
+        if (p && p.ts && (jetzt - p.ts) < PRES_FRIST) da.push(p);
+      });
+      renderMembers(da);
+    }, function(){ renderMembers([]); });
+  }
+
+  function stopPresence(){
+    if(CS.presUnsub){ CS.presUnsub(); CS.presUnsub=null; }
+    if(CS.presTimer){ clearInterval(CS.presTimer); CS.presTimer=null; }
+  }
+
+  function renderMembers(da){
+    var el = document.getElementById('csMemList'); if(!el) return;
+    var s = CS.cur;
+    if(!da.length){
+      el.innerHTML = '<div class="cs-mem-empty">Nobody here right now.</div>';
+      var h0 = document.querySelector('#page-channels .cs-mem-h');
+      if(h0) h0.textContent = 'Members';
+      return;
+    }
+    /* Sprachkanal zuerst — das ist die Person, die man gerade erreichen kann. */
+    da.sort(function(a,b){
+      if(!!b.voice !== !!a.voice) return b.voice ? 1 : -1;
+      if(!!b.traded !== !!a.traded) return b.traded ? 1 : -1;
+      return String(a.name||'').localeCompare(String(b.name||''));
+    });
+    var h = document.querySelector('#page-channels .cs-mem-h');
+    if(h) h.textContent = 'Members — ' + da.length + ' here';
+
+    el.innerHTML = da.map(function(p){
+      var rolle = s ? roleOf(s, p.uid) : '';
+      var marke = rolle==='owner' ? '<span class="cs-role owner">OWNER</span>'
+                : rolle==='admin' ? '<span class="cs-role admin">ADMIN</span>'
+                : rolle==='mod'   ? '<span class="cs-role mod">MOD</span>' : '';
+      return '<div class="cs-mem" data-uid="'+esc(p.uid)+'" data-nm="'+esc(p.name||'Trader')+'">'
+        + '<span class="cs-mem-av">'+esc((p.name||'?')[0].toUpperCase())+'</span>'
+        + '<span class="cs-mem-nm">'+esc(p.name||'Trader')+'</span>'
+        + marke
+        + (p.voice ? '<span class="cs-mem-tag voice" title="In a voice channel">'
+            + '<svg class=ic aria-hidden=true><use href=#i-mic ></use></svg></span>' : '')
+        + (p.traded ? '<span class="cs-mem-tag traded" title="Logged a trade today">'
+            + '<svg class=ic aria-hidden=true><use href=#i-trend-up ></use></svg></span>' : '')
+        + '</div>';
+    }).join('');
+
+    el.querySelectorAll('.cs-mem').forEach(function(row){
+      row.onclick = function(ev){ CS.userCard(row.getAttribute('data-uid'), row.getAttribute('data-nm'), ev); };
+    });
+  }
+
   function listenChannels(sid){
     if(CS.chanUnsub){ CS.chanUnsub(); CS.chanUnsub=null; }
     CS.chanUnsub=db.collection('apexServers').doc(sid).collection('channels').orderBy('order','asc').onSnapshot(function(snap){
@@ -33170,41 +33863,251 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
     db.collection('apexServers').doc(CS.voice.sid).collection('voice').doc(window.currentUID).update({mic:CS.voice.micOn}).catch(function(){});
     vSound(CS.voice.micOn?'unmute':'mute'); toast(CS.voice.micOn?'🎤 Mic on':'🔇 Muted'); paintVoice(); };
   CS.chan=function(cid){ openChannel(cid); var sv=document.querySelector('#page-channels .cs-server'); if(sv && window.innerWidth<=760) sv.classList.add('show-chat'); };
-  CS.backToList=function(){ var sv=document.querySelector('#page-channels .cs-server'); if(sv) sv.classList.remove('show-chat'); };
+  CS.backToList=function(){
+    var w=document.querySelector('#page-channels .cs-wrap');
+    /* Auf dem Handy ist "zurueck" die Kanal-Schublade, auf dem Desktop gibt
+       es nichts zurueckzugehen — dort schliesst derselbe Knopf den Server. */
+    if(w && window.innerWidth<=760){ w.classList.toggle('chans-open'); return; }
+    var sv=document.querySelector('#page-channels .cs-server'); if(sv) sv.classList.remove('show-chat');
+  };
+  /* Server verlassen heisst zurueck in die Uebersicht — Fokus aus. */
+  CS.closeServer=function(){ CS.view='discover'; CS.cur=null; CS.curChan=null; stopPresence(); CS.render(); };
   function openChannel(cid){
     CS.curChan=cid; renderChannels();
     var c=CS.chans.filter(function(x){return x.id===cid;})[0]||{name:cid,icon:'#'};
     var muted=isMutedNow(CS.cur, window.currentUID);
     var rem=muteRemainingMs(CS.cur, window.currentUID);
     var head=document.getElementById('csChatHead');
-    if(head) head.innerHTML='<button class="cs-back" onclick="ApexServers.backToList()">‹</button><div class="nm">'+(c.icon||'#')+' '+esc(c.name)+'</div><div class="actions"><span style="font-size:11px;color:var(--ink3)">'+((CS.cur.memberCount||(CS.cur.members||[]).length||0))+' members</span></div>';
+    if(head) head.innerHTML='<button class="cs-back" onclick="ApexServers.backToList()">‹</button><div class="nm">'+(c.icon||'#')+' '+esc(c.name)+'</div><div class="actions"><input id="csFind" class="cs-find" placeholder="Search this channel…" aria-label="Search messages" oninput="ApexServers.find(this.value)"><span id="csPinBar" style="position:relative"></span><span style="font-size:11px;color:var(--ink3)">'+((CS.cur.memberCount||(CS.cur.members||[]).length||0))+' members</span></div>';
     var inp=document.getElementById('csTxt'); if(inp){ inp.disabled=muted; inp.placeholder=muted?('🔇 You are muted'+(rem>0?' — '+fmtDur(rem)+' left':'')):('Message #'+c.name+'…'); }
     listenMsgs(cid);
   }
+  /* ───────── Nachrichten ─────────────────────────────────────────────
+     Die Abfrage lautete `orderBy('ts','asc').limit(150)`. Aufsteigend
+     sortiert und begrenzt heisst: die AELTESTEN 150. Solange ein Kanal
+     darunter blieb, fiel es nicht auf — ab der 151. Nachricht fror er ein.
+     Neue Beitraege landeten in der Datenbank, sah aber niemand mehr.
+
+     Jetzt: ein Live-Fenster auf die JUENGSTEN Nachrichten (absteigend
+     abgefragt, clientseitig zurueckgedreht) plus aeltere Seiten, die beim
+     Hochscrollen nachgeladen werden. */
+  var MSG_PAGE = 60;
+
+  /* ───────── Antworten, Erwaehnungen, Angepinntes ────────────────────
+     Ein Chat ohne Bezug ist eine Wand: bei drei parallelen Gespraechen
+     weiss niemand mehr, worauf sich ein Satz bezieht. Antworten stellen
+     den Bezug her, Erwaehnungen holen jemanden dazu, Angepinntes haelt
+     fest, was nicht im Verlauf verschwinden darf. */
+  CS._reply = null;
+
+  function mitgliedNamen(){
+    var mi=(CS.cur&&CS.cur.memberInfo)||{}; var out=[];
+    Object.keys(mi).forEach(function(u){ out.push({uid:u, name:(mi[u]&&mi[u].name)||'Trader'}); });
+    return out;
+  }
+  /* @Name im Text finden. Laengster Treffer zuerst, sonst schluckt
+     "@Tom" das "@Tom Meier". */
+  function erwaehnte(text){
+    var leute=mitgliedNamen().sort(function(a,b){ return b.name.length-a.name.length; });
+    var t=String(text||'').toLowerCase(), tref=[];
+    leute.forEach(function(p){ if(t.indexOf('@'+p.name.toLowerCase())>=0) tref.push(p.uid); });
+    return tref.slice(0,10);
+  }
+  function markiereNamen(sicher){
+    var leute=mitgliedNamen().sort(function(a,b){ return b.name.length-a.name.length; });
+    leute.forEach(function(p){
+      var muster=new RegExp('@'+p.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+      sicher=sicher.replace(muster, function(m){ return '<span class="cs-at">'+m+'</span>'; });
+    });
+    return sicher;
+  }
+
+  CS.reply=function(mid){
+    var alle=(CS._older||[]).concat(CS._live||[]);
+    var m=alle.filter(function(x){ return x.id===mid; })[0]; if(!m) return;
+    CS._reply={ id:mid, name:m.d.fromName||'Trader', text:(m.d.text||(m.d.sticker?'sticker':'image')).slice(0,120) };
+    zeigeAntwortleiste();
+    var i=document.getElementById('csTxt'); if(i) i.focus();
+  };
+  CS.cancelReply=function(){ CS._reply=null; zeigeAntwortleiste(); };
+  function zeigeAntwortleiste(){
+    var row=document.querySelector('#page-channels .cs-inrow'); if(!row) return;
+    var alt=document.getElementById('csReplyBar'); if(alt) alt.remove();
+    if(!CS._reply) return;
+    var d=document.createElement('div'); d.id='csReplyBar'; d.className='cs-replybar';
+    d.innerHTML='<svg class=ic aria-hidden=true><use href=#i-reply ></use></svg>'+
+      '<span>Replying to <b>'+esc(CS._reply.name)+'</b> · '+esc(CS._reply.text)+'</span>'+
+      '<button class="cs-mini" onclick="ApexServers.cancelReply()" aria-label="Cancel reply">✕</button>';
+    row.appendChild(d);
+  }
+
+  CS.jumpTo=function(mid){
+    var el=document.querySelector('#csMsgs .cs-msg[data-mid="'+mid+'"]');
+    if(!el){ toast('That message is further back — load earlier messages'); return; }
+    el.scrollIntoView({block:'center', behavior:'smooth'});
+    el.classList.add('flash'); setTimeout(function(){ el.classList.remove('flash'); }, 1200);
+  };
+
+  CS.pin=function(mid, an){
+    if(!isMod(CS.cur)) return;
+    msgRef(CS.curChan).doc(mid).set({ pinned:!!an }, {merge:true})
+      .then(function(){ toast(an?'Pinned':'Unpinned'); })
+      .catch(function(e){ toast('⚠ '+(e.message||'failed')); });
+  };
+  CS.togglePins=function(){
+    var b=document.getElementById('csPinList'); if(b) b.classList.toggle('open');
+  };
+  function zeichnePins(){
+    var host=document.getElementById('csPinBar'); if(!host) return;
+    var pins=(CS._older||[]).concat(CS._live||[]).filter(function(m){ return m.d.pinned; });
+    if(!pins.length){ host.innerHTML=''; return; }
+    host.innerHTML='<button class="cs-pinbtn" onclick="ApexServers.togglePins()">'+
+        '<svg class=ic aria-hidden=true><use href=#i-pin ></use></svg> '+pins.length+' pinned</button>'+
+      '<div class="cs-pinlist" id="csPinList">'+pins.map(function(m){
+        return '<div class="cs-pinrow" onclick="ApexServers.jumpTo(\''+m.id+'\')">'+
+          '<b>'+esc(m.d.fromName||'Trader')+'</b> '+esc((m.d.text||'attachment').slice(0,120))+'</div>';
+      }).join('')+'</div>';
+  }
+
+  function msgRowEl(d, mid){
+    var ts=d.ts?new Date(d.ts.toMillis()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+    var nm=d.fromName||'Trader'; var uid=d.from||'';
+    var role=roleOf(CS.cur, uid);
+    var roleBadge = role==='owner'?'<span class="cs-role owner">OWNER</span>':role==='admin'?'<span class="cs-role admin">ADMIN</span>':role==='mod'?'<span class="cs-role mod">MOD</span>':'';
+    var content = d.sticker? '<div class="cs-mstk">'+esc(d.sticker)+'</div>' : '';
+    if(d.text) content+='<div class="cs-mt">'+markiereNamen(esc(d.text))+'</div>';
+    if(d.img) content+='<img class="cs-mimg" src="'+esc(d.img)+'" onclick="if(typeof openLightbox===\'function\')openLightbox(this.src)" alt="">';
+
+    var zitat = d.replyTo ? '<div class="cs-quote" data-jump="'+esc(d.replyTo.id||'')+'">'+
+        '<svg class=ic aria-hidden=true><use href=#i-reply ></use></svg>'+
+        '<b>'+esc(d.replyTo.name||'Trader')+'</b> '+esc(d.replyTo.text||'')+'</div>' : '';
+
+    var anMich = (d.mentions||[]).indexOf(window.currentUID)>=0;
+    var row=document.createElement('div');
+    row.className='cs-msg'+(anMich?' me':'')+(d.pinned?' pinned':'');
+    row.setAttribute('data-mid', mid);
+    row.innerHTML='<div class="cs-av" data-act="card">'+esc((nm[0]||'?').toUpperCase())+'</div>'+
+      '<div class="cs-mb">'+zitat+'<div class="cs-mh"><b data-act="card">'+esc(nm)+'</b>'+roleBadge+
+        '<span class="t">'+ts+'</span>'+(d.pinned?'<span class="cs-pinmark" title="Pinned"><svg class=ic aria-hidden=true><use href=#i-pin ></use></svg></span>':'')+
+      '</div>'+content+'</div>'+
+      '<div class="cs-macts">'+
+        '<button class="cs-mini" title="Reply" onclick="ApexServers.reply(\''+mid+'\')"><svg class=ic aria-hidden=true><use href=#i-reply ></use></svg></button>'+
+        (isMod(CS.cur)?'<button class="cs-mini" title="'+(d.pinned?'Unpin':'Pin')+'" onclick="ApexServers.pin(\''+mid+'\','+(d.pinned?'false':'true')+')"><svg class=ic aria-hidden=true><use href=#i-pin ></use></svg></button>':'')+
+      '</div>';
+    [].forEach.call(row.querySelectorAll('[data-act="card"]'), function(el){
+      el.style.cursor='pointer';
+      el.onclick=function(ev){ ev.stopPropagation(); CS.userCard(uid, nm, ev); };
+    });
+    var q=row.querySelector('.cs-quote');
+    if(q) q.onclick=function(){ CS.jumpTo(q.getAttribute('data-jump')); };
+    row.oncontextmenu=function(ev){ if(isMod(CS.cur) && uid){ ev.preventDefault(); CS.msgMenu(mid, uid, nm, ev); } };
+    return row;
+  }
+
+  /* Zeichnet aeltere Seiten + Live-Fenster als eine Liste.
+     `halten` bewahrt die Leseposition, wenn oben etwas eingefuegt wurde —
+     ohne das springt der Verlauf beim Nachladen weg. */
+  function paintMsgs(halten){
+    var box=document.getElementById('csMsgs'); if(!box) return;
+    var alleAlt = (CS._older||[]).concat(CS._live||[]);
+    /* Firestore kann nicht nach Teilzeichenketten suchen. Gesucht wird
+       deshalb in dem, was geladen ist — und die Zeile sagt ehrlich, wie
+       viele Nachrichten das sind, statt Vollstaendigkeit vorzutaeuschen. */
+    if(CS._find){
+      var n=CS._find.toLowerCase();
+      var geladen=alleAlt.length;
+      alleAlt=alleAlt.filter(function(m){
+        return ((m.d.text||'')+' '+(m.d.fromName||'')).toLowerCase().indexOf(n)>=0;
+      });
+      box.innerHTML='';
+      var kopf=document.createElement('div');
+      kopf.className='cs-findnote';
+      kopf.innerHTML=alleAlt.length+' of '+geladen+' loaded messages match “'+esc(CS._find)+'”'+
+        (CS._noMore?'':' · <button class="cs-mini" onclick="ApexServers.findMore()">load earlier and search again</button>');
+      box.appendChild(kopf);
+      if(!alleAlt.length) box.innerHTML+='<div class="cs-empty" style="padding:24px">Nothing found.</div>';
+      alleAlt.forEach(function(m){ box.appendChild(msgRowEl(m.d, m.id)); });
+      zeichnePins();
+      return;
+    }
+    if(!alleAlt.length){
+      box.innerHTML='<div class="cs-empty"><div class="big"><svg class=ic aria-hidden=true><use href=#i-chat ></use></svg></div>No messages yet — start the conversation.</div>';
+      return;
+    }
+    var vorherHoehe = box.scrollHeight, vorherTop = box.scrollTop;
+    /* Am Ende dranbleiben nur, wenn man auch am Ende WAR. Vorher sprang die
+       Ansicht bei jeder fremden Nachricht nach unten, mitten im Nachlesen. */
+    var warUnten = (box.scrollHeight - box.scrollTop - box.clientHeight) < 60;
+
+    box.innerHTML='';
+    if(CS._noMore===false && (CS._older||[]).length + (CS._live||[]).length >= MSG_PAGE){
+      var mehr=document.createElement('button');
+      mehr.className='cs-more'; mehr.textContent='Load earlier messages';
+      mehr.onclick=function(){ ladeAeltere(); };
+      box.appendChild(mehr);
+    }
+    alleAlt.forEach(function(m){ box.appendChild(msgRowEl(m.d, m.id)); });
+
+    zeichnePins();
+    if(halten){ box.scrollTop = vorherTop + (box.scrollHeight - vorherHoehe); }
+    else if(warUnten){ box.scrollTop = box.scrollHeight; }
+  }
+
+  CS._find='';
+  CS.find=function(q){ CS._find=(q||'').trim(); paintMsgs(true); };
+  CS.findMore=function(){ ladeAeltere(); };
+
+  function msgRef(cid){
+    return db.collection('apexServers').doc(CS.cur.id).collection('channels').doc(cid).collection('messages');
+  }
+
+  function ladeAeltere(){
+    if(CS._loadingOlder || CS._noMore) return;
+    var cid=CS.curChan; if(!cid) return;
+    var aeltester = (CS._older||[]).concat(CS._live||[])[0];
+    if(!aeltester || !aeltester.snap) return;
+    CS._loadingOlder = true;
+    msgRef(cid).orderBy('ts','desc').startAfter(aeltester.snap).limit(MSG_PAGE).get()
+      .then(function(snap){
+        if(CS.curChan!==cid) return;
+        var neu=[]; snap.forEach(function(doc){ neu.push({id:doc.id, d:doc.data(), snap:doc}); });
+        neu.reverse();
+        if(neu.length < MSG_PAGE) CS._noMore = true;
+        CS._older = neu.concat(CS._older||[]);
+        paintMsgs(true);
+      })
+      .catch(function(){ CS._noMore = true; })
+      .then(function(){ CS._loadingOlder = false; });
+  }
+
   function listenMsgs(cid){
     if(CS.msgUnsub){ CS.msgUnsub(); CS.msgUnsub=null; }
-    CS.msgUnsub=db.collection('apexServers').doc(CS.cur.id).collection('channels').doc(cid).collection('messages').orderBy('ts','asc').limit(150).onSnapshot(function(snap){
-      var box=document.getElementById('csMsgs'); if(!box||CS.curChan!==cid) return;
-      if(snap.empty){ box.innerHTML='<div class="cs-empty"><div class="big">👋</div>No messages yet — start the conversation.</div>'; return; }
-      box.innerHTML='';
-      snap.forEach(function(doc){ var d=doc.data();
-        var ts=d.ts?new Date(d.ts.toMillis()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-        var nm=d.fromName||'Trader'; var uid=d.from||''; var mid=doc.id;
-        var role=roleOf(CS.cur, uid);
-        var roleBadge = role==='owner'?'<span class="cs-role owner">OWNER</span>':role==='admin'?'<span class="cs-role admin">ADMIN</span>':role==='mod'?'<span class="cs-role mod">MOD</span>':'';
-        var content = d.sticker? '<div class="cs-mstk">'+esc(d.sticker)+'</div>' : '';
-        if(d.text) content+='<div class="cs-mt">'+esc(d.text)+'</div>';
-        if(d.img) content+='<img class="cs-mimg" src="'+esc(d.img)+'" onclick="if(typeof openLightbox===\'function\')openLightbox(this.src)" alt="">';
-        var row=document.createElement('div'); row.className='cs-msg';
-        row.innerHTML='<div class="cs-av" data-act="card">'+esc((nm[0]||'?').toUpperCase())+'</div><div class="cs-mb"><div class="cs-mh"><b data-act="card">'+esc(nm)+'</b>'+roleBadge+'<span class="t">'+ts+'</span></div>'+content+'</div>';
-        // Click name/avatar → user card
-        [].forEach.call(row.querySelectorAll('[data-act="card"]'), function(el){ el.style.cursor='pointer'; el.onclick=function(ev){ ev.stopPropagation(); CS.userCard(uid, nm, ev); }; });
-        // Right-click a message → moderator menu
-        row.oncontextmenu=function(ev){ if(isMod(CS.cur) && uid){ ev.preventDefault(); CS.msgMenu(mid, uid, nm, ev); } };
-        box.appendChild(row);
+    CS._older=[]; CS._live=[]; CS._noMore=false; CS._loadingOlder=false; CS._find='';
+
+    var box=document.getElementById('csMsgs');
+    if(box && !box._csScroll){
+      box._csScroll=true;
+      box.addEventListener('scroll', function(){
+        if(box.scrollTop < 80) ladeAeltere();
       });
-      box.scrollTop=box.scrollHeight;
-    }, function(e){ var box=document.getElementById('csMsgs'); var perm=/permission|insufficient|PERMISSION/i.test(e.message||'')||e.code==='permission-denied'; if(box) box.innerHTML='<div class="cs-empty"><div class="big"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg></div>'+(perm?'Chat is locked until the updated <b>firestore.rules</b> are published.<br><span style="font-size:12px;line-height:1.6">Paste the latest <code>firestore.rules</code> in Firebase Console \u2192 Firestore \u2192 Rules \u2192 Publish, then reload.</span>':('\u26a0 '+esc(e.message||'cannot load')))+'</div>'; });
+    }
+
+    CS.msgUnsub=msgRef(cid).orderBy('ts','desc').limit(MSG_PAGE).onSnapshot(function(snap){
+      if(CS.curChan!==cid) return;
+      var live=[]; snap.forEach(function(doc){ live.push({id:doc.id, d:doc.data(), snap:doc}); });
+      live.reverse();                       // juengste zuletzt, wie man liest
+      if(live.length < MSG_PAGE) CS._noMore = true;
+      /* Was im Live-Fenster steht, darf nicht doppelt aus den alten Seiten
+         kommen — beim Nachladen ueberschneiden sich die Raender sonst. */
+      var drin={}; live.forEach(function(m){ drin[m.id]=1; });
+      CS._older=(CS._older||[]).filter(function(m){ return !drin[m.id]; });
+      CS._live=live;
+      paintMsgs(false);
+    }, function(e){
+      var box=document.getElementById('csMsgs');
+      var perm=/permission|insufficient|PERMISSION/i.test(e.message||'')||e.code==='permission-denied';
+      if(box) box.innerHTML='<div class="cs-empty"><div class="big"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg></div>'+(perm?'Chat is locked until the updated <b>firestore.rules</b> are published.<br><span style="font-size:12px;line-height:1.6">Paste the latest <code>firestore.rules</code> in Firebase Console → Firestore → Rules → Publish, then reload.</span>':('⚠ '+esc(e.message||'cannot load')))+'</div>';
+    });
   }
 
   /* ───────── send (text / image / sticker) ───────── */
@@ -33223,7 +34126,10 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
     var inp=document.getElementById('csTxt'); var text=inp?(inp.value||'').trim():'';
     if(!text && !CS.pendingImg) return;
     var msg={}; if(text) msg.text=text; if(CS.pendingImg) msg.img=CS.pendingImg;
+    if(CS._reply) msg.replyTo={ id:CS._reply.id, name:CS._reply.name, text:CS._reply.text };
+    var tref=erwaehnte(text); if(tref.length) msg.mentions=tref;
     if(inp) inp.value=''; CS.pendingImg=null; paintPending();
+    CS._reply=null; zeigeAntwortleiste();
     doSend(msg);
   };
   function doSend(extra){
@@ -33244,7 +34150,9 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
     if(!ready()||!isPro()) return;
     var name=(document.getElementById('csName').value||'').trim().slice(0,40); if(!name){ toast('Enter a name'); return; }
     var tag=(document.getElementById('csTag').value||'').trim().slice(0,80);
-    var doc={ name:name, tagline:tag, icon:(name[0]||'S').toUpperCase(), type:'community', official:false,
+    var themen=[].slice.call(document.querySelectorAll('#csTopics .cs-chip.on')).map(function(b){return b.getAttribute('data-tag');}).slice(0,4);
+    var doc={ name:name, tagline:tag, tags:themen, lastTs:FV().serverTimestamp(),
+      icon:(name[0]||'S').toUpperCase(), type:'community', official:false,
       discoverable: CS._vis==='public', ownerUid:window.currentUID, ownerName:window.currentName||'Trader',
       admins:[window.currentUID], members:[window.currentUID], banned:[], muted:[], memberCount:1, createdAt:FV().serverTimestamp() };
     doc['memberInfo']={}; doc.memberInfo[window.currentUID]={name:window.currentName||'Trader'};
@@ -33282,7 +34190,8 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
         '<button onclick="ApexServers.modKick(\''+uid+'\',\''+nmS+'\')">Kick</button>'+
         (isServerAdmin(s)?'<button class="danger" onclick="ApexServers.mod(\''+uid+'\',\'ban\',\''+nmS+'\')">Ban</button>':'')+'</div>';
     }).join('');
-    var delBtn = owner ? '<button class="cs-mini" style="border-color:var(--loss);color:var(--loss)" onclick="ApexServers.deleteServer()">Delete server</button>' : '';
+    var invBtn = isServerAdmin(s) ? '<button class="cs-mini" onclick="ApexServers.invites()">Invite links</button>' : '';
+    var delBtn = (invBtn?invBtn+' ':'') + (owner ? '<button class="cs-mini" style="border-color:var(--loss);color:var(--loss)" onclick="ApexServers.deleteServer()">Delete server</button>' : '');
     var bInfo=s.bannedInfo||{}; var bannedArr=(s.banned||[]);
     var bannedHtml=bannedArr.length?bannedArr.map(function(uid){
       var b=bInfo[uid]||{}; var bn=b.name||(info[uid]&&info[uid].name)||uid.slice(0,8); var bnS=esc(bn).replace(/\x27/g,'');
@@ -33561,7 +34470,48 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
     }).catch(function(e){ toast('⚠ '+(e.message||'no channel found')); });
   };
 
-  CS.render=function(){ injectCSS(); buildPage(); ensureOfficial(); listenMine(); listenNotices(); if(CS.view==='server'&&CS.cur) renderServer(); else { CS.view='discover'; renderDiscover(); } };
+  /* Fokus an, sobald ein Server offen ist — und wieder aus, sobald man
+     zurueck in die Uebersicht geht. Ohne das Zuruecksetzen bliebe die
+     Scroll-Sperre am Dokument haengen. */
+  function setzeFokus(an){
+    var w=document.querySelector('#page-channels .cs-wrap');
+    if(!w) return;
+    w.classList.toggle('cs-focus', !!an);
+    w.classList.remove('chans-open');
+    document.body.classList.toggle('cs-focus-on', !!an);
+    if(an){
+      /* Jeder Vorfahre mit transform wuerde position:fixed brechen —
+         .page.active > * traegt die apexRise-Animation. */
+      for(var el=w.parentElement; el && el!==document.body; el=el.parentElement){
+        var cs=getComputedStyle(el);
+        if(cs.transform!=='none' || cs.filter!=='none' || cs.perspective!=='none') el.classList.add('cs-flat');
+      }
+    } else {
+      document.querySelectorAll('#page-channels .cs-flat').forEach(function(n){ n.classList.remove('cs-flat'); });
+    }
+  }
+  CS._focus=setzeFokus;
+
+  /* Verlaesst man die Seite bei offenem Server, bleibt die Scroll-Sperre
+     sonst am Dokument haengen und der Rest der App ist unbedienbar.
+     Derselbe Waechter wie in der Chart-Werkstatt. */
+  if(window.MutationObserver && !CS._pageObs){
+    CS._pageObs = new MutationObserver(function(){
+      var pg = document.getElementById('page-channels');
+      var w  = document.querySelector('#page-channels .cs-wrap.cs-focus');
+      if(!w) return;
+      var aktiv = pg && pg.classList.contains('active');
+      w.style.display = aktiv ? '' : 'none';
+      document.body.classList.toggle('cs-focus-on', !!aktiv);
+    });
+    CS._pageObs.observe(document.body, { attributes:true, subtree:true, attributeFilter:['class'] });
+  }
+
+  CS.render=function(){
+    injectCSS(); buildPage(); ensureOfficial(); listenMine(); listenNotices();
+    if(CS.view==='server'&&CS.cur){ renderServer(); setzeFokus(true); }
+    else { CS.view='discover'; stopPresence(); renderDiscover(); setzeFokus(false); }
+  };
 
   /* ───────── nav integration ───────── */
   function hook(){
@@ -33657,6 +34607,8 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
 #page-channels .sp-tab:hover{color:var(--ink)}
 #page-channels .sp-tab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700}
 #page-channels .sp-body{flex:1;overflow-y:auto;padding:14px 15px;min-height:0}
+#page-channels .sp-proof{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:3px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.03em;color:var(--ink3);background:var(--surface);border:0.5px solid var(--rim2);white-space:nowrap;vertical-align:1px}
+#page-channels .sp-proof.strong{color:var(--profit);border-color:rgba(var(--profit-rgb),0.35);background:rgba(var(--profit-rgb),0.08)}
 #page-channels .sp-card{border:0.5px solid var(--rim);border-radius:12px;background:var(--layer);padding:14px 15px;margin-bottom:12px}
 #page-channels .sp-h{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px}
 #page-channels .sp-s{font-size:12px;line-height:1.6;color:var(--ink3)}
@@ -33717,8 +34669,13 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
 
   /* ═══════════════ tab bar ═══════════════ */
 
+  /* Icons statt Emoji — dieselbe Kontur wie im Rest der App, und sie nehmen
+     die Farbe des aktiven Reiters an. */
+  function svgIc(n){ return '<svg class=ic aria-hidden=true><use href=#i-'+n+' ></use></svg>'; }
+
   SP.tabsHtml = function () {
-    var t = [['chat', '💬 Chat'], ['feed', '📣 Feed'], ['board', '🏆 Board'], ['library', '📚 Library']];
+    var t = [['chat', svgIc('chat') + ' Chat'], ['feed', svgIc('megaphone') + ' Feed'],
+             ['board', svgIc('trophy') + ' Board'], ['library', svgIc('book') + ' Library']];
     return '<div class="sp-tabs">' + t.map(function (x) {
       return '<button class="sp-tab' + (SP.tab === x[0] ? ' on' : '') + '" onclick="ApexSpaces.go(\'' + x[0] + '\')">' + x[1] + '</button>';
     }).join('') + '</div>';
@@ -34043,6 +35000,31 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
                 days: scope.days, _scope: scope };
     var tr = tradesIn(scope.days);
 
+    /* ── Herkunft der Zahlen ────────────────────────────────────────
+       Die Karte wird im Browser gerechnet. Wer die Anfrage abfaengt, koennte
+       jede Trefferquote eintragen — eine echte serverseitige Pruefung
+       braeuchte einen Dienst mit Lesezugriff auf das Journal, und das
+       Journal liegt bewusst in einem Dokument, das nur der Nutzer selbst
+       lesen darf.
+
+       Statt "verifiziert" zu behaupten, was nicht geprueft ist, faehrt die
+       Karte mit, WORAUS sie entstanden ist: wie viele Trades, ueber welchen
+       Zeitraum, und welcher Anteil davon vom Broker kam statt von Hand
+       getippt. Ein Leser sieht damit selbst, wie belastbar eine Zahl ist —
+       und ein synchronisierter Datensatz ist ein Beleg, den man nicht
+       nebenbei erfindet. */
+    var vonBroker = tr.filter(function (t) {
+      return !!(t.ctraderId || t.extId || t.source === 'sync' || t.broker);
+    }).length;
+    var tage = tr.map(function (t) { return t._date || ''; }).filter(Boolean).sort();
+    doc.proof = {
+      trades: tr.length,
+      synced: vonBroker,
+      syncedPct: tr.length ? Math.round(vonBroker / tr.length * 100) : 0,
+      from: tage[0] || null,
+      to: tage[tage.length - 1] || null
+    };
+
     if (scope.score && isProPlan()) {
       try {
         var c = window.ApexScore ? window.ApexScore.compute({ days: scope.days }) : null;
@@ -34100,6 +35082,26 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
 
   SP.sortBy = function (k) { SP.sort = k; paintBoard(); };
 
+  /* Herkunfts-Marke am Namen.
+     ------------------------------------------------------------------
+     Die Karte wird im Browser gerechnet und vom Nutzer geschrieben — es gibt
+     also keine Instanz, die "verifiziert" bestaetigen koennte. Statt eine
+     Sicherheit zu behaupten, die nicht existiert, zeigt die Marke die
+     PRUEFBARE Tatsache: wie viele Trades hinter der Zahl stehen und welcher
+     Anteil vom Broker kam statt von Hand getippt. Ein zu 90 % synchronisierter
+     Datensatz ueber 128 Trades ist etwas, das man nicht nebenbei erfindet;
+     eine Zahl aus 6 handgetippten Trades ist es nicht. Der Leser entscheidet. */
+  function herkunftChip(m) {
+    var p = m.proof;
+    if (!p || !p.trades) return '';
+    var stark = p.trades >= 30 && p.syncedPct >= 70;
+    var titel = p.trades + ' trades'
+      + (p.from && p.to ? ', ' + p.from + ' → ' + p.to : '')
+      + ', ' + p.syncedPct + '% straight from a broker connection';
+    return '<span class="sp-proof' + (stark ? ' strong' : '') + '" title="' + esc(titel) + '">'
+      + p.trades + ' · ' + p.syncedPct + '% synced</span>';
+  }
+
   function paintBoard() {
     var el = document.getElementById('spBoardList'); if (!el) return;
     var rows = SP.members.slice();
@@ -34139,7 +35141,8 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
       + rows.map(function (m, i) {
           var stale = m.lastDay ? (Date.now() - Date.parse(m.lastDay + 'T12:00:00')) > 7 * 86400000 : false;
           return '<tr><td class="rank">' + (i + 1) + '</td>'
-            + '<td class="who">' + esc(m.name || 'Trader') + (m.uid === uid() ? ' <span class="sp-chip">you</span>' : '') + '</td>'
+            + '<td class="who">' + esc(m.name || 'Trader') + (m.uid === uid() ? ' <span class="sp-chip">you</span>' : '')
+              + herkunftChip(m) + '</td>'
             + '<td class="num">' + (m.score != null ? m.score : '—') + '</td>'
             + '<td class="num">' + (m.trades != null ? m.trades : '—') + '</td>'
             + '<td class="num">' + (m.winRate != null ? m.winRate + '%' : '—') + '</td>'
@@ -42912,6 +43915,22 @@ self.addEventListener('message', async (ev) => {
     return rows.map(function (r) { return { time: r.time, value: r.close }; });
   }
 
+  /* Ein zerstoertes Chart-Objekt muss stumm sein, nicht explodieren.
+     ------------------------------------------------------------------
+     `destroy()` setzt chart und series auf null. Der Replay laedt seine
+     Kerzen aber asynchron: endet die Sitzung (oder wechselt der Nutzer den
+     Edge-Lab-Reiter), waehrend der Ladevorgang laeuft, kommt danach ein
+     `setBars()` auf genau diesem toten Objekt an — und warf
+     "null is not an object (evaluating 'this.series.applyOptions')".
+
+     Sichtbar wurde das als grauer Kasten: der Fehler flog VOR dem Aufbau der
+     Werkstatt, also blieb die halbfertige Oberflaeche mit leerem Chart
+     stehen. Genau der Zustand aus Jasons Screenshot.
+
+     Deshalb prueft jede Methode, die an der Serie arbeitet, zuerst, ob es
+     sie noch gibt — und tut sonst schlicht nichts. */
+  Instance.prototype._tot = function () { return !this.chart || !this.series; };
+
   Instance.prototype._build = function (LWC) {
     var th = theme();
     var self = this;
@@ -42986,6 +44005,7 @@ self.addEventListener('message', async (ev) => {
 
   /** Install a dataset. Everything is revealed unless replay mode takes over. */
   Instance.prototype.setBars = function (bars) {
+    if (this._tot()) return this;
     this._all = bars;
     this._rows = toRows(bars);
     var th = theme();
@@ -43263,6 +44283,7 @@ self.addEventListener('message', async (ev) => {
 
   /** Hand over exactly the revealed prefix — no look-ahead through an EMA. */
   Instance.prototype._paintOverlays = function () {
+    if (this._tot()) return;
     var n = this._shown, self = this;
     Object.keys(this._ovl).forEach(function (k) {
       var o = self._ovl[k];
@@ -43279,7 +44300,7 @@ self.addEventListener('message', async (ev) => {
 
   /** Reveal exactly `n` bars. Stepping forward appends in O(1). */
   Instance.prototype.reveal = function (n) {
-    if (!this._rows) return this;
+    if (this._tot() || !this._rows) return this;
     var rows = this._rowsForType || this._rows;
     n = Math.max(0, Math.min(rows.length, n | 0));
     if (n === this._shown) return this;
@@ -43397,6 +44418,7 @@ self.addEventListener('message', async (ev) => {
    * recreating them made a dragged stop flicker on every pointer move.
    */
   Instance.prototype.setLevels = function (lv) {
+    if (this._tot()) return this;
     var th = theme(), self = this;
     this._levels = lv;                 // remembered so a series-type switch can restore them
     var list = toLevelList(lv, th);
@@ -43429,6 +44451,7 @@ self.addEventListener('message', async (ev) => {
      the library's own canvas handlers and can stop the chart from panning when
      the gesture belongs to a level instead. */
   Instance.prototype.enableLevelDrag = function (h) {
+    if (this._tot()) return this;
     var self = this;
     if (this._dragBound) { this._dragH = h || {}; return this; }
     this._dragBound = true;
@@ -45707,6 +46730,11 @@ self.addEventListener('message', async (ev) => {
     var chart = document.getElementById('arpChart');
     var tools = body.querySelector('.arp-tools');
     if (!chart || !tools) return;
+    /* Das Laden dauert; in der Zwischenzeit kann der Nutzer die Seite
+       verlassen haben. Ohne diese Pruefung legte sich die bildschirmfuellende
+       Werkstatt anschliessend ueber das Journal. */
+    var seite = body.closest('.page');
+    if (seite && !seite.classList.contains('active')) return;
 
     var groups = [].slice.call(tools.children);
     var toolGroup = document.getElementById('arpToolGroup');
@@ -46751,7 +47779,17 @@ self.addEventListener('message', async (ev) => {
 
       if (has('data-arp-more')) {
         var m = document.getElementById('arpToolMenu');
-        if (m) m.style.display = (m.style.display === 'none') ? '' : 'none';
+        if (!m) return;
+        var auf = (m.style.display === 'none');
+        m.style.display = auf ? '' : 'none';
+        /* In der Werkstatt sitzt die Leiste in einer 46px schmalen Spalte mit
+           `overflow:auto` — die beschneidet alles, was aus ihr herausragt.
+           Das 250px breite Menue blieb dadurch auf Glyphenbreite stehen:
+           Bezeichnungen und die Favoriten-Sterne waren abgeschnitten. Am
+           Bildschirm verankert entkommt es der Beschneidung. */
+        if (auf && window.ApexDraw && ApexDraw.placeList) {
+          ApexDraw.placeList(m, e.target.closest('[data-arp-more]'));
+        }
         return;
       }
 
@@ -46763,7 +47801,14 @@ self.addEventListener('message', async (ev) => {
         if (grp) {
           grp.innerHTML = toolButtonsHtml() + toolMenuHtml();
           var open = document.getElementById('arpToolMenu');
-          if (open) open.style.display = '';        // keep the menu up while starring
+          if (open) {
+            open.style.display = '';               // keep the menu up while starring
+            /* Der Knoten ist nach innerHTML ein neuer — Lage neu setzen,
+               sonst faellt das Menue in die schmale Spalte zurueck. */
+            if (window.ApexDraw && ApexDraw.placeList) {
+              ApexDraw.placeList(open, grp.querySelector('[data-arp-more]'));
+            }
+          }
           var cur = S.draw ? S.draw.tool : 'cursor';
           grp.querySelectorAll('[data-arp-tool]').forEach(function (b) {
             b.classList.toggle('on', b.getAttribute('data-arp-tool') === cur);
@@ -47400,6 +48445,12 @@ self.addEventListener('message', async (ev) => {
         clockEl.textContent = 'Loading history… ' + Math.round(done / total * 100) + '%';
       });
     }).then(function () {
+      /* Die Sitzung kann waehrend des Ladens beendet worden sein — der Nutzer
+         drueckt "End session" oder wechselt den Edge-Lab-Reiter, und
+         teardown() zerstoert den Chart. Ohne diesen Ausstieg lief die Kette
+         auf einem toten Objekt weiter und liess eine halbfertige Oberflaeche
+         mit grauem Chart stehen. */
+      if (!S.chart || !S.session || S.chart._tot()) return;
       // Drawings attach after data exists, so the first projection has real
       // coordinates to work with. They persist per instrument.
       if (window.ApexDraw) {
@@ -47647,6 +48698,32 @@ self.addEventListener('message', async (ev) => {
   'use strict';
 
   var FIB = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+
+  /* ─────────────── Fibonacci-Einstellungen ───────────────
+     Vorher waren die sieben Stufen fest verdrahtet: keine Erweiterungen,
+     keine Farbe pro Stufe, keine Fuellung. Bei TradingView ist genau das
+     der Dialog, den man am haeufigsten oeffnet.
+
+     Die Voreinstellung entspricht dem alten Verhalten Zeichen fuer Zeichen —
+     eine bestehende Zeichnung ohne `s.fib` sieht also unveraendert aus. */
+  var FIB_DEFAULT = [
+    { v: 0,     on: true  }, { v: 0.236, on: true  }, { v: 0.382, on: true  },
+    { v: 0.5,   on: true  }, { v: 0.618, on: true  }, { v: 0.786, on: true  },
+    { v: 1,     on: true  },
+    /* Erweiterungen — aus, aber einen Klick entfernt. Wer mit Zielzonen
+       arbeitet, braucht genau diese drei. */
+    { v: 1.272, on: false }, { v: 1.618, on: false }, { v: 2.618, on: false }
+  ];
+  function fibCfg(s) {
+    var c = s.fib || {};
+    return {
+      levels: (c.levels && c.levels.length) ? c.levels
+              : FIB_DEFAULT.map(function (l) { return { v: l.v, on: l.on }; }),
+      extend: c.extend || 'right',      // wie bisher: bis zum rechten Rand
+      fill:   !!c.fill,
+      labels: c.labels === undefined ? 'both' : c.labels   // 'both'|'pct'|'price'|'none'
+    };
+  }
 
   /* [id, glyph, label, needs two anchors?]
      `cursor` and `erase` are modes rather than shapes and stay pinned in the
@@ -48078,21 +49155,55 @@ self.addEventListener('message', async (ev) => {
 
     } else if (s.type === 'fib') {
       if (y0 == null || y1 == null) { ctx.restore(); return; }
-      var left = x0 == null ? 0 : Math.min(x0, x1 == null ? w : x1);
-      var right = w;
+      var cfg = fibCfg(s);
+      var xa = x0 == null ? 0 : x0, xb = x1 == null ? w : x1;
+      var left  = Math.min(xa, xb), right = Math.max(xa, xb);
+      if (cfg.extend === 'right') right = w;
+      else if (cfg.extend === 'both') { left = 0; right = w; }
       var hi = p0.p, lo = p1.p;
-      for (var i = 0; i < FIB.length; i++) {
-        var lv = FIB[i];
-        var price = hi + (lo - hi) * lv;
-        var y = this._y(price);
-        if (y == null) continue;
+
+      /* Erst die Faechen, dann die Linien darueber — sonst deckt eine
+         Fuellung die Linie darunter zur Haelfte zu. */
+      var pts = [];
+      for (var i = 0; i < cfg.levels.length; i++) {
+        var L = cfg.levels[i];
+        if (!L.on) { pts.push(null); continue; }
+        var yy = this._y(hi + (lo - hi) * L.v);
+        pts.push(yy == null ? null : { y: yy, L: L });
+      }
+      if (cfg.fill) {
+        var vor = null;
+        for (var f = 0; f < pts.length; f++) {
+          if (!pts[f]) continue;
+          if (vor) {
+            ctx.globalAlpha = 0.07;
+            ctx.fillStyle = pts[f].L.c || s.color;
+            ctx.fillRect(left, Math.min(vor.y, pts[f].y), right - left, Math.abs(pts[f].y - vor.y));
+          }
+          vor = pts[f];
+        }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = s.color;
+      }
+
+      for (var k = 0; k < pts.length; k++) {
+        if (!pts[k]) continue;
+        var lv = pts[k].L.v, y = pts[k].y;
+        ctx.strokeStyle = pts[k].L.c || s.color;
+        ctx.fillStyle   = pts[k].L.c || s.color;
         ctx.globalAlpha = (lv === 0 || lv === 1) ? 1 : 0.75;
         ctx.setLineDash((lv === 0 || lv === 1) ? [] : [4, 3]);
         ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
         ctx.setLineDash([]);
         ctx.globalAlpha = 1;
-        ctx.fillText((lv * 100).toFixed(1).replace('.0', '') + '%  ' + this._fmtPrice(price), left + 5, y - 3);
+        if (cfg.labels !== 'none') {
+          var pct = (lv * 100).toFixed(1).replace('.0', '') + '%';
+          var pr  = this._fmtPrice(hi + (lo - hi) * lv);
+          var txt = cfg.labels === 'pct' ? pct : cfg.labels === 'price' ? pr : (pct + '  ' + pr);
+          ctx.fillText(txt, left + 5, y - 3);
+        }
       }
+      ctx.strokeStyle = s.color; ctx.fillStyle = s.color;
 
     } else if (s.type === 'text') {
       if (x0 == null || y0 == null) { ctx.restore(); return; }
@@ -48282,6 +49393,138 @@ self.addEventListener('message', async (ev) => {
     return null;
   };
 
+  /* ─────────────── Einstellungen einer Zeichnung ───────────────
+     Bisher liess sich an einer fertigen Zeichnung nur Farbe, Staerke und
+     Linienstil aendern. Fuer Fibonacci ist das zu wenig: welche Stufen
+     ueberhaupt gezeigt werden, wie weit die Linien laufen und ob die Baender
+     gefuellt sind, entscheidet dort ueber die Lesbarkeit. Bei TradingView ist
+     genau das der Dialog hinter dem Zahnrad.
+
+     Bewusst am Bildschirm verankert (wie Menue und Liste): die Werkzeugspalte
+     der Werkstatt scrollt und wuerde alles beschneiden, was aus ihr ragt. */
+  function fibDialog(draw, shape, btn) {
+    var alt = document.querySelector('.apd-dlg');
+    if (alt) alt.remove();
+    var cfg = fibCfg(shape);
+    /* Auf einer Kopie arbeiten: Abbrechen muss den Ausgangszustand
+       zurueckgeben koennen, auch nach mehreren Klicks. */
+    var arbeit = JSON.parse(JSON.stringify(cfg));
+    var vorher = JSON.stringify(shape.fib || null);
+
+    var box = document.createElement('div');
+    box.className = 'apd-dlg';
+
+    function zeichne() {
+      box.innerHTML =
+        '<div class="apd-dlg-h"><b>Fibonacci retracement</b>' +
+          '<button class="apd-dlg-x" data-fd-close aria-label="Close">✕︎</button></div>' +
+
+        '<div class="apd-dlg-row"><label>Extend</label>' +
+          '<select data-fd-extend>' +
+            ['none|Not extended', 'right|To the right', 'both|Both sides'].map(function (o) {
+              var p = o.split('|');
+              return '<option value="' + p[0] + '"' + (arbeit.extend === p[0] ? ' selected' : '') + '>' + p[1] + '</option>';
+            }).join('') +
+          '</select></div>' +
+
+        '<div class="apd-dlg-row"><label>Labels</label>' +
+          '<select data-fd-labels>' +
+            ['both|Percent + price', 'pct|Percent only', 'price|Price only', 'none|None'].map(function (o) {
+              var p = o.split('|');
+              return '<option value="' + p[0] + '"' + (arbeit.labels === p[0] ? ' selected' : '') + '>' + p[1] + '</option>';
+            }).join('') +
+          '</select></div>' +
+
+        '<label class="apd-dlg-chk"><input type="checkbox" data-fd-fill' + (arbeit.fill ? ' checked' : '') +
+          '> Shade the bands between levels</label>' +
+
+        '<div class="apd-dlg-h2">Levels</div>' +
+        '<div class="apd-dlg-lv">' + arbeit.levels.map(function (L, i) {
+          return '<div class="apd-lv">' +
+            '<input type="checkbox" data-fd-on="' + i + '"' + (L.on ? ' checked' : '') +
+              ' aria-label="Show level ' + L.v + '">' +
+            '<input class="apd-lv-v" type="number" step="0.001" value="' + L.v + '" data-fd-v="' + i + '"' +
+              ' aria-label="Level value">' +
+            '<input class="apd-lv-c" type="color" value="' + (L.c || farbeVon(shape)) + '" data-fd-c="' + i + '"' +
+              ' aria-label="Level colour">' +
+            (arbeit.levels.length > 1 ? '<button class="apd-lv-x" data-fd-del="' + i + '" aria-label="Remove level">✕︎</button>' : '') +
+          '</div>';
+        }).join('') + '</div>' +
+        '<button class="apd-dlg-add" data-fd-add>+ Add level</button>' +
+
+        '<div class="apd-dlg-f">' +
+          '<button class="apd-dlg-b" data-fd-reset>Reset</button>' +
+          '<span style="flex:1"></span>' +
+          '<button class="apd-dlg-b" data-fd-cancel>Cancel</button>' +
+          '<button class="apd-dlg-b prim" data-fd-ok>Done</button>' +
+        '</div>';
+    }
+
+    function farbeVon(sh) {
+      var c = sh.color || '#c9a84c';
+      return /^#[0-9a-f]{6}$/i.test(c) ? c : '#c9a84c';
+    }
+    /* Uebernehmen heisst: auf die Form schreiben und neu zeichnen — man sieht
+       jede Aenderung sofort am Chart, ohne den Dialog zu schliessen. */
+    function uebernehmen() {
+      shape.fib = JSON.parse(JSON.stringify(arbeit));
+      draw._commit();
+    }
+
+    zeichne();
+    document.body.appendChild(box);
+    placeList(box, btn);
+
+    box.addEventListener('click', function (e) {
+      var t = e.target.closest ? e.target.closest('button') : null;
+      if (!t) return;
+      e.preventDefault(); e.stopPropagation();
+      var i;
+      if (t.hasAttribute('data-fd-add')) {
+        arbeit.levels.push({ v: 1.5, on: true });
+        zeichne(); placeList(box, btn); uebernehmen(); return;
+      }
+      if ((i = t.getAttribute('data-fd-del')) != null) {
+        arbeit.levels.splice(+i, 1);
+        zeichne(); placeList(box, btn); uebernehmen(); return;
+      }
+      if (t.hasAttribute('data-fd-reset')) {
+        arbeit = { levels: FIB_DEFAULT.map(function (l) { return { v: l.v, on: l.on }; }),
+                   extend: 'right', fill: false, labels: 'both' };
+        zeichne(); placeList(box, btn); uebernehmen(); return;
+      }
+      if (t.hasAttribute('data-fd-cancel')) {
+        shape.fib = vorher === 'null' ? null : JSON.parse(vorher);
+        if (!shape.fib) delete shape.fib;
+        draw._commit(); box.remove(); return;
+      }
+      if (t.hasAttribute('data-fd-ok') || t.hasAttribute('data-fd-close')) {
+        uebernehmen(); box.remove(); return;
+      }
+    });
+
+    box.addEventListener('input', function (e) {
+      var t = e.target, i;
+      if (t.hasAttribute('data-fd-fill')) arbeit.fill = t.checked;
+      else if (t.hasAttribute('data-fd-extend')) arbeit.extend = t.value;
+      else if (t.hasAttribute('data-fd-labels')) arbeit.labels = t.value;
+      else if ((i = t.getAttribute('data-fd-on')) != null) arbeit.levels[+i].on = t.checked;
+      else if ((i = t.getAttribute('data-fd-v')) != null) {
+        var v = parseFloat(t.value); if (!isNaN(v)) arbeit.levels[+i].v = v;
+      } else if ((i = t.getAttribute('data-fd-c')) != null) arbeit.levels[+i].c = t.value;
+      else return;
+      uebernehmen();
+    });
+    /* Klick daneben schliesst — mit dem zuletzt gesehenen Zustand, weil jede
+       Aenderung schon uebernommen wurde. */
+    setTimeout(function () {
+      document.addEventListener('pointerdown', function zu(ev) {
+        if (!box.contains(ev.target)) { box.remove(); document.removeEventListener('pointerdown', zu, true); }
+      }, true);
+    }, 0);
+    return box;
+  }
+
   /* ─────────────── Stilleiste ───────────────
      Erscheint an der ausgewaehlten Zeichnung: Farbe, Staerke, Linienstil,
      verdoppeln, sperren, loeschen.
@@ -48314,6 +49557,7 @@ self.addEventListener('message', async (ev) => {
       }).join('') + '</div>' +
       '<i class="apd-sbar-sep"></i>' +
       '<div class="apd-sbar-g">' +
+        '<button class="apd-sbar-b" data-sb-cfg title="Settings" style="display:none">⚙︎</button>' +
         '<button class="apd-sbar-b" data-sb-dup title="Duplicate">⧉</button>' +
         '<button class="apd-sbar-b" data-sb-lock title="Lock in place">🔓</button>' +
         '<button class="apd-sbar-b danger" data-sb-del title="Delete (Del)">✕︎</button>' +
@@ -48331,6 +49575,7 @@ self.addEventListener('message', async (ev) => {
       if (col)      { self._push(); sh.color = col; self._commit(); }
       else if (wd)  { self._push(); sh.width = parseFloat(wd); self._commit(); }
       else if (dh)  { self._push(); sh.dash = dh; self._commit(); }
+      else if (b.hasAttribute('data-sb-cfg')) { fibDialog(self, sh, b); return; }
       else if (b.hasAttribute('data-sb-lock')) { self.toggleLocked(sh.id); }
       else if (b.hasAttribute('data-sb-del'))  { self._push(); self.remove(sh.id); }
       else if (b.hasAttribute('data-sb-dup')) {
@@ -48387,6 +49632,10 @@ self.addEventListener('message', async (ev) => {
     });
     var lk = bar.querySelector('[data-sb-lock]');
     if (lk) { lk.textContent = s.locked ? '🔒' : '🔓'; lk.classList.toggle('on', !!s.locked); }
+    /* Das Zahnrad erscheint nur, wo es auch etwas einzustellen gibt —
+       eine Trendlinie hat ausser Farbe/Staerke/Stil nichts weiter. */
+    var cf = bar.querySelector('[data-sb-cfg]');
+    if (cf) cf.style.display = (s.type === 'fib') ? '' : 'none';
   };
 
   Draw.prototype.select = function (id) {
@@ -49046,6 +50295,41 @@ self.addEventListener('message', async (ev) => {
       '.apd-list-b:hover{color:var(--ink);background:var(--surface)}',
       '.apd-list-b.on{color:var(--gold)}',
       '.apd-list-b.danger:hover{color:var(--loss)}',
+      /* Einstellungs-Dialog einer Zeichnung (Fibonacci). Am Bildschirm
+         verankert, siehe placeList(). */
+      '.apd-dlg{position:fixed;z-index:100030;width:300px;max-height:min(560px,90vh);overflow:auto;' +
+        'background:var(--raised);border:0.5px solid var(--rim2);border-radius:12px;padding:10px;' +
+        'box-shadow:0 18px 44px rgba(0,0,0,0.5);font-family:var(--font-body)}',
+      '.apd-dlg-h{display:flex;align-items:center;justify-content:space-between;gap:8px;' +
+        'font-size:12px;color:var(--ink);margin-bottom:10px}',
+      '.apd-dlg-x{background:none;border:0;color:var(--ink3);cursor:pointer;font-size:12px;padding:2px 4px}',
+      '.apd-dlg-x:hover{color:var(--loss)}',
+      '.apd-dlg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}',
+      '.apd-dlg-row label{flex:0 0 74px;font-size:11px;color:var(--ink3)}',
+      '.apd-dlg-row select{flex:1;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;' +
+        'color:var(--ink);font-family:var(--font-body);font-size:12px;padding:5px 7px;outline:none}',
+      '.apd-dlg-chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);' +
+        'cursor:pointer;margin:2px 0 10px}',
+      '.apd-dlg-chk input{accent-color:var(--gold);cursor:pointer}',
+      '.apd-dlg-h2{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);' +
+        'border-top:0.5px solid var(--rim);padding-top:8px;margin-bottom:6px}',
+      '.apd-lv{display:flex;align-items:center;gap:6px;margin-bottom:4px}',
+      '.apd-lv input[type=checkbox]{accent-color:var(--gold);cursor:pointer;flex:none}',
+      '.apd-lv-v{flex:1;min-width:0;background:var(--surface);border:0.5px solid var(--rim2);border-radius:6px;' +
+        'color:var(--ink);font-family:var(--font-mono);font-size:12px;padding:4px 6px;outline:none}',
+      '.apd-lv-c{flex:none;width:28px;height:24px;padding:0;border:0.5px solid var(--rim2);border-radius:6px;' +
+        'background:none;cursor:pointer}',
+      '.apd-lv-x{flex:none;background:none;border:0;color:var(--ink4);cursor:pointer;font-size:11px;padding:2px 3px}',
+      '.apd-lv-x:hover{color:var(--loss)}',
+      '.apd-dlg-add{width:100%;margin-top:6px;background:none;border:0.5px dashed var(--rim3);border-radius:8px;' +
+        'color:var(--ink3);cursor:pointer;font-family:var(--font-body);font-size:11px;padding:5px}',
+      '.apd-dlg-add:hover{color:var(--gold);border-color:var(--gold-line);border-style:solid}',
+      '.apd-dlg-f{display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:10px;' +
+        'border-top:0.5px solid var(--rim)}',
+      '.apd-dlg-b{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink2);' +
+        'cursor:pointer;font-family:var(--font-body);font-size:12px;padding:6px 12px}',
+      '.apd-dlg-b:hover{border-color:var(--gold-line);color:var(--ink)}',
+      '.apd-dlg-b.prim{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}',
       '@media(max-width:760px){.apd-g{flex-wrap:wrap;justify-content:center}.apd-t{width:38px;height:38px;font-size:15px}.apd-sw{width:22px;height:22px}}'
     ].join('\n');
     document.head.appendChild(s);
@@ -49214,7 +50498,12 @@ self.addEventListener('message', async (ev) => {
       var menu = host.querySelector('[data-apd-menu]');
 
       if (el.hasAttribute('data-apd-more')) {
-        if (menu) menu.style.display = (menu.style.display === 'none') ? '' : 'none';
+        if (!menu) return;
+        var auf = (menu.style.display === 'none');
+        menu.style.display = auf ? '' : 'none';
+        /* Am Bildschirm verankern — siehe placeList(): in der schmalen
+           Werkzeugspalte der Werkstatt wuerde das Menue sonst beschnitten. */
+        if (auf) placeList(menu, el);
         return;
       }
       var tool = el.getAttribute('data-apd-tool');
@@ -49231,7 +50520,13 @@ self.addEventListener('message', async (ev) => {
         toggleFav(fav);
         host.innerHTML = barHtml(d);
         var m2 = host.querySelector('[data-apd-menu]');
-        if (m2) m2.style.display = '';     // stay open while starring
+        if (m2) {
+          m2.style.display = '';           // stay open while starring
+          /* barHtml() baut die Leiste neu — das Menue ist ein anderer Knoten
+             und braucht seine Lage erneut, sonst springt es in die Spalte
+             zurueck und wird wieder beschnitten. */
+          placeList(m2, host.querySelector('[data-apd-more]'));
+        }
         return;
       }
       var col = el.getAttribute('data-apd-color');
@@ -50723,11 +52018,17 @@ self.addEventListener('message', async (ev) => {
       }).map(function (name, k) {
         var col = COLORS[(ci + k) % COLORS.length];
         var mid = (name === 'mid');
+        /* Eigene Farbe schlaegt die Rotation — aber nur fuer die ERSTE Linie.
+           Bei MACD oder Bollinger muessen Linie, Signal und Baender
+           unterscheidbar bleiben; eine gemeinsame Farbe waere dort keine
+           Einstellung, sondern ein Verlust. */
+        if (k === 0 && ch.color) col = ch.color;
         return {
           name: name,
           values: res[name],
           color: mid ? COLORS[0] : col,
-          width: (name === 'upper' || name === 'lower' || mid) ? 1 : 1.6,
+          width: (k === 0 && ch.width) ? ch.width
+                 : (name === 'upper' || name === 'lower' || mid) ? 1 : 1.6,
           style: (name === 'upper' || name === 'lower') ? 2 : 0,
           type: (d.histOutput === name) ? 'hist' : (d.style === 'dots' ? 'dots' : 'line'),
           last: isPane && k === 0
@@ -53686,6 +54987,9 @@ self.addEventListener('message', async (ev) => {
       '.aiu-row input{width:62px;background:var(--surface);border:0.5px solid var(--rim);border-radius:4px;color:var(--ink);padding:3px 6px;font-size:11px;text-align:right;font-variant-numeric:tabular-nums}',
       '.aiu-row select{background:var(--surface);border:0.5px solid var(--rim);border-radius:4px;color:var(--ink);padding:3px 6px;font-size:11px;font-family:var(--font-body)}',
       '.aiu-row .u{font-size:11px;color:var(--ink4)}',
+      '.aiu-row input.aiu-dot{width:18px;height:18px;padding:0;border:0.5px solid var(--rim2);' +
+        'border-radius:50%;background:none;cursor:pointer;flex:none;overflow:hidden}',
+      '.aiu-row select.aiu-w{width:auto;min-width:58px}',
       '.aiu-x{background:none;border:0;color:var(--ink4);cursor:pointer;font-size:13px;margin-left:auto;padding:2px 6px}',
       '.aiu-x:hover{color:var(--loss)}',
       '.aiu-add{display:flex;gap:6px;align-items:center;margin-top:9px;flex-wrap:wrap}',
@@ -53708,9 +55012,13 @@ self.addEventListener('message', async (ev) => {
       (l.length ? l.map(function (c, i) {
         var d = Ind.DEF[c.id]; if (!d) return '';
         var q = Ind.fillParams(c.id, c.params);
-        var col = Ind.colors[i % Ind.colors.length];
+        var col = c.color || Ind.colors[i % Ind.colors.length];
         return '<div class="aiu-row">' +
-          '<i class="aiu-dot" style="background:' + col + '"></i>' +
+          /* Der Punkt war bisher nur Anzeige. Jetzt ist er der Farbwaehler —
+             die Farbe eines Indikators war die haeufigste Nachfrage und lag
+             als einziger Wert nicht in der Hand des Nutzers. */
+          '<input class="aiu-dot" type="color" data-aiu-color="' + i + '" value="' +
+            (/^#[0-9a-f]{6}$/i.test(col) ? col : '#c9a84c') + '" title="Line colour" aria-label="Line colour">' +
           '<span class="aiu-name">' + esc(d.label) + '</span>' +
           d.params.map(function (p) {
             return '<span class="u">' + esc(p[1]) + '</span>' +
@@ -53721,7 +55029,11 @@ self.addEventListener('message', async (ev) => {
                 return '<option value="' + s[0] + '"' + (s[0] === (c.params && c.params.src || 'close') ? ' selected' : '') + '>' + esc(s[1]) + '</option>';
               }).join('') + '</select>'
             : '') +
-          '<button class="aiu-x" data-aiu-del="' + i + '" title="Remove" aria-label="Remove indicator">✕</button>' +
+          '<select class="aiu-w" data-aiu-width="' + i + '" title="Line width" aria-label="Line width">' +
+            [1, 1.6, 2.5, 4].map(function (w) {
+              return '<option value="' + w + '"' + ((c.width || 1.6) === w ? ' selected' : '') + '>' + w + 'px</option>';
+            }).join('') + '</select>' +
+          '<button class="aiu-x" data-aiu-del="' + i + '" title="Remove" aria-label="Remove indicator">✕︎</button>' +
         '</div>';
       }).join('') : '') +
       '<div class="aiu-add">' +
@@ -53807,18 +55119,36 @@ self.addEventListener('message', async (ev) => {
         var parts = p.split('.'), i = +parts[0], k = parts[1];
         var l2 = list().slice();
         if (!l2[i]) return;
-        l2[i] = { id: l2[i].id, params: Object.assign({}, l2[i].params) };
+        /* color/width mitnehmen: ohne sie faellt die eigene Farbe bei
+           jeder Parameteraenderung auf die Rotation zurueck. */
+        l2[i] = { id: l2[i].id, color: l2[i].color, width: l2[i].width,
+                  params: Object.assign({}, l2[i].params) };
         l2[i].params[k] = num(t.value, l2[i].params[k]);
         setList(l2);
         redraw();
         return;
       }
 
+      var cIdx = t.getAttribute('data-aiu-color');
+      if (cIdx) {
+        var lc = list().slice(), ic = +cIdx;
+        if (!lc[ic]) return;
+        lc[ic] = Object.assign({}, lc[ic], { color: t.value });
+        setList(lc); redraw(); return;
+      }
+      var wIdx = t.getAttribute('data-aiu-width');
+      if (wIdx) {
+        var lw = list().slice(), iw = +wIdx;
+        if (!lw[iw]) return;
+        lw[iw] = Object.assign({}, lw[iw], { width: parseFloat(t.value) || 1.6 });
+        setList(lw); redraw(); return;
+      }
       var sIdx = t.getAttribute('data-aiu-src');
       if (sIdx) {
         var l3 = list().slice(), j = +sIdx;
         if (!l3[j]) return;
-        l3[j] = { id: l3[j].id, params: Object.assign({}, l3[j].params, { src: t.value }) };
+        l3[j] = { id: l3[j].id, color: l3[j].color, width: l3[j].width,
+                  params: Object.assign({}, l3[j].params, { src: t.value }) };
         setList(l3);
         redraw();
       }
@@ -61954,6 +63284,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   var W = null;              // aktive Werkstatt
   var W_obs = null;          // wacht darueber, dass die Werkstatt noch im DOM haengt
   var W_flat = [];           // Vorfahren, deren transform/filter wir stillgelegt haben
+  var W_tips = null, W_tipT = null;   // haelt die Hover-Beschriftungen aktuell
+  var W_tipUI = null;                 // das gemeinsame Beschriftungs-Element
   var legendOff = null;      // Abmeldung des Fadenkreuz-Hooks
 
   /* Ein Platzhalter merkt sich, wo ein Knoten herkam. Ohne ihn koennte
@@ -62034,6 +63366,66 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return paint;
   }
 
+  /* Beschriftung beim Zeigen.
+     ------------------------------------------------------------------
+     In einer 46px-Spalte steht neben dem Zeichen kein Wort — man muss also
+     raten, was ein Werkzeug tut. Der System-Tooltip aus `title` braucht rund
+     eine Sekunde und laesst sich nicht gestalten. Deshalb wandert der Text
+     nach `data-tip` (und `title` verschwindet, sonst kaeme beides), und CSS
+     zeigt ihn sofort neben dem Knopf. Fuer Screenreader bleibt `aria-label`
+     zurueck — das wird hier gesetzt, falls es fehlte. */
+  function tipsAn(wurzel) {
+    wurzel.querySelectorAll('button[title], label[title]').forEach(function (b) {
+      var t = b.getAttribute('title');
+      if (!t) return;
+      if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', t);
+      b.setAttribute('data-tip', t);
+      b.removeAttribute('title');
+      b._awTip = t;
+    });
+  }
+  /* Zeigt die Beschriftung neben dem Knopf. Ein Element fuer die ganze
+     Werkstatt — kein ::after am Knopf, sonst beschneidet die Spalte es. */
+  function tipBind(wurzel, root) {
+    var tip = el('div', 'aw-tip');
+    root.appendChild(tip);
+    var t = null;
+    function zeige(e) {
+      var b = e.target.closest ? e.target.closest('[data-tip]') : null;
+      if (!b || !wurzel.contains(b)) return;
+      clearTimeout(t);
+      t = setTimeout(function () {
+        var txt = b.getAttribute('data-tip');
+        if (!txt) return;
+        tip.textContent = txt;
+        tip.classList.add('on');
+        var r = b.getBoundingClientRect();
+        var x = r.right + 8, y = r.top + r.height / 2 - tip.offsetHeight / 2;
+        if (x + tip.offsetWidth > window.innerWidth - 8) x = Math.max(8, r.left - tip.offsetWidth - 8);
+        y = Math.max(8, Math.min(window.innerHeight - tip.offsetHeight - 8, y));
+        tip.style.left = Math.round(x) + 'px';
+        tip.style.top = Math.round(y) + 'px';
+      }, 260);
+    }
+    function weg() { clearTimeout(t); tip.classList.remove('on'); }
+    wurzel.addEventListener('pointerover', zeige);
+    wurzel.addEventListener('pointerout', weg);
+    wurzel.addEventListener('pointerdown', weg);
+    return { el: tip, off: function () { wurzel.removeEventListener('pointerover', zeige);
+                                         wurzel.removeEventListener('pointerout', weg);
+                                         wurzel.removeEventListener('pointerdown', weg);
+                                         clearTimeout(t); } };
+  }
+
+  function tipsAus(wurzel) {
+    if (!wurzel) return;
+    wurzel.querySelectorAll('[data-tip]').forEach(function (b) {
+      if (b._awTip) b.setAttribute('title', b._awTip);
+      b.removeAttribute('data-tip');
+      b._awTip = null;
+    });
+  }
+
   /* ─────────────── aufbauen ─────────────── */
   /* opts: { chart, tools, bars[], dock[], head, title, sub, chartInst,
              symbol, tf, onExit } */
@@ -62089,9 +63481,23 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        sonst bleibt die Seite unscrollbar zurueck. */
     if (window.MutationObserver) {
       W_obs = new MutationObserver(function () {
-        if (W && !document.body.contains(W.root)) unmount();
+        if (!W) return;
+        /* Zwei Gruende zu verschwinden: der Knoten ist aus dem Dokument
+           geflogen (Reiterwechsel baut den Rumpf neu), ODER die Seite, auf
+           der die Werkstatt liegt, ist nicht mehr die sichtbare. Der zweite
+           Fall trat auf, wenn man Edge Lab waehrend des Ladens verliess. */
+        if (!document.body.contains(W.root)) { unmount(); return; }
+        /* Seite nicht sichtbar: die Werkstatt geht mit ins Verborgene, statt
+           abgebaut zu werden. Die Sitzung laeuft weiter, und beim Zurueck-
+           kommen ist die Anordnung dieselbe wie vorher — ein unmount() haette
+           hier die alte Kartenansicht hinterlassen. */
+        var seite = W.root.closest ? W.root.closest('.page') : null;
+        var aktiv = !seite || seite.classList.contains('active');
+        W.root.style.display = aktiv ? '' : 'none';
+        document.body.classList.toggle('aw-on', aktiv);
       });
-      W_obs.observe(document.body, { childList: true, subtree: true });
+      W_obs.observe(document.body, { childList: true, subtree: true, attributes: true,
+                                     attributeFilter: ['class'] });
     }
 
     /* Kopfleiste: Symbol links, danach die Bedienelemente, die aus der
@@ -62156,6 +63562,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       if (i) rail.appendChild(el('div', 'aw-rail-sep'));
       take(group, rail);
     });
+    tipsAn(rail);
+    W_tipUI = tipBind(rail, root);
+    /* Die Werkzeugleiste baut sich selbst neu, sobald ein Favorit gesetzt
+       wird (`grp.innerHTML = …`). Die neuen Knoepfe kommen wieder mit `title`
+       und ohne unsere Beschriftung. Statt jeden Aufrufer daran zu erinnern,
+       zieht die Spalte sie selbst nach. */
+    if (window.MutationObserver) {
+      W_tips = new MutationObserver(function () {
+        clearTimeout(W_tipT);
+        W_tipT = setTimeout(function () { if (W) tipsAn(W.rail); }, 30);
+      });
+      W_tips.observe(rail, { childList: true, subtree: true });
+    }
 
     /* Buehne: optional eine hoehere Zeitebene, darunter der Chart, darueber
        die Legende. Die Klassen sagen dem CSS, welcher Knoten waechst. */
@@ -62209,6 +63628,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   function unmount() {
     if (!W) return;
     if (W_obs) { try { W_obs.disconnect(); } catch (e) {} W_obs = null; }
+    if (W_tips) { try { W_tips.disconnect(); } catch (e) {} W_tips = null; }
+    if (W_tipUI) { W_tipUI.off(); W_tipUI = null; }
+    clearTimeout(W_tipT);
+    tipsAus(W.rail);
     W_flat.forEach(function (n) { n.classList.remove('aw-flat'); });
     W_flat = [];
     if (legendOff) { try { legendOff(); } catch (e) {} legendOff = null; }

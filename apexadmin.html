@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Evidence — Control Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --void:#06070a; --surface:#0b0d11; --layer:#0f1216; --elevated:#141821; --raised:#1a1f29;
+    --rim:rgba(201,168,76,0.10); --rim2:rgba(201,168,76,0.18); --rim3:rgba(201,168,76,0.32);
+    --gold:#c9a84c; --gold-light:#ebcb74;
+    --ink:#f0ece6; --ink2:#a89880; --ink3:#6a5c4c;
+    --profit:#3ecf8e; --loss:#f0636a; --blue:#5b9bd5; --caution:#e8a33a;
+    --font-display:'Syne',sans-serif; --font-body:'Instrument Sans',sans-serif; --font-mono:'DM Mono',monospace;
+    --r-sm:9px; --r-md:13px; --r-lg:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font-body); color:var(--ink); min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:40px 20px;
+    background-color:var(--void);
+    background-image:radial-gradient(ellipse 120% 80% at 20% 10%, #121519 0%, #07080b 60%, #030405 100%);
+    background-attachment:fixed; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  }
+  /* animated marble-gold background */
+  #bgVeins,#bgShimmer{position:fixed;inset:0;z-index:-2;pointer-events:none}
+  #bgVeins{z-index:-3;
+    background:
+      radial-gradient(ellipse 3px 260px at 15% 25%, rgba(201,168,76,0.28), transparent 100%),
+      radial-gradient(ellipse 2px 200px at 74% 58%, rgba(201,168,76,0.22), transparent 100%),
+      radial-gradient(ellipse 2px 150px at 45% 82%, rgba(180,140,50,0.20), transparent 100%),
+      radial-gradient(ellipse 2px 230px at 90% 20%, rgba(201,168,76,0.18), transparent 100%);
+    animation:veinBreath 10s ease-in-out infinite;}
+  @keyframes veinBreath{0%,100%{opacity:.5;filter:brightness(1)}50%{opacity:1;filter:brightness(1.5) drop-shadow(0 0 7px rgba(201,168,76,0.3))}}
+  #bgShimmer{
+    background:linear-gradient(105deg,transparent 41%,rgba(201,168,76,0.05) 47%,rgba(235,203,116,0.12) 50%,rgba(201,168,76,0.05) 53%,transparent 59%);
+    background-size:300% 300%;mix-blend-mode:screen;animation:shimmerSweep 16s ease-in-out infinite;}
+  @keyframes shimmerSweep{0%{background-position:0% 0%}50%{background-position:100% 100%}100%{background-position:0% 0%}}
+  @media(prefers-reduced-motion:reduce){#bgVeins,#bgShimmer{animation:none}}
+
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.25);border-radius:4px}
+
+  .glass{ background:linear-gradient(145deg, rgba(20,24,33,0.92) 0%, rgba(11,13,17,0.96) 100%);
+    border:0.5px solid var(--rim); border-radius:var(--r-lg); backdrop-filter:blur(13px) saturate(1.1);
+    box-shadow:inset 0 1px 0 rgba(201,168,76,0.06), 0 8px 32px rgba(0,0,0,0.4); position:relative; overflow:hidden; }
+  .glass::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--rim3),transparent)}
+
+  .logo{font-family:var(--font-display);font-weight:800;letter-spacing:2px;color:var(--gold);display:flex;align-items:center;gap:11px}
+  /* Kachel und Goldrahmen stecken im SVG selbst — kein eigener Hintergrund. */
+  .logo .mark{width:34px;height:34px;flex:none;display:block}
+  .logo .mark svg{width:100%;height:100%;display:block}
+
+  /* login */
+  #login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:26px;width:100%;max-width:420px}
+  #login-screen .logo{font-size:30px}
+  .login-card{padding:38px;width:100%}
+  .login-card h2{font-family:var(--font-display);font-size:19px;font-weight:600;margin-bottom:6px}
+  .login-card .sub{font-size:13px;color:var(--ink3);margin-bottom:24px}
+  .field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+  label{font-size:11px;color:var(--ink2);letter-spacing:1.2px;text-transform:uppercase;font-family:var(--font-mono)}
+  input[type=text],input[type=password],input[type=email],input[type=number],textarea{
+    background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-sm);color:var(--ink);
+    padding:12px 15px;font-size:15px;font-family:var(--font-body);outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+  input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim,rgba(201,168,76,0.12))}
+  textarea{resize:vertical;min-height:90px;line-height:1.5}
+
+  .btn{font-family:var(--font-display);background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1206;border:none;border-radius:var(--r-sm);padding:13px 24px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:transform .2s,box-shadow .2s,filter .2s;box-shadow:0 4px 20px rgba(201,168,76,0.25)}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 8px 28px rgba(201,168,76,0.35)}
+  .btn-danger{background:rgba(240,99,106,0.14);color:var(--loss);border:0.5px solid rgba(240,99,106,0.4);border-radius:var(--r-sm);padding:8px 14px;font-size:13px;font-weight:600;width:auto;cursor:pointer;font-family:var(--font-body);transition:background .2s}
+  .btn-danger:hover{background:rgba(240,99,106,0.22)}
+  .btn-small{background:var(--elevated);color:var(--ink2);border:0.5px solid var(--rim2);padding:9px 16px;font-size:13px;width:auto;border-radius:var(--r-sm);cursor:pointer;font-family:var(--font-body);transition:color .2s,border-color .2s}
+  .btn-small:hover{color:var(--ink);border-color:var(--gold-line,var(--rim3))}
+  .btn-success{background:rgba(62,207,142,0.14);color:var(--profit);border:0.5px solid rgba(62,207,142,0.4);font-size:13px;padding:8px 14px;width:auto;border-radius:var(--r-sm);cursor:pointer;font-weight:600;font-family:var(--font-body);transition:background .2s}
+  .btn-success:hover{background:rgba(62,207,142,0.24)}
+  .btn-blue{background:rgba(91,155,213,0.14);color:var(--blue);border:0.5px solid rgba(91,155,213,0.4);font-size:13px;padding:8px 14px;width:auto;border-radius:var(--r-sm);cursor:pointer;font-weight:600;font-family:var(--font-body);transition:background .2s}
+  .btn-blue:hover{background:rgba(91,155,213,0.24)}
+  .error-msg{color:var(--loss);font-size:13px;margin-top:6px;display:none}
+
+  #dashboard{display:none;width:100%;max-width:1080px}
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}
+  .top-bar .logo{font-size:21px}
+
+  .tabs{display:flex;gap:4px;margin-bottom:26px;padding:5px;width:fit-content;flex-wrap:wrap}
+  .tab-btn{font-family:var(--font-display);padding:10px 20px;border-radius:var(--r-sm);border:none;background:transparent;color:var(--ink2);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.2px}
+  .tab-btn.active{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1206}
+  .tab-btn:not(.active):hover{color:var(--ink);background:var(--elevated)}
+  .tab-pane{display:none}
+  .tab-pane.active{display:block;animation:fadeUp .4s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .card{padding:26px;margin-bottom:22px}
+  .card h3{font-family:var(--font-display);font-size:14px;font-weight:600;margin-bottom:18px;color:var(--gold);display:flex;align-items:center;gap:8px;letter-spacing:.3px}
+
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .stat-card{padding:18px 20px}
+  .stat-label{font-size:10px;color:var(--ink3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;font-family:var(--font-mono)}
+  .stat-value{font-family:var(--font-display);font-size:27px;font-weight:700}
+  .stat-value.gold{color:var(--gold-light)} .stat-value.green{color:var(--profit)} .stat-value.red{color:var(--loss)} .stat-value.blue{color:var(--blue)}
+
+  .filter-bar{display:flex;gap:12px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
+  .search-wrap{position:relative;flex:1;min-width:200px}
+  .search-wrap input{padding-left:38px}
+  .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:15px;pointer-events:none}
+  select{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-sm);color:var(--ink);padding:11px 15px;font-size:14px;outline:none;cursor:pointer;font-family:var(--font-body)}
+  select:focus{border-color:var(--gold)}
+
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:10px;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;padding:11px 14px;border-bottom:0.5px solid var(--rim2);white-space:nowrap;font-family:var(--font-mono)}
+  td{padding:13px 14px;font-size:14px;border-bottom:0.5px solid rgba(201,168,76,0.06);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(201,168,76,0.03)}
+
+  .badge{display:inline-block;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:600;font-family:var(--font-mono)}
+  .green-badge{background:rgba(62,207,142,0.12);color:var(--profit)}
+  .red-badge{background:rgba(240,99,106,0.12);color:var(--loss)}
+  .blue-badge{background:rgba(91,155,213,0.12);color:var(--blue)}
+  .gold-badge{background:rgba(201,168,76,0.14);color:var(--gold-light)}
+  .dim-badge{background:var(--elevated);color:var(--ink2)}
+  .code-badge{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:6px;padding:3px 9px;font-family:var(--font-mono);font-size:12px;color:var(--gold);cursor:pointer}
+  .code-badge:hover{border-color:var(--gold)}
+
+  .empty-state{text-align:center;color:var(--ink3);padding:46px 0;font-size:14px}
+  .action-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+  .user-avatar{width:36px;height:36px;border-radius:50%;background:var(--elevated);border:0.5px solid var(--rim2);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;flex-shrink:0;font-family:var(--font-display)}
+  .user-info{display:flex;align-items:center;gap:10px}
+  .user-info-text{line-height:1.3}
+  .user-name{font-size:14px;font-weight:600}
+  .user-handle{font-size:12px;color:var(--gold);font-family:var(--font-mono)}
+  .user-email{font-size:12px;color:var(--ink3)}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+  .grid-5col{display:grid;grid-template-columns:1fr 1fr 1fr 80px 80px;gap:15px;align-items:flex-end}
+  @media(max-width:700px){.grid-2,.grid-5col,.ann-grid{grid-template-columns:1fr !important}.stats-row{grid-template-columns:1fr 1fr}}
+
+  /* appeal / ban cards */
+  .appeal{padding:18px 20px;margin-bottom:14px;border-left:3px solid var(--caution)}
+  .appeal.accepted{border-left-color:var(--profit);opacity:.7}
+  .appeal.rejected{border-left-color:var(--loss);opacity:.7}
+  .appeal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .appeal-who{font-family:var(--font-display);font-size:15px;font-weight:600}
+  .appeal-srv{font-size:12px;color:var(--ink2);font-family:var(--font-mono)}
+  .appeal-block{background:var(--elevated);border:0.5px solid var(--rim);border-radius:var(--r-sm);padding:11px 14px;font-size:13px;line-height:1.55;margin-bottom:8px}
+  .appeal-block .lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);font-family:var(--font-mono);margin-bottom:4px}
+  .chat-log{max-height:240px;overflow:auto;background:var(--void);border:0.5px solid var(--rim);border-radius:var(--r-sm);padding:10px 12px;margin-top:8px;display:none}
+  .chat-msg{font-size:12px;line-height:1.5;padding:5px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)}
+  .chat-msg .t{color:var(--ink3);font-family:var(--font-mono);font-size:10px;margin-right:6px}
+
+  /* modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(3,4,6,0.78);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.open{display:flex;animation:fadeUp .25s ease}
+  .modal{padding:32px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+  .modal h2{font-family:var(--font-display);font-size:19px;font-weight:600;margin-bottom:22px}
+  .modal-footer{display:flex;gap:12px;margin-top:24px;justify-content:flex-end;flex-wrap:wrap}
+
+  .section-title{font-size:10px;color:var(--ink3);letter-spacing:2px;text-transform:uppercase;margin-bottom:13px;font-family:var(--font-mono)}
+  .toggle-switch{position:relative;width:44px;height:24px;cursor:pointer;flex-shrink:0}
+  .toggle-switch input{opacity:0;width:0;height:0;position:absolute}
+  .toggle-track{position:absolute;inset:0;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:24px;transition:background .25s}
+  .toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--ink3);transition:all .25s}
+  .toggle-switch input:checked + .toggle-track{background:rgba(62,207,142,0.25);border-color:var(--profit)}
+  .toggle-switch input:checked + .toggle-track + .toggle-thumb{left:22px;background:var(--profit)}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--elevated);border:0.5px solid var(--gold);border-radius:var(--r-sm);padding:14px 20px;font-size:14px;color:var(--gold-light);opacity:0;pointer-events:none;transition:opacity .3s;z-index:9999;font-family:var(--font-body)}
+  .toast.show{opacity:1}
+  .toast.error{border-color:var(--loss);color:var(--loss)}
+  .loading-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--rim2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ref-preview-bar{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--ink2);font-family:var(--font-mono);margin-top:8px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <linearGradient id="etGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset="0.42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient>
+  <radialGradient id="etShine" cx="0.5" cy="0.45" r="0.5"><stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/><stop offset="0.4" stop-color="#FFF8DE" stop-opacity="0.72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient>
+  <clipPath id="etMono"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath>
+  <symbol id="etMark" viewBox="0 0 512 512">
+    <rect width="512" height="512" rx="118" fill="#131313"/>
+    <rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/>
+    <g clip-path="url(#etMono)">
+      <rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etGold)"/>
+      <rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etGold)"/>
+      <rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etGold)"/>
+      <rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etGold)"/>
+      <circle cx="347" cy="147" r="77" fill="url(#etShine)"/>
+    </g>
+  </symbol>
+</defs></svg>
+
+<div id="bgVeins" aria-hidden="true"></div>
+<div id="bgShimmer" aria-hidden="true"></div>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="logo"><span class="mark"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#etMark"/></svg></span>Evidence</div>
+  <div class="login-card glass">
+    <h2>Control Center</h2>
+    <div class="sub">Super-Admin Zugang · alle Server, alle Nutzer.</div>
+    <form onsubmit="event.preventDefault(); doLogin();" autocomplete="on">
+      <div class="field">
+        <label>Firebase E-Mail</label>
+        <input type="email" id="inp-user" placeholder="admin@email.com" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Passwort</label>
+        <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <!-- Getrennt vom Firebase-Passwort: dieser Wert geht als Bearer-Token an
+           den Checkout-Worker (env.ADMIN_PASSWORD). autocomplete=off, damit der
+           Passwort-Manager hier nichts hineinschreibt. -->
+      <div class="field">
+        <label>Admin-Secret (Worker)</label>
+        <input type="password" id="inp-admin-secret" placeholder="ADMIN_PASSWORD"
+               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      </div>
+      <div class="error-msg" id="login-error">Login fehlgeschlagen. Firebase Email + Passwort verwenden.</div>
+      <br />
+      <button type="submit" class="btn">Anmelden</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard">
+  <div class="top-bar">
+    <div class="logo"><span class="mark"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#etMark"/></svg></span>Evidence — Control Center</div>
+    <button class="btn-small" onclick="doLogout()">Abmelden</button>
+  </div>
+
+  <div class="tabs glass">
+    <button class="tab-btn active" onclick="switchTab('users')">👤 Nutzer</button>
+    <button class="tab-btn" onclick="switchTab('servers')">🛡️ Server &amp; Bans</button>
+    <button class="tab-btn" onclick="switchTab('news')">📣 News</button>
+    <button class="tab-btn" onclick="switchTab('partners')">🤝 Partner</button>
+    <button class="tab-btn" onclick="switchTab('bugreports')">🐛 Bug Reports</button>
+    <button class="tab-btn" onclick="switchTab('voices')">⭐ Testimonials</button>
+    <button class="tab-btn" onclick="switchTab('errors')">🐞 JS-Fehler</button>
+    <button class="tab-btn" onclick="switchTab('cancel')">📄 Kündigungen</button>
+  </div>
+
+  <!-- ════════════ USERS ════════════ -->
+  <div id="tab-users" class="tab-pane active">
+    <div class="stats-row">
+      <div class="stat-card glass"><div class="stat-label">Gesamt User</div><div class="stat-value blue" id="stat-total">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Pro User</div><div class="stat-value green" id="stat-pro">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Free User</div><div class="stat-value" id="stat-free">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Heute registriert</div><div class="stat-value gold" id="stat-today">—</div></div>
+    </div>
+    <div class="filter-bar">
+      <div class="search-wrap"><span class="search-icon">🔍</span>
+        <input type="text" id="user-search" placeholder="Name, @username, E-Mail oder UID suchen…" oninput="filterUsers()" /></div>
+      <select id="plan-filter" onchange="filterUsers()">
+        <option value="all">Alle Pläne</option><option value="pro">Pro</option><option value="free">Free</option>
+      </select>
+      <button class="btn-small" onclick="loadUsers()">↺ Aktualisieren</button>
+    </div>
+    <div class="card glass" style="padding:0;overflow:hidden">
+      <div id="user-list-wrap"><div class="empty-state"><span class="loading-spinner"></span> Lädt…</div></div>
+    </div>
+  </div>
+
+  <!-- ════════════ SERVERS & BANS ════════════ -->
+  <div id="tab-servers" class="tab-pane">
+    <div class="stats-row">
+      <div class="stat-card glass"><div class="stat-label">Server gesamt</div><div class="stat-value blue" id="srv-stat-total">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Öffentlich</div><div class="stat-value green" id="srv-stat-public">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Gebannte Nutzer</div><div class="stat-value red" id="srv-stat-banned">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Offene Anträge</div><div class="stat-value gold" id="srv-stat-appeals">—</div></div>
+    </div>
+    <div class="filter-bar">
+      <div class="search-wrap"><span class="search-icon">🔍</span>
+        <input type="text" id="srv-search" placeholder="Server, Nutzer oder UID suchen…" oninput="renderServersTab()" /></div>
+      <button class="btn-small" onclick="loadServersAndBans()">↺ Aktualisieren</button>
+    </div>
+
+    <div class="card glass">
+      <h3>⚖️ Entbannungsanträge</h3>
+      <div id="appeal-list-wrap"><div class="empty-state"><span class="loading-spinner"></span> Lädt…</div></div>
+    </div>
+
+    <div class="card glass" style="padding:0;overflow:hidden">
+      <h3 style="padding:24px 24px 0">🚫 Gebannte Nutzer — alle Server</h3>
+      <div id="ban-list-wrap"><div class="empty-state">Lädt…</div></div>
+    </div>
+
+    <div class="card glass" style="padding:0;overflow:hidden">
+      <h3 style="padding:24px 24px 0">🗂️ Alle Server</h3>
+      <div id="server-list-wrap"><div class="empty-state">Lädt…</div></div>
+    </div>
+  </div>
+
+  <!-- ════════════ PARTNERS ════════════ -->
+  <div id="tab-partners" class="tab-pane">
+    <div class="card glass">
+      <h3>+ Neuen Partner hinzufügen</h3>
+      <div class="grid-5col">
+        <div class="field"><label>Referral Code</label><input type="text" id="new-code" placeholder="z.B. dagnis" /></div>
+        <div class="field"><label>Name</label><input type="text" id="new-name" placeholder="Mike Müller" /></div>
+        <div class="field"><label>Stripe Account ID</label><input type="text" id="new-acct" placeholder="acct_1AbCd..." /></div>
+        <div class="field"><label>Split %</label><input type="number" id="new-split" value="50" min="1" max="99" /></div>
+        <div class="field"><label>Rabatt %</label><input type="number" id="new-discount" value="0" min="0" max="99" /></div>
+      </div>
+      <br/><button class="btn" style="width:auto;padding:13px 32px" onclick="addPartner()">Partner speichern</button>
+    </div>
+    <div class="card glass"><h3>Aktive Partner</h3><div id="partner-list-wrap"><div class="empty-state">Laden…</div></div></div>
+    <div class="card glass" style="background:var(--elevated)">
+      <p class="section-title">Referral Link Generator</p>
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:10px">Klicke auf einen Code → Link wird automatisch kopiert.</p>
+      <div class="ref-preview-bar" id="ref-preview">—</div>
+    </div>
+  </div>
+
+  <!-- ════════════ BUG REPORTS ════════════ -->
+  <div id="tab-bugreports" class="tab-pane">
+    <div class="stats-row">
+      <div class="stat-card glass"><div class="stat-label">Gesamt</div><div class="stat-value blue" id="br-stat-total">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Offen</div><div class="stat-value red" id="br-stat-open">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">In Bearbeitung</div><div class="stat-value gold" id="br-stat-progress">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Gelöst</div><div class="stat-value green" id="br-stat-resolved">—</div></div>
+    </div>
+    <div class="filter-bar">
+      <div class="search-wrap" style="flex:1"><span class="search-icon">🔍</span>
+        <input type="text" id="br-search" placeholder="Titel, Beschreibung, User suchen…" oninput="filterBugReports()" /></div>
+      <select id="br-cat-filter" onchange="filterBugReports()">
+        <option value="all">Alle Kategorien</option><option value="bug">🐛 Bug</option><option value="ui">🎨 UI</option>
+        <option value="performance">⚡ Performance</option><option value="feature">💡 Feature-Wunsch</option>
+        <!-- Eigener Filter: Indikator-Wünsche sind schnell umsetzbar und
+             sollen nicht zwischen den Feature-Wünschen liegen bleiben. -->
+        <option value="indicator">📐 Indikator-Wunsch</option>
+        <option value="data">📊 Daten</option><option value="other">📝 Sonstiges</option>
+      </select>
+      <select id="br-status-filter" onchange="filterBugReports()">
+        <option value="all">Alle Status</option><option value="open">Offen</option><option value="in_progress">In Bearbeitung</option>
+        <option value="resolved">Gelöst</option><option value="wontfix">Won't Fix</option>
+      </select>
+      <button class="btn-small" onclick="loadBugReports()">↺ Aktualisieren</button>
+    </div>
+    <div class="card glass" style="padding:0;overflow:hidden">
+      <div id="br-list-wrap"><div class="empty-state"><span class="loading-spinner"></span> Lädt…</div></div>
+    </div>
+  </div>
+
+  <!-- ════════════ TESTIMONIALS ════════════ -->
+  <!-- ════════════ KÜNDIGUNGEN (§ 312k BGB) ════════════ -->
+  <div id="tab-cancel" class="tab-pane">
+    <div class="filter-bar">
+      <div id="cxl-stat" style="flex:1;font-size:12px;color:var(--ink3)"></div>
+      <button class="btn-blue btn-small" onclick="loadCancellations()">↻ Neu laden</button>
+    </div>
+    <div id="cxl-list-wrap"></div>
+  </div>
+
+  <!-- ════════════ JS-FEHLER ════════════ -->
+  <div id="tab-errors" class="tab-pane">
+    <div class="filter-bar">
+      <div id="err-stat" style="flex:1;font-size:12px;color:var(--ink3)"></div>
+      <button class="btn-blue btn-small" onclick="loadErrors()">↻ Neu laden</button>
+      <button class="btn-danger btn-small" onclick="clearErrors()">🗑 Alle löschen</button>
+    </div>
+    <div id="err-list-wrap"></div>
+  </div>
+
+  <div id="tab-voices" class="tab-pane">
+    <div class="stats-row">
+      <div class="stat-card glass"><div class="stat-label">Eingereicht</div><div class="stat-value blue" id="tm-stat-total">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Wartet auf Freigabe</div><div class="stat-value gold" id="tm-stat-pending">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Live auf der Website</div><div class="stat-value green" id="tm-stat-live">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Ø Sterne</div><div class="stat-value" id="tm-stat-avg">—</div></div>
+    </div>
+    <div class="filter-bar">
+      <div class="search-wrap" style="flex:1"><span class="search-icon">🔍</span>
+        <input type="text" id="tm-search" placeholder="Name, Text oder Rolle suchen…" oninput="renderTestimonials()" /></div>
+      <select id="tm-filter" onchange="renderTestimonials()">
+        <option value="pending">Nur offene</option>
+        <option value="all">Alle</option>
+        <option value="approved">Nur freigegebene</option>
+      </select>
+      <button class="btn-small" onclick="loadTestimonials()">↺ Aktualisieren</button>
+    </div>
+    <div style="font-size:12px;color:var(--ink3);margin:0 0 14px">
+      Nur freigegebene Einträge erscheinen auf der Landingpage. Nichts wird automatisch veröffentlicht — und erfundene Stimmen gehören hier nicht rein.
+    </div>
+    <div class="card glass" style="padding:0;overflow:hidden">
+      <div id="tm-list-wrap"><div class="empty-state">Noch nicht geladen.</div></div>
+    </div>
+  </div>
+
+  <!-- ════════════ NEWS & AKTIONEN ════════════ -->
+  <div id="tab-news" class="tab-pane">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start" class="ann-grid">
+      <div class="card glass">
+        <h3>📣 News / Aktion erstellen</h3>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">Schreib es kurz rein — Evidence formuliert schöne Sätze &amp; baut die Karte.</div>
+        <div class="field">
+          <label>Typ</label>
+          <select id="ann-type" onchange="updateAnnPreview()">
+            <option value="update">✨ Update — zählt Version automatisch hoch</option>
+            <option value="giveaway">🎁 Giveaway</option>
+            <option value="promo">💸 Aktion / Promo</option>
+            <option value="news">📣 News</option>
+          </select>
+        </div>
+        <div class="field"><label>Titel (kurz)</label><input type="text" id="ann-title" placeholder="z.B. Bring 5 Freunde zu Pro" oninput="updateAnnPreview()"></div>
+        <div class="field"><label>Text (kurz — jede Zeile = ein Punkt)</label><textarea id="ann-body" rows="4" placeholder="z.B.&#10;neue Equity-Curve&#10;schnellerer CSV-Import" oninput="updateAnnPreview()"></textarea></div>
+        <div class="grid-2">
+          <div class="field"><label>Belohnung (optional)</label><input type="text" id="ann-reward" placeholder="z.B. 50 €" oninput="updateAnnPreview()"></div>
+          <div class="field"><label>Frist (optional)</label><input type="text" id="ann-deadline" placeholder="z.B. 15.07.2026" oninput="updateAnnPreview()"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Button-Text (optional)</label><input type="text" id="ann-cta-text" placeholder="z.B. Jetzt mitmachen" oninput="updateAnnPreview()"></div>
+          <div class="field"><label>Button-Link (optional)</label><input type="text" id="ann-cta-url" placeholder="https://…" oninput="updateAnnPreview()"></div>
+        </div>
+        <div class="field">
+          <label>Auf Wunsch von (optional) — Nutzername ohne @</label>
+          <input type="text" id="ann-requested-by" placeholder="z.B. Leon K. — mehrere mit Komma trennen" oninput="updateAnnPreview()">
+          <div style="font-size:11.5px;color:var(--ink3);margin-top:5px">Zeigt „Auf Wunsch von @name gebaut" unter dem Eintrag. Wer seinen Wunsch umgesetzt sieht, wird zum Fürsprecher.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin:8px 0 12px">
+          <label class="toggle-switch"><input type="checkbox" id="ann-pinned" onchange="updateAnnPreview()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          <span style="font-size:13px;color:var(--ink2)">Oben anpinnen</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin:0 0 18px">
+          <label class="toggle-switch"><input type="checkbox" id="ann-push" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          <span style="font-size:13px;color:var(--ink2)">🔔 Als Glocken-Benachrichtigung an alle Nutzer pushen</span>
+        </div>
+        <button class="btn" style="width:auto;padding:13px 30px" onclick="publishAnnouncement()">Veröffentlichen</button>
+      </div>
+      <div class="card glass">
+        <h3>👁 Vorschau</h3>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:14px">So sehen es deine Nutzer in der App.</div>
+        <div id="ann-preview"></div>
+      </div>
+    </div>
+    <div class="card glass" style="padding:0;overflow:hidden;margin-top:22px">
+      <h3 style="padding:24px 24px 0">🗂️ Veröffentlicht</h3>
+      <div id="ann-list-wrap"><div class="empty-state">Lädt…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EDIT USER MODAL ═══ -->
+<div class="modal-overlay" id="edit-modal"><div class="modal glass">
+  <h2>Nutzer bearbeiten</h2>
+  <input type="hidden" id="edit-uid" />
+  <div class="field">
+    <label>Username (@handle, Community)</label>
+    <input type="text" id="edit-username" placeholder="z.B. maxtrader" />
+  </div>
+  <div class="grid-2">
+    <div class="field"><label>Vorname</label><input type="text" id="edit-firstName" placeholder="Max" /></div>
+    <div class="field"><label>Nachname</label><input type="text" id="edit-lastName" placeholder="Mustermann" /></div>
+  </div>
+  <div class="field"><label>E-Mail</label><input type="email" id="edit-email" placeholder="max@email.com" /></div>
+  <div class="field"><label>Anzeigename</label><input type="text" id="edit-displayName" placeholder="Max M." /></div>
+  <div style="background:var(--elevated);border:0.5px solid var(--rim);border-radius:var(--r-md);padding:18px;margin-top:8px">
+    <p class="section-title" style="margin-bottom:14px">Plan &amp; Zugang</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div><div style="font-size:14px;font-weight:600">Pro Plan</div>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px">Vollzugang zu allen Premium-Features</div></div>
+      <label class="toggle-switch"><input type="checkbox" id="edit-isPro" /><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+    </div>
+    <div class="field" style="margin-bottom:0"><label>Pro läuft ab (leer = unbegrenzt)</label>
+      <input type="text" id="edit-proExpiry" placeholder="z.B. 2025-12-31 oder leer lassen" /></div>
+  </div>
+  <div class="field" style="margin-top:16px"><label>Notiz (intern)</label><input type="text" id="edit-note" placeholder="Interne Notiz…" /></div>
+  <div class="modal-footer">
+    <button class="btn-small" onclick="closeModal()">Abbrechen</button>
+    <button class="btn-danger" onclick="confirmDeleteUser()">Nutzer löschen</button>
+    <button class="btn-success" onclick="saveUser()">Speichern</button>
+  </div>
+</div></div>
+
+<!-- ═══ PLAN QUICK MODAL ═══ -->
+<div class="modal-overlay" id="plan-modal"><div class="modal glass" style="max-width:400px">
+  <h2 id="plan-modal-title">Pro Plan vergeben</h2>
+  <p style="font-size:14px;color:var(--ink2);margin-bottom:20px" id="plan-modal-desc"></p>
+  <div class="field" id="plan-expiry-field"><label>Ablaufdatum (leer = unbegrenzt)</label><input type="text" id="plan-expiry" placeholder="z.B. 2025-12-31" /></div>
+  <div class="modal-footer">
+    <button class="btn-small" onclick="closePlanModal()">Abbrechen</button>
+    <button class="btn-success" id="plan-confirm-btn" onclick="confirmPlanChange()">Bestätigen</button>
+  </div>
+</div></div>
+
+<!-- ═══ BUG REPORT MODAL ═══ -->
+<div class="modal-overlay" id="br-modal"><div class="modal glass" style="max-width:560px">
+  <h2 id="br-modal-title">Bug Report</h2>
+  <input type="hidden" id="br-modal-id" />
+  <div id="br-modal-body" style="font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:20px"></div>
+  <div class="field"><label>Status</label><select id="br-modal-status">
+    <option value="open">Offen</option><option value="in_progress">In Bearbeitung</option>
+    <option value="resolved">Gelöst</option><option value="wontfix">Won't Fix</option></select></div>
+  <div class="field"><label>Interne Notiz</label><input type="text" id="br-modal-note" placeholder="z.B. Fixed in v2.3…" /></div>
+  <div class="modal-footer">
+    <button class="btn-small" onclick="closeBrModal()">Abbrechen</button>
+    <button class="btn-danger" onclick="deleteBugReport()">Löschen</button>
+    <button class="btn-success" onclick="saveBugReport()">Speichern</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* Die Partner-Verwaltung liegt im CHECKOUT-Worker (dort sitzt das KV
+   `PARTNERS`), nicht im Coach-Worker. Hier stand lange die Coach-URL —
+   die kennt /admin/partners gar nicht, deshalb konnte nie ein Code
+   angelegt werden. */
+const WORKER_URL = "https://apex-checkout.4kjyyyftv6.workers.dev";
+const FB_CONFIG = { apiKey:"AIzaSyCztMCUt9pX4caEDXobxI6Y6GP4LTFI-gg", authDomain:"sd-indikator-by-jason.firebaseapp.com", projectId:"sd-indikator-by-jason" };
+
+let db=null, adminToken=null, adminUid=null, allUsers=[];
+let allServers=[], allBans=[], allAppeals=[], planModalAction=null;
+const FV = () => firebase.firestore.FieldValue;
+
+// ─── LOGIN ───
+async function doLogin(){
+  const email=document.getElementById("inp-user").value.trim();
+  const pass=document.getElementById("inp-pass").value.trim();
+  if(!email||!pass){ document.getElementById("login-error").style.display="block"; return; }
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    db=firebase.firestore();
+    const cred=await firebase.auth().signInWithEmailAndPassword(email,pass);
+    /* Der Worker-Token kommt aus dem eigenen Feld. Leer gelassen, fällt er auf
+       das Firebase-Passwort zurück — so bleibt der alte Aufbau nutzbar. */
+    const secretEl=document.getElementById("inp-admin-secret");
+    const secret=(secretEl && secretEl.value.trim()) || pass;
+    adminToken=secret; adminUid=cred.user.uid;
+    try{ localStorage.setItem("apexAdminSecret", secret); }catch(e){}
+    document.getElementById("login-screen").style.display="none";
+    document.getElementById("dashboard").style.display="block";
+    document.getElementById("login-error").style.display="none";
+    loadUsers();
+  }catch(err){ document.getElementById("login-error").style.display="block"; console.error("Login:",err.message); }
+}
+async function doLogout(){ try{ await firebase.auth().signOut(); }catch(e){} adminToken=null; adminUid=null;
+  document.getElementById("login-screen").style.display="flex"; document.getElementById("dashboard").style.display="none";
+  document.getElementById("inp-pass").value=""; }
+/* Das Admin-Secret überlebt den Logout, damit es nicht bei jedem Login neu
+   getippt werden muss — anders als das Firebase-Passwort. */
+document.addEventListener("DOMContentLoaded",()=>{
+  try{
+    const saved=localStorage.getItem("apexAdminSecret");
+    const el=document.getElementById("inp-admin-secret");
+    if(saved && el) el.value=saved;
+  }catch(e){}
+});
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Enter"&&document.getElementById("login-screen").style.display!=="none") doLogin();
+  if(e.key==="Escape"){ closeModal(); closePlanModal(); closeBrModal(); }
+});
+
+// ─── TABS ───
+function switchTab(tab){
+  document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+tab).classList.add("active");
+  event.currentTarget.classList.add("active");
+  if(tab==="servers") loadServersAndBans();
+  if(tab==="news") loadAnnouncements();
+  if(tab==="partners") loadPartners();
+  if(tab==="bugreports") loadBugReports();
+  if(tab==="voices") loadTestimonials();
+  if(tab==="errors") loadErrors();
+  if(tab==="cancel") loadCancellations();
+}
+
+
+// Das Panel hatte bisher keinen Escape-Helfer — Fehlermeldungen kommen
+// aus dem Browser des Nutzers und dürfen hier nicht als HTML landen.
+function escapeHtml(v){
+  return String(v==null?"":v).replace(/[&<>"']/g, c => (
+    {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+// ═══════════════ KÜNDIGUNGEN ═══════════════
+// Eingang MUSS dem Kunden unverzüglich mit Datum und Uhrzeit bestätigt werden
+// (§ 312k BGB). Die Bestätigung im Browser erfolgt sofort; die E-Mail muss
+// derzeit noch von Hand geschickt werden — siehe Hinweis im Panel.
+let allCancellations=[];
+
+async function loadCancellations(){
+  const wrap=document.getElementById("cxl-list-wrap");
+  wrap.innerHTML = '<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+  try{
+    const snap=await db.collection("apexCancellations").orderBy("ts","desc").limit(200).get();
+    allCancellations=snap.docs.map(d=>Object.assign({_id:d.id}, d.data()));
+    // Nutzer brauchen wir, um den Stripe-Kunden zuzuordnen — das Formular
+    // läuft ohne Anmeldung, also ist die UID oft leer und nur die E-Mail da.
+    if(!allUsers.length){
+      try{ const us=await db.collection("apexUsers").get();
+           allUsers=await mergeEmails(us.docs.map(d=>({uid:d.id,...d.data()}))); }catch(e){}
+    }
+    renderCancellations();
+  }catch(e){
+    wrap.innerHTML='<div class="empty-state">Fehler beim Laden: '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+function renderCancellations(){
+  const wrap=document.getElementById("cxl-list-wrap");
+  const stat=document.getElementById("cxl-stat");
+  const offen=allCancellations.filter(c=>c.status!=="done").length;
+  stat.innerHTML = allCancellations.length+" Kündigungen · <b style=\"color:var(--loss)\">"+offen+" unbearbeitet</b>";
+  if(!allCancellations.length){ wrap.innerHTML='<div class="empty-state">Keine Kündigungen.</div>'; return; }
+  wrap.innerHTML = allCancellations.map(function(c){
+    const art = c.kind==="ordentlich" ? "Ordentlich" : "Außerordentlich";
+    const u = matchCancellationUser(c);
+    return '<div class="card" style="margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+        '<div><b>'+escapeHtml(c.name||"—")+'</b> · '+escapeHtml(c.email||"—")+'</div>'+
+        '<div style="font-size:11px;color:var(--ink3)">'+escapeHtml(c.receivedAt||"")+'</div>'+
+      '</div>'+
+      '<div style="font-size:11.5px;color:var(--ink3);margin-top:6px;line-height:1.7">'+
+        art+' · wirksam: '+escapeHtml(
+          (!c.effective||c.effective==="earliest") ? "zum nächstmöglichen Zeitpunkt" : c.effective)+
+        (c.contractRef?' · Vertrag: '+escapeHtml(c.contractRef):"")+
+        (c.uid?' · UID: '+escapeHtml(c.uid):" · nicht angemeldet")+
+      '</div>'+
+      (c.reason?'<div style="margin-top:8px;font-size:12px">Grund: '+escapeHtml(c.reason)+'</div>':"")+
+      cancellationStripeBox(u)+
+      cancellationReceiptBox(c)+
+      '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'+
+        '<a class="btn-blue btn-small" href="mailto:'+encodeURIComponent(c.email||"")+
+          '?subject='+encodeURIComponent("Bestätigung Ihrer Kündigung — Evidence Trading")+
+          '&body='+encodeURIComponent("Guten Tag "+(c.name||"")+",\n\nwir bestätigen den Eingang Ihrer Kündigung am "+(c.receivedAt||"")+".\n\nIhr Zugang bleibt bis zum Ende der bezahlten Abrechnungsperiode bestehen.\n\nFreundliche Grüße\nJason Ziborius")+
+          '">✉ Eingang bestätigen</a>'+
+        (c.status==="done" ? '<span class="green-badge">erledigt</span>' :
+          '<button class="btn-success btn-small" onclick="markCancellationDone(\''+c._id+'\')">Als erledigt markieren</button>')+
+      '</div></div>';
+  }).join("");
+}
+
+// Zuordnung: UID schlägt E-Mail, weil sie eindeutig ist. Die E-Mail im
+// Formular kann von der im Konto abweichen — dann findet man nichts und muss
+// von Hand suchen. Genau das sagt die Karte dann auch.
+function matchCancellationUser(c){
+  if(c.uid){ const byUid=allUsers.find(u=>u.uid===c.uid); if(byUid) return byUid; }
+  const mail=(c.email||"").trim().toLowerCase();
+  if(!mail) return null;
+  return allUsers.find(u=>(u.email||"").trim().toLowerCase()===mail) || null;
+}
+
+/* Die Eingangsbestätigung nach § 312k Abs. 4 BGB verschickt der Webhook-Worker
+   automatisch und setzt danach `receiptSentAt`. Fehlt das Feld, ist die Mail
+   NICHT rausgegangen — dann muss sie unverzüglich von Hand nachgeholt werden
+   (Schaltfläche „Eingang bestätigen" darunter). Das hier ist die einzige
+   Stelle, an der dieser Ausfall sichtbar wird.                              */
+function cancellationReceiptBox(c){
+  const sent = c.receiptSentAt;
+  if(sent){
+    let when="";
+    try{
+      const d = sent.toDate ? sent.toDate() : new Date(sent);
+      if(!isNaN(d)) when=" am "+d.toLocaleString("de-DE");
+    }catch(e){}
+    return '<div style="margin-top:8px;font-size:11.5px;color:var(--profit,#4ade80)">'+
+      '✓ Eingangsbestätigung automatisch verschickt'+escapeHtml(when)+'</div>';
+  }
+  return '<div style="margin-top:8px;padding:9px 11px;border-radius:8px;'+
+    'background:var(--loss-dim,rgba(240,99,106,.09));border:0.5px solid rgba(240,99,106,.3);'+
+    'font-size:11.5px;color:var(--ink2)">'+
+    '⚠ <b>Eingangsbestätigung noch nicht verschickt.</b> § 312k verlangt sie unverzüglich — '+
+    'bitte jetzt über „Eingang bestätigen" senden.</div>';
+}
+
+function cancellationStripeBox(u){
+  if(!u){
+    return '<div style="margin-top:10px;padding:9px 11px;border-radius:8px;background:var(--loss-dim,rgba(240,99,106,.09));'+
+      'border:0.5px solid rgba(240,99,106,.3);font-size:11.5px;color:var(--ink2)">'+
+      '⚠ Kein Konto zu dieser E-Mail gefunden. Bitte in Stripe von Hand suchen — '+
+      'die im Formular angegebene Adresse kann von der im Konto abweichen.</div>';
+  }
+  const cust=u.stripeCustomerId||"", sub=u.stripeSubscriptionId||"";
+  const bits=[];
+  bits.push('Konto: <b>'+escapeHtml(u.email||u.uid)+'</b> · Tarif: <b>'+escapeHtml(u.plan||"free")+'</b>');
+  if(u.subscriptionStatus) bits.push('Stripe-Status: <b>'+escapeHtml(u.subscriptionStatus)+'</b>');
+  if(u.cancelAtPeriodEnd)  bits.push('<b style="color:var(--profit,#4ade80)">bereits zum Laufzeitende gekündigt</b>');
+  if(u.currentPeriodEnd)   bits.push('läuft bis <b>'+new Date(u.currentPeriodEnd).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"})+'</b>');
+  let links='';
+  if(cust) links+='<a class="btn-blue btn-small" target="_blank" rel="noopener" '+
+    'href="https://dashboard.stripe.com/customers/'+encodeURIComponent(cust)+'">↗ Kunde in Stripe</a> ';
+  if(sub)  links+='<a class="btn-blue btn-small" target="_blank" rel="noopener" '+
+    'href="https://dashboard.stripe.com/subscriptions/'+encodeURIComponent(sub)+'">↗ Abo öffnen</a>';
+  if(!cust&&!sub) links='<span style="font-size:11.5px;color:var(--ink3)">Keine Stripe-Kennung hinterlegt — '+
+    'entweder Founding Lifetime (kein Abo) oder nie bezahlt.</span>';
+  return '<div style="margin-top:10px;padding:9px 11px;border-radius:8px;background:var(--layer,rgba(255,255,255,.03));'+
+    'border:0.5px solid var(--rim,rgba(255,255,255,.08))">'+
+    '<div style="font-size:11.5px;color:var(--ink3);line-height:1.7;margin-bottom:8px">'+bits.join(' · ')+'</div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">'+links+'</div></div>';
+}
+
+async function markCancellationDone(id){
+  await db.collection("apexCancellations").doc(id).update({status:"done"});
+  loadCancellations();
+}
+
+// ═══════════════ JS-FEHLER ═══════════════
+// Gruppiert nach Meldung + Zeile: ein kaputtes Release wirft denselben
+// Fehler bei vielen Nutzern, und interessant ist "wie viele betrifft es",
+// nicht 200 Einzelmeldungen.
+let allErrors = [];
+
+async function loadErrors(){
+  const wrap = document.getElementById('err-list-wrap');
+  wrap.innerHTML = '<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+  try{
+    const snap = await db.collection('apexErrors').orderBy('ts','desc').limit(500).get();
+    allErrors = snap.docs.map(d => Object.assign({ _id:d.id }, d.data()));
+    renderErrors();
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-state">Fehler beim Laden: '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+function renderErrors(){
+  const wrap = document.getElementById('err-list-wrap');
+  const stat = document.getElementById('err-stat');
+  if(!allErrors.length){
+    stat.textContent = '';
+    wrap.innerHTML = '<div class="empty-state">Keine Fehler gemeldet. 🎉</div>';
+    return;
+  }
+
+  const groups = {};
+  allErrors.forEach(e => {
+    const key = (e.msg||'?') + '|' + (e.line||0);
+    if(!groups[key]) groups[key] = { msg:e.msg||'?', line:e.line||0, src:e.src||'', kind:e.kind||'',
+                                     stack:e.stack||'', n:0, users:{}, builds:{}, pages:{}, last:0 };
+    const g = groups[key];
+    g.n++;
+    if(e.uid)   g.users[e.uid]   = 1;
+    if(e.build) g.builds[e.build] = 1;
+    if(e.page)  g.pages[e.page]  = 1;
+    if((e.ts||0) > g.last) g.last = e.ts||0;
+  });
+
+  const list = Object.values(groups).sort((a,b) => b.last - a.last);
+  const users = new Set(allErrors.map(e => e.uid).filter(Boolean)).size;
+  stat.textContent = allErrors.length + ' Meldungen · ' + list.length + ' verschiedene Fehler · ' + users + ' Nutzer betroffen';
+
+  wrap.innerHTML = list.map(g => {
+    const when = g.last ? new Date(g.last).toLocaleString('de-DE') : '—';
+    const nUsers = Object.keys(g.users).length;
+    const builds = Object.keys(g.builds).join(', ') || '—';
+    const pages  = Object.keys(g.pages).join(', ') || '—';
+    return '<div class="card" style="margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline">'+
+        '<div style="font-weight:700;color:var(--loss);font-size:13px;word-break:break-word">'+escapeHtml(g.msg)+'</div>'+
+        '<div style="font-size:11px;color:var(--ink3);white-space:nowrap">'+g.n+'× · '+nUsers+' Nutzer</div>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--ink3);margin-top:6px;line-height:1.7">'+
+        'Zeile <b>'+g.line+'</b>'+(g.src?' · '+escapeHtml(g.src.split('/').pop()):'')+
+        ' · Typ '+escapeHtml(g.kind)+' · Seite: '+escapeHtml(pages)+
+        ' · Build: '+escapeHtml(builds)+' · zuletzt '+when+
+      '</div>'+
+      (g.stack ? '<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;color:var(--ink3)">Stacktrace</summary>'+
+        '<pre style="white-space:pre-wrap;font-size:11px;color:var(--ink3);margin:6px 0 0;overflow-x:auto">'+escapeHtml(g.stack)+'</pre></details>' : '')+
+    '</div>';
+  }).join('');
+}
+
+async function clearErrors(){
+  if(!confirm('Alle '+allErrors.length+' Fehlermeldungen löschen?')) return;
+  const batchSize = 400;
+  for(let i=0; i<allErrors.length; i+=batchSize){
+    const batch = db.batch();
+    allErrors.slice(i, i+batchSize).forEach(e => batch.delete(db.collection('apexErrors').doc(e._id)));
+    await batch.commit();
+  }
+  loadErrors();
+}
+
+
+// ═══════════════ TESTIMONIALS ═══════════════
+let allTestimonials=[];
+async function loadTestimonials(){
+  document.getElementById('tm-list-wrap').innerHTML='<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+  try{
+    const snap=await db.collection('apexTestimonials').get();
+    allTestimonials=snap.docs.map(d=>({_id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    updateTmStats(); renderTestimonials();
+  }catch(err){ document.getElementById('tm-list-wrap').innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ ${err.message}</div>`; }
+}
+function updateTmStats(){
+  const live=allTestimonials.filter(t=>t.approved);
+  const rated=allTestimonials.filter(t=>t.rating);
+  document.getElementById('tm-stat-total').textContent=allTestimonials.length;
+  document.getElementById('tm-stat-pending').textContent=allTestimonials.filter(t=>!t.approved).length;
+  document.getElementById('tm-stat-live').textContent=live.length;
+  document.getElementById('tm-stat-avg').textContent=rated.length
+    ? (rated.reduce((a,t)=>a+(+t.rating||0),0)/rated.length).toFixed(1) : '—';
+}
+function renderTestimonials(){
+  const wrap=document.getElementById('tm-list-wrap');
+  const q=(document.getElementById('tm-search').value||'').toLowerCase();
+  const f=document.getElementById('tm-filter').value;
+  const list=allTestimonials.filter(t=>{
+    const mq=!q||(t.text||'').toLowerCase().includes(q)||(t.name||'').toLowerCase().includes(q)||(t.role||'').toLowerCase().includes(q);
+    const mf=f==='all'||(f==='approved'?!!t.approved:!t.approved);
+    return mq&&mf;
+  });
+  if(!list.length){ wrap.innerHTML='<div class="empty-state">Keine Einträge.</div>'; return; }
+  wrap.innerHTML='<div class="table-wrap"><table><thead><tr><th>Datum</th><th>Trader</th><th>Text</th><th>Sterne</th><th>Status</th><th></th></tr></thead><tbody>'+
+    list.map(t=>{
+      const date=t.createdAt?new Date(t.createdAt).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—';
+      const stars='★'.repeat(Math.max(0,Math.min(5,+t.rating||0)))+'☆'.repeat(5-Math.max(0,Math.min(5,+t.rating||0)));
+      return `<tr>
+        <td style="font-size:12px;color:var(--ink3);white-space:nowrap">${date}</td>
+        <td style="font-size:12px"><b>${escHtml(t.name||'—')}</b><div style="color:var(--ink3)">${escHtml(t.role||'')}</div>
+          <div style="color:var(--ink3);font-size:10px">${escHtml(t.plan||'')} · ${escHtml((t._id||'').slice(0,8))}…</div></td>
+        <td style="max-width:420px;font-size:12.5px;line-height:1.55;white-space:pre-wrap">${escHtml(t.text||'')}</td>
+        <td style="color:var(--gold);white-space:nowrap">${stars}</td>
+        <td style="font-size:12px;white-space:nowrap">${t.approved?'<span style="color:var(--profit)">● live</span>':'<span style="color:var(--gold)">● offen</span>'}${t.featured?'<div style="color:var(--gold);font-size:10px">★ featured</div>':''}</td>
+        <td style="white-space:nowrap">
+          <button class="btn-small" onclick="setTestimonial('${t._id}',{approved:${t.approved?'false':'true'}})">${t.approved?'Zurückziehen':'Freigeben'}</button>
+          <button class="btn-small" onclick="setTestimonial('${t._id}',{featured:${t.featured?'false':'true'}})">${t.featured?'Unfeature':'Feature'}</button>
+          <button class="btn-small" style="color:var(--loss)" onclick="delTestimonial('${t._id}')">Löschen</button>
+        </td></tr>`;
+    }).join('')+'</tbody></table></div>';
+}
+async function setTestimonial(id,patch){
+  try{ await db.collection('apexTestimonials').doc(id).update({...patch,reviewedAt:Date.now()});
+    showToast('✓ Gespeichert.'); loadTestimonials();
+  }catch(err){ showToast('⚠ '+err.message,true); }
+}
+async function delTestimonial(id){
+  if(!confirm('Testimonial endgültig löschen?')) return;
+  try{ await db.collection('apexTestimonials').doc(id).delete(); showToast('✓ Gelöscht.'); loadTestimonials(); }
+  catch(err){ showToast('⚠ '+err.message,true); }
+}
+
+// ═══════════════ USER MANAGEMENT ═══════════════
+/* E-Mail-Adressen stehen seit dem 11.08.2026 NICHT mehr in apexUsers — das
+   Dokument ist weltlesbar, damit lag die komplette Nutzerliste samt Adressen
+   offen. Sie liegen jetzt in apexUserEmails/<uid>, lesbar nur für den Admin.
+   Eine zusätzliche Abfrage, danach sieht der Rest des Panels wie vorher `u.email`.
+   `email` aus dem alten Dokument gewinnt nicht: Altkonten, die noch nicht
+   migriert sind, behalten ihren Wert nur, solange nichts Neues da ist. */
+async function mergeEmails(users){
+  try{
+    const snap=await db.collection("apexUserEmails").get();
+    const byUid={}; snap.docs.forEach(d=>{ byUid[d.id]=(d.data()||{}).email||""; });
+    users.forEach(u=>{ if(byUid[u.uid]) u.email=byUid[u.uid]; });
+  }catch(e){ console.warn("apexUserEmails nicht lesbar:", e.message); }
+  return users;
+}
+async function loadUsers(){
+  document.getElementById("user-list-wrap").innerHTML='<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+  try{
+    const snap=await db.collection("apexUsers").get();
+    allUsers=await mergeEmails(snap.docs.map(d=>({uid:d.id,...d.data()})));
+    updateStats(); renderUsers(allUsers);
+  }catch(err){ document.getElementById("user-list-wrap").innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ Firestore Fehler: ${err.message}</div>`; }
+}
+function tsToStr(val){ if(!val)return""; if(typeof val==="string")return val; if(val.toDate)return val.toDate().toISOString(); if(val.seconds)return new Date(val.seconds*1000).toISOString(); return String(val); }
+function updateStats(){
+  const pro=allUsers.filter(u=>u.plan==="pro"||u.subscriptionActive===true).length;
+  const today=new Date().toISOString().slice(0,10);
+  const todayCount=allUsers.filter(u=>tsToStr(u.createdAt).slice(0,10)===today).length;
+  document.getElementById("stat-total").textContent=allUsers.length;
+  document.getElementById("stat-pro").textContent=pro;
+  document.getElementById("stat-free").textContent=allUsers.length-pro;
+  document.getElementById("stat-today").textContent=todayCount;
+}
+function userName(u){ return u.displayName || ((u.firstName||"")+" "+(u.lastName||"")).trim() || u.username || "–"; }
+function filterUsers(){
+  const q=document.getElementById("user-search").value.toLowerCase();
+  const planF=document.getElementById("plan-filter").value;
+  const filtered=allUsers.filter(u=>{
+    const name=userName(u).toLowerCase(); const handle=(u.username||"").toLowerCase();
+    const email=(u.email||"").toLowerCase(); const uid=(u.uid||"").toLowerCase();
+    const matchQ=!q||name.includes(q)||handle.includes(q)||email.includes(q)||uid.includes(q);
+    const isPro=u.isPro||u.plan==="pro"; const matchPlan=planF==="all"||(planF==="pro"&&isPro)||(planF==="free"&&!isPro);
+    return matchQ&&matchPlan;
+  });
+  renderUsers(filtered);
+}
+function renderUsers(users){
+  const wrap=document.getElementById("user-list-wrap");
+  if(!users.length){ wrap.innerHTML='<div class="empty-state">Keine User gefunden.</div>'; return; }
+  const rows=users.map(u=>{
+    const isPro=u.isPro||u.plan==="pro"; const name=userName(u);
+    const initials=name.replace(/[^A-Za-zÄÖÜäöü]/g," ").split(" ").filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase()||"?";
+    const handle=u.username?`<div class="user-handle">@${escHtml(u.username)}</div>`:"";
+    const email=u.email||"–"; const uid=u.uid||"–";
+    const created=tsToStr(u.createdAt||u.created).slice(0,10)||"–";
+    const expiry=u.proExpiry?tsToStr(u.proExpiry).slice(0,10):(isPro?"∞":"–");
+    const planBadge=isPro?`<span class="badge green-badge">PRO</span>`:`<span class="badge dim-badge">Free</span>`;
+    return `<tr>
+      <td><div class="user-info"><div class="user-avatar">${initials}</div>
+        <div class="user-info-text"><div class="user-name">${escHtml(name)}</div>${handle}<div class="user-email">${escHtml(email)}</div></div></div></td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--ink3)" title="${escHtml(uid)}">${uid.length>16?uid.slice(0,8)+"…"+uid.slice(-6):uid}</td>
+      <td>${planBadge}</td>
+      <td style="font-size:12px;color:var(--ink3)">${expiry}</td>
+      <td style="font-size:12px;color:var(--ink3)">${created}</td>
+      <td><div class="action-btns">
+        ${isPro?`<button class="btn-danger" onclick="openPlanModal('${uid}','revoke')">– Pro</button>`:`<button class="btn-success" onclick="openPlanModal('${uid}','grant')">+ Pro</button>`}
+        <button class="btn-blue" onclick="openEditModalByUid('${uid}')">✏ Edit</button>
+      </div></td></tr>`;
+  }).join("");
+  wrap.innerHTML=`<div class="table-wrap"><table><thead><tr>
+    <th>User</th><th>UID</th><th>Plan</th><th>Pro bis</th><th>Registriert</th><th style="width:180px"></th>
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function escHtml(str){ return String(str==null?"":str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function openEditModalByUid(uid){
+  const u=allUsers.find(x=>x.uid===uid); if(!u){ showToast("User nicht gefunden",true); return; }
+  const isPro=u.isPro||u.plan==="pro";
+  document.getElementById("edit-uid").value=u.uid||"";
+  document.getElementById("edit-username").value=u.username||"";
+  document.getElementById("edit-firstName").value=u.firstName||"";
+  document.getElementById("edit-lastName").value=u.lastName||"";
+  document.getElementById("edit-email").value=u.email||"";
+  document.getElementById("edit-displayName").value=u.displayName||"";
+  document.getElementById("edit-isPro").checked=isPro;
+  document.getElementById("edit-proExpiry").value=u.proExpiry?tsToStr(u.proExpiry).slice(0,10):"";
+  document.getElementById("edit-note").value=u.note||u.adminNote||"";
+  document.getElementById("edit-modal").classList.add("open");
+}
+function closeModal(){ document.getElementById("edit-modal").classList.remove("open"); }
+async function saveUser(){
+  const uid=document.getElementById("edit-uid").value;
+  const isPro=document.getElementById("edit-isPro").checked;
+  const username=document.getElementById("edit-username").value.trim();
+  const email=document.getElementById("edit-email").value.trim();
+  const payload={
+    firstName:document.getElementById("edit-firstName").value.trim(),
+    lastName:document.getElementById("edit-lastName").value.trim(),
+    // `email` gehört NICHT hier hinein — apexUsers ist weltlesbar. Sie wird
+    // unten getrennt nach apexUserEmails geschrieben.
+    displayName:document.getElementById("edit-displayName").value.trim(),
+    plan:isPro?"pro":"free", subscriptionActive:isPro,
+    proExpiry:document.getElementById("edit-proExpiry").value.trim()||null,
+    adminNote:document.getElementById("edit-note").value.trim(),
+  };
+  if(username){
+    const taken=allUsers.find(u=>u.uid!==uid && (u.username||"").toLowerCase()===username.toLowerCase());
+    if(taken){ showToast('Username „'+username+'" ist bereits vergeben'+(taken.email?' ('+taken.email+')':''), true); return; }
+    payload.username=username;
+  }
+  Object.keys(payload).forEach(k=>{ if(payload[k]===null) delete payload[k]; });
+  try{
+    await db.collection("apexUsers").doc(uid).update(payload);
+    if(email) await db.collection("apexUserEmails").doc(uid).set(
+      {email:email.toLowerCase(), updatedAt:Date.now()}, {merge:true});
+    /* Falls dieses Konto noch die alte, öffentliche Adresse trägt: jetzt weg
+       damit. Fehlt das Feld, wirft Firestore nicht — der Aufruf ist gutmütig. */
+    await db.collection("apexUsers").doc(uid).update(
+      {email:firebase.firestore.FieldValue.delete()}).catch(()=>{});
+    showToast("✓ User gespeichert."); closeModal(); loadUsers();
+  }
+  catch(err){ showToast("Fehler: "+err.message,true); }
+}
+async function confirmDeleteUser(){
+  const uid=document.getElementById("edit-uid").value;
+  const name=document.getElementById("edit-displayName").value||document.getElementById("edit-username").value||uid;
+  if(!confirm(`User "${name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) return;
+  try{
+    await db.collection("apexUsers").doc(uid).delete();
+    // Die Adresse liegt getrennt — sie muss mitgelöscht werden (Art. 17 DSGVO).
+    await db.collection("apexUserEmails").doc(uid).delete().catch(()=>{});
+    showToast(`✓ User "${name}" gelöscht.`); closeModal(); loadUsers(); }
+  catch(err){ showToast("Fehler: "+err.message,true); }
+}
+function openPlanModal(uid,action){
+  planModalAction={uid,action}; const isGrant=action==="grant";
+  document.getElementById("plan-modal-title").textContent=isGrant?"Pro Plan vergeben":"Pro Plan entziehen";
+  document.getElementById("plan-modal-desc").textContent=isGrant?`UID: ${uid}`:`Pro wird sofort entfernt für UID: ${uid}`;
+  document.getElementById("plan-expiry").value="";
+  document.getElementById("plan-expiry-field").style.display=isGrant?"flex":"none";
+  const b=document.getElementById("plan-confirm-btn");
+  b.className=isGrant?"btn-success":"btn-danger"; b.textContent=isGrant?"Pro vergeben":"Pro entziehen";
+  document.getElementById("plan-modal").classList.add("open");
+}
+function closePlanModal(){ document.getElementById("plan-modal").classList.remove("open"); planModalAction=null; }
+async function confirmPlanChange(){
+  if(!planModalAction)return; const {uid,action}=planModalAction; const isGrant=action==="grant";
+  const expiry=document.getElementById("plan-expiry").value.trim()||null;
+  const payload={ plan:isGrant?"pro":"free", subscriptionActive:isGrant };
+  if(isGrant&&expiry) payload.proExpiry=expiry; if(!isGrant) payload.proExpiry=null;
+  try{ await db.collection("apexUsers").doc(uid).update(payload); showToast(isGrant?"✓ Pro vergeben.":"✓ Pro entzogen."); closePlanModal(); loadUsers(); }
+  catch(err){ showToast("Fehler: "+err.message,true); }
+}
+
+// ═══════════════ SERVERS & BANS (Super-Admin) ═══════════════
+async function loadServersAndBans(){
+  document.getElementById("appeal-list-wrap").innerHTML='<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+  try{
+    if(!allUsers.length){ try{ const us=await db.collection("apexUsers").get(); allUsers=us.docs.map(d=>({uid:d.id,...d.data()})); }catch(e){} }
+    const [srvSnap, apSnap] = await Promise.all([
+      db.collection("apexServers").get(),
+      db.collection("apexBanAppeals").get().catch(()=>({docs:[]}))
+    ]);
+    allServers=srvSnap.docs.map(d=>({id:d.id,...d.data()}));
+    allAppeals=apSnap.docs.map(d=>({id:d.id,...d.data()}));
+    // flatten bans across all servers
+    allBans=[];
+    allServers.forEach(s=>{
+      (s.banned||[]).forEach(uid=>{
+        const info=(s.bannedInfo&&s.bannedInfo[uid])||{};
+        allBans.push({ serverId:s.id, serverName:s.name||s.id, uid:uid,
+          name:resolveName(uid,s), reason:info.reason||"", byName:info.byName||"", at:info.at||0 });
+      });
+    });
+    updateServerStats(); renderServersTab();
+  }catch(err){ document.getElementById("appeal-list-wrap").innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ ${err.message}</div>`; }
+}
+function resolveName(uid, srv){
+  if(srv&&srv.bannedInfo&&srv.bannedInfo[uid]&&srv.bannedInfo[uid].name) return srv.bannedInfo[uid].name;
+  if(srv&&srv.memberInfo&&srv.memberInfo[uid]&&srv.memberInfo[uid].name) return srv.memberInfo[uid].name;
+  const u=allUsers.find(x=>x.uid===uid); if(u) return u.username||userName(u);
+  return uid.slice(0,10)+"…";
+}
+function updateServerStats(){
+  document.getElementById("srv-stat-total").textContent=allServers.length;
+  document.getElementById("srv-stat-public").textContent=allServers.filter(s=>s.discoverable).length;
+  document.getElementById("srv-stat-banned").textContent=allBans.length;
+  document.getElementById("srv-stat-appeals").textContent=allAppeals.filter(a=>(a.status||"pending")==="pending").length;
+}
+function renderServersTab(){ renderAppeals(); renderBans(); renderServers(); }
+
+function renderAppeals(){
+  const wrap=document.getElementById("appeal-list-wrap");
+  const q=(document.getElementById("srv-search").value||"").toLowerCase();
+  let list=allAppeals.slice().sort((a,b)=>((a.status||"pending")==="pending"?-1:1)-((b.status||"pending")==="pending"?-1:1));
+  if(q) list=list.filter(a=>((a.userName||"")+a.uid+(a.serverName||"")).toLowerCase().includes(q));
+  if(!list.length){ wrap.innerHTML='<div class="empty-state">Keine Entbannungsanträge.</div>'; return; }
+  wrap.innerHTML=list.map(a=>{
+    const st=a.status||"pending";
+    const stBadge=st==="pending"?'<span class="badge gold-badge">OFFEN</span>':st==="accepted"?'<span class="badge green-badge">ENTBANNT</span>':'<span class="badge red-badge">ABGELEHNT</span>';
+    const when=a.createdAt?tsToStr(a.createdAt).slice(0,16).replace("T"," "):"";
+    const actions=st==="pending"?`<div class="action-btns" style="margin-top:10px">
+        <button class="btn-success" onclick="acceptAppeal('${a.id}','${a.serverId}','${a.uid}')">✓ Entbannen &amp; akzeptieren</button>
+        <button class="btn-danger" onclick="rejectAppeal('${a.id}')">✕ Ablehnen</button>
+        <button class="btn-small" onclick="loadChatHistory('${a.serverId}','${a.uid}','chat-${a.id}')">💬 Chatverlauf</button>
+      </div>`:"";
+    return `<div class="appeal glass ${st}">
+      <div class="appeal-head">
+        <div><div class="appeal-who">${escHtml(a.userName||a.uid)} ${stBadge}</div>
+          <div class="appeal-srv">Server: ${escHtml(a.serverName||a.serverId)} · ${when}</div></div>
+      </div>
+      ${a.banReason?`<div class="appeal-block"><div class="lbl">Grund des Banns</div>${escHtml(a.banReason)}</div>`:""}
+      <div class="appeal-block"><div class="lbl">Antrag des Nutzers</div>${escHtml(a.message||"(kein Text)")}</div>
+      ${a.resolvedByName?`<div style="font-size:11px;color:var(--ink3);margin-top:4px">Bearbeitet von ${escHtml(a.resolvedByName)}</div>`:""}
+      <div class="chat-log" id="chat-${a.id}"></div>
+      ${actions}
+    </div>`;
+  }).join("");
+}
+function renderBans(){
+  const wrap=document.getElementById("ban-list-wrap");
+  const q=(document.getElementById("srv-search").value||"").toLowerCase();
+  let list=allBans;
+  if(q) list=list.filter(b=>(b.name+b.uid+b.serverName).toLowerCase().includes(q));
+  if(!list.length){ wrap.innerHTML='<div class="empty-state">Keine gebannten Nutzer 🎉</div>'; return; }
+  const rows=list.map(b=>`<tr>
+    <td><div class="user-info"><div class="user-avatar">${escHtml((b.name[0]||"?").toUpperCase())}</div>
+      <div class="user-info-text"><div class="user-name">${escHtml(b.name)}</div>
+        <div class="user-email" style="font-family:var(--font-mono)">${escHtml(b.uid.slice(0,14))}…</div></div></div></td>
+    <td><span class="badge dim-badge">${escHtml(b.serverName)}</span></td>
+    <td style="max-width:240px;font-size:13px;color:var(--ink2)">${escHtml(b.reason||"—")}</td>
+    <td style="font-size:12px;color:var(--ink3)">${escHtml(b.byName||"—")}</td>
+    <td><div class="action-btns">
+      <button class="btn-small" onclick="adminLoadChat('${b.serverId}','${b.uid}','${escHtml(b.name).replace(/'/g,'')}')">💬 Verlauf</button>
+      <button class="btn-success" onclick="unbanUser('${b.serverId}','${b.uid}','${escHtml(b.name).replace(/'/g,'')}')">↺ Entbannen</button>
+    </div></td></tr>`).join("");
+  wrap.innerHTML=`<div class="table-wrap"><table><thead><tr>
+    <th>Nutzer</th><th>Server</th><th>Grund</th><th>Gebannt von</th><th style="width:230px"></th>
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function renderServers(){
+  const wrap=document.getElementById("server-list-wrap");
+  const q=(document.getElementById("srv-search").value||"").toLowerCase();
+  let list=allServers;
+  if(q) list=list.filter(s=>((s.name||"")+(s.ownerName||"")+s.id).toLowerCase().includes(q));
+  if(!list.length){ wrap.innerHTML='<div class="empty-state">Keine Server.</div>'; return; }
+  const rows=list.map(s=>`<tr>
+    <td><div class="user-info"><div class="user-avatar">${escHtml((s.icon||s.name||"S")[0].toUpperCase())}</div>
+      <div class="user-info-text"><div class="user-name">${escHtml(s.name||s.id)}</div>
+        <div class="user-email">${escHtml(s.tagline||"")}</div></div></div></td>
+    <td style="font-size:13px">${escHtml(s.ownerName||"—")}</td>
+    <td>${s.discoverable?'<span class="badge green-badge">Öffentlich</span>':'<span class="badge dim-badge">Privat</span>'}</td>
+    <td style="font-size:13px">${(s.members||[]).length}</td>
+    <td>${(s.banned||[]).length?`<span class="badge red-badge">${(s.banned||[]).length}</span>`:'<span style="color:var(--ink3)">0</span>'}</td>
+    <td style="font-family:var(--font-mono);font-size:11px;color:var(--ink3)">${escHtml(s.id)}</td>
+  </tr>`).join("");
+  wrap.innerHTML=`<div class="table-wrap"><table><thead><tr>
+    <th>Server</th><th>Owner</th><th>Sichtbarkeit</th><th>Mitglieder</th><th>Bans</th><th>ID</th>
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+async function unbanUser(sid, uid, name){
+  if(!confirm(`"${name}" auf diesem Server entbannen?`)) return;
+  try{
+    const upd={ banned:FV().arrayRemove(uid) };
+    upd["bannedInfo."+uid]=FV().delete();
+    await db.collection("apexServers").doc(sid).update(upd);
+    await logUnban(sid, uid, name);
+    await resolveAppealFor(sid, uid, "accepted");
+    showToast(`↺ ${name} entbannt.`);
+    loadServersAndBans();
+  }catch(err){ showToast("Fehler: "+err.message,true); }
+}
+async function acceptAppeal(appealId, sid, uid){
+  try{
+    const upd={ banned:FV().arrayRemove(uid) }; upd["bannedInfo."+uid]=FV().delete();
+    await db.collection("apexServers").doc(sid).update(upd);
+    await logUnban(sid, uid, "Antragsteller");
+    await db.collection("apexBanAppeals").doc(appealId).update({
+      status:"accepted", resolvedAt:FV().serverTimestamp(), resolvedByUid:adminUid, resolvedByName:"Super-Admin" });
+    showToast("✓ Antrag akzeptiert — Nutzer entbannt.");
+    loadServersAndBans();
+  }catch(err){ showToast("Fehler: "+err.message,true); }
+}
+async function rejectAppeal(appealId){
+  try{
+    await db.collection("apexBanAppeals").doc(appealId).update({
+      status:"rejected", resolvedAt:FV().serverTimestamp(), resolvedByUid:adminUid, resolvedByName:"Super-Admin" });
+    showToast("Antrag abgelehnt.");
+    loadServersAndBans();
+  }catch(err){ showToast("Fehler: "+err.message,true); }
+}
+async function resolveAppealFor(sid, uid, status){
+  const ap=allAppeals.find(a=>a.serverId===sid&&a.uid===uid&&(a.status||"pending")==="pending");
+  if(!ap) return;
+  try{ await db.collection("apexBanAppeals").doc(ap.id).update({ status, resolvedAt:FV().serverTimestamp(), resolvedByUid:adminUid, resolvedByName:"Super-Admin" }); }catch(e){}
+}
+async function logUnban(sid, uid, name){
+  try{ await db.collection("apexServers").doc(sid).collection("modlog").add({
+    action:"unban", target:uid, targetName:name, by:adminUid, byName:"Super-Admin", reason:"via Control Center", ts:FV().serverTimestamp() }); }catch(e){}
+}
+
+// chat history — best effort: read recent messages from common channels, filter to this user
+async function fetchUserMessages(sid, uid){
+  const out=[];
+  let chans=[];
+  try{ const cs=await db.collection("apexServers").doc(sid).collection("channels").get(); chans=cs.docs.map(d=>d.id); }catch(e){ chans=["general"]; }
+  if(!chans.length) chans=["general"];
+  for(const ch of chans.slice(0,4)){
+    try{
+      const snap=await db.collection("apexServers").doc(sid).collection("channels").doc(ch).collection("messages").orderBy("ts","desc").limit(60).get();
+      snap.docs.forEach(d=>{ const m=d.data(); if(m.from===uid) out.push({ ch, text:m.text||m.body||m.msg||"(kein Text)", ts:m.ts&&m.ts.toMillis?m.ts.toMillis():0 }); });
+    }catch(e){}
+  }
+  out.sort((a,b)=>b.ts-a.ts);
+  return out.slice(0,40);
+}
+async function loadChatHistory(sid, uid, containerId){
+  const el=document.getElementById(containerId); if(!el) return;
+  el.style.display="block"; el.innerHTML='<span class="loading-spinner"></span> Lädt Verlauf…';
+  const msgs=await fetchUserMessages(sid, uid);
+  if(!msgs.length){ el.innerHTML='<div style="color:var(--ink3);font-size:12px">Keine Nachrichten dieses Nutzers gefunden.</div>'; return; }
+  el.innerHTML=msgs.map(m=>{ const t=m.ts?new Date(m.ts).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+    return `<div class="chat-msg"><span class="t">${escHtml(t)} #${escHtml(m.ch)}</span>${escHtml(m.text)}</div>`; }).join("");
+}
+function adminLoadChat(sid, uid, name){
+  // open a lightweight overlay reusing bug modal styles
+  const body=document.getElementById("br-modal-body");
+  document.getElementById("br-modal-title").textContent="Chatverlauf — "+name;
+  document.getElementById("br-modal-id").value="";
+  body.innerHTML='<div class="chat-log" id="adminChatLog" style="display:block"><span class="loading-spinner"></span> Lädt…</div>';
+  document.querySelector("#br-modal .modal-footer").style.display="none";
+  document.getElementById("br-modal-status").parentElement.style.display="none";
+  document.getElementById("br-modal-note").parentElement.style.display="none";
+  document.getElementById("br-modal").classList.add("open");
+  fetchUserMessages(sid, uid).then(msgs=>{
+    const log=document.getElementById("adminChatLog"); if(!log) return;
+    log.innerHTML=msgs.length?msgs.map(m=>{ const t=m.ts?new Date(m.ts).toLocaleString("de-DE"):""; return `<div class="chat-msg"><span class="t">${escHtml(t)} #${escHtml(m.ch)}</span>${escHtml(m.text)}</div>`; }).join("")
+      :'<div style="color:var(--ink3);font-size:12px">Keine Nachrichten gefunden.</div>';
+  });
+}
+
+// ═══════════════ PARTNERS ═══════════════
+/* Der Worker prüft `Authorization: Bearer <ADMIN_PASSWORD>`. Hier stand
+   früher ein eigener Header `X-Admin-Key` — den lässt schon der
+   CORS-Preflight nicht durch, die Anfrage kam also nie am Worker an. */
+function adminHeaders(extra){
+  return Object.assign({ 'Authorization': 'Bearer ' + (adminToken||'') }, extra||{});
+}
+async function loadPartners(){
+  const wrap=document.getElementById("partner-list-wrap");
+  try{
+    const res=await fetch(`${WORKER_URL}/admin/partners`,{headers:adminHeaders()});
+    const data=await res.json();
+    /* Ein 401 liefert {error:…}. Das hat kein .length und lief vorher in den
+       "Noch keine Partner"-Zweig — ein Auth-Fehler sah also aus wie eine
+       leere Liste. */
+    if(!res.ok || !Array.isArray(data)){
+      /* Bei 401 die Token-LÄNGE mitzeigen (nie den Wert). Weicht sie zwischen
+         zwei Logins ab, hat der Passwort-Manager das Feld anders befüllt. */
+      const hint = res.status===401 ? ` (gesendeter Token: ${(adminToken||'').length} Zeichen)` : '';
+      wrap.innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ ${data&&data.error?data.error:'HTTP '+res.status}${hint}</div>`;
+      return;
+    }
+    renderPartners(data);
+  }
+  catch(e){ wrap.innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ ${e.message}</div>`; }
+}
+function renderPartners(partners){
+  const wrap=document.getElementById("partner-list-wrap");
+  if(!partners.length){ wrap.innerHTML='<div class="empty-state">Noch keine Partner. Füge oben einen hinzu.</div>'; return; }
+  const rows=partners.map(p=>`<tr>
+    <td><span class="code-badge" onclick="copyRef('${p.code}')" title="Link kopieren">${p.code}</span></td>
+    <td>${p.name||"–"}</td>
+    <td style="font-family:var(--font-mono);font-size:11px;color:var(--ink3)">${p.stripeAccountId}</td>
+    <td><span class="badge gold-badge">${p.splitPercent}%</span></td>
+    <td><span class="badge green-badge">${p.discountPercent?p.discountPercent+'%':'—'}</span></td>
+    <td style="color:var(--ink3);font-size:12px">${p.addedAt?p.addedAt.slice(0,10):'—'}</td>
+    <td><button class="btn-danger" onclick="deletePartner('${p.code}')">Löschen</button></td></tr>`).join("");
+  wrap.innerHTML=`<div class="table-wrap"><table><thead><tr>
+    <th>Code</th><th>Name</th><th>Stripe Account</th><th>Split</th><th>Rabatt</th><th>Hinzugefügt</th><th></th>
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+async function addPartner(){
+  const code=document.getElementById("new-code").value.trim(), name=document.getElementById("new-name").value.trim();
+  const acct=document.getElementById("new-acct").value.trim(), split=document.getElementById("new-split").value, discount=document.getElementById("new-discount").value;
+  if(!code||!acct){ showToast("Code und Stripe Account ID sind Pflichtfelder.",true); return; }
+  if(!acct.startsWith("acct_")){ showToast("Stripe Account ID muss mit acct_ beginnen.",true); return; }
+  const res=await fetch(`${WORKER_URL}/admin/partners`,{method:"POST",headers:adminHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({code,name,stripeAccountId:acct,splitPercent:Number(split),discountPercent:Number(discount)})});
+  const data=await res.json();
+  if(data.success){ showToast(`✓ Partner "${code}" gespeichert.`); ["new-code","new-name","new-acct"].forEach(i=>document.getElementById(i).value=""); document.getElementById("new-split").value="50"; document.getElementById("new-discount").value="0"; loadPartners(); }
+  else showToast("Fehler: "+(data.error||"Unbekannt"),true);
+}
+async function deletePartner(code){
+  if(!confirm(`Partner "${code}" wirklich löschen?`)) return;
+  const res=await fetch(`${WORKER_URL}/admin/partners/${code}`,{method:"DELETE",headers:adminHeaders()});
+  if((await res.json()).success){ showToast(`✓ Partner "${code}" gelöscht.`); loadPartners(); }
+}
+function copyRef(code){
+  const link=`https://evidencetrading.com/?ref=${code}`;
+  navigator.clipboard.writeText(link);
+  const el=document.getElementById("ref-preview"); el.textContent="✓ Kopiert: "+link; el.style.color="var(--gold)";
+  showToast("Referral Link kopiert!");
+}
+
+// ═══════════════ BUG REPORTS ═══════════════
+let allBugReports=[];
+const CAT_LABELS={bug:'🐛 Bug',ui:'🎨 UI',performance:'⚡ Performance',feature:'💡 Feature',indicator:'📐 Indikator',data:'📊 Daten',other:'📝 Sonstiges'};
+const STATUS_LABELS={open:'Offen',in_progress:'In Bearbeitung',resolved:'Gelöst',wontfix:"Won't Fix"};
+const STATUS_COLORS={open:'var(--loss)',in_progress:'var(--gold)',resolved:'var(--profit)',wontfix:'var(--ink3)'};
+async function loadBugReports(){
+  document.getElementById('br-list-wrap').innerHTML='<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+  try{ const snap=await db.collection('bugReports').orderBy('createdAt','desc').get();
+    allBugReports=snap.docs.map(d=>({_id:d.id,...d.data()})); updateBrStats(); renderBugReports(allBugReports);
+  }catch(err){ document.getElementById('br-list-wrap').innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ ${err.message}</div>`; }
+}
+function updateBrStats(){
+  document.getElementById('br-stat-total').textContent=allBugReports.length;
+  document.getElementById('br-stat-open').textContent=allBugReports.filter(r=>r.status==='open'||!r.status).length;
+  document.getElementById('br-stat-progress').textContent=allBugReports.filter(r=>r.status==='in_progress').length;
+  document.getElementById('br-stat-resolved').textContent=allBugReports.filter(r=>r.status==='resolved').length;
+}
+function filterBugReports(){
+  const q=(document.getElementById('br-search').value||'').toLowerCase();
+  const cat=document.getElementById('br-cat-filter').value, status=document.getElementById('br-status-filter').value;
+  const filtered=allBugReports.filter(r=>{
+    const matchQ=!q||(r.title||'').toLowerCase().includes(q)||(r.description||'').toLowerCase().includes(q)||(r.email||'').toLowerCase().includes(q)||(r.displayName||'').toLowerCase().includes(q);
+    const matchCat=cat==='all'||r.category===cat; const matchStatus=status==='all'||(r.status||'open')===status;
+    return matchQ&&matchCat&&matchStatus;
+  });
+  renderBugReports(filtered);
+}
+function renderBugReports(reports){
+  const wrap=document.getElementById('br-list-wrap');
+  if(!reports.length){ wrap.innerHTML='<div class="empty-state">Keine Reports gefunden.</div>'; return; }
+  const rows=reports.map(r=>{
+    const status=r.status||'open';
+    const date=r.createdAt?new Date(r.createdAt).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+    const catLabel=CAT_LABELS[r.category]||r.category||'—', statusLabel=STATUS_LABELS[status]||status, statusColor=STATUS_COLORS[status]||'var(--ink3)';
+    const userStr=r.displayName||r.email||(r.uid?r.uid.slice(0,8)+'…':'Anonym');
+    return `<tr style="cursor:pointer" onclick="openBrModalById('${r._id}')">
+      <td style="font-size:12px;color:var(--ink3);white-space:nowrap">${date}</td>
+      <td><span class="badge dim-badge" style="font-size:11px">${escHtml(catLabel)}</span></td>
+      <td style="font-weight:500;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(r.title||'(kein Titel)')}</td>
+      <td style="font-size:12px;color:var(--ink3);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml((r.description||'').slice(0,80))}${(r.description||'').length>80?'…':''}</td>
+      <td style="font-size:12px;color:var(--ink3)">${escHtml(userStr)}</td>
+      <td><span style="color:${statusColor};font-size:12px;font-weight:600">${escHtml(statusLabel)}</span></td>
+      <td><button class="btn-blue" style="font-size:12px;padding:5px 12px" onclick="event.stopPropagation();openBrModalById('${r._id}')">Details</button></td></tr>`;
+  }).join('');
+  wrap.innerHTML=`<div class="table-wrap"><table><thead><tr>
+    <th>Datum</th><th>Kategorie</th><th>Titel</th><th>Beschreibung</th><th>User</th><th>Status</th><th></th>
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function openBrModalById(id){
+  const r=allBugReports.find(x=>x._id===id); if(!r){ showToast("Report nicht gefunden",true); return; }
+  // restore modal to bug-report layout (adminLoadChat may have hidden parts)
+  document.querySelector("#br-modal .modal-footer").style.display="flex";
+  document.getElementById("br-modal-status").parentElement.style.display="flex";
+  document.getElementById("br-modal-note").parentElement.style.display="flex";
+  document.getElementById('br-modal-id').value=r._id;
+  document.getElementById('br-modal-title').textContent=r.title||'(kein Titel)';
+  document.getElementById('br-modal-status').value=r.status||'open';
+  document.getElementById('br-modal-note').value=r.adminNote||'';
+  const date=r.createdAt?new Date(r.createdAt).toLocaleString('de-DE'):'—';
+  const catLabel=CAT_LABELS[r.category]||r.category||'—';
+  const userStr=[r.displayName,r.email,r.uid?'UID: '+r.uid:null].filter(Boolean).join(' · ');
+  const pageStr=r.url?`<div style="margin-top:8px;font-size:11px"><b>URL:</b> ${escHtml(r.url)}</div>`:'';
+  const uaStr=r.ua?`<div style="margin-top:4px;font-size:11px;word-break:break-all"><b>UA:</b> ${escHtml(r.ua)}</div>`:'';
+  document.getElementById('br-modal-body').innerHTML=`
+    <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+      <span class="badge dim-badge">${escHtml(catLabel)}</span>
+      <span style="color:var(--ink3);font-size:12px">${date}</span>
+      ${userStr?`<span style="color:var(--ink3);font-size:12px">${escHtml(userStr)}</span>`:''}</div>
+    <div style="background:var(--elevated);border:0.5px solid var(--rim);border-radius:10px;padding:14px;white-space:pre-wrap;font-size:13px;line-height:1.6">${escHtml(r.description||'(keine Beschreibung)')}</div>
+    ${pageStr}${uaStr}
+    ${r.adminNote?`<div style="margin-top:12px;padding:10px 14px;background:rgba(201,168,76,0.06);border:0.5px solid rgba(201,168,76,0.2);border-radius:8px;font-size:12px;color:var(--gold)">📌 ${escHtml(r.adminNote)}</div>`:''}`;
+  document.getElementById('br-modal').classList.add('open');
+}
+function closeBrModal(){ document.getElementById('br-modal').classList.remove('open'); }
+async function saveBugReport(){
+  const id=document.getElementById('br-modal-id').value; if(!id){ closeBrModal(); return; }
+  const status=document.getElementById('br-modal-status').value, adminNote=document.getElementById('br-modal-note').value.trim();
+  try{ await db.collection('bugReports').doc(id).update({status,adminNote,updatedAt:Date.now()}); showToast('✓ Report aktualisiert.'); closeBrModal(); loadBugReports(); }
+  catch(err){ showToast('Fehler: '+err.message,true); }
+}
+async function deleteBugReport(){
+  const id=document.getElementById('br-modal-id').value; if(!id){ closeBrModal(); return; }
+  if(!confirm('Report wirklich löschen?')) return;
+  try{ await db.collection('bugReports').doc(id).delete(); showToast('✓ Report gelöscht.'); closeBrModal(); loadBugReports(); }
+  catch(err){ showToast('Fehler: '+err.message,true); }
+}
+
+// ═══════════════ NEWS & AKTIONEN (Announcements) ═══════════════
+let annNextVersionCache=null;
+
+function annPolish(type, rawTitle, rawBody, reward, deadline, version){
+  rawTitle=(rawTitle||'').trim(); rawBody=(rawBody||'').trim();
+  function lines(txt){ return txt.split('\n').map(function(l){return l.trim();}).filter(Boolean); }
+  function cap(s){ s=s.trim(); if(!s) return s; s=s.charAt(0).toUpperCase()+s.slice(1); if(!/[.!?…]$/.test(s)) s+='.'; return s; }
+  function bullets(txt){ return lines(txt).map(function(l){ return '• '+cap(l); }).join('\n'); }
+  function para(txt){ return lines(txt).map(cap).join(' '); }
+  var title, body;
+  if(type==='update'){
+    title=(version||'Update')+(rawTitle?' — '+rawTitle:' ist da!');
+    body='Wir haben Evidence wieder ein Stück besser gemacht. Das ist neu:\n'+(rawBody?bullets(rawBody):'• Diverse Verbesserungen & Bugfixes.')+'\n\nViel Erfolg beim Traden! 📈';
+  } else if(type==='giveaway'){
+    title='🎁 '+(rawTitle||'Evidence Giveaway');
+    body='Großes Giveaway! '+(rawBody?para(rawBody):'')+(reward?'\n\nZu gewinnen: '+reward+'.':'')+(deadline?'\nTeilnahme noch bis '+deadline+'.':'')+'\n\nViel Glück! 🍀';
+  } else if(type==='promo'){
+    title='💸 '+(rawTitle||'Evidence Aktion');
+    body='Nur für kurze Zeit: '+(rawBody?para(rawBody):'')+(reward?'\n\nDeine Belohnung: '+reward+'.':'')+(deadline?'\nGültig bis '+deadline+'.':'');
+  } else {
+    title=rawTitle||'Evidence News'; body=para(rawBody);
+  }
+  return { title:title, body:body };
+}
+function annCardHtml(a){
+  var TYPES={ update:{ic:'✨',label:'Update',col:'var(--gold-light)'}, giveaway:{ic:'🎁',label:'Giveaway',col:'#c78bff'}, promo:{ic:'💸',label:'Aktion',col:'var(--profit)'}, news:{ic:'📣',label:'News',col:'var(--blue)'} };
+  var t=TYPES[a.type]||TYPES.news;
+  var ms=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():(typeof a.createdAt==='number'?a.createdAt:Date.now());
+  var date=new Date(ms).toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric'});
+  var bodyHtml=escHtml(a.body||'').replace(/\n/g,'<br>');
+  var verPill=a.version?'<span style="font-family:var(--font-mono);font-size:11px;color:'+t.col+';border:0.5px solid '+t.col+';border-radius:20px;padding:2px 10px;margin-left:4px">'+escHtml(a.version)+'</span>':'';
+  var reward=a.reward?'<div style="margin-top:12px;display:inline-flex;gap:8px;background:rgba(62,207,142,0.1);border:0.5px solid rgba(62,207,142,0.3);border-radius:10px;padding:8px 14px;font-weight:700;color:var(--profit)">🏆 '+escHtml(a.reward)+'</div>':'';
+  var deadline=a.deadline?'<div style="margin-top:8px;font-size:12px;color:var(--ink2)">⏳ Noch bis <b>'+escHtml(a.deadline)+'</b></div>':'';
+  var cta=(a.ctaUrl&&a.ctaText)?'<div><span style="display:inline-block;margin-top:14px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1206;font-weight:700;padding:9px 18px;border-radius:10px;font-size:13px">'+escHtml(a.ctaText)+' →</span></div>':'';
+  var pin=a.pinned?'<span style="font-size:12px;margin-left:4px">📌</span>':'';
+  var credit=a.requestedBy?'<div style="margin-top:14px;padding-top:12px;border-top:0.5px solid var(--rim2);font-size:12.5px;color:var(--ink2)">💡 Auf Wunsch von '+
+    String(a.requestedBy).split(',').map(function(n){ n=n.trim().replace(/^@/,''); return n?'<b style="color:var(--gold-light)" translate="no" class="notranslate">@'+escHtml(n)+'</b>':''; }).filter(Boolean).join(', ')+
+    ' gebaut.</div>':'';
+  return '<div style="background:var(--elevated);border:0.5px solid var(--rim2);border-radius:14px;padding:20px;border-left:3px solid '+t.col+'">'+
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+
+      '<span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:'+t.col+'">'+t.ic+' '+t.label+'</span>'+verPill+pin+
+      '<span style="margin-left:auto;font-size:11px;color:var(--ink3);font-family:var(--font-mono)">'+date+'</span>'+
+    '</div>'+
+    '<div style="font-family:var(--font-display);font-size:1.15rem;font-weight:700;margin-bottom:8px;color:var(--ink);line-height:1.25">'+escHtml(a.title||'')+'</div>'+
+    '<div style="font-size:14px;color:var(--ink2);line-height:1.6">'+bodyHtml+'</div>'+
+    reward+deadline+cta+credit+
+  '</div>';
+}
+function annFormData(){
+  var type=document.getElementById('ann-type').value;
+  return {
+    type:type,
+    rawTitle:document.getElementById('ann-title').value,
+    rawBody:document.getElementById('ann-body').value,
+    reward:document.getElementById('ann-reward').value.trim(),
+    deadline:document.getElementById('ann-deadline').value.trim(),
+    ctaText:document.getElementById('ann-cta-text').value.trim(),
+    ctaUrl:document.getElementById('ann-cta-url').value.trim(),
+    requestedBy:document.getElementById('ann-requested-by').value.trim(),
+    pinned:document.getElementById('ann-pinned').checked,
+    push:!!(document.getElementById('ann-push')&&document.getElementById('ann-push').checked)
+  };
+}
+function updateAnnPreview(){
+  if(!document.getElementById('ann-preview')) return;
+  var f=annFormData();
+  var ver=f.type==='update'?(annNextVersionCache||'Evidence x.x'):null;
+  var p=annPolish(f.type, f.rawTitle, f.rawBody, f.reward, f.deadline, ver);
+  document.getElementById('ann-preview').innerHTML=annCardHtml({ type:f.type, version:ver, title:p.title, body:p.body, reward:f.reward, deadline:f.deadline, ctaText:f.ctaText, ctaUrl:f.ctaUrl, requestedBy:f.requestedBy, pinned:f.pinned, createdAt:Date.now() });
+}
+async function nextVersion(){
+  try{
+    var snap=await db.collection('apexAnnouncements').where('type','==','update').get();
+    var maxMa=1, maxMi=-1, found=false;
+    snap.docs.forEach(function(d){ var v=(d.data().version||'').replace(/[^0-9.]/g,'').split('.'); if(v.length>=2){ var ma=parseInt(v[0],10), mi=parseInt(v[1],10); if(!isNaN(ma)&&!isNaN(mi)){ found=true; if(ma>maxMa||(ma===maxMa&&mi>maxMi)){ maxMa=ma; maxMi=mi; } } } });
+    if(!found) return 'Evidence 1.0';
+    var mi=maxMi+1, ma=maxMa; if(mi>9){ ma+=1; mi=0; }
+    return 'Evidence '+ma+'.'+mi;
+  }catch(e){ return 'Evidence 1.0'; }
+}
+async function publishAnnouncement(){
+  var f=annFormData();
+  if(!f.rawTitle.trim() && !f.rawBody.trim()){ showToast('Bitte Titel oder Text eingeben',true); return; }
+  var version=null;
+  if(f.type==='update'){ version=await nextVersion(); }
+  var p=annPolish(f.type, f.rawTitle, f.rawBody, f.reward, f.deadline, version);
+  if(!confirm('„'+p.title+'" veröffentlichen?'+(f.push?'\n\n🔔 Alle eingeloggten Nutzer erhalten eine Glocken-Benachrichtigung.':''))) return;
+  var doc={ type:f.type, version:version||null, title:p.title, body:p.body,
+    rawTitle:f.rawTitle.trim(), rawBody:f.rawBody.trim(),
+    reward:f.reward||null, deadline:f.deadline||null, ctaText:f.ctaText||null, ctaUrl:f.ctaUrl||null,
+    requestedBy:f.requestedBy||null,
+    pinned:f.pinned, push:f.push, createdAt:firebase.firestore.FieldValue.serverTimestamp(), createdByName:'Evidence Team' };
+  Object.keys(doc).forEach(function(k){ if(doc[k]===null) delete doc[k]; });
+  try{
+    await db.collection('apexAnnouncements').add(doc);
+    showToast('✓ Veröffentlicht'+(version?' ('+version+')':'')+(f.push?' · 🔔 gepusht':''));
+    ['ann-title','ann-body','ann-reward','ann-deadline','ann-cta-text','ann-cta-url','ann-requested-by'].forEach(function(i){ document.getElementById(i).value=''; });
+    document.getElementById('ann-pinned').checked=false;
+    loadAnnouncements();
+  }catch(err){ showToast('Fehler: '+err.message,true); }
+}
+async function loadAnnouncements(){
+  var wrap=document.getElementById('ann-list-wrap');
+  if(wrap) wrap.innerHTML='<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+  annNextVersionCache=await nextVersion();
+  updateAnnPreview();
+  try{
+    var snap=await db.collection('apexAnnouncements').orderBy('createdAt','desc').get();
+    var items=snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); });
+    items.sort(function(a,b){ return (b.pinned?1:0)-(a.pinned?1:0); });
+    if(!items.length){ if(wrap) wrap.innerHTML='<div class="empty-state">Noch nichts veröffentlicht.</div>'; return; }
+    if(wrap) wrap.innerHTML='<div style="padding:22px;display:grid;gap:18px">'+items.map(function(a){
+      return '<div>'+
+        '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px">'+
+          '<button class="btn-small" onclick="editRequestedBy(\''+a.id+'\')">💡 Auf Wunsch von…</button>'+
+          '<button class="'+(a.pinned?'btn-success':'btn-small')+'" onclick="togglePinAnnouncement(\''+a.id+'\','+(a.pinned?'true':'false')+')">'+(a.pinned?'📌 Angepinnt':'📌 Anpinnen')+'</button>'+
+          '<button class="btn-danger" onclick="deleteAnnouncement(\''+a.id+'\')">Löschen</button>'+
+        '</div>'+annCardHtml(a)+'</div>';
+    }).join('')+'</div>';
+  }catch(err){ if(wrap) wrap.innerHTML='<div class="empty-state" style="color:var(--loss)">⚠ '+err.message+'</div>'; }
+}
+async function deleteAnnouncement(id){
+  if(!confirm('Diese News wirklich löschen?')) return;
+  try{ await db.collection('apexAnnouncements').doc(id).delete(); showToast('✓ Gelöscht'); loadAnnouncements(); }
+  catch(err){ showToast('Fehler: '+err.message,true); }
+}
+// Credit a user on an entry that is already published (or clear the credit).
+async function editRequestedBy(id){
+  var cur='';
+  try{ var d=await db.collection('apexAnnouncements').doc(id).get(); cur=(d.data()||{}).requestedBy||''; }catch(e){}
+  var val=prompt('Auf Wunsch von welchem Nutzer? (ohne @, mehrere mit Komma trennen — leer lassen zum Entfernen)', cur);
+  if(val===null) return;                     // cancelled
+  val=val.trim();
+  try{
+    await db.collection('apexAnnouncements').doc(id).update({
+      requestedBy: val || firebase.firestore.FieldValue.delete()
+    });
+    showToast(val?'✓ Credit gesetzt':'✓ Credit entfernt');
+    loadAnnouncements();
+  }catch(err){ showToast('Fehler: '+err.message,true); }
+}
+async function togglePinAnnouncement(id, currentlyPinned){
+  try{ await db.collection('apexAnnouncements').doc(id).update({ pinned: !currentlyPinned }); showToast(currentlyPinned?'Pin entfernt':'📌 Oben angepinnt'); loadAnnouncements(); }
+  catch(err){ showToast('Fehler: '+err.message,true); }
+}
+
+// ─── TOAST ───
+function showToast(msg,isError=false){
+  const t=document.getElementById("toast"); t.textContent=msg; t.className="toast show"+(isError?" error":"");
+  setTimeout(()=>{ t.classList.remove("show"); },3200);
+}
+</script>
+</body>
+</html>
