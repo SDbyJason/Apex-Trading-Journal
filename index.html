@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01n';
+  window.APEX_BUILD = '2026-09-01q';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -6999,6 +6999,41 @@ body.light .aw-type { color-scheme: light; }
    changes — there is simply no overflow to scroll.
 ══════════════════════════════════════ */
 .settings-tab-nav.settings-tab-nav,
+#page-live .lc-tfrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+#page-live .lc-tf{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink3);border-radius:8px;padding:7px 14px;font-family:var(--font-body);font-size:12.5px;cursor:pointer;transition:.15s}
+#page-live .lc-tf:hover{border-color:var(--gold-line);color:var(--ink)}
+#page-live .lc-tf.on{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}
+#page-live .lc-tfhint{font-size:11.5px;color:var(--ink3);margin-left:6px}
+#page-live .lc-gname{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:20px 0 9px}
+#page-live .lc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px}
+#page-live .lc-tile{display:flex;flex-direction:column;gap:3px;align-items:flex-start;background:linear-gradient(150deg,var(--elevated),var(--layer));border:0.5px solid var(--rim);border-radius:11px;padding:13px 15px;cursor:pointer;transition:.15s;text-align:left;font-family:var(--font-body)}
+#page-live .lc-tile:hover{border-color:var(--gold-line);transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.26)}
+#page-live .lc-tile.zuletzt{border-color:var(--gold-line)}
+#page-live .lc-t-sym{font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink)}
+#page-live .lc-t-name{font-size:11.5px;color:var(--ink3)}
+/* Wechsler in der Kopfleiste der Buehne */
+#lcSwitch{display:flex;align-items:center;gap:8px}
+#lcSwitch .lc-symbtn{display:flex;align-items:center;gap:6px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:5px 11px;font-family:var(--font-body);font-size:13px;cursor:pointer;white-space:nowrap}
+#lcSwitch .lc-symbtn:hover{border-color:var(--gold-line)}
+#lcSwitch .lc-symbtn b{font-family:var(--font-display);font-weight:700}
+#lcSwitch .lc-symbtn i{font-style:normal;color:var(--ink3);font-size:10px}
+#lcSwitch .lc-tfmini{display:flex;gap:2px;background:var(--layer);border:0.5px solid var(--rim);border-radius:8px;padding:2px}
+#lcSwitch .lc-tfmini button{background:none;border:0;color:var(--ink3);border-radius:6px;padding:4px 9px;font-family:var(--font-body);font-size:11.5px;cursor:pointer}
+#lcSwitch .lc-tfmini button.on{background:var(--elevated);color:var(--gold);font-weight:600}
+/* Auswahlliste — haengt am Bildschirm, Lage kommt aus ApexDraw.placeList */
+.lc-picker{position:fixed;z-index:100025;width:270px;max-height:min(440px,80vh);overflow:auto;background:var(--raised);border:0.5px solid var(--rim2);border-radius:12px;padding:8px;box-shadow:0 18px 44px rgba(0,0,0,.5)}
+.lc-picker input{width:100%;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink);padding:8px 10px;font-family:var(--font-body);font-size:12.5px;margin-bottom:6px}
+.lc-picker input:focus{outline:none;border-color:var(--gold-line)}
+.lc-pg{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:8px 6px 4px}
+.lc-prow{display:flex;align-items:baseline;gap:8px;width:100%;background:none;border:0;color:var(--ink2);border-radius:7px;padding:7px 8px;cursor:pointer;font-family:var(--font-body);font-size:12.5px;text-align:left}
+.lc-prow:hover{background:var(--elevated);color:var(--ink)}
+.lc-prow.on{color:var(--gold)}
+.lc-prow b{font-family:var(--font-display);font-weight:700;min-width:64px}
+.lc-prow span{font-size:11px;color:var(--ink3)}
+.lc-pleer{font-size:12px;color:var(--ink3);padding:12px 8px}
+body.light .lc-picker{box-shadow:0 18px 44px rgba(0,0,0,.14)}
+body.light #page-live .lc-tile{background:#fff;border-color:rgba(0,0,0,.09)}
+body.light #page-live .lc-tf,body.light #lcSwitch .lc-symbtn,body.light #lcSwitch .lc-tfmini{background:#fff;border-color:rgba(0,0,0,.12)}
 #page-live .lc-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
 #page-live .lc-row label{display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
 #page-live .lc-row select{background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:8px 10px;font-family:var(--font-body);font-size:13px;min-width:130px}
@@ -63630,7 +63665,39 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
   var WORKER = 'https://candles-worker.4kjyyyftv6.workers.dev';
   var TF = [['1min','M1',1],['5min','M5',5],['15min','M15',15],['30min','M30',30],['1h','H1',60],['4h','H4',240]];
-  var SYMS = ['XAUUSD','EURUSD','GBPUSD','USDJPY','BTCUSD','ETHUSD','NAS100','US30'];
+
+  /* Nach Gruppen sortiert, weil eine flache Liste aus zwanzig Kuerzeln nichts
+     erklaert. Der Klartextname steht dabei — "NAS100" sagt nicht jedem etwas,
+     "Nasdaq 100" schon. */
+  var GRUPPEN = [
+    ['Metalle',  [['XAUUSD','Gold'], ['XAGUSD','Silber · Tarif']]],
+    ['Indizes',  [['GER40','DAX 40'], ['NAS100','Nasdaq 100 · Tarif'],
+                  ['SPX500','S&P 500 · Tarif'], ['US30','Dow Jones · Tarif']]],
+    ['Forex',    [['EURUSD','Euro / US-Dollar'], ['GBPUSD','Pfund / US-Dollar'],
+                  ['USDJPY','US-Dollar / Yen'], ['AUDUSD','Aussie / US-Dollar'],
+                  ['USDCAD','US-Dollar / Kanada'], ['EURGBP','Euro / Pfund']]],
+    ['Krypto',   [['BTCUSD','Bitcoin'], ['ETHUSD','Ethereum'], ['SOLUSD','Solana']]]
+  ];
+  function alleSymbole() {
+    var o = [];
+    GRUPPEN.forEach(function (g) { g[1].forEach(function (s) { o.push(s); }); });
+    return o;
+  }
+  function nameVon(sym) {
+    var t = alleSymbole().filter(function (s) { return s[0] === sym; })[0];
+    return t ? t[1] : sym;
+  }
+
+  /* Zuletzt benutzt merken. Wer taeglich Gold auf M1 handelt, will nicht
+     jedes Mal zweimal klicken. */
+  function letzteWahl() {
+    try { return JSON.parse(localStorage.getItem('apexLiveLast') || 'null') || {}; }
+    catch (e) { return {}; }
+  }
+  function merkeWahl(sym, tf) {
+    try { localStorage.setItem('apexLiveLast', JSON.stringify({ sym: sym, tf: tf })); }
+    catch (e) {}
+  }
 
   function workerUrl() {
     try { return (localStorage.getItem('apexCandleWorker') || WORKER).replace(/\/$/, ''); }
@@ -63663,7 +63730,17 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             '&start_date=' + encodeURIComponent(tdDate(vonMs)) +
             '&end_date=' + encodeURIComponent(tdDate(bisMs));
     return fetch(u).then(function (r) { return r.json(); }).then(function (j) {
-      if (!j || !Array.isArray(j.values)) return [];
+      if (!j || !Array.isArray(j.values) || !j.values.length) {
+        /* Der Anbieter erklaert im Klartext, warum nichts kommt — Tarif,
+           unbekanntes Symbol, Kontingent. Das stumm zu schlucken hiess:
+           man klickt ein Instrument an und es passiert einfach nichts. */
+        var grund = (j && (j.message || j.code)) ? String(j.message || j.code) : 'keine Kerzen erhalten';
+        if (/Grow or Venture|upgrade|plan/i.test(grund))
+          grund = 'Dieses Instrument ist im kostenlosen Datentarif nicht enthalten.';
+        else if (/API credits|rate/i.test(grund))
+          grund = 'Kontingent erschoepft (8 Abfragen je Minute). Kurz warten.';
+        throw new Error(grund);
+      }
       /* ApexChart erwartet SPALTEN, keine Objektliste: { n, t[], o[], h[],
          l[], c[], v[] } mit t in Millisekunden. Dasselbe Format wie
          ApexMarketData liefert — so schluckt setBars() es unveraendert. */
@@ -63728,34 +63805,152 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
 
   function setupHtml() {
+    var w = letzteWahl();
+    var tfAktiv = w.tf || '1min';
     return '<div class="el-card" id="lcSetup">' +
-      '<div class="el-card-h">Chart starten</div>' +
-      '<div class="lc-row">' +
-        '<label>Instrument<select id="lcSym">' +
-          SYMS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('') +
-        '</select></label>' +
-        '<label>Zeiteinheit<select id="lcTf">' +
-          TF.map(function (t) { return '<option value="' + t[0] + '"' + (t[0] === '1min' ? ' selected' : '') + '>' + t[1] + '</option>'; }).join('') +
-        '</select></label>' +
-        '<label>Kerzen<select id="lcCount">' +
-          [300, 600, 1000, 2000].map(function (n) { return '<option value="' + n + '"' + (n === 600 ? ' selected' : '') + '>' + n + '</option>'; }).join('') +
-        '</select></label>' +
-        '<label>Aktualisieren<select id="lcPoll">' +
-          [['0','aus'],['5','alle 5 s'],['10','alle 10 s'],['30','alle 30 s'],['60','jede Minute']]
-            .map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === '10' ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
-        '</select></label>' +
-        '<button class="el-btn primary" id="lcStart" onclick="ApexLive.start()">▶ Chart öffnen</button>' +
+      '<div class="el-card-h">Instrument wählen</div>' +
+      '<div class="lc-tfrow" id="lcTfRow">' +
+        TF.map(function (t) {
+          return '<button class="lc-tf' + (t[0] === tfAktiv ? ' on' : '') + '" data-tf="' + t[0] +
+                 '" onclick="ApexLive.setTf(\'' + t[0] + '\')">' + t[1] + '</button>';
+        }).join('') +
+        '<span class="lc-tfhint">Zeiteinheit — gilt für das, was du gleich öffnest</span>' +
       '</div>' +
-      '<div class="lc-note" id="lcNote">Die Kurse kommen über euren Candle-Worker. Kein Tickstrom — es werden ' +
-      'in dem gewählten Takt die jüngsten Kerzen nachgeladen. Für Zonen auf M1 und M5 reicht das.</div>' +
+      GRUPPEN.map(function (g) {
+        return '<div class="lc-gname">' + g[0] + '</div>' +
+          '<div class="lc-grid">' + g[1].map(function (s) {
+            var zuletzt = (w.sym === s[0]) ? ' zuletzt' : '';
+            return '<button class="lc-tile' + zuletzt + '" onclick="ApexLive.start(\'' + s[0] + '\')">' +
+                   '<span class="lc-t-sym notranslate" translate="no">' + s[0] + '</span>' +
+                   '<span class="lc-t-name">' + s[1] + '</span></button>';
+          }).join('') + '</div>';
+      }).join('') +
+      '<div class="lc-note" id="lcNote">Ein Klick öffnet den Chart. Mit <b>· Tarif</b> markierte ' +
+      'Instrumente sind im kostenlosen Datentarif nicht enthalten — sie melden sich beim Anklicken. ' +
+      'Der Anbieter erlaubt 8 Abfragen je Minute, deshalb wird alle 15 Sekunden nachgeladen.</div>' +
       '</div>' +
       '<div class="el-card" id="lcCard" style="display:none">' +
-        '<div class="el-card-h" id="lcHead">—</div>' +
+        '<div id="lcSwitch">' +
+          '<button class="lc-symbtn" id="lcSymBtn" onclick="ApexLive.oeffneListe(this)">' +
+            '<b id="lcSymNow" class="notranslate" translate="no">—</b><i>▾</i></button>' +
+          '<div class="lc-tfmini" id="lcTfMini">' +
+            TF.map(function (t) {
+              return '<button data-tf="' + t[0] + '" onclick="ApexLive.wechseln(null,\'' + t[0] + '\')">' + t[1] + '</button>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
         '<div id="lcTools"></div>' +
         '<div id="lcChart" style="height:520px"></div>' +
         '<div id="lcInd" style="display:none"></div>' +
         '<div id="lcStyle" style="display:none"></div>' +
+      '</div>' +
+      '<div class="lc-picker" id="lcPicker" style="display:none">' +
+        '<input id="lcPickSearch" placeholder="Suchen…" oninput="ApexLive.filterListe(this.value)">' +
+        '<div id="lcPickList"></div>' +
       '</div>';
+  }
+
+  LC.setTf = function (tf) {
+    document.querySelectorAll('#lcTfRow .lc-tf').forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-tf') === tf);
+    });
+    LC.tfWahl = tf;
+  };
+
+  /* Wechsler im Chart. Die Liste haengt am Bildschirm und wird ueber
+     ApexDraw.placeList gesetzt — innerhalb der Buehne wuerde sie an einem
+     transformierten Vorfahren haengenbleiben, dieselbe Falle wie bei den
+     Zeichenmenues. */
+  LC.oeffneListe = function (btn) {
+    var p = document.getElementById('lcPicker');
+    if (!p) return;
+    if (p.style.display !== 'none') { p.style.display = 'none'; return; }
+    LC.filterListe('');
+    p.style.display = '';
+    if (window.ApexDraw && ApexDraw.placeList) ApexDraw.placeList(p, btn);
+    var s = document.getElementById('lcPickSearch');
+    if (s) { s.value = ''; s.focus(); }
+    setTimeout(function () {
+      document.addEventListener('pointerdown', function zu(ev) {
+        if (!p.contains(ev.target) && ev.target !== btn) {
+          p.style.display = 'none';
+          document.removeEventListener('pointerdown', zu, true);
+        }
+      }, true);
+    }, 0);
+  };
+
+  LC.filterListe = function (q) {
+    q = (q || '').toLowerCase();
+    var box = document.getElementById('lcPickList');
+    if (!box) return;
+    box.innerHTML = GRUPPEN.map(function (g) {
+      var treffer = g[1].filter(function (s) {
+        return !q || s[0].toLowerCase().indexOf(q) >= 0 || s[1].toLowerCase().indexOf(q) >= 0;
+      });
+      if (!treffer.length) return '';
+      return '<div class="lc-pg">' + g[0] + '</div>' + treffer.map(function (s) {
+        return '<button class="lc-prow' + (s[0] === LC.sym ? ' on' : '') +
+               '" onclick="ApexLive.wechseln(\'' + s[0] + '\')">' +
+               '<b class="notranslate" translate="no">' + s[0] + '</b><span>' + s[1] + '</span></button>';
+      }).join('');
+    }).join('') || '<div class="lc-pleer">Nichts gefunden.</div>';
+  };
+
+  /* Instrument oder Zeiteinheit im laufenden Chart wechseln — ohne die
+     Buehne abzubauen. Zeichnungen haengen am Symbol, deshalb bekommt auch
+     die Zeichenebene das neue Symbol mitgeteilt. */
+  LC.wechseln = function (sym, tf) {
+    if (!LC.on || !LC.chart) return;
+    var p = document.getElementById('lcPicker');
+    if (p) p.style.display = 'none';
+    var neuSym = sym || LC.sym;
+    var neuTf  = tf  || LC.tf;
+    if (neuSym === LC.sym && neuTf === LC.tf) return;
+    var bis = Date.now();
+    var von = bis - LC.cnt * minuten(neuTf) * 60000 * 1.6;
+    var btn = document.getElementById('lcSymNow');
+    if (btn) btn.textContent = 'lädt…';
+    holeKerzen(neuSym, neuTf, von, bis).then(function (bars) {
+      if (!bars.length) throw new Error('keine Kerzen');
+      LC.bars = bars.slice(-LC.cnt);
+      LC.sym = neuSym; LC.tf = neuTf;
+      merkeWahl(neuSym, neuTf);
+      if (LC.chart.setSymbol) LC.chart.setSymbol(neuSym);
+      if (LC.chart.setTimeframe) LC.chart.setTimeframe(neuTf);
+      LC.chart.setBars(spalten(LC.bars));
+      if (LC.draw && LC.draw.setSymbol) LC.draw.setSymbol(neuSym);
+      if (window.ApexIndicatorUI && ApexIndicatorUI.list) {
+        try { LC.chart.setIndicators(ApexIndicatorUI.list()); } catch (e) {}
+      }
+      try { LC.chart.fit(); } catch (e) {}
+      kopfNachziehen();
+    }).catch(function (e) {
+      if (btn) btn.textContent = LC.sym;
+      if (window.showToast) showToast('⚠ ' + neuSym + ': ' + (e && e.message ? e.message : 'nicht verfuegbar'));
+    });
+  };
+
+  function kopfNachziehen() {
+    /* Symbolkuerzel duerfen nie durch die Browser-Uebersetzung laufen:
+       Google hat aus "EURUSD" ein "EUR/USD" gemacht, aus "US30" wird
+       "USA 30". Dasselbe Problem wie seinerzeit bei den Benutzernamen. */
+    var t0 = document.querySelector('.aw-sym-t');
+    if (t0) { t0.classList.add('notranslate'); t0.setAttribute('translate', 'no'); }
+    var b = document.getElementById('lcSymNow');
+    if (b) b.textContent = LC.sym;
+    /* Die OHLC-Legende der Buehne traegt das Symbol aus dem Aufbau. Beim
+       Wechsel im laufenden Chart bleibt sie sonst auf dem alten stehen und
+       widerspricht der Kopfzeile. */
+    var leg = document.querySelector('.aw-legend b');
+    if (leg) leg.textContent = LC.sym;
+    var t = document.querySelector('.aw-sym-t');
+    if (t) t.textContent = LC.sym + ' · ' + nameVon(LC.sym);
+    var s = document.querySelector('.aw-sym-s');
+    if (s) s.textContent = LC.tf + ' · ' + LC.stand();
+    document.querySelectorAll('#lcTfMini button').forEach(function (x) {
+      x.classList.toggle('on', x.getAttribute('data-tf') === LC.tf);
+    });
   }
 
   LC.render = function () {
@@ -63766,15 +63961,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   };
 
   // ── Start ──────────────────────────────────────────────────────────
-  LC.start = function () {
+  LC.start = function (symWahl) {
     if (LC.on) return;
-    var sym = (document.getElementById('lcSym') || {}).value || 'XAUUSD';
-    var tf  = (document.getElementById('lcTf')  || {}).value || '1min';
-    var cnt = +((document.getElementById('lcCount') || {}).value || 600);
-    var pollS = +((document.getElementById('lcPoll') || {}).value || 10);
+    var w = letzteWahl();
+    var sym = symWahl || w.sym || 'XAUUSD';
+    var tf  = LC.tfWahl || w.tf || '1min';
+    var cnt = 600;
+    var pollS = 15;
+    LC.cnt = cnt;
     var note = document.getElementById('lcNote');
-    var btn = document.getElementById('lcStart');
-    if (btn) { btn.disabled = true; btn.textContent = 'Lade Kerzen…'; }
+    if (note) note.textContent = 'Lade ' + sym + ' …';
 
     var bis = Date.now();
     var von = bis - cnt * minuten(tf) * 60000 * 1.6;   // Puffer fuer Marktpausen
@@ -63785,7 +63981,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       LC.sym = sym; LC.tf = tf; LC.pollS = pollS;
       document.getElementById('lcSetup').style.display = 'none';
       document.getElementById('lcCard').style.display = '';
-      document.getElementById('lcHead').textContent = sym + ' · ' + tf;
+      merkeWahl(sym, tf);
+      var sb = document.getElementById('lcSymNow');
+      if (sb) sb.textContent = sym;
       return window.ApexChart.create(document.getElementById('lcChart'),
              { symbol: sym, timeframe: tf, volume: true });
     }).then(function (inst) {
@@ -63808,11 +64006,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       buehne();
       /* Einpassen erst NACH dem Mounten: vorher steht der Chart noch in der
          Karte und hat eine andere Groesse als auf der Buehne. */
-      setTimeout(function () { try { LC.chart.fit(); } catch (e) {} }, 60);
+      setTimeout(function () { try { LC.chart.fit(); } catch (e) {} kopfNachziehen(); }, 60);
       takt();
     }).catch(function (e) {
       if (note) note.innerHTML = '<b style="color:var(--loss)">' + (e && e.message ? e.message : 'Fehler') + '</b>';
-      if (btn) { btn.disabled = false; btn.textContent = '▶ Chart öffnen'; }
     });
   };
 
@@ -63846,9 +64043,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       chartInst: LC.chart,
       symbol: LC.sym,
       tf: LC.tf,
-      title: LC.sym,
+      title: LC.sym + ' · ' + nameVon(LC.sym),
       sub: LC.tf + ' · ' + LC.stand(),
-      top: [],
+      top: [document.getElementById('lcSwitch')].filter(Boolean),
       topRight: [quote],
       exit: exit,
       rail: gruppen,
@@ -63907,8 +64104,6 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var setup = document.getElementById('lcSetup');
     if (card) card.style.display = 'none';
     if (setup) setup.style.display = '';
-    var btn = document.getElementById('lcStart');
-    if (btn) { btn.disabled = false; btn.textContent = '▶ Chart öffnen'; }
     var chartHost = document.getElementById('lcChart');
     if (chartHost) chartHost.innerHTML = '';
   };
