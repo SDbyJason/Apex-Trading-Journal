@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01e';
+  window.APEX_BUILD = '2026-09-01g';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -48868,6 +48868,39 @@ self.addEventListener('message', async (ev) => {
   function loadMagnet() { try { return localStorage.getItem(magnetKey()) === '1'; } catch (e) { return false; } }
   function saveMagnet(on) { try { localStorage.setItem(magnetKey(), on ? '1' : '0'); } catch (e) {} }
 
+  /* ─────────────── Werkzeug-Voreinstellungen ───────────────
+     Vorher wurde `this.color` bei JEDEM neuen Chart wieder auf COLORS[0]
+     gesetzt und nirgends gespeichert — wer seine Fibonacci gruen und
+     gestrichelt haben wollte, musste das bei jeder einzelnen Zeichnung neu
+     einstellen, und beim naechsten Backtest von vorn.
+
+     Gemerkt wird deshalb PRO WERKZEUG: Trendlinie und Fibonacci duerfen
+     unterschiedlich aussehen, sonst faerbt das Einstellen der einen die
+     andere um. Bei der Fibonacci gehoert die ganze Level-Konfiguration dazu. */
+  function prefsKey() { return 'apexDrawPrefs_' + (window.currentUID || 'local'); }
+  function loadPrefs() {
+    try { return JSON.parse(localStorage.getItem(prefsKey()) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function savePrefs(o) {
+    try { localStorage.setItem(prefsKey(), JSON.stringify(o)); } catch (e) {}
+  }
+  /** Voreinstellung eines Werkzeugs lesen. */
+  function prefFor(type) {
+    var p = loadPrefs();
+    return (type && p[type]) ? p[type] : {};
+  }
+  /** Voreinstellung eines Werkzeugs ergaenzen. `patch` wird zusammengefuehrt,
+      nicht ersetzt — sonst loescht eine Farbaenderung die Strichart. */
+  function rememberStyle(type, patch) {
+    if (!type || type === 'cursor' || type === 'erase') return;
+    var p = loadPrefs();
+    var cur = p[type] || {};
+    for (var k in patch) if (patch.hasOwnProperty(k)) cur[k] = patch[k];
+    p[type] = cur;
+    savePrefs(p);
+  }
+
   /** Rastet {t,p} auf den naechsten OHLC-Wert der Kerze darunter ein.
       Der Vergleich laeuft in Bildpunkten, nicht im Preis: 14px sind auf jedem
       Instrument und jedem Zoom dasselbe Gefuehl, 0,5 Punkte nicht. */
@@ -49481,6 +49514,10 @@ self.addEventListener('message', async (ev) => {
        jede Aenderung sofort am Chart, ohne den Dialog zu schliessen. */
     function uebernehmen() {
       shape.fib = JSON.parse(JSON.stringify(arbeit));
+      /* Die ganze Konfiguration wird zur Voreinstellung fuer die naechste
+         Fibonacci — Levels, Farben, Beschriftung, Verlaengerung. Sonst
+         stellt man 0.786 bei jeder einzelnen neu ein. */
+      rememberStyle('fib', { fib: JSON.parse(JSON.stringify(arbeit)) });
       draw._commit();
     }
 
@@ -49504,7 +49541,7 @@ self.addEventListener('message', async (ev) => {
       if (t.hasAttribute('data-fd-reset')) {
         arbeit = { levels: FIB_DEFAULT.map(function (l) { return { v: l.v, on: l.on }; }),
                    extend: 'right', fill: false, labels: 'both' };
-        zeichne(); placeList(box, btn); uebernehmen(); return;
+        zeichne(); placeList(box, btn); uebernehmen(); return;   // setzt auch die Voreinstellung zurueck
       }
       if (t.hasAttribute('data-fd-cancel')) {
         shape.fib = vorher === 'null' ? null : JSON.parse(vorher);
@@ -49585,9 +49622,14 @@ self.addEventListener('message', async (ev) => {
       if (!sh) return;
       var col = b.getAttribute('data-sb-color'), wd = b.getAttribute('data-sb-width'),
           dh = b.getAttribute('data-sb-dash');
-      if (col)      { self._push(); sh.color = col; self._commit(); }
-      else if (wd)  { self._push(); sh.width = parseFloat(wd); self._commit(); }
-      else if (dh)  { self._push(); sh.dash = dh; self._commit(); }
+      /* Was hier eingestellt wird, gilt ab jetzt auch fuer die naechste
+         Zeichnung DIESES Werkzeugs — und ueber die Sitzung hinaus. */
+      if (col)      { self._push(); sh.color = col; self.color = col;
+                      rememberStyle(sh.type, { color: col }); self._commit(); }
+      else if (wd)  { self._push(); sh.width = parseFloat(wd); self.width = parseFloat(wd);
+                      rememberStyle(sh.type, { width: parseFloat(wd) }); self._commit(); }
+      else if (dh)  { self._push(); sh.dash = dh; self.dash = dh;
+                      rememberStyle(sh.type, { dash: dh }); self._commit(); }
       else if (b.hasAttribute('data-sb-cfg')) { fibDialog(self, sh, b); return; }
       else if (b.hasAttribute('data-sb-lock')) { self.toggleLocked(sh.id); }
       else if (b.hasAttribute('data-sb-del'))  { self._push(); self.remove(sh.id); }
@@ -49701,6 +49743,31 @@ self.addEventListener('message', async (ev) => {
    *  liefe jeder Schritt erneut durch Pixel → Zeit → Pixel, und die Rundung
    *  summiert sich: die Form bleibt sichtbar hinter der Maus zurück.
    */
+  /* Ein Long ist ein Long: Stop UNTER dem Einstieg, Ziel darueber — also rot
+     unten, gruen oben. Beim Short umgekehrt. Vorher liess sich der Stop ueber
+     den Einstieg ziehen, damit sass Rot oben und aus einem Buy wurde optisch
+     ein Sell, waehrend das Etikett weiter "LONG" sagte. Das R:R stimmte dann
+     auch nicht mehr mit dem ueberein, was man sah.
+
+     Geklemmt wird, nicht gespiegelt: der Griff bleibt am Einstieg stehen,
+     statt auf die andere Seite zu springen. Springen fuehlt sich wie ein
+     Fehler an. */
+  Draw.prototype._fixPos = function (s, k) {
+    if (s.type !== 'long' && s.type !== 'short') return;
+    var e = s.points[0], st = s.points[1], tg = s.points[2];
+    if (!e || !st || !tg) return;
+    // Mindestabstand, sonst kann eine Zone auf null zusammenfallen.
+    var min = Math.max(Math.abs(e.p) * 1e-5, 1e-9);
+    var lo  = (s.type === 'long');
+    if (k === 1)      st.p = lo ? Math.min(st.p, e.p - min) : Math.max(st.p, e.p + min);
+    else if (k === 2) tg.p = lo ? Math.max(tg.p, e.p + min) : Math.min(tg.p, e.p - min);
+    else if (k === 0) {
+      // Einstieg zwischen Stop und Ziel halten.
+      var unten = lo ? st.p : tg.p, oben = lo ? tg.p : st.p;
+      if (oben - unten > 2 * min) e.p = Math.min(Math.max(e.p, unten + min), oben - min);
+    }
+  };
+
   Draw.prototype._shift = function (s, part, dx, dy, orig) {
     var self = this;
     var base = orig || s.points;
@@ -49724,7 +49791,10 @@ self.addEventListener('message', async (ev) => {
     if (part === 'body') s.points = base.map(moved);
     else {
       var k = +part.slice(1);
-      if (base[k]) { var np = s.points.slice(); np[k] = moved(base[k]); s.points = np; }
+      if (base[k]) {
+        var np = s.points.slice(); np[k] = moved(base[k]); s.points = np;
+        this._fixPos(s, k);
+      }
     }
   };
 
@@ -49909,7 +49979,14 @@ self.addEventListener('message', async (ev) => {
 
     var single = (this.tool === 'hline' || this.tool === 'vline');
     this.draft = { id: uid(), type: this.tool, color: this.color, width: this.width,
+                   dash: this.dash || 'solid',
                    points: single ? [{ t: t, p: p }] : [{ t: t, p: p }, { t: t, p: p }] };
+    /* `dash` fehlte hier ganz: eine gestrichelte Linie liess sich gar nicht
+       zeichnen, nur nachtraeglich umstellen. */
+    if (this.tool === 'fib') {
+      var fp = prefFor('fib');
+      if (fp.fib) this.draft.fib = JSON.parse(JSON.stringify(fp.fib));
+    }
     // A channel carries a third anchor for its offset, a position tool for its
     // target. They are seeded here and refined in _move / by dragging later.
     if (this.tool === 'channel' || this.tool === 'long' || this.tool === 'short') {
@@ -49954,8 +50031,20 @@ self.addEventListener('message', async (ev) => {
       /* Drag from entry to stop; the target is seeded at twice the risk, which
          is the ratio most people are aiming for anyway. Every edge stays
          draggable afterwards, so this is a starting point, not a rule. */
-      var risk = this.draft.points[0].p - p;
-      this.draft.points[2] = { t: t, p: this.draft.points[0].p + risk * 2 };
+      /* Der Stop liegt beim Long immer unter dem Einstieg, beim Short darueber
+         — egal in welche Richtung gezogen wird. Vorher konnte `risk` negativ
+         werden und die Box entstand schon verkehrt herum. */
+      var ein  = this.draft.points[0].p;
+      var minA = Math.max(Math.abs(ein) * 1e-5, 1e-9);
+      /* Beim ZEICHNEN zaehlt nur, WIE WEIT gezogen wurde — die Richtung gibt
+         das Werkzeug vor. Klemmen waere hier falsch: wer einen Long nach oben
+         zieht, bekaeme sonst eine Box der Hoehe null. Beim BEARBEITEN wird
+         dagegen geklemmt (siehe _fixPos), da soll ein Griff stehenbleiben
+         statt auf die andere Seite zu springen. */
+      var risk = Math.max(Math.abs(ein - p), minA);
+      var stop = (ty === 'long') ? ein - risk : ein + risk;
+      this.draft.points[1] = { t: t, p: stop };
+      this.draft.points[2] = { t: t, p: (ty === 'long') ? ein + risk * 2 : ein - risk * 2 };
     } else if (ty === 'channel') {
       // Third anchor follows the line until the user drags it apart.
       this.draft.points[2] = { t: t, p: p };
@@ -50112,6 +50201,11 @@ self.addEventListener('message', async (ev) => {
 
   Draw.prototype.setTool = function (t) {
     this.tool = t;
+    /* Stift auf das laden, was fuer dieses Werkzeug zuletzt eingestellt war. */
+    var pf = prefFor(t);
+    if (pf.color) this.color = pf.color;
+    if (pf.width) this.width = pf.width;
+    this.dash = pf.dash || 'solid';
     var drawing = (t !== 'cursor');
     this._freezeChart(drawing);
     this.cv.style.pointerEvents = drawing ? 'auto' : 'none';
@@ -50126,7 +50220,12 @@ self.addEventListener('message', async (ev) => {
     if (this._onTool) { try { this._onTool(t); } catch (e) {} }
     return this;
   };
-  Draw.prototype.setColor = function (c) { this.color = c; return this; };
+  Draw.prototype.setColor = function (c) {
+    this.color = c;
+    // Gilt fuer das gerade gewaehlte Werkzeug, nicht fuer alle.
+    rememberStyle(this.tool, { color: c });
+    return this;
+  };
   Draw.prototype.setSymbol = function (sym) {
     if (String(sym).toUpperCase() === String(this.symbol).toUpperCase()) return this;
     this.symbol = sym;
