@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01q';
+  window.APEX_BUILD = '2026-09-02b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -26690,6 +26690,14 @@ window.startFreeTrial = startFreeTrial;
         await new Promise(r => setTimeout(r, 2500));
         var q = await fetch(WORKER_URL + '/api/spots?accountId=' + ctState.accountId +
                             '&symbols=XAUUSD,EURUSD').then(r => r.json());
+        /* Die Symbolliste des Kontos einmal sichtbar machen: danach laesst
+           sich die Instrumentenauswahl aus der Wirklichkeit bauen statt aus
+           einer Vermutung. */
+        var alleSym = start.symbole || [];
+        var interessant = alleSym.filter(function (n) {
+          return /^(XAU|XAG|EUR|GBP|USD|AUD|NZD|CAD|CHF|JPY|BTC|ETH|US30|US100|US500|NAS|SPX|GER|DAX|UK100|JP225|NDX|DE30|OIL|WTI|BRENT)/i.test(n);
+        });
+        console.log('[ctrader] Symbole des Kontos (' + alleSym.length + '):', alleSym.join(', '));
         var namen = Object.keys(q.kurse || {});
         if (!namen.length) {
           await ApexDialog.alert(
@@ -26697,6 +26705,8 @@ window.startFreeTrial = startFreeTrial;
             'Symbole beim Broker bekannt: ' + (start.symboleBekannt || 0) + '\n' +
             'Abonniert: ' + (start.abonniert || 0) + '\n' +
             'Nicht gefunden: ' + ((start.nichtGefunden || []).join(', ') || '—') + '\n\n' +
+            'Handelbare Symbole deines Kontos (Auszug):\n' + interessant.slice(0, 40).join(', ') + '\n\n' +
+            'Die vollstaendige Liste steht in der Browser-Konsole.\n\n' +
             'Steht unter „Nicht gefunden" etwas, schreibt dein Broker das Symbol anders.',
             { title: 'Kursstrom' });
         } else {
@@ -26705,6 +26715,9 @@ window.startFreeTrial = startFreeTrial;
             return n + ':  ' + k.bid + ' / ' + k.ask + '   (' + Math.round(k.alterMs / 1000) + ' s alt, roh ' + k.raw + ')';
           }).join('\n');
           await ApexDialog.alert('Kursstrom laeuft:\n\n' + z +
+            '\n\nSymbole des Kontos: ' + alleSym.length +
+            '\nAuszug: ' + interessant.slice(0, 30).join(', ') +
+            '\n(vollstaendig in der Browser-Konsole)' +
             '\n\nStimmen die Zahlen mit deiner Handelsplattform ueberein? Falls sie um eine ' +
             'Zehnerpotenz danebenliegen, ist der Skalierungsfaktor in der Bruecke anzupassen.',
             { title: 'Kursstrom' });
@@ -26714,6 +26727,32 @@ window.startFreeTrial = startFreeTrial;
           { title: 'Kursstrom' });
       }
       spotsBtn.disabled = false; spotsBtn.textContent = alt;
+    };
+
+    /* Zugang zum Kursstrom fuer andere Module (Live-Chart). Bewusst als
+       Funktionen statt als offengelegte Zugangsdaten: die Token bleiben in
+       diesem Modul, draussen sieht man nur "geht" oder "geht nicht". */
+    window.ApexSpots = {
+      verfuegbar: function () { return !!(ctState.accessToken && ctState.accountId); },
+      start: function (symbole) {
+        if (!this.verfuegbar()) return Promise.reject(new Error('cTrader nicht verbunden'));
+        return fetch(WORKER_URL + '/api/spots/start', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_token: ctState.accessToken,
+            refresh_token: ctState.refreshToken,
+            ctidTraderAccountId: ctState.accountId,
+            env: ctState.accountEnv || 'live',
+            symbols: symbole || []
+          })
+        }).then(function (r) { return r.json(); });
+      },
+      hole: function (symbole) {
+        if (!this.verfuegbar()) return Promise.reject(new Error('cTrader nicht verbunden'));
+        return fetch(WORKER_URL + '/api/spots?accountId=' + ctState.accountId +
+                     '&symbols=' + encodeURIComponent((symbole || []).join(',')))
+          .then(function (r) { return r.json(); });
+      }
     };
 
     card.querySelector('#ctBtnReloadAccounts').onclick = async () => {
@@ -63925,6 +63964,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }
       try { LC.chart.fit(); } catch (e) {}
       kopfNachziehen();
+      LC.live.an = false; stromTakt(); stromStarten();   // neues Symbol abonnieren
     }).catch(function (e) {
       if (btn) btn.textContent = LC.sym;
       if (window.showToast) showToast('⚠ ' + neuSym + ': ' + (e && e.message ? e.message : 'nicht verfuegbar'));
@@ -63947,7 +63987,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var t = document.querySelector('.aw-sym-t');
     if (t) t.textContent = LC.sym + ' · ' + nameVon(LC.sym);
     var s = document.querySelector('.aw-sym-s');
-    if (s) s.textContent = LC.tf + ' · ' + LC.stand();
+    if (s) {
+      s.classList.add('notranslate');
+      s.setAttribute('translate', 'no');
+      s.textContent = LC.tf + ' · ' + LC.stand();
+    }
     document.querySelectorAll('#lcTfMini button').forEach(function (x) {
       x.classList.toggle('on', x.getAttribute('data-tf') === LC.tf);
     });
@@ -64007,6 +64051,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       /* Einpassen erst NACH dem Mounten: vorher steht der Chart noch in der
          Karte und hat eine andere Groesse als auf der Buehne. */
       setTimeout(function () { try { LC.chart.fit(); } catch (e) {} kopfNachziehen(); }, 60);
+      stromStarten();
       takt();
     }).catch(function (e) {
       if (note) note.innerHTML = '<b style="color:var(--loss)">' + (e && e.message ? e.message : 'Fehler') + '</b>';
@@ -64034,7 +64079,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var quote = document.getElementById('lcQuote');
     if (!quote) {
       quote = document.createElement('div');
-      quote.className = 'arp-quote'; quote.id = 'lcQuote';
+      quote.className = 'arp-quote notranslate'; quote.id = 'lcQuote';
+      quote.setAttribute('translate', 'no');
       karte.appendChild(quote);
     }
     window.ApexWorkspace.mount({
@@ -64094,8 +64140,89 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }, LC.pollS * 1000);
   }
 
+  // ══════════════════════════════════════════════════════════════
+  //  LIVE-KURSE
+  //  Die Kerzen-API liefert nur ABGESCHLOSSENE Kerzen — auf M1 sind das rund
+  //  zwei Minuten Rueckstand. Der Spot-Strom des Brokers liefert im
+  //  Sekundentakt. Beides zusammen: die Historie kommt aus den Kerzen, die
+  //  LAUFENDE Kerze wird aus dem Strom fortgeschrieben.
+  //
+  //  Faellt der Strom aus (Brueckenneustart, cTrader nicht verbunden), bleibt
+  //  der Chart genau so stehen wie vorher. Der Live-Teil ist eine
+  //  Verbesserung, keine Voraussetzung.
+  // ══════════════════════════════════════════════════════════════
+  LC.live = { an: false, timer: null, letzterKurs: null, fehler: 0 };
+
+  function stromStarten() {
+    if (!window.ApexSpots || !ApexSpots.verfuegbar()) return;
+    ApexSpots.start([LC.sym]).then(function (r) {
+      LC.live.an = !(r && r.error);
+      // Der Broker schreibt dieses Instrument anders — kein Fehler, der
+      // Chart laeuft mit Kerzen weiter.
+      if (r && (r.nichtGefunden || []).indexOf(LC.sym) >= 0) LC.live.an = false;
+      stromTakt();
+    }).catch(function () { LC.live.an = false; });
+  }
+
+  function stromTakt() {
+    if (LC.live.timer) { clearInterval(LC.live.timer); LC.live.timer = null; }
+    if (!LC.live.an) return;
+    LC.live.timer = setInterval(function () {
+      if (!LC.on || !LC.chart) return;
+      ApexSpots.hole([LC.sym]).then(function (r) {
+        if (r && r.error) {
+          // 404 heisst: die Bruecke wurde neu gestartet, der Strom ist weg.
+          // Einmal neu abonnieren statt den Chart tot zurueckzulassen.
+          if (++LC.live.fehler <= 2) stromStarten();
+          else { LC.live.an = false; stromTakt(); }
+          return;
+        }
+        LC.live.fehler = 0;
+        var k = null;
+        for (var name in (r.kurse || {})) { k = r.kurse[name]; break; }
+        if (!k || !isFinite(k.bid)) return;
+        var mitte = (isFinite(k.ask) && k.ask > 0) ? (k.bid + k.ask) / 2 : k.bid;
+        LC.live.letzterKurs = mitte;
+        laufendeKerze(mitte);
+      }).catch(function () {});
+    }, 1500);
+  }
+
+  // Schreibt die laufende Kerze fort. Liegt der Zeitpunkt schon im naechsten
+  // Zeitfenster, wird eine neue begonnen — sonst friert der Chart am
+  // Minutenwechsel ein, bis die Kerzen-API nachzieht.
+  function laufendeKerze(preis) {
+    if (!LC.bars.length) return;
+    var tfMs = minuten(LC.tf) * 60000;
+    var eimer = Math.floor(Date.now() / tfMs) * tfMs;
+    var letzte = LC.bars[LC.bars.length - 1];
+    if (letzte.t === eimer) {
+      letzte.c = preis;
+      if (preis > letzte.h) letzte.h = preis;
+      if (preis < letzte.l) letzte.l = preis;
+    } else if (eimer > letzte.t) {
+      LC.bars.push({ t: eimer, o: preis, h: preis, l: preis, c: preis, v: 0 });
+      if (LC.bars.length > LC.cnt + 50) LC.bars.shift();
+    } else {
+      return;
+    }
+    LC.chart.setBars(spalten(LC.bars));
+    if (LC.draw) LC.draw.sync();
+    var q = document.getElementById('lcQuote');
+    if (q) q.innerHTML = '<b class="notranslate" translate="no">' +
+      preis.toFixed(preis > 100 ? 2 : 5) + '</b><span class="sp"> · live</span>';
+    var sub = document.querySelector('.aw-sym-s');
+    if (sub) {
+      sub.classList.add('notranslate');
+      sub.setAttribute('translate', 'no');
+      sub.textContent = LC.tf + ' · live (Broker)';
+    }
+  }
+
   LC.stop = function () {
     if (LC.timer) { clearInterval(LC.timer); LC.timer = null; }
+    if (LC.live.timer) { clearInterval(LC.live.timer); LC.live.timer = null; }
+    LC.live.an = false;
     if (window.ApexWorkspace && ApexWorkspace.isOn()) ApexWorkspace.unmount();
     if (LC.draw && LC.draw.destroy) { try { LC.draw.destroy(); } catch (e) {} }
     if (LC.chart && LC.chart.destroy) { try { LC.chart.destroy(); } catch (e) {} }
