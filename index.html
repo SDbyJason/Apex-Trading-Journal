@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01h';
+  window.APEX_BUILD = '2026-09-01j';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -49215,7 +49215,16 @@ self.addEventListener('message', async (ev) => {
       var left  = Math.min(xa, xb), right = Math.max(xa, xb);
       if (cfg.extend === 'right') right = w;
       else if (cfg.extend === 'both') { left = 0; right = w; }
-      var hi = p0.p, lo = p1.p;
+      /* Die 0 gehoert an den ZWEITEN Punkt — dorthin, wo der Zug endet —
+         und die 100 an den ersten. So herum arbeiten TradingView und MT5:
+         zieht man vom Hoch zum Tief, ist das Tief die 0 und die Retracements
+         zaehlen von dort zurueck ins Hoch.
+
+         Vorher war es umgekehrt. Das verschob nicht nur die Beschriftung,
+         sondern die LINIEN: 23,6 % lag dort, wo eigentlich 76,4 % ist. Nur
+         50 % sowie das Paar 38,2/61,8 fallen zufaellig zusammen, weil sie
+         sich zu 1 ergaenzen — 23,6 und 78,6 tun das nicht. */
+      var hi = p1.p, lo = p0.p;
 
       /* Erst die Faechen, dann die Linien darueber — sonst deckt eine
          Fuellung die Linie darunter zur Haelfte zu. */
@@ -49470,10 +49479,44 @@ self.addEventListener('message', async (ev) => {
     box.className = 'apd-dlg';
 
     function zeichne() {
+      var istFib = shape.type === 'fib';
       box.innerHTML =
-        '<div class="apd-dlg-h"><b>Fibonacci retracement</b>' +
+        /* Kein esc() — in diesem Modul gibt es keins, und beides sind
+           unsere eigenen Konstanten, kein Nutzertext. */
+        '<div class="apd-dlg-h"><b>' + (TYPE_LABEL[shape.type] || shape.type) + '</b>' +
           '<button class="apd-dlg-x" data-fd-close aria-label="Close">✕︎</button></div>' +
 
+        /* Farbe, Staerke und Strichart gab es bisher NUR in der schwebenden
+           Stilleiste. Kam die nicht, war eine Trendlinie ueberhaupt nicht mehr
+           zu aendern. Deshalb stehen sie jetzt auch hier — der Dialog ist ueber
+           Doppelklick von jeder Zeichnung aus erreichbar. */
+        '<div class="apd-dlg-row"><label>Colour</label>' +
+          '<div class="apd-dlg-sw">' + COLORS.map(function (c) {
+            return '<button class="apd-sbar-sw' + (c === shape.color ? ' on' : '') +
+                   '" data-fd-color="' + c + '" style="background:' + c + '" title="' + c + '"></button>';
+          }).join('') + '</div></div>' +
+
+        '<div class="apd-dlg-row"><label>Width</label>' +
+          '<select data-fd-width>' + WIDTHS.map(function (w) {
+            return '<option value="' + w + '"' + (w === (shape.width || 1.5) ? ' selected' : '') + '>' + w + ' px</option>';
+          }).join('') + '</select></div>' +
+
+        '<div class="apd-dlg-row"><label>Line</label>' +
+          '<select data-fd-dash>' + DASHES.map(function (dd) {
+            return '<option value="' + dd[0] + '"' + (dd[0] === (shape.dash || 'solid') ? ' selected' : '') +
+                   '>' + dd[1] + '</option>';
+          }).join('') + '</select></div>' +
+
+        (istFib ? '' :
+          '<div class="apd-dlg-f">' +
+            '<button class="apd-dlg-b" data-fd-dup>Duplicate</button>' +
+            '<span style="flex:1"></span>' +
+            '<button class="apd-dlg-b" data-fd-del-shape>Delete</button>' +
+            '<button class="apd-dlg-b prim" data-fd-ok>Done</button>' +
+          '</div>') +
+
+        (!istFib ? '' :
+        '<div class="apd-dlg-h2">Fibonacci</div>' +
         '<div class="apd-dlg-row"><label>Extend</label>' +
           '<select data-fd-extend>' +
             ['none|Not extended', 'right|To the right', 'both|Both sides'].map(function (o) {
@@ -49512,7 +49555,7 @@ self.addEventListener('message', async (ev) => {
           '<span style="flex:1"></span>' +
           '<button class="apd-dlg-b" data-fd-cancel>Cancel</button>' +
           '<button class="apd-dlg-b prim" data-fd-ok>Done</button>' +
-        '</div>';
+        '</div>');
     }
 
     function farbeVon(sh) {
@@ -49547,6 +49590,26 @@ self.addEventListener('message', async (ev) => {
         arbeit.levels.splice(+i, 1);
         zeichne(); placeList(box, btn); uebernehmen(); return;
       }
+      var fc = t.getAttribute && t.getAttribute('data-fd-color');
+      if (fc) {
+        draw._push(); shape.color = fc; draw.color = fc;
+        rememberStyle(shape.type, { color: fc }); draw._commit();
+        box.querySelectorAll('[data-fd-color]').forEach(function (b) {
+          b.classList.toggle('on', b.getAttribute('data-fd-color') === fc);
+        });
+        return;
+      }
+      if (t.hasAttribute('data-fd-del-shape')) {
+        draw._push(); draw.remove(shape.id); box.remove(); return;
+      }
+      if (t.hasAttribute('data-fd-dup')) {
+        draw._push();
+        var kopie = JSON.parse(JSON.stringify(shape));
+        kopie.id = uid();
+        var dy = (shape.points[0] ? Math.abs(shape.points[0].p) * 0.001 : 0);
+        kopie.points = kopie.points.map(function (pt) { return { t: pt.t, p: pt.p - dy }; });
+        draw.shapes.push(kopie); draw.sel = kopie.id; draw._commit(); box.remove(); return;
+      }
       if (t.hasAttribute('data-fd-reset')) {
         arbeit = { levels: FIB_DEFAULT.map(function (l) { return { v: l.v, on: l.on }; }),
                    extend: 'right', fill: false, labels: 'both' };
@@ -49564,6 +49627,15 @@ self.addEventListener('message', async (ev) => {
 
     box.addEventListener('input', function (e) {
       var t = e.target, i;
+      /* Stil gilt sofort und wird zur Voreinstellung fuer dieses Werkzeug. */
+      if (t.hasAttribute('data-fd-width')) {
+        draw._push(); shape.width = parseFloat(t.value); draw.width = shape.width;
+        rememberStyle(shape.type, { width: shape.width }); draw._commit(); return;
+      }
+      if (t.hasAttribute('data-fd-dash')) {
+        draw._push(); shape.dash = t.value; draw.dash = t.value;
+        rememberStyle(shape.type, { dash: t.value }); draw._commit(); return;
+      }
       if (t.hasAttribute('data-fd-fill')) arbeit.fill = t.checked;
       else if (t.hasAttribute('data-fd-extend')) arbeit.extend = t.value;
       else if (t.hasAttribute('data-fd-labels')) arbeit.labels = t.value;
@@ -49616,7 +49688,7 @@ self.addEventListener('message', async (ev) => {
       }).join('') + '</div>' +
       '<i class="apd-sbar-sep"></i>' +
       '<div class="apd-sbar-g">' +
-        '<button class="apd-sbar-b" data-sb-cfg title="Settings" style="display:none">⚙︎</button>' +
+        '<button class="apd-sbar-b" data-sb-cfg title="Settings">⚙︎</button>' +
         '<button class="apd-sbar-b" data-sb-dup title="Duplicate">⧉</button>' +
         '<button class="apd-sbar-b" data-sb-lock title="Lock in place">🔓</button>' +
         '<button class="apd-sbar-b danger" data-sb-del title="Delete (Del)">✕︎</button>' +
@@ -49718,7 +49790,7 @@ self.addEventListener('message', async (ev) => {
     /* Das Zahnrad erscheint nur, wo es auch etwas einzustellen gibt —
        eine Trendlinie hat ausser Farbe/Staerke/Stil nichts weiter. */
     var cf = bar.querySelector('[data-sb-cfg]');
-    if (cf) cf.style.display = (s.type === 'fib') ? '' : 'none';
+    if (cf) cf.style.display = '';   // Einstellungen gibt es jetzt fuer jede Zeichnung
   };
 
   Draw.prototype.select = function (id) {
@@ -49926,8 +49998,8 @@ self.addEventListener('message', async (ev) => {
     this._onEdDbl = function (e) {
       if (self.tool !== 'cursor') return;
       var pt = local(e);
-      var hit = self._hit(pt.x, pt.y, false);
-      if (!hit || hit.shape.type !== 'fib') return;
+      var hit = self._hit(pt.x, pt.y, e.pointerType === 'touch');
+      if (!hit) return;
       e.preventDefault(); e.stopPropagation();
       self.sel = hit.shape.id;
       self._syncStyleBar();
@@ -50120,7 +50192,7 @@ self.addEventListener('message', async (ev) => {
       if (y0 == null || y1 == null) return null;
       var d = null;
       for (var i = 0; i < FIB.length; i++) {
-        var y = this._y(p0.p + (p1.p - p0.p) * FIB[i]);
+        var y = this._y(p1.p + (p0.p - p1.p) * FIB[i]);   // gleiche Richtung wie beim Zeichnen
         if (y == null) continue;
         var dd = Math.abs(py - y);
         if (d == null || dd < d) d = dd;
@@ -50476,6 +50548,7 @@ self.addEventListener('message', async (ev) => {
       '.apd-dlg-x:hover{color:var(--loss)}',
       '.apd-dlg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}',
       '.apd-dlg-row label{flex:0 0 74px;font-size:11px;color:var(--ink3)}',
+      '.apd-dlg-sw{display:flex;gap:5px;flex-wrap:wrap;flex:1}',
       '.apd-dlg-row select{flex:1;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;' +
         'color:var(--ink);font-family:var(--font-body);font-size:12px;padding:5px 7px;outline:none}',
       '.apd-dlg-chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);' +
