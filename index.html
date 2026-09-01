@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01k';
+  window.APEX_BUILD = '2026-09-01l';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -36743,6 +36743,15 @@ body.light .pt-sugg{background:var(--layer)}
         manuallyEdited:false, pnl:(e.pnl!=null?e.pnl:''),
         commission:(e.commission!=null?e.commission:''), swap:(e.swap!=null?e.swap:'') };
       if (e.source === 'ctrader' && e.posId) orphan.ctraderId = String(e.posId);
+      /* Wie bei openTrade und closeTrade: der Zeitstempel ist da, aber die
+         Anzeigefelder des Journals heissen entryTime/exitTime. Ohne das stand
+         bei einem verwaisten Ausstieg die Uhrzeit im Datensatz und trotzdem
+         nichts im Feld — genau der Fehler, den es bei den Importen schon
+         einmal gab. Session ebenfalls aus dem Zeitstempel. */
+      try { if (window.apexFillTradeTimes) window.apexFillTradeTimes(orphan); } catch(_){}
+      if (!orphan.session && typeof csvSession === 'function') {
+        try { orphan.session = csvSession(new Date(ct)); } catch(_){}
+      }
       if (alreadyJournalled(orphan)) { _dupes++; return; }
       ensureDay(dayKey(ct)).trades.push(orphan);
       return;
