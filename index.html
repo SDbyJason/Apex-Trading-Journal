@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01l';
+  window.APEX_BUILD = '2026-09-01m';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -6999,6 +6999,11 @@ body.light .aw-type { color-scheme: light; }
    changes — there is simply no overflow to scroll.
 ══════════════════════════════════════ */
 .settings-tab-nav.settings-tab-nav,
+#page-live .lc-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+#page-live .lc-row label{display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+#page-live .lc-row select{background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:8px 10px;font-family:var(--font-body);font-size:13px;min-width:130px}
+#page-live .lc-row select:focus{outline:none;border-color:var(--gold-line)}
+#page-live .lc-note{font-size:12.5px;color:var(--ink3);line-height:1.6;max-width:70ch}
 #page-edgelab .el-subtabs.el-subtabs,
 .stats-subtabs.stats-subtabs,
 .acx-tabs.acx-tabs,
@@ -11060,6 +11065,7 @@ function _authAction(type) {
           </button>
           <div class="nav-group-drop" id="navgdrop-analysis">
             <button class="nav-item" onclick="nav('edgelab');closeNavGroups()" id="nav-edgelab">Edge Lab</button>
+            <button class="nav-item" onclick="nav('live');closeNavGroups()" id="nav-live">Live Chart</button>
             <button class="nav-item" onclick="nav('insights');closeNavGroups()" id="nav-insights">AI Insights</button>
             <button class="nav-item" onclick="nav('psychology');closeNavGroups()" id="nav-psychology">Psychology</button>
             <button class="nav-item" onclick="nav('setups');closeNavGroups()" id="nav-setups">Setups</button>
@@ -14369,7 +14375,7 @@ function nav(id) {
      leaves the app on a blank screen with no page active at all. */
   var pageEl = document.getElementById('page-'+id);
   if (!pageEl) {
-    var builders = { propfirm: window.ApexPropPlus, developer: window.ApexDev, edgelab: window.EdgeLab };
+    var builders = { propfirm: window.ApexPropPlus, developer: window.ApexDev, edgelab: window.EdgeLab, live: window.ApexLive };
     var b = builders[id];
     if (b && typeof b.render === 'function') { try { b.render(); } catch (e) {} }
     pageEl = document.getElementById('page-'+id);
@@ -63542,6 +63548,325 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Deshalb kann diese Schicht das Verhalten des Replays nicht kaputt
      machen: sie fasst nur an, wo etwas steht.
 ══════════════════════════════════════ -->
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   Evidence — Live-Chart  (window.ApexLive)
+   ──────────────────────────────────────────────────────────────────────
+   Ein echter Chart im Produkt statt daneben. Bewusst KEIN neuer Chart-Code:
+   gezeichnet wird mit ApexChart, gemalt mit ApexDraw, Indikatoren kommen aus
+   ApexIndicatorUI, das Aussehen aus ApexChartStyle und die Buehne von
+   ApexWorkspace. Alles das existiert und ist im Replay erprobt — hier wird
+   es nur mit laufenden Kursen versorgt.
+
+   ── Woher die Kurse kommen ─────────────────────────────────────────
+   Ueber den vorhandenen candles-worker (Twelve Data, ein Server-Key fuer
+   alle). Kein WebSocket: es werden alle paar Sekunden die juengsten Kerzen
+   nachgeladen und die letzte ersetzt. Fuer Zonen auf M1 und M5 ist das
+   ausreichend — man braucht keinen Tickstrom, um eine Basis zu erkennen —
+   und es kommt ohne zweite Infrastruktur aus.
+
+   ── Was hier bewusst nicht passiert ────────────────────────────────
+   Keine Orders, keine Broker-Anbindung. Der Live-Chart zeigt und zeichnet.
+   Handeln passiert bei deinem Broker.
+   ══════════════════════════════════════════════════════════════════════ */
+(function apexLive() {
+  var LC = { on: false, chart: null, draw: null, bars: [], timer: null };
+  window.ApexLive = LC;
+
+  var WORKER = 'https://candles-worker.4kjyyyftv6.workers.dev';
+  var TF = [['1min','M1',1],['5min','M5',5],['15min','M15',15],['30min','M30',30],['1h','H1',60],['4h','H4',240]];
+  var SYMS = ['XAUUSD','EURUSD','GBPUSD','USDJPY','BTCUSD','ETHUSD','NAS100','US30'];
+
+  function workerUrl() {
+    try { return (localStorage.getItem('apexCandleWorker') || WORKER).replace(/\/$/, ''); }
+    catch (e) { return WORKER; }
+  }
+
+  /* Twelve Data schreibt Symbole mit Schraegstrich. Dieselbe Umsetzung wie
+     im Snapshot-Modul — bewusst dieselbe, damit ein Chart nicht andere
+     Kerzen zeigt als der Schnappschuss eines Trades. */
+  function tdSym(s) {
+    s = String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (s === 'XAUUSD' || s === 'GOLD') return 'XAU/USD';
+    if (s === 'XAGUSD') return 'XAG/USD';
+    if (s === 'NAS100' || s === 'US100') return 'NDX';
+    if (s === 'US30' || s === 'DJI')     return 'DJI';
+    if (s === 'SPX500' || s === 'US500') return 'SPX';
+    if (/^(BTC|ETH|XRP|LTC|SOL|ADA|DOGE|BNB)USDT?$/.test(s)) return s.replace(/USDT?$/, '') + '/USD';
+    if (/^[A-Z]{6}$/.test(s)) return s.slice(0, 3) + '/' + s.slice(3);
+    return s;
+  }
+  function tdDate(ms) { return new Date(ms).toISOString().slice(0, 19).replace('T', ' '); }
+  function parseTd(dt) {
+    var s = (dt.indexOf(' ') > 0) ? dt.replace(' ', 'T') : dt + 'T00:00:00';
+    return new Date(s + 'Z').getTime();
+  }
+
+  function holeKerzen(sym, interval, vonMs, bisMs) {
+    var u = workerUrl() + '/candles?symbol=' + encodeURIComponent(tdSym(sym)) +
+            '&interval=' + interval +
+            '&start_date=' + encodeURIComponent(tdDate(vonMs)) +
+            '&end_date=' + encodeURIComponent(tdDate(bisMs));
+    return fetch(u).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !Array.isArray(j.values)) return [];
+      /* ApexChart erwartet SPALTEN, keine Objektliste: { n, t[], o[], h[],
+         l[], c[], v[] } mit t in Millisekunden. Dasselbe Format wie
+         ApexMarketData liefert — so schluckt setBars() es unveraendert. */
+      var roh = j.values.map(function (v) {
+        return { t: parseTd(v.datetime), o: +v.open, h: +v.high,
+                 l: +v.low, c: +v.close, v: v.volume != null ? +v.volume : 0 };
+      }).filter(function (b) { return isFinite(b.t) && isFinite(b.c); })
+        .sort(function (a, b) { return a.t - b.t; });
+      return roh;
+    });
+  }
+
+  /* Objektliste in Spalten. Einmal hier, damit die Einsortierung weiter mit
+     handlichen Objekten arbeiten kann und nur die Uebergabe an den Chart
+     umgeformt wird. */
+  function spalten(liste) {
+    var n = liste.length;
+    var b = { n: n, t: new Array(n), o: new Array(n), h: new Array(n),
+              l: new Array(n), c: new Array(n), v: new Array(n) };
+    for (var i = 0; i < n; i++) {
+      b.t[i] = liste[i].t; b.o[i] = liste[i].o; b.h[i] = liste[i].h;
+      b.l[i] = liste[i].l; b.c[i] = liste[i].c; b.v[i] = liste[i].v || 0;
+    }
+    return b;
+  }
+
+  function minuten(interval) {
+    for (var i = 0; i < TF.length; i++) if (TF[i][0] === interval) return TF[i][2];
+    return 1;
+  }
+
+  /* Neue Kerzen einsortieren. Die letzte bekannte Kerze wird ERSETZT, nicht
+     angehaengt: sie ist beim vorigen Abruf noch gelaufen und hat sich seither
+     geaendert. Ohne das entstehen Dubletten mit veralteten Hochs und Tiefs. */
+  function einsortieren(alt, neu) {
+    if (!neu.length) return alt;
+    var idx = {};
+    for (var i = 0; i < alt.length; i++) idx[alt[i].t] = i;
+    var out = alt.slice();
+    for (var j = 0; j < neu.length; j++) {
+      var b = neu[j];
+      if (idx[b.t] != null) out[idx[b.t]] = b;
+      else out.push(b);
+    }
+    out.sort(function (a, b) { return a.t - b.t; });
+    return out;
+  }
+
+  // ── Seite ──────────────────────────────────────────────────────────
+  function seiteBauen() {
+    if (document.getElementById('page-live')) return;
+    var host = document.getElementById('page-edgelab') || document.getElementById('page-stats');
+    if (!host || !host.parentNode) return;
+    var p = document.createElement('div');
+    p.className = 'page'; p.id = 'page-live';
+    p.innerHTML =
+      '<div class="ph"><div class="ph-eyebrow">Live</div>' +
+      '<h1>Live <span style="color:var(--gold)">Chart</span></h1>' +
+      '<p>Dein Chart im Produkt — mit denselben Zeichenwerkzeugen, Indikatoren und Zonen wie im Replay.</p></div>' +
+      '<div id="lcBody"></div>';
+    host.parentNode.appendChild(p);
+  }
+
+  function setupHtml() {
+    return '<div class="el-card" id="lcSetup">' +
+      '<div class="el-card-h">Chart starten</div>' +
+      '<div class="lc-row">' +
+        '<label>Instrument<select id="lcSym">' +
+          SYMS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('') +
+        '</select></label>' +
+        '<label>Zeiteinheit<select id="lcTf">' +
+          TF.map(function (t) { return '<option value="' + t[0] + '"' + (t[0] === '1min' ? ' selected' : '') + '>' + t[1] + '</option>'; }).join('') +
+        '</select></label>' +
+        '<label>Kerzen<select id="lcCount">' +
+          [300, 600, 1000, 2000].map(function (n) { return '<option value="' + n + '"' + (n === 600 ? ' selected' : '') + '>' + n + '</option>'; }).join('') +
+        '</select></label>' +
+        '<label>Aktualisieren<select id="lcPoll">' +
+          [['0','aus'],['5','alle 5 s'],['10','alle 10 s'],['30','alle 30 s'],['60','jede Minute']]
+            .map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === '10' ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+        '</select></label>' +
+        '<button class="el-btn primary" id="lcStart" onclick="ApexLive.start()">▶ Chart öffnen</button>' +
+      '</div>' +
+      '<div class="lc-note" id="lcNote">Die Kurse kommen über euren Candle-Worker. Kein Tickstrom — es werden ' +
+      'in dem gewählten Takt die jüngsten Kerzen nachgeladen. Für Zonen auf M1 und M5 reicht das.</div>' +
+      '</div>' +
+      '<div class="el-card" id="lcCard" style="display:none">' +
+        '<div class="el-card-h" id="lcHead">—</div>' +
+        '<div id="lcTools"></div>' +
+        '<div id="lcChart" style="height:520px"></div>' +
+        '<div id="lcInd" style="display:none"></div>' +
+        '<div id="lcStyle" style="display:none"></div>' +
+      '</div>';
+  }
+
+  LC.render = function () {
+    seiteBauen();
+    var b = document.getElementById('lcBody');
+    if (!b) return;
+    if (!b.dataset.built) { b.innerHTML = setupHtml(); b.dataset.built = '1'; }
+  };
+
+  // ── Start ──────────────────────────────────────────────────────────
+  LC.start = function () {
+    if (LC.on) return;
+    var sym = (document.getElementById('lcSym') || {}).value || 'XAUUSD';
+    var tf  = (document.getElementById('lcTf')  || {}).value || '1min';
+    var cnt = +((document.getElementById('lcCount') || {}).value || 600);
+    var pollS = +((document.getElementById('lcPoll') || {}).value || 10);
+    var note = document.getElementById('lcNote');
+    var btn = document.getElementById('lcStart');
+    if (btn) { btn.disabled = true; btn.textContent = 'Lade Kerzen…'; }
+
+    var bis = Date.now();
+    var von = bis - cnt * minuten(tf) * 60000 * 1.6;   // Puffer fuer Marktpausen
+
+    holeKerzen(sym, tf, von, bis).then(function (bars) {
+      if (!bars.length) throw new Error('Keine Kerzen erhalten — Symbol oder Zeiteinheit prüfen.');
+      LC.bars = bars.slice(-cnt);
+      LC.sym = sym; LC.tf = tf; LC.pollS = pollS;
+      document.getElementById('lcSetup').style.display = 'none';
+      document.getElementById('lcCard').style.display = '';
+      document.getElementById('lcHead').textContent = sym + ' · ' + tf;
+      return window.ApexChart.create(document.getElementById('lcChart'),
+             { symbol: sym, timeframe: tf, volume: true });
+    }).then(function (inst) {
+      LC.chart = inst;
+      inst.setBars(spalten(LC.bars));
+      inst.reveal ? inst.reveal() : null;
+      if (inst.fit) inst.fit();
+      // Aussehen und Indikatoren, die der Nutzer ueberall gewaehlt hat
+      if (window.ApexChartStyle && ApexChartStyle.load) {
+        try { inst.setStyle(ApexChartStyle.load()); } catch (e) {}
+      }
+      if (window.ApexIndicatorUI && ApexIndicatorUI.list) {
+        try { inst.setIndicators(ApexIndicatorUI.list()); } catch (e) {}
+      }
+      if (window.ApexDraw) {
+        LC.draw = ApexDraw.attach(inst, { symbol: sym });
+        ApexDraw.mountToolbar(document.getElementById('lcTools'), LC.draw);
+      }
+      LC.on = true;
+      buehne();
+      /* Einpassen erst NACH dem Mounten: vorher steht der Chart noch in der
+         Karte und hat eine andere Groesse als auf der Buehne. */
+      setTimeout(function () { try { LC.chart.fit(); } catch (e) {} }, 60);
+      takt();
+    }).catch(function (e) {
+      if (note) note.innerHTML = '<b style="color:var(--loss)">' + (e && e.message ? e.message : 'Fehler') + '</b>';
+      if (btn) { btn.disabled = false; btn.textContent = '▶ Chart öffnen'; }
+    });
+  };
+
+  /* Buehne: dieselbe wie im Replay, damit Werkzeuge und Bedienung identisch
+     sind. Der Chart wandert dabei in den Vollbild-Rahmen. */
+  function buehne() {
+    if (!window.ApexWorkspace) return;
+    var tools = document.getElementById('lcTools');
+    var gruppen = tools ? [].slice.call(tools.querySelectorAll('.apd-g')) : [];
+    /* Beide Knoten muessen IM Dokument haengen, bevor die Buehne sie holt:
+       take() merkt sich die alte Elternschaft ueber einen Platzhalter und
+       ruft insertBefore auf — bei einem freischwebenden Element ist
+       parentNode null und der Aufbau bricht ab. */
+    var karte = document.getElementById('lcCard');
+    var exit = document.getElementById('lcExit');
+    if (!exit) {
+      exit = document.createElement('button');
+      exit.className = 'el-btn'; exit.id = 'lcExit'; exit.textContent = '✕ Schließen';
+      karte.appendChild(exit);
+    }
+    exit.onclick = function () { LC.stop(); };
+    var quote = document.getElementById('lcQuote');
+    if (!quote) {
+      quote = document.createElement('div');
+      quote.className = 'arp-quote'; quote.id = 'lcQuote';
+      karte.appendChild(quote);
+    }
+    window.ApexWorkspace.mount({
+      host: document.getElementById('lcCard'),
+      chart: document.getElementById('lcChart'),
+      chartInst: LC.chart,
+      symbol: LC.sym,
+      tf: LC.tf,
+      title: LC.sym,
+      sub: LC.tf + ' · ' + LC.stand(),
+      top: [],
+      topRight: [quote],
+      exit: exit,
+      rail: gruppen,
+      panels: [document.getElementById('lcInd'), document.getElementById('lcStyle')].filter(Boolean),
+      onExit: function () { LC.stop(); }
+    });
+  }
+
+  /* Wie alt die juengste Kerze wirklich ist. Der kostenlose Datentarif
+     liefert verzoegert — das gehoert an den Chart geschrieben und nicht
+     unter den Teppich. Wer glaubt, den aktuellen Kurs zu sehen, trifft
+     Entscheidungen auf Zahlen von vor drei Stunden. */
+  LC.stand = function () {
+    var b = LC.bars[LC.bars.length - 1];
+    if (!b) return '—';
+    var min = Math.round((Date.now() - b.t) / 60000);
+    if (min <= 2) return 'aktuell';
+    if (min < 90) return min + ' Min alt';
+    return Math.round(min / 60) + ' Std alt';
+  };
+
+  // ── Takt ───────────────────────────────────────────────────────────
+  function takt() {
+    if (LC.timer) { clearInterval(LC.timer); LC.timer = null; }
+    if (!LC.pollS) return;
+    LC.timer = setInterval(function () {
+      if (!LC.on || !LC.chart) return;
+      /* Nur ein kleines Fenster nachladen. Ein voller Abruf bei jedem Takt
+         waere Verschwendung und reisst das Kontingent des Workers auf. */
+      var bis = Date.now();
+      var von = bis - minuten(LC.tf) * 60000 * 8;
+      holeKerzen(LC.sym, LC.tf, von, bis).then(function (neu) {
+        if (!neu.length || !LC.on) return;
+        LC.bars = einsortieren(LC.bars, neu);
+        LC.chart.setBars(spalten(LC.bars));
+        if (LC.draw) LC.draw.sync();
+        var q = document.getElementById('lcQuote');
+        var letzte = LC.bars[LC.bars.length - 1];
+        var sub = document.querySelector('.aw-sym-s');
+        if (sub) sub.textContent = LC.tf + ' · ' + LC.stand();
+        if (q && letzte) {
+          q.innerHTML = '<b>' + letzte.c.toFixed(letzte.c > 100 ? 2 : 5) + '</b>' +
+                        '<span class="sp"> · ' + new Date(letzte.t).toLocaleTimeString() + '</span>';
+        }
+      }).catch(function () {});
+    }, LC.pollS * 1000);
+  }
+
+  LC.stop = function () {
+    if (LC.timer) { clearInterval(LC.timer); LC.timer = null; }
+    if (window.ApexWorkspace && ApexWorkspace.isOn()) ApexWorkspace.unmount();
+    if (LC.draw && LC.draw.destroy) { try { LC.draw.destroy(); } catch (e) {} }
+    if (LC.chart && LC.chart.destroy) { try { LC.chart.destroy(); } catch (e) {} }
+    LC.draw = null; LC.chart = null; LC.on = false;
+    var card = document.getElementById('lcCard');
+    var setup = document.getElementById('lcSetup');
+    if (card) card.style.display = 'none';
+    if (setup) setup.style.display = '';
+    var btn = document.getElementById('lcStart');
+    if (btn) { btn.disabled = false; btn.textContent = '▶ Chart öffnen'; }
+    var chartHost = document.getElementById('lcChart');
+    if (chartHost) chartHost.innerHTML = '';
+  };
+
+  /* Verlaesst der Nutzer die Seite, wird der Takt angehalten — sonst laeuft
+     der Abruf im Hintergrund weiter und verbraucht das Kontingent. */
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && LC.timer) { clearInterval(LC.timer); LC.timer = null; }
+    else if (!document.hidden && LC.on && !LC.timer) takt();
+  });
+})();
+</script>
+
 <script>
 (function apexWorkspace() {
   'use strict';
