@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01c';
+  window.APEX_BUILD = '2026-09-01e';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -6935,6 +6935,27 @@ body.light .aw-type { color-scheme: light; }
 
 /* Die Kopfleiste darf nie umbrechen — sonst waechst sie und frisst Chart. */
 .aw-top > * { flex-shrink: 0; }
+
+/* Auf dem Handy passte der Inhalt nie in 46px Breite — und weil die Leiste
+   weder umbricht noch scrollt, wurde alles rechts davon einfach abgeschnitten.
+   Der Ausgang steht als LETZTES darin: die Sitzung liess sich am Telefon
+   ueberhaupt nicht mehr verlassen.
+   Jetzt scrollt die Leiste waagerecht, und der Ausgang klebt am rechten Rand,
+   damit er unabhaengig von der Scrollposition erreichbar bleibt. */
+@media (max-width: 860px) {
+  .aw-top {
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .aw-top::-webkit-scrollbar { display: none; }
+  .aw-top .aw-spacer { min-width: 0; }
+  .aw-top .aw-exit {
+    position: sticky; right: 0; z-index: 2;
+    margin-left: auto;
+    background: var(--surface);
+    box-shadow: -10px 0 12px -6px var(--surface);
+  }
+}
 .aw-top .arp-quote,
 .aw-top .aw-sym { min-width: 0; flex-shrink: 1; }
 
@@ -10468,8 +10489,8 @@ body.light #landingPage * {
 .forgot-link { font-size: 12px; color: var(--ink3); cursor: pointer; margin-top: -4px; margin-bottom: 14px; display: block; text-align:right; transition: color 0.15s; }
 .forgot-link:hover { color: var(--gold); }
 .auth-error   { color: var(--loss);   font-size: 12px; margin-top: 8px; min-height: 18px; text-align: center; }
-/* Anmeldung ueber Google und Apple. Bewusst zurueckhaltend: die Marken geben
-   ihre Knopffarben vor, aber sie sollen die goldene Haupthandlung nicht
+/* Anmeldung ueber Google. Bewusst zurueckhaltend: die Marke gibt ihre
+   Knopffarbe vor, sie soll aber die goldene Haupthandlung nicht
    ueberstrahlen — deshalb neutral mit farbigem Zeichen. */
 .auth-sep { display:flex; align-items:center; gap:12px; margin:18px 0 14px; color:var(--ink3); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
 .auth-sep::before, .auth-sep::after { content:""; flex:1; height:1px; background:var(--rim); }
@@ -10483,7 +10504,6 @@ body.light #landingPage * {
 .oauth-btn:hover:not(:disabled) { border-color:var(--gold-line); background:var(--layer); }
 .oauth-btn:disabled { opacity:.55; cursor:default; }
 .oauth-btn svg { width:17px; height:17px; flex-shrink:0; }
-.oauth-btn .oa-apple { fill:var(--ink); }
 body.light .oauth-btn { background:#fff; border-color:rgba(0,0,0,0.14); }
 body.light .oauth-btn:hover:not(:disabled) { background:#f6f7f9; }
 .oauth-note { font-size:11px; color:var(--ink3); text-align:center; margin-top:10px; line-height:1.5; }
@@ -10750,12 +10770,6 @@ body.light .oauth-btn:hover:not(:disabled) { background:#f6f7f9; }
           </svg>
           <span>Continue with Google</span>
         </button>
-        <button class="oauth-btn" id="oauth-apple-login" onclick="doOAuth('apple')">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path class="oa-apple" d="M16.4 12.8c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.7 2.3 2.9 2.2 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.2 1.2-2.4 1.2-2.5 0 0-2.4-.9-2.4-3.6zM14.2 5.9c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/>
-          </svg>
-          <span>Continue with Apple</span>
-        </button>
       </div>
     </div>
 
@@ -10793,15 +10807,9 @@ body.light .oauth-btn:hover:not(:disabled) { background:#f6f7f9; }
           </svg>
           <span>Continue with Google</span>
         </button>
-        <button class="oauth-btn" id="oauth-apple-reg" onclick="doOAuth('apple')">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path class="oa-apple" d="M16.4 12.8c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.7 2.3 2.9 2.2 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.2 1.2-2.4 1.2-2.5 0 0-2.4-.9-2.4-3.6zM14.2 5.9c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/>
-          </svg>
-          <span>Continue with Apple</span>
-        </button>
       </div>
-      <div class="oauth-note">Google and Apple create your account for you — no password needed.
-      Your trader name is taken from your account, and Apple may hide your email. Both are fine.</div>
+      <div class="oauth-note">Google creates your account for you — no password needed.
+      Your trader name is taken from your Google account.</div>
     </div>
 
     <!-- RESET SCREEN -->
@@ -13576,7 +13584,7 @@ async function _doReset() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   Anmelden mit Google und Apple
+   Anmelden mit Google  (Apple vorbereitet, aber ohne Knopf)
 
    Zwei Dinge unterscheiden das von der E-Mail-Anmeldung:
 
@@ -13600,6 +13608,11 @@ function oauthProvider(which) {
     p.setCustomParameters({ prompt: 'select_account' });
     return p;
   }
+  /* Apple ist eingebaut, aber ohne Knopf: der Anbieter braucht ein
+     Apple-Developer-Konto, eine Services ID, einen .p8-Schluessel und eine
+     bei Apple registrierte Sendedomain (sonst laufen Mails an die
+     privaterelay-Adressen ins Leere). Zum Anschalten reicht der Knopf im
+     Anmeldeformular — dieser Zweig bleibt deshalb stehen. */
   var a = new firebase.auth.OAuthProvider('apple.com');
   a.addScope('email');
   a.addScope('name');
@@ -13607,7 +13620,7 @@ function oauthProvider(which) {
 }
 
 function oauthBusy(on) {
-  ['oauth-google-login','oauth-apple-login','oauth-google-reg','oauth-apple-reg']
+  ['oauth-google-login','oauth-google-reg']
     .forEach(function (id) {
       var b = document.getElementById(id);
       if (b) b.disabled = !!on;
@@ -49607,7 +49620,11 @@ self.addEventListener('message', async (ev) => {
     var bar = this._sbar;
     if (!bar) return;
     var s = this.sel ? this._byId(this.sel) : null;
-    if (!s || s.hidden) { bar.style.display = 'none'; return; }
+    if (!s || s.hidden) {
+      bar.style.display = 'none';
+      if (this.el) this.el.style.touchAction = '';   // Chart darf wieder schwenken
+      return;
+    }
 
     /* Waagerechte Mitte ueber der Zeichnung, knapp darueber. */
     var xs = [], ys = [];
@@ -49639,6 +49656,12 @@ self.addEventListener('message', async (ev) => {
     bar.querySelectorAll('[data-sb-dash]').forEach(function (b) {
       b.classList.toggle('on', b.getAttribute('data-sb-dash') === (s.dash || 'solid'));
     });
+    /* Solange etwas ausgewaehlt ist, gehoert die Geste der Zeichnung und
+       nicht dem Chart. Ohne das laesst sich auf dem Handy nichts schieben:
+       touch-action erst im pointerdown zu setzen ist zu spaet, der Browser
+       hat die Geste dann schon als Schwenk vergeben. */
+    if (this.el) this.el.style.touchAction = 'none';
+
     var lk = bar.querySelector('[data-sb-lock]');
     if (lk) { lk.textContent = s.locked ? '🔒' : '🔓'; lk.classList.toggle('on', !!s.locked); }
     /* Das Zahnrad erscheint nur, wo es auch etwas einzustellen gibt —
@@ -49789,7 +49812,7 @@ self.addEventListener('message', async (ev) => {
       var before = drag.before;      // vor dem Nullen sichern
       drag = null;
       self._freezeChart(false);
-      el.style.touchAction = self._prevTouchAction || '';
+      el.style.touchAction = self.sel ? 'none' : (self._prevTouchAction || '');
       try { el.releasePointerCapture(e.pointerId); } catch (err) {}
       e.stopPropagation();
       if (moved) {
@@ -50224,6 +50247,7 @@ self.addEventListener('message', async (ev) => {
   Draw.prototype.destroy = function () {
     /* Die Leiste haengt am Body und wuerde sonst nach dem Verlassen des
        Charts stehenbleiben. */
+    if (this.el) this.el.style.touchAction = '';
     if (this._sbar && this._sbar.parentNode) this._sbar.parentNode.removeChild(this._sbar);
     this._sbar = null;
     var dlg = document.querySelector('.apd-dlg');
@@ -50298,6 +50322,7 @@ self.addEventListener('message', async (ev) => {
       '.apd-sbar{position:fixed;z-index:100029;display:flex;align-items:center;gap:6px;padding:5px 7px;' +
         'background:var(--raised);border:0.5px solid var(--rim2);border-radius:10px;' +
         'box-shadow:0 10px 28px rgba(0,0,0,0.45);white-space:nowrap}',
+      '@media (max-width:700px){.apd-sbar{flex-wrap:wrap;max-width:calc(100vw - 16px);row-gap:4px}.apd-sbar-sep{display:none}.apd-sbar-b{min-width:30px;height:28px}.apd-sbar-sw{width:18px;height:18px}}',
       '.apd-sbar-g{display:flex;align-items:center;gap:3px}',
       '.apd-sbar-sep{width:1px;height:16px;background:var(--rim);flex:none}',
       '.apd-sbar-sw{width:14px;height:14px;border-radius:50%;border:1.5px solid transparent;cursor:pointer;padding:0}',
@@ -63591,7 +63616,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       relayout();
     };
     top.appendChild(dockBtn);
-    if (opts.exit) take(opts.exit, top);
+    if (opts.exit) { opts.exit.classList.add('aw-exit'); take(opts.exit, top); }
 
     /* Linke Spalte: Zeichenwerkzeuge, Farben, Rueckgaengig/Loeschen. */
     (opts.rail || []).forEach(function (group, i) {
@@ -63677,6 +63702,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     /* In der Reihenfolge zuruecklegen, in der sie geholt wurden — sonst
        landen die Karten zwar wieder auf der Seite, aber vertauscht. */
     var o = W.opts;
+    if (o.exit) o.exit.classList.remove('aw-exit');
     if (o.chart) o.chart.classList.remove('aw-chart-slot');
     if (o.stageTop) o.stageTop.classList.remove('aw-stage-top');
     (o.panels || []).forEach(function (n) { if (n) n.removeAttribute('data-aw-panel'); });
