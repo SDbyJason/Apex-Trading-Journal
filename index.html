@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01j';
+  window.APEX_BUILD = '2026-09-01k';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -48848,6 +48848,19 @@ self.addEventListener('message', async (ev) => {
        Hand nie genau auf dem Docht sitzt. Pro Nutzer gemerkt. */
     this.magnet = loadMagnet();
     this._onChange = opts.onChange || function () {};
+    /* Das CSS der Zeichenebene hing bisher an mountToolbar(). Der Market
+       Replay baut seine Werkzeugleiste aber SELBST und ruft mountToolbar nie
+       — dort wurde das CSS nur eingespielt, wenn man zufaellig die
+       Zeichnungsliste oeffnete (mountList ruft es ebenfalls).
+
+       Folge: `.apd-sbar` und `.apd-dlg` hatten keine Regeln. Die Stilleiste
+       fiel damit auf position:static zurueck, ihre left/top wirkten nicht und
+       sie landete unsichtbar am Ende des Dokuments — sie "erschien nicht".
+       Der Fibonacci-Dialog sass zwar richtig (placeList setzt position:fixed
+       hart), war aber ohne Hintergrund und Rahmen.
+
+       Deshalb hier: wer die Zeichenebene benutzt, bekommt ihr CSS. */
+    injectToolbarCss();
     this._build();
     this._buildStyleBar();
   }
