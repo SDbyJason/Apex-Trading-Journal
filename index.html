@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-01b';
+  window.APEX_BUILD = '2026-09-01c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -49592,7 +49592,12 @@ self.addEventListener('message', async (ev) => {
       }
       self._syncStyleBar();
     });
-    this.el.appendChild(bar);
+    /* An den Body, nicht in den Chart. Innerhalb des Chart-Hosts wurde die
+       Leiste von der Buehne des Workspace beschnitten beziehungsweise
+       ueberdeckt — derselbe Fehler, der schon die Zeichnungsliste, beide
+       Werkzeugmenues und den Tooltip erwischt hat. Alle vier liegen deshalb
+       am Body und werden ueber Bildschirmkoordinaten platziert. */
+    document.body.appendChild(bar);
     this._sbar = bar;
   };
 
@@ -49613,13 +49618,17 @@ self.addEventListener('message', async (ev) => {
     }
     if (!ys.length) { bar.style.display = 'none'; return; }
     bar.style.display = '';
-    var w = this.el.clientWidth, h = this.el.clientHeight;
+    /* xs/ys sind chart-lokal; die Leiste haengt am Body und rechnet deshalb
+       in Bildschirmkoordinaten. */
+    var host = this.el.getBoundingClientRect();
     var bw = bar.offsetWidth || 240, bh = bar.offsetHeight || 30;
-    var cx = xs.length ? (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2 : w / 2;
-    var top = Math.min.apply(null, ys) - bh - 10;
-    if (top < 4) top = Math.max.apply(null, ys) + 10;      // kein Platz oben → darunter
-    bar.style.left = Math.round(Math.max(4, Math.min(w - bw - 4, cx - bw / 2))) + 'px';
-    bar.style.top = Math.round(Math.max(4, Math.min(h - bh - 4, top))) + 'px';
+    var cx = (xs.length ? (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2
+                        : host.width / 2) + host.left;
+    var top = Math.min.apply(null, ys) + host.top - bh - 10;
+    if (top < host.top + 4) top = Math.max.apply(null, ys) + host.top + 10;   // kein Platz oben → darunter
+    var maxL = window.innerWidth - bw - 4, maxT = window.innerHeight - bh - 4;
+    bar.style.left = Math.round(Math.max(4, Math.min(maxL, cx - bw / 2))) + 'px';
+    bar.style.top  = Math.round(Math.max(4, Math.min(maxT, top))) + 'px';
 
     bar.querySelectorAll('[data-sb-color]').forEach(function (b) {
       b.classList.toggle('on', b.getAttribute('data-sb-color') === s.color);
@@ -49809,6 +49818,26 @@ self.addEventListener('message', async (ev) => {
       if (e.shiftKey) self.redo(); else self.undo();
     };
 
+    /* Doppelklick auf die Zeichnung oeffnet ihre Einstellungen — der Griff,
+       den jeder von TradingView und MT5 kennt. Das Zahnrad in der Stilleiste
+       bleibt, ist aber nicht mehr der einzige Weg. */
+    this._onEdDbl = function (e) {
+      if (self.tool !== 'cursor') return;
+      var pt = local(e);
+      var hit = self._hit(pt.x, pt.y, false);
+      if (!hit || hit.shape.type !== 'fib') return;
+      e.preventDefault(); e.stopPropagation();
+      self.sel = hit.shape.id;
+      self._syncStyleBar();
+      self.sync();
+      /* placeList() braucht nur ein Rechteck — der Zeiger tut es als Anker. */
+      var anker = { getBoundingClientRect: function () {
+        return { left: e.clientX, right: e.clientX, top: e.clientY,
+                 bottom: e.clientY, width: 0, height: 0 };
+      } };
+      fibDialog(self, hit.shape, anker);
+    };
+    el.addEventListener('dblclick', this._onEdDbl, true);
     el.addEventListener('pointerdown', this._onEdDown, true);
     el.addEventListener('pointermove', this._onEdMove, true);
     el.addEventListener('pointerup', this._onEdUp, true);
@@ -50193,6 +50222,12 @@ self.addEventListener('message', async (ev) => {
   };
 
   Draw.prototype.destroy = function () {
+    /* Die Leiste haengt am Body und wuerde sonst nach dem Verlassen des
+       Charts stehenbleiben. */
+    if (this._sbar && this._sbar.parentNode) this._sbar.parentNode.removeChild(this._sbar);
+    this._sbar = null;
+    var dlg = document.querySelector('.apd-dlg');
+    if (dlg) dlg.remove();
     if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
     // The projection watchdog re-arms itself every frame — without this it
     // would keep running against a destroyed chart for the rest of the session.
@@ -50209,6 +50244,8 @@ self.addEventListener('message', async (ev) => {
     }
     window.removeEventListener('pointermove', this._onMove);
     window.removeEventListener('pointerup', this._onUp);
+    if (this._onEdDbl && this.el) this.el.removeEventListener('dblclick', this._onEdDbl, true);
+    this._onEdDbl = null;
     if (this._onEdDown && this.el) {
       this.el.removeEventListener('pointerdown', this._onEdDown, true);
       this.el.removeEventListener('pointermove', this._onEdMove, true);
@@ -50258,7 +50295,7 @@ self.addEventListener('message', async (ev) => {
          sich gegen irgendeinen Vorfahren und landet neben dem Bild. */
       '.apd-tb{position:relative}',
       /* Schwebende Stilleiste ueber der ausgewaehlten Zeichnung. */
-      '.apd-sbar{position:absolute;z-index:12;display:flex;align-items:center;gap:6px;padding:5px 7px;' +
+      '.apd-sbar{position:fixed;z-index:100029;display:flex;align-items:center;gap:6px;padding:5px 7px;' +
         'background:var(--raised);border:0.5px solid var(--rim2);border-radius:10px;' +
         'box-shadow:0 10px 28px rgba(0,0,0,0.45);white-space:nowrap}',
       '.apd-sbar-g{display:flex;align-items:center;gap:3px}',
