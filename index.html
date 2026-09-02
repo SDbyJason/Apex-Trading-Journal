@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-02d';
+  window.APEX_BUILD = '2026-09-02e';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -64197,17 +64197,87 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   //  der Chart genau so stehen wie vorher. Der Live-Teil ist eine
   //  Verbesserung, keine Voraussetzung.
   // ══════════════════════════════════════════════════════════════
-  LC.live = { an: false, timer: null, letzterKurs: null, fehler: 0 };
+  LC.live = { an: false, timer: null, letzterKurs: null, fehler: 0,
+               quellen: [], idx: 0, quelle: '' };
+
+  /* Welche Yahoo-Schreibweise passt? Nur dort eintragen, wo Yahoo wirklich
+     in ECHTZEIT liefert — Forex und Krypto (gemessen: 20 Sekunden). Gold
+     und Indizes sind dort 10 bis 15 Minuten verzoegert und damit schlechter
+     als die Kerzen, die wir ohnehin haben. Lieber keine Quelle als eine,
+     die den Chart aelter macht, als er ohne sie waere. */
+  function yahooSym(sym) {
+    var s = String(sym || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (/^(BTC|ETH|SOL|XRP|LTC|ADA|DOGE)USD[T]?$/.test(s))
+      return s.replace(/USDT?$/, '') + '-USD';
+    if (/^[A-Z]{6}$/.test(s) && !/^XA[UG]/.test(s)) return s + '=X';
+    return null;   // Gold, Silber, Indizes: hier hilft Yahoo nicht
+  }
+
+  /* Preisquellen in der Reihenfolge ihrer Qualitaet. Die erste, die einen
+     brauchbaren Kurs liefert, gewinnt; faellt sie aus, ruecken die anderen
+     nach. Ohne jede Quelle laeuft der Chart weiter wie bisher, nur eben
+     mit dem Rueckstand der Kerzen. */
+  function preisQuellen() {
+    var q = [];
+    if (window.ApexSpots && ApexSpots.verfuegbar()) {
+      q.push({ name: 'Broker', hole: function () {
+        return ApexSpots.hole([LC.sym]).then(function (r) {
+          if (r && r.error) throw new Error(r.error);
+          var k = null;
+          for (var n in (r.kurse || {})) { k = r.kurse[n]; break; }
+          if (!k || !isFinite(k.bid)) throw new Error('kein Kurs');
+          return (isFinite(k.ask) && k.ask > 0) ? (k.bid + k.ask) / 2 : k.bid;
+        });
+      } });
+    }
+    var y = yahooSym(LC.sym);
+    if (y) {
+      q.push({ name: 'Echtzeit', hole: function () {
+        return fetch(workerUrl() + '/yprice?symbol=' + encodeURIComponent(y))
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (!j || j.status !== 'ok' || !isFinite(j.price)) throw new Error('kein Preis');
+            return j.price;
+          });
+      } });
+    }
+    q.push({ name: 'Datenanbieter', hole: function () {
+      return fetch(workerUrl() + '/price?symbol=' + encodeURIComponent(tdSym(LC.sym)))
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j || j.status !== 'ok' || !isFinite(j.price)) throw new Error('kein Preis');
+          return j.price;
+        });
+    } });
+    return q;
+  }
 
   function stromStarten() {
-    if (!window.ApexSpots || !ApexSpots.verfuegbar()) return;
-    ApexSpots.start([LC.sym]).then(function (r) {
-      LC.live.an = !(r && r.error);
-      // Der Broker schreibt dieses Instrument anders — kein Fehler, der
-      // Chart laeuft mit Kerzen weiter.
-      if (r && (r.nichtGefunden || []).indexOf(LC.sym) >= 0) LC.live.an = false;
+    LC.live.quellen = preisQuellen();
+    LC.live.idx = 0;
+    LC.live.fehler = 0;
+    /* Ohne Broker muss nichts abonniert werden — die uebrigen Quellen
+       werden einfach abgefragt. Also direkt lostakten. */
+    if (!window.ApexSpots || !ApexSpots.verfuegbar()) {
+      LC.live.an = LC.live.quellen.length > 0;
       stromTakt();
-    }).catch(function () { LC.live.an = false; });
+      return;
+    }
+    ApexSpots.start([LC.sym]).then(function (r) {
+      /* Broker kennt das Instrument nicht oder meldet einen Fehler: keine
+         Katastrophe, sondern ein Grund, die naechste Quelle zu nehmen. */
+      var brokerOk = !(r && r.error) &&
+                     !(r && (r.nichtGefunden || []).indexOf(LC.sym) >= 0);
+      if (!brokerOk && LC.live.quellen[0] && LC.live.quellen[0].name === 'Broker')
+        LC.live.quellen.shift();
+      LC.live.an = LC.live.quellen.length > 0;
+      stromTakt();
+    }).catch(function () {
+      if (LC.live.quellen[0] && LC.live.quellen[0].name === 'Broker')
+        LC.live.quellen.shift();
+      LC.live.an = LC.live.quellen.length > 0;
+      stromTakt();
+    });
   }
 
   function stromTakt() {
@@ -64215,23 +64285,24 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (!LC.live.an) return;
     LC.live.timer = setInterval(function () {
       if (!LC.on || !LC.chart) return;
-      ApexSpots.hole([LC.sym]).then(function (r) {
-        if (r && r.error) {
-          // 404 heisst: die Bruecke wurde neu gestartet, der Strom ist weg.
-          // Einmal neu abonnieren statt den Chart tot zurueckzulassen.
-          if (++LC.live.fehler <= 2) stromStarten();
-          else { LC.live.an = false; stromTakt(); }
-          return;
-        }
+      var q = LC.live.quellen[LC.live.idx];
+      if (!q) { LC.live.an = false; stromTakt(); return; }
+      q.hole().then(function (preis) {
+        if (!isFinite(preis)) throw new Error('kein Preis');
         LC.live.fehler = 0;
-        var k = null;
-        for (var name in (r.kurse || {})) { k = r.kurse[name]; break; }
-        if (!k || !isFinite(k.bid)) return;
-        var mitte = (isFinite(k.ask) && k.ask > 0) ? (k.bid + k.ask) / 2 : k.bid;
-        LC.live.letzterKurs = mitte;
-        laufendeKerze(mitte);
-      }).catch(function () {});
-    }, 1500);
+        LC.live.quelle = q.name;
+        LC.live.letzterKurs = preis;
+        laufendeKerze(preis);
+      }).catch(function () {
+        /* Dreimal darf eine Quelle stolpern — ein einzelner Aussetzer ist
+           kein Grund zu wechseln. Danach die naechste nehmen. */
+        if (++LC.live.fehler > 3) {
+          LC.live.fehler = 0;
+          LC.live.idx++;
+          if (LC.live.idx >= LC.live.quellen.length) { LC.live.an = false; stromTakt(); }
+        }
+      });
+    }, 2000);
   }
 
   // Schreibt die laufende Kerze fort. Liegt der Zeitpunkt schon im naechsten
@@ -64261,7 +64332,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (sub) {
       sub.classList.add('notranslate');
       sub.setAttribute('translate', 'no');
-      sub.textContent = LC.tf + ' · live (Broker)';
+      sub.textContent = LC.tf + ' · live (' + (LC.live.quelle || 'live') + ')';
     }
   }
 
