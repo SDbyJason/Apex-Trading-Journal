@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-02b';
+  window.APEX_BUILD = '2026-09-02d';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -26744,6 +26744,22 @@ window.startFreeTrial = startFreeTrial;
             ctidTraderAccountId: ctState.accountId,
             env: ctState.accountEnv || 'live',
             symbols: symbole || []
+          })
+        }).then(function (r) { return r.json(); });
+      },
+      /* Kerzen vom eigenen Broker. Kein Kontingent, keine gesperrten
+         Instrumente — und die Auswahl entspricht dem, was das Konto
+         tatsaechlich handeln kann. */
+      kerzen: function (symbol, tf, anzahl) {
+        if (!this.verfuegbar()) return Promise.reject(new Error('cTrader nicht verbunden'));
+        return fetch(WORKER_URL + '/api/candles', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_token: ctState.accessToken,
+            refresh_token: ctState.refreshToken,
+            ctidTraderAccountId: ctState.accountId,
+            env: ctState.accountEnv || 'live',
+            symbol: symbol, tf: tf, count: anzahl || 500
           })
         }).then(function (r) { return r.json(); });
       },
@@ -63764,6 +63780,28 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
 
   function holeKerzen(sym, interval, vonMs, bisMs) {
+    /* Zuerst der eigene Broker. Der Fremdanbieter bleibt als Rueckfall, weil
+       er ohne cTrader-Verbindung funktioniert — aber er hat 8 Abfragen je
+       Minute und sperrt Indizes, und beides hat den Chart regelmaessig
+       stillgelegt. Scheitert der Broker, wird NICHT abgebrochen: dann laeuft
+       einfach der alte Weg. */
+    if (window.ApexSpots && ApexSpots.verfuegbar()) {
+      return ApexSpots.kerzen(sym, interval, 500).then(function (j) {
+        if (j && Array.isArray(j.values) && j.values.length) {
+          LC.quelle = 'Broker';
+          return j.values;
+        }
+        throw new Error((j && j.error) || 'Broker lieferte keine Kerzen');
+      }).catch(function () {
+        LC.quelle = 'Datenanbieter';
+        return holeKerzenExtern(sym, interval, vonMs, bisMs);
+      });
+    }
+    LC.quelle = 'Datenanbieter';
+    return holeKerzenExtern(sym, interval, vonMs, bisMs);
+  }
+
+  function holeKerzenExtern(sym, interval, vonMs, bisMs) {
     var u = workerUrl() + '/candles?symbol=' + encodeURIComponent(tdSym(sym)) +
             '&interval=' + interval +
             '&start_date=' + encodeURIComponent(tdDate(vonMs)) +
@@ -63774,10 +63812,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
            unbekanntes Symbol, Kontingent. Das stumm zu schlucken hiess:
            man klickt ein Instrument an und es passiert einfach nichts. */
         var grund = (j && (j.message || j.code)) ? String(j.message || j.code) : 'keine Kerzen erhalten';
-        if (/Grow or Venture|upgrade|plan/i.test(grund))
+        if (/API credits|run out of|rate limit/i.test(grund))
+          grund = 'Kontingent erschoepft — der Datentarif erlaubt 8 Abfragen je Minute. Etwa eine Minute warten.';
+        else if (/available starting with|Grow or Venture/i.test(grund))
           grund = 'Dieses Instrument ist im kostenlosen Datentarif nicht enthalten.';
-        else if (/API credits|rate/i.test(grund))
-          grund = 'Kontingent erschoepft (8 Abfragen je Minute). Kurz warten.';
         throw new Error(grund);
       }
       /* ApexChart erwartet SPALTEN, keine Objektliste: { n, t[], o[], h[],
@@ -64119,6 +64157,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (!LC.pollS) return;
     LC.timer = setInterval(function () {
       if (!LC.on || !LC.chart) return;
+      /* Der Broker-Strom liefert die laufende Kerze bereits. Die Kerzen-API
+         korrigiert dann nur noch abgeschlossene Kerzen — dafuer reicht jeder
+         vierte Takt, und das Kontingent von 8 Abfragen je Minute bleibt frei
+         fuer das Oeffnen und Wechseln von Instrumenten. */
+      if (LC.live.an) {
+        LC._sparen = (LC._sparen || 0) + 1;
+        if (LC._sparen % 4 !== 0) return;
+      }
       /* Nur ein kleines Fenster nachladen. Ein voller Abruf bei jedem Takt
          waere Verschwendung und reisst das Kontingent des Workers auf. */
       var bis = Date.now();
