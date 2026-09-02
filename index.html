@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-02e';
+  window.APEX_BUILD = '2026-09-02g';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -6999,6 +6999,24 @@ body.light .aw-type { color-scheme: light; }
    changes — there is simply no overflow to scroll.
 ══════════════════════════════════════ */
 .settings-tab-nav.settings-tab-nav,
+/* ── Chart (TradingView) ────────────────────────────────────────── */
+#page-chart{display:none;height:calc(100vh - 120px);min-height:520px;grid-template-rows:auto minmax(320px,1fr) auto}
+#page-chart.active{display:grid}
+#page-chart .tv-kopf{flex:0 0 auto;margin-bottom:12px}
+#page-chart .tv-schnell{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+#page-chart .tv-chip{flex:0 0 auto;white-space:nowrap}
+#page-chart .tv-chip{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink3);border-radius:8px;padding:7px 14px;font-family:var(--font-body);font-size:12.5px;cursor:pointer;transition:.15s}
+#page-chart .tv-chip:hover{border-color:var(--gold-line);color:var(--ink)}
+#page-chart .tv-chip.on{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}
+/* Die Buehne traegt die Hoehe. Das Widget stellt sich auf autosize und
+   braucht dafuer einen Elternteil mit einer echten, nicht geerbten Hoehe —
+   sonst faellt es auf 0 zusammen und man sieht eine leere Flaeche. */
+#page-chart .tv-buehne{min-height:0;border:0.5px solid var(--rim);border-radius:12px;overflow:hidden;background:var(--layer)}
+#page-chart #tvBox{width:100%;height:100%}
+#page-chart .tv-hinweis:not(:empty){margin-top:10px;font-size:12.5px;color:var(--loss);line-height:1.6;max-width:70ch}
+body.light #page-chart .tv-chip{background:#fff;border-color:rgba(0,0,0,.12)}
+body.light #page-chart .tv-buehne{background:#fff;border-color:rgba(0,0,0,.09)}
+@media(max-width:760px){#page-chart{height:calc(100vh - 170px)}}
 #page-live .lc-tfrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
 #page-live .lc-tf{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink3);border-radius:8px;padding:7px 14px;font-family:var(--font-body);font-size:12.5px;cursor:pointer;transition:.15s}
 #page-live .lc-tf:hover{border-color:var(--gold-line);color:var(--ink)}
@@ -11100,7 +11118,16 @@ function _authAction(type) {
           </button>
           <div class="nav-group-drop" id="navgdrop-analysis">
             <button class="nav-item" onclick="nav('edgelab');closeNavGroups()" id="nav-edgelab">Edge Lab</button>
-            <button class="nav-item" onclick="nav('live');closeNavGroups()" id="nav-live">Live Chart</button>
+            <!-- Live-Chart vorerst ausgeblendet: es gibt keine kostenlose
+                 Kursquelle, die Spot-Gold in Echtzeit liefert, ohne dass der
+                 Nutzer seinen Broker verbindet. Der Code bleibt vollstaendig
+                 erhalten — diese eine Zeile ist der ganze Schalter.
+                 Wieder sichtbar machen: style-Attribut entfernen.
+                 Die Mobil-Navigation liest diese Liste und ueberspringt
+                 Eintraege mit display:none von selbst; eine zweite Stelle
+                 gibt es nicht. -->
+            <button class="nav-item" style="display:none" onclick="nav('live');closeNavGroups()" id="nav-live">Live Chart</button>
+            <button class="nav-item" onclick="nav('chart');closeNavGroups()" id="nav-chart">Chart</button>
             <button class="nav-item" onclick="nav('insights');closeNavGroups()" id="nav-insights">AI Insights</button>
             <button class="nav-item" onclick="nav('psychology');closeNavGroups()" id="nav-psychology">Psychology</button>
             <button class="nav-item" onclick="nav('setups');closeNavGroups()" id="nav-setups">Setups</button>
@@ -14410,7 +14437,7 @@ function nav(id) {
      leaves the app on a blank screen with no page active at all. */
   var pageEl = document.getElementById('page-'+id);
   if (!pageEl) {
-    var builders = { propfirm: window.ApexPropPlus, developer: window.ApexDev, edgelab: window.EdgeLab, live: window.ApexLive };
+    var builders = { propfirm: window.ApexPropPlus, developer: window.ApexDev, edgelab: window.EdgeLab, live: window.ApexLive, chart: window.ApexTV };
     var b = builders[id];
     if (b && typeof b.render === 'function') { try { b.render(); } catch (e) {} }
     pageEl = document.getElementById('page-'+id);
@@ -14420,6 +14447,7 @@ function nav(id) {
   var navEl = document.getElementById('nav-'+id);
   if (navEl) navEl.classList.add('active');
 
+  if (id === 'chart')       { if (window.ApexTV) ApexTV.oeffnen(); }
   if (id === 'overview')    { updateOverview(); initCharts(); }
   if (id === 'stats')       { updateStats(); }
   if (id === 'psychology')  { renderMistakeHeatmap(); renderStrengthsHeatmap(); renderStreakTracker(); renderTopMistakes(); renderEmotionPerformance(); updatePsychChart(); }
@@ -63693,6 +63721,163 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Deshalb kann diese Schicht das Verhalten des Replays nicht kaputt
      machen: sie fasst nur an, wo etwas steht.
 ══════════════════════════════════════ -->
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   Evidence — Chart  (window.ApexTV)
+   ──────────────────────────────────────────────────────────────────────
+   Der eingebettete TradingView-Chart. Bewusst als eigenes, duennes Modul
+   neben ApexLive, nicht an dessen Stelle: der eigene Chart bleibt damit
+   vollstaendig erhalten und ist eine einzige Zeile davon entfernt, wieder
+   sichtbar zu sein.
+
+   ── Warum ueberhaupt ──────────────────────────────────────────────────
+   Fuer Spot-Gold in Echtzeit gibt es keine kostenlose Quelle, die ohne
+   verbundenen Broker auskommt (gemessen: Yahoo kennt kein Spot-Gold,
+   Dukascopy hinkt bis zu 60 Minuten, der Datenanbieter rund 2 Minuten).
+   TradingView loest genau das — jedes Instrument, in Echtzeit, ohne dass
+   jemand etwas verbinden muss.
+
+   ── Was das kostet ────────────────────────────────────────────────────
+   Es ist ein Fenster in eine fremde Seite. Wir koennen NICHTS darauf
+   zeichnen und NICHTS daraus auslesen: kein eigener Indikator, keine
+   Zonen, keine KI, keine Trades. Wer das braucht, benutzt Replay und
+   Backtest — die laufen auf dem eigenen Chart-Motor weiter.
+
+   Die Marke von TradingView bleibt sichtbar. Das ist Bedingung ihrer
+   kostenlosen Einbettung und wird nicht entfernt.
+   ══════════════════════════════════════════════════════════════════════ */
+(function apexTV() {
+  var TV = { bereit: false, widget: null, sym: null, tf: null };
+  window.ApexTV = TV;
+
+  var SKRIPT = 'https://s3.tradingview.com/tv.js';
+
+  /* Kurzwahl fuer die Instrumente, die hier tatsaechlich gehandelt werden.
+     Der Symbolwechsler von TradingView kann alles Uebrige — diese Leiste
+     spart nur die haeufigsten drei Klicks. */
+  var SCHNELL = [
+    ['OANDA:XAUUSD',    'Gold'],
+    ['OANDA:NAS100USD', 'Nasdaq'],
+    ['OANDA:SPX500USD', 'S&P 500'],
+    ['OANDA:DE30EUR',   'DAX'],
+    ['OANDA:EURUSD',    'EURUSD'],
+    ['OANDA:GBPUSD',    'GBPUSD'],
+    ['BINANCE:BTCUSDT', 'Bitcoin'],
+  ];
+  var STD_SYM = 'OANDA:XAUUSD';
+  var STD_TF  = '15';
+
+  function merke(k, v) { try { localStorage.setItem('apexTV_' + k, v); } catch (e) {} }
+  function lies(k, std) {
+    try { return localStorage.getItem('apexTV_' + k) || std; } catch (e) { return std; }
+  }
+
+  /* Hell/Dunkel muss beim Bauen feststehen — das Widget laesst sich
+     nachtraeglich nicht umfaerben. Deshalb wird bei einem Themenwechsel
+     neu aufgebaut statt umgestellt. */
+  function thema() {
+    return document.body.classList.contains('light') ? 'light' : 'dark';
+  }
+
+  /* Das Skript erst laden, wenn die Seite zum ersten Mal geoeffnet wird.
+     Beim Start der App mitzuladen wuerde jeden Nutzer Ladezeit kosten,
+     auch den, der nie auf diese Seite geht. */
+  function skriptLaden() {
+    if (window.TradingView && window.TradingView.widget) return Promise.resolve();
+    if (TV._laden) return TV._laden;
+    TV._laden = new Promise(function (ok, fehl) {
+      var el = document.createElement('script');
+      el.src = SKRIPT; el.async = true;
+      el.onload  = function () { ok(); };
+      el.onerror = function () { TV._laden = null; fehl(new Error('Skript nicht erreichbar')); };
+      document.head.appendChild(el);
+    });
+    return TV._laden;
+  }
+
+  TV.render = function () {
+    if (document.getElementById('page-chart')) return;
+    var host = document.querySelector('.page') && document.querySelector('.page').parentNode;
+    if (!host) return;
+    var d = document.createElement('div');
+    d.className = 'page'; d.id = 'page-chart';
+    d.innerHTML =
+      '<div class="tv-kopf">' +
+        '<div class="tv-schnell" id="tvSchnell">' +
+          SCHNELL.map(function (x) {
+            return '<button class="tv-chip notranslate" translate="no" data-sym="' + x[0] + '">' +
+                   x[1] + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="tv-buehne"><div id="tvBox"></div></div>' +
+      '<div class="tv-hinweis" id="tvHinweis"></div>';
+    host.appendChild(d);
+
+    d.querySelector('#tvSchnell').addEventListener('click', function (e) {
+      var b = e.target.closest('.tv-chip');
+      if (b) TV.setSymbol(b.getAttribute('data-sym'));
+    });
+  };
+
+  TV.setSymbol = function (sym) {
+    TV.sym = sym; merke('sym', sym);
+    aktiv();
+    bauen();
+  };
+
+  function aktiv() {
+    var w = document.getElementById('tvSchnell');
+    if (!w) return;
+    w.querySelectorAll('.tv-chip').forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-sym') === TV.sym);
+    });
+  }
+
+  function bauen() {
+    var box = document.getElementById('tvBox');
+    if (!box) return;
+    var hin = document.getElementById('tvHinweis');
+    box.innerHTML = '';
+    skriptLaden().then(function () {
+      if (hin) hin.textContent = '';
+      TV.widget = new window.TradingView.widget({
+        container_id: 'tvBox',
+        symbol:   TV.sym || STD_SYM,
+        interval: TV.tf  || STD_TF,
+        autosize: true,
+        timezone: 'Etc/UTC',
+        theme:    thema(),
+        style:    '1',
+        locale:   'en',
+        /* Der eigene Symbolwechsler und die Werkzeugleiste von TradingView
+           bleiben an — das ist der ganze Grund, dieses Fenster zu benutzen. */
+        allow_symbol_change: true,
+        hide_side_toolbar:   false,
+        withdateranges:      true,
+        enable_publishing:   false,
+        save_image:          true,
+      });
+      TV._thema = thema();
+    }).catch(function () {
+      if (hin) hin.textContent =
+        'Der Chart von TradingView konnte nicht geladen werden. ' +
+        'Das passiert meist, wenn ein Werbe- oder Skriptblocker die Einbettung stoppt.';
+    });
+  }
+
+  /* Beim Oeffnen der Seite: nur neu bauen, wenn es noetig ist. Ein Neubau
+     wirft Zoom und Zeichnungen des Nutzers weg — das darf nicht bei jedem
+     Seitenwechsel passieren. */
+  TV.oeffnen = function () {
+    TV.sym = TV.sym || lies('sym', STD_SYM);
+    TV.tf  = TV.tf  || lies('tf',  STD_TF);
+    aktiv();
+    if (!TV.widget || TV._thema !== thema()) bauen();
+  };
+})();
+</script>
+
 <script>
 /* ══════════════════════════════════════════════════════════════════════
    Evidence — Live-Chart  (window.ApexLive)
