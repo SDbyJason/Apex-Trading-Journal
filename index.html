@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-03h';
+  window.APEX_BUILD = '2026-09-04a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7066,41 +7066,51 @@ body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
    suchen muss. */
 #page-chart .tv-daten{display:grid;grid-template-columns:1fr 320px;gap:12px;margin-top:12px;align-items:start}
 @media(max-width:980px){#page-chart .tv-daten{grid-template-columns:1fr}}
-#page-chart .tv-levels:not(:empty){max-height:280px;overflow-y:auto;border:0.5px solid var(--rim);border-radius:9px;padding:9px 10px;background:var(--elevated)}
-#page-chart .tv-lv-kopf{display:flex;align-items:center;gap:9px;margin-bottom:2px}
-#page-chart .tv-lv-auf{flex:0 0 auto;background:none;border:0;padding:0;cursor:pointer;color:var(--ink);font-family:var(--font-display);font-size:12px;display:flex;align-items:center;gap:6px}
+/* Keine Hoehendeckelung mehr: das Datenfenster steht unten ueber die volle
+   Breite, die Seite darf scrollen. Ein 280px-Kasten mit 465px Inhalt zwingt
+   zum Scrollen in einem Scroller — genau das, was hier stoerte. */
+#page-chart .tv-levels:not(:empty){border:0.5px solid var(--rim);border-radius:9px;padding:9px 10px;background:var(--elevated)}
+#page-chart .tv-lv-kopf{display:flex;align-items:center;gap:9px;margin-bottom:4px}
+#page-chart .tv-lv-auf{flex:0 0 auto;background:none;border:0;padding:0;cursor:pointer;color:var(--ink);font-family:var(--font-display);font-size:12.5px;display:flex;align-items:center;gap:6px}
 #page-chart .tv-lv-auf:before{content:'\25B8';color:var(--ink3);font-size:10px;transition:.15s}
 #page-chart .tv-lv-auf[aria-expanded="true"]:before{transform:rotate(90deg)}
-#page-chart .tv-lv-kurs{flex:1 1 auto;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+#page-chart .tv-lv-kurs{font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+#page-chart .tv-lv-alt{flex:1 1 auto;font-size:10px;color:var(--loss)}
+#page-chart .tv-lv-kopf .tv-lv-alt+.tv-lv-copy{margin-left:0}
+#page-chart .tv-lv-kurs+.tv-lv-copy{margin-left:auto}
 #page-chart .tv-lv-copy{background:none;border:0.5px solid var(--rim);color:var(--ink3);border-radius:6px;padding:3px 9px;font-size:10.5px;cursor:pointer}
 #page-chart .tv-lv-copy:hover{border-color:var(--gold-line);color:var(--gold)}
-#page-chart .tv-lv-body{margin-top:7px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 18px;align-items:start}
-#page-chart .tv-lv-tf{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:9px 0 3px;border-top:0.5px solid var(--rim);padding-top:7px}
-#page-chart .tv-lv-tf:first-child{border-top:0;margin-top:0;padding-top:0}
+/* EINE Spalte je Zeitrahmen. Vorher floss der Inhalt quer durch alle
+   Spalten, dadurch stand "Flip levels" neben den Zonen eines anderen
+   Zeitrahmens statt darunter. */
+#page-chart .tv-lv-spalten{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:0 20px}
+#page-chart .tv-lv-sp{min-width:0;border-left:0.5px solid var(--rim);padding-left:12px}
+#page-chart .tv-lv-sp:first-child{border-left:0;padding-left:0}
+#page-chart .tv-lv-tf{display:flex;align-items:baseline;gap:7px;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px}
 #page-chart .tv-lv-tf span{letter-spacing:0;text-transform:none;font-weight:400;color:var(--ink3);font-size:10px}
-#page-chart .tv-lv-z{display:flex;align-items:center;gap:8px;font-size:11.5px;line-height:1.9}
-#page-chart .tv-lv-z.aus{opacity:.45}
+#page-chart .tv-lv-z{display:flex;align-items:center;gap:7px;font-size:11.5px;line-height:1.85}
+#page-chart .tv-lv-z.gegen{opacity:.4}
 #page-chart .tv-lv-z.fein .tv-lv-p{color:var(--gold)}
 #page-chart .tv-lv-typ{flex:0 0 auto;width:3px;height:13px;border-radius:2px}
 #page-chart .tv-lv-typ.s{background:#e06a6a}
 #page-chart .tv-lv-typ.d{background:#4fb87a}
-#page-chart .tv-lv-p{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--ink);letter-spacing:-.01em}
-#page-chart .tv-lv-p i{font-style:normal;color:var(--ink3);margin:0 2px}
-#page-chart .tv-lv-kraft{flex:0 0 auto;width:26px;height:3px;border-radius:2px;background:var(--rim);overflow:hidden}
-#page-chart .tv-lv-kraft i{display:block;height:100%;background:var(--gold);border-radius:2px}
-#page-chart .tv-lv-m{flex:1 1 auto;min-width:0;font-size:10px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#page-chart .tv-lv-kern{font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums;padding-left:11px;line-height:1.5}
-#page-chart .tv-lv-flip{margin-top:5px;padding-top:5px;border-top:0.5px dashed var(--rim)}
-#page-chart .tv-lv-fltitel{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:1px}
-#page-chart .tv-lv-z.flip .tv-lv-p{color:var(--ink2)}
 #page-chart .tv-lv-typ.hohl{background:none;box-shadow:inset 0 0 0 1.5px currentColor}
 #page-chart .tv-lv-typ.s.hohl{color:#e06a6a}
 #page-chart .tv-lv-typ.d.hohl{color:#4fb87a}
-#page-chart .tv-lv-sw{font-size:10px;color:var(--ink3);font-variant-numeric:tabular-nums;margin-top:3px}
-#page-chart .tv-lv-leer{font-size:10px;color:var(--ink3);line-height:1.6}
-#page-chart .tv-lv-fein{grid-column:1/-1;border:0.5px solid var(--gold-line);border-radius:8px;padding:8px 10px;margin-bottom:4px;background:var(--gold-dim)}
+#page-chart .tv-lv-p{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--ink)}
+#page-chart .tv-lv-p i{font-style:normal;color:var(--ink3);margin:0 1px}
+#page-chart .tv-lv-kraft{flex:0 0 auto;width:24px;height:3px;border-radius:2px;background:var(--rim);overflow:hidden}
+#page-chart .tv-lv-kraft i{display:block;height:100%;background:var(--gold);border-radius:2px}
+#page-chart .tv-lv-m{flex:1 1 auto;min-width:0;font-size:10px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-chart .tv-lv-flip{margin-top:6px;padding-top:5px;border-top:0.5px dashed var(--rim)}
+#page-chart .tv-lv-fltitel{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:1px}
+#page-chart .tv-lv-z.flip .tv-lv-p{color:var(--ink2)}
+#page-chart .tv-lv-sw{font-size:10px;color:var(--ink3);font-variant-numeric:tabular-nums;margin-top:6px}
+#page-chart .tv-lv-leer{font-size:10px;color:var(--ink3);line-height:1.8}
+#page-chart .tv-lv-fein{margin-top:10px;border:0.5px solid var(--gold-line);border-radius:8px;padding:8px 10px;background:var(--gold-dim)}
 #page-chart .tv-lv-fkopf{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);font-weight:700}
 #page-chart .tv-lv-fin{font-size:10.5px;color:var(--ink3);margin:2px 0 4px;font-variant-numeric:tabular-nums}
+#page-chart .tv-lv-hinweis{margin-top:9px;font-size:10px;color:var(--ink3);line-height:1.5}
 body.light #page-chart .tv-levels:not(:empty){background:#fff;border-color:rgba(0,0,0,.09)}
 #page-chart .tv-ki-out{flex:1 1 auto;overflow-y:auto;min-height:0;font-size:12.5px;line-height:1.65;color:var(--ink2)}
 #page-chart .tv-ki-antwort{white-space:normal;margin-bottom:11px}
@@ -64081,16 +64091,32 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Nutzer arbeitet: ein Neuaufbau wuerde seine Zeichnungen wegwerfen. */
   function beobachten() {
     if (TV._beob) return;
-    TV._beob = setInterval(function () {
+    var tick = function () {
       var seite = document.getElementById('page-chart');
       if (!seite || !seite.classList.contains('active')) return;
       symbolJetzt().then(function (info) {
         if (!info) return;
+        var gewechselt = TV.sym !== info.voll;
         TV.sym = info.voll;
         merke('sym', info.voll);
         kopfAnzeigen(info);
+        if (gewechselt || !TV._levels) {
+          /* Die Level des vorigen Instruments stehenzulassen ist schlimmer
+             als keine: sie sehen gueltig aus und gehoeren woandershin.
+             Und beim ERSTEN Durchlauf greift derselbe Weg — beim Oeffnen der
+             Seite ist das Widget noch nicht bereit, dort lief die Abfrage in
+             ihre Zeitgrenze und die gespeicherten Level blieben liegen. */
+          if (gewechselt) { TV._fein = null; setupZeigen(null); }
+          var Lg = levelAufraeumen(levelLaden(info.name), TV.kurs && TV.kurs.preis);
+          if (Lg || gewechselt) { TV._levels = Lg; levelZeigen(); }
+        }
       });
-    }, 8000);
+    };
+    TV._beob = setInterval(tick, 8000);
+    /* Einmal frueh nachfassen, damit gespeicherte Level nicht acht Sekunden
+       auf sich warten lassen. */
+    setTimeout(tick, 1500);
+    setTimeout(tick, 4000);
   }
 
   function bauen() {
@@ -65138,6 +65164,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        dastehen, wenn das KI-Guthaben leer ist. */
     TV._levels = { titel: anzeige, sym: symName || anzeige, kurs: kurs,
                    stellen: stellen, ebenen: ebenen };
+    function L_TS() { TV._levels.ts = Date.now(); }
     /* Rangfolge erst JETZT, wenn alle Zeitrahmen stehen: die Bestaetigung
        durch einen hoeheren Zeitrahmen laesst sich nicht bewerten, solange
        man ihn noch nicht gerechnet hat. */
@@ -65174,7 +65201,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
     /* Erst JETZT zeichnen: vorher stand die Staerke noch nicht fest und die
        Balken fehlten in der Liste. */
+    L_TS();
     levelZeigen();
+    levelSpeichern();
 
     if (fein && fein.ziel) z.push(feinBlock(fein.ziel, fein.daten, stellen, fein.mStop));
     z.push(newsBlock(kalender, symName || anzeige));
@@ -65657,6 +65686,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   TV.auffrischen = zonenAuffrischen;
   TV.setupLesen = setupLesen;
   TV.setupZeigen = setupZeigen;
+  TV.neuRechnen = function () { analysieren(); };
 
   /* ── Level zum Einzeichnen ────────────────────────────────────────
      Zeichnen koennen wir im TradingView-Chart nicht — er liegt auf fremder
@@ -65706,6 +65736,66 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return z.join('\n');
   }
 
+  /* Gespeicherte Level je Instrument. Sie sollen nicht verschwinden, nur
+     weil man die Seite neu laedt oder kurz woanders war — und sie sollen
+     NICHT vom vorigen Instrument stehenbleiben, wenn man im Chart wechselt.
+     Beides war vorher falsch. */
+  function levelSpeichern() {
+    var L = TV._levels;
+    if (!L || !L.sym) return;
+    try {
+      /* Die Kerzen NICHT mitspeichern — das sind 900 Werte je Zeitrahmen und
+         sie werden beim naechsten Rechnen ohnehin neu geholt. */
+      var schlank = {
+        titel: L.titel, sym: L.sym, kurs: L.kurs, stellen: L.stellen, ts: Date.now(),
+        ebenen: (L.ebenen || []).map(function (e) {
+          return { tf: e.tf, atr: e.atr, stellen: e.stellen, zonen: e.zonen,
+                   flips: e.flips, hoch: e.hoch, tief: e.tief };
+        }),
+      };
+      localStorage.setItem('apexTV_lv_' + L.sym, JSON.stringify(schlank));
+    } catch (e) { /* voller Speicher darf die Analyse nicht aufhalten */ }
+  }
+
+  function levelLaden(sym) {
+    try {
+      var roh = localStorage.getItem('apexTV_lv_' + sym);
+      if (!roh) return null;
+      var L = JSON.parse(roh);
+      return (L && L.ebenen && L.ebenen.length) ? L : null;
+    } catch (e) { return null; }
+  }
+
+  /* Was der Kurs durchlaufen hat, ist keine Zone mehr — auch wenn sie aus
+     dem Speicher kommt. So verschwinden alte Level von selbst, ohne auf die
+     naechste Berechnung zu warten. */
+  function levelAufraeumen(L, kurs) {
+    if (!L || !isFinite(kurs)) return L;
+    (L.ebenen || []).forEach(function (e) {
+      e.zonen = (e.zonen || []).filter(function (g) {
+        return g.supply ? (kurs < g.top) : (kurs > g.bot);
+      });
+      e.flips = (e.flips || []).filter(function (g) {
+        return g.supply ? (kurs < g.bot) : (kurs > g.top);
+      });
+    });
+    return L;
+  }
+
+  /* Richtung, die das Playbook ueberhaupt zulaesst. "Only long" heisst: eine
+     Supply-Zone ist fuer diesen Nutzer kein Einstieg, sondern hoechstens ein
+     Ziel — und gehoert nicht gleichwertig in die Liste. */
+  function pbRichtung() {
+    var sel = document.getElementById('tvKiPb');
+    var pb = (window.playbooks || []).filter(function (p) {
+      return p.id === (sel && sel.value); })[0];
+    if (!pb) return null;
+    var t = ((pb.rules || '') + ' ' + (pb.checklist || []).join(' ')).toLowerCase();
+    if (/only long|nur long|longs only|long only/.test(t)) return { lang: true, name: pb.name };
+    if (/only short|nur short|shorts only|short only/.test(t)) return { lang: false, name: pb.name };
+    return null;
+  }
+
   function levelZeigen() {
     var el = document.getElementById('tvLevels');
     var L = TV._levels;
@@ -65714,107 +65804,106 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
     var offen = TV._levelsOffen !== false;
     var n = function (x) { return nf(x, L.stellen); };
-    var kurs = L.kurs;
+    var rich = pbRichtung();
 
+    var alterMin = L.ts ? Math.round((Date.now() - L.ts) / 60000) : 0;
     var h = '<div class="tv-lv-kopf">' +
       '<button class="tv-lv-auf" id="tvLvAuf" aria-expanded="' + (offen ? 'true' : 'false') +
         '"><b>Levels to draw</b></button>' +
-      '<span class="tv-lv-kurs notranslate" translate="no">' + n(kurs) + '</span>' +
+      '<span class="tv-lv-kurs notranslate" translate="no">' + n(L.kurs) + '</span>' +
+      (alterMin >= 2 ? '<span class="tv-lv-alt">' + alterMin + ' min old</span>' : '') +
+      '<button id="tvLvNeu" class="tv-lv-copy" title="Recalculate">↻</button>' +
       '<button id="tvLvCopy" class="tv-lv-copy">Copy</button></div>';
 
     if (offen) {
-      h += '<div class="tv-lv-body">';
+      h += '<div class="tv-lv-spalten">';
+      L.ebenen.forEach(function (e) {
+        var zonen = (e.zonen || []).slice(0, 5);
+        var flips = (e.flips || []);
+        if (!zonen.length && !flips.length && !isFinite(e.hoch) && !isFinite(e.tief)) return;
 
-      /* Der Feineinstieg zuerst: er beantwortet die Frage, die man stellt,
-         waehrend man an der Zone steht. */
-      var F = TV._fein;
-      if (F && F.ziel) {
-        var pz = F.ziel.z;
-        h += '<div class="tv-lv-fein">' +
-          '<div class="tv-lv-fkopf">Finer entry · ' + F.tf + '</div>' +
-          '<div class="tv-lv-fin notranslate" translate="no">in ' +
-            (pz.supply ? 'supply ' : 'demand ') + n(pz.bot) + '–' + n(pz.top) + '</div>';
-        if (F.daten.sub && F.daten.sub.length) {
-          F.daten.sub.forEach(function (f) {
-            h += zeile(f.supply, f.bot, f.top, 'width ' + n(f.top - f.bot) +
-                 (f.retests ? ' · ' + f.retests + 'r' : ''), false, true);
+        h += '<div class="tv-lv-sp">' +
+             '<div class="tv-lv-tf">' + e.tf +
+               (isFinite(e.atr) ? '<span>ATR ' + n(e.atr) + '</span>' : '') + '</div>';
+
+        if (zonen.length) {
+          zonen.forEach(function (g) {
+            var gegen = rich && (rich.lang !== !g.supply);
+            var meta = (g.teile && g.teile.length > 1 ? g.teile.length + '× · ' : '') +
+                       (g.retests ? g.retests + 'r · ' : '') + n(g.ab) + ' away';
+            h += zeile(g.supply, g.bot, g.top, meta,
+                       g.staerke ? g.staerke.punkte : null, gegen);
           });
         } else {
-          h += '<div class="tv-lv-leer">no tighter zone inside it yet</div>';
+          h += '<div class="tv-lv-leer">no intact zones here</div>';
         }
-        if (isFinite(F.daten.tiefstes))
-          h += '<div class="tv-lv-leer notranslate" translate="no">reached ' +
-               n(F.daten.tiefstes) + ' – ' + n(F.daten.hoechstes) + ' inside</div>';
-        h += '</div>';
-      }
 
-      L.ebenen.forEach(function (e) {
-        var hatWas = (e.zonen && e.zonen.length) || (e.flips && e.flips.length) ||
-                     isFinite(e.hoch) || isFinite(e.tief);
-        if (!hatWas) return;
-        h += '<div class="tv-lv-tf">' + e.tf +
-             (isFinite(e.atr) ? '<span>ATR ' + n(e.atr) + '</span>' : '') + '</div>';
-        (e.zonen || []).slice(0, 5).forEach(function (g) {
-          var meta = (g.teile && g.teile.length > 1 ? g.teile.length + ' merged · ' : '') +
-                     (g.retests ? g.retests + 'r · ' : '') +
-                     n(g.ab) + ' away';
-          var p = g.staerke ? g.staerke.punkte : null;
-          h += zeile(g.supply, g.bot, g.top, meta, false, false, p);
-          /* Der Kern nur, wenn der Bereich wirklich aus mehreren besteht —
-             sonst waere es dieselbe Zahl zweimal. */
-          if (g.kern && g.teile && g.teile.length > 1)
-            h += '<div class="tv-lv-kern notranslate" translate="no">↳ ' +
-                 n(g.kern.bot) + '–' + n(g.kern.top) + '</div>';
-        });
-        if (e.flips && e.flips.length) {
-          h += '<div class="tv-lv-flip">' +
-               '<div class="tv-lv-fltitel">Flip levels</div>';
-          e.flips.forEach(function (g) {
-            var war = g.teile[0] && g.teile[0].war;
+        if (flips.length) {
+          h += '<div class="tv-lv-flip"><div class="tv-lv-fltitel">Flip levels</div>';
+          flips.forEach(function (g) {
+            var war = g.teile && g.teile[0] && g.teile[0].war;
             h += '<div class="tv-lv-z flip">' +
               '<span class="tv-lv-typ ' + (g.supply ? 's' : 'd') + ' hohl"></span>' +
-              '<span class="tv-lv-p notranslate" translate="no">' + n(g.bot) +
-                '<i>–</i>' + n(g.top) + '</span>' +
-              '<span class="tv-lv-m">was ' + war + ' · ' + n(g.ab) + ' away' +
-                (isFinite(g.juengste) ? ' · broke ' + g.juengste + ' bars ago' : '') +
-              '</span></div>';
+              '<span class="tv-lv-p notranslate" translate="no">' + n(g.bot) + '<i>–</i>' +
+                n(g.top) + '</span>' +
+              '<span class="tv-lv-m">was ' + war + ' · ' + n(g.ab) + '</span></div>';
           });
           h += '</div>';
         }
+
         var sw = [];
         if (isFinite(e.hoch)) sw.push('high ' + n(e.hoch));
         if (isFinite(e.tief)) sw.push('low ' + n(e.tief));
         if (sw.length)
           h += '<div class="tv-lv-sw notranslate" translate="no">swing ' + sw.join(' · ') + '</div>';
+        h += '</div>';
       });
       h += '</div>';
+
+      /* Der Feineinstieg gehoert unter die Spalten, nicht in eine davon —
+         er bezieht sich auf genau eine Zone und wuerde sonst so aussehen,
+         als gehoere er zum ganzen Zeitrahmen. */
+      var F = TV._fein;
+      if (F && F.ziel) {
+        var pz = F.ziel.z;
+        h += '<div class="tv-lv-fein"><div class="tv-lv-fkopf">Finer entry · ' + F.tf +
+             '</div><div class="tv-lv-fin notranslate" translate="no">in ' +
+             (pz.supply ? 'supply ' : 'demand ') + n(pz.bot) + '–' + n(pz.top) + '</div>';
+        if (F.daten.sub && F.daten.sub.length)
+          F.daten.sub.forEach(function (f) {
+            h += zeile(f.supply, f.bot, f.top, 'width ' + n(f.top - f.bot), null, false, true);
+          });
+        else h += '<div class="tv-lv-leer">no tighter zone inside it yet</div>';
+        h += '</div>';
+      }
+
+      if (rich)
+        h += '<div class="tv-lv-hinweis">Zones against your playbook &ldquo;' +
+             escHtml(rich.name) + '&rdquo; (' + (rich.lang ? 'long only' : 'short only') +
+             ') are dimmed &mdash; they are targets, not entries.</div>';
     }
 
     el.innerHTML = h;
 
     var auf = document.getElementById('tvLvAuf');
     if (auf) auf.onclick = function () { TV._levelsOffen = !offen; levelZeigen(); };
+    var neu = document.getElementById('tvLvNeu');
+    if (neu) neu.onclick = function () { if (TV.neuRechnen) TV.neuRechnen(); };
     var k = document.getElementById('tvLvCopy');
     if (k) k.onclick = function () {
       var t = levelText();
       if (navigator.clipboard && navigator.clipboard.writeText)
         navigator.clipboard.writeText(t).then(function () {
-          k.textContent = 'Copied'; setTimeout(function () { k.textContent = 'Copy'; }, 1600);
+          k.textContent = 'Copied'; setTimeout(function () { k.textContent = '↻ Copy'; }, 1600);
         }).catch(function () { notfall(t, k); });
       else notfall(t, k);
     };
 
-    function zeile(supply, bot, top, meta, gedaempft, fein, punkte) {
-      /* Eine Zeile je Bereich: Seite als Farbfleck, Spanne monospaced damit
-         die Ziffern untereinander stehen, Rest klein daneben. Die Staerke
-         als kurzer Balken — auf einen Blick vergleichbar, ohne Zahlen zu
-         lesen. */
-      var kraft = '';
-      if (punkte != null) {
-        kraft = '<span class="tv-lv-kraft" title="strength ' + punkte + '/100">' +
-                '<i style="width:' + Math.max(4, Math.min(100, punkte)) + '%"></i></span>';
-      }
-      return '<div class="tv-lv-z' + (gedaempft ? ' aus' : '') + (fein ? ' fein' : '') + '">' +
+    function zeile(supply, bot, top, meta, punkte, gegen, fein) {
+      var kraft = punkte != null
+        ? '<span class="tv-lv-kraft" title="strength ' + punkte + '/100"><i style="width:' +
+          Math.max(4, Math.min(100, punkte)) + '%"></i></span>' : '';
+      return '<div class="tv-lv-z' + (gegen ? ' gegen' : '') + (fein ? ' fein' : '') + '">' +
         '<span class="tv-lv-typ ' + (supply ? 's' : 'd') + '"></span>' +
         '<span class="tv-lv-p notranslate" translate="no">' + n(bot) + '<i>–</i>' +
           n(top) + '</span>' + kraft +
@@ -66171,6 +66260,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     kiZeigen(lies('ki', '1') === '1');
     playbooksFuellen();
     indFuellen();
+    /* Gespeicherte Level holt beobachten() nach, sobald das Widget antwortet. */
     beobachten();
     wachtSchalten(lies('wacht', '0') === '1');
     /* Neue Zonen entstehen nur mit neuen Kerzen. Der Takt fragt darum selten

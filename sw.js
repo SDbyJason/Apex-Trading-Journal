@@ -12,7 +12,7 @@
    apex-replay / apex-replay-ui). Static assets are served cache-first, so
    without this bump existing installs would keep serving the old files
    forever and the new tab would look broken. */
-const CACHE = 'evidence-v54';
+const CACHE = 'evidence-v55';
 
 /* Alle Pfade relativ zum Ablageort dieser Datei — NICHT ab "/".
    Auf GitHub Pages liegt die App unter /<repo>/, dort zeigt "/" auf
