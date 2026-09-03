@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04f';
+  window.APEX_BUILD = '2026-09-04g';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -14747,13 +14747,17 @@ function playbookStats(pbId){
   function laden() {
     try {
       var r = localStorage.getItem('apexPbRecaps_' + (window.currentUID || ''));
-      PF.recaps = r ? (JSON.parse(r) || []) : [];
-    } catch (e) { PF.recaps = []; }
+      var o = r ? JSON.parse(r) : null;
+      /* Frueher wurde nur ein Array gespeichert — altes Format weiter lesen,
+         damit niemand seine gesammelten Rueckblicke verliert. */
+      if (Array.isArray(o)) { PF.recaps = o; PF.quelle = ''; }
+      else { PF.recaps = (o && o.recaps) || []; PF.quelle = (o && o.quelle) || ''; }
+    } catch (e) { PF.recaps = []; PF.quelle = ''; }
   }
   function sichern() {
     try {
       localStorage.setItem('apexPbRecaps_' + (window.currentUID || ''),
-                           JSON.stringify(PF.recaps));
+                           JSON.stringify({ recaps: PF.recaps, quelle: PF.quelle || '' }));
     } catch (e) {}
   }
 
@@ -14793,11 +14797,17 @@ function playbookStats(pbId){
 
     var h = '<div class="glass-card" style="margin-bottom:1.5rem">' +
       '<div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">' +
-        'Find the strategy in your trades</div>' +
+        'Find the strategy in trade recaps</div>' +
       '<p style="font-size:12.5px;color:var(--ink3);line-height:1.6;margin:0 0 14px;max-width:70ch">' +
-        'Add several trade recaps &mdash; from your journal or pasted in &mdash; and the AI ' +
-        'works out what they have in common: the setup, what you wait for, where your stop ' +
-        'and target go. The result becomes a playbook you can edit.</p>';
+        'Works with anyone&rsquo;s trades &mdash; your own, or a trader you are studying. ' +
+        'Add several recaps and the AI works out what they have in common: the setup, what ' +
+        'has to line up before the entry, where the stop and target go. The result becomes ' +
+        'a playbook you can edit.</p>' +
+      '<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">' +
+        '<input id="pbf-quelle" class="tc-input" style="flex:1 1 260px;min-width:0" ' +
+          'placeholder="Whose trades are these? (optional — e.g. a trader you follow)" ' +
+          'value="' + esc(PF.quelle || '') + '">' +
+      '</div>';
 
     if (trades.length) {
       h += '<div class="calc-label">Add from your journal</div>' +
@@ -14817,12 +14827,15 @@ function playbookStats(pbId){
         'No journal trades with notes yet &mdash; paste your recaps below instead.</div>';
     }
 
-    h += '<div class="calc-label">Or paste a recap</div>' +
-      '<textarea id="pbf-text" rows="3" placeholder="What was the setup, why did you take it, ' +
-        'where was your stop and target, how did you manage it?" ' +
+    h += '<div class="calc-label">Paste recaps &mdash; several at once is fine</div>' +
+      '<div style="font-size:10.5px;color:var(--ink3);line-height:1.5;margin:3px 0 4px">' +
+        'Separate them with a blank line or a line containing only &mdash;&mdash;&mdash;. ' +
+        'Everything in one block is read as one recap.</div>' +
+      '<textarea id="pbf-text" rows="5" placeholder="What was the setup, why was it taken, ' +
+        'where were stop and target, how was it managed?&#10;&#10;---&#10;&#10;Next recap…" ' +
         'style="width:100%;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:10px;color:var(--ink);padding:10px 12px;font-family:inherit;font-size:13px;line-height:1.6;resize:vertical;margin-top:4px"></textarea>' +
       '<div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">' +
-        '<button id="pbf-add-text" class="tc-btn">＋ Add recap</button>' +
+        '<button id="pbf-add-text" class="tc-btn">＋ Add</button>' +
         '<span style="font-size:12px;color:' + (n >= MIN ? 'var(--ink3)' : 'var(--loss)') + '">' +
           n + ' added' + (n < MIN ? ' · need at least ' + MIN : '') + '</span>' +
       '</div>';
@@ -14865,6 +14878,8 @@ function playbookStats(pbId){
       PF.recaps.push(tradeText(t));
       sichern(); zeichnen();
     };
+    var q = document.getElementById('pbf-quelle');
+    if (q) q.onchange = function () { PF.quelle = this.value.trim().slice(0, 60); sichern(); };
     var ax = document.getElementById('pbf-add-text');
     if (ax) ax.onclick = function () {
       var el = document.getElementById('pbf-text');
@@ -14873,8 +14888,12 @@ function playbookStats(pbId){
         if (typeof toast === 'function') toast('Please write a bit more about the trade');
         return;
       }
-      PF.recaps.push(t); el.value = '';
+      var teile = teilen(t);
+      teile.forEach(function (x) { PF.recaps.push(x); });
+      el.value = '';
       sichern(); zeichnen();
+      if (typeof toast === 'function' && teile.length > 1)
+        toast('Added ' + teile.length + ' recaps');
     };
     host.querySelectorAll('[data-weg]').forEach(function (b) {
       b.onclick = function () {
@@ -14888,9 +14907,28 @@ function playbookStats(pbId){
     if (go && !go.disabled) go.onclick = suchen;
   }
 
+  /* Mehrere Rueckblicke in einem Rutsch. Zuerst an ausdruecklichen Trennern,
+     sonst an Leerzeilen — wer viele Recaps von woanders kopiert, hat sie
+     meist so getrennt. Kurze Bruchstuecke werden verworfen: eine Zeile
+     "Screenshot" ist kein Rueckblick. */
+  function teilen(text) {
+    var t = String(text || '').replace(/\r/g, '');
+    var stuecke;
+    if (/^\s*[-=_*]{3,}\s*$/m.test(t)) stuecke = t.split(/^\s*[-=_*]{3,}\s*$/m);
+    else if (/\n\s*\n/.test(t))        stuecke = t.split(/\n\s*\n+/);
+    else                                stuecke = [t];
+    var raus = stuecke.map(function (x) { return x.trim(); })
+                      .filter(function (x) { return x.length >= 30; });
+    /* Ergibt das Zerlegen nichts Brauchbares, lieber den ganzen Text als
+       einen Rueckblick nehmen als gar nichts. */
+    return raus.length ? raus : [t.trim()];
+  }
+
   var ANWEISUNG =
-    'Below are several trade recaps written by one trader. Work out the strategy they ' +
-    'have in COMMON — not a summary of each trade.\n\n' +
+    'Below are several trade recaps from ONE trader — they may or may not be the person ' +
+    'using this app. Work out the strategy the recaps have in COMMON, not a summary of ' +
+    'each trade. Write about the trader in the third person where it reads naturally, and ' +
+    'do not assume anything about the reader.\n\n' +
     'Look for: what market and time they trade, what has to be true before they enter, ' +
     'what they wait for as confirmation, where the stop goes, how the target is chosen, ' +
     'and how they manage the position.\n\n' +
@@ -14943,9 +14981,12 @@ function playbookStats(pbId){
   function suchen() {
     if (PF.laeuft || PF.recaps.length < MIN) return;
     PF.laeuft = true; PF.ergebnis = null; zeichnen();
-    var inhalt = ANWEISUNG + '\n\n---\n' + PF.recaps.map(function (r, i) {
-      return 'RECAP ' + (i + 1) + ':\n' + r;
-    }).join('\n\n');
+    var inhalt = ANWEISUNG +
+      (PF.quelle ? '\n\nThese recaps are from: ' + PF.quelle +
+                   '. Name the playbook after their approach, not after them.' : '') +
+      '\n\n---\n' + PF.recaps.map(function (r, i) {
+        return 'RECAP ' + (i + 1) + ':\n' + r;
+      }).join('\n\n');
 
     var url = (typeof COACH_WORKER_URL !== 'undefined') ? COACH_WORKER_URL : null;
     if (!url) { PF.laeuft = false; zeichnen(); return; }
