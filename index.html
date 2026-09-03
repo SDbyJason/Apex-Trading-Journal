@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-02w';
+  window.APEX_BUILD = '2026-09-03c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7030,10 +7030,20 @@ body.light #page-chart .tv-kitoggle{background:#fff;border-color:rgba(0,0,0,.12)
 /* Chart und KI nebeneinander. Der KI-Bereich hat eine feste Breite, damit
    der Chart den ganzen Rest bekommt — er ist die Hauptsache. */
 #page-chart .tv-haupt{display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start}
-#page-chart .tv-ki{display:flex;flex-direction:column;gap:9px;height:min(72vh,820px);min-height:360px;border:0.5px solid var(--rim);border-radius:12px;background:var(--layer);padding:13px}
+#page-chart .tv-ki{display:flex;flex-direction:column;gap:9px;height:min(56vh,660px);min-height:320px;border:0.5px solid var(--rim);border-radius:12px;background:var(--layer);padding:13px}
 #page-chart .tv-ki-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px}
 #page-chart .tv-ki-kopf b{font-family:var(--font-display);font-size:13.5px;color:var(--ink)}
 #page-chart .tv-ki-kopf select{background:var(--elevated);border:0.5px solid var(--rim);border-radius:7px;color:var(--ink);padding:5px 8px;font-family:var(--font-body);font-size:12px}
+#page-chart .tv-ind{flex:0 0 auto;border:0.5px solid var(--rim);border-radius:8px;background:var(--elevated)}
+#page-chart .tv-ind summary{cursor:pointer;padding:7px 10px;font-size:11.5px;color:var(--ink2);list-style:none}
+#page-chart .tv-ind summary::-webkit-details-marker{display:none}
+#page-chart .tv-ind summary:before{content:'\25B8';display:inline-block;margin-right:6px;transition:.15s;color:var(--ink3)}
+#page-chart .tv-ind[open] summary:before{transform:rotate(90deg)}
+#page-chart .tv-ind-liste{max-height:190px;overflow-y:auto;padding:0 10px 9px}
+#page-chart .tv-ind-g{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:7px 0 3px}
+#page-chart .tv-ind-i{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);padding:1px 0;cursor:pointer}
+#page-chart .tv-ind-i input{accent-color:var(--gold);margin:0}
+body.light #page-chart .tv-ind{background:#fff;border-color:rgba(0,0,0,.12)}
 #page-chart .tv-ki-pb{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}
 #page-chart .tv-ki-pb select{background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:7px 9px;font-family:var(--font-body);font-size:12.5px;width:100%}
 #page-chart .tv-ki-pb select:focus{outline:none;border-color:var(--gold-line)}
@@ -7051,11 +7061,17 @@ body.light #page-chart .tv-ki-pb select{background:#fff;border-color:rgba(0,0,0,
 #page-chart .tv-wacht-st:not(:empty){flex:0 0 auto;font-size:10.5px;line-height:1.45;color:var(--ink3)}
 #page-chart .tv-ki-alarm{background:var(--gold-dim);border:0.5px solid var(--gold-line);border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:11.5px;color:var(--gold);font-weight:600}
 body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
-#page-chart .tv-levels:not(:empty){flex:0 0 auto;max-height:34%;overflow-y:auto;border:0.5px solid var(--rim);border-radius:9px;padding:9px 10px;background:var(--elevated)}
+/* Datenfenster unter Chart und Analyse, ueber die volle Breite. Die Zahlen
+   zum Handeln sollen nicht in einer schmalen Spalte stehen, in der man sie
+   suchen muss. */
+#page-chart .tv-daten{display:grid;grid-template-columns:1fr 320px;gap:12px;margin-top:12px;align-items:start}
+@media(max-width:980px){#page-chart .tv-daten{grid-template-columns:1fr}}
+#page-chart .tv-levels:not(:empty){max-height:280px;overflow-y:auto;border:0.5px solid var(--rim);border-radius:9px;padding:9px 10px;background:var(--elevated)}
 #page-chart .tv-lv-kopf{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
 #page-chart .tv-lv-kopf b{font-family:var(--font-display);font-size:12px;color:var(--ink)}
 #page-chart .tv-lv-copy{background:none;border:0.5px solid var(--rim);color:var(--ink3);border-radius:6px;padding:3px 9px;font-size:10.5px;cursor:pointer}
 #page-chart .tv-lv-copy:hover{border-color:var(--gold-line);color:var(--gold)}
+#page-chart .tv-lv-gitter{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 16px}
 #page-chart .tv-lv-tf{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:8px 0 3px}
 #page-chart .tv-lv-z{display:flex;align-items:center;gap:6px;font-size:11.5px;line-height:1.7}
 #page-chart .tv-lv-z.aus{opacity:.5}
@@ -7071,11 +7087,12 @@ body.light #page-chart .tv-levels:not(:empty){background:#fff;border-color:rgba(
 #page-chart .tv-ki-out{flex:1 1 auto;overflow-y:auto;min-height:0;font-size:12.5px;line-height:1.65;color:var(--ink2)}
 #page-chart .tv-ki-antwort{white-space:normal;margin-bottom:11px}
 #page-chart .tv-ki-frage{background:var(--elevated);border:0.5px solid var(--rim);border-radius:9px;padding:8px 11px;margin:0 0 9px auto;max-width:88%;color:var(--ink);font-size:12px}
-#page-chart .tv-setup:not(:empty){flex:0 0 auto;border:0.5px solid var(--gold-line);border-radius:9px;padding:9px 10px;background:var(--gold-dim)}
+#page-chart .tv-setup:not(:empty){border:0.5px solid var(--gold-line);border-radius:9px;padding:9px 10px;background:var(--gold-dim)}
 #page-chart .tv-su-kopf{display:flex;align-items:center;gap:7px;margin-bottom:6px}
 #page-chart .tv-su-kopf b{font-family:var(--font-display);font-size:12px;color:var(--ink)}
 #page-chart .tv-su-dir{flex:1 1 auto;font-size:9.5px;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
 #page-chart .tv-su-dir.l{color:#4fb87a}
+#page-chart .tv-su-dir.k{color:var(--ink3)}
 #page-chart .tv-su-dir.s{color:#e06a6a}
 #page-chart .tv-su-z{font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums;margin-bottom:5px}
 #page-chart .tv-su-r{display:flex;align-items:baseline;gap:7px;font-size:11.5px;line-height:1.75}
@@ -7108,7 +7125,7 @@ body.light #page-chart .tv-ki{background:#fff;border-color:rgba(0,0,0,.09)}
   #page-chart .tv-ki{height:auto;min-height:0}
   #page-chart .tv-ki-out{max-height:none;overflow-y:visible}
 }
-#page-chart .tv-buehne{height:min(72vh,820px);min-height:360px;border:0.5px solid var(--rim);border-radius:12px;overflow:hidden;background:var(--layer)}
+#page-chart .tv-buehne{height:min(56vh,660px);min-height:320px;border:0.5px solid var(--rim);border-radius:12px;overflow:hidden;background:var(--layer)}
 #page-chart #tvBox{width:100%;height:100%}
 #page-chart .tv-hinweis:not(:empty){margin-top:10px;font-size:12.5px;color:var(--loss);line-height:1.6;max-width:70ch}
 body.light #page-chart .tv-chip{background:#fff;border-color:rgba(0,0,0,.12)}
@@ -63907,6 +63924,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
               '<option value="4h">H4</option>' +
             '</select>' +
           '</div>' +
+          '<details class="tv-ind" id="tvInd">' +
+            '<summary id="tvIndKopf">Indicators the AI sees</summary>' +
+            '<div class="tv-ind-liste" id="tvIndListe"></div>' +
+          '</details>' +
           '<div class="tv-ki-pb">' +
             '<select id="tvKiPb" aria-label="Playbook"></select>' +
             '<span class="tv-ki-pbhint">Your rules from <b>Analysis &rsaquo; Playbooks</b> ' +
@@ -63916,17 +63937,22 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           '<button class="tv-wacht" id="tvWachtBtn" aria-pressed="false">' +
             'Watch for setups</button>' +
           '<div class="tv-wacht-st" id="tvWachtStatus"></div>' +
-          '<div class="tv-levels" id="tvLevels"></div>' +
           '<div class="tv-ki-out" id="tvKiOut">' +
             '<p class="tv-ki-leer">The AI reads the candles and your supply &amp; demand ' +
             'zones across three timeframes &mdash; it cannot see the chart above.</p>' +
           '</div>' +
-          '<div class="tv-setup" id="tvSetup"></div>' +
           '<div class="tv-ki-ask">' +
             '<input id="tvKiAsk" placeholder="Ask a follow-up…" autocomplete="off">' +
             '<button id="tvKiSend" aria-label="Send">&rarr;</button>' +
           '</div>' +
         '</aside>' +
+      '</div>' +
+      /* Eigenes Datenfenster unter Chart und Analyse, ueber die volle
+         Breite. Die Zahlen zum Handeln sollen nicht in einer schmalen
+         Seitenspalte stehen, wo man sie scrollen muss. */
+      '<div class="tv-daten" id="tvDaten">' +
+        '<div class="tv-levels" id="tvLevels"></div>' +
+        '<div class="tv-setup" id="tvSetup"></div>' +
       '</div>' +
       '<div class="tv-hinweis" id="tvHinweis"></div>';
     host.appendChild(d);
@@ -63935,6 +63961,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     d.querySelector('#tvKiToggle').addEventListener('click', function () { kiZeigen(!TV.kiOffen); });
     d.querySelector('#tvKiPb').addEventListener('change', function () {
       merke('pb', this.value || '');
+      indFuellen();
     });
     d.querySelector('#tvWachtBtn').addEventListener('click', function () {
       wachtSchalten(!WACHT.an);
@@ -64298,7 +64325,21 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var Ind = window.ApexIndicators;
       if (!Ind || !Ind.compute) return [];
       var res = Ind.compute(bars, 'sd', {});
-      var sicht = Ind.sdVisibleZones(res.zoneList || [], bars.n - 1, { maxZones: 5 }) || [];
+      var alle = res.zoneList || [];
+      var sicht = Ind.sdVisibleZones(alle, bars.n - 1, { maxZones: 5 }) || [];
+      /* sdVisibleZones filtert nach ALTER — fuer den Chart richtig, fuer eine
+         Analyse falsch. Es gibt praktisch immer Zonen; ob sie nah, frisch
+         oder brauchbar sind, ist die eigentliche Frage. "Keine gueltigen
+         Zonen" hat die KI zu Antworten verleitet wie "NOT MET, both
+         timeframes lack valid zones" — sachlich falsch und keine Analyse.
+         Bleibt der Filter leer, nehmen wir die naechsten aus der Gesamtliste
+         und sagen dazu, wie alt sie sind. */
+      if (!sicht.length && alle.length) {
+        sicht = alle.slice().sort(function (a, b) {
+          var am = (a.top + a.bot) / 2, bm = (b.top + b.bot) / 2;
+          return Math.abs(am - kurs) - Math.abs(bm - kurs);
+        }).slice(0, 5);
+      }
       /* Die Rohwerte mitnehmen, damit die Level-Liste sie ANZEIGEN kann statt
          sie aus dem Antworttext der KI herauslesen zu muessen. Zum Einzeichnen
          braucht es exakte Zahlen, und die duerfen nicht davon abhaengen, wie
@@ -64307,7 +64348,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         sicht.map(function (z) {
           var m = (z.top + z.bot) / 2;
           return { supply: !!z.supply, bot: z.bot, top: z.top, broken: !!z.broken,
-                   retests: z.retests || 0, ab: Math.abs(m - kurs) };
+                   retests: z.retests || 0, ab: Math.abs(m - kurs),
+                   alter: isFinite(z.from) ? (bars.n - 1 - z.from) : NaN };
         }).sort(function (a, b) { return a.ab - b.ab; })
           .forEach(function (x) { sammler.push(x); });
       }
@@ -64320,12 +64362,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           /* Abstand ZUSAETZLICH in ATR: "12 Dollar entfernt" sagt nichts,
              solange man die Tagesschwankung nicht kennt. "0,4 ATR" schon. */
           var inAtr = isFinite(atrW) && atrW > 0 ? '  (' + nf(x.ab / atrW, 2) + ' ATR)' : '';
+          var alt = isFinite(z.from) ? (bars.n - 1 - z.from) : NaN;
           return '  - ' + (z.supply ? 'SUPPLY' : 'DEMAND') + ' ' +
             nf(z.bot, stellen) + '-' + nf(z.top, stellen) +
             ' | height ' + nf(z.top - z.bot, stellen) +
             ' | ' + (z.broken ? 'broken' : 'unbroken') +
             ' | retests ' + (z.retests || 0) +
-            ' | ' + nf(x.ab, stellen) + ' away' + inAtr;
+            ' | ' + nf(x.ab, stellen) + ' away' + inAtr +
+            (isFinite(alt) ? ' | formed ' + alt + ' candles ago' : '');
         });
     } catch (e) { return []; }
   }
@@ -64338,6 +64382,145 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      formuliert — damit misst die KI an SEINEN Kriterien statt an denen, die
      ich fuer sinnvoll gehalten habe. Genau das macht sie strategieunabhaengig:
      nicht mehr Wissen, sondern ein fremder Massstab. */
+  /* ── Welche Indikatoren die KI sieht ──────────────────────────────
+     Bisher hing die ganze Datenlage an Supply/Demand — weil der Autor so
+     handelt. Wer nach gleitenden Durchschnitten, RSI oder Bollinger
+     handelt, bekam seine Kriterien nie zu sehen und las dafuer "CANNOT
+     TELL". Die App hat 28 Indikatoren; welche zaehlen, entscheidet der
+     Nutzer, nicht ich. */
+  var IND_STD = ['sd'];
+
+  function indAuswahl() {
+    try {
+      var roh = localStorage.getItem('apexTV_ind');
+      if (roh) return JSON.parse(roh) || [];
+    } catch (e) {}
+    return IND_STD.slice();
+  }
+  function indMerken(liste) {
+    try { localStorage.setItem('apexTV_ind', JSON.stringify(liste)); } catch (e) {}
+  }
+
+  /* Aus dem Playbook vorbelegen: wer "EMA 200" in seine Regeln schreibt,
+     soll EMA nicht erst suchen muessen. Nur VORschlagen — was der Nutzer
+     danach abwaehlt, bleibt abgewaehlt. */
+  function indAusPlaybook() {
+    try {
+      if (localStorage.getItem('apexTV_ind')) return null;   // schon entschieden
+      var sel = document.getElementById('tvKiPb');
+      var pb = (window.playbooks || []).filter(function (p) {
+        return p.id === (sel && sel.value); })[0];
+      if (!pb) return null;
+      var text = ((pb.rules || '') + ' ' + (pb.checklist || []).join(' ')).toLowerCase();
+      var treffer = [];
+      (window.ApexIndicators.list() || []).forEach(function (d) {
+        var wort = d.id.toLowerCase();
+        var name = String(d.label || '').toLowerCase().split(/[^a-z]+/)[0];
+        if (new RegExp('\\b' + wort + '\\b').test(text) ||
+            (name.length > 2 && text.indexOf(name) >= 0)) treffer.push(d.id);
+      });
+      return treffer.length ? treffer.slice(0, 6) : null;
+    } catch (e) { return null; }
+  }
+
+  function indFuellen() {
+    var w = document.getElementById('tvIndListe');
+    if (!w || !window.ApexIndicators) return;
+    var gewaehlt = indAuswahl();
+    var vor = indAusPlaybook();
+    if (vor) { gewaehlt = vor; indMerken(gewaehlt); }
+
+    var liste = window.ApexIndicators.list() || [];
+    var gruppen = { overlay: 'On the price', pane: 'Separate scale' };
+    var h = '';
+    Object.keys(gruppen).forEach(function (g) {
+      var teil = liste.filter(function (d) { return d.group === g; });
+      if (!teil.length) return;
+      h += '<div class="tv-ind-g">' + gruppen[g] + '</div>';
+      teil.forEach(function (d) {
+        var an = gewaehlt.indexOf(d.id) >= 0;
+        h += '<label class="tv-ind-i"><input type="checkbox" value="' + d.id + '"' +
+             (an ? ' checked' : '') + '><span>' + escHtml(d.label) + '</span></label>';
+      });
+    });
+    w.innerHTML = h;
+    indKopfZeigen();
+    w.onchange = function () {
+      var neu = [].slice.call(w.querySelectorAll('input:checked')).map(function (i) {
+        return i.value; });
+      indMerken(neu);
+      indKopfZeigen();
+    };
+  }
+
+  function indKopfZeigen() {
+    var k = document.getElementById('tvIndKopf');
+    if (!k) return;
+    var n = indAuswahl().length;
+    k.textContent = n ? 'Indicators the AI sees (' + n + ')'
+                      : 'Indicators the AI sees — none picked yet';
+  }
+
+  /* Werte der gewaehlten Indikatoren. Bewusst generisch: was in DEF steht,
+     wird gelesen — so wirkt jeder kuenftige Indikator sofort mit, ohne dass
+     hier etwas nachgetragen werden muss. */
+  function indikatorBlock(bars, ids, stellen, kurs) {
+    var I = window.ApexIndicators;
+    if (!I || !ids.length) return '';
+    var zeilen = [];
+    ids.forEach(function (id) {
+      if (id === 'sd') return;              // Zonen haben ihren eigenen Abschnitt
+      var d = I.DEF && I.DEF[id];
+      if (!d) return;
+      try {
+        var q = I.fillParams(id, {});
+        var res = I.compute(bars, id, {});
+        var teile = [];
+        (d.outputs || []).forEach(function (name) {
+          var arr = res[name];
+          if (!arr || !arr.length) return;
+
+          /* Signalreihen (0/1) sagen nichts ueber ihren letzten Wert, sondern
+             darueber, WANN sie zuletzt ausgeloest haben. */
+          var binaer = true, i;
+          for (i = arr.length - 1; i >= 0 && i > arr.length - 200; i--) {
+            var v = arr[i];
+            if (v === 0 || v === 1 || !isFinite(v)) continue;
+            binaer = false; break;
+          }
+          if (binaer) {
+            var wann = -1;
+            for (i = arr.length - 1; i >= 0 && i > arr.length - 300; i--) {
+              if (arr[i]) { wann = arr.length - 1 - i; break; }
+            }
+            teile.push(name + ': ' + (wann >= 0 ? wann + ' candles ago' : 'no signal'));
+            return;
+          }
+          var letzter = NaN;
+          for (i = arr.length - 1; i >= 0; i--) {
+            if (isFinite(arr[i])) { letzter = arr[i]; break; }
+          }
+          if (!isFinite(letzter)) return;
+          var txt = name + ': ' + nf(letzter, stellen);
+          /* Liegt der Wert auf der Preisachse, ist die Lage zum Kurs die
+             eigentliche Information. */
+          if (d.group === 'overlay' && isFinite(kurs) && kurs > 0 &&
+              Math.abs(letzter - kurs) / kurs < 0.3)
+            txt += ' (price ' + (kurs > letzter ? 'above' : 'below') + ')';
+          teile.push(txt);
+        });
+        if (!teile.length) return;
+        var pText = Object.keys(q || {}).filter(function (k) {
+          return typeof q[k] === 'number';
+        }).map(function (k) { return k + '=' + q[k]; }).join(' ');
+        zeilen.push('  ' + (d.label || id) + (pText ? ' [' + pText + ']' : '') +
+                    ' → ' + teile.join(', '));
+      } catch (e) { /* ein kaputter Indikator darf den Rest nicht mitnehmen */ }
+    });
+    if (!zeilen.length) return '';
+    return '\nIndicators the user selected:\n' + zeilen.join('\n');
+  }
+
   function playbooksFuellen() {
     var sel = document.getElementById('tvKiPb');
     if (!sel) return;
@@ -64732,15 +64915,27 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         if (st.choch >= 0) ereignisse.push('change of character ' + st.choch + ' candles ago');
         z.push('Recent structure events: ' + ereignisse.join(', '));
       }
+      var gewaehlt = indAuswahl();
+      var zonenAn = gewaehlt.indexOf('sd') >= 0;
       var roh = [];
-      var zn = zonenVon(b, kurs, stellen, a, roh);
+      var zn = zonenAn ? zonenVon(b, kurs, stellen, a, roh) : [];
       ebenen.push({ tf: name, atr: a, stellen: stellen, zonen: roh,
                     hoch: st && st.hoch, tief: st && st.tief });
-      if (zn.length) {
+      var iw = indikatorBlock(b, gewaehlt, stellen, kurs);
+      if (iw) z.push(iw);
+      if (!zonenAn) {
+        /* Nichts weiter: wer keine Zonen benutzt, soll auch nicht darueber
+           lesen. */
+      } else if (zn.length) {
         z.push('Supply & demand zones (user\'s own logic, nearest first):');
         zn.forEach(function (l) { z.push(l); });
       } else {
-        z.push('No valid zones on this timeframe.');
+        /* Auch hier nicht "keine Zonen" behaupten. Wenn wirklich keine
+           berechnet wurden, ist das eine Aussage ueber die Kerzen, die wir
+           haben — nicht ueber den Markt. */
+        z.push('The zone calculation produced nothing on this timeframe from ' +
+               'the ' + b.n + ' candles loaded. That is a limit of this window, ' +
+               'not proof that no zone exists.');
       }
     });
 
@@ -64767,8 +64962,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'which is more precise than a picture.\n\n' +
     'Read it the way a discretionary trader does: highest timeframe first for context, ' +
     'then down to the entry timeframe.\n\n' +
+    'The indicators listed are the ones THIS user chose to trade by. Build your read on ' +
+    'those, in their terms. Do not fall back on tools they did not pick, and do not ' +
+    'treat supply/demand zones as the default lens unless they are in the list.\n\n' +
     'Hard rules:\n' +
     '- Use ONLY numbers that appear in the data. Never invent a level.\n' +
+    '- Zones are always listed when they exist, with distance and age. Never say a ' +
+    'timeframe "has no zones" as if that were a market fact - judge the zones you are ' +
+    'given on distance, age and how often they were retested, and say plainly when the ' +
+    'nearest one is too far to matter. Distance and quality are the analysis; existence ' +
+    'is not.\n' +
     'If a FINER ENTRY section is present, use it: say where inside the zone an entry would sit and what the stop would be there, next to what it would be behind the whole zone. Give both, with the trade-off \u2014 a tighter stop is closer to the noise.\n' +
     '- The user draws on a chart you cannot touch, so every level you mention must be typed out in full and exactly as given \u2014 both bounds of a zone, not "the zone above". They will type your numbers in by hand.\n' +
     '- Do not tell the user to buy or sell and do not state a direction as a prediction. ' +
@@ -64783,6 +64986,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'LEVELS - which of the listed zones actually matter right now, and why those.\n' +
     'IF/THEN - the condition that would confirm, and the one that would invalidate. ' +
     'Name price levels from the list.\n' +
+    'After your prose, append this block exactly once, with your own numbers. Leave a ' +
+    'field empty if the data does not support it, and set direction to none if there is ' +
+    'no workable situation right now:\n' +
+    '<<SETUP>>\n' +
+    'direction: long | short | none\n' +
+    'entry: <price>\n' +
+    'stop: <price>\n' +
+    'target: <price>\n' +
+    'confidence: high | medium | low\n' +
+    'basis: <one short line naming what this is built on>\n' +
+    '<</SETUP>>\n' +
+    'These numbers are checked against the data after you write them, and any mismatch ' +
+    'is shown to the user next to your answer. Do the arithmetic before you commit.\n' +
     'LEVELS TO WORK WITH - where a stop and a target WOULD sit, phrased as information, ' +
     'never as an instruction: "a stop below the zone would be around X; your typical stop ' +
     'distance is Y". Base the size on how this user actually trades. Say plainly if the ' +
@@ -64804,11 +65020,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'Judge the chart against THEIR criteria, not against general market theory.\n\n' +
     'Answer in at most 230 words, using exactly these five headings:\n' +
     'CONTEXT - what the higher timeframe says.\n' +
-    'PLAYBOOK CHECK - go through their checklist item by item. Mark each one MET, ' +
-    'NOT MET, or CANNOT TELL, each with one short reason. Use CANNOT TELL honestly ' +
-    'and often: many checklist items (news, discipline, session feel, order flow) ' +
-    'simply cannot be verified from candles and zones. Guessing at those is worse ' +
-    'than admitting the limit.\n' +
+    'PLAYBOOK CHECK - do NOT produce a list of unanswerable items. Judge only the ' +
+    'checklist points the data can actually speak to, one short line each, MET or ' +
+    'NOT MET with the number that decides it. Collapse everything you cannot verify ' +
+    'into a SINGLE closing line naming those points (for example: "Not checkable from ' +
+    'price data: news timing, your own discipline"). A wall of CANNOT TELL is not ' +
+    'analysis and wastes the reader\u2019s attention.\n' +
     'LEVELS - which listed zones matter for THIS playbook right now.\n' +
     'IF/THEN - what would make this a valid setup by their own rules, and what would ' +
     'rule it out. Name price levels from the list.\n' +
@@ -64816,6 +65033,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'their playbook does not cover, or any way the market disagrees with their rules ' +
     'right now. If their playbook fits the situation well, say so instead of ' +
     'inventing a concern.\n\n' +
+    'After your prose, append this block exactly once, with your own numbers. Leave a ' +
+    'field empty if the data does not support it, and set direction to none if their ' +
+    'rules are not met right now:\n' +
+    '<<SETUP>>\n' +
+    'direction: long | short | none\n' +
+    'entry: <price>\n' +
+    'stop: <price>\n' +
+    'target: <price>\n' +
+    'confidence: high | medium | low\n' +
+    'basis: <one short line naming what this is built on>\n' +
+    '<</SETUP>>\n' +
+    'These numbers are checked against the data after you write them, and any mismatch ' +
+    'is shown to the user next to your answer. Do the arithmetic before you commit.\n' +
     'LEVELS TO WORK WITH - where a stop and a target WOULD sit by their own rules, ' +
     'phrased as information, never as an instruction. Base the size on how this user ' +
     'actually trades, not on a round number.\n\n' +
@@ -65183,6 +65413,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   TV.wacht = WACHT;
   TV.pruefePreis = preisPruefen;
   TV.auffrischen = zonenAuffrischen;
+  TV.setupLesen = setupLesen;
+  TV.setupZeigen = setupZeigen;
 
   /* ── Level zum Einzeichnen ────────────────────────────────────────
      Zeichnen koennen wir im TradingView-Chart nicht — er liegt auf fremder
@@ -65319,143 +65551,175 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
      Richtung folgt aus dem Zonentyp: Demand heisst long, Supply short.
      Das ist keine Empfehlung, sondern die Definition der Zone. */
-  function setupRechnen() {
-    var L = TV._levels, F = TV._fein;
-    if (!L || !F || !F.ziel) return null;
-    var z = F.ziel.z, st = L.stellen, atrW = (L.ebenen[0] && L.ebenen[0].atr) || 0;
-    var lang = !z.supply;
+  /* Die KI liefert die Werte. Wir rechnen sie NICHT nach eigenen Regeln um —
+     wir pruefen sie. Das ist der Unterschied: ihre Analyse bleibt ihre, aber
+     ein Widerspruch zu den Daten wird sichtbar, statt als Zahl zu erscheinen,
+     die aussieht wie geprueft.
 
-    /* Puffer, damit der Stop nicht exakt auf der Kante klebt. Ein Zehntel
-       ATR ist wenig genug, um die Idee nicht zu verwaessern, und genug,
-       damit ein einzelner Docht ihn nicht abraeumt. */
-    var puffer = isFinite(atrW) && atrW > 0 ? atrW * 0.1 : (z.top - z.bot) * 0.1;
-
-    /* Einstieg an der Kante, die der Kurs zuerst beruehrt. */
-    var einstieg = lang ? z.top : z.bot;
-    var stopWeit = lang ? (z.bot - puffer) : (z.top + puffer);
-
-    var stopEng = NaN, feinZone = null;
-    if (F.daten.sub && F.daten.sub.length) {
-      feinZone = F.daten.sub[0];
-      stopEng = lang ? (feinZone.bot - puffer) : (feinZone.top + puffer);
-    }
-    /* Der tiefste tatsaechlich erreichte Punkt ist der ehrlichste Anker:
-       darunter war der Markt nicht, seit die Zone besteht. */
-    var stopDocht = lang ? F.daten.tiefstes : F.daten.hoechstes;
-    if (isFinite(stopDocht)) stopDocht = lang ? stopDocht - puffer : stopDocht + puffer;
-
-    /* Ziel: die naechste ungebrochene GEGENzone in Kursrichtung. Ohne eine
-       solche kein Ziel — lieber keine Zahl als eine erfundene. */
-    var ziel = NaN, zielHer = '';
-    (L.ebenen || []).forEach(function (e) {
-      (e.zonen || []).forEach(function (g) {
-        if (g.broken || !!g.supply === !!z.supply) return;
-        var kante = lang ? g.bot : g.top;
-        if (lang ? kante <= einstieg : kante >= einstieg) return;
-        if (!isFinite(ziel) || (lang ? kante < ziel : kante > ziel)) {
-          ziel = kante; zielHer = e.tf + ' ' + (g.supply ? 'supply' : 'demand');
-        }
-      });
+     Der Grund fuer diese Schicht ist Erfahrung, keine Vorsicht: heute hat
+     dasselbe Modell 57R behauptet, wo 2R stand, und Level genannt, die in
+     den Daten nicht vorkamen. */
+  function setupLesen(text) {
+    var m = /<<SETUP>>([\s\S]*?)<<\/SETUP>>/.exec(text || '');
+    if (!m) return null;
+    var feld = {};
+    m[1].split('\n').forEach(function (zeile) {
+      var t = /^\s*([a-z]+)\s*:\s*(.*?)\s*$/i.exec(zeile);
+      if (t) feld[t[1].toLowerCase()] = t[2];
     });
-
-    function rr(stop) {
-      if (!isFinite(stop) || !isFinite(ziel)) return NaN;
-      var risiko = Math.abs(einstieg - stop), gewinn = Math.abs(ziel - einstieg);
-      return risiko > 0 ? gewinn / risiko : NaN;
-    }
-
-    return {
-      lang: lang, tf: F.ziel.tf, stellen: st,
-      zone: { bot: z.bot, top: z.top },
-      fein: feinZone,
-      einstieg: einstieg,
-      stops: [
-        { name: 'behind the zone', wert: stopWeit, risiko: Math.abs(einstieg - stopWeit), rr: rr(stopWeit) },
-        feinZone ? { name: 'behind the ' + F.tf + ' sub-zone', wert: stopEng,
-                     risiko: Math.abs(einstieg - stopEng), rr: rr(stopEng) } : null,
-        isFinite(stopDocht) ? { name: 'below the deepest wick', wert: stopDocht,
-                     risiko: Math.abs(einstieg - stopDocht), rr: rr(stopDocht) } : null,
-      ].filter(Boolean),
-      ziel: ziel, zielHer: zielHer,
-      ueblich: medianStop(L.sym),
-      ueblichR: medianR(L.sym),
+    var richtung = String(feld.direction || '').toLowerCase();
+    if (richtung.indexOf('long') === 0) richtung = 'long';
+    else if (richtung.indexOf('short') === 0) richtung = 'short';
+    else richtung = 'none';
+    var zahl = function (v) {
+      var t = String(v || '').trim();
+      /* Ein Komma ist ein Dezimaltrennzeichen, kein Muell. Wer es wegwirft,
+         macht aus "4483,10" die Zahl 448310 — und die faellt danach nur
+         noch durch die Bereichspruefung auf, statt gleich richtig zu sein. */
+      if (t.indexOf('.') < 0 && /\d,\d/.test(t)) t = t.replace(',', '.');
+      t = t.replace(/,/g, '');
+      /* Die ERSTE Zahl nehmen, statt alle Ziffern zusammenzuziehen:
+         "about 4482.12 (below the zone)" darf nicht 448212 werden. */
+      var m = /-?\d+(?:\.\d+)?/.exec(t);
+      var x = m ? parseFloat(m[0]) : NaN;
+      return isFinite(x) ? x : NaN;
     };
+    return { richtung: richtung, einstieg: zahl(feld.entry), stop: zahl(feld.stop),
+             ziel: zahl(feld.target),
+             sicherheit: String(feld.confidence || '').toLowerCase(),
+             basis: feld.basis || '' };
   }
 
-  function setupZeigen() {
+  /* Nur Text ohne den Block — der gehoert in die Karte, nicht zweimal in
+     die Antwort. */
+  function ohneBlock(text) {
+    return String(text || '').replace(/<<SETUP>>[\s\S]*?<<\/SETUP>>/g, '').trim();
+  }
+
+  function setupPruefen(S) {
+    var L = TV._levels;
+    if (!S || S.richtung === 'none') return [];
+    var warn = [];
+    var lang = S.richtung === 'long';
+    var st = (L && L.stellen) || 2;
+    var n = function (x) { return nf(x, st); };
+
+    if (!isFinite(S.einstieg)) warn.push('No entry price given.');
+    if (!isFinite(S.stop))     warn.push('No stop price given.');
+
+    if (isFinite(S.einstieg) && isFinite(S.stop)) {
+      var richtigeSeite = lang ? S.stop < S.einstieg : S.stop > S.einstieg;
+      if (!richtigeSeite)
+        warn.push('The stop at ' + n(S.stop) + ' is on the wrong side of the entry ' +
+                  n(S.einstieg) + ' for a ' + S.richtung + '.');
+    }
+    if (isFinite(S.einstieg) && isFinite(S.ziel)) {
+      var zielSeite = lang ? S.ziel > S.einstieg : S.ziel < S.einstieg;
+      if (!zielSeite)
+        warn.push('The target at ' + n(S.ziel) + ' is on the wrong side of the entry ' +
+                  'for a ' + S.richtung + '.');
+    }
+
+    /* Liegen die Preise ueberhaupt im beobachteten Bereich? Ein Level weit
+       ausserhalb ist erfunden, nicht gelesen. */
+    if (L && L.ebenen && L.ebenen.length) {
+      var lo = Infinity, hi = -Infinity;
+      L.ebenen.forEach(function (e) {
+        (e.zonen || []).forEach(function (z) {
+          if (z.bot < lo) lo = z.bot;
+          if (z.top > hi) hi = z.top;
+        });
+        if (isFinite(e.hoch) && e.hoch > hi) hi = e.hoch;
+        if (isFinite(e.tief) && e.tief < lo) lo = e.tief;
+      });
+      if (isFinite(L.kurs)) { if (L.kurs < lo) lo = L.kurs; if (L.kurs > hi) hi = L.kurs; }
+      if (isFinite(lo) && isFinite(hi)) {
+        var luft = (hi - lo) * 0.5 || 1;
+        [['entry', S.einstieg], ['stop', S.stop], ['target', S.ziel]].forEach(function (p) {
+          if (isFinite(p[1]) && (p[1] < lo - luft || p[1] > hi + luft))
+            warn.push('The ' + p[0] + ' ' + n(p[1]) + ' lies outside the price range in ' +
+                      'the data (' + n(lo) + '–' + n(hi) + ').');
+        });
+      }
+    }
+
+    /* R nachrechnen und mit dem eigenen Handeln vergleichen. */
+    if (isFinite(S.einstieg) && isFinite(S.stop) && isFinite(S.ziel)) {
+      var risiko = Math.abs(S.einstieg - S.stop);
+      var gewinn = Math.abs(S.ziel - S.einstieg);
+      if (risiko > 0) {
+        S.rr = gewinn / risiko;
+        if (S.rr > 12)
+          warn.push('That is ' + S.rr.toFixed(1) + 'R — the target sits very far ' +
+                    'away for this stop, so it is not a realistic expectation.');
+        if (S.rr < 0.8)
+          warn.push('That is only ' + S.rr.toFixed(1) + 'R — the target is closer ' +
+                    'than the risk.');
+      }
+      S.risiko = risiko;
+      var uebl = medianStop(L && L.sym);
+      if (isFinite(uebl) && risiko > 0) {
+        var faktor = risiko / uebl;
+        if (faktor > 3 || faktor < 0.33)
+          warn.push('The risk of ' + n(risiko) + ' is ' + faktor.toFixed(1) +
+                    '× your usual ' + n(uebl) + '.');
+      }
+      /* Auch das Verhaeltnis mit dem eigenen vergleichen: ein Ziel, das
+         weit ueber dem liegt, was der Nutzer sonst mitnimmt, ist eher
+         Wunsch als Plan. */
+      var ueblR = medianR(L && L.sym);
+      if (isFinite(ueblR) && isFinite(S.rr) && ueblR > 0 && S.rr > ueblR * 3)
+        warn.push('At ' + S.rr.toFixed(1) + 'R this is well beyond the ' +
+                  ueblR.toFixed(1) + 'R you usually take.');
+    }
+    return warn;
+  }
+
+  function setupZeigen(S) {
     var el = document.getElementById('tvSetup');
     if (!el) return;
-    var S = setupRechnen();
-    TV._setup = S;
+    TV._setup = S || null;
     if (!S) { el.innerHTML = ''; return; }
-    var n = function (x) { return nf(x, S.stellen); };
+    var L = TV._levels, st = (L && L.stellen) || 2;
+    var n = function (x) { return nf(x, st); };
+
+    if (S.richtung === 'none') {
+      el.innerHTML = '<div class="tv-su-kopf"><b>Setup</b>' +
+        '<span class="tv-su-dir k">NONE</span></div>' +
+        '<div class="tv-su-hint">' + (escHtml(S.basis) ||
+          'The AI sees no workable situation right now.') + '</div>';
+      return;
+    }
+
+    var lang = S.richtung === 'long';
+    var warn = setupPruefen(S);
     var h = '<div class="tv-su-kopf"><b>Setup</b>' +
-      '<span class="tv-su-dir ' + (S.lang ? 'l' : 's') + '">' +
-        (S.lang ? 'LONG · demand' : 'SHORT · supply') + '</span>' +
+      '<span class="tv-su-dir ' + (lang ? 'l' : 's') + '">' + S.richtung.toUpperCase() +
+      (S.sicherheit ? ' · ' + escHtml(S.sicherheit) : '') + '</span>' +
       '<button id="tvSuCopy" class="tv-lv-copy">Copy</button></div>';
-    h += '<div class="tv-su-z notranslate" translate="no">' + S.tf + '  ' +
-         n(S.zone.bot) + '&ndash;' + n(S.zone.top) + '</div>';
-    h += '<div class="tv-su-r"><span>Entry</span>' +
-         '<b class="notranslate" translate="no">' + n(S.einstieg) + '</b>' +
-         '<i>zone edge</i></div>';
-    S.stops.forEach(function (x) {
-      h += '<div class="tv-su-r"><span>Stop</span>' +
-           '<b class="notranslate" translate="no">' + n(x.wert) + '</b>' +
-           '<i>' + x.name + ' &middot; risk ' +
-           '<span class="notranslate" translate="no">' + n(x.risiko) + '</span>' +
-           (isFinite(x.rr) ? ' &middot; <span class="notranslate" translate="no">' +
-              x.rr.toFixed(1) + 'R</span>' : '') + '</i></div>';
+    if (S.basis) h += '<div class="tv-su-z">' + escHtml(S.basis) + '</div>';
+
+    [['Entry', S.einstieg], ['Stop', S.stop], ['Target', S.ziel]].forEach(function (p) {
+      if (!isFinite(p[1])) return;
+      var zusatz = '';
+      if (p[0] === 'Stop' && isFinite(S.risiko)) zusatz = 'risk ' + n(S.risiko);
+      if (p[0] === 'Target' && isFinite(S.rr)) zusatz = S.rr.toFixed(1) + 'R';
+      h += '<div class="tv-su-r"><span>' + p[0] + '</span>' +
+           '<b class="notranslate" translate="no">' + n(p[1]) + '</b>' +
+           '<i class="notranslate" translate="no">' + zusatz + '</i></div>';
     });
-    if (isFinite(S.ziel)) {
-      /* Ein sehr hohes R heisst nicht "guter Trade", sondern "das Ziel liegt
-         weit weg gemessen am Stop". Ungekennzeichnet liest sich 57R wie ein
-         Geschenk. */
-      var weit = S.stops[0] && isFinite(S.stops[0].rr) && S.stops[0].rr > 10;
-      h += '<div class="tv-su-r"><span>Target</span>' +
-           '<b class="notranslate" translate="no">' + n(S.ziel) + '</b>' +
-           '<i>next ' + S.zielHer + (weit ? ' &middot; far for this stop' : '') + '</i></div>';
-      if (weit)
-        h += '<div class="tv-su-hint">That target sits far away relative to the stop, so ' +
-             'the R number is not a realistic expectation &mdash; price would have to run ' +
-             'a long way untouched.</div>';
-    } else {
-      h += '<div class="tv-su-hint">No opposing zone ahead &mdash; no target level can be ' +
-           'derived from your zones.</div>';
-    }
-    /* Zusaetzlich ein Ziel, das zum eigenen Handeln passt: ueblicher
-       R-Faktor mal das Risiko dieses Stops. Naeher an dem, was der Nutzer
-       tatsaechlich mitnimmt, als eine weit entfernte Zone. */
-    if (isFinite(S.ueblichR) && S.stops.length) {
-      var r0 = S.stops[0].risiko;
-      var zielEigen = S.lang ? S.einstieg + r0 * S.ueblichR : S.einstieg - r0 * S.ueblichR;
-      h += '<div class="tv-su-r"><span>Target</span>' +
-           '<b class="notranslate" translate="no">' + n(zielEigen) + '</b>' +
-           '<i>at your usual ' +
-           '<span class="notranslate" translate="no">' + S.ueblichR.toFixed(1) + 'R</span>' +
-           '</i></div>';
-    }
-    if (isFinite(S.ueblich))
-      h += '<div class="tv-su-hint">You normally risk about ' +
-           '<span class="notranslate" translate="no">' + n(S.ueblich) + '</span> per trade.</div>';
-    /* Gegen die eigenen Regeln pruefen, mit den eigenen Worten. Steht im
-       Playbook "only long" und die Karte zeigt einen Short, muss das
-       dastehen — sonst liest man eine Zahl und vergisst die Regel. */
-    var sel = document.getElementById('tvKiPb');
-    var pb = (window.playbooks || []).filter(function (p) {
-      return p.id === (sel && sel.value); })[0];
-    if (pb) {
-      var t = ((pb.rules || '') + ' ' + (pb.checklist || []).join(' ')).toLowerCase();
-      var nurLang  = /only long|nur long|longs only|long only/.test(t);
-      var nurKurz  = /only short|nur short|shorts only|short only/.test(t);
-      if ((nurLang && !S.lang) || (nurKurz && S.lang))
-        h += '<div class="tv-su-warn">This is a ' + (S.lang ? 'long' : 'short') +
-             ', but your playbook &ldquo;' + escHtml(pb.name) + '&rdquo; says ' +
-             (nurLang ? 'long only' : 'short only') + '.</div>';
-      else
-        h += '<div class="tv-su-hint">Direction fits &ldquo;' + escHtml(pb.name) + '&rdquo;.</div>';
-    }
-    h += '<div class="tv-su-hint">Levels derived from your own zone logic. ' +
-         'Not advice &mdash; check them against your plan.</div>';
+
+    /* Die Pruefung steht NEBEN den Zahlen, nicht statt ihnen. Der Nutzer
+       sieht, was die KI gesagt hat, und wo es der Datenlage widerspricht. */
+    warn.forEach(function (w) {
+      h += '<div class="tv-su-warn">' + escHtml(w) + '</div>';
+    });
+    if (!warn.length)
+      h += '<div class="tv-su-hint">Checked against the data: sides, range and R are ' +
+           'consistent.</div>';
+    h += '<div class="tv-su-hint">Values from the AI. Not advice — check them ' +
+         'against your plan.</div>';
+
     el.innerHTML = h;
     var k = document.getElementById('tvSuCopy');
     if (k) k.onclick = function () {
@@ -65470,23 +65734,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
   function setupText() {
     var S = TV._setup, L = TV._levels;
-    if (!S) return '';
-    var n = function (x) { return nf(x, S.stellen); };
-    var z = [(L ? L.titel + '  ' : '') + (S.lang ? 'LONG (demand)' : 'SHORT (supply)') +
-             '  ' + S.tf + '  ' + n(S.zone.bot) + '-' + n(S.zone.top),
-             'Entry  ' + n(S.einstieg)];
-    S.stops.forEach(function (x) {
-      z.push('Stop   ' + n(x.wert) + '   ' + x.name + ', risk ' + n(x.risiko) +
-             (isFinite(x.rr) ? ', ' + x.rr.toFixed(1) + 'R' : ''));
-    });
-    if (isFinite(S.ziel)) z.push('Target ' + n(S.ziel) + '   next ' + S.zielHer);
-    if (isFinite(S.ueblichR) && S.stops.length) {
-      var r0 = S.stops[0].risiko;
-      z.push('Target ' + n(S.lang ? S.einstieg + r0 * S.ueblichR
-                                  : S.einstieg - r0 * S.ueblichR) +
-             '   at your usual ' + S.ueblichR.toFixed(1) + 'R');
-    }
-    if (isFinite(S.ueblich)) z.push('(you normally risk about ' + n(S.ueblich) + ')');
+    if (!S || S.richtung === 'none') return '';
+    var st = (L && L.stellen) || 2;
+    var n = function (x) { return nf(x, st); };
+    var z = [(L ? L.titel + '  ' : '') + S.richtung.toUpperCase() +
+             (S.basis ? '  (' + S.basis + ')' : '')];
+    if (isFinite(S.einstieg)) z.push('Entry  ' + n(S.einstieg));
+    if (isFinite(S.stop))     z.push('Stop   ' + n(S.stop) +
+      (isFinite(S.risiko) ? '   risk ' + n(S.risiko) : ''));
+    if (isFinite(S.ziel))     z.push('Target ' + n(S.ziel) +
+      (isFinite(S.rr) ? '   ' + S.rr.toFixed(1) + 'R' : ''));
     return z.join('\n');
   }
 
@@ -65516,7 +65773,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }
 
       var stufe = STUFEN[tf] || STUFEN['15min'];
-      verlauf = []; TV._fakten = '';
+      verlauf = []; TV._fakten = ''; setupZeigen(null);
       busy(true, 'Loading…');
       out.innerHTML = '<p class="tv-ki-leer">Loading candles, computing zones across three ' +
                       'timeframes…</p>';
@@ -65542,7 +65799,6 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           var fein = verfeinern(fb, ziel, L.stellen);
           TV._fein = { ziel: ziel, daten: fein, tf: ftf };
           levelZeigen();
-          setupZeigen();
           return fakten + '\n' + feinBlock(ziel, fein, L.stellen,
                             medianStop((info && info.name) || anzeige));
         }).catch(function (e) {
@@ -65557,7 +65813,6 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         /* Keine Zone in Reichweite: dann gibt es auch kein Setup zu zeigen.
            Eine leere Karte ist besser als eine mit Zahlen von vorhin. */
         TV._fein = null;
-        setupZeigen();
         vorbereitet = Promise.resolve(fakten);
       }
 
@@ -65572,7 +65827,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         verlauf.push({ role: 'user', content: anweisung + '\n\n---\n' + volle,
                        versteckt: true });
         return fragen(null).then(function (text) {
-          verlauf.push({ role: 'assistant', content: text });
+          /* Werte aus der Antwort holen, pruefen, anzeigen — und den Block
+             aus dem Text nehmen, damit er nicht doppelt erscheint. */
+          setupZeigen(setupLesen(text));
+          verlauf.push({ role: 'assistant', content: text,
+                         anzeige: ohneBlock(text) });
           malen();
         });
       });
@@ -65621,6 +65880,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     TV.tf  = TV.tf  || lies('tf',  STD_TF);
     kiZeigen(lies('ki', '1') === '1');
     playbooksFuellen();
+    indFuellen();
     beobachten();
     wachtSchalten(lies('wacht', '0') === '1');
     /* Neue Zonen entstehen nur mit neuen Kerzen. Der Takt fragt darum selten
