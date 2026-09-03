@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-02t';
+  window.APEX_BUILD = '2026-09-02w';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7051,9 +7051,40 @@ body.light #page-chart .tv-ki-pb select{background:#fff;border-color:rgba(0,0,0,
 #page-chart .tv-wacht-st:not(:empty){flex:0 0 auto;font-size:10.5px;line-height:1.45;color:var(--ink3)}
 #page-chart .tv-ki-alarm{background:var(--gold-dim);border:0.5px solid var(--gold-line);border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:11.5px;color:var(--gold);font-weight:600}
 body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
+#page-chart .tv-levels:not(:empty){flex:0 0 auto;max-height:34%;overflow-y:auto;border:0.5px solid var(--rim);border-radius:9px;padding:9px 10px;background:var(--elevated)}
+#page-chart .tv-lv-kopf{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+#page-chart .tv-lv-kopf b{font-family:var(--font-display);font-size:12px;color:var(--ink)}
+#page-chart .tv-lv-copy{background:none;border:0.5px solid var(--rim);color:var(--ink3);border-radius:6px;padding:3px 9px;font-size:10.5px;cursor:pointer}
+#page-chart .tv-lv-copy:hover{border-color:var(--gold-line);color:var(--gold)}
+#page-chart .tv-lv-tf{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:8px 0 3px}
+#page-chart .tv-lv-z{display:flex;align-items:center;gap:6px;font-size:11.5px;line-height:1.7}
+#page-chart .tv-lv-z.aus{opacity:.5}
+#page-chart .tv-lv-typ{flex:0 0 auto;width:14px;text-align:center;border-radius:3px;font-size:9.5px;font-weight:700;line-height:14px}
+#page-chart .tv-lv-typ.s{background:rgba(220,80,80,.18);color:#e06a6a}
+#page-chart .tv-lv-typ.d{background:rgba(80,180,120,.18);color:#4fb87a}
+#page-chart .tv-lv-p{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--ink)}
+#page-chart .tv-lv-m{flex:1 1 auto;min-width:0;font-size:10.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-chart .tv-lv-eltern{font-size:10.5px;color:var(--ink3);margin-bottom:3px}
+#page-chart .tv-lv-z.fein .tv-lv-p{color:var(--gold)}
+#page-chart .tv-lv-sw{font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums;margin-top:2px}
+body.light #page-chart .tv-levels:not(:empty){background:#fff;border-color:rgba(0,0,0,.09)}
 #page-chart .tv-ki-out{flex:1 1 auto;overflow-y:auto;min-height:0;font-size:12.5px;line-height:1.65;color:var(--ink2)}
 #page-chart .tv-ki-antwort{white-space:normal;margin-bottom:11px}
 #page-chart .tv-ki-frage{background:var(--elevated);border:0.5px solid var(--rim);border-radius:9px;padding:8px 11px;margin:0 0 9px auto;max-width:88%;color:var(--ink);font-size:12px}
+#page-chart .tv-setup:not(:empty){flex:0 0 auto;border:0.5px solid var(--gold-line);border-radius:9px;padding:9px 10px;background:var(--gold-dim)}
+#page-chart .tv-su-kopf{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+#page-chart .tv-su-kopf b{font-family:var(--font-display);font-size:12px;color:var(--ink)}
+#page-chart .tv-su-dir{flex:1 1 auto;font-size:9.5px;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
+#page-chart .tv-su-dir.l{color:#4fb87a}
+#page-chart .tv-su-dir.s{color:#e06a6a}
+#page-chart .tv-su-z{font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums;margin-bottom:5px}
+#page-chart .tv-su-r{display:flex;align-items:baseline;gap:7px;font-size:11.5px;line-height:1.75}
+#page-chart .tv-su-r span{flex:0 0 42px;color:var(--ink3);font-size:10.5px}
+#page-chart .tv-su-r b{flex:0 0 auto;color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
+#page-chart .tv-su-r i{flex:1 1 auto;min-width:0;font-style:normal;font-size:10px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-chart .tv-su-warn{margin-top:5px;font-size:10.5px;line-height:1.45;color:var(--loss);font-weight:600}
+#page-chart .tv-su-hint{margin-top:5px;font-size:10px;line-height:1.45;color:var(--ink3)}
+body.light #page-chart .tv-setup:not(:empty){background:rgba(201,168,76,.09)}
 #page-chart .tv-ki-ask{display:flex;gap:6px;flex:0 0 auto}
 #page-chart .tv-ki-ask input{flex:1 1 auto;min-width:0;background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:8px 10px;font-family:var(--font-body);font-size:12.5px}
 #page-chart .tv-ki-ask input:focus{outline:none;border-color:var(--gold-line)}
@@ -63885,10 +63916,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           '<button class="tv-wacht" id="tvWachtBtn" aria-pressed="false">' +
             'Watch for setups</button>' +
           '<div class="tv-wacht-st" id="tvWachtStatus"></div>' +
+          '<div class="tv-levels" id="tvLevels"></div>' +
           '<div class="tv-ki-out" id="tvKiOut">' +
             '<p class="tv-ki-leer">The AI reads the candles and your supply &amp; demand ' +
             'zones across three timeframes &mdash; it cannot see the chart above.</p>' +
           '</div>' +
+          '<div class="tv-setup" id="tvSetup"></div>' +
           '<div class="tv-ki-ask">' +
             '<input id="tvKiAsk" placeholder="Ask a follow-up…" autocomplete="off">' +
             '<button id="tvKiSend" aria-label="Send">&rarr;</button>' +
@@ -64260,12 +64293,24 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     } catch (e) { return NaN; }
   }
 
-  function zonenVon(bars, kurs, stellen, atrW) {
+  function zonenVon(bars, kurs, stellen, atrW, sammler) {
     try {
       var Ind = window.ApexIndicators;
       if (!Ind || !Ind.compute) return [];
       var res = Ind.compute(bars, 'sd', {});
       var sicht = Ind.sdVisibleZones(res.zoneList || [], bars.n - 1, { maxZones: 5 }) || [];
+      /* Die Rohwerte mitnehmen, damit die Level-Liste sie ANZEIGEN kann statt
+         sie aus dem Antworttext der KI herauslesen zu muessen. Zum Einzeichnen
+         braucht es exakte Zahlen, und die duerfen nicht davon abhaengen, wie
+         ein Sprachmodell einen Satz formuliert. */
+      if (sammler) {
+        sicht.map(function (z) {
+          var m = (z.top + z.bot) / 2;
+          return { supply: !!z.supply, bot: z.bot, top: z.top, broken: !!z.broken,
+                   retests: z.retests || 0, ab: Math.abs(m - kurs) };
+        }).sort(function (a, b) { return a.ab - b.ab; })
+          .forEach(function (x) { sammler.push(x); });
+      }
       return sicht.map(function (z) {
         var mitte = (z.top + z.bot) / 2;
         return { z: z, ab: Math.abs(mitte - kurs) };
@@ -64375,6 +64420,40 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      in einer erfundenen. Bewusst Median statt Mittelwert: ein einzelner
      entgleister Trade wuerde den Mittelwert verschieben und damit jeden
      Vorschlag mitverschieben. */
+  /* Wie gross der Stop dieses Nutzers ueblicherweise ist. Median, damit ein
+     einzelner entgleister Trade nicht jeden Vorschlag mitverschiebt. */
+  function medianStop(symbol) {
+    try {
+      var kurz = String(symbol).replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      var alle = trades();
+      var meine = alle.filter(function (t) { return gleichesSymbol(t, kurz); });
+      var basis = meine.length >= 5 ? meine : alle;
+      if (basis.length < 5) return NaN;
+      var stops = [];
+      basis.forEach(function (t) {
+        var e = parseFloat(t.entry), sl = parseFloat(t.sl);
+        if (isFinite(e) && isFinite(sl) && sl > 0) stops.push(Math.abs(e - sl));
+      });
+      return median(stops);
+    } catch (e) { return NaN; }
+  }
+
+  function medianR(symbol) {
+    try {
+      var kurz = String(symbol).replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      var alle = trades();
+      var meine = alle.filter(function (t) { return gleichesSymbol(t, kurz); });
+      var basis = meine.length >= 5 ? meine : alle;
+      if (basis.length < 5) return NaN;
+      var rs = [];
+      basis.forEach(function (t) {
+        var r = parseFloat(t.rr);
+        if (isFinite(r) && r > 0) rs.push(r);
+      });
+      return median(rs);
+    } catch (e) { return NaN; }
+  }
+
   function journalBlock(symbol, stellen) {
     try {
       var kurz = String(symbol).replace(/[^A-Za-z0-9]/g, '').toUpperCase();
@@ -64495,7 +64574,111 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return z.join('\n');
   }
 
-  function sachstand(basis, tfWahl, anzeige, symName, kalender) {
+  /* ── Feineinstieg in der Zone ─────────────────────────────────────
+     Eine M15-Zone ist zwei bis drei Dollar breit. Wer am oberen Rand kauft
+     und unter der ganzen Zone absichert, riskiert das Doppelte dessen, was
+     noetig waere. Auf M1 laesst sich innerhalb der Zone die Stelle finden,
+     an der der Kurs tatsaechlich reagiert hat — engerer Stop, gleiches Ziel.
+
+     Das kostet EINEN zusaetzlichen Abruf, deshalb nur, wenn der Preis
+     ueberhaupt in Reichweite ist. Bei Forex und Krypto ist er ohnehin
+     kostenlos (Yahoo). */
+  var FEIN_VON = { '5min': '1min', '15min': '1min', '1h': '5min', '4h': '15min' };
+
+  function feinTf(tf) { return FEIN_VON[tf] || null; }
+
+  /* Die naechste ungebrochene Zone, wenn sie nah genug ist, um zu zaehlen. */
+  function zielZone(ebenen, kurs, atrW) {
+    if (!isFinite(atrW) || atrW <= 0) return null;
+    var beste = null;
+    (ebenen || []).forEach(function (e) {
+      (e.zonen || []).forEach(function (z) {
+        if (z.broken) return;
+        var ab = (kurs >= z.bot && kurs <= z.top) ? 0
+               : Math.min(Math.abs(kurs - z.bot), Math.abs(kurs - z.top));
+        if (ab / atrW > 1.5) return;
+        if (!beste || ab < beste.ab) beste = { z: z, ab: ab, tf: e.tf };
+      });
+    });
+    return beste;
+  }
+
+  function verfeinern(feinBars, ziel, stellen) {
+    var z = ziel.z, aus = { sub: [], tiefstes: NaN, hoechstes: NaN };
+    try {
+      var Ind = window.ApexIndicators;
+      var res = Ind.compute(feinBars, 'sd', {});
+      var liste = Ind.sdVisibleZones(res.zoneList || [], feinBars.n - 1, { maxZones: 12 }) || [];
+      /* Nur was INNERHALB der groben Zone liegt. Eine feine Zone daneben
+         beantwortet die Frage nicht, sondern lenkt ab. */
+      aus.sub = liste.filter(function (f) {
+        return !f.broken && f.top >= z.bot && f.bot <= z.top;
+      }).map(function (f) {
+        return { supply: !!f.supply, bot: Math.max(f.bot, z.bot),
+                 top: Math.min(f.top, z.top), retests: f.retests || 0 };
+      }).sort(function (a, b) { return (a.top - a.bot) - (b.top - b.bot); }).slice(0, 3);
+
+      /* Wie tief der Kurs in der Zone wirklich war. Das ist der ehrlichste
+         Bezugspunkt fuer einen Stop: darunter war der Markt noch nie, seit
+         die Zone besteht. */
+      var tief = Infinity, hoch = -Infinity;
+      for (var i = 0; i < feinBars.n; i++) {
+        if (feinBars.l[i] <= z.top && feinBars.h[i] >= z.bot) {
+          if (feinBars.l[i] < tief) tief = feinBars.l[i];
+          if (feinBars.h[i] > hoch) hoch = feinBars.h[i];
+        }
+      }
+      aus.tiefstes  = isFinite(tief) ? tief : NaN;
+      aus.hoechstes = isFinite(hoch) ? hoch : NaN;
+    } catch (e) { /* ohne Verfeinerung bleibt der Rest gueltig */ }
+    return aus;
+  }
+
+  function feinBlock(ziel, fein, stellen, mStop) {
+    var z = ziel.z;
+    var out = ['', '=== FINER ENTRY INSIDE THE NEAREST ZONE ==='];
+    out.push('Parent zone (' + ziel.tf + '): ' + (z.supply ? 'SUPPLY' : 'DEMAND') + ' ' +
+             nf(z.bot, stellen) + '-' + nf(z.top, stellen) +
+             ', width ' + nf(z.top - z.bot, stellen) +
+             (ziel.ab === 0 ? ', price is INSIDE it' : ', ' + nf(ziel.ab, stellen) + ' away'));
+
+    if (fein.sub.length) {
+      out.push('Tighter zones found inside it on the lower timeframe (narrowest first):');
+      fein.sub.forEach(function (f) {
+        out.push('  - ' + (f.supply ? 'SUPPLY' : 'DEMAND') + ' ' +
+                 nf(f.bot, stellen) + '-' + nf(f.top, stellen) +
+                 '  width ' + nf(f.top - f.bot, stellen) +
+                 ', ' + f.retests + ' retests');
+      });
+    } else {
+      out.push('No tighter sub-zone formed inside it yet on the lower timeframe.');
+    }
+    if (isFinite(fein.tiefstes))
+      out.push('Deepest price reached inside the zone: ' + nf(fein.tiefstes, stellen) +
+               '   Highest: ' + nf(fein.hoechstes, stellen));
+
+    /* Beide Stopvarianten AUSRECHNEN und danebenstellen. Ohne die Zahlen
+       vergleicht die KI Aepfel mit Birnen und lobt die enge Variante, ohne
+       zu sagen was sie kostet. */
+    var breit = z.supply ? (z.top - z.bot) : (z.top - z.bot);
+    out.push('');
+    out.push('Stop comparison (this is the point of the section):');
+    out.push('  - Behind the WHOLE parent zone: risk is at least its full width, ' +
+             nf(breit, stellen) + ', plus buffer.');
+    if (fein.sub.length) {
+      var f0 = fein.sub[0];
+      out.push('  - Behind the narrowest sub-zone ' + nf(f0.bot, stellen) + '-' +
+               nf(f0.top, stellen) + ': risk about ' + nf(f0.top - f0.bot, stellen) + '.');
+    }
+    if (isFinite(mStop))
+      out.push('  - This user normally risks about ' + nf(mStop, stellen) + ' per trade.');
+    out.push('A tighter stop is not automatically better: the closer it sits to price, ' +
+             'the more likely a wick takes it out before the move happens. Name the ' +
+             'trade-off instead of just recommending the smaller number.');
+    return out.join('\n');
+  }
+
+  function sachstand(basis, tfWahl, anzeige, symName, kalender, fein) {
     var stufe = STUFEN[tfWahl] || STUFEN['15min'];
     var schluss = basis.c[basis.n - 1];
     /* Abstaende werden gegen den LIVE-Kurs gerechnet, wenn es ihn gibt. Der
@@ -64520,6 +64703,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }
     z.push('Time now (UTC): ' + new Date().toISOString().slice(0, 16).replace('T', ' '));
 
+    var ebenen = [];
     stufe.aus.forEach(function (paar) {
       var name = paar[0], faktor = paar[1];
       var b = verdichten(basis, faktor);
@@ -64539,12 +64723,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }
       z.push(kopf);
       if (st && !st.fehler && (st.bos >= 0 || st.choch >= 0)) {
-        var b = [];
-        if (st.bos >= 0)   b.push('break of structure ' + st.bos + ' candles ago');
-        if (st.choch >= 0) b.push('change of character ' + st.choch + ' candles ago');
-        z.push('Recent structure events: ' + b.join(', '));
+        /* NICHT 'b' nennen: 'b' sind die Kerzen dieser Ebene, und var gilt
+           funktionsweit. Die Umbenennung behebt einen Fehler, bei dem die
+           Zonenrechnung diese Textliste statt der Kerzen bekam — und zwar
+           nur dann, wenn gerade ein Strukturbruch vorlag. */
+        var ereignisse = [];
+        if (st.bos >= 0)   ereignisse.push('break of structure ' + st.bos + ' candles ago');
+        if (st.choch >= 0) ereignisse.push('change of character ' + st.choch + ' candles ago');
+        z.push('Recent structure events: ' + ereignisse.join(', '));
       }
-      var zn = zonenVon(b, kurs, stellen, a);
+      var roh = [];
+      var zn = zonenVon(b, kurs, stellen, a, roh);
+      ebenen.push({ tf: name, atr: a, stellen: stellen, zonen: roh,
+                    hoch: st && st.hoch, tief: st && st.tief });
       if (zn.length) {
         z.push('Supply & demand zones (user\'s own logic, nearest first):');
         zn.forEach(function (l) { z.push(l); });
@@ -64553,6 +64744,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }
     });
 
+    /* Fuer die Anzeige merken. Bewusst NACH der Berechnung und unabhaengig
+       davon, ob die KI ueberhaupt antwortet — die Level sollen auch dann
+       dastehen, wenn das KI-Guthaben leer ist. */
+    TV._levels = { titel: anzeige, sym: symName || anzeige, kurs: kurs,
+                   stellen: stellen, ebenen: ebenen };
+    levelZeigen();
+    if (fein && fein.ziel) z.push(feinBlock(fein.ziel, fein.daten, stellen, fein.mStop));
     z.push(newsBlock(kalender, symName || anzeige));
     /* Mit dem SYMBOL abgleichen, nicht mit dem Anzeigenamen: das Widget
        liefert als Titel "Gold", im Journal steht "XAUUSD". Der Vergleich lief
@@ -64571,6 +64769,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'then down to the entry timeframe.\n\n' +
     'Hard rules:\n' +
     '- Use ONLY numbers that appear in the data. Never invent a level.\n' +
+    'If a FINER ENTRY section is present, use it: say where inside the zone an entry would sit and what the stop would be there, next to what it would be behind the whole zone. Give both, with the trade-off \u2014 a tighter stop is closer to the noise.\n' +
+    '- The user draws on a chart you cannot touch, so every level you mention must be typed out in full and exactly as given \u2014 both bounds of a zone, not "the zone above". They will type your numbers in by hand.\n' +
     '- Do not tell the user to buy or sell and do not state a direction as a prediction. ' +
     'Describe conditions.\n' +
     '- If timeframes disagree, say so plainly instead of picking a side.\n' +
@@ -64630,9 +64830,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      KI sich nicht widerspricht. */
   var verlauf = [];
 
+  /* Der Fliesstext SOLL uebersetzt werden — die Zahlen darin nicht. Google
+     Translate macht aus "4349.21" ein "4349,21", und wer das in TradingView
+     eintippt, landet woanders. Darum jede Zahl einzeln schuetzen, statt den
+     ganzen Text von der Uebersetzung auszunehmen. */
+  function zahlenSchuetzen(html) {
+    return html.replace(/\d+(?:\.\d+)?/g, function (m) {
+      return '<span class="notranslate" translate="no">' + m + '</span>';
+    });
+  }
+
   function blase(rolle, text) {
     return '<div class="tv-ki-' + (rolle === 'user' ? 'frage' : 'antwort') + '">' +
-           escHtml(text).replace(/\n/g, '<br>') + '</div>';
+           zahlenSchuetzen(escHtml(text)).replace(/\n/g, '<br>') + '</div>';
   }
 
   function malen() {
@@ -64974,6 +65184,312 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   TV.pruefePreis = preisPruefen;
   TV.auffrischen = zonenAuffrischen;
 
+  /* ── Level zum Einzeichnen ────────────────────────────────────────
+     Zeichnen koennen wir im TradingView-Chart nicht — er liegt auf fremder
+     Herkunft. Also muessen die Zahlen so dastehen, dass man sie von Hand
+     eintragen kann: exakt, vollstaendig, kopierbar. Diese Liste kommt aus
+     der Rechnung, NICHT aus dem Antworttext der KI — sie steht auch dann,
+     wenn die KI gerade nichts sagen kann. */
+  function levelText() {
+    var L = TV._levels;
+    if (!L || !L.ebenen || !L.ebenen.length) return '';
+    var z = [L.titel + '  ' + nf(L.kurs, L.stellen) + '  (' +
+             new Date().toLocaleString() + ')'];
+    var F = TV._fein;
+    if (F && F.ziel) {
+      z.push('');
+      z.push('Finer entry (' + F.tf + ') inside ' +
+             (F.ziel.z.supply ? 'SUPPLY ' : 'DEMAND ') +
+             nf(F.ziel.z.bot, L.stellen) + ' - ' + nf(F.ziel.z.top, L.stellen));
+      (F.daten.sub || []).forEach(function (f) {
+        z.push('  ' + (f.supply ? 'SUPPLY' : 'DEMAND') + '  ' +
+               nf(f.bot, L.stellen) + ' - ' + nf(f.top, L.stellen) +
+               '   width ' + nf(f.top - f.bot, L.stellen));
+      });
+      if (isFinite(F.daten.tiefstes))
+        z.push('  reached ' + nf(F.daten.tiefstes, L.stellen) + ' - ' +
+               nf(F.daten.hoechstes, L.stellen) + ' inside');
+    }
+    L.ebenen.forEach(function (e) {
+      if (!e.zonen.length && !isFinite(e.hoch) && !isFinite(e.tief)) return;
+      z.push('');
+      z.push(e.tf + (isFinite(e.atr) ? '   ATR ' + nf(e.atr, L.stellen) : ''));
+      e.zonen.forEach(function (x) {
+        z.push('  ' + (x.supply ? 'SUPPLY' : 'DEMAND') + '  ' +
+               nf(x.bot, L.stellen) + ' - ' + nf(x.top, L.stellen) +
+               '   ' + (x.broken ? 'broken' : 'unbroken') +
+               ', ' + x.retests + ' retests, ' + nf(x.ab, L.stellen) + ' away');
+      });
+      if (isFinite(e.hoch)) z.push('  swing high  ' + nf(e.hoch, L.stellen));
+      if (isFinite(e.tief)) z.push('  swing low   ' + nf(e.tief, L.stellen));
+    });
+    return z.join('\n');
+  }
+
+  function levelZeigen() {
+    var el = document.getElementById('tvLevels');
+    var L = TV._levels;
+    if (!el) return;
+    if (!L || !L.ebenen || !L.ebenen.length) { el.innerHTML = ''; return; }
+
+    var h = '<div class="tv-lv-kopf"><b>Levels to draw</b>' +
+            '<button id="tvLvCopy" class="tv-lv-copy">Copy</button></div>';
+
+    /* Die Verfeinerung ganz nach oben: sie beantwortet die Frage, die man
+       stellt, waehrend man in der Zone steht. */
+    var F = TV._fein;
+    if (F && F.ziel) {
+      var pz = F.ziel.z;
+      h += '<div class="tv-lv-tf">Finer entry &middot; ' + F.tf + '</div>';
+      h += '<div class="tv-lv-eltern notranslate" translate="no">in ' +
+           (pz.supply ? 'SUPPLY ' : 'DEMAND ') + nf(pz.bot, L.stellen) + '&ndash;' +
+           nf(pz.top, L.stellen) + '</div>';
+      if (F.daten.sub && F.daten.sub.length) {
+        F.daten.sub.forEach(function (f) {
+          h += '<div class="tv-lv-z fein">' +
+            '<span class="tv-lv-typ ' + (f.supply ? 's' : 'd') + '">' +
+              (f.supply ? 'S' : 'D') + '</span>' +
+            '<span class="tv-lv-p notranslate" translate="no">' +
+              nf(f.bot, L.stellen) + '&ndash;' + nf(f.top, L.stellen) + '</span>' +
+            '<span class="tv-lv-m">width ' + nf(f.top - f.bot, L.stellen) +
+              (f.retests ? ' · ' + f.retests + 'r' : '') + '</span>' +
+          '</div>';
+        });
+      } else {
+        h += '<div class="tv-lv-sw">no tighter zone inside it yet</div>';
+      }
+      if (isFinite(F.daten.tiefstes))
+        h += '<div class="tv-lv-sw notranslate" translate="no">reached ' +
+             nf(F.daten.tiefstes, L.stellen) + ' &ndash; ' +
+             nf(F.daten.hoechstes, L.stellen) + ' inside</div>';
+    }
+    L.ebenen.forEach(function (e) {
+      var zeilen = '';
+      e.zonen.forEach(function (x) {
+        /* Gebrochene Zonen bleiben in der Liste, aber gedaempft: sie sind zum
+           Einzeichnen weiterhin nuetzlich (alte Zonen wirken oft nach), nur
+           eben nicht gleichwertig. */
+        zeilen += '<div class="tv-lv-z' + (x.broken ? ' aus' : '') + '">' +
+          '<span class="tv-lv-typ ' + (x.supply ? 's' : 'd') + '">' +
+            (x.supply ? 'S' : 'D') + '</span>' +
+          '<span class="tv-lv-p notranslate" translate="no">' +
+            nf(x.bot, L.stellen) + '&ndash;' + nf(x.top, L.stellen) + '</span>' +
+          '<span class="tv-lv-m">' + (x.broken ? 'broken' : 'unbroken') +
+            (x.retests ? ' · ' + x.retests + 'r' : '') + '</span>' +
+        '</div>';
+      });
+      var sw = [];
+      if (isFinite(e.hoch)) sw.push('H ' + nf(e.hoch, L.stellen));
+      if (isFinite(e.tief)) sw.push('L ' + nf(e.tief, L.stellen));
+      if (sw.length) zeilen += '<div class="tv-lv-sw notranslate" translate="no">' +
+        sw.join('   ') + '</div>';
+      if (!zeilen) return;
+      h += '<div class="tv-lv-tf">' + e.tf + '</div>' + zeilen;
+    });
+    el.innerHTML = h;
+    var k = document.getElementById('tvLvCopy');
+    if (k) k.onclick = function () {
+      var t = levelText();
+      /* Zwischenablage kann fehlschlagen (Rechte, unsicherer Kontext). Dann
+         die Auswahl anbieten statt nur zu scheitern. */
+      var fertig = function () { k.textContent = 'Copied'; setTimeout(function () {
+        k.textContent = 'Copy'; }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(fertig).catch(function () { notfall(t, k); });
+      } else notfall(t, k);
+    };
+  }
+
+  function notfall(text, knopf) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); knopf.textContent = 'Copied'; }
+    catch (e) { knopf.textContent = 'Press Ctrl+C'; }
+    setTimeout(function () { knopf.textContent = 'Copy'; }, 1600);
+    document.body.removeChild(ta);
+  }
+
+  /* ── Setup-Karte ──────────────────────────────────────────────────
+     Die Zahlen zum Handeln gehoeren nicht in einen Fliesstext. Sie werden
+     hier GERECHNET — aus der Zone, ihrer Verfeinerung und der naechsten
+     Gegenzone — und nicht aus der Antwort der KI herausgelesen. Damit
+     stehen sie auch dann, wenn die KI schweigt, und sie koennen nicht
+     durch eine ungluecklich formulierte Antwort verrutschen.
+
+     Richtung folgt aus dem Zonentyp: Demand heisst long, Supply short.
+     Das ist keine Empfehlung, sondern die Definition der Zone. */
+  function setupRechnen() {
+    var L = TV._levels, F = TV._fein;
+    if (!L || !F || !F.ziel) return null;
+    var z = F.ziel.z, st = L.stellen, atrW = (L.ebenen[0] && L.ebenen[0].atr) || 0;
+    var lang = !z.supply;
+
+    /* Puffer, damit der Stop nicht exakt auf der Kante klebt. Ein Zehntel
+       ATR ist wenig genug, um die Idee nicht zu verwaessern, und genug,
+       damit ein einzelner Docht ihn nicht abraeumt. */
+    var puffer = isFinite(atrW) && atrW > 0 ? atrW * 0.1 : (z.top - z.bot) * 0.1;
+
+    /* Einstieg an der Kante, die der Kurs zuerst beruehrt. */
+    var einstieg = lang ? z.top : z.bot;
+    var stopWeit = lang ? (z.bot - puffer) : (z.top + puffer);
+
+    var stopEng = NaN, feinZone = null;
+    if (F.daten.sub && F.daten.sub.length) {
+      feinZone = F.daten.sub[0];
+      stopEng = lang ? (feinZone.bot - puffer) : (feinZone.top + puffer);
+    }
+    /* Der tiefste tatsaechlich erreichte Punkt ist der ehrlichste Anker:
+       darunter war der Markt nicht, seit die Zone besteht. */
+    var stopDocht = lang ? F.daten.tiefstes : F.daten.hoechstes;
+    if (isFinite(stopDocht)) stopDocht = lang ? stopDocht - puffer : stopDocht + puffer;
+
+    /* Ziel: die naechste ungebrochene GEGENzone in Kursrichtung. Ohne eine
+       solche kein Ziel — lieber keine Zahl als eine erfundene. */
+    var ziel = NaN, zielHer = '';
+    (L.ebenen || []).forEach(function (e) {
+      (e.zonen || []).forEach(function (g) {
+        if (g.broken || !!g.supply === !!z.supply) return;
+        var kante = lang ? g.bot : g.top;
+        if (lang ? kante <= einstieg : kante >= einstieg) return;
+        if (!isFinite(ziel) || (lang ? kante < ziel : kante > ziel)) {
+          ziel = kante; zielHer = e.tf + ' ' + (g.supply ? 'supply' : 'demand');
+        }
+      });
+    });
+
+    function rr(stop) {
+      if (!isFinite(stop) || !isFinite(ziel)) return NaN;
+      var risiko = Math.abs(einstieg - stop), gewinn = Math.abs(ziel - einstieg);
+      return risiko > 0 ? gewinn / risiko : NaN;
+    }
+
+    return {
+      lang: lang, tf: F.ziel.tf, stellen: st,
+      zone: { bot: z.bot, top: z.top },
+      fein: feinZone,
+      einstieg: einstieg,
+      stops: [
+        { name: 'behind the zone', wert: stopWeit, risiko: Math.abs(einstieg - stopWeit), rr: rr(stopWeit) },
+        feinZone ? { name: 'behind the ' + F.tf + ' sub-zone', wert: stopEng,
+                     risiko: Math.abs(einstieg - stopEng), rr: rr(stopEng) } : null,
+        isFinite(stopDocht) ? { name: 'below the deepest wick', wert: stopDocht,
+                     risiko: Math.abs(einstieg - stopDocht), rr: rr(stopDocht) } : null,
+      ].filter(Boolean),
+      ziel: ziel, zielHer: zielHer,
+      ueblich: medianStop(L.sym),
+      ueblichR: medianR(L.sym),
+    };
+  }
+
+  function setupZeigen() {
+    var el = document.getElementById('tvSetup');
+    if (!el) return;
+    var S = setupRechnen();
+    TV._setup = S;
+    if (!S) { el.innerHTML = ''; return; }
+    var n = function (x) { return nf(x, S.stellen); };
+    var h = '<div class="tv-su-kopf"><b>Setup</b>' +
+      '<span class="tv-su-dir ' + (S.lang ? 'l' : 's') + '">' +
+        (S.lang ? 'LONG · demand' : 'SHORT · supply') + '</span>' +
+      '<button id="tvSuCopy" class="tv-lv-copy">Copy</button></div>';
+    h += '<div class="tv-su-z notranslate" translate="no">' + S.tf + '  ' +
+         n(S.zone.bot) + '&ndash;' + n(S.zone.top) + '</div>';
+    h += '<div class="tv-su-r"><span>Entry</span>' +
+         '<b class="notranslate" translate="no">' + n(S.einstieg) + '</b>' +
+         '<i>zone edge</i></div>';
+    S.stops.forEach(function (x) {
+      h += '<div class="tv-su-r"><span>Stop</span>' +
+           '<b class="notranslate" translate="no">' + n(x.wert) + '</b>' +
+           '<i>' + x.name + ' &middot; risk ' +
+           '<span class="notranslate" translate="no">' + n(x.risiko) + '</span>' +
+           (isFinite(x.rr) ? ' &middot; <span class="notranslate" translate="no">' +
+              x.rr.toFixed(1) + 'R</span>' : '') + '</i></div>';
+    });
+    if (isFinite(S.ziel)) {
+      /* Ein sehr hohes R heisst nicht "guter Trade", sondern "das Ziel liegt
+         weit weg gemessen am Stop". Ungekennzeichnet liest sich 57R wie ein
+         Geschenk. */
+      var weit = S.stops[0] && isFinite(S.stops[0].rr) && S.stops[0].rr > 10;
+      h += '<div class="tv-su-r"><span>Target</span>' +
+           '<b class="notranslate" translate="no">' + n(S.ziel) + '</b>' +
+           '<i>next ' + S.zielHer + (weit ? ' &middot; far for this stop' : '') + '</i></div>';
+      if (weit)
+        h += '<div class="tv-su-hint">That target sits far away relative to the stop, so ' +
+             'the R number is not a realistic expectation &mdash; price would have to run ' +
+             'a long way untouched.</div>';
+    } else {
+      h += '<div class="tv-su-hint">No opposing zone ahead &mdash; no target level can be ' +
+           'derived from your zones.</div>';
+    }
+    /* Zusaetzlich ein Ziel, das zum eigenen Handeln passt: ueblicher
+       R-Faktor mal das Risiko dieses Stops. Naeher an dem, was der Nutzer
+       tatsaechlich mitnimmt, als eine weit entfernte Zone. */
+    if (isFinite(S.ueblichR) && S.stops.length) {
+      var r0 = S.stops[0].risiko;
+      var zielEigen = S.lang ? S.einstieg + r0 * S.ueblichR : S.einstieg - r0 * S.ueblichR;
+      h += '<div class="tv-su-r"><span>Target</span>' +
+           '<b class="notranslate" translate="no">' + n(zielEigen) + '</b>' +
+           '<i>at your usual ' +
+           '<span class="notranslate" translate="no">' + S.ueblichR.toFixed(1) + 'R</span>' +
+           '</i></div>';
+    }
+    if (isFinite(S.ueblich))
+      h += '<div class="tv-su-hint">You normally risk about ' +
+           '<span class="notranslate" translate="no">' + n(S.ueblich) + '</span> per trade.</div>';
+    /* Gegen die eigenen Regeln pruefen, mit den eigenen Worten. Steht im
+       Playbook "only long" und die Karte zeigt einen Short, muss das
+       dastehen — sonst liest man eine Zahl und vergisst die Regel. */
+    var sel = document.getElementById('tvKiPb');
+    var pb = (window.playbooks || []).filter(function (p) {
+      return p.id === (sel && sel.value); })[0];
+    if (pb) {
+      var t = ((pb.rules || '') + ' ' + (pb.checklist || []).join(' ')).toLowerCase();
+      var nurLang  = /only long|nur long|longs only|long only/.test(t);
+      var nurKurz  = /only short|nur short|shorts only|short only/.test(t);
+      if ((nurLang && !S.lang) || (nurKurz && S.lang))
+        h += '<div class="tv-su-warn">This is a ' + (S.lang ? 'long' : 'short') +
+             ', but your playbook &ldquo;' + escHtml(pb.name) + '&rdquo; says ' +
+             (nurLang ? 'long only' : 'short only') + '.</div>';
+      else
+        h += '<div class="tv-su-hint">Direction fits &ldquo;' + escHtml(pb.name) + '&rdquo;.</div>';
+    }
+    h += '<div class="tv-su-hint">Levels derived from your own zone logic. ' +
+         'Not advice &mdash; check them against your plan.</div>';
+    el.innerHTML = h;
+    var k = document.getElementById('tvSuCopy');
+    if (k) k.onclick = function () {
+      var t = setupText();
+      if (navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(t).then(function () {
+          k.textContent = 'Copied'; setTimeout(function () { k.textContent = 'Copy'; }, 1600);
+        }).catch(function () { notfall(t, k); });
+      else notfall(t, k);
+    };
+  }
+
+  function setupText() {
+    var S = TV._setup, L = TV._levels;
+    if (!S) return '';
+    var n = function (x) { return nf(x, S.stellen); };
+    var z = [(L ? L.titel + '  ' : '') + (S.lang ? 'LONG (demand)' : 'SHORT (supply)') +
+             '  ' + S.tf + '  ' + n(S.zone.bot) + '-' + n(S.zone.top),
+             'Entry  ' + n(S.einstieg)];
+    S.stops.forEach(function (x) {
+      z.push('Stop   ' + n(x.wert) + '   ' + x.name + ', risk ' + n(x.risiko) +
+             (isFinite(x.rr) ? ', ' + x.rr.toFixed(1) + 'R' : ''));
+    });
+    if (isFinite(S.ziel)) z.push('Target ' + n(S.ziel) + '   next ' + S.zielHer);
+    if (isFinite(S.ueblichR) && S.stops.length) {
+      var r0 = S.stops[0].risiko;
+      z.push('Target ' + n(S.lang ? S.einstieg + r0 * S.ueblichR
+                                  : S.einstieg - r0 * S.ueblichR) +
+             '   at your usual ' + S.ueblichR.toFixed(1) + 'R');
+    }
+    if (isFinite(S.ueblich)) z.push('(you normally risk about ' + n(S.ueblich) + ')');
+    return z.join('\n');
+  }
+
   function analysieren() {
     var out = document.getElementById('tvKiOut');
     var tf = (document.getElementById('tvKiTf') || {}).value || '15min';
@@ -65009,20 +65525,57 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         kerzenHolen(datenSym, stufe.basis, stufe.bars),
         kalenderHolen(),
       ]).then(function (paar) {
-      var bars = paar[0];
-      var fakten = sachstand(bars, tf, anzeige, (info && info.name) || '', paar[1]);
-      TV._fakten = fakten;
-      busy(true, 'Analysing…');
-      /* Die Faktenlage steht als versteckte erste Nachricht im Verlauf:
-         Rueckfragen sollen sich darauf beziehen koennen, ohne sie dem
-         Nutzer als Gespraechsblase vorzusetzen. */
-      var mitPb = /=== THE PLAYBOOK THE USER TRADES/.test(fakten);
-      var anweisung = GRUND + (mitPb ? MIT_PLAYBOOK : OHNE_PLAYBOOK);
-      verlauf.push({ role: 'user', content: anweisung + '\n\n---\n' + fakten, versteckt: true });
+      var bars = paar[0], kalender = paar[1];
+      var fakten = sachstand(bars, tf, anzeige, (info && info.name) || '', kalender);
+
+      /* Lohnt eine Verfeinerung? Nur wenn eine ungebrochene Zone in Reichweite
+         ist. Sonst waere der zusaetzliche Abruf verschenkt — und bei Gold
+         zaehlt jeder aus dem knappen Tagesbudget. */
+      var L = TV._levels;
+      var atrBasis = L && L.ebenen && L.ebenen[0] && L.ebenen[0].atr;
+      var ziel = zielZone(L && L.ebenen, L && L.kurs, atrBasis);
+      var ftf = feinTf(tf);
+      var vorbereitet;
+      if (ziel && ftf) {
+        busy(true, 'Refining…');
+        vorbereitet = kerzenHolen(datenSym, ftf, 900).then(function (fb) {
+          var fein = verfeinern(fb, ziel, L.stellen);
+          TV._fein = { ziel: ziel, daten: fein, tf: ftf };
+          levelZeigen();
+          setupZeigen();
+          return fakten + '\n' + feinBlock(ziel, fein, L.stellen,
+                            medianStop((info && info.name) || anzeige));
+        }).catch(function (e) {
+          /* Ohne Verfeinerung bleibt die Analyse gueltig, nur groeber. Den
+             Grund aber festhalten — ein stiller catch hat hier schon zweimal
+             einen echten Fehler versteckt. */
+          TV._fein = null;
+          TV._feinFehler = (e && e.message) || String(e);
+          return fakten;
+        });
+      } else {
+        /* Keine Zone in Reichweite: dann gibt es auch kein Setup zu zeigen.
+           Eine leere Karte ist besser als eine mit Zahlen von vorhin. */
+        TV._fein = null;
+        setupZeigen();
+        vorbereitet = Promise.resolve(fakten);
+      }
+
+      return vorbereitet.then(function (volle) {
+        TV._fakten = volle;
+        busy(true, 'Analysing…');
+        /* Die Faktenlage steht als versteckte erste Nachricht im Verlauf:
+           Rueckfragen sollen sich darauf beziehen koennen, ohne sie dem
+           Nutzer als Gespraechsblase vorzusetzen. */
+        var mitPb = /=== THE PLAYBOOK THE USER TRADES/.test(volle);
+        var anweisung = GRUND + (mitPb ? MIT_PLAYBOOK : OHNE_PLAYBOOK);
+        verlauf.push({ role: 'user', content: anweisung + '\n\n---\n' + volle,
+                       versteckt: true });
         return fragen(null).then(function (text) {
           verlauf.push({ role: 'assistant', content: text });
           malen();
         });
+      });
       });
     }).catch(function (e) {
       out.innerHTML = '<p class="tv-ki-warn">' + escHtml(e.message || 'failed') + '</p>';
