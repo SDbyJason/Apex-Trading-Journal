@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-03c';
+  window.APEX_BUILD = '2026-09-03h';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7067,22 +7067,40 @@ body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
 #page-chart .tv-daten{display:grid;grid-template-columns:1fr 320px;gap:12px;margin-top:12px;align-items:start}
 @media(max-width:980px){#page-chart .tv-daten{grid-template-columns:1fr}}
 #page-chart .tv-levels:not(:empty){max-height:280px;overflow-y:auto;border:0.5px solid var(--rim);border-radius:9px;padding:9px 10px;background:var(--elevated)}
-#page-chart .tv-lv-kopf{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-#page-chart .tv-lv-kopf b{font-family:var(--font-display);font-size:12px;color:var(--ink)}
+#page-chart .tv-lv-kopf{display:flex;align-items:center;gap:9px;margin-bottom:2px}
+#page-chart .tv-lv-auf{flex:0 0 auto;background:none;border:0;padding:0;cursor:pointer;color:var(--ink);font-family:var(--font-display);font-size:12px;display:flex;align-items:center;gap:6px}
+#page-chart .tv-lv-auf:before{content:'\25B8';color:var(--ink3);font-size:10px;transition:.15s}
+#page-chart .tv-lv-auf[aria-expanded="true"]:before{transform:rotate(90deg)}
+#page-chart .tv-lv-kurs{flex:1 1 auto;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
 #page-chart .tv-lv-copy{background:none;border:0.5px solid var(--rim);color:var(--ink3);border-radius:6px;padding:3px 9px;font-size:10.5px;cursor:pointer}
 #page-chart .tv-lv-copy:hover{border-color:var(--gold-line);color:var(--gold)}
-#page-chart .tv-lv-gitter{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 16px}
-#page-chart .tv-lv-tf{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:8px 0 3px}
-#page-chart .tv-lv-z{display:flex;align-items:center;gap:6px;font-size:11.5px;line-height:1.7}
-#page-chart .tv-lv-z.aus{opacity:.5}
-#page-chart .tv-lv-typ{flex:0 0 auto;width:14px;text-align:center;border-radius:3px;font-size:9.5px;font-weight:700;line-height:14px}
-#page-chart .tv-lv-typ.s{background:rgba(220,80,80,.18);color:#e06a6a}
-#page-chart .tv-lv-typ.d{background:rgba(80,180,120,.18);color:#4fb87a}
-#page-chart .tv-lv-p{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--ink)}
-#page-chart .tv-lv-m{flex:1 1 auto;min-width:0;font-size:10.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#page-chart .tv-lv-eltern{font-size:10.5px;color:var(--ink3);margin-bottom:3px}
+#page-chart .tv-lv-body{margin-top:7px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 18px;align-items:start}
+#page-chart .tv-lv-tf{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:9px 0 3px;border-top:0.5px solid var(--rim);padding-top:7px}
+#page-chart .tv-lv-tf:first-child{border-top:0;margin-top:0;padding-top:0}
+#page-chart .tv-lv-tf span{letter-spacing:0;text-transform:none;font-weight:400;color:var(--ink3);font-size:10px}
+#page-chart .tv-lv-z{display:flex;align-items:center;gap:8px;font-size:11.5px;line-height:1.9}
+#page-chart .tv-lv-z.aus{opacity:.45}
 #page-chart .tv-lv-z.fein .tv-lv-p{color:var(--gold)}
-#page-chart .tv-lv-sw{font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums;margin-top:2px}
+#page-chart .tv-lv-typ{flex:0 0 auto;width:3px;height:13px;border-radius:2px}
+#page-chart .tv-lv-typ.s{background:#e06a6a}
+#page-chart .tv-lv-typ.d{background:#4fb87a}
+#page-chart .tv-lv-p{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--ink);letter-spacing:-.01em}
+#page-chart .tv-lv-p i{font-style:normal;color:var(--ink3);margin:0 2px}
+#page-chart .tv-lv-kraft{flex:0 0 auto;width:26px;height:3px;border-radius:2px;background:var(--rim);overflow:hidden}
+#page-chart .tv-lv-kraft i{display:block;height:100%;background:var(--gold);border-radius:2px}
+#page-chart .tv-lv-m{flex:1 1 auto;min-width:0;font-size:10px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-chart .tv-lv-kern{font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums;padding-left:11px;line-height:1.5}
+#page-chart .tv-lv-flip{margin-top:5px;padding-top:5px;border-top:0.5px dashed var(--rim)}
+#page-chart .tv-lv-fltitel{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:1px}
+#page-chart .tv-lv-z.flip .tv-lv-p{color:var(--ink2)}
+#page-chart .tv-lv-typ.hohl{background:none;box-shadow:inset 0 0 0 1.5px currentColor}
+#page-chart .tv-lv-typ.s.hohl{color:#e06a6a}
+#page-chart .tv-lv-typ.d.hohl{color:#4fb87a}
+#page-chart .tv-lv-sw{font-size:10px;color:var(--ink3);font-variant-numeric:tabular-nums;margin-top:3px}
+#page-chart .tv-lv-leer{font-size:10px;color:var(--ink3);line-height:1.6}
+#page-chart .tv-lv-fein{grid-column:1/-1;border:0.5px solid var(--gold-line);border-radius:8px;padding:8px 10px;margin-bottom:4px;background:var(--gold-dim)}
+#page-chart .tv-lv-fkopf{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);font-weight:700}
+#page-chart .tv-lv-fin{font-size:10.5px;color:var(--ink3);margin:2px 0 4px;font-variant-numeric:tabular-nums}
 body.light #page-chart .tv-levels:not(:empty){background:#fff;border-color:rgba(0,0,0,.09)}
 #page-chart .tv-ki-out{flex:1 1 auto;overflow-y:auto;min-height:0;font-size:12.5px;line-height:1.65;color:var(--ink2)}
 #page-chart .tv-ki-antwort{white-space:normal;margin-bottom:11px}
@@ -7125,7 +7143,13 @@ body.light #page-chart .tv-ki{background:#fff;border-color:rgba(0,0,0,.09)}
   #page-chart .tv-ki{height:auto;min-height:0}
   #page-chart .tv-ki-out{max-height:none;overflow-y:visible}
 }
-#page-chart .tv-buehne{height:min(56vh,660px);min-height:320px;border:0.5px solid var(--rim);border-radius:12px;overflow:hidden;background:var(--layer)}
+#page-chart .tv-buehne{position:relative;height:min(56vh,660px);min-height:320px;border:0.5px solid var(--rim);border-radius:12px;overflow:hidden;background:var(--layer)}
+/* Der Knopf liegt UEBER dem Rahmen; im Vollbild traegt die Buehne die
+   Hoehe selbst, sonst bliebe sie auf ihren 56vh stehen. */
+#page-chart .tv-voll{position:absolute;top:8px;right:8px;z-index:3;background:rgba(0,0,0,.45);border:0.5px solid var(--rim);color:var(--ink2);border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.6;transition:.15s}
+#page-chart .tv-voll:hover{opacity:1;border-color:var(--gold-line);color:var(--gold)}
+#page-chart .tv-buehne.apex-fs{height:100vh;max-height:none;border-radius:0}
+body.light #page-chart .tv-voll{background:rgba(255,255,255,.75)}
 #page-chart #tvBox{width:100%;height:100%}
 #page-chart .tv-hinweis:not(:empty){margin-top:10px;font-size:12.5px;color:var(--loss);line-height:1.6;max-width:70ch}
 body.light #page-chart .tv-chip{background:#fff;border-color:rgba(0,0,0,.12)}
@@ -63912,7 +63936,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           '<span id="tvKiToggleT">Hide AI</span></button>' +
       '</div>' +
       '<div class="tv-haupt">' +
-        '<div class="tv-buehne"><div id="tvBox"></div></div>' +
+        '<div class="tv-buehne" id="tvBuehne">' +
+          '<button class="tv-voll apex-fsbtn" data-apex-fs=".tv-buehne" ' +
+            'title="Full screen" aria-label="Full screen">&#9974;</button>' +
+          '<div id="tvBox"></div>' +
+        '</div>' +
         '<aside class="tv-ki" id="tvKi">' +
           '<div class="tv-ki-kopf">' +
             '<b>AI analysis</b>' +
@@ -64320,7 +64348,125 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     } catch (e) { return NaN; }
   }
 
-  function zonenVon(bars, kurs, stellen, atrW, sammler) {
+  /* ── Zonen buendeln ───────────────────────────────────────────────
+     Fuenf Zonen innerhalb von zehn Dollar sind keine fuenf Gelegenheiten,
+     sondern EIN Bereich, den der Markt mehrfach markiert hat. Ungebuendelt
+     liest die KI daraus fuenf Kandidaten und der Nutzer bekommt eine Liste
+     statt einer Entscheidung.
+
+     Zusammengefasst wird, was sich ueberlappt oder naeher als 0,4 ATR
+     beieinanderliegt — dieselbe Seite vorausgesetzt. Ein Supply- und ein
+     Demand-Bereich auf gleicher Hoehe bleiben getrennt: sie bedeuten
+     Gegensaetzliches. */
+  /* Zusammengefasst wird nicht nach LUECKE, sondern nach GESAMTSPANNE.
+     Der Unterschied ist entscheidend: zwei drei Dollar breite Zonen mit vier
+     Dollar Abstand haben eine grosse Luecke, aber zusammen nur zehn Dollar —
+     und das ist ein Bereich, keine zwei Gelegenheiten. Eine Luecken-Regel
+     haette sie getrennt gelassen.
+
+     Die Grenze steht in ATR, nicht in Dollar, damit sie fuer Gold und fuer
+     ein Devisenpaar dasselbe bedeutet. 2 ATR entsprach beim Kalibrieren
+     genau der Vorgabe "zwei bis drei Zonen in zehn Dollar". */
+  var BUENDEL_SPANNE = 2.0;   // in ATR
+
+  /* ── Staerke einer Zone ───────────────────────────────────────────
+     Bewusst gerechnet und nicht dem Sprachmodell ueberlassen: eine Rangfolge
+     muss bei gleicher Datenlage gleich bleiben. Die KI bekommt die Zahl und
+     ihre Bestandteile als Eingabe und darf begruendet widersprechen — aber
+     die Grundlage steht fest und ist nachpruefbar.
+
+     Fuenf Bestandteile, jeder fuer sich 0 bis 1:
+       Impuls   wie kraftvoll der Markt die Zone verlassen hat
+       frisch   je oefter zurueckgetestet, desto mehr Liquiditaet ist weg
+       eng      schmale Zonen erlauben praezise Einstiege und enge Stops
+       HTF      bestaetigt ein hoeherer Zeitrahmen dieselbe Stelle?
+       jung     alte Zonen verlieren an Bedeutung, aber nur langsam */
+  function impulsVon(bars, z, atrW) {
+    if (!isFinite(z.von) || !isFinite(atrW) || atrW <= 0) return NaN;
+    var start = Math.max(0, Math.min(bars.n - 1, z.von | 0));
+    var ende = Math.min(bars.n - 1, start + 20);
+    var weit = 0;
+    for (var i = start; i <= ende; i++) {
+      /* Nachfragezone: der Markt muss NACH OBEN weggelaufen sein.
+         Angebotszone entsprechend nach unten. */
+      var d = z.supply ? (z.bot - bars.l[i]) : (bars.h[i] - z.top);
+      if (d > weit) weit = d;
+    }
+    return weit / atrW;
+  }
+
+  function staerke(g, bars, atrW, andereEbenen) {
+    var k = g.kern || g;
+    var imp = impulsVon(bars, k, atrW);
+    var teil = {};
+    teil.impuls = isFinite(imp) ? Math.min(imp / 3, 1) : 0.4;
+    var r = g.retests || 0;
+    teil.frisch = r === 0 ? 1 : (r === 1 ? 0.7 : (r === 2 ? 0.45 : 0.25));
+    var breite = (k.top - k.bot);
+    teil.eng = (isFinite(atrW) && atrW > 0)
+      ? Math.max(0, 1 - Math.min(breite / (2 * atrW), 1)) : 0.5;
+    /* Deckt ein hoeherer Zeitrahmen dieselbe Stelle ab, ist es kein Zufall. */
+    teil.htf = 0.35;
+    (andereEbenen || []).forEach(function (e) {
+      (e.zonen || []).forEach(function (o) {
+        if (o.supply !== g.supply) return;
+        if (o.top >= g.bot && o.bot <= g.top) teil.htf = 1;
+      });
+    });
+    teil.jung = isFinite(g.juengste) ? Math.max(0.4, 1 - Math.min(g.juengste / 400, 1)) : 0.7;
+
+    var wert = teil.impuls * 0.30 + teil.frisch * 0.25 + teil.eng * 0.20 +
+               teil.htf * 0.15 + teil.jung * 0.10;
+    return { punkte: Math.round(wert * 100), teil: teil, impulsAtr: imp };
+  }
+
+  function zonenBuendeln(zonen, atrW) {
+    var maxSpanne = (isFinite(atrW) && atrW > 0) ? atrW * BUENDEL_SPANNE : Infinity;
+    var sortiert = zonen.slice().sort(function (a, b) { return a.bot - b.bot; });
+    var gruppen = [];
+
+    sortiert.forEach(function (z) {
+      var passt = null;
+      for (var i = 0; i < gruppen.length; i++) {
+        var g = gruppen[i];
+        if (g.supply !== z.supply) continue;
+        var neuBot = Math.min(g.bot, z.bot), neuTop = Math.max(g.top, z.top);
+        /* Ueberlappende immer, sonst nur solange der Bereich handhabbar
+           bleibt — ohne diese Deckelung wuerde sich eine Kette von Zonen
+           ueber den halben Chart zusammenziehen. */
+        var ueberlappt = z.bot <= g.top && z.top >= g.bot;
+        if (ueberlappt || (neuTop - neuBot) <= maxSpanne) { passt = g; break; }
+      }
+      if (passt) {
+        passt.bot = Math.min(passt.bot, z.bot);
+        passt.top = Math.max(passt.top, z.top);
+        passt.teile.push(z);
+      } else {
+        gruppen.push({ supply: z.supply, bot: z.bot, top: z.top, teile: [z] });
+      }
+    });
+
+    gruppen.forEach(function (g) {
+      g.retests = 0; g.juengste = Infinity; g.ab = Infinity;
+      g.teile.forEach(function (z) {
+        g.retests += z.retests || 0;
+        if (isFinite(z.alter) && z.alter < g.juengste) g.juengste = z.alter;
+        if (z.ab < g.ab) g.ab = z.ab;
+      });
+      g.offen = true;
+      /* Der Kern ist die Zone, mit der man tatsaechlich arbeitet: die engste
+         im Bereich. Bei mehreren gleich engen die juengste. */
+      var kand = g.teile.slice().sort(function (a, b) {
+        var d = (a.top - a.bot) - (b.top - b.bot);
+        if (Math.abs(d) > 1e-9) return d;
+        return (a.alter || 0) - (b.alter || 0);
+      });
+      g.kern = kand[0];
+    });
+    return gruppen.sort(function (a, b) { return a.ab - b.ab; });
+  }
+
+  function zonenVon(bars, kurs, stellen, atrW, sammler, flipSammler) {
     try {
       var Ind = window.ApexIndicators;
       if (!Ind || !Ind.compute) return [];
@@ -64335,6 +64481,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
          Bleibt der Filter leer, nehmen wir die naechsten aus der Gesamtliste
          und sagen dazu, wie alt sie sind. */
       if (!sicht.length && alle.length) {
+        alle = alle.filter(function (z) { return !z.broken; });
         sicht = alle.slice().sort(function (a, b) {
           var am = (a.top + a.bot) / 2, bm = (b.top + b.bot) / 2;
           return Math.abs(am - kurs) - Math.abs(bm - kurs);
@@ -64344,33 +64491,62 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
          sie aus dem Antworttext der KI herauslesen zu muessen. Zum Einzeichnen
          braucht es exakte Zahlen, und die duerfen nicht davon abhaengen, wie
          ein Sprachmodell einen Satz formuliert. */
-      if (sammler) {
-        sicht.map(function (z) {
+      /* Gebrochene Zonen raus — und zwar VOR dem Buendeln. Ein gebrochenes
+         Mitglied wuerde den Bereich sonst breiter ziehen, als er noch ist,
+         und der Kern saesse an einer Kante, die der Markt bereits
+         durchlaufen hat. */
+      var roh = sicht.filter(function (z) { return !z.broken; }).map(function (z) {
+        var m = (z.top + z.bot) / 2;
+        return { supply: !!z.supply, bot: z.bot, top: z.top, broken: false,
+                 retests: z.retests || 0, ab: Math.abs(m - kurs),
+                 von: isFinite(z.bornAt) ? z.bornAt : z.from,
+                 alter: isFinite(z.from) ? (bars.n - 1 - z.from) : NaN };
+      });
+      var buendel = zonenBuendeln(roh, atrW);
+      if (sammler) buendel.forEach(function (b) { sammler.push(b); });
+
+      /* ── Flip-Level ──────────────────────────────────────────────────
+         Eine durchbrochene Zone ist kein Level mehr — aber sie kann in der
+         GEGENTEILIGEN Rolle wieder wirken: durchbrochene Nachfrage wird zu
+         Angebot, durchbrochenes Angebot zu Nachfrage. Das ist eine eigene
+         Idee, keine halbtote Zone, und gehoert darum in einen eigenen
+         Abschnitt statt untergemischt.
+
+         Zwei Bedingungen, sonst ist es Erinnerung statt Level: der Kurs muss
+         auf der neuen Seite stehen, und der Bruch darf nicht ewig her sein. */
+      if (flipSammler) {
+        var flips = sicht.filter(function (z) {
+          if (!z.broken) return false;
+          var alt = isFinite(z.from) ? (bars.n - 1 - z.from) : Infinity;
+          if (alt > 400) return false;
+          return z.supply ? (kurs > z.top) : (kurs < z.bot);
+        }).map(function (z) {
           var m = (z.top + z.bot) / 2;
-          return { supply: !!z.supply, bot: z.bot, top: z.top, broken: !!z.broken,
+          return { supply: !z.supply,                 // die NEUE Rolle
+                   war: z.supply ? 'supply' : 'demand',
+                   bot: z.bot, top: z.top, broken: false,
                    retests: z.retests || 0, ab: Math.abs(m - kurs),
                    alter: isFinite(z.from) ? (bars.n - 1 - z.from) : NaN };
-        }).sort(function (a, b) { return a.ab - b.ab; })
-          .forEach(function (x) { sammler.push(x); });
-      }
-      return sicht.map(function (z) {
-        var mitte = (z.top + z.bot) / 2;
-        return { z: z, ab: Math.abs(mitte - kurs) };
-      }).sort(function (a, b) { return a.ab - b.ab; }).slice(0, 4)
-        .map(function (x) {
-          var z = x.z;
-          /* Abstand ZUSAETZLICH in ATR: "12 Dollar entfernt" sagt nichts,
-             solange man die Tagesschwankung nicht kennt. "0,4 ATR" schon. */
-          var inAtr = isFinite(atrW) && atrW > 0 ? '  (' + nf(x.ab / atrW, 2) + ' ATR)' : '';
-          var alt = isFinite(z.from) ? (bars.n - 1 - z.from) : NaN;
-          return '  - ' + (z.supply ? 'SUPPLY' : 'DEMAND') + ' ' +
-            nf(z.bot, stellen) + '-' + nf(z.top, stellen) +
-            ' | height ' + nf(z.top - z.bot, stellen) +
-            ' | ' + (z.broken ? 'broken' : 'unbroken') +
-            ' | retests ' + (z.retests || 0) +
-            ' | ' + nf(x.ab, stellen) + ' away' + inAtr +
-            (isFinite(alt) ? ' | formed ' + alt + ' candles ago' : '');
         });
+        zonenBuendeln(flips, atrW).slice(0, 3)
+          .forEach(function (b) { flipSammler.push(b); });
+      }
+      return buendel.slice(0, 4).map(function (g) {
+        /* Abstand ZUSAETZLICH in ATR: "12 Dollar entfernt" sagt nichts,
+           solange man die Tagesschwankung nicht kennt. "0,4 ATR" schon. */
+        var inAtr = (isFinite(atrW) && atrW > 0) ? '  (' + nf(g.ab / atrW, 2) + ' ATR)' : '';
+        var kopf = '  - ' + (g.supply ? 'SUPPLY' : 'DEMAND') + ' AREA ' +
+          nf(g.bot, stellen) + '-' + nf(g.top, stellen) +
+          ' | ' + g.teile.length + (g.teile.length === 1 ? ' zone' : ' zones merged') +
+          ' | ' + g.retests + ' retests' +
+          ' | ' + nf(g.ab, stellen) + ' away' + inAtr +
+          (isFinite(g.juengste) ? ' | newest ' + g.juengste + ' candles ago' : '');
+        if (g.kern && g.teile.length > 1)
+          kopf += '\n      precise level inside it: ' +
+                  nf(g.kern.bot, stellen) + '-' + nf(g.kern.top, stellen) +
+                  ' (width ' + nf(g.kern.top - g.kern.bot, stellen) + ')';
+        return kopf;
+      });
     } catch (e) { return []; }
   }
 
@@ -64771,16 +64947,20 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   function feinTf(tf) { return FEIN_VON[tf] || null; }
 
   /* Die naechste ungebrochene Zone, wenn sie nah genug ist, um zu zaehlen. */
+  /* Arbeitet auf BUENDELN. Verfeinert wird der Kern — die praeziseste Zone
+     im Bereich —, nicht der ganze zusammengefasste Bereich: sonst waere der
+     "engere Stop" breiter als vorher. */
   function zielZone(ebenen, kurs, atrW) {
     if (!isFinite(atrW) || atrW <= 0) return null;
     var beste = null;
     (ebenen || []).forEach(function (e) {
-      (e.zonen || []).forEach(function (z) {
-        if (z.broken) return;
-        var ab = (kurs >= z.bot && kurs <= z.top) ? 0
-               : Math.min(Math.abs(kurs - z.bot), Math.abs(kurs - z.top));
+      (e.zonen || []).forEach(function (g) {
+        var kern = g.kern || g;
+        var ab = (kurs >= kern.bot && kurs <= kern.top) ? 0
+               : Math.min(Math.abs(kurs - kern.bot), Math.abs(kurs - kern.top));
         if (ab / atrW > 1.5) return;
-        if (!beste || ab < beste.ab) beste = { z: z, ab: ab, tf: e.tf };
+        if (!beste || ab < beste.ab)
+          beste = { z: kern, bereich: g, ab: ab, tf: e.tf };
       });
     });
     return beste;
@@ -64917,18 +65097,32 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }
       var gewaehlt = indAuswahl();
       var zonenAn = gewaehlt.indexOf('sd') >= 0;
-      var roh = [];
-      var zn = zonenAn ? zonenVon(b, kurs, stellen, a, roh) : [];
-      ebenen.push({ tf: name, atr: a, stellen: stellen, zonen: roh,
-                    hoch: st && st.hoch, tief: st && st.tief });
+      var roh = [], flips = [];
+      var zn = zonenAn ? zonenVon(b, kurs, stellen, a, roh, flips) : [];
+      ebenen.push({ tf: name, atr: a, stellen: stellen, zonen: roh, flips: flips,
+                    bars: b, hoch: st && st.hoch, tief: st && st.tief });
       var iw = indikatorBlock(b, gewaehlt, stellen, kurs);
       if (iw) z.push(iw);
       if (!zonenAn) {
         /* Nichts weiter: wer keine Zonen benutzt, soll auch nicht darueber
            lesen. */
       } else if (zn.length) {
-        z.push('Supply & demand zones (user\'s own logic, nearest first):');
+        z.push('Supply & demand AREAS still intact (nearest first). Zones the market ' +
+               'has already traded through are left out entirely — they are history, ' +
+               'not levels. Zones sitting close together are merged into one area:');
         zn.forEach(function (l) { z.push(l); });
+        if (flips.length) {
+          z.push('Flip levels (zones price broke through; they often act in the ' +
+                 'OPPOSITE role now). These are a separate class — weaker than an ' +
+                 'intact zone, and only worth naming if nothing intact is closer:');
+          flips.forEach(function (g) {
+            z.push('  - now ' + (g.supply ? 'SUPPLY' : 'DEMAND') +
+                   ' (was ' + (g.teile[0] && g.teile[0].war) + ') ' +
+                   nf(g.bot, stellen) + '-' + nf(g.top, stellen) +
+                   ' | ' + nf(g.ab, stellen) + ' away' +
+                   (isFinite(g.juengste) ? ' | broken ' + g.juengste + ' candles ago' : ''));
+          });
+        }
       } else {
         /* Auch hier nicht "keine Zonen" behaupten. Wenn wirklich keine
            berechnet wurden, ist das eine Aussage ueber die Kerzen, die wir
@@ -64944,7 +65138,44 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        dastehen, wenn das KI-Guthaben leer ist. */
     TV._levels = { titel: anzeige, sym: symName || anzeige, kurs: kurs,
                    stellen: stellen, ebenen: ebenen };
+    /* Rangfolge erst JETZT, wenn alle Zeitrahmen stehen: die Bestaetigung
+       durch einen hoeheren Zeitrahmen laesst sich nicht bewerten, solange
+       man ihn noch nicht gerechnet hat. */
+    var rang = [];
+    ebenen.forEach(function (e, idx) {
+      var hoeher = ebenen.slice(idx + 1);
+      (e.zonen || []).forEach(function (g) {
+        g.staerke = staerke(g, e.bars, e.atr, hoeher);
+        rang.push({ g: g, e: e });
+      });
+    });
+    rang.sort(function (a, b) { return b.g.staerke.punkte - a.g.staerke.punkte; });
+
+    if (rang.length) {
+      z.push('');
+      z.push('=== ZONES RANKED BY STRENGTH ===');
+      z.push('Strength is computed, not guessed: departure impulse (30%), how untested ' +
+             'it still is (25%), how tight it is (20%), confirmation by a higher ' +
+             'timeframe (15%), age (10%). Use it as the starting point and say so if ' +
+             'you rank them differently.');
+      rang.slice(0, 6).forEach(function (x, i) {
+        var g = x.g, st2 = g.staerke, t = st2.teil;
+        z.push('  ' + (i + 1) + '. ' + (g.supply ? 'SUPPLY' : 'DEMAND') + ' ' + x.e.tf +
+               ' ' + nf(g.bot, stellen) + '-' + nf(g.top, stellen) +
+               '  strength ' + st2.punkte + '/100' +
+               '  [impulse ' + (isFinite(st2.impulsAtr) ? nf(st2.impulsAtr, 1) + ' ATR' : 'n/a') +
+               ', ' + (g.retests || 0) + ' retests' +
+               ', width ' + nf((g.kern || g).top - (g.kern || g).bot, stellen) +
+               ', ' + (t.htf === 1 ? 'confirmed on a higher timeframe' : 'single timeframe') +
+               ', ' + (isFinite(g.juengste) ? g.juengste + ' bars old' : 'age n/a') + ']' +
+               '  ' + nf(g.ab, stellen) + ' away');
+      });
+    }
+
+    /* Erst JETZT zeichnen: vorher stand die Staerke noch nicht fest und die
+       Balken fehlten in der Liste. */
     levelZeigen();
+
     if (fein && fein.ziel) z.push(feinBlock(fein.ziel, fein.daten, stellen, fein.mStop));
     z.push(newsBlock(kalender, symName || anzeige));
     /* Mit dem SYMBOL abgleichen, nicht mit dem Anzeigenamen: das Widget
@@ -64967,6 +65198,17 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'treat supply/demand zones as the default lens unless they are in the list.\n\n' +
     'Hard rules:\n' +
     '- Use ONLY numbers that appear in the data. Never invent a level.\n' +
+    '- A computed strength ranking is provided. Lead with the strongest zones that are ' +
+    'also within reach, not merely the nearest. If you would order them differently - ' +
+    'because of structure, session or your read of the context - say so explicitly and ' +
+    'give the reason; do not silently reorder.\n' +
+    '- Flip levels are listed separately and are NOT equivalent to intact zones. Only ' +
+    'reach for one when nothing intact is closer, and say that is what you are doing.\n' +
+    '- Nearby zones are already merged into AREAS. Work with the area, and when you name ' +
+    'a level to act on, name ONE - the precise level inside it if given, otherwise the ' +
+    'edge that matters. Do not list several zones a few points apart as if they were ' +
+    'separate choices; that hands the reader a list instead of a decision. If two areas ' +
+    'genuinely compete, say which you would watch first and why.\n' +
     '- Zones are always listed when they exist, with distance and age. Never say a ' +
     'timeframe "has no zones" as if that were a market fact - judge the zones you are ' +
     'given on distance, age and how often they were retested, and say plainly when the ' +
@@ -65425,35 +65667,41 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   function levelText() {
     var L = TV._levels;
     if (!L || !L.ebenen || !L.ebenen.length) return '';
-    var z = [L.titel + '  ' + nf(L.kurs, L.stellen) + '  (' +
-             new Date().toLocaleString() + ')'];
+    var n = function (x) { return nf(x, L.stellen); };
+    var z = [L.titel + '  ' + n(L.kurs) + '  (' + new Date().toLocaleString() + ')'];
     var F = TV._fein;
     if (F && F.ziel) {
       z.push('');
       z.push('Finer entry (' + F.tf + ') inside ' +
-             (F.ziel.z.supply ? 'SUPPLY ' : 'DEMAND ') +
-             nf(F.ziel.z.bot, L.stellen) + ' - ' + nf(F.ziel.z.top, L.stellen));
+             (F.ziel.z.supply ? 'supply ' : 'demand ') +
+             n(F.ziel.z.bot) + ' - ' + n(F.ziel.z.top));
       (F.daten.sub || []).forEach(function (f) {
-        z.push('  ' + (f.supply ? 'SUPPLY' : 'DEMAND') + '  ' +
-               nf(f.bot, L.stellen) + ' - ' + nf(f.top, L.stellen) +
-               '   width ' + nf(f.top - f.bot, L.stellen));
+        z.push('  ' + (f.supply ? 'SUPPLY' : 'DEMAND') + '  ' + n(f.bot) + ' - ' + n(f.top) +
+               '   width ' + n(f.top - f.bot));
       });
       if (isFinite(F.daten.tiefstes))
-        z.push('  reached ' + nf(F.daten.tiefstes, L.stellen) + ' - ' +
-               nf(F.daten.hoechstes, L.stellen) + ' inside');
+        z.push('  reached ' + n(F.daten.tiefstes) + ' - ' + n(F.daten.hoechstes) + ' inside');
     }
     L.ebenen.forEach(function (e) {
-      if (!e.zonen.length && !isFinite(e.hoch) && !isFinite(e.tief)) return;
+      if (!(e.zonen && e.zonen.length) && !(e.flips && e.flips.length) &&
+          !isFinite(e.hoch) && !isFinite(e.tief)) return;
       z.push('');
-      z.push(e.tf + (isFinite(e.atr) ? '   ATR ' + nf(e.atr, L.stellen) : ''));
-      e.zonen.forEach(function (x) {
-        z.push('  ' + (x.supply ? 'SUPPLY' : 'DEMAND') + '  ' +
-               nf(x.bot, L.stellen) + ' - ' + nf(x.top, L.stellen) +
-               '   ' + (x.broken ? 'broken' : 'unbroken') +
-               ', ' + x.retests + ' retests, ' + nf(x.ab, L.stellen) + ' away');
+      z.push(e.tf + (isFinite(e.atr) ? '   ATR ' + n(e.atr) : ''));
+      (e.zonen || []).slice(0, 5).forEach(function (g) {
+        z.push('  ' + (g.supply ? 'SUPPLY' : 'DEMAND') + '  ' + n(g.bot) + ' - ' + n(g.top) +
+               '   ' + (g.staerke ? 'strength ' + g.staerke.punkte + ', ' : '') +
+               (g.teile && g.teile.length > 1 ? g.teile.length + ' merged, ' : '') +
+               g.retests + ' retests, ' + n(g.ab) + ' away');
+        if (g.kern && g.teile && g.teile.length > 1)
+          z.push('      precise: ' + n(g.kern.bot) + ' - ' + n(g.kern.top));
       });
-      if (isFinite(e.hoch)) z.push('  swing high  ' + nf(e.hoch, L.stellen));
-      if (isFinite(e.tief)) z.push('  swing low   ' + nf(e.tief, L.stellen));
+      (e.flips || []).forEach(function (g) {
+        z.push('  FLIP now ' + (g.supply ? 'SUPPLY' : 'DEMAND') +
+               ' (was ' + (g.teile[0] && g.teile[0].war) + ')  ' +
+               n(g.bot) + ' - ' + n(g.top) + '   ' + n(g.ab) + ' away');
+      });
+      if (isFinite(e.hoch)) z.push('  swing high  ' + n(e.hoch));
+      if (isFinite(e.tief)) z.push('  swing low   ' + n(e.tief));
     });
     return z.join('\n');
   }
@@ -65464,72 +65712,114 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (!el) return;
     if (!L || !L.ebenen || !L.ebenen.length) { el.innerHTML = ''; return; }
 
-    var h = '<div class="tv-lv-kopf"><b>Levels to draw</b>' +
-            '<button id="tvLvCopy" class="tv-lv-copy">Copy</button></div>';
+    var offen = TV._levelsOffen !== false;
+    var n = function (x) { return nf(x, L.stellen); };
+    var kurs = L.kurs;
 
-    /* Die Verfeinerung ganz nach oben: sie beantwortet die Frage, die man
-       stellt, waehrend man in der Zone steht. */
-    var F = TV._fein;
-    if (F && F.ziel) {
-      var pz = F.ziel.z;
-      h += '<div class="tv-lv-tf">Finer entry &middot; ' + F.tf + '</div>';
-      h += '<div class="tv-lv-eltern notranslate" translate="no">in ' +
-           (pz.supply ? 'SUPPLY ' : 'DEMAND ') + nf(pz.bot, L.stellen) + '&ndash;' +
-           nf(pz.top, L.stellen) + '</div>';
-      if (F.daten.sub && F.daten.sub.length) {
-        F.daten.sub.forEach(function (f) {
-          h += '<div class="tv-lv-z fein">' +
-            '<span class="tv-lv-typ ' + (f.supply ? 's' : 'd') + '">' +
-              (f.supply ? 'S' : 'D') + '</span>' +
-            '<span class="tv-lv-p notranslate" translate="no">' +
-              nf(f.bot, L.stellen) + '&ndash;' + nf(f.top, L.stellen) + '</span>' +
-            '<span class="tv-lv-m">width ' + nf(f.top - f.bot, L.stellen) +
-              (f.retests ? ' · ' + f.retests + 'r' : '') + '</span>' +
-          '</div>';
-        });
-      } else {
-        h += '<div class="tv-lv-sw">no tighter zone inside it yet</div>';
+    var h = '<div class="tv-lv-kopf">' +
+      '<button class="tv-lv-auf" id="tvLvAuf" aria-expanded="' + (offen ? 'true' : 'false') +
+        '"><b>Levels to draw</b></button>' +
+      '<span class="tv-lv-kurs notranslate" translate="no">' + n(kurs) + '</span>' +
+      '<button id="tvLvCopy" class="tv-lv-copy">Copy</button></div>';
+
+    if (offen) {
+      h += '<div class="tv-lv-body">';
+
+      /* Der Feineinstieg zuerst: er beantwortet die Frage, die man stellt,
+         waehrend man an der Zone steht. */
+      var F = TV._fein;
+      if (F && F.ziel) {
+        var pz = F.ziel.z;
+        h += '<div class="tv-lv-fein">' +
+          '<div class="tv-lv-fkopf">Finer entry · ' + F.tf + '</div>' +
+          '<div class="tv-lv-fin notranslate" translate="no">in ' +
+            (pz.supply ? 'supply ' : 'demand ') + n(pz.bot) + '–' + n(pz.top) + '</div>';
+        if (F.daten.sub && F.daten.sub.length) {
+          F.daten.sub.forEach(function (f) {
+            h += zeile(f.supply, f.bot, f.top, 'width ' + n(f.top - f.bot) +
+                 (f.retests ? ' · ' + f.retests + 'r' : ''), false, true);
+          });
+        } else {
+          h += '<div class="tv-lv-leer">no tighter zone inside it yet</div>';
+        }
+        if (isFinite(F.daten.tiefstes))
+          h += '<div class="tv-lv-leer notranslate" translate="no">reached ' +
+               n(F.daten.tiefstes) + ' – ' + n(F.daten.hoechstes) + ' inside</div>';
+        h += '</div>';
       }
-      if (isFinite(F.daten.tiefstes))
-        h += '<div class="tv-lv-sw notranslate" translate="no">reached ' +
-             nf(F.daten.tiefstes, L.stellen) + ' &ndash; ' +
-             nf(F.daten.hoechstes, L.stellen) + ' inside</div>';
-    }
-    L.ebenen.forEach(function (e) {
-      var zeilen = '';
-      e.zonen.forEach(function (x) {
-        /* Gebrochene Zonen bleiben in der Liste, aber gedaempft: sie sind zum
-           Einzeichnen weiterhin nuetzlich (alte Zonen wirken oft nach), nur
-           eben nicht gleichwertig. */
-        zeilen += '<div class="tv-lv-z' + (x.broken ? ' aus' : '') + '">' +
-          '<span class="tv-lv-typ ' + (x.supply ? 's' : 'd') + '">' +
-            (x.supply ? 'S' : 'D') + '</span>' +
-          '<span class="tv-lv-p notranslate" translate="no">' +
-            nf(x.bot, L.stellen) + '&ndash;' + nf(x.top, L.stellen) + '</span>' +
-          '<span class="tv-lv-m">' + (x.broken ? 'broken' : 'unbroken') +
-            (x.retests ? ' · ' + x.retests + 'r' : '') + '</span>' +
-        '</div>';
+
+      L.ebenen.forEach(function (e) {
+        var hatWas = (e.zonen && e.zonen.length) || (e.flips && e.flips.length) ||
+                     isFinite(e.hoch) || isFinite(e.tief);
+        if (!hatWas) return;
+        h += '<div class="tv-lv-tf">' + e.tf +
+             (isFinite(e.atr) ? '<span>ATR ' + n(e.atr) + '</span>' : '') + '</div>';
+        (e.zonen || []).slice(0, 5).forEach(function (g) {
+          var meta = (g.teile && g.teile.length > 1 ? g.teile.length + ' merged · ' : '') +
+                     (g.retests ? g.retests + 'r · ' : '') +
+                     n(g.ab) + ' away';
+          var p = g.staerke ? g.staerke.punkte : null;
+          h += zeile(g.supply, g.bot, g.top, meta, false, false, p);
+          /* Der Kern nur, wenn der Bereich wirklich aus mehreren besteht —
+             sonst waere es dieselbe Zahl zweimal. */
+          if (g.kern && g.teile && g.teile.length > 1)
+            h += '<div class="tv-lv-kern notranslate" translate="no">↳ ' +
+                 n(g.kern.bot) + '–' + n(g.kern.top) + '</div>';
+        });
+        if (e.flips && e.flips.length) {
+          h += '<div class="tv-lv-flip">' +
+               '<div class="tv-lv-fltitel">Flip levels</div>';
+          e.flips.forEach(function (g) {
+            var war = g.teile[0] && g.teile[0].war;
+            h += '<div class="tv-lv-z flip">' +
+              '<span class="tv-lv-typ ' + (g.supply ? 's' : 'd') + ' hohl"></span>' +
+              '<span class="tv-lv-p notranslate" translate="no">' + n(g.bot) +
+                '<i>–</i>' + n(g.top) + '</span>' +
+              '<span class="tv-lv-m">was ' + war + ' · ' + n(g.ab) + ' away' +
+                (isFinite(g.juengste) ? ' · broke ' + g.juengste + ' bars ago' : '') +
+              '</span></div>';
+          });
+          h += '</div>';
+        }
+        var sw = [];
+        if (isFinite(e.hoch)) sw.push('high ' + n(e.hoch));
+        if (isFinite(e.tief)) sw.push('low ' + n(e.tief));
+        if (sw.length)
+          h += '<div class="tv-lv-sw notranslate" translate="no">swing ' + sw.join(' · ') + '</div>';
       });
-      var sw = [];
-      if (isFinite(e.hoch)) sw.push('H ' + nf(e.hoch, L.stellen));
-      if (isFinite(e.tief)) sw.push('L ' + nf(e.tief, L.stellen));
-      if (sw.length) zeilen += '<div class="tv-lv-sw notranslate" translate="no">' +
-        sw.join('   ') + '</div>';
-      if (!zeilen) return;
-      h += '<div class="tv-lv-tf">' + e.tf + '</div>' + zeilen;
-    });
+      h += '</div>';
+    }
+
     el.innerHTML = h;
+
+    var auf = document.getElementById('tvLvAuf');
+    if (auf) auf.onclick = function () { TV._levelsOffen = !offen; levelZeigen(); };
     var k = document.getElementById('tvLvCopy');
     if (k) k.onclick = function () {
       var t = levelText();
-      /* Zwischenablage kann fehlschlagen (Rechte, unsicherer Kontext). Dann
-         die Auswahl anbieten statt nur zu scheitern. */
-      var fertig = function () { k.textContent = 'Copied'; setTimeout(function () {
-        k.textContent = 'Copy'; }, 1600); };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(t).then(fertig).catch(function () { notfall(t, k); });
-      } else notfall(t, k);
+      if (navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(t).then(function () {
+          k.textContent = 'Copied'; setTimeout(function () { k.textContent = 'Copy'; }, 1600);
+        }).catch(function () { notfall(t, k); });
+      else notfall(t, k);
     };
+
+    function zeile(supply, bot, top, meta, gedaempft, fein, punkte) {
+      /* Eine Zeile je Bereich: Seite als Farbfleck, Spanne monospaced damit
+         die Ziffern untereinander stehen, Rest klein daneben. Die Staerke
+         als kurzer Balken — auf einen Blick vergleichbar, ohne Zahlen zu
+         lesen. */
+      var kraft = '';
+      if (punkte != null) {
+        kraft = '<span class="tv-lv-kraft" title="strength ' + punkte + '/100">' +
+                '<i style="width:' + Math.max(4, Math.min(100, punkte)) + '%"></i></span>';
+      }
+      return '<div class="tv-lv-z' + (gedaempft ? ' aus' : '') + (fein ? ' fein' : '') + '">' +
+        '<span class="tv-lv-typ ' + (supply ? 's' : 'd') + '"></span>' +
+        '<span class="tv-lv-p notranslate" translate="no">' + n(bot) + '<i>–</i>' +
+          n(top) + '</span>' + kraft +
+        '<span class="tv-lv-m">' + meta + '</span></div>';
+    }
   }
 
   function notfall(text, knopf) {
