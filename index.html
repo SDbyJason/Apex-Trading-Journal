@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04g';
+  window.APEX_BUILD = '2026-09-04h';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -14761,38 +14761,9 @@ function playbookStats(pbId){
     } catch (e) {}
   }
 
-  /* Trades aus dem Journal, die ueberhaupt etwas erzaehlen. Ein Trade ohne
-     Notiz sagt nichts ueber die Strategie — nur ueber das Ergebnis. */
-  function ausJournal() {
-    try {
-      var alle = (typeof getAllTrades === 'function') ? getAllTrades() : [];
-      return alle.filter(function (t) {
-        return String(t.notes || t.note || '').trim().length > 20;
-      }).sort(function (a, b) {
-        return String(b._date || '').localeCompare(String(a._date || ''));
-      }).slice(0, 40);
-    } catch (e) { return []; }
-  }
-
-  function tradeText(t) {
-    var teile = [];
-    teile.push((t._date || '') + '  ' + (t.symbol || '') + '  ' + (t.dir || ''));
-    var z = [];
-    if (t.entry) z.push('entry ' + t.entry);
-    if (t.sl)    z.push('stop ' + t.sl);
-    if (t.tp)    z.push('target ' + t.tp);
-    if (t.rr)    z.push(t.rr + 'R');
-    if (t.pips != null) z.push(t.pips + ' pips');
-    if (z.length) teile.push(z.join(' · '));
-    if (t.tags && t.tags.length) teile.push('tags: ' + [].concat(t.tags).join(', '));
-    teile.push(String(t.notes || t.note || '').trim());
-    return teile.filter(Boolean).join('\n');
-  }
-
   function zeichnen() {
     var host = document.getElementById('pbFinderHost');
     if (!host) return;
-    var trades = ausJournal();
     var n = PF.recaps.length;
 
     var h = '<div class="glass-card" style="margin-bottom:1.5rem">' +
@@ -14808,24 +14779,6 @@ function playbookStats(pbId){
           'placeholder="Whose trades are these? (optional — e.g. a trader you follow)" ' +
           'value="' + esc(PF.quelle || '') + '">' +
       '</div>';
-
-    if (trades.length) {
-      h += '<div class="calc-label">Add from your journal</div>' +
-        '<div style="display:flex;gap:8px;margin:4px 0 12px;flex-wrap:wrap">' +
-        '<select id="pbf-trade" class="tc-input" style="flex:1 1 320px;min-width:0">' +
-          trades.map(function (t, i) {
-            var kurz = String(t.notes || t.note || '').replace(/\s+/g, ' ').slice(0, 60);
-            return '<option value="' + i + '">' + esc((t._date || '') + ' · ' +
-                   (t.symbol || '') + ' · ' + (t.pips != null ? t.pips + ' pips' : '') +
-                   ' — ' + kurz) + '</option>';
-          }).join('') +
-        '</select>' +
-        '<button id="pbf-add-trade" class="tc-btn" style="flex:0 0 auto">Add</button>' +
-        '</div>';
-    } else {
-      h += '<div style="font-size:12px;color:var(--ink3);margin-bottom:12px">' +
-        'No journal trades with notes yet &mdash; paste your recaps below instead.</div>';
-    }
 
     h += '<div class="calc-label">Paste recaps &mdash; several at once is fine</div>' +
       '<div style="font-size:10.5px;color:var(--ink3);line-height:1.5;margin:3px 0 4px">' +
@@ -14869,15 +14822,6 @@ function playbookStats(pbId){
   function verdrahten() {
     var host = document.getElementById('pbFinderHost');
     if (!host) return;
-    var at = document.getElementById('pbf-add-trade');
-    if (at) at.onclick = function () {
-      var sel = document.getElementById('pbf-trade');
-      var trades = ausJournal();
-      var t = trades[parseInt(sel && sel.value, 10)];
-      if (!t) return;
-      PF.recaps.push(tradeText(t));
-      sichern(); zeichnen();
-    };
     var q = document.getElementById('pbf-quelle');
     if (q) q.onchange = function () { PF.quelle = this.value.trim().slice(0, 60); sichern(); };
     var ax = document.getElementById('pbf-add-text');
