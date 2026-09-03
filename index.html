@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-02g';
+  window.APEX_BUILD = '2026-09-02t';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7000,9 +7000,25 @@ body.light .aw-type { color-scheme: light; }
 ══════════════════════════════════════ */
 .settings-tab-nav.settings-tab-nav,
 /* ── Chart (TradingView) ────────────────────────────────────────── */
-#page-chart{display:none;height:calc(100vh - 120px);min-height:520px;grid-template-rows:auto minmax(320px,1fr) auto}
-#page-chart.active{display:grid}
+/* Die Hoehe haengt bewusst NICHT an den Vorfahren. #page-chart ist ein
+   Flex-Element, und in einem Spalten-Flexbehaelter schlaegt flex-basis die
+   angegebene Hoehe — eine height-Angabe hier war wirkungslos, und eine lange
+   KI-Antwort hat die Seite auf 1774px aufgeblaeht statt im Panel zu scrollen.
+   Chart und Panel bekommen darum eine eigene, am Sichtfeld gemessene Hoehe. */
+#page-chart{display:none}
+#page-chart.active{display:block}
 #page-chart .tv-kopf{flex:0 0 auto;margin-bottom:12px}
+#page-chart .tv-kopf{display:flex;gap:9px;align-items:center;min-width:0}
+#page-chart .tv-kitoggle{flex:0 0 auto;order:2;background:var(--layer);border:0.5px solid var(--rim);color:var(--ink3);border-radius:8px;padding:7px 12px;font-family:var(--font-body);font-size:12px;cursor:pointer;transition:.15s;white-space:nowrap}
+#page-chart .tv-kitoggle:hover{border-color:var(--gold-line);color:var(--gold)}
+#page-chart .tv-kitoggle[aria-expanded="false"]{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold)}
+/* Zugeklappt bekommt der Chart die ganze Breite. Das Panel wird ausgeblendet
+   statt nur schmal gemacht — ein halb sichtbarer Rest waere schlechter als
+   keiner. */
+#page-chart.ki-zu .tv-haupt{grid-template-columns:1fr}
+#page-chart.ki-zu .tv-ki{display:none}
+body.light #page-chart .tv-kitoggle{background:#fff;border-color:rgba(0,0,0,.12)}
+#page-chart .tv-jetzt{flex:1 1 auto;min-width:0;order:1;font-family:var(--font-display);font-size:13px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #page-chart .tv-schnell{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
 #page-chart .tv-chip{flex:0 0 auto;white-space:nowrap}
 #page-chart .tv-chip{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink3);border-radius:8px;padding:7px 14px;font-family:var(--font-body);font-size:12.5px;cursor:pointer;transition:.15s}
@@ -7011,7 +7027,57 @@ body.light .aw-type { color-scheme: light; }
 /* Die Buehne traegt die Hoehe. Das Widget stellt sich auf autosize und
    braucht dafuer einen Elternteil mit einer echten, nicht geerbten Hoehe —
    sonst faellt es auf 0 zusammen und man sieht eine leere Flaeche. */
-#page-chart .tv-buehne{min-height:0;border:0.5px solid var(--rim);border-radius:12px;overflow:hidden;background:var(--layer)}
+/* Chart und KI nebeneinander. Der KI-Bereich hat eine feste Breite, damit
+   der Chart den ganzen Rest bekommt — er ist die Hauptsache. */
+#page-chart .tv-haupt{display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start}
+#page-chart .tv-ki{display:flex;flex-direction:column;gap:9px;height:min(72vh,820px);min-height:360px;border:0.5px solid var(--rim);border-radius:12px;background:var(--layer);padding:13px}
+#page-chart .tv-ki-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#page-chart .tv-ki-kopf b{font-family:var(--font-display);font-size:13.5px;color:var(--ink)}
+#page-chart .tv-ki-kopf select{background:var(--elevated);border:0.5px solid var(--rim);border-radius:7px;color:var(--ink);padding:5px 8px;font-family:var(--font-body);font-size:12px}
+#page-chart .tv-ki-pb{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}
+#page-chart .tv-ki-pb select{background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:7px 9px;font-family:var(--font-body);font-size:12.5px;width:100%}
+#page-chart .tv-ki-pb select:focus{outline:none;border-color:var(--gold-line)}
+#page-chart .tv-ki-pbhint{font-size:10.5px;line-height:1.45;color:var(--ink3)}
+#page-chart .tv-ki-pbhint b{color:var(--ink2);font-weight:600}
+body.light #page-chart .tv-ki-pb select{background:#fff;border-color:rgba(0,0,0,.12)}
+#page-chart .tv-ki-go{background:var(--gold-dim);border:0.5px solid var(--gold-line);color:var(--gold);border-radius:8px;padding:9px 14px;font-family:var(--font-body);font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
+#page-chart .tv-ki-go:hover:not(:disabled){filter:brightness(1.15)}
+#page-chart .tv-ki-go:disabled{opacity:.55;cursor:default}
+/* Eigenes Scrollen: eine lange Antwort darf die Seite nicht laenger machen
+   und damit den Chart aus dem Bild schieben. */
+#page-chart .tv-wacht{flex:0 0 auto;background:var(--layer);border:0.5px solid var(--rim);color:var(--ink3);border-radius:8px;padding:8px 13px;font-family:var(--font-body);font-size:12.5px;cursor:pointer;transition:.15s}
+#page-chart .tv-wacht:hover{border-color:var(--gold-line);color:var(--gold)}
+#page-chart .tv-wacht[aria-pressed="true"]{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}
+#page-chart .tv-wacht-st:not(:empty){flex:0 0 auto;font-size:10.5px;line-height:1.45;color:var(--ink3)}
+#page-chart .tv-ki-alarm{background:var(--gold-dim);border:0.5px solid var(--gold-line);border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:11.5px;color:var(--gold);font-weight:600}
+body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
+#page-chart .tv-ki-out{flex:1 1 auto;overflow-y:auto;min-height:0;font-size:12.5px;line-height:1.65;color:var(--ink2)}
+#page-chart .tv-ki-antwort{white-space:normal;margin-bottom:11px}
+#page-chart .tv-ki-frage{background:var(--elevated);border:0.5px solid var(--rim);border-radius:9px;padding:8px 11px;margin:0 0 9px auto;max-width:88%;color:var(--ink);font-size:12px}
+#page-chart .tv-ki-ask{display:flex;gap:6px;flex:0 0 auto}
+#page-chart .tv-ki-ask input{flex:1 1 auto;min-width:0;background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:8px 10px;font-family:var(--font-body);font-size:12.5px}
+#page-chart .tv-ki-ask input:focus{outline:none;border-color:var(--gold-line)}
+#page-chart .tv-ki-ask button{flex:0 0 auto;background:var(--layer);border:0.5px solid var(--rim);color:var(--ink2);border-radius:8px;padding:0 13px;cursor:pointer;font-size:15px}
+#page-chart .tv-ki-ask button:hover{border-color:var(--gold-line);color:var(--gold)}
+body.light #page-chart .tv-ki-frage,body.light #page-chart .tv-ki-ask input,body.light #page-chart .tv-ki-ask button{background:#fff;border-color:rgba(0,0,0,.12)}
+#page-chart .tv-ki-leer{color:var(--ink3);font-size:12px;line-height:1.6}
+#page-chart .tv-ki-warn{color:var(--loss);font-size:12.5px;line-height:1.6}
+#page-chart .tv-ki-fakten{margin-top:11px;border-top:0.5px solid var(--rim);padding-top:9px}
+#page-chart .tv-ki-fakten summary{cursor:pointer;font-size:11.5px;color:var(--ink3)}
+#page-chart .tv-ki-fakten pre{white-space:pre-wrap;word-break:break-word;font-size:11px;line-height:1.5;color:var(--ink3);margin-top:7px}
+body.light #page-chart .tv-ki{background:#fff;border-color:rgba(0,0,0,.09)}
+/* Schmal: KI unter den Chart, damit der Chart nicht auf eine Spalte
+   zusammenschrumpft, auf der man nichts erkennt. */
+@media(max-width:980px){
+  #page-chart .tv-haupt{grid-template-columns:1fr}
+  #page-chart .tv-buehne{height:58vh;min-height:320px}
+  /* Untereinander darf das Panel mitwachsen — auf dem Handy scrollt die
+     Seite ohnehin, und ein Kasten mit eigenem Scrollbalken darin ist dort
+     laestiger als eine lange Seite. */
+  #page-chart .tv-ki{height:auto;min-height:0}
+  #page-chart .tv-ki-out{max-height:none;overflow-y:visible}
+}
+#page-chart .tv-buehne{height:min(72vh,820px);min-height:360px;border:0.5px solid var(--rim);border-radius:12px;overflow:hidden;background:var(--layer)}
 #page-chart #tvBox{width:100%;height:100%}
 #page-chart .tv-hinweis:not(:empty){margin-top:10px;font-size:12.5px;color:var(--loss);line-height:1.6;max-width:70ch}
 body.light #page-chart .tv-chip{background:#fff;border-color:rgba(0,0,0,.12)}
@@ -63752,18 +63818,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
   var SKRIPT = 'https://s3.tradingview.com/tv.js';
 
-  /* Kurzwahl fuer die Instrumente, die hier tatsaechlich gehandelt werden.
-     Der Symbolwechsler von TradingView kann alles Uebrige — diese Leiste
-     spart nur die haeufigsten drei Klicks. */
-  var SCHNELL = [
-    ['OANDA:XAUUSD',    'Gold'],
-    ['OANDA:NAS100USD', 'Nasdaq'],
-    ['OANDA:SPX500USD', 'S&P 500'],
-    ['OANDA:DE30EUR',   'DAX'],
-    ['OANDA:EURUSD',    'EURUSD'],
-    ['OANDA:GBPUSD',    'GBPUSD'],
-    ['BINANCE:BTCUSDT', 'Bitcoin'],
-  ];
+  /* Das Instrument waehlt der Nutzer in TradingViews eigener Suche. Hier
+     steht nur, womit geoeffnet wird, wenn noch nichts gemerkt ist. */
   var STD_SYM = 'OANDA:XAUUSD';
   var STD_TF  = '15';
 
@@ -63803,35 +63859,150 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     d.className = 'page'; d.id = 'page-chart';
     d.innerHTML =
       '<div class="tv-kopf">' +
-        '<div class="tv-schnell" id="tvSchnell">' +
-          SCHNELL.map(function (x) {
-            return '<button class="tv-chip notranslate" translate="no" data-sym="' + x[0] + '">' +
-                   x[1] + '</button>';
-          }).join('') +
-        '</div>' +
+        '<div class="tv-jetzt notranslate" translate="no" id="tvJetzt"></div>' +
+        '<button class="tv-kitoggle" id="tvKiToggle" aria-expanded="true">' +
+          '<span id="tvKiToggleT">Hide AI</span></button>' +
       '</div>' +
-      '<div class="tv-buehne"><div id="tvBox"></div></div>' +
+      '<div class="tv-haupt">' +
+        '<div class="tv-buehne"><div id="tvBox"></div></div>' +
+        '<aside class="tv-ki" id="tvKi">' +
+          '<div class="tv-ki-kopf">' +
+            '<b>AI analysis</b>' +
+            '<select id="tvKiTf" aria-label="Timeframe">' +
+              '<option value="1min">M1</option>' +
+              '<option value="5min">M5</option>' +
+              '<option value="15min" selected>M15</option>' +
+              '<option value="1h">H1</option>' +
+              '<option value="4h">H4</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="tv-ki-pb">' +
+            '<select id="tvKiPb" aria-label="Playbook"></select>' +
+            '<span class="tv-ki-pbhint">Your rules from <b>Analysis &rsaquo; Playbooks</b> ' +
+            '&mdash; edit or add them there.</span>' +
+          '</div>' +
+          '<button class="tv-ki-go" id="tvKiGo">Analyse chart</button>' +
+          '<button class="tv-wacht" id="tvWachtBtn" aria-pressed="false">' +
+            'Watch for setups</button>' +
+          '<div class="tv-wacht-st" id="tvWachtStatus"></div>' +
+          '<div class="tv-ki-out" id="tvKiOut">' +
+            '<p class="tv-ki-leer">The AI reads the candles and your supply &amp; demand ' +
+            'zones across three timeframes &mdash; it cannot see the chart above.</p>' +
+          '</div>' +
+          '<div class="tv-ki-ask">' +
+            '<input id="tvKiAsk" placeholder="Ask a follow-up…" autocomplete="off">' +
+            '<button id="tvKiSend" aria-label="Send">&rarr;</button>' +
+          '</div>' +
+        '</aside>' +
+      '</div>' +
       '<div class="tv-hinweis" id="tvHinweis"></div>';
     host.appendChild(d);
 
-    d.querySelector('#tvSchnell').addEventListener('click', function (e) {
-      var b = e.target.closest('.tv-chip');
-      if (b) TV.setSymbol(b.getAttribute('data-sym'));
+    d.querySelector('#tvKiGo').addEventListener('click', analysieren);
+    d.querySelector('#tvKiToggle').addEventListener('click', function () { kiZeigen(!TV.kiOffen); });
+    d.querySelector('#tvKiPb').addEventListener('change', function () {
+      merke('pb', this.value || '');
+    });
+    d.querySelector('#tvWachtBtn').addEventListener('click', function () {
+      wachtSchalten(!WACHT.an);
+    });
+    d.querySelector('#tvKiSend').addEventListener('click', nachfragen);
+    d.querySelector('#tvKiAsk').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); nachfragen(); }
     });
   };
 
-  TV.setSymbol = function (sym) {
-    TV.sym = sym; merke('sym', sym);
-    aktiv();
-    bauen();
-  };
+  /* Viele wollen nur den Chart. Der KI-Bereich ist deshalb zuklappbar, und
+     der Zustand bleibt erhalten — wer ihn einmal weggeklappt hat, soll ihn
+     nicht bei jedem Besuch erneut wegklicken muessen. */
+  TV.kiOffen = true;
 
-  function aktiv() {
-    var w = document.getElementById('tvSchnell');
-    if (!w) return;
-    w.querySelectorAll('.tv-chip').forEach(function (b) {
-      b.classList.toggle('on', b.getAttribute('data-sym') === TV.sym);
+  function kiZeigen(offen) {
+    TV.kiOffen = !!offen;
+    merke('ki', offen ? '1' : '0');
+    var seite = document.getElementById('page-chart');
+    var knopf = document.getElementById('tvKiToggle');
+    var text  = document.getElementById('tvKiToggleT');
+    if (seite) seite.classList.toggle('ki-zu', !offen);
+    if (knopf) knopf.setAttribute('aria-expanded', offen ? 'true' : 'false');
+    if (text)  text.textContent = offen ? 'Hide AI' : 'AI analysis';
+  }
+
+  /* Was im Chart gerade laeuft, direkt aus dem Widget erfragen. Nur so kann
+     die KI dem folgen, was der Nutzer in TradingViews Suche auswaehlt — in
+     den Chart hineinsehen koennen wir nicht. */
+  function symbolJetzt() {
+    return new Promise(function (ok) {
+      var w = TV.widget;
+      if (!w || !w.getSymbolInfo) return ok(null);
+      var fertig = false;
+      /* Die Antwort kommt per postMessage aus einem fremden Rahmen. Bleibt
+         sie aus, darf die Oberflaeche nicht ewig haengen. */
+      var t = setTimeout(function () { if (!fertig) { fertig = true; ok(null); } }, 4000);
+      try {
+        w.getSymbolInfo(function (info) {
+          if (fertig) return;
+          fertig = true; clearTimeout(t);
+          if (!info || !info.name) return ok(null);
+          ok({ voll: (info.exchange ? info.exchange + ':' : '') + info.name,
+               name: info.name, titel: info.description || info.name,
+               intervall: info.interval });
+        });
+      } catch (e) { fertig = true; clearTimeout(t); ok(null); }
     });
+  }
+
+  /* TradingView zaehlt in Minuten, der Datenanbieter benennt sie. */
+  var TF_VON_TV = { '1': '1min', '5': '5min', '15': '15min', '30': '30min',
+                    '60': '1h', '240': '4h', 'D': '1day' };
+
+  function kopfAnzeigen(info) {
+    var el = document.getElementById('tvJetzt');
+    if (!el) return;
+    TV._titel = info ? (info.titel + '  ·  ' + info.name) : '';
+    kursAnzeigen();
+  }
+
+  function kursAnzeigen() {
+    var el = document.getElementById('tvJetzt');
+    if (!el) return;
+    var t = TV._titel || '';
+    if (TV.kurs && isFinite(TV.kurs.preis)) {
+      var p = TV.kurs.preis;
+      t += '  ·  ' + p.toFixed(p > 100 ? 2 : (p > 10 ? 3 : 5));
+    }
+    el.textContent = t;
+  }
+
+  /* Nur benutzen, wenn der Kurs zum angezeigten Instrument gehoert und frisch
+     ist. Ein stehengebliebener Kurs eines vorher gewaehlten Instruments waere
+     schlimmer als gar keiner — die KI wuerde jeden Zonenabstand falsch
+     rechnen und es nicht merken. */
+  function liveKurs(symName) {
+    var k = TV.kurs;
+    if (!k || !isFinite(k.preis)) return null;
+    if (Date.now() - k.ts > 90000) return null;
+    var a = String(k.sym || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    var b = String(symName || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (a && b && a !== b) return null;
+    return k.preis;
+  }
+
+  /* Gemerkt wird, was im Chart laeuft — damit beim naechsten Besuch dasselbe
+     Instrument offen ist. Gesetzt wird es nur beim AUFBAU, nie waehrend der
+     Nutzer arbeitet: ein Neuaufbau wuerde seine Zeichnungen wegwerfen. */
+  function beobachten() {
+    if (TV._beob) return;
+    TV._beob = setInterval(function () {
+      var seite = document.getElementById('page-chart');
+      if (!seite || !seite.classList.contains('active')) return;
+      symbolJetzt().then(function (info) {
+        if (!info) return;
+        TV.sym = info.voll;
+        merke('sym', info.voll);
+        kopfAnzeigen(info);
+      });
+    }, 8000);
   }
 
   function bauen() {
@@ -63859,10 +64030,1033 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         save_image:          true,
       });
       TV._thema = thema();
+      /* Der Chart ist live, unsere Kerzen sind es nicht — sie hinken rund zwei
+         Minuten hinterher. Das Widget gibt seinen eigenen Kurs aber heraus:
+         kostenlos, ohne Kontingent, und aus GENAU der Quelle, die der Nutzer
+         vor sich sieht. Damit rechnet die KI die Zonenabstaende sekunden-
+         genau, statt gegen einen zwei Minuten alten Schlusskurs. */
+      /* NICHT sofort abonnieren: subscribeToQuote schickt eine Nachricht an
+         den Rahmen, und solange der nicht geladen ist, verpufft sie
+         wirkungslos. ready() feuert, sobald er bereit ist. */
+      var abonnieren = function () {
+        try {
+          TV.widget.subscribeToQuote(function (q) {
+            if (!q || !isFinite(q.last_price)) return;
+            TV.kurs = { preis: Number(q.last_price), ts: Date.now(),
+                        sym: q.short_name || '', aend: q.change_percent };
+            kursAnzeigen();
+            preisPruefen(TV.kurs.preis);
+          });
+        } catch (e) { /* ohne Live-Kurs laeuft alles weiter, nur mit Kerzenkurs */ }
+      };
+      try {
+        if (typeof TV.widget.ready === 'function') TV.widget.ready(abonnieren);
+        else setTimeout(abonnieren, 3000);
+      } catch (e) { setTimeout(abonnieren, 3000); }
     }).catch(function () {
       if (hin) hin.textContent =
-        'Der Chart von TradingView konnte nicht geladen werden. ' +
-        'Das passiert meist, wenn ein Werbe- oder Skriptblocker die Einbettung stoppt.';
+        'The TradingView chart could not be loaded. This is usually caused by ' +
+        'an ad blocker or script blocker stopping the embed.';
+    });
+  }
+
+  /* ── Datenbeschaffung fuer die KI ─────────────────────────────────
+     Die KI kann in den TradingView-Chart NICHT hineinsehen: er liegt auf
+     einer fremden Herkunft, und der Browser sperrt das. Sie bekommt darum
+     dieselben Daten, aus denen so ein Chart gezeichnet wird — Kerzen und
+     die eigene Zonenlogik. Das ist genauer als ein Bild, weil gerechnet
+     statt gedeutet wird. */
+
+  /* TradingView-Schreibweise in die des Datenanbieters uebersetzen. Was hier
+     fehlt, wird ehrlich abgelehnt statt geraten — ein falsch geratenes
+     Symbol liefert Kerzen eines ANDEREN Instruments, und das faellt
+     niemandem auf. */
+  var DATEN_SYM = {
+    'OANDA:XAUUSD': 'XAU/USD', 'OANDA:XAGUSD': 'XAG/USD',
+    'OANDA:EURUSD': 'EUR/USD', 'OANDA:GBPUSD': 'GBP/USD',
+    'OANDA:USDJPY': 'USD/JPY', 'OANDA:AUDUSD': 'AUD/USD',
+    'OANDA:USDCAD': 'USD/CAD', 'OANDA:NZDUSD': 'NZD/USD',
+    'BINANCE:BTCUSDT': 'BTC/USD', 'BINANCE:ETHUSDT': 'ETH/USD',
+    'OANDA:NAS100USD': 'NAS100', 'OANDA:SPX500USD': 'SPX500',
+    'OANDA:US30USD': 'US30', 'OANDA:DE30EUR': 'GER40',
+  };
+
+  var KERZEN_WORKER = 'https://candles-worker.4kjyyyftv6.workers.dev';
+  function kerzenWorker() {
+    try { return (localStorage.getItem('apexCandleWorker') || KERZEN_WORKER).replace(/\/$/, ''); }
+    catch (e) { return KERZEN_WORKER; }
+  }
+  function tdDatum(ms) { return new Date(ms).toISOString().slice(0, 19).replace('T', ' '); }
+
+  /* Welche Quelle fuer welches Instrument. Nicht nach Gewohnheit, sondern
+     nach Staerke: Yahoo liefert Forex und Krypto kostenlos, unbegrenzt und
+     echtzeitnah (gemessen: 0,2 min), kennt aber kein Spot-Gold und keine
+     Indizes. Die bleiben bei Twelve Data mit seinen 800 Abrufen pro Tag,
+     die sich ALLE Nutzer teilen. So faellt der groesste Teil der Last aus
+     dem knappen Budget heraus. */
+  function yahooSym(sym) {
+    var s2 = String(sym || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (/^(BTC|ETH|SOL|XRP|LTC|ADA|DOGE)USDT?$/.test(s2))
+      return s2.replace(/USDT?$/, '') + '-USD';
+    /* Gold und Silber ausdruecklich ausgenommen: Yahoo hat dafuer nur den
+       Future zu einem ANDEREN Kurs. Das faellt niemandem auf und macht jede
+       Zone falsch. */
+    if (/^[A-Z]{6}$/.test(s2) && !/^XA[UG]/.test(s2)) return s2 + '=X';
+    return null;
+  }
+
+  function inSpalten(liste) {
+    var n = liste.length;
+    var b = { n: n, t: [], o: [], h: [], l: [], c: [], v: [] };
+    for (var i = 0; i < n; i++) {
+      b.t.push(liste[i].t); b.o.push(liste[i].o); b.h.push(liste[i].h);
+      b.l.push(liste[i].l); b.c.push(liste[i].c); b.v.push(liste[i].v);
+    }
+    return b;
+  }
+
+  function ausWerten(j, sym, anzahl) {
+    if (!j || !Array.isArray(j.values) || !j.values.length)
+      throw new Error((j && (j.message || j.code)) || 'no candles returned');
+    var liste = j.values.map(function (v) {
+      return { t: Date.parse(String(v.datetime).replace(' ', 'T') + 'Z'),
+               o: +v.open, h: +v.high, l: +v.low, c: +v.close,
+               v: v.volume != null ? +v.volume : 0 };
+    }).filter(function (b) { return isFinite(b.t) && isFinite(b.c); })
+      .sort(function (a, b) { return a.t - b.t; });
+    if (!liste.length) throw new Error('no usable candles');
+    /* Nur die juengsten behalten: Yahoo liefert je nach Zeitraum weit mehr
+       als angefragt, und alles davon zu verarbeiten kostet nur Rechenzeit. */
+    if (anzahl && liste.length > anzahl) liste = liste.slice(-anzahl);
+    var bars = inSpalten(liste);
+    bars.__sym = sym;
+    return bars;
+  }
+
+  function kerzenHolen(sym, tf, anzahl) {
+    var y = yahooSym(sym);
+    if (y) {
+      return fetch(kerzenWorker() + '/ycandles?symbol=' + encodeURIComponent(y) +
+                   '&interval=' + tf)
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j || j.status === 'error') throw new Error((j && j.message) || 'yahoo failed');
+          TV._quelle = 'Yahoo';
+          return ausWerten(j, sym, anzahl);
+        })
+        .catch(function () {
+          /* Yahoo hat keine offizielle Schnittstelle. Faellt sie aus, uebernimmt
+             der bezahlte Weg — das ist der Grund, warum Twelve Data bleibt. */
+          TV._quelle = 'Twelve Data';
+          return twelveHolen(sym, tf, anzahl);
+        });
+    }
+    TV._quelle = 'Twelve Data';
+    return twelveHolen(sym, tf, anzahl);
+  }
+
+  function twelveHolen(sym, tf, anzahl) {
+    var min = { '1min': 1, '5min': 5, '15min': 15, '1h': 60, '4h': 240 }[tf] || 15;
+    var bis = Date.now();
+    var von = bis - anzahl * min * 60000 * 2.2;
+    var u = kerzenWorker() + '/candles?symbol=' + encodeURIComponent(sym) +
+            '&interval=' + tf + '&start_date=' + encodeURIComponent(tdDatum(von)) +
+            '&end_date=' + encodeURIComponent(tdDatum(bis));
+    return fetch(u).then(function (r) { return r.json(); })
+      .then(function (j) { return ausWerten(j, sym, anzahl); });
+  }
+
+  /* ── Verdichten statt nachladen ───────────────────────────────────
+     Ein hoeherer Zeitrahmen ist nichts anderes als zusammengefasste kleine
+     Kerzen. Statt H4, H1 und M15 EINZELN beim Anbieter zu holen — drei
+     Abrufe je Analyse, bei 800 pro Tag fuer ALLE Nutzer — wird der feinste
+     einmal geholt und daraus gerechnet. Ein Abruf, drei Zeitrahmen, und
+     die Werte sind exakt dieselben. */
+  function verdichten(bars, faktor) {
+    if (faktor <= 1) return bars;
+    var n = bars.n, gruppen = Math.floor(n / faktor);
+    var b = { n: 0, t: [], o: [], h: [], l: [], c: [], v: [], __sym: bars.__sym };
+    /* Vom ENDE her gruppieren. Von vorne wuerde ein unvollstaendiger Rest
+       am Anfang alle folgenden Kerzen um denselben Betrag verschieben —
+       die letzte Kerze waere dann nicht mehr die aktuelle. */
+    var rest = n - gruppen * faktor;
+    for (var g = 0; g < gruppen; g++) {
+      var i0 = rest + g * faktor, i1 = i0 + faktor;
+      var hi = -Infinity, lo = Infinity, vol = 0;
+      for (var i = i0; i < i1; i++) {
+        if (bars.h[i] > hi) hi = bars.h[i];
+        if (bars.l[i] < lo) lo = bars.l[i];
+        vol += bars.v[i] || 0;
+      }
+      b.t.push(bars.t[i0]); b.o.push(bars.o[i0]); b.h.push(hi);
+      b.l.push(lo); b.c.push(bars.c[i1 - 1]); b.v.push(vol);
+    }
+    b.n = b.t.length;
+    return b;
+  }
+
+  /* Welcher Basiszeitrahmen, und welche zwei daraus verdichtet werden.
+     Die Faktoren sind exakt, nicht gerundet — sonst passen die Kerzen
+     nicht auf die Stundengrenzen. */
+  var STUFEN = {
+    /* M1 ist bewusst dabei, obwohl die Kerzen rund zwei Minuten hinterher
+       sind — auf M1 sind das die letzten beiden Kerzen. Der Live-Kurs aus
+       dem Widget gleicht das teilweise aus, und das steht auch so in den
+       Daten, damit die KI es nicht fuer aktuelle Ruhe haelt. */
+    '1min':  { basis: '1min',  bars: 900, aus: [['M1', 1], ['M5', 5], ['M15', 15]] },
+    '5min':  { basis: '5min',  bars: 900, aus: [['M5', 1], ['M15', 3], ['H1', 12]] },
+    '15min': { basis: '15min', bars: 900, aus: [['M15', 1], ['H1', 4], ['H4', 16]] },
+    '1h':    { basis: '1h',    bars: 700, aus: [['H1', 1], ['H4', 4], ['D1', 24]] },
+    '4h':    { basis: '4h',    bars: 500, aus: [['H4', 1], ['D1', 6], ['W1', 30]] },
+  };
+
+  function nf(x, stellen) { return Number(x).toFixed(stellen); }
+
+  /* Richtung der Marktstruktur aus den vorhandenen Werkzeugen. Kein neuer
+     Algorithmus: structureScan ist bereits im Backtest im Einsatz und
+     geprueft. */
+  function struktur(bars) {
+    try {
+      var Ind = window.ApexIndicators;
+      if (!Ind || !Ind.structureScan || !Ind.pivots) return null;
+      var n = bars.n;
+      /* structureScan gibt {bos, choch, trend, sweptHigh, sweptLow} zurueck —
+         die Swing-Punkte selbst NICHT. Die kommen aus pivots(), das
+         structureScan intern ebenfalls benutzt. (Ich hatte die internen
+         Variablen fuer Rueckgabewerte gehalten; der Fehler landete im catch
+         und die Struktur fehlte still in allen Zeitrahmen.) */
+      var r = Ind.structureScan(bars, 5, 2);
+      var P = Ind.pivots(bars, 5, 2);
+      var t = r && r.trend ? r.trend[n - 1] : 0;
+
+      var hoch = NaN, tief = NaN;
+      for (var i = n - 1; i >= 0 && (!isFinite(hoch) || !isFinite(tief)); i--) {
+        if (!isFinite(hoch) && P.high && isFinite(P.high[i])) hoch = P.high[i];
+        if (!isFinite(tief) && P.low  && isFinite(P.low[i]))  tief = P.low[i];
+      }
+
+      /* Ein Strukturbruch der juengsten Zeit ist fuer viele Strategien das
+         eigentliche Signal — mitgeben, nicht nur die Richtung. */
+      var letzterBos = -1, letzterChoch = -1;
+      for (var k = n - 1; k >= 0 && k > n - 60; k--) {
+        if (letzterBos < 0 && r.bos && r.bos[k]) letzterBos = n - 1 - k;
+        if (letzterChoch < 0 && r.choch && r.choch[k]) letzterChoch = n - 1 - k;
+      }
+      return { trend: t > 0 ? 'up' : (t < 0 ? 'down' : 'unclear'),
+               hoch: hoch, tief: tief, bos: letzterBos, choch: letzterChoch,
+               /* Zeitstempel statt Index: Indizes verschieben sich mit jeder
+                  neuen Kerze, ein Vergleich darueber wuerde dasselbe
+                  Ereignis endlos als neu melden. */
+               bosTs:   letzterBos   >= 0 ? bars.t[n - 1 - letzterBos]   : 0,
+               chochTs: letzterChoch >= 0 ? bars.t[n - 1 - letzterChoch] : 0 };
+    } catch (e) { return { fehler: e.message || 'structure unavailable' }; }
+  }
+
+  function atrVon(bars) {
+    try {
+      var a = window.ApexIndicators.atr(bars, 14);
+      var v = a[bars.n - 1];
+      return isFinite(v) ? v : NaN;
+    } catch (e) { return NaN; }
+  }
+
+  function zonenVon(bars, kurs, stellen, atrW) {
+    try {
+      var Ind = window.ApexIndicators;
+      if (!Ind || !Ind.compute) return [];
+      var res = Ind.compute(bars, 'sd', {});
+      var sicht = Ind.sdVisibleZones(res.zoneList || [], bars.n - 1, { maxZones: 5 }) || [];
+      return sicht.map(function (z) {
+        var mitte = (z.top + z.bot) / 2;
+        return { z: z, ab: Math.abs(mitte - kurs) };
+      }).sort(function (a, b) { return a.ab - b.ab; }).slice(0, 4)
+        .map(function (x) {
+          var z = x.z;
+          /* Abstand ZUSAETZLICH in ATR: "12 Dollar entfernt" sagt nichts,
+             solange man die Tagesschwankung nicht kennt. "0,4 ATR" schon. */
+          var inAtr = isFinite(atrW) && atrW > 0 ? '  (' + nf(x.ab / atrW, 2) + ' ATR)' : '';
+          return '  - ' + (z.supply ? 'SUPPLY' : 'DEMAND') + ' ' +
+            nf(z.bot, stellen) + '-' + nf(z.top, stellen) +
+            ' | height ' + nf(z.top - z.bot, stellen) +
+            ' | ' + (z.broken ? 'broken' : 'unbroken') +
+            ' | retests ' + (z.retests || 0) +
+            ' | ' + nf(x.ab, stellen) + ' away' + inAtr;
+        });
+    } catch (e) { return []; }
+  }
+
+  /* Was der Nutzer auf DIESEM Instrument bisher getan hat. Das ist der
+     Unterschied zwischen einer allgemeinen Marktbeschreibung und einer
+     Aussage, die nur fuer ihn gilt — und der einzige Teil, den kein
+     fremder Chart je liefern kann. */
+  /* Die Strategien, die das Journal ohnehin kennt. Der Nutzer hat sie selbst
+     formuliert — damit misst die KI an SEINEN Kriterien statt an denen, die
+     ich fuer sinnvoll gehalten habe. Genau das macht sie strategieunabhaengig:
+     nicht mehr Wissen, sondern ein fremder Massstab. */
+  function playbooksFuellen() {
+    var sel = document.getElementById('tvKiPb');
+    if (!sel) return;
+    var liste = window.playbooks || [];
+    var gemerkt = lies('pb', '');
+    sel.innerHTML = '<option value="">No playbook &mdash; general read</option>' +
+      liste.map(function (pb) {
+        return '<option value="' + escHtml(pb.id) + '">' + escHtml(pb.name) + '</option>';
+      }).join('');
+    if (gemerkt && liste.some(function (p) { return p.id === gemerkt; })) sel.value = gemerkt;
+    var hint = document.querySelector('.tv-ki-pbhint');
+    if (hint) {
+      hint.innerHTML = liste.length
+        ? 'Your rules from <b>Analysis &rsaquo; Playbooks</b> &mdash; edit or add them there.'
+        : 'No playbooks yet. Create one under <b>Analysis &rsaquo; Playbooks</b> and the AI ' +
+          'will check the chart against your own rules.';
+    }
+  }
+
+  function playbookBlock() {
+    var sel = document.getElementById('tvKiPb');
+    var id = sel && sel.value;
+    if (!id) return '';
+    var pb = (window.playbooks || []).filter(function (p) { return p.id === id; })[0];
+    if (!pb) return '';
+
+    var z = ['', '=== THE PLAYBOOK THE USER TRADES: ' + pb.name + ' ==='];
+    if (pb.market) z.push('Intended market: ' + pb.market);
+    if (pb.checklist && pb.checklist.length) {
+      z.push('Checklist the user requires before entering:');
+      pb.checklist.forEach(function (c, i) { z.push('  ' + (i + 1) + '. ' + c); });
+    }
+    if (pb.rules) z.push('Rules: ' + pb.rules);
+
+    /* Wie gut das Playbook bisher lief. Ohne diese Zahl bewertet die KI eine
+       Strategie, ueber deren Ergebnis sie nichts weiss. */
+    try {
+      var alle = (window.journalData && journalData.trades) || window.journalData || [];
+      var meine = (alle || []).filter(function (t) { return t.playbook === id; });
+      if (meine.length >= 3) {
+        var g = 0, sum = 0;
+        meine.forEach(function (t) {
+          var v = parseFloat(t.pips || 0);
+          if (v > 0) g++;
+          sum += isFinite(v) ? v : 0;
+        });
+        z.push('Track record of this playbook: ' + meine.length + ' trades, ' +
+               Math.round(g / meine.length * 100) + '% winners, ' + nf(sum, 1) + ' pips total.');
+      }
+    } catch (e) { /* ohne Bilanz laeuft der Rest weiter */ }
+    return z.join('\n');
+  }
+
+  function median(werte) {
+    var a = werte.filter(function (x) { return isFinite(x); }).sort(function (x, y) { return x - y; });
+    if (!a.length) return NaN;
+    var m = Math.floor(a.length / 2);
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
+
+  /* journalData ist ein OBJEKT nach Datum ({ '2026-09-02': { trades: [...] } }),
+     kein Array und kein { trades: [] }. Der einzige richtige Zugang ist
+     getAllTrades() — das flacht alle Tage ab, haengt _date/_dow an und hat
+     einen eigenen Zwischenspeicher. Der falsche Zugriff hat hier still eine
+     leere Liste geliefert: kein Fehler, keine Meldung, nur ein Journal-Profil,
+     das in der echten App nie erschien. */
+  function trades() {
+    try {
+      if (typeof getAllTrades === 'function') return getAllTrades() || [];
+    } catch (e) { /* faellt unten auf die leere Liste zurueck */ }
+    return [];
+  }
+
+  function gleichesSymbol(t, kurz) {
+    return String(t.symbol || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase() === kurz;
+  }
+
+  /* Wie der Nutzer TATSAECHLICH handelt — nicht wie er es sich vornimmt.
+     Damit kann die KI Stop und Ziel in SEINER Groessenordnung nennen statt
+     in einer erfundenen. Bewusst Median statt Mittelwert: ein einzelner
+     entgleister Trade wuerde den Mittelwert verschieben und damit jeden
+     Vorschlag mitverschieben. */
+  function journalBlock(symbol, stellen) {
+    try {
+      var kurz = String(symbol).replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      var alle = trades();
+      if (!alle.length) return '';
+      var meine = alle.filter(function (t) { return gleichesSymbol(t, kurz); });
+      /* Unter fuenf Trades ist ein Median Zufall, kein Verhalten. */
+      var basis = meine.length >= 5 ? meine : alle;
+      var woher = meine.length >= 5 ? ('on ' + symbol) : 'across all instruments';
+      if (basis.length < 5) return '';
+
+      var z = ['', '=== HOW THIS USER ACTUALLY TRADES (' + woher + ') ==='];
+
+      var gew = 0, sum = 0;
+      basis.forEach(function (t) {
+        var pv = parseFloat(t.pips || 0);
+        if (pv > 0) gew++;
+        sum += isFinite(pv) ? pv : 0;
+      });
+      z.push(basis.length + ' trades, ' + Math.round(gew / basis.length * 100) +
+             '% winners, ' + nf(sum, 1) + ' pips total.');
+
+      var stops = [], ziele = [], rrs = [];
+      basis.forEach(function (t) {
+        var e = parseFloat(t.entry), sl = parseFloat(t.sl), tp = parseFloat(t.tp);
+        if (isFinite(e) && isFinite(sl) && sl > 0) stops.push(Math.abs(e - sl));
+        if (isFinite(e) && isFinite(tp) && tp > 0) ziele.push(Math.abs(tp - e));
+        var r = parseFloat(t.rr);
+        if (isFinite(r) && r !== 0) rrs.push(r);
+      });
+      var mS = median(stops), mZ = median(ziele), mR = median(rrs);
+      if (isFinite(mS)) z.push('Typical stop distance (median): ' + nf(mS, stellen) +
+                               ' in price terms.');
+      if (isFinite(mZ)) z.push('Typical target distance (median): ' + nf(mZ, stellen) + '.');
+      if (isFinite(mR)) z.push('Typical risk/reward taken (median): ' + nf(mR, 2) + ' R.');
+      z.push('When suggesting stop or target levels, stay in THIS order of magnitude. ' +
+             'Never propose a distance several times larger or smaller than what this ' +
+             'user actually trades.');
+
+      /* Die unangenehme Zahl. Sie ist oft wertvoller als jedes Setup — und
+         sie kann nur aus dem Journal kommen, nirgends sonst. */
+      try {
+        var sortiert = basis.slice().sort(function (a, b) {
+          return (Date.parse(a._date || a.date || a.openTime || 0) || 0) -
+                 (Date.parse(b._date || b.date || b.openTime || 0) || 0);
+        });
+        var reihe = 0, nachZwei = 0, nachZweiGew = 0;
+        sortiert.forEach(function (t) {
+          var pv = parseFloat(t.pips || 0);
+          if (reihe >= 2) { nachZwei++; if (pv > 0) nachZweiGew++; }
+          if (pv > 0) reihe = 0; else if (isFinite(pv)) reihe++;
+        });
+        if (nachZwei >= 5) {
+          z.push('After two or more losses in a row this user took ' + nachZwei +
+                 ' trades with a ' + Math.round(nachZweiGew / nachZwei * 100) +
+                 '% win rate (overall: ' + Math.round(gew / basis.length * 100) + '%).');
+        }
+      } catch (e) { /* ohne diese Zahl bleibt der Rest gueltig */ }
+
+      return z.join('\n');
+    } catch (e) { return ''; }
+  }
+
+  /* ── Wirtschaftskalender ──────────────────────────────────────────
+     Eine Zone kann technisch perfekt sein und trotzdem in zehn Minuten
+     pulverisiert werden. Ohne diesen Block redet die KI ueber Struktur,
+     waehrend gleich Zahlen kommen — und klingt dabei souveraen. */
+  var KAL_URL = 'https://econal.4kjyyyftv6.workers.dev/';
+
+  function waehrungenVon(symbol) {
+    var s2 = String(symbol || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    var out = [];
+    if (/^XAU|^XAG/.test(s2)) out.push('USD');
+    else if (/^(NAS100|SPX500|US30|US500)/.test(s2)) out.push('USD');
+    else if (/^(GER40|DE30|DAX)/.test(s2)) out.push('EUR');
+    else if (/^UK100/.test(s2)) out.push('GBP');
+    else if (/^[A-Z]{6}$/.test(s2)) { out.push(s2.slice(0, 3)); out.push(s2.slice(3)); }
+    return out;
+  }
+
+  function kalenderHolen() {
+    /* Der Worker haelt die Woche in KV und frischt selbst auf. Einmal je
+       Sitzung reicht daher voellig. */
+    if (TV._kalender && Date.now() - TV._kalender.ts < 900000)
+      return Promise.resolve(TV._kalender.liste);
+    return fetch(KAL_URL).then(function (r) { return r.json(); }).then(function (j) {
+      var liste = (j && j.economicCalendar) || [];
+      TV._kalender = { ts: Date.now(), liste: liste };
+      return liste;
+    }).catch(function () { return []; });
+  }
+
+  function newsBlock(liste, symbol) {
+    if (!liste || !liste.length) return '';
+    var waehr = waehrungenVon(symbol);
+    var jetzt = Date.now();
+    var relevant = liste.filter(function (e) {
+      var t = Date.parse(e.time);
+      if (!isFinite(t)) return false;
+      var min = (t - jetzt) / 60000;
+      if (min < -30 || min > 240) return false;             // 30 min zurueck, 4 h voraus
+      if (!/high|medium/i.test(e.impact || '')) return false;
+      if (waehr.length && e.country && waehr.indexOf(e.country) < 0) return false;
+      return true;
+    }).slice(0, 8);
+    if (!relevant.length)
+      return '\n=== ECONOMIC CALENDAR ===\nNothing of medium or high impact for this ' +
+             'instrument in the next four hours.';
+    var z = ['', '=== ECONOMIC CALENDAR (next 4 hours, this instrument) ==='];
+    relevant.forEach(function (e) {
+      var min = Math.round((Date.parse(e.time) - jetzt) / 60000);
+      z.push('- ' + (min >= 0 ? 'in ' + min + ' min' : Math.abs(min) + ' min ago') +
+             ': ' + (e.country || '') + ' ' + e.event +
+             ' [' + e.impact + ']' + (e.estimate ? '  forecast ' + e.estimate : ''));
+    });
+    z.push('If a high-impact release is close, say so and treat any technical read as ' +
+           'provisional. Do not pretend the calendar is not there.');
+    return z.join('\n');
+  }
+
+  function sachstand(basis, tfWahl, anzeige, symName, kalender) {
+    var stufe = STUFEN[tfWahl] || STUFEN['15min'];
+    var schluss = basis.c[basis.n - 1];
+    /* Abstaende werden gegen den LIVE-Kurs gerechnet, wenn es ihn gibt. Der
+       letzte Kerzenschluss ist bis zu zwei Minuten alt — bei Zonen von ein
+       bis drei Dollar entscheidet das darueber, ob "nah dran" stimmt. */
+    var live = liveKurs(symName);
+    var kurs = live != null ? live : schluss;
+    var stellen = kurs > 100 ? 2 : (kurs > 10 ? 3 : 5);
+    var z = [];
+
+    z.push('Instrument: ' + anzeige);
+    var verzug = TV._quelle === 'Yahoo'
+      ? 'candle data is essentially real-time for this instrument'
+      : 'candle data lags the live price by roughly 2 minutes';
+    if (live != null) {
+      z.push('Current price: ' + nf(live, stellen) + '   (live)');
+      z.push('Last completed candle closed at ' + nf(schluss, stellen) +
+             '   (' + verzug + ')');
+    } else {
+      z.push('Current price: ' + nf(schluss, stellen) +
+             '   (last completed candle; ' + verzug + ')');
+    }
+    z.push('Time now (UTC): ' + new Date().toISOString().slice(0, 16).replace('T', ' '));
+
+    stufe.aus.forEach(function (paar) {
+      var name = paar[0], faktor = paar[1];
+      var b = verdichten(basis, faktor);
+      if (b.n < 30) return;
+      var a = atrVon(b), st = struktur(b);
+      z.push('');
+      z.push('=== ' + name + '  (' + b.n + ' candles) ===');
+      var kopf = 'ATR(14): ' + (isFinite(a) ? nf(a, stellen) : 'n/a');
+      if (st && !st.fehler) {
+        kopf += '   Structure: ' + st.trend;
+        if (isFinite(st.hoch)) kopf += '   last swing high ' + nf(st.hoch, stellen);
+        if (isFinite(st.tief)) kopf += '   last swing low ' + nf(st.tief, stellen);
+      } else if (st && st.fehler) {
+        /* Nicht verschweigen. Fehlt die Struktur stillschweigend, haelt die
+           KI das fuer eine Aussage ueber den Markt statt ueber uns. */
+        kopf += '   Structure: not available (' + st.fehler + ')';
+      }
+      z.push(kopf);
+      if (st && !st.fehler && (st.bos >= 0 || st.choch >= 0)) {
+        var b = [];
+        if (st.bos >= 0)   b.push('break of structure ' + st.bos + ' candles ago');
+        if (st.choch >= 0) b.push('change of character ' + st.choch + ' candles ago');
+        z.push('Recent structure events: ' + b.join(', '));
+      }
+      var zn = zonenVon(b, kurs, stellen, a);
+      if (zn.length) {
+        z.push('Supply & demand zones (user\'s own logic, nearest first):');
+        zn.forEach(function (l) { z.push(l); });
+      } else {
+        z.push('No valid zones on this timeframe.');
+      }
+    });
+
+    z.push(newsBlock(kalender, symName || anzeige));
+    /* Mit dem SYMBOL abgleichen, nicht mit dem Anzeigenamen: das Widget
+       liefert als Titel "Gold", im Journal steht "XAUUSD". Der Vergleich lief
+       damit ins Leere und die eigenen Zahlen des Nutzers galten stets als
+       "ueber alle Instrumente" — falsch, und niemand haette es gemerkt. */
+    z.push(journalBlock(symName || anzeige, stellen));
+    z.push(playbookBlock());
+    return z.join('\n');
+  }
+
+  var GRUND =
+    'You are given the actual numbers behind a chart for one instrument, across three ' +
+    'timeframes. You cannot see a chart image - these numbers are the data instead, ' +
+    'which is more precise than a picture.\n\n' +
+    'Read it the way a discretionary trader does: highest timeframe first for context, ' +
+    'then down to the entry timeframe.\n\n' +
+    'Hard rules:\n' +
+    '- Use ONLY numbers that appear in the data. Never invent a level.\n' +
+    '- Do not tell the user to buy or sell and do not state a direction as a prediction. ' +
+    'Describe conditions.\n' +
+    '- If timeframes disagree, say so plainly instead of picking a side.\n' +
+    '- If the data does not support a useful read, say that and stop. A short honest ' +
+    'answer beats a padded one.';
+
+  var OHNE_PLAYBOOK =
+    '\n\nAnswer in at most 180 words, using exactly these four headings:\n' +
+    'CONTEXT - what the higher timeframe says.\n' +
+    'LEVELS - which of the listed zones actually matter right now, and why those.\n' +
+    'IF/THEN - the condition that would confirm, and the one that would invalidate. ' +
+    'Name price levels from the list.\n' +
+    'LEVELS TO WORK WITH - where a stop and a target WOULD sit, phrased as information, ' +
+    'never as an instruction: "a stop below the zone would be around X; your typical stop ' +
+    'distance is Y". Base the size on how this user actually trades. Say plainly if the ' +
+    'data does not support naming one.\n' +
+    'CONFIDENCE - high, medium or low, and the single biggest thing that is unclear. ' +
+    'Mention any high-impact economic release that is close.';
+
+  /* Mit Playbook aendert sich der MASSSTAB, nicht das Wissen. Bewertet wird
+     gegen die Kriterien des Nutzers statt gegen allgemeine Marktlehre — das
+     ist der Grund, warum es dann fuer jede Strategie taugt und nicht nur
+     fuer Supply & Demand.
+
+     Entscheidend ist die "cannot tell"-Regel: die meisten Checklisten
+     enthalten Punkte, die sich aus Kursdaten NICHT pruefen lassen ("auf
+     Nachrichten gewartet", "ausgeruht"). Ohne diese Erlaubnis wuerde die KI
+     sie erfinden und dabei genauso ueberzeugt klingen. */
+  var MIT_PLAYBOOK =
+    '\n\nThe user trades a specific playbook, given below in their own words. ' +
+    'Judge the chart against THEIR criteria, not against general market theory.\n\n' +
+    'Answer in at most 230 words, using exactly these five headings:\n' +
+    'CONTEXT - what the higher timeframe says.\n' +
+    'PLAYBOOK CHECK - go through their checklist item by item. Mark each one MET, ' +
+    'NOT MET, or CANNOT TELL, each with one short reason. Use CANNOT TELL honestly ' +
+    'and often: many checklist items (news, discipline, session feel, order flow) ' +
+    'simply cannot be verified from candles and zones. Guessing at those is worse ' +
+    'than admitting the limit.\n' +
+    'LEVELS - which listed zones matter for THIS playbook right now.\n' +
+    'IF/THEN - what would make this a valid setup by their own rules, and what would ' +
+    'rule it out. Name price levels from the list.\n' +
+    'YOUR OWN READ - think for yourself here. Anything important the data shows that ' +
+    'their playbook does not cover, or any way the market disagrees with their rules ' +
+    'right now. If their playbook fits the situation well, say so instead of ' +
+    'inventing a concern.\n\n' +
+    'LEVELS TO WORK WITH - where a stop and a target WOULD sit by their own rules, ' +
+    'phrased as information, never as an instruction. Base the size on how this user ' +
+    'actually trades, not on a round number.\n\n' +
+    'Never rewrite their playbook and never tell them their strategy is wrong. If you ' +
+    'see a genuine gap, name it as an observation in YOUR OWN READ and leave the ' +
+    'decision to them.\n\n' +
+    'You inform, you never instruct. Say "a stop below the zone would sit around X", ' +
+    'not "set your stop at X". Never use imperatives about entering, exiting or sizing. ' +
+    'If an economic release is close, warn about it before anything technical.';
+
+  /* Der Verlauf, damit Rueckfragen auf derselben Datenlage stehen und die
+     KI sich nicht widerspricht. */
+  var verlauf = [];
+
+  function blase(rolle, text) {
+    return '<div class="tv-ki-' + (rolle === 'user' ? 'frage' : 'antwort') + '">' +
+           escHtml(text).replace(/\n/g, '<br>') + '</div>';
+  }
+
+  function malen() {
+    var out = document.getElementById('tvKiOut');
+    if (!out) return;
+    var h = verlauf.filter(function (m) { return !m.versteckt; })
+                   .map(function (m) { return blase(m.role, m.anzeige || m.content); }).join('');
+    if (TV._fakten) {
+      h += '<details class="tv-ki-fakten"><summary>Data the AI was given</summary>' +
+           '<pre class="notranslate" translate="no">' + escHtml(TV._fakten) + '</pre></details>';
+    }
+    out.innerHTML = h || '<p class="tv-ki-leer">The AI reads the candles and your ' +
+      'supply &amp; demand zones across three timeframes &mdash; it cannot see the chart above.</p>';
+    out.scrollTop = out.scrollHeight;
+  }
+
+  function fragen(nachricht) {
+    return fetch(COACH_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: (window.currentUser && currentUser.uid) || 'guest',
+        system: 'Trading Coach',
+        messages: verlauf.map(function (m) { return { role: m.role, content: m.content }; })
+                         .concat(nachricht ? [{ role: 'user', content: nachricht }] : []),
+      }),
+    }).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return {}; }).then(function (e) {
+        throw new Error(e.error || 'AI service error (' + r.status + ')');
+      });
+      return r.json();
+    }).then(function (d) {
+      var text = d.response ||
+        (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+      if (!text) throw new Error('the AI service returned no text');
+      /* Der Worker reicht Stoerungen des Anbieters als NORMALEN Text durch —
+         Guthaben leer, Kontingent, Spam-Schutz. Ungeprueft sieht so eine
+         Meldung aus wie eine Analyse. */
+      if (/API Error|credits are depleted|Quota exceeded|Limit erreicht|Spam-Schutz|pauses until tomorrow|unusual amount of AI use|unusual number of chart analyses/i.test(text))
+        throw new Error(text.replace(/^\s*⚠️\s*/, ''));
+      return text;
+    });
+  }
+
+  function busy(an, was) {
+    var k = document.getElementById('tvKiGo'), e = document.getElementById('tvKiAsk');
+    if (k) { k.disabled = an; k.textContent = an ? (was || 'Working…') : 'Analyse chart'; }
+    if (e) e.disabled = an;
+  }
+
+  /* ── Waechter ─────────────────────────────────────────────────────
+     Der Preis wird KOSTENLOS ueberwacht: subscribeToQuote liefert ihn
+     unbegrenzt aus dem Widget. Kerzen — und damit Zonen und Struktur —
+     kosten dagegen Kontingent. Daraus folgt der ganze Aufbau:
+
+       Zonen selten neu rechnen  ·  Preis dauernd pruefen  ·  KI nur dann,
+       wenn der Preis wirklich in einer relevanten Zone ankommt.
+
+     Alles laeuft nur, solange die Chart-Seite offen ist. */
+  var WACHT = {
+    an: false, zonen: [], atr: NaN, sym: '', tf: '', letzteZonen: 0,
+    gemeldet: {}, letzteMeldung: 0, laeuft: false,
+  };
+  var MELDUNG_PAUSE   = 120000;  // zwischen zwei Meldungen mindestens 2 Minuten
+
+  /* Wie oft Kerzen geholt werden, haengt davon ab, ob ueberhaupt etwas
+     passieren KANN. Weit weg von jeder Zone aendert ein Strukturbruch nichts
+     an der Lage — dann reicht alle zehn Minuten. Steht der Preis an einer
+     Zone, zaehlt jede Minute. Das ist derselbe Gedanke wie beim Preis: teuer
+     nur dort, wo es etwas bringt. */
+  function zonenKennung(z) {
+    return (z.supply ? 'S' : 'D') + nf(z.bot, 4) + '-' + nf(z.top, 4);
+  }
+
+  function taktMs() {
+    var k = TV.kurs && TV.kurs.preis;
+    if (!isFinite(k) || !WACHT.zonen.length || !isFinite(WACHT.atr) || WACHT.atr <= 0)
+      return 600000;
+    var naechste = Infinity;
+    WACHT.zonen.forEach(function (z) {
+      /* Eine bereits gemeldete Zone treibt den Takt nicht mehr. Sonst klebt
+         der Preis den ganzen Tag in derselben Zone und wir fragen im
+         90-Sekunden-Takt Kerzen ab, obwohl zu dieser Zone nichts mehr zu
+         sagen ist — das war der teuerste Fall in der Rechnung. */
+      if (WACHT.gemeldet[zonenKennung(z)]) return;
+      var ab = (k >= z.bot && k <= z.top) ? 0
+             : Math.min(Math.abs(k - z.bot), Math.abs(k - z.top));
+      if (ab < naechste) naechste = ab;
+    });
+    if (!isFinite(naechste)) return 600000;   // alle nahen Zonen erledigt
+    var inAtr = naechste / WACHT.atr;
+    if (inAtr <= 0.5) return 90000;    // an oder in der Zone
+    if (inAtr <= 2)   return 180000;   // in Reichweite
+    return 600000;                     // nichts in Sicht
+  }
+
+  /* Ob ein Strukturereignis den Nutzer ueberhaupt interessiert. Zwei Wege,
+     beide ohne Rateversuch: entweder sein Playbook spricht selbst von
+     Struktur — dann immer —, oder der Preis steht nahe genug an einer Zone,
+     dass es die Lage aendert. */
+  function strukturRelevant() {
+    var sel = document.getElementById('tvKiPb');
+    var pb = (window.playbooks || []).filter(function (p) { return p.id === (sel && sel.value); })[0];
+    if (pb) {
+      var text = ((pb.rules || '') + ' ' + (pb.checklist || []).join(' ')).toLowerCase();
+      if (/break of structure|\bbos\b|choch|change of character|structure|struktur/.test(text))
+        return true;
+    }
+    var k = TV.kurs && TV.kurs.preis;
+    if (!isFinite(k) || !isFinite(WACHT.atr) || WACHT.atr <= 0) return false;
+    return WACHT.zonen.some(function (z) {
+      var ab = (k >= z.bot && k <= z.top) ? 0
+             : Math.min(Math.abs(k - z.bot), Math.abs(k - z.top));
+      return ab / WACHT.atr <= 2;
+    });
+  }
+
+  function wachtSchalten(an) {
+    WACHT.an = !!an;
+    merke('wacht', an ? '1' : '0');
+    var k = document.getElementById('tvWachtBtn');
+    if (k) {
+      k.setAttribute('aria-pressed', an ? 'true' : 'false');
+      k.textContent = an ? 'Watching' : 'Watch for setups';
+    }
+    var st = document.getElementById('tvWachtStatus');
+    if (st) st.textContent = an
+      ? 'Watching the live price against your zones. Only while this page is open.'
+      : '';
+    if (an) { WACHT.gemeldet = {}; WACHT.struktur = null; zonenAuffrischen(true); }
+  }
+
+  /* Zonen und ATR neu berechnen. Kostet EINEN Kerzenabruf, deshalb selten
+     und nur mit Grund — neue Zonen entstehen ohnehin nur mit neuen Kerzen. */
+  function zonenAuffrischen(erzwingen) {
+    if (!WACHT.an || WACHT.laeuft) return Promise.resolve();
+    if (!erzwingen && Date.now() - WACHT.letzteZonen < taktMs()) return Promise.resolve();
+    WACHT.laeuft = true;
+    var tf = (document.getElementById('tvKiTf') || {}).value || '15min';
+    var stufe = STUFEN[tf] || STUFEN['15min'];
+    return symbolJetzt().then(function (info) {
+      var tvSym = (info && info.voll) || TV.sym || STD_SYM;
+      var datenSym = DATEN_SYM[tvSym];
+      if (!datenSym) throw new Error('no data for ' + tvSym);
+      /* Symbol oder Zeitrahmen gewechselt: alte Meldungen gelten nicht mehr. */
+      if (WACHT.sym !== tvSym || WACHT.tf !== tf) WACHT.gemeldet = {};
+      WACHT.sym = tvSym; WACHT.tf = tf;
+      WACHT.name = (info && info.name) || '';
+      WACHT.titel = (info && info.titel) || tvSym.split(':').pop();
+      return kerzenHolen(datenSym, stufe.basis, stufe.bars);
+    }).then(function (bars) {
+      var Ind = window.ApexIndicators;
+      var res = Ind.compute(bars, 'sd', {});
+      var sicht = Ind.sdVisibleZones(res.zoneList || [], bars.n - 1, { maxZones: 8 }) || [];
+      /* Nur ungebrochene Zonen taugen als Auslöser. Eine gebrochene Zone
+         wieder zu melden waere genau das Rauschen, das niemand will. */
+      WACHT.zonen = sicht.filter(function (z) { return !z.broken; });
+      WACHT.atr = atrVon(bars);
+      WACHT.bars = bars;
+      WACHT.letzteZonen = Date.now();
+      strukturPruefen(bars);
+      wachtStatusZeigen();
+      WACHT.fehler = 0;
+    }).catch(function () {
+      /* Kein Abbruch: die zuletzt bekannten Zonen bleiben gueltig und der
+         Preisalarm arbeitet weiter. Aber es muss SICHTBAR sein, sonst haelt
+         man Stunden alte Zonen fuer aktuelle. */
+      WACHT.fehler = (WACHT.fehler || 0) + 1;
+      wachtStatusZeigen();
+    }).then(function () { WACHT.laeuft = false; });
+  }
+
+  /* Strukturereignisse melden — aber nur NEUE. Beim ersten Durchlauf wird
+     lediglich eine Grundlinie gesetzt: sonst wuerde das Einschalten des
+     Waechters die halbe Vergangenheit als frische Ereignisse ausschuetten. */
+  function strukturPruefen(bars) {
+    var st = struktur(bars);
+    if (!st || st.fehler) return;
+    var vorher = WACHT.struktur;
+    WACHT.struktur = { trend: st.trend, bosTs: st.bosTs || 0, chochTs: st.chochTs || 0 };
+
+    if (!vorher) return;                                   // Grundlinie
+    if (Date.now() - WACHT.letzteMeldung < MELDUNG_PAUSE) return;
+    if (!strukturRelevant()) return;
+
+    var art = null, was = '';
+    if (st.chochTs && st.chochTs > (vorher.chochTs || 0)) {
+      art = 'CHoCH';
+      was = 'a change of character just formed on ' + WACHT.tf;
+    } else if (st.bosTs && st.bosTs > (vorher.bosTs || 0)) {
+      art = 'BOS';
+      was = 'a break of structure just formed on ' + WACHT.tf;
+    } else if (vorher.trend && st.trend !== vorher.trend && st.trend !== 'unclear') {
+      art = 'TREND';
+      was = 'the structure on ' + WACHT.tf + ' flipped from ' + vorher.trend +
+            ' to ' + st.trend;
+    }
+    if (!art) return;
+
+    WACHT.letzteMeldung = Date.now();
+    strukturMeldung(art, was, st);
+  }
+
+  var STRUKTUR_ANWEISUNG =
+    'A structure event just formed on the chart the user is watching. This is an ' +
+    'alert, not a full analysis. Answer in at most 90 words:\n' +
+    'Line 1: SETUP POSSIBLE or JUST A HEADS-UP - decide based on whether this fits ' +
+    'the criteria below.\n' +
+    'Then 2-4 short lines: what the event means for the nearest zones, what would ' +
+    'confirm it, and where a stop would sit given how this user trades.\n' +
+    'If an economic release is close, lead with that.\n' +
+    'If you name a stop and a target, they must be ARITHMETICALLY consistent with each other and with this user\u2019s typical risk/reward: target distance divided by stop distance should land near their usual R. Do not put a stop a few points away and a target hundreds of points away and call it their usual R \u2014 do the division before you write the numbers.\n' +
+    'You inform, you never instruct. No imperatives, no buy/sell calls. If the event ' +
+    'does not actually matter for their rules, say JUST A HEADS-UP and why in one ' +
+    'line - a quiet honest answer is worth more than a manufactured setup.';
+
+  function strukturMeldung(art, was, st) {
+    var out = document.getElementById('tvKiOut');
+    if (!out) return;
+    var k = (TV.kurs && TV.kurs.preis) || WACHT.bars.c[WACHT.bars.n - 1];
+    var stellen = k > 100 ? 2 : (k > 10 ? 3 : 5);
+    out.insertAdjacentHTML('afterbegin',
+      '<div class="tv-ki-alarm" id="tvAlarmLade">' + art + ' on ' + WACHT.tf +
+      ' — analysing…</div>');
+    kalenderHolen().then(function (kal) {
+      var fakten = sachstand(WACHT.bars, WACHT.tf, WACHT.titel, WACHT.name, kal);
+      fakten += '\n\n=== WHAT JUST HAPPENED ===\n' + was.charAt(0).toUpperCase() + was.slice(1) +
+        '. Structure is now ' + st.trend + '. Live price ' + nf(k, stellen) + '.';
+      if (isFinite(st.hoch)) fakten += ' Last swing high ' + nf(st.hoch, stellen) + '.';
+      if (isFinite(st.tief)) fakten += ' Last swing low ' + nf(st.tief, stellen) + '.';
+      verlauf = [{ role: 'user', content: STRUKTUR_ANWEISUNG + '\n\n---\n' + fakten,
+                   versteckt: true }];
+      TV._fakten = fakten;
+      return fragen(null).then(function (text) {
+        verlauf.push({ role: 'assistant', content: text });
+        malen();
+        var kopf = document.createElement('div');
+        kopf.className = 'tv-ki-alarm';
+        kopf.textContent = new Date().toLocaleTimeString() + '  ·  ' + was;
+        out.insertBefore(kopf, out.firstChild);
+        try { if (document.hidden && window.playNotifSound) playNotifSound(); } catch (e) {}
+      });
+    }).catch(function () {
+      var l = document.getElementById('tvAlarmLade');
+      if (l) l.textContent = 'Could not analyse the structure event.';
+    });
+  }
+
+  function wachtStatusZeigen() {
+    var st = document.getElementById('tvWachtStatus');
+    if (!st || !WACHT.an) return;
+    if (!WACHT.zonen.length) {
+      st.textContent = 'No unbroken zones to watch on ' + WACHT.tf + ' right now.';
+      return;
+    }
+    /* Den Takt sichtbar machen: sonst wirkt es willkuerlich, wann sie sich
+       meldet und wann nicht. */
+    if (WACHT.fehler >= 2) {
+      var alt = Math.round((Date.now() - WACHT.letzteZonen) / 60000);
+      st.textContent = 'Zones could not be refreshed (data quota or connection). ' +
+        'Still watching the ' + WACHT.zonen.length + ' zones from ' + alt +
+        ' min ago — they may be out of date.';
+      return;
+    }
+    var t = Math.round(taktMs() / 60000);
+    st.textContent = 'Watching ' + WACHT.zonen.length + ' unbroken zones and structure on ' +
+      WACHT.tf + ', checking every ' + (t < 2 ? '1.5' : t) + ' min. ' +
+      'Only while this page is open.';
+  }
+
+  /* Bei JEDER Kursaktualisierung: liegt der Preis in einer Zone? Reine
+     Rechnung, kein Netzverkehr, kein Kontingent. */
+  function preisPruefen(preis) {
+    if (!WACHT.an || !isFinite(preis) || !WACHT.zonen.length) return;
+    if (Date.now() - WACHT.letzteMeldung < MELDUNG_PAUSE) return;
+    for (var i = 0; i < WACHT.zonen.length; i++) {
+      var z = WACHT.zonen[i];
+      if (preis < z.bot || preis > z.top) continue;
+      var kennung = zonenKennung(z);
+      if (WACHT.gemeldet[kennung]) continue;      // je Zone genau einmal
+      WACHT.gemeldet[kennung] = true;
+      WACHT.letzteMeldung = Date.now();
+      meldung(z, preis);
+      return;
+    }
+  }
+
+  var ALARM_ANWEISUNG =
+    'The live price has just entered one of the user’s own supply/demand zones. ' +
+    'This is an alert, not a full analysis. Answer in at most 90 words:\n' +
+    'Line 1: SETUP POSSIBLE or JUST A HEADS-UP - decide which, based on whether the ' +
+    'situation fits the criteria below.\n' +
+    'Then 2-4 short lines: which zone and why it matters, what would confirm, and where ' +
+    'a stop would sit given how this user trades.\n' +
+    'If an economic release is close, lead with that.\n' +
+    'If you name a stop and a target, they must be ARITHMETICALLY consistent with each other and with this user\u2019s typical risk/reward: target distance divided by stop distance should land near their usual R. Do not put a stop a few points away and a target hundreds of points away and call it their usual R \u2014 do the division before you write the numbers.\n' +
+    'You inform, you never instruct. No imperatives, no buy/sell calls. If the situation ' +
+    'does not actually fit their rules, say JUST A HEADS-UP and explain in one line why ' +
+    'it falls short - a quiet honest answer is worth more than a manufactured setup.';
+
+  function meldung(z, preis) {
+    var out = document.getElementById('tvKiOut');
+    if (!out) return;
+    var stellen = preis > 100 ? 2 : (preis > 10 ? 3 : 5);
+    kalenderHolen().then(function (kal) {
+      var fakten = sachstand(WACHT.bars, WACHT.tf, WACHT.titel, WACHT.name, kal);
+      fakten += '\n\n=== WHAT JUST HAPPENED ===\nThe live price ' + nf(preis, stellen) +
+        ' has entered the ' + (z.supply ? 'SUPPLY' : 'DEMAND') + ' zone ' +
+        nf(z.bot, stellen) + '-' + nf(z.top, stellen) +
+        ' (unbroken, ' + (z.retests || 0) + ' retests so far).';
+      verlauf = [{ role: 'user', content: ALARM_ANWEISUNG + '\n\n---\n' + fakten, versteckt: true }];
+      TV._fakten = fakten;
+      malen();
+      out.insertAdjacentHTML('afterbegin',
+        '<div class="tv-ki-alarm" id="tvAlarmLade">Price entered a ' +
+        (z.supply ? 'supply' : 'demand') + ' zone — analysing…</div>');
+      return fragen(null).then(function (text) {
+        verlauf.push({ role: 'assistant', content: text, anzeige: text });
+        malen();
+        var kopf = document.createElement('div');
+        kopf.className = 'tv-ki-alarm';
+        kopf.textContent = new Date().toLocaleTimeString() + '  ·  price entered ' +
+          (z.supply ? 'supply' : 'demand') + ' ' + nf(z.bot, stellen) + '-' + nf(z.top, stellen);
+        out.insertBefore(kopf, out.firstChild);
+        /* Aufmerksamkeit ohne Laerm: ein Ton nur, wenn die Seite im
+           Hintergrund ist, und nur wenn der Nutzer Toene ohnehin erlaubt. */
+        try { if (document.hidden && window.playNotifSound) playNotifSound(); } catch (e) {}
+      });
+    }).catch(function () {
+      var l = document.getElementById('tvAlarmLade');
+      if (l) l.textContent = 'Could not analyse the zone entry (data or AI unavailable).';
+    });
+  }
+
+  /* Zustand des Waechters offengelegt — wie TV.kurs und TV.sym. Erlaubt,
+     nachzusehen was ueberwacht wird, und den Auslöser mit einem Preis zu
+     pruefen, ohne auf eine echte Marktbewegung zu warten. */
+  TV.wacht = WACHT;
+  TV.pruefePreis = preisPruefen;
+  TV.auffrischen = zonenAuffrischen;
+
+  function analysieren() {
+    var out = document.getElementById('tvKiOut');
+    var tf = (document.getElementById('tvKiTf') || {}).value || '15min';
+    if (!out) return;
+
+    busy(true, 'Reading chart…');
+    out.innerHTML = '<p class="tv-ki-leer">Reading the instrument from the chart…</p>';
+
+    /* Erst fragen, was im Chart laeuft. Der Nutzer waehlt in TradingViews
+       eigener Suche, und die kennt nur das Widget selbst. */
+    symbolJetzt().then(function (info) {
+      var tvSym = (info && info.voll) || TV.sym || STD_SYM;
+      var anzeige = (info && info.titel) || tvSym.split(':').pop();
+      var datenSym = DATEN_SYM[tvSym];
+      if (info) { TV.sym = tvSym; merke('sym', tvSym); kopfAnzeigen(info); }
+
+      if (!datenSym) {
+        busy(false);
+        out.innerHTML = '<p class="tv-ki-warn">No data source for <b class="notranslate" ' +
+          'translate="no">' + escHtml(tvSym) + '</b>. The chart shows every instrument, ' +
+          'but the AI can only analyse the ones we have candle data for &mdash; gold, ' +
+          'silver, the major FX pairs, the main indices and BTC/ETH.</p>';
+        return;
+      }
+
+      var stufe = STUFEN[tf] || STUFEN['15min'];
+      verlauf = []; TV._fakten = '';
+      busy(true, 'Loading…');
+      out.innerHTML = '<p class="tv-ki-leer">Loading candles, computing zones across three ' +
+                      'timeframes…</p>';
+
+      return Promise.all([
+        kerzenHolen(datenSym, stufe.basis, stufe.bars),
+        kalenderHolen(),
+      ]).then(function (paar) {
+      var bars = paar[0];
+      var fakten = sachstand(bars, tf, anzeige, (info && info.name) || '', paar[1]);
+      TV._fakten = fakten;
+      busy(true, 'Analysing…');
+      /* Die Faktenlage steht als versteckte erste Nachricht im Verlauf:
+         Rueckfragen sollen sich darauf beziehen koennen, ohne sie dem
+         Nutzer als Gespraechsblase vorzusetzen. */
+      var mitPb = /=== THE PLAYBOOK THE USER TRADES/.test(fakten);
+      var anweisung = GRUND + (mitPb ? MIT_PLAYBOOK : OHNE_PLAYBOOK);
+      verlauf.push({ role: 'user', content: anweisung + '\n\n---\n' + fakten, versteckt: true });
+        return fragen(null).then(function (text) {
+          verlauf.push({ role: 'assistant', content: text });
+          malen();
+        });
+      });
+    }).catch(function (e) {
+      out.innerHTML = '<p class="tv-ki-warn">' + escHtml(e.message || 'failed') + '</p>';
+    }).then(function () { busy(false); });
+  }
+
+  function nachfragen() {
+    var feld = document.getElementById('tvKiAsk');
+    if (!feld) return;
+    var text = (feld.value || '').trim();
+    if (!text) return;
+    if (!verlauf.length) {
+      /* Ohne Datenlage waere die Antwort geraten. Lieber sagen, was fehlt. */
+      var o = document.getElementById('tvKiOut');
+      if (o) o.innerHTML = '<p class="tv-ki-warn">Run an analysis first &mdash; then the ' +
+        'AI can answer follow-up questions about the same data.</p>';
+      return;
+    }
+    feld.value = '';
+    verlauf.push({ role: 'user', content: text });
+    malen();
+    busy(true, 'Thinking…');
+    fragen(null).then(function (a) {
+      verlauf.push({ role: 'assistant', content: a });
+      malen();
+    }).catch(function (e) {
+      verlauf.push({ role: 'assistant', content: '⚠ ' + (e.message || 'failed') });
+      malen();
+    }).then(function () { busy(false); });
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
 
@@ -63872,7 +65066,29 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   TV.oeffnen = function () {
     TV.sym = TV.sym || lies('sym', STD_SYM);
     TV.tf  = TV.tf  || lies('tf',  STD_TF);
-    aktiv();
+    kiZeigen(lies('ki', '1') === '1');
+    playbooksFuellen();
+    beobachten();
+    wachtSchalten(lies('wacht', '0') === '1');
+    /* Neue Zonen entstehen nur mit neuen Kerzen. Der Takt fragt darum selten
+       nach und zonenAuffrischen() bremst zusaetzlich selbst. */
+    if (!TV._wachtTakt) {
+      TV._wachtTakt = setInterval(function () {
+        var seite = document.getElementById('page-chart');
+        if (!seite || !seite.classList.contains('active')) return;
+        if (document.hidden) return;
+        zonenAuffrischen(false);
+      }, 60000);
+    }
+    /* Zeitrahmen der KI an den des Charts angleichen, damit beide dasselbe
+       meinen, wenn der Nutzer im Chart umschaltet. */
+    symbolJetzt().then(function (info) {
+      if (!info) return;
+      kopfAnzeigen(info);
+      var w = TF_VON_TV[String(info.intervall)];
+      var sel = document.getElementById('tvKiTf');
+      if (w && sel && STUFEN[w]) sel.value = w;
+    });
     if (!TV.widget || TV._thema !== thema()) bauen();
   };
 })();
@@ -63997,8 +65213,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
            unbekanntes Symbol, Kontingent. Das stumm zu schlucken hiess:
            man klickt ein Instrument an und es passiert einfach nichts. */
         var grund = (j && (j.message || j.code)) ? String(j.message || j.code) : 'keine Kerzen erhalten';
-        if (/API credits|run out of|rate limit/i.test(grund))
-          grund = 'Kontingent erschoepft — der Datentarif erlaubt 8 Abfragen je Minute. Etwa eine Minute warten.';
+        if (/for the day|daily limit/i.test(grund))
+          grund = 'Daily data quota is used up (800 requests per day, shared by all users). It resets tomorrow.';
+        else if (/API credits|run out of|rate limit/i.test(grund))
+          grund = 'Data quota is briefly used up (8 requests per minute, shared by all users). Try again in a minute.';
         else if (/available starting with|Grow or Venture/i.test(grund))
           grund = 'Dieses Instrument ist im kostenlosen Datentarif nicht enthalten.';
         throw new Error(grund);
