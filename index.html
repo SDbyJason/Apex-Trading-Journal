@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04a';
+  window.APEX_BUILD = '2026-09-04c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7083,6 +7083,24 @@ body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
 /* EINE Spalte je Zeitrahmen. Vorher floss der Inhalt quer durch alle
    Spalten, dadurch stand "Flip levels" neben den Zonen eines anderen
    Zeitrahmens statt darunter. */
+/* Fokusleiste: die naechsten zwei je Seite, gross genug um sie zu lesen,
+   ohne die Liste darunter zu ersetzen. */
+#page-chart .tv-fokus{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+#page-chart .tv-fk{border:0.5px solid var(--rim);border-radius:9px;padding:8px 10px;background:var(--elevated);border-left-width:3px}
+#page-chart .tv-fk.d{border-left-color:#4fb87a}
+#page-chart .tv-fk.s{border-left-color:#e06a6a}
+#page-chart .tv-fk.gegen{opacity:.45}
+#page-chart .tv-fk-kopf{display:flex;justify-content:space-between;align-items:baseline;font-size:9px;letter-spacing:.11em;font-weight:700;margin-bottom:3px}
+#page-chart .tv-fk.d .tv-fk-kopf{color:#4fb87a}
+#page-chart .tv-fk.s .tv-fk-kopf{color:#e06a6a}
+#page-chart .tv-fk-kopf span{letter-spacing:.06em;color:var(--ink3);font-weight:600}
+#page-chart .tv-fk-p{font-family:var(--font-display);font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink);line-height:1.2}
+#page-chart .tv-fk-p i{font-style:normal;color:var(--ink3);margin:0 2px;font-size:13px}
+#page-chart .tv-fk-m{font-size:10px;color:var(--ink3);margin-top:2px}
+/* In der Liste darunter dieselben vier hervorheben, der Rest tritt zurueck. */
+#page-chart .tv-lv-z.fokus .tv-lv-p{color:var(--ink);font-weight:600}
+#page-chart .tv-lv-z:not(.fokus):not(.flip):not(.fein) .tv-lv-p{color:var(--ink3)}
+body.light #page-chart .tv-fk{background:#fff}
 #page-chart .tv-lv-spalten{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:0 20px}
 #page-chart .tv-lv-sp{min-width:0;border-left:0.5px solid var(--rim);padding-left:12px}
 #page-chart .tv-lv-sp:first-child{border-left:0;padding-left:0}
@@ -7110,6 +7128,12 @@ body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
 #page-chart .tv-lv-fein{margin-top:10px;border:0.5px solid var(--gold-line);border-radius:8px;padding:8px 10px;background:var(--gold-dim)}
 #page-chart .tv-lv-fkopf{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);font-weight:700}
 #page-chart .tv-lv-fin{font-size:10.5px;color:var(--ink3);margin:2px 0 4px;font-variant-numeric:tabular-nums}
+#page-chart .tv-lv-z.verworfen{opacity:.35}
+#page-chart .tv-lv-z.verworfen .tv-lv-p{text-decoration:line-through}
+#page-chart .tv-lv-z.bestaetigt .tv-lv-m{color:var(--profit)}
+#page-chart .tv-ki-zonen{margin-top:10px;border:0.5px dashed var(--gold-line);border-radius:8px;padding:8px 10px}
+#page-chart .tv-lv-z.ungeprueft{opacity:.55}
+#page-chart .tv-lv-z.ungeprueft .tv-lv-m{color:var(--loss)}
 #page-chart .tv-lv-hinweis{margin-top:9px;font-size:10px;color:var(--ink3);line-height:1.5}
 body.light #page-chart .tv-levels:not(:empty){background:#fff;border-color:rgba(0,0,0,.09)}
 #page-chart .tv-ki-out{flex:1 1 auto;overflow-y:auto;min-height:0;font-size:12.5px;line-height:1.65;color:var(--ink2)}
@@ -65067,6 +65091,26 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return out.join('\n');
   }
 
+  /* ── Kerzen fuer die KI ───────────────────────────────────────────
+     Damit sie Zonen SELBST finden kann, muss sie die Kursbewegung sehen und
+     nicht nur das Ergebnis des Indikators. Bewusst kompakt: nur die letzten
+     Kerzen, gerundet, ohne Zeitstempel je Zeile — die Reihenfolge und der
+     Startzeitpunkt genuegen, und jede zusaetzliche Spalte kostet Platz, den
+     die Analyse besser gebraucht. */
+  function kerzenBlock(bars, anzahl, stellen, tfName) {
+    if (!bars || !bars.n) return '';
+    var von = Math.max(0, bars.n - anzahl);
+    var zeilen = [];
+    for (var i = von; i < bars.n; i++) {
+      zeilen.push(nf(bars.o[i], stellen) + ' ' + nf(bars.h[i], stellen) + ' ' +
+                  nf(bars.l[i], stellen) + ' ' + nf(bars.c[i], stellen));
+    }
+    return '\n=== RAW CANDLES ' + tfName + ' (oldest first, open high low close) ===\n' +
+           'First candle opens ' +
+           new Date(bars.t[von]).toISOString().slice(0, 16).replace('T', ' ') + ' UTC. ' +
+           zeilen.length + ' candles.\n' + zeilen.join('\n');
+  }
+
   function sachstand(basis, tfWahl, anzeige, symName, kalender, fein) {
     var stufe = STUFEN[tfWahl] || STUFEN['15min'];
     var schluss = basis.c[basis.n - 1];
@@ -65205,7 +65249,30 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     levelZeigen();
     levelSpeichern();
 
+    /* Dieselben vier, die der Nutzer vor sich sieht, bekommt auch die KI —
+       sonst redet sie ueber Zonen, die er gerade nicht im Blick hat. */
+    var fk = fokusZonen(ebenen);
+    var vier = [].concat(fk.demand, fk.supply);
+    if (vier.length) {
+      z.push('');
+      z.push('=== IN FOCUS: THE TWO NEAREST ON EACH SIDE ===');
+      z.push('These four are what the user has in front of them. Build the read on ' +
+             'these unless something else is clearly more important — and if you go ' +
+             'elsewhere, say why.');
+      vier.forEach(function (x) {
+        var g = x.g;
+        z.push('  - ' + (g.supply ? 'SUPPLY' : 'DEMAND') + ' ' + x.tf + ' ' +
+               nf(g.bot, stellen) + '-' + nf(g.top, stellen) +
+               ' | ' + nf(g.ab, stellen) + ' away' +
+               (g.staerke ? ' | strength ' + g.staerke.punkte + '/100' : '') +
+               ' | ' + (g.retests || 0) + ' retests');
+      });
+    }
+
     if (fein && fein.ziel) z.push(feinBlock(fein.ziel, fein.daten, stellen, fein.mStop));
+    /* Die Kerzen zuletzt: sie sind der laengste Teil und sollen die
+       aufbereiteten Zahlen nicht verdraengen. */
+    z.push(kerzenBlock(basis, 140, stellen, stufe.aus[0][0]));
     z.push(newsBlock(kalender, symName || anzeige));
     /* Mit dem SYMBOL abgleichen, nicht mit dem Anzeigenamen: das Widget
        liefert als Titel "Gold", im Journal steht "XAUUSD". Der Vergleich lief
@@ -65225,6 +65292,20 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'The indicators listed are the ones THIS user chose to trade by. Build your read on ' +
     'those, in their terms. Do not fall back on tools they did not pick, and do not ' +
     'treat supply/demand zones as the default lens unless they are in the list.\n\n' +
+    'The zones you are given come from an indicator. Treat them as CANDIDATES, not as ' +
+    'truth: an indicator applies a fixed rule and cannot see context. You have the raw ' +
+    'candles as well, so read the price action yourself — where did the market actually ' +
+    'consolidate before it left in a hurry, and where did it react on the way back?\n\n' +
+    'Append this block once, after your prose:\n' +
+    '<<ZONES>>\n' +
+    'confirm: <low>-<high> | one short reason\n' +
+    'reject: <low>-<high> | one short reason\n' +
+    'new: demand|supply <low>-<high> | one short reason\n' +
+    '<</ZONES>>\n' +
+    'Judge only zones that matter for the current price - a verdict on something 200 ' +
+    'points away is noise. Every level you write there is checked against the candles ' +
+    'afterwards, and anything that does not match the actual highs and lows is shown to ' +
+    'the user as unverified. Read the numbers before you commit to them.\n\n' +
     'Hard rules:\n' +
     '- Use ONLY numbers that appear in the data. Never invent a level.\n' +
     '- A computed strength ranking is provided. Lead with the strongest zones that are ' +
@@ -65498,10 +65579,23 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var Ind = window.ApexIndicators;
       var res = Ind.compute(bars, 'sd', {});
       var sicht = Ind.sdVisibleZones(res.zoneList || [], bars.n - 1, { maxZones: 8 }) || [];
-      /* Nur ungebrochene Zonen taugen als Auslöser. Eine gebrochene Zone
-         wieder zu melden waere genau das Rauschen, das niemand will. */
-      WACHT.zonen = sicht.filter(function (z) { return !z.broken; });
-      WACHT.atr = atrVon(bars);
+      var atrW = atrVon(bars);
+      var kurs = (TV.kurs && TV.kurs.preis) || bars.c[bars.n - 1];
+      /* Dieselbe Buendelung wie in der Analyse — sonst meldet der Waechter
+         dieselbe Stelle zweimal, weil dort zwei Zonen dicht beieinander
+         liegen. Gebrochene fliegen vorher raus. */
+      WACHT.zonen = zonenBuendeln(sicht.filter(function (z) { return !z.broken; })
+        .map(function (z) {
+          var m = (z.top + z.bot) / 2;
+          return { supply: !!z.supply, bot: z.bot, top: z.top, broken: false,
+                   retests: z.retests || 0, ab: Math.abs(m - kurs),
+                   von: isFinite(z.bornAt) ? z.bornAt : z.from,
+                   alter: isFinite(z.from) ? (bars.n - 1 - z.from) : NaN };
+        }), atrW);
+      /* Staerke mitrechnen: der Alarm soll sagen koennen, WIE gut die Stelle
+         ist, nicht nur dass der Kurs dort steht. */
+      WACHT.zonen.forEach(function (g) { g.staerke = staerke(g, bars, atrW, []); });
+      WACHT.atr = atrW;
       WACHT.bars = bars;
       WACHT.letzteZonen = Date.now();
       strukturPruefen(bars);
@@ -65609,7 +65703,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       return;
     }
     var t = Math.round(taktMs() / 60000);
-    st.textContent = 'Watching ' + WACHT.zonen.length + ' unbroken zones and structure on ' +
+    st.textContent = 'Watching ' + WACHT.zonen.length + ' zone areas and structure on ' +
       WACHT.tf + ', checking every ' + (t < 2 ? '1.5' : t) + ' min. ' +
       'Only while this page is open.';
   }
@@ -65650,10 +65744,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var stellen = preis > 100 ? 2 : (preis > 10 ? 3 : 5);
     kalenderHolen().then(function (kal) {
       var fakten = sachstand(WACHT.bars, WACHT.tf, WACHT.titel, WACHT.name, kal);
+      var kern = z.kern || z;
       fakten += '\n\n=== WHAT JUST HAPPENED ===\nThe live price ' + nf(preis, stellen) +
-        ' has entered the ' + (z.supply ? 'SUPPLY' : 'DEMAND') + ' zone ' +
+        ' has entered the ' + (z.supply ? 'SUPPLY' : 'DEMAND') + ' area ' +
         nf(z.bot, stellen) + '-' + nf(z.top, stellen) +
-        ' (unbroken, ' + (z.retests || 0) + ' retests so far).';
+        ' (' + (z.teile ? z.teile.length : 1) + ' zone(s) merged, ' +
+        (z.retests || 0) + ' retests' +
+        (z.staerke ? ', computed strength ' + z.staerke.punkte + '/100' : '') + ').';
+      if (kern !== z)
+        fakten += ' The precise level inside it is ' +
+                  nf(kern.bot, stellen) + '-' + nf(kern.top, stellen) + '.';
       verlauf = [{ role: 'user', content: ALARM_ANWEISUNG + '\n\n---\n' + fakten, versteckt: true }];
       TV._fakten = fakten;
       malen();
@@ -65686,6 +65786,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   TV.auffrischen = zonenAuffrischen;
   TV.setupLesen = setupLesen;
   TV.setupZeigen = setupZeigen;
+  TV.zonenUrteilLesen = zonenUrteilLesen;
+  TV.urteilAnwenden = urteilAnwenden;
   TV.neuRechnen = function () { analysieren(); };
 
   /* ── Level zum Einzeichnen ────────────────────────────────────────
@@ -65796,6 +65898,40 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return null;
   }
 
+  /* Die naechsten zwei je Seite — mehr braucht niemand im Blick. Ueber alle
+     Zeitrahmen hinweg gesucht, denn eine H1-Zone direkt am Kurs ist wichtiger
+     als eine M15-Zone weit weg.
+
+     Ueberlappende Kandidaten sind DIESELBE Stelle, nur auf zwei Zeitrahmen
+     gefunden. Dann bleibt der staerkere stehen, sonst stuenden zwei Eintraege
+     fuer ein Level da und man haette wieder eine Liste statt eines Fokus. */
+  function fokusZonen(ebenen) {
+    var alle = [];
+    (ebenen || []).forEach(function (e) {
+      (e.zonen || []).forEach(function (g) { alle.push({ g: g, tf: e.tf }); });
+    });
+    function nimm(supply) {
+      var kand = alle.filter(function (x) { return !!x.g.supply === supply; })
+                     .sort(function (a, b) { return a.g.ab - b.g.ab; });
+      var raus = [];
+      kand.forEach(function (x) {
+        for (var i = 0; i < raus.length; i++) {
+          var o = raus[i].g;
+          if (x.g.top >= o.bot && x.g.bot <= o.top) {
+            /* Gleiche Stelle: den staerkeren behalten. */
+            var pn = x.g.staerke ? x.g.staerke.punkte : 0;
+            var po = o.staerke ? o.staerke.punkte : 0;
+            if (pn > po) raus[i] = x;
+            return;
+          }
+        }
+        if (raus.length < 2) raus.push(x);
+      });
+      return raus;
+    }
+    return { demand: nimm(false), supply: nimm(true) };
+  }
+
   function levelZeigen() {
     var el = document.getElementById('tvLevels');
     var L = TV._levels;
@@ -65805,6 +65941,18 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var offen = TV._levelsOffen !== false;
     var n = function (x) { return nf(x, L.stellen); };
     var rich = pbRichtung();
+
+    var fokus = fokusZonen(L.ebenen);
+    var imFokus = fokus.demand.concat(fokus.supply);
+    imFokus.forEach(function (x) { x.g._fokus = true; });
+    /* Vor dem Markieren alles zuruecksetzen, sonst bleibt eine Zone markiert,
+       die inzwischen weiter weg liegt. */
+    (L.ebenen || []).forEach(function (e) {
+      (e.zonen || []).forEach(function (g) {
+        if (imFokus.indexOf(g) < 0 && !imFokus.some(function (x) { return x.g === g; }))
+          g._fokus = false;
+      });
+    });
 
     var alterMin = L.ts ? Math.round((Date.now() - L.ts) / 60000) : 0;
     var h = '<div class="tv-lv-kopf">' +
@@ -65816,6 +65964,26 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       '<button id="tvLvCopy" class="tv-lv-copy">Copy</button></div>';
 
     if (offen) {
+      if (imFokus.length) {
+        h += '<div class="tv-fokus">';
+        /* Nachfrage links, Angebot rechts — wie im Chart: unten kaufen,
+           oben verkaufen. */
+        [].concat(fokus.demand, fokus.supply).forEach(function (x) {
+          var g = x.g, gegen = rich && (rich.lang !== !g.supply);
+          h += '<div class="tv-fk' + (g.supply ? ' s' : ' d') + (gegen ? ' gegen' : '') + '">' +
+            '<div class="tv-fk-kopf">' + (g.supply ? 'SUPPLY' : 'DEMAND') +
+              '<span>' + x.tf + '</span></div>' +
+            '<div class="tv-fk-p notranslate" translate="no">' + n(g.bot) + '<i>–</i>' +
+              n(g.top) + '</div>' +
+            '<div class="tv-fk-m"><span class="notranslate" translate="no">' + n(g.ab) +
+              '</span> away' +
+              (g.staerke ? ' · <span class="notranslate" translate="no">' +
+                 g.staerke.punkte + '</span> strength' : '') +
+              (g.retests ? ' · ' + g.retests + 'r' : '') + '</div>' +
+          '</div>';
+        });
+        h += '</div>';
+      }
       h += '<div class="tv-lv-spalten">';
       L.ebenen.forEach(function (e) {
         var zonen = (e.zonen || []).slice(0, 5);
@@ -65831,8 +65999,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             var gegen = rich && (rich.lang !== !g.supply);
             var meta = (g.teile && g.teile.length > 1 ? g.teile.length + '× · ' : '') +
                        (g.retests ? g.retests + 'r · ' : '') + n(g.ab) + ' away';
+            if (g._ki === 'ok')  meta = '✓ ' + meta;
+            if (g._ki === 'weg') meta = '✗ ' + meta;
             h += zeile(g.supply, g.bot, g.top, meta,
-                       g.staerke ? g.staerke.punkte : null, gegen);
+                       g.staerke ? g.staerke.punkte : null, gegen,
+                       false, g._fokus, g._ki);
           });
         } else {
           h += '<div class="tv-lv-leer">no intact zones here</div>';
@@ -65877,6 +66048,25 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         h += '</div>';
       }
 
+      var U = TV._urteil;
+      if (U && (U.neu.length || U.anzahlOk || U.anzahlWeg)) {
+        h += '<div class="tv-ki-zonen"><div class="tv-lv-fkopf">Found by the AI</div>';
+        if (!U.neu.length)
+          h += '<div class="tv-lv-leer">No additional zones &mdash; it worked with the ' +
+               'ones already listed (' + U.anzahlOk + ' confirmed, ' + U.anzahlWeg +
+               ' rejected).</div>';
+        U.neu.forEach(function (e) {
+          h += '<div class="tv-lv-z' + (e.ok ? '' : ' ungeprueft') + '">' +
+            '<span class="tv-lv-typ ' + (e.supply ? 's' : 'd') + '"></span>' +
+            '<span class="tv-lv-p notranslate" translate="no">' + n(e.bot) + '<i>–</i>' +
+              n(e.top) + '</span>' +
+            '<span class="tv-lv-m">' + (e.ok
+              ? escHtml(e.grund || '').slice(0, 70) +
+                (isFinite(e.impuls) ? ' · impulse ' + e.impuls.toFixed(1) + ' ATR' : '')
+              : '&#9888; ' + escHtml(e.pGrund)) + '</span></div>';
+        });
+        h += '</div>';
+      }
       if (rich)
         h += '<div class="tv-lv-hinweis">Zones against your playbook &ldquo;' +
              escHtml(rich.name) + '&rdquo; (' + (rich.lang ? 'long only' : 'short only') +
@@ -65899,11 +66089,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       else notfall(t, k);
     };
 
-    function zeile(supply, bot, top, meta, punkte, gegen, fein) {
+    function zeile(supply, bot, top, meta, punkte, gegen, fein, fokus, ki) {
       var kraft = punkte != null
         ? '<span class="tv-lv-kraft" title="strength ' + punkte + '/100"><i style="width:' +
           Math.max(4, Math.min(100, punkte)) + '%"></i></span>' : '';
-      return '<div class="tv-lv-z' + (gegen ? ' gegen' : '') + (fein ? ' fein' : '') + '">' +
+      return '<div class="tv-lv-z' + (gegen ? ' gegen' : '') + (fein ? ' fein' : '') +
+        (fokus ? ' fokus' : '') + (ki === 'weg' ? ' verworfen' : '') +
+        (ki === 'ok' ? ' bestaetigt' : '') + '">' +
         '<span class="tv-lv-typ ' + (supply ? 's' : 'd') + '"></span>' +
         '<span class="tv-lv-p notranslate" translate="no">' + n(bot) + '<i>–</i>' +
           n(top) + '</span>' + kraft +
@@ -65938,6 +66130,77 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Der Grund fuer diese Schicht ist Erfahrung, keine Vorsicht: heute hat
      dasselbe Modell 57R behauptet, wo 2R stand, und Level genannt, die in
      den Daten nicht vorkamen. */
+  /* ── Urteil der KI ueber die Zonen ────────────────────────────────
+     Sie darf bestaetigen, verwerfen und eigene vorschlagen. Was sie
+     vorschlaegt, wird gegen die KERZEN geprueft — nicht gegen den Indikator.
+     Eine Zone, die im Kursverlauf keine Entsprechung hat, ist erfunden, und
+     das muss dastehen statt als gleichwertiger Eintrag zu erscheinen. */
+  function zonenUrteilLesen(text) {
+    var m = /<<ZONES>>([\s\S]*?)<<\/ZONES>>/.exec(text || '');
+    if (!m) return null;
+    var aus = { bestaetigt: [], verworfen: [], neu: [] };
+    var zahl = function (t) {
+      var x = parseFloat(String(t).replace(/,/g, ''));
+      return isFinite(x) ? x : NaN;
+    };
+    m[1].split('\n').forEach(function (zeile) {
+      var t = /^\s*(confirm|reject|new)\s*:\s*(.+)$/i.exec(zeile);
+      if (!t) return;
+      var art = t[1].toLowerCase(), rest = t[2];
+      var teile = rest.split('|');
+      var kopf = teile[0].trim();
+      var grund = (teile[1] || '').trim();
+      var seite = null;
+      var sm = /^(demand|supply)\s+/i.exec(kopf);
+      if (sm) { seite = sm[1].toLowerCase() === 'supply'; kopf = kopf.slice(sm[0].length); }
+      var sp = /(-?[\d.,]+)\s*[-–]\s*(-?[\d.,]+)/.exec(kopf);
+      if (!sp) return;
+      var a = zahl(sp[1]), b = zahl(sp[2]);
+      if (!isFinite(a) || !isFinite(b)) return;
+      var eintrag = { bot: Math.min(a, b), top: Math.max(a, b), grund: grund, supply: seite };
+      if (art === 'confirm') aus.bestaetigt.push(eintrag);
+      else if (art === 'reject') aus.verworfen.push(eintrag);
+      else aus.neu.push(eintrag);
+    });
+    return aus;
+  }
+
+  function ohneZonenBlock(text) {
+    return String(text || '').replace(/<<ZONES>>[\s\S]*?<<\/ZONES>>/g, '').trim();
+  }
+
+  /* Gegen die Kerzen pruefen: Hat der Kurs diese Spanne ueberhaupt beruehrt,
+     und ist er danach kraftvoll weggelaufen? Ohne beides ist es keine Zone,
+     sondern eine Zahl. */
+  function zonePruefen(bars, e, atrW) {
+    if (!bars || !bars.n) return { ok: false, grund: 'no candles to check against' };
+    var lo = Infinity, hi = -Infinity;
+    for (var i = 0; i < bars.n; i++) {
+      if (bars.l[i] < lo) lo = bars.l[i];
+      if (bars.h[i] > hi) hi = bars.h[i];
+    }
+    if (e.top < lo || e.bot > hi)
+      return { ok: false, grund: 'outside the candles in view (' +
+               nf(lo, 2) + '–' + nf(hi, 2) + ')' };
+
+    /* Kerzen finden, die die Spanne wirklich beruehrt haben. */
+    var treffer = [], letzterTreffer = -1;
+    for (i = 0; i < bars.n; i++) {
+      if (bars.l[i] <= e.top && bars.h[i] >= e.bot) { treffer.push(i); letzterTreffer = i; }
+    }
+    if (!treffer.length) return { ok: false, grund: 'price never traded in this range' };
+
+    /* Impuls nach dem letzten Aufenthalt dort. */
+    var weit = 0;
+    for (i = letzterTreffer; i < Math.min(bars.n, letzterTreffer + 25); i++) {
+      var d = e.supply ? (e.bot - bars.l[i]) : (bars.h[i] - e.top);
+      if (d > weit) weit = d;
+    }
+    var impuls = (isFinite(atrW) && atrW > 0) ? weit / atrW : NaN;
+    return { ok: true, beruehrt: treffer.length, impuls: impuls,
+             zuletzt: bars.n - 1 - letzterTreffer };
+  }
+
   function setupLesen(text) {
     var m = /<<SETUP>>([\s\S]*?)<<\/SETUP>>/.exec(text || '');
     if (!m) return null;
@@ -66052,6 +66315,42 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                   ueblR.toFixed(1) + 'R you usually take.');
     }
     return warn;
+  }
+
+  /* Das Urteil auf die vorhandenen Bereiche uebertragen und die eigenen
+     Vorschlaege pruefen. Zugeordnet wird ueber Ueberlappung — die KI nennt
+     selten exakt dieselben Grenzen, meint aber dieselbe Stelle. */
+  function urteilAnwenden(U, bars) {
+    var L = TV._levels;
+    TV._urteil = null;
+    if (!U || !L) { levelZeigen(); return; }
+
+    var atrW = (L.ebenen[0] && L.ebenen[0].atr) || NaN;
+    function zuordnen(e, marke) {
+      var getroffen = false;
+      (L.ebenen || []).forEach(function (ebene) {
+        (ebene.zonen || []).forEach(function (g) {
+          if (e.top >= g.bot && e.bot <= g.top) { g._ki = marke; g._kiGrund = e.grund; getroffen = true; }
+        });
+      });
+      return getroffen;
+    }
+    (L.ebenen || []).forEach(function (ebene) {
+      (ebene.zonen || []).forEach(function (g) { g._ki = null; g._kiGrund = ''; });
+    });
+    U.bestaetigt.forEach(function (e) { zuordnen(e, 'ok'); });
+    U.verworfen.forEach(function (e) { zuordnen(e, 'weg'); });
+
+    /* Eigene Vorschlaege: nur die behalten, die im Kursverlauf eine
+       Entsprechung haben. Der Rest wird als ungeprueft gekennzeichnet, nicht
+       weggeworfen — der Nutzer soll sehen, was sie gesagt hat. */
+    var neu = U.neu.map(function (e) {
+      var p = zonePruefen(bars, e, atrW);
+      return { bot: e.bot, top: e.top, supply: !!e.supply, grund: e.grund,
+               ok: p.ok, pGrund: p.grund, impuls: p.impuls, zuletzt: p.zuletzt };
+    });
+    TV._urteil = { neu: neu, anzahlOk: U.bestaetigt.length, anzahlWeg: U.verworfen.length };
+    levelZeigen();
   }
 
   function setupZeigen(S) {
@@ -66206,11 +66505,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         verlauf.push({ role: 'user', content: anweisung + '\n\n---\n' + volle,
                        versteckt: true });
         return fragen(null).then(function (text) {
-          /* Werte aus der Antwort holen, pruefen, anzeigen — und den Block
-             aus dem Text nehmen, damit er nicht doppelt erscheint. */
+          /* Werte aus der Antwort holen, pruefen, anzeigen — und die Bloecke
+             aus dem Text nehmen, damit sie nicht doppelt erscheinen. */
           setupZeigen(setupLesen(text));
+          urteilAnwenden(zonenUrteilLesen(text), bars);
           verlauf.push({ role: 'assistant', content: text,
-                         anzeige: ohneBlock(text) });
+                         anzeige: ohneZonenBlock(ohneBlock(text)) });
           malen();
         });
       });
