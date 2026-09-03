@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04c';
+  window.APEX_BUILD = '2026-09-04f';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7042,6 +7042,16 @@ body.light #page-chart .tv-kitoggle{background:#fff;border-color:rgba(0,0,0,.12)
 #page-chart .tv-ind-liste{max-height:190px;overflow-y:auto;padding:0 10px 9px}
 #page-chart .tv-ind-g{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:7px 0 3px}
 #page-chart .tv-ind-i{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);padding:1px 0;cursor:pointer}
+#page-chart .tv-ind-i{position:relative}
+#page-chart .tv-ind-set{margin-left:auto;background:none;border:0;color:var(--ink3);cursor:pointer;font-size:11px;padding:0 2px;opacity:.6}
+#page-chart .tv-ind-set:hover{opacity:1;color:var(--gold)}
+#page-chart .tv-ind-p{margin:3px 0 7px 20px;padding:7px 9px;border-left:2px solid var(--gold-line);background:var(--layer);border-radius:0 7px 7px 0}
+#page-chart .tv-ind-pz{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--ink3);padding:2px 0}
+#page-chart .tv-ind-pz span{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-chart .tv-ind-pz input{flex:0 0 62px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:5px;color:var(--ink);padding:3px 6px;font-size:11px;font-variant-numeric:tabular-nums}
+#page-chart .tv-ind-reset{margin-top:5px;background:none;border:0.5px solid var(--rim);color:var(--ink3);border-radius:5px;padding:3px 8px;font-size:10px;cursor:pointer}
+#page-chart .tv-ind-reset:hover{border-color:var(--gold-line);color:var(--gold)}
+body.light #page-chart .tv-ind-p{background:#f4f5f7}
 #page-chart .tv-ind-i input{accent-color:var(--gold);margin:0}
 body.light #page-chart .tv-ind{background:#fff;border-color:rgba(0,0,0,.12)}
 #page-chart .tv-ki-pb{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}
@@ -12186,6 +12196,9 @@ function _authAction(type) {
       <h1 translate="no" class="notranslate">Play<span style="color:var(--gold)">books</span></h1>
       <p>Define your strategies with a checklist and rules — then see which ones actually make money.</p>
     </div>
+    <!-- Werkzeug, das aus mehreren Trade-Rueckblicken die Strategie
+         herausliest. Steht ueber dem Formular, weil es dieses fuellt. -->
+    <div id="pbFinderHost"></div>
     <div class="glass-card" style="margin-bottom:1.5rem">
       <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem" id="pbFormTitle">＋ New playbook</div>
       <input type="hidden" id="pb-edit-id">
@@ -14625,7 +14638,7 @@ function nav(id) {
   if (id === 'psychology')  { renderMistakeHeatmap(); renderStrengthsHeatmap(); renderStreakTracker(); renderTopMistakes(); renderEmotionPerformance(); updatePsychChart(); }
   if (id === 'calendar')    { renderCalendar(); }
   if (id === 'setups')      { renderSetups(); }
-  if (id === 'playbooks')   { renderPlaybooks(); }
+  if (id === 'playbooks')   { renderPlaybooks(); if (window.ApexPbFinder) ApexPbFinder.render(); }
   if (id === 'insights')    { updateInsights(); if (typeof window._initWeeklyReportCard === 'function') window._initWeeklyReportCard(); }
   if (id === 'community')   { renderCommunity(); }
   if (id === 'feed')        { renderFeed(); }
@@ -14710,6 +14723,308 @@ function playbookStats(pbId){
   function avg(a){ return a.length? a.reduce(function(x,y){return x+y;},0)/a.length : null; }
   return { n:n, total:all.length, wr:wr, pf:pf, exp:exp, net:net, adhPct:(clLen&&n)?Math.round(adhSum/n*100):null, avgFully:avg(fully), avgPartial:avg(partial), fullyN:fully.length, partialN:partial.length, clLen:clLen };
 }
+/* ══════════════════════════════════════════════════════════════════════
+   Strategie aus Trade-Rueckblicken  (window.ApexPbFinder)
+   ──────────────────────────────────────────────────────────────────────
+   Die meisten wissen, WIE sie handeln — sie haben es nur nie aufgeschrieben.
+   Hier wirft man mehrere Rueckblicke ein, und die KI liest heraus, was sie
+   gemeinsam haben: Aufbau, Einstiegsbedingungen, Stop- und Zielregeln.
+
+   Mehrere sind Pflicht, nicht Zierde: aus EINEM Trade laesst sich keine
+   Strategie ableiten, nur eine Anekdote. Darum die Untergrenze von drei.
+   ══════════════════════════════════════════════════════════════════════ */
+(function apexPbFinder() {
+  var PF = { recaps: [], ergebnis: null, laeuft: false };
+  window.ApexPbFinder = PF;
+  var MIN = 3;
+
+  function esc(t) {
+    return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  function laden() {
+    try {
+      var r = localStorage.getItem('apexPbRecaps_' + (window.currentUID || ''));
+      PF.recaps = r ? (JSON.parse(r) || []) : [];
+    } catch (e) { PF.recaps = []; }
+  }
+  function sichern() {
+    try {
+      localStorage.setItem('apexPbRecaps_' + (window.currentUID || ''),
+                           JSON.stringify(PF.recaps));
+    } catch (e) {}
+  }
+
+  /* Trades aus dem Journal, die ueberhaupt etwas erzaehlen. Ein Trade ohne
+     Notiz sagt nichts ueber die Strategie — nur ueber das Ergebnis. */
+  function ausJournal() {
+    try {
+      var alle = (typeof getAllTrades === 'function') ? getAllTrades() : [];
+      return alle.filter(function (t) {
+        return String(t.notes || t.note || '').trim().length > 20;
+      }).sort(function (a, b) {
+        return String(b._date || '').localeCompare(String(a._date || ''));
+      }).slice(0, 40);
+    } catch (e) { return []; }
+  }
+
+  function tradeText(t) {
+    var teile = [];
+    teile.push((t._date || '') + '  ' + (t.symbol || '') + '  ' + (t.dir || ''));
+    var z = [];
+    if (t.entry) z.push('entry ' + t.entry);
+    if (t.sl)    z.push('stop ' + t.sl);
+    if (t.tp)    z.push('target ' + t.tp);
+    if (t.rr)    z.push(t.rr + 'R');
+    if (t.pips != null) z.push(t.pips + ' pips');
+    if (z.length) teile.push(z.join(' · '));
+    if (t.tags && t.tags.length) teile.push('tags: ' + [].concat(t.tags).join(', '));
+    teile.push(String(t.notes || t.note || '').trim());
+    return teile.filter(Boolean).join('\n');
+  }
+
+  function zeichnen() {
+    var host = document.getElementById('pbFinderHost');
+    if (!host) return;
+    var trades = ausJournal();
+    var n = PF.recaps.length;
+
+    var h = '<div class="glass-card" style="margin-bottom:1.5rem">' +
+      '<div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">' +
+        'Find the strategy in your trades</div>' +
+      '<p style="font-size:12.5px;color:var(--ink3);line-height:1.6;margin:0 0 14px;max-width:70ch">' +
+        'Add several trade recaps &mdash; from your journal or pasted in &mdash; and the AI ' +
+        'works out what they have in common: the setup, what you wait for, where your stop ' +
+        'and target go. The result becomes a playbook you can edit.</p>';
+
+    if (trades.length) {
+      h += '<div class="calc-label">Add from your journal</div>' +
+        '<div style="display:flex;gap:8px;margin:4px 0 12px;flex-wrap:wrap">' +
+        '<select id="pbf-trade" class="tc-input" style="flex:1 1 320px;min-width:0">' +
+          trades.map(function (t, i) {
+            var kurz = String(t.notes || t.note || '').replace(/\s+/g, ' ').slice(0, 60);
+            return '<option value="' + i + '">' + esc((t._date || '') + ' · ' +
+                   (t.symbol || '') + ' · ' + (t.pips != null ? t.pips + ' pips' : '') +
+                   ' — ' + kurz) + '</option>';
+          }).join('') +
+        '</select>' +
+        '<button id="pbf-add-trade" class="tc-btn" style="flex:0 0 auto">Add</button>' +
+        '</div>';
+    } else {
+      h += '<div style="font-size:12px;color:var(--ink3);margin-bottom:12px">' +
+        'No journal trades with notes yet &mdash; paste your recaps below instead.</div>';
+    }
+
+    h += '<div class="calc-label">Or paste a recap</div>' +
+      '<textarea id="pbf-text" rows="3" placeholder="What was the setup, why did you take it, ' +
+        'where was your stop and target, how did you manage it?" ' +
+        'style="width:100%;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:10px;color:var(--ink);padding:10px 12px;font-family:inherit;font-size:13px;line-height:1.6;resize:vertical;margin-top:4px"></textarea>' +
+      '<div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">' +
+        '<button id="pbf-add-text" class="tc-btn">＋ Add recap</button>' +
+        '<span style="font-size:12px;color:' + (n >= MIN ? 'var(--ink3)' : 'var(--loss)') + '">' +
+          n + ' added' + (n < MIN ? ' · need at least ' + MIN : '') + '</span>' +
+      '</div>';
+
+    if (n) {
+      h += '<div style="margin-top:14px;display:flex;flex-direction:column;gap:7px">' +
+        PF.recaps.map(function (r, i) {
+          return '<div style="display:flex;gap:9px;align-items:flex-start;background:var(--elevated);border:0.5px solid var(--rim);border-radius:9px;padding:8px 10px">' +
+            '<span style="flex:0 0 auto;font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">' + (i + 1) + '</span>' +
+            '<span style="flex:1 1 auto;min-width:0;font-size:11.5px;color:var(--ink2);line-height:1.5;white-space:pre-wrap">' +
+              esc(r.length > 260 ? r.slice(0, 260) + '…' : r) + '</span>' +
+            '<button data-weg="' + i + '" style="flex:0 0 auto;background:none;border:0;color:var(--ink3);cursor:pointer;font-size:14px;line-height:1" title="Remove">×</button>' +
+          '</div>';
+        }).join('') + '</div>';
+    }
+
+    h += '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">' +
+      '<button id="pbf-go"' + (n < MIN || PF.laeuft ? ' disabled' : '') +
+        ' style="background:linear-gradient(135deg,var(--gold),#b8923d);color:#080909;border:none;border-radius:10px;padding:11px 24px;font-weight:700;cursor:pointer;font-size:13px' +
+        (n < MIN || PF.laeuft ? ';opacity:.5;cursor:default' : '') + '">' +
+        (PF.laeuft ? 'Reading your trades…' : 'Find the strategy') + '</button>' +
+      (n ? '<button id="pbf-clear" style="background:transparent;border:0.5px solid var(--rim2);color:var(--ink2);border-radius:10px;padding:11px 18px;cursor:pointer;font-size:13px">Clear all</button>' : '') +
+      '</div>';
+
+    h += '<div id="pbf-out" style="margin-top:16px"></div></div>';
+    host.innerHTML = h;
+    verdrahten();
+    ergebnisZeichnen();
+  }
+
+  function verdrahten() {
+    var host = document.getElementById('pbFinderHost');
+    if (!host) return;
+    var at = document.getElementById('pbf-add-trade');
+    if (at) at.onclick = function () {
+      var sel = document.getElementById('pbf-trade');
+      var trades = ausJournal();
+      var t = trades[parseInt(sel && sel.value, 10)];
+      if (!t) return;
+      PF.recaps.push(tradeText(t));
+      sichern(); zeichnen();
+    };
+    var ax = document.getElementById('pbf-add-text');
+    if (ax) ax.onclick = function () {
+      var el = document.getElementById('pbf-text');
+      var t = (el && el.value || '').trim();
+      if (t.length < 20) {
+        if (typeof toast === 'function') toast('Please write a bit more about the trade');
+        return;
+      }
+      PF.recaps.push(t); el.value = '';
+      sichern(); zeichnen();
+    };
+    host.querySelectorAll('[data-weg]').forEach(function (b) {
+      b.onclick = function () {
+        PF.recaps.splice(parseInt(b.getAttribute('data-weg'), 10), 1);
+        sichern(); zeichnen();
+      };
+    });
+    var cl = document.getElementById('pbf-clear');
+    if (cl) cl.onclick = function () { PF.recaps = []; PF.ergebnis = null; sichern(); zeichnen(); };
+    var go = document.getElementById('pbf-go');
+    if (go && !go.disabled) go.onclick = suchen;
+  }
+
+  var ANWEISUNG =
+    'Below are several trade recaps written by one trader. Work out the strategy they ' +
+    'have in COMMON — not a summary of each trade.\n\n' +
+    'Look for: what market and time they trade, what has to be true before they enter, ' +
+    'what they wait for as confirmation, where the stop goes, how the target is chosen, ' +
+    'and how they manage the position.\n\n' +
+    'Rules:\n' +
+    '- Base every line on something actually present in the recaps. Do not add textbook ' +
+    'steps they never mention — a short honest playbook is worth more than a complete ' +
+    'invented one.\n' +
+    '- If the recaps contradict each other, follow what appears most often and say so in ' +
+    'your notes.\n' +
+    '- Write the checklist in THEIR words where you can.\n\n' +
+    'Answer with a short paragraph of what you noticed, then this block exactly once:\n' +
+    '<<PLAYBOOK>>\n' +
+    'name: <short name for this strategy>\n' +
+    'market: <instrument and time window, or empty if unclear>\n' +
+    'checklist: <one condition per line, prefixed with "- ", max 8>\n' +
+    'rules: <stop, target, risk and management in one or two sentences>\n' +
+    '<</PLAYBOOK>>';
+
+  /* Zeilenweise statt mit einem regulaeren Ausdruck: mit dem m-Flag bedeutet
+     $ das ZEILENende, dadurch brach die mehrzeilige Checkliste nach dem
+     ersten Punkt ab. Zeilenweise ist ohnehin leichter zu lesen. */
+  function lesen(text) {
+    var m = /<<PLAYBOOK>>([\s\S]*?)<<\/PLAYBOOK>>/.exec(text || '');
+    if (!m) return null;
+    var felder = { name: '', market: '', checklist: [], rules: '' };
+    var aktuell = null;
+    m[1].split('\n').forEach(function (zeile) {
+      var k = /^\s*(name|market|checklist|rules)\s*:\s*(.*)$/i.exec(zeile);
+      if (k) {
+        aktuell = k[1].toLowerCase();
+        var rest = k[2].trim();
+        if (aktuell === 'checklist') { if (rest) felder.checklist.push(saeubern(rest)); }
+        else felder[aktuell] = rest;
+        return;
+      }
+      if (!aktuell) return;
+      var t = zeile.trim();
+      if (!t) return;
+      if (aktuell === 'checklist') felder.checklist.push(saeubern(t));
+      else felder[aktuell] = (felder[aktuell] ? felder[aktuell] + ' ' : '') + t;
+    });
+    function saeubern(t) { return t.replace(/^\s*[-*•]\s*/, '').trim(); }
+    felder.checklist = felder.checklist.filter(Boolean).slice(0, 8);
+    return { name: felder.name.slice(0, 80), market: felder.market.slice(0, 80),
+             checklist: felder.checklist,
+             rules: felder.rules.replace(/\s+/g, ' ').trim(),
+             text: text.replace(/<<PLAYBOOK>>[\s\S]*?<<\/PLAYBOOK>>/g, '').trim() };
+  }
+
+  function suchen() {
+    if (PF.laeuft || PF.recaps.length < MIN) return;
+    PF.laeuft = true; PF.ergebnis = null; zeichnen();
+    var inhalt = ANWEISUNG + '\n\n---\n' + PF.recaps.map(function (r, i) {
+      return 'RECAP ' + (i + 1) + ':\n' + r;
+    }).join('\n\n');
+
+    var url = (typeof COACH_WORKER_URL !== 'undefined') ? COACH_WORKER_URL : null;
+    if (!url) { PF.laeuft = false; zeichnen(); return; }
+
+    fetch(url, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: (window.currentUser && currentUser.uid) || 'guest',
+        system: 'Trading Coach',
+        messages: [{ role: 'user', content: inhalt }],
+      }),
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      var text = d.response ||
+        (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+      /* Stoerungen des Anbieters kommen als normaler Text — ungeprueft saehen
+         sie aus wie ein Ergebnis. */
+      if (!text || /API Error|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
+        throw new Error(text || 'no answer from the AI');
+      var pb = lesen(text);
+      if (!pb || !pb.name) throw new Error('The AI did not return a usable playbook.');
+      PF.ergebnis = pb;
+    }).catch(function (e) {
+      PF.ergebnis = { fehler: e.message || 'failed' };
+    }).then(function () { PF.laeuft = false; zeichnen(); });
+  }
+
+  function ergebnisZeichnen() {
+    var out = document.getElementById('pbf-out');
+    if (!out) return;
+    var E = PF.ergebnis;
+    if (!E) { out.innerHTML = ''; return; }
+    if (E.fehler) {
+      out.innerHTML = '<div style="font-size:12.5px;color:var(--loss);line-height:1.6">' +
+        esc(E.fehler) + '</div>';
+      return;
+    }
+    out.innerHTML =
+      '<div style="border:0.5px solid var(--gold-line);border-radius:11px;padding:14px 16px;background:var(--gold-dim)">' +
+        (E.text ? '<div style="font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:12px">' +
+          esc(E.text) + '</div>' : '') +
+        '<div style="font-family:var(--font-display);font-size:15px;color:var(--ink);font-weight:700">' +
+          esc(E.name) + '</div>' +
+        (E.market ? '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">' + esc(E.market) + '</div>' : '') +
+        (E.checklist.length ? '<ul style="margin:10px 0 0;padding-left:18px;font-size:12.5px;color:var(--ink2);line-height:1.7">' +
+          E.checklist.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul>' : '') +
+        (E.rules ? '<div style="margin-top:10px;font-size:12.5px;color:var(--ink2);line-height:1.6"><b style="color:var(--ink3)">Rules:</b> ' +
+          esc(E.rules) + '</div>' : '') +
+        '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">' +
+          '<button id="pbf-use" style="background:linear-gradient(135deg,var(--gold),#b8923d);color:#080909;border:none;border-radius:10px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:12.5px">Use as playbook</button>' +
+          '<button id="pbf-again" style="background:transparent;border:0.5px solid var(--rim2);color:var(--ink2);border-radius:10px;padding:10px 16px;cursor:pointer;font-size:12.5px">Try again</button>' +
+        '</div>' +
+        '<div style="margin-top:9px;font-size:10.5px;color:var(--ink3);line-height:1.5">' +
+          'This goes into the form below, where you can edit every line before saving. ' +
+          'Nothing is saved until you press Save playbook.</div>' +
+      '</div>';
+
+    var u = document.getElementById('pbf-use');
+    if (u) u.onclick = function () {
+      /* Bewusst NICHT direkt speichern: das Ergebnis fuellt das Formular, der
+         Nutzer sieht es, aendert was er will und speichert selbst. */
+      var setz = function (id, wert) { var el = document.getElementById(id); if (el) el.value = wert; };
+      setz('pb-edit-id', '');
+      setz('pb-name', E.name);
+      setz('pb-market', E.market);
+      setz('pb-checklist', E.checklist.join('\n'));
+      setz('pb-rules', E.rules);
+      var t = document.getElementById('pbFormTitle');
+      if (t) t.textContent = '＋ New playbook (from your trades)';
+      var el = document.getElementById('pb-name');
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+      if (typeof toast === 'function') toast('Filled in below — check it, then save');
+    };
+    var a = document.getElementById('pbf-again');
+    if (a) a.onclick = suchen;
+  }
+
+  PF.render = function () { laden(); zeichnen(); };
+})();
+
 function renderPlaybooks(){
   _pbEnsure();
   var wrap=document.getElementById('playbookList'); if(!wrap) return;
@@ -64453,8 +64768,20 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var r = g.retests || 0;
     teil.frisch = r === 0 ? 1 : (r === 1 ? 0.7 : (r === 2 ? 0.45 : 0.25));
     var breite = (k.top - k.bot);
-    teil.eng = (isFinite(atrW) && atrW > 0)
-      ? Math.max(0, 1 - Math.min(breite / (2 * atrW), 1)) : 0.5;
+    /* Gegen den ATR ZUR ENTSTEHUNGSZEIT messen, nicht gegen den heutigen.
+       Der Indikator deckelt die Zonenhoehe ebenfalls damit — eine Zone aus
+       einer unruhigen Phase ist nicht "zu breit", sie ist in ihrer Zeit
+       normal. Mit dem heutigen ATR gerechnet wurden solche Zonen doppelt
+       bestraft: einmal durch die Breite, einmal durch einen Vergleich, den
+       sie nie bestehen konnten. */
+    var atrDamals = atrW;
+    try {
+      var arr = window.ApexIndicators.atr(bars, 20);
+      var iErz = isFinite(k.von) ? Math.max(0, Math.min(bars.n - 1, k.von | 0)) : bars.n - 1;
+      if (isFinite(arr[iErz]) && arr[iErz] > 0) atrDamals = arr[iErz];
+    } catch (e) { /* dann eben der heutige */ }
+    teil.eng = (isFinite(atrDamals) && atrDamals > 0)
+      ? Math.max(0, 1 - Math.min(breite / (2 * atrDamals), 1)) : 0.5;
     /* Deckt ein hoeherer Zeitrahmen dieselbe Stelle ab, ist es kein Zufall. */
     teil.htf = 0.35;
     (andereEbenen || []).forEach(function (e) {
@@ -64520,7 +64847,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     try {
       var Ind = window.ApexIndicators;
       if (!Ind || !Ind.compute) return [];
-      var res = Ind.compute(bars, 'sd', {});
+      var res = Ind.compute(bars, 'sd', pOf('sd'));
       var alle = res.zoneList || [];
       var sicht = Ind.sdVisibleZones(alle, bars.n - 1, { maxZones: 5 }) || [];
       /* sdVisibleZones filtert nach ALTER — fuer den Chart richtig, fuer eine
@@ -64616,6 +64943,25 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Nutzer, nicht ich. */
   var IND_STD = ['sd'];
 
+  /* Eigene Einstellungen je Indikator. Die Voreinstellungen sind Jasons Werte
+     aus dem Pine-Indikator; wer sie aendert, aendert seine Methode — deshalb
+     gehoeren sie in die Hand des Nutzers und nicht in meinen Code. */
+  function indParams() {
+    try {
+      var r = localStorage.getItem('apexTV_indP');
+      return r ? (JSON.parse(r) || {}) : {};
+    } catch (e) { return {}; }
+  }
+  function indParamsMerken(o) {
+    try { localStorage.setItem('apexTV_indP', JSON.stringify(o)); } catch (e) {}
+  }
+  /* Die Werte fuer EINEN Indikator, so wie compute() sie erwartet. Fehlt
+     etwas, fuellt fillParams die Vorgabe nach. */
+  function pOf(id) {
+    var alle = indParams();
+    return alle[id] || {};
+  }
+
   function indAuswahl() {
     try {
       var roh = localStorage.getItem('apexTV_ind');
@@ -64666,14 +65012,67 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       teil.forEach(function (d) {
         var an = gewaehlt.indexOf(d.id) >= 0;
         h += '<label class="tv-ind-i"><input type="checkbox" value="' + d.id + '"' +
-             (an ? ' checked' : '') + '><span>' + escHtml(d.label) + '</span></label>';
+             (an ? ' checked' : '') + '><span>' + escHtml(d.label) + '</span>' +
+             ((d.params && d.params.length) ?
+               '<button class="tv-ind-set" data-set="' + d.id + '" title="Settings">⚙</button>' : '') +
+             '</label>';
+        /* Einstellungen nur fuer den, den man gerade aufgeklappt hat — alle
+           gleichzeitig waeren eine Wand aus Feldern. */
+        if (an && TV._indOffen === d.id && d.params && d.params.length) {
+          var eigen = pOf(d.id), voll = window.ApexIndicators.fillParams(d.id, eigen);
+          h += '<div class="tv-ind-p">';
+          d.params.forEach(function (pp) {
+            var key = pp[0], label = pp[1], std = pp[2], mn = pp[3], mx = pp[4];
+            var wert = voll[key];
+            var schritt = (String(std).indexOf('.') >= 0) ? '0.1' : '1';
+            h += '<label class="tv-ind-pz">' +
+              '<span>' + escHtml(label) + '</span>' +
+              '<input type="number" data-p="' + d.id + '|' + key + '" value="' + wert +
+                '" min="' + mn + '" max="' + mx + '" step="' + schritt +
+                '" class="notranslate" translate="no">' +
+              '</label>';
+          });
+          h += '<button class="tv-ind-reset" data-reset="' + d.id + '">Reset to defaults</button>' +
+               '</div>';
+        }
       });
     });
     w.innerHTML = h;
     indKopfZeigen();
-    w.onchange = function () {
-      var neu = [].slice.call(w.querySelectorAll('input:checked')).map(function (i) {
-        return i.value; });
+
+    w.querySelectorAll('[data-set]').forEach(function (b) {
+      b.onclick = function (e) {
+        /* Der Knopf sitzt in einem <label> — ohne das hier wuerde der Klick
+           zusaetzlich das Haekchen umschalten. */
+        e.preventDefault(); e.stopPropagation();
+        var id = b.getAttribute('data-set');
+        TV._indOffen = (TV._indOffen === id) ? null : id;
+        indFuellen();
+      };
+    });
+    w.querySelectorAll('[data-reset]').forEach(function (b) {
+      b.onclick = function (e) {
+        e.preventDefault(); e.stopPropagation();
+        var alle = indParams();
+        delete alle[b.getAttribute('data-reset')];
+        indParamsMerken(alle);
+        indFuellen();
+      };
+    });
+
+    w.onchange = function (ev) {
+      var z = ev && ev.target;
+      if (z && z.getAttribute && z.getAttribute('data-p')) {
+        var t = z.getAttribute('data-p').split('|');
+        var alle = indParams();
+        alle[t[0]] = alle[t[0]] || {};
+        var v = parseFloat(z.value);
+        if (isFinite(v)) alle[t[0]][t[1]] = v;
+        indParamsMerken(alle);
+        return;
+      }
+      var neu = [].slice.call(w.querySelectorAll('input[type=checkbox]:checked'))
+        .map(function (i) { return i.value; });
       indMerken(neu);
       indKopfZeigen();
     };
@@ -64699,8 +65098,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var d = I.DEF && I.DEF[id];
       if (!d) return;
       try {
-        var q = I.fillParams(id, {});
-        var res = I.compute(bars, id, {});
+        var q = I.fillParams(id, pOf(id));
+        var res = I.compute(bars, id, pOf(id));
         var teile = [];
         (d.outputs || []).forEach(function (name) {
           var arr = res[name];
@@ -65020,7 +65419,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var z = ziel.z, aus = { sub: [], tiefstes: NaN, hoechstes: NaN };
     try {
       var Ind = window.ApexIndicators;
-      var res = Ind.compute(feinBars, 'sd', {});
+      var res = Ind.compute(feinBars, 'sd', pOf('sd'));
       var liste = Ind.sdVisibleZones(res.zoneList || [], feinBars.n - 1, { maxZones: 12 }) || [];
       /* Nur was INNERHALB der groben Zone liegt. Eine feine Zone daneben
          beantwortet die Frage nicht, sondern lenkt ab. */
@@ -65170,7 +65569,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var roh = [], flips = [];
       var zn = zonenAn ? zonenVon(b, kurs, stellen, a, roh, flips) : [];
       ebenen.push({ tf: name, atr: a, stellen: stellen, zonen: roh, flips: flips,
-                    bars: b, hoch: st && st.hoch, tief: st && st.tief });
+                    bars: b, faktor: faktor, hoch: st && st.hoch, tief: st && st.tief });
       var iw = indikatorBlock(b, gewaehlt, stellen, kurs);
       if (iw) z.push(iw);
       if (!zonenAn) {
@@ -65271,8 +65670,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
     if (fein && fein.ziel) z.push(feinBlock(fein.ziel, fein.daten, stellen, fein.mStop));
     /* Die Kerzen zuletzt: sie sind der laengste Teil und sollen die
-       aufbereiteten Zahlen nicht verdraengen. */
-    z.push(kerzenBlock(basis, 140, stellen, stufe.aus[0][0]));
+       aufbereiteten Zahlen nicht verdraengen.
+
+       Alle drei Zeitrahmen, aber unterschiedlich tief: auf dem Basisrahmen
+       braucht es Detail fuer den Einstieg, auf H4 genuegt der Verlauf. Sonst
+       verdraengt der hoehere Zeitrahmen mit seinen langen Kerzen genau das,
+       wofuer der niedrige da ist. */
+    var tiefe = [140, 80, 45];
+    ebenen.forEach(function (e, i) {
+      z.push(kerzenBlock(e.bars, tiefe[i] || 45, stellen, e.tf));
+    });
     z.push(newsBlock(kalender, symName || anzeige));
     /* Mit dem SYMBOL abgleichen, nicht mit dem Anzeigenamen: das Widget
        liefert als Titel "Gold", im Journal steht "XAUUSD". Der Vergleich lief
@@ -65577,7 +65984,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       return kerzenHolen(datenSym, stufe.basis, stufe.bars);
     }).then(function (bars) {
       var Ind = window.ApexIndicators;
-      var res = Ind.compute(bars, 'sd', {});
+      var res = Ind.compute(bars, 'sd', pOf('sd'));
       var sicht = Ind.sdVisibleZones(res.zoneList || [], bars.n - 1, { maxZones: 8 }) || [];
       var atrW = atrVon(bars);
       var kurs = (TV.kurs && TV.kurs.preis) || bars.c[bars.n - 1];
