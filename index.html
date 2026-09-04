@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04h';
+  window.APEX_BUILD = '2026-09-04k';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7015,8 +7015,13 @@ body.light .aw-type { color-scheme: light; }
 /* Zugeklappt bekommt der Chart die ganze Breite. Das Panel wird ausgeblendet
    statt nur schmal gemacht — ein halb sichtbarer Rest waere schlechter als
    keiner. */
+/* "Hide AI" blendet ALLES aus, was zur KI gehoert — Analyse, Level und
+   Setup. Vorher blieb das Datenfenster stehen: der Chart war frei, darunter
+   klebte weiter eine halbe Auswertung. Es ist ein Werkzeug, kein Chart mit
+   Beiwerk. */
 #page-chart.ki-zu .tv-haupt{grid-template-columns:1fr}
 #page-chart.ki-zu .tv-ki{display:none}
+#page-chart.ki-zu .tv-daten{display:none}
 body.light #page-chart .tv-kitoggle{background:#fff;border-color:rgba(0,0,0,.12)}
 #page-chart .tv-jetzt{flex:1 1 auto;min-width:0;order:1;font-family:var(--font-display);font-size:13px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #page-chart .tv-schnell{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
@@ -64278,12 +64283,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         '<aside class="tv-ki" id="tvKi">' +
           '<div class="tv-ki-kopf">' +
             '<b>AI analysis</b>' +
-            '<select id="tvKiTf" aria-label="Timeframe">' +
-              '<option value="1min">M1</option>' +
-              '<option value="5min">M5</option>' +
-              '<option value="15min" selected>M15</option>' +
-              '<option value="1h">H1</option>' +
-              '<option value="4h">H4</option>' +
+            '<select id="tvKiTf" aria-label="Entry timeframe" ' +
+              'title="Every timeframe is scanned — this is the one entries aim at">' +
+              '<option value="1min">Entry M1</option>' +
+              '<option value="5min">Entry M5</option>' +
+              '<option value="15min" selected>Entry M15</option>' +
+              '<option value="1h">Entry H1</option>' +
+              '<option value="4h">Entry H4</option>' +
             '</select>' +
           '</div>' +
           '<details class="tv-ind" id="tvInd">' +
@@ -64636,17 +64642,23 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Welcher Basiszeitrahmen, und welche zwei daraus verdichtet werden.
      Die Faktoren sind exakt, nicht gerundet — sonst passen die Kerzen
      nicht auf die Stundengrenzen. */
-  var STUFEN = {
-    /* M1 ist bewusst dabei, obwohl die Kerzen rund zwei Minuten hinterher
-       sind — auf M1 sind das die letzten beiden Kerzen. Der Live-Kurs aus
-       dem Widget gleicht das teilweise aus, und das steht auch so in den
-       Daten, damit die KI es nicht fuer aktuelle Ruhe haelt. */
-    '1min':  { basis: '1min',  bars: 900, aus: [['M1', 1], ['M5', 5], ['M15', 15]] },
-    '5min':  { basis: '5min',  bars: 900, aus: [['M5', 1], ['M15', 3], ['H1', 12]] },
-    '15min': { basis: '15min', bars: 900, aus: [['M15', 1], ['H1', 4], ['H4', 16]] },
-    '1h':    { basis: '1h',    bars: 700, aus: [['H1', 1], ['H4', 4], ['D1', 24]] },
-    '4h':    { basis: '4h',    bars: 500, aus: [['H4', 1], ['D1', 6], ['W1', 30]] },
-  };
+  /* Alle Zeitrahmen auf einmal, nicht einer als Basis mit zwei daraus
+     verdichteten. Der alte Aufbau hatte einen harten Fehler: bei M1 als
+     Basis sind 900 Kerzen nur 15 Stunden — daraus laesst sich keine H1- und
+     erst recht keine H4-Struktur bauen, und die Analyse fand auf M1 nichts.
+
+     Zwei Abrufe loesen das: einer fein, einer grob. Aus dem feinen kommen
+     M1 und M5, aus dem groben M15, H1 und H4. Mehr als zwei braucht es
+     nicht, und weniger reicht nicht. */
+  var LEITER = [
+    { hole: '1min',  bars: 900, aus: [['M1', 1], ['M5', 5]] },
+    { hole: '15min', bars: 900, aus: [['M15', 1], ['H1', 4], ['H4', 16]] },
+  ];
+
+  /* Der Zeitrahmen aus der Auswahl bestimmt nicht mehr, WAS gerechnet wird,
+     sondern worauf der Einstieg zielen soll. */
+  var EINSTIEG_STD = '15min';
+  var TF_NAME = { '1min': 'M1', '5min': 'M5', '15min': 'M15', '1h': 'H1', '4h': 'H4' };
 
   function nf(x, stellen) { return Number(x).toFixed(stellen); }
 
@@ -65495,8 +65507,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
            zeilen.length + ' candles.\n' + zeilen.join('\n');
   }
 
-  function sachstand(basis, tfWahl, anzeige, symName, kalender, fein) {
-    var stufe = STUFEN[tfWahl] || STUFEN['15min'];
+  function sachstand(saetze, tfWahl, anzeige, symName, kalender, fein, leiter) {
+    /* Die Leiter ist ein Parameter, weil der Waechter nur EINEN Kerzensatz
+       hat: er beobachtet einen Zeitrahmen und soll dafuer keine zweite
+       Abfrage ausloesen. Ohne das lief seine Meldung in einen Fehler —
+       sachstand bekam ein einzelnes Kerzenobjekt, wo es eine Liste erwartet. */
+    leiter = leiter || LEITER;
+    var basis = saetze[0];
     var schluss = basis.c[basis.n - 1];
     /* Abstaende werden gegen den LIVE-Kurs gerechnet, wenn es ihn gibt. Der
        letzte Kerzenschluss ist bis zu zwei Minuten alt — bei Zonen von ein
@@ -65507,6 +65524,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var z = [];
 
     z.push('Instrument: ' + anzeige);
+    z.push('The user trades entries on ' + (TF_NAME[tfWahl] || tfWahl) +
+           '. Every timeframe below was scanned; use the higher ones for context and ' +
+           'this one for the entry.');
     var verzug = TV._quelle === 'Yahoo'
       ? 'candle data is essentially real-time for this instrument'
       : 'candle data lags the live price by roughly 2 minutes';
@@ -65521,9 +65541,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     z.push('Time now (UTC): ' + new Date().toISOString().slice(0, 16).replace('T', ' '));
 
     var ebenen = [];
-    stufe.aus.forEach(function (paar) {
-      var name = paar[0], faktor = paar[1];
-      var b = verdichten(basis, faktor);
+    /* Ueber beide Kerzensaetze laufen: der feine liefert M1 und M5, der
+       grobe M15, H1 und H4. */
+    var paare = [];
+    leiter.forEach(function (st, i) {
+      if (!saetze[i]) return;
+      st.aus.forEach(function (p) { paare.push({ name: p[0], faktor: p[1], satz: saetze[i] }); });
+    });
+    paare.forEach(function (paar) {
+      var name = paar.name, faktor = paar.faktor;
+      var b = verdichten(paar.satz, faktor);
       if (b.n < 30) return;
       var a = atrVon(b), st = struktur(b);
       z.push('');
@@ -65661,9 +65688,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        braucht es Detail fuer den Einstieg, auf H4 genuegt der Verlauf. Sonst
        verdraengt der hoehere Zeitrahmen mit seinen langen Kerzen genau das,
        wofuer der niedrige da ist. */
-    var tiefe = [140, 80, 45];
-    ebenen.forEach(function (e, i) {
-      z.push(kerzenBlock(e.bars, tiefe[i] || 45, stellen, e.tf));
+    /* Nicht fuer jeden Zeitrahmen Kerzen: fuenf Saetze wuerden die
+       aufbereiteten Zahlen verdraengen. Der Einstiegsrahmen bekommt Detail,
+       darueber genuegt der Verlauf, M5 faellt weg — es liegt zwischen M1
+       und M15 und bringt fuer die Lesart nichts Eigenes. */
+    var tiefe = { M1: 120, M15: 90, H4: 45 };
+    ebenen.forEach(function (e) {
+      if (tiefe[e.tf]) z.push(kerzenBlock(e.bars, tiefe[e.tf], stellen, e.tf));
     });
     z.push(newsBlock(kalender, symName || anzeige));
     /* Mit dem SYMBOL abgleichen, nicht mit dem Anzeigenamen: das Widget
@@ -65734,7 +65765,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'field empty if the data does not support it, and set direction to none if there is ' +
     'no workable situation right now:\n' +
     '<<SETUP>>\n' +
-    'direction: long | short | none\n' +
+    'direction: long | short | none  (if none, leave entry, stop and target EMPTY - naming levels while calling it no setup contradicts itself)\n' +
     'entry: <price>\n' +
     'stop: <price>\n' +
     'target: <price>\n' +
@@ -65781,7 +65812,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'field empty if the data does not support it, and set direction to none if their ' +
     'rules are not met right now:\n' +
     '<<SETUP>>\n' +
-    'direction: long | short | none\n' +
+    'direction: long | short | none  (if none, leave entry, stop and target EMPTY - naming levels while calling it no setup contradicts itself)\n' +
     'entry: <price>\n' +
     'stop: <price>\n' +
     'target: <price>\n' +
@@ -65955,8 +65986,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (!WACHT.an || WACHT.laeuft) return Promise.resolve();
     if (!erzwingen && Date.now() - WACHT.letzteZonen < taktMs()) return Promise.resolve();
     WACHT.laeuft = true;
-    var tf = (document.getElementById('tvKiTf') || {}).value || '15min';
-    var stufe = STUFEN[tf] || STUFEN['15min'];
+    var tf = (document.getElementById('tvKiTf') || {}).value || EINSTIEG_STD;
+    /* Der Waechter beobachtet bewusst nur den Einstiegsrahmen: er soll melden,
+       wenn der Kurs dort ankommt, nicht fuenfmal fuer fuenf Zeitrahmen. */
     return symbolJetzt().then(function (info) {
       var tvSym = (info && info.voll) || TV.sym || STD_SYM;
       var datenSym = DATEN_SYM[tvSym];
@@ -65966,7 +65998,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       WACHT.sym = tvSym; WACHT.tf = tf;
       WACHT.name = (info && info.name) || '';
       WACHT.titel = (info && info.titel) || tvSym.split(':').pop();
-      return kerzenHolen(datenSym, stufe.basis, stufe.bars);
+      return kerzenHolen(datenSym, tf, 900);
     }).then(function (bars) {
       var Ind = window.ApexIndicators;
       var res = Ind.compute(bars, 'sd', pOf('sd'));
@@ -65988,6 +66020,30 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
          ist, nicht nur dass der Kurs dort steht. */
       WACHT.zonen.forEach(function (g) { g.staerke = staerke(g, bars, atrW, []); });
       WACHT.atr = atrW;
+
+      /* Was der Waechter gerade gerechnet hat, gehoert auch in die Liste
+         unten. Sonst steht dort "no intact zones here", waehrend er oben
+         neun Bereiche ueberwacht — zwei Staende derselben Sache, und der
+         Nutzer kann nicht wissen, welcher gilt. */
+      try {
+        var L = TV._levels;
+        var name = TF_NAME[WACHT.tf] || WACHT.tf;
+        if (L && L.ebenen) {
+          var vorhanden = null;
+          L.ebenen.forEach(function (e) { if (e.tf === name) vorhanden = e; });
+          var frisch = { tf: name, atr: atrW, stellen: L.stellen, bars: bars,
+                         flips: (vorhanden && vorhanden.flips) || [],
+                         hoch: vorhanden && vorhanden.hoch,
+                         tief: vorhanden && vorhanden.tief,
+                         zonen: WACHT.zonen };
+          if (vorhanden) L.ebenen[L.ebenen.indexOf(vorhanden)] = frisch;
+          else L.ebenen.push(frisch);
+          L.kurs = kurs;
+          L.ts = Date.now();
+          levelZeigen();
+          levelSpeichern();
+        }
+      } catch (e) { /* die Ueberwachung darf daran nicht scheitern */ }
       WACHT.bars = bars;
       WACHT.letzteZonen = Date.now();
       strukturPruefen(bars);
@@ -66044,7 +66100,17 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'If you name a stop and a target, they must be ARITHMETICALLY consistent with each other and with this user\u2019s typical risk/reward: target distance divided by stop distance should land near their usual R. Do not put a stop a few points away and a target hundreds of points away and call it their usual R \u2014 do the division before you write the numbers.\n' +
     'You inform, you never instruct. No imperatives, no buy/sell calls. If the event ' +
     'does not actually matter for their rules, say JUST A HEADS-UP and why in one ' +
-    'line - a quiet honest answer is worth more than a manufactured setup.';
+    'line - a quiet honest answer is worth more than a manufactured setup.\n\n' +
+    'End with this block exactly once, so the setup card below matches what you just said. Set direction to none if this is only a heads-up:\n' +
+    '<<SETUP>>\n' +
+    'direction: long | short | none  (if none, leave entry, stop and target EMPTY - naming levels while calling it no setup contradicts itself)\n' +
+    'entry: <price>\n' +
+    'stop: <price>\n' +
+    'target: <price>\n' +
+    'confidence: high | medium | low\n' +
+    'basis: <one short line>\n' +
+    '<</SETUP>>';
+
 
   function strukturMeldung(art, was, st) {
     var out = document.getElementById('tvKiOut');
@@ -66055,7 +66121,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       '<div class="tv-ki-alarm" id="tvAlarmLade">' + art + ' on ' + WACHT.tf +
       ' — analysing…</div>');
     kalenderHolen().then(function (kal) {
-      var fakten = sachstand(WACHT.bars, WACHT.tf, WACHT.titel, WACHT.name, kal);
+      var fakten = sachstand([WACHT.bars], WACHT.tf, WACHT.titel, WACHT.name, kal, null,
+        [{ aus: [[TF_NAME[WACHT.tf] || WACHT.tf, 1]] }]);
       fakten += '\n\n=== WHAT JUST HAPPENED ===\n' + was.charAt(0).toUpperCase() + was.slice(1) +
         '. Structure is now ' + st.trend + '. Live price ' + nf(k, stellen) + '.';
       if (isFinite(st.hoch)) fakten += ' Last swing high ' + nf(st.hoch, stellen) + '.';
@@ -66064,7 +66131,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                    versteckt: true }];
       TV._fakten = fakten;
       return fragen(null).then(function (text) {
-        verlauf.push({ role: 'assistant', content: text });
+        setupZeigen(setupLesen(text));
+        verlauf.push({ role: 'assistant', content: text, anzeige: ohneBlock(text) });
         malen();
         var kopf = document.createElement('div');
         kopf.className = 'tv-ki-alarm';
@@ -66072,9 +66140,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         out.insertBefore(kopf, out.firstChild);
         try { if (document.hidden && window.playNotifSound) playNotifSound(); } catch (e) {}
       });
-    }).catch(function () {
+    }).catch(function (e) {
+      TV._alarmFehler = (e && e.message) || String(e);
       var l = document.getElementById('tvAlarmLade');
-      if (l) l.textContent = 'Could not analyse the structure event.';
+      if (l) l.textContent = 'Could not analyse the structure event: ' + TV._alarmFehler;
     });
   }
 
@@ -66128,14 +66197,25 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'If you name a stop and a target, they must be ARITHMETICALLY consistent with each other and with this user\u2019s typical risk/reward: target distance divided by stop distance should land near their usual R. Do not put a stop a few points away and a target hundreds of points away and call it their usual R \u2014 do the division before you write the numbers.\n' +
     'You inform, you never instruct. No imperatives, no buy/sell calls. If the situation ' +
     'does not actually fit their rules, say JUST A HEADS-UP and explain in one line why ' +
-    'it falls short - a quiet honest answer is worth more than a manufactured setup.';
+    'it falls short - a quiet honest answer is worth more than a manufactured setup.\n\n' +
+    'End with this block exactly once, so the setup card below matches what you just said. Set direction to none if this is only a heads-up:\n' +
+    '<<SETUP>>\n' +
+    'direction: long | short | none  (if none, leave entry, stop and target EMPTY - naming levels while calling it no setup contradicts itself)\n' +
+    'entry: <price>\n' +
+    'stop: <price>\n' +
+    'target: <price>\n' +
+    'confidence: high | medium | low\n' +
+    'basis: <one short line>\n' +
+    '<</SETUP>>';
+
 
   function meldung(z, preis) {
     var out = document.getElementById('tvKiOut');
     if (!out) return;
     var stellen = preis > 100 ? 2 : (preis > 10 ? 3 : 5);
     kalenderHolen().then(function (kal) {
-      var fakten = sachstand(WACHT.bars, WACHT.tf, WACHT.titel, WACHT.name, kal);
+      var fakten = sachstand([WACHT.bars], WACHT.tf, WACHT.titel, WACHT.name, kal, null,
+        [{ aus: [[TF_NAME[WACHT.tf] || WACHT.tf, 1]] }]);
       var kern = z.kern || z;
       fakten += '\n\n=== WHAT JUST HAPPENED ===\nThe live price ' + nf(preis, stellen) +
         ' has entered the ' + (z.supply ? 'SUPPLY' : 'DEMAND') + ' area ' +
@@ -66153,7 +66233,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         '<div class="tv-ki-alarm" id="tvAlarmLade">Price entered a ' +
         (z.supply ? 'supply' : 'demand') + ' zone — analysing…</div>');
       return fragen(null).then(function (text) {
-        verlauf.push({ role: 'assistant', content: text, anzeige: text });
+        /* Die Karte MUSS mitziehen. Sonst steht neben "Supply-Zone betreten"
+           weiter ein LONG aus einer frueheren Analyse — und beides zusammen
+           ergibt keinen Sinn. */
+        setupZeigen(setupLesen(text));
+        verlauf.push({ role: 'assistant', content: text, anzeige: ohneBlock(text) });
         malen();
         var kopf = document.createElement('div');
         kopf.className = 'tv-ki-alarm';
@@ -66164,9 +66248,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
            Hintergrund ist, und nur wenn der Nutzer Toene ohnehin erlaubt. */
         try { if (document.hidden && window.playNotifSound) playNotifSound(); } catch (e) {}
       });
-    }).catch(function () {
+    }).catch(function (e) {
+      /* Grund festhalten: dieser catch hat schon einmal eine Regression
+         verdeckt, bei der der Alarm gar nicht mehr durchlief. */
+      TV._alarmFehler = (e && e.message) || String(e);
       var l = document.getElementById('tvAlarmLade');
-      if (l) l.textContent = 'Could not analyse the zone entry (data or AI unavailable).';
+      if (l) l.textContent = 'Could not analyse the zone entry: ' + TV._alarmFehler;
     });
   }
 
@@ -66364,7 +66451,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           var g = x.g, gegen = rich && (rich.lang !== !g.supply);
           h += '<div class="tv-fk' + (g.supply ? ' s' : ' d') + (gegen ? ' gegen' : '') + '">' +
             '<div class="tv-fk-kopf">' + (g.supply ? 'SUPPLY' : 'DEMAND') +
-              '<span>' + x.tf + '</span></div>' +
+              '<span>' + (g._kiNeu ? 'AI' : x.tf) + '</span></div>' +
             '<div class="tv-fk-p notranslate" translate="no">' + n(g.bot) + '<i>–</i>' +
               n(g.top) + '</div>' +
             '<div class="tv-fk-m"><span class="notranslate" translate="no">' + n(g.ab) +
@@ -66393,6 +66480,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                        (g.retests ? g.retests + 'r · ' : '') + n(g.ab) + ' away';
             if (g._ki === 'ok')  meta = '✓ ' + meta;
             if (g._ki === 'weg') meta = '✗ ' + meta;
+            if (g._kiNeu && g.grund) meta = escHtml(String(g.grund).slice(0, 46));
             h += zeile(g.supply, g.bot, g.top, meta,
                        g.staerke ? g.staerke.punkte : null, gegen,
                        false, g._fokus, g._ki);
@@ -66447,15 +66535,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           h += '<div class="tv-lv-leer">No additional zones &mdash; it worked with the ' +
                'ones already listed (' + U.anzahlOk + ' confirmed, ' + U.anzahlWeg +
                ' rejected).</div>';
-        U.neu.forEach(function (e) {
-          h += '<div class="tv-lv-z' + (e.ok ? '' : ' ungeprueft') + '">' +
+        /* Die brauchbaren stehen jetzt oben in der Liste — hier nur noch, was
+           die Pruefung nicht bestanden hat. Sonst staende alles doppelt. */
+        U.neu.filter(function (e) { return !e.ok; }).forEach(function (e) {
+          h += '<div class="tv-lv-z ungeprueft">' +
             '<span class="tv-lv-typ ' + (e.supply ? 's' : 'd') + '"></span>' +
             '<span class="tv-lv-p notranslate" translate="no">' + n(e.bot) + '<i>–</i>' +
               n(e.top) + '</span>' +
-            '<span class="tv-lv-m">' + (e.ok
-              ? escHtml(e.grund || '').slice(0, 70) +
-                (isFinite(e.impuls) ? ' · impulse ' + e.impuls.toFixed(1) + ' ATR' : '')
-              : '&#9888; ' + escHtml(e.pGrund)) + '</span></div>';
+            '<span class="tv-lv-m">&#9888; ' + escHtml(e.pGrund) + '</span></div>';
         });
         h += '</div>';
       }
@@ -66742,6 +66829,35 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                ok: p.ok, pGrund: p.grund, impuls: p.impuls, zuletzt: p.zuletzt };
     });
     TV._urteil = { neu: neu, anzahlOk: U.bestaetigt.length, anzahlWeg: U.verworfen.length };
+
+    /* Bestaetigte KI-Zonen gehoeren in dieselbe Liste wie die uebrigen. Vorher
+       standen sie als Fussnote darunter — man konnte sie lesen, aber sie
+       nahmen weder an der Fokus-Auswahl teil noch am Kopieren. Wenn der
+       Indikator nichts findet und die KI schon, ist genau das das Level, das
+       man einzeichnen will. */
+    L.ebenen = (L.ebenen || []).filter(function (e) { return e.tf !== 'AI'; });
+    var brauchbar = neu.filter(function (e) { return e.ok; });
+    if (brauchbar.length) {
+      var atrKi = (L.ebenen[0] && L.ebenen[0].atr) || NaN;
+      L.ebenen.push({
+        tf: 'AI', atr: atrKi, stellen: L.stellen, bars: bars, flips: [],
+        hoch: NaN, tief: NaN,
+        zonen: brauchbar.map(function (e) {
+          var mitte = (e.bot + e.top) / 2;
+          var g = { supply: !!e.supply, bot: e.bot, top: e.top, broken: false,
+                    retests: 0, ab: Math.abs(mitte - L.kurs), teile: [], _kiNeu: true,
+                    grund: e.grund };
+          g.teile = [g];
+          g.kern = g;
+          /* Auch hier eine gerechnete Staerke, damit sie mit den uebrigen
+             vergleichbar ist statt bevorzugt oder benachteiligt zu werden. */
+          try { g.staerke = staerke(g, bars, atrKi, []); } catch (x) {}
+          if (g.staerke && isFinite(e.impuls))
+            g.staerke.impulsAtr = e.impuls;
+          return g;
+        }),
+      });
+    }
     levelZeigen();
   }
 
@@ -66754,10 +66870,22 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var n = function (x) { return nf(x, st); };
 
     if (S.richtung === 'none') {
-      el.innerHTML = '<div class="tv-su-kopf"><b>Setup</b>' +
+      var h0 = '<div class="tv-su-kopf"><b>Setup</b>' +
         '<span class="tv-su-dir k">NONE</span></div>' +
         '<div class="tv-su-hint">' + (escHtml(S.basis) ||
           'The AI sees no workable situation right now.') + '</div>';
+      /* Wenn sie "kein Setup" sagt und trotzdem Preise nennt, widerspricht sie
+         sich. Die Zahlen zu verschlucken waere bequem, aber der Nutzer saehe
+         nur NONE und wuesste nicht, dass darunter ein halbes Setup steht. */
+      var genannt = [];
+      if (isFinite(S.einstieg)) genannt.push('entry ' + n(S.einstieg));
+      if (isFinite(S.stop))     genannt.push('stop ' + n(S.stop));
+      if (isFinite(S.ziel))     genannt.push('target ' + n(S.ziel));
+      if (genannt.length)
+        h0 += '<div class="tv-su-warn">It marked this as no setup but still named ' +
+              '<span class="notranslate" translate="no">' + genannt.join(', ') +
+              '</span>. Treat those as context, not a plan.</div>';
+      el.innerHTML = h0;
       return;
     }
 
@@ -66842,18 +66970,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         return;
       }
 
-      var stufe = STUFEN[tf] || STUFEN['15min'];
       verlauf = []; TV._fakten = ''; setupZeigen(null);
       busy(true, 'Loading…');
-      out.innerHTML = '<p class="tv-ki-leer">Loading candles, computing zones across three ' +
-                      'timeframes…</p>';
+      out.innerHTML = '<p class="tv-ki-leer">Loading candles, scanning M1 to H4…</p>';
 
+      /* Zwei Abrufe: fein fuer M1/M5, grob fuer M15/H1/H4. Beide parallel,
+         damit es sich nicht anfuehlt wie doppelt so lang. */
       return Promise.all([
-        kerzenHolen(datenSym, stufe.basis, stufe.bars),
+        kerzenHolen(datenSym, LEITER[0].hole, LEITER[0].bars),
+        kerzenHolen(datenSym, LEITER[1].hole, LEITER[1].bars),
         kalenderHolen(),
       ]).then(function (paar) {
-      var bars = paar[0], kalender = paar[1];
-      var fakten = sachstand(bars, tf, anzeige, (info && info.name) || '', kalender);
+      var saetze = [paar[0], paar[1]], bars = paar[0], kalender = paar[2];
+      var fakten = sachstand(saetze, tf, anzeige, (info && info.name) || '', kalender);
 
       /* Lohnt eine Verfeinerung? Nur wenn eine ungebrochene Zone in Reichweite
          ist. Sonst waere der zusaetzliche Abruf verschenkt — und bei Gold
@@ -66861,7 +66990,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var L = TV._levels;
       var atrBasis = L && L.ebenen && L.ebenen[0] && L.ebenen[0].atr;
       var ziel = zielZone(L && L.ebenen, L && L.kurs, atrBasis);
-      var ftf = feinTf(tf);
+      var ftf = feinTf(ziel && ziel.tf === 'M1' ? '1min' : tf);
       var vorbereitet;
       if (ziel && ftf) {
         busy(true, 'Refining…');
@@ -66972,7 +67101,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       kopfAnzeigen(info);
       var w = TF_VON_TV[String(info.intervall)];
       var sel = document.getElementById('tvKiTf');
-      if (w && sel && STUFEN[w]) sel.value = w;
+      if (w && sel && TF_NAME[w]) sel.value = w;
     });
     if (!TV.widget || TV._thema !== thema()) bauen();
   };
