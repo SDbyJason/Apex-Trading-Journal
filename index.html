@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04l';
+  window.APEX_BUILD = '2026-09-04m';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7035,7 +7035,7 @@ body.light #page-chart .tv-kitoggle{background:#fff;border-color:rgba(0,0,0,.12)
 /* Chart und KI nebeneinander. Der KI-Bereich hat eine feste Breite, damit
    der Chart den ganzen Rest bekommt — er ist die Hauptsache. */
 #page-chart .tv-haupt{display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start}
-#page-chart .tv-ki{display:flex;flex-direction:column;gap:9px;height:min(56vh,660px);min-height:320px;border:0.5px solid var(--rim);border-radius:12px;background:var(--layer);padding:13px}
+#page-chart .tv-ki{display:flex;flex-direction:column;gap:9px;height:min(56vh,660px);min-height:320px;overflow:hidden;border:0.5px solid var(--rim);border-radius:12px;background:var(--layer);padding:13px}
 #page-chart .tv-ki-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px}
 #page-chart .tv-ki-kopf b{font-family:var(--font-display);font-size:13.5px;color:var(--ink)}
 #page-chart .tv-ki-kopf select{background:var(--elevated);border:0.5px solid var(--rim);border-radius:7px;color:var(--ink);padding:5px 8px;font-family:var(--font-body);font-size:12px}
@@ -7053,6 +7053,9 @@ body.light #page-chart .tv-kitoggle{background:#fff;border-color:rgba(0,0,0,.12)
 #page-chart .tv-ind-p{margin:3px 0 7px 20px;padding:7px 9px;border-left:2px solid var(--gold-line);background:var(--layer);border-radius:0 7px 7px 0}
 #page-chart .tv-ind-pz{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--ink3);padding:2px 0}
 #page-chart .tv-ind-pz span{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-chart .tv-ind-tfwahl{margin-bottom:5px;padding-bottom:5px;border-bottom:0.5px solid var(--rim)}
+#page-chart .tv-ind-tfwahl select{flex:0 0 auto;background:var(--elevated);border:0.5px solid var(--rim);border-radius:5px;color:var(--ink);padding:3px 6px;font-size:11px}
+#page-chart .tv-lv-z.streit .tv-lv-p{color:var(--loss)}
 #page-chart .tv-ind-pz input{flex:0 0 62px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:5px;color:var(--ink);padding:3px 6px;font-size:11px;font-variant-numeric:tabular-nums}
 #page-chart .tv-ind-reset{margin-top:5px;background:none;border:0.5px solid var(--rim);color:var(--ink3);border-radius:5px;padding:3px 8px;font-size:10px;cursor:pointer}
 #page-chart .tv-ind-reset:hover{border-color:var(--gold-line);color:var(--gold)}
@@ -7074,7 +7077,12 @@ body.light #page-chart .tv-ki-pb select{background:#fff;border-color:rgba(0,0,0,
 #page-chart .tv-wacht:hover{border-color:var(--gold-line);color:var(--gold)}
 #page-chart .tv-wacht[aria-pressed="true"]{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}
 #page-chart .tv-wacht-st:not(:empty){flex:0 0 auto;font-size:10.5px;line-height:1.45;color:var(--ink3)}
-#page-chart .tv-lauf{flex:0 0 auto}
+/* Die Stationen duerfen SCHRUMPFEN und notfalls selbst scrollen. Vorher
+   waren sie 0 0 auto: sie drueckten den Ausgabebereich auf Hoehe 0 und
+   schoben dann Eingabefeld und Antwort aus dem Panel heraus, wo sie ueber
+   dem Datenfenster landeten. Zusammen mit overflow:hidden am Panel kann
+   nichts mehr herauslaufen. */
+#page-chart .tv-lauf{flex:0 1 auto;min-height:0;max-height:38%;overflow-y:auto}
 #page-chart .tv-lauf:empty{display:none}
 #page-chart .tv-ki-lauf{background:var(--elevated);border-left:2px solid var(--gold-line);border-radius:0 7px 7px 0;padding:7px 10px;margin-bottom:9px;font-size:11.5px;line-height:1.55;color:var(--ink2)}
 #page-chart .tv-ki-lauf b{color:var(--ink)}
@@ -7157,7 +7165,7 @@ body.light #page-chart .tv-fk{background:#fff}
 #page-chart .tv-lv-z.ungeprueft .tv-lv-m{color:var(--loss)}
 #page-chart .tv-lv-hinweis{margin-top:9px;font-size:10px;color:var(--ink3);line-height:1.5}
 body.light #page-chart .tv-levels:not(:empty){background:#fff;border-color:rgba(0,0,0,.09)}
-#page-chart .tv-ki-out{flex:1 1 auto;overflow-y:auto;min-height:0;font-size:12.5px;line-height:1.65;color:var(--ink2)}
+#page-chart .tv-ki-out{flex:1 1 auto;overflow-y:auto;min-height:64px;font-size:12.5px;line-height:1.65;color:var(--ink2)}
 #page-chart .tv-ki-antwort{white-space:normal;margin-bottom:11px}
 #page-chart .tv-ki-frage{background:var(--elevated);border:0.5px solid var(--rim);border-radius:9px;padding:8px 11px;margin:0 0 9px auto;max-width:88%;color:var(--ink);font-size:12px}
 #page-chart .tv-setup:not(:empty){border:0.5px solid var(--gold-line);border-radius:9px;padding:9px 10px;background:var(--gold-dim)}
@@ -64787,19 +64795,28 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     } catch (e) { /* dann eben der heutige */ }
     teil.eng = (isFinite(atrDamals) && atrDamals > 0)
       ? Math.max(0, 1 - Math.min(breite / (2 * atrDamals), 1)) : 0.5;
-    /* Deckt ein hoeherer Zeitrahmen dieselbe Stelle ab, ist es kein Zufall. */
-    teil.htf = 0.35;
+    /* Deckt ein hoeherer Zeitrahmen dieselbe Stelle ab, ist es kein Zufall.
+       ABGESTUFT nach Ueberlappungsanteil, nicht als Schalter: vorher sprang
+       die Staerke um zehn Punkte, sobald eine Zone auf einem anderen
+       Zeitrahmen minimal wanderte — bei praktisch gleichem Kurs waren das
+       49 zu 59 innerhalb einer Minute. */
+    var besteDeckung = 0;
     (andereEbenen || []).forEach(function (e) {
       (e.zonen || []).forEach(function (o) {
         if (o.supply !== g.supply) return;
-        if (o.top >= g.bot && o.bot <= g.top) teil.htf = 1;
+        var unten = Math.max(o.bot, g.bot), oben = Math.min(o.top, g.top);
+        if (oben <= unten) return;
+        var anteil = (oben - unten) / Math.max(1e-9, g.top - g.bot);
+        if (anteil > besteDeckung) besteDeckung = Math.min(1, anteil);
       });
     });
+    teil.htf = 0.35 + 0.65 * besteDeckung;
     teil.jung = isFinite(g.juengste) ? Math.max(0.4, 1 - Math.min(g.juengste / 400, 1)) : 0.7;
 
     var wert = teil.impuls * 0.30 + teil.frisch * 0.25 + teil.eng * 0.20 +
                teil.htf * 0.15 + teil.jung * 0.10;
-    return { punkte: Math.round(wert * 100), teil: teil, impulsAtr: imp };
+    return { punkte: Math.round(wert * 100), teil: teil, impulsAtr: imp,
+             deckung: besteDeckung };
   }
 
   function zonenBuendeln(zonen, atrW) {
@@ -64848,11 +64865,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return gruppen.sort(function (a, b) { return a.ab - b.ab; });
   }
 
-  function zonenVon(bars, kurs, stellen, atrW, sammler, flipSammler) {
+  function zonenVon(bars, kurs, stellen, atrW, sammler, flipSammler, tfName) {
     try {
       var Ind = window.ApexIndicators;
       if (!Ind || !Ind.compute) return [];
-      var res = Ind.compute(bars, 'sd', pOf('sd'));
+      var res = Ind.compute(bars, 'sd', pOf('sd', tfName));
       var alle = res.zoneList || [];
       var sicht = Ind.sdVisibleZones(alle, bars.n - 1, { maxZones: 5 }) || [];
       /* sdVisibleZones filtert nach ALTER — fuer den Chart richtig, fuer eine
@@ -64922,7 +64939,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           ' | ' + g.teile.length + (g.teile.length === 1 ? ' zone' : ' zones merged') +
           ' | ' + g.retests + ' retests' +
           ' | ' + nf(g.ab, stellen) + ' away' + inAtr +
-          (isFinite(g.juengste) ? ' | newest ' + g.juengste + ' candles ago' : '');
+          (isFinite(g.juengste) ? ' | newest ' + g.juengste + ' candles ago' : '') +
+          (g._streit ? ' | CONTESTED: an opposing zone covers part of this range, so ' +
+                       'support and resistance sit on the same price. Unusable unless ' +
+                       'you can say which side wins.' : '');
         if (g.kern && g.teile.length > 1)
           kopf += '\n      precise level inside it: ' +
                   nf(g.kern.bot, stellen) + '-' + nf(g.kern.top, stellen) +
@@ -64962,9 +64982,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
   /* Die Werte fuer EINEN Indikator, so wie compute() sie erwartet. Fehlt
      etwas, fuellt fillParams die Vorgabe nach. */
-  function pOf(id) {
+  function pOf(id, tf) {
     var alle = indParams();
-    return alle[id] || {};
+    /* Zeitrahmen-eigene Werte ueberschreiben die allgemeinen. Noetig, weil
+       dieselbe Einstellung auf M1 und H4 Unterschiedliches bedeutet:
+       forceMinAtr 0.5 erzwingt auf M1 rund 0.8 Dollar Mindesthoehe — fuer
+       einen Scalp bereits zu breit. */
+    var basis = alle[id] || {};
+    var eigen = tf ? (alle[id + '@' + tf] || null) : null;
+    if (!eigen) return basis;
+    var raus = {};
+    Object.keys(basis).forEach(function (k) { raus[k] = basis[k]; });
+    Object.keys(eigen).forEach(function (k) { raus[k] = eigen[k]; });
+    return raus;
   }
 
   function indAuswahl() {
@@ -65024,21 +65054,32 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         /* Einstellungen nur fuer den, den man gerade aufgeklappt hat — alle
            gleichzeitig waeren eine Wand aus Feldern. */
         if (an && TV._indOffen === d.id && d.params && d.params.length) {
-          var eigen = pOf(d.id), voll = window.ApexIndicators.fillParams(d.id, eigen);
-          h += '<div class="tv-ind-p">';
+          var fuerTf = TV._indTf || '';
+          var eigen = pOf(d.id, fuerTf), voll = window.ApexIndicators.fillParams(d.id, eigen);
+          h += '<div class="tv-ind-p">' +
+            '<label class="tv-ind-pz tv-ind-tfwahl"><span>Applies to</span>' +
+            '<select data-indtf="1">' +
+              '<option value=""' + (fuerTf ? '' : ' selected') + '>All timeframes</option>' +
+              ['M1', 'M5', 'M15', 'H1', 'H4'].map(function (t) {
+                return '<option value="' + t + '"' + (fuerTf === t ? ' selected' : '') +
+                       '>' + t + ' only</option>';
+              }).join('') +
+            '</select></label>';
           d.params.forEach(function (pp) {
             var key = pp[0], label = pp[1], std = pp[2], mn = pp[3], mx = pp[4];
             var wert = voll[key];
             var schritt = (String(std).indexOf('.') >= 0) ? '0.1' : '1';
             h += '<label class="tv-ind-pz">' +
               '<span>' + escHtml(label) + '</span>' +
-              '<input type="number" data-p="' + d.id + '|' + key + '" value="' + wert +
+              '<input type="number" data-p="' + d.id + '|' + key + '|' + fuerTf +
+                '" value="' + wert +
                 '" min="' + mn + '" max="' + mx + '" step="' + schritt +
                 '" class="notranslate" translate="no">' +
               '</label>';
           });
-          h += '<button class="tv-ind-reset" data-reset="' + d.id + '">Reset to defaults</button>' +
-               '</div>';
+          h += '<button class="tv-ind-reset" data-reset="' + d.id + '">' +
+               (fuerTf ? 'Clear ' + fuerTf + ' overrides' : 'Reset to defaults') +
+               '</button></div>';
         }
       });
     });
@@ -65059,7 +65100,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       b.onclick = function (e) {
         e.preventDefault(); e.stopPropagation();
         var alle = indParams();
-        delete alle[b.getAttribute('data-reset')];
+        var id = b.getAttribute('data-reset');
+        delete alle[TV._indTf ? (id + '@' + TV._indTf) : id];
         indParamsMerken(alle);
         indFuellen();
       };
@@ -65067,12 +65109,18 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
     w.onchange = function (ev) {
       var z = ev && ev.target;
+      if (z && z.getAttribute && z.getAttribute('data-indtf')) {
+        TV._indTf = z.value || '';
+        indFuellen();
+        return;
+      }
       if (z && z.getAttribute && z.getAttribute('data-p')) {
         var t = z.getAttribute('data-p').split('|');
+        var schluessel = t[2] ? (t[0] + '@' + t[2]) : t[0];
         var alle = indParams();
-        alle[t[0]] = alle[t[0]] || {};
+        alle[schluessel] = alle[schluessel] || {};
         var v = parseFloat(z.value);
-        if (isFinite(v)) alle[t[0]][t[1]] = v;
+        if (isFinite(v)) alle[schluessel][t[1]] = v;
         indParamsMerken(alle);
         return;
       }
@@ -65094,7 +65142,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Werte der gewaehlten Indikatoren. Bewusst generisch: was in DEF steht,
      wird gelesen — so wirkt jeder kuenftige Indikator sofort mit, ohne dass
      hier etwas nachgetragen werden muss. */
-  function indikatorBlock(bars, ids, stellen, kurs) {
+  function indikatorBlock(bars, ids, stellen, kurs, tfName) {
     var I = window.ApexIndicators;
     if (!I || !ids.length) return '';
     var zeilen = [];
@@ -65103,8 +65151,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var d = I.DEF && I.DEF[id];
       if (!d) return;
       try {
-        var q = I.fillParams(id, pOf(id));
-        var res = I.compute(bars, id, pOf(id));
+        var q = I.fillParams(id, pOf(id, tfName));
+        var res = I.compute(bars, id, pOf(id, tfName));
         var teile = [];
         (d.outputs || []).forEach(function (name) {
           var arr = res[name];
@@ -65587,10 +65635,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var gewaehlt = indAuswahl();
       var zonenAn = gewaehlt.indexOf('sd') >= 0;
       var roh = [], flips = [];
-      var zn = zonenAn ? zonenVon(b, kurs, stellen, a, roh, flips) : [];
+      var zn = zonenAn ? zonenVon(b, kurs, stellen, a, roh, flips, name) : [];
       ebenen.push({ tf: name, atr: a, stellen: stellen, zonen: roh, flips: flips,
                     bars: b, faktor: faktor, hoch: st && st.hoch, tief: st && st.tief });
-      var iw = indikatorBlock(b, gewaehlt, stellen, kurs);
+      var iw = indikatorBlock(b, gewaehlt, stellen, kurs, name);
       if (iw) z.push(iw);
       if (!zonenAn) {
         /* Nichts weiter: wer keine Zonen benutzt, soll auch nicht darueber
@@ -65640,6 +65688,23 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       });
     });
     rang.sort(function (a, b) { return b.g.staerke.punkte - a.g.staerke.punkte; });
+
+    /* Supply und Demand auf demselben Preis widersprechen sich: dort waere
+       Stuetze und Widerstand zugleich. Auf dem Screenshot lagen DEMAND
+       4465.64-4468.10 und SUPPLY 4467.35-4471.18 uebereinander — als zwei
+       brauchbare Zonen angeboten, obwohl keine von beiden handelbar ist.
+       Markieren statt loeschen: der Nutzer soll sehen, dass es die Stelle
+       gibt und warum sie nichts taugt. */
+    var flach = [];
+    ebenen.forEach(function (e) { (e.zonen || []).forEach(function (g) {
+      g._streit = false; flach.push(g); }); });
+    for (var iA = 0; iA < flach.length; iA++) {
+      for (var iB = iA + 1; iB < flach.length; iB++) {
+        var A = flach[iA], B = flach[iB];
+        if (!!A.supply === !!B.supply) continue;
+        if (A.top > B.bot && B.top > A.bot) { A._streit = true; B._streit = true; }
+      }
+    }
 
     if (rang.length) {
       z.push('');
@@ -65723,6 +65788,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'The indicators listed are the ones THIS user chose to trade by. Build your read on ' +
     'those, in their terms. Do not fall back on tools they did not pick, and do not ' +
     'treat supply/demand zones as the default lens unless they are in the list.\n\n' +
+    'If no supply/demand zones are listed below, the user has that indicator switched ' +
+    'off — do NOT treat that as "no levels exist". Derive the levels yourself from the ' +
+    'raw candles and from the indicators they DID select: where price consolidated ' +
+    'before leaving in a hurry, prior session highs and lows, the levels their own ' +
+    'indicators imply. Put them in the <<ZONES>> block as "new" so they appear as ' +
+    'drawable levels. Not everyone trades supply and demand; work in the terms this ' +
+    'user chose.\n\n' +
     'The zones you are given come from an indicator. Treat them as CANDIDATES, not as ' +
     'truth: an indicator applies a fixed rule and cannot see context. You have the raw ' +
     'candles as well, so read the price action yourself — where did the market actually ' +
@@ -66398,8 +66470,22 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       (e.zonen || []).forEach(function (g) { alle.push({ g: g, tf: e.tf }); });
     });
     function nimm(supply) {
-      var kand = alle.filter(function (x) { return !!x.g.supply === supply; })
-                     .sort(function (a, b) { return a.g.ab - b.g.ab; });
+      var kand = alle.filter(function (x) {
+        if (!!x.g.supply !== supply) return false;
+        /* Was die KI verworfen hat, gehoert nicht in den Fokus. Auf dem
+           Screenshot standen genau die beiden mit ✗ markierten Zonen oben. */
+        if (x.g._ki === 'weg') return false;
+        /* Und eine Zone, die sich mit einer Gegenzone ueberschneidet, ist
+           kein Level, sondern ein Widerspruch — Stuetze und Widerstand auf
+           demselben Preis. */
+        if (x.g._streit) return false;
+        return true;
+      }).sort(function (a, b) {
+        /* Bestaetigte zuerst, dann nach Naehe. */
+        var ka = a.g._ki === 'ok' ? 0 : 1, kb = b.g._ki === 'ok' ? 0 : 1;
+        if (ka !== kb) return ka - kb;
+        return a.g.ab - b.g.ab;
+      });
       var raus = [];
       kand.forEach(function (x) {
         for (var i = 0; i < raus.length; i++) {
@@ -66488,6 +66574,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                        (g.retests ? g.retests + 'r · ' : '') + n(g.ab) + ' away';
             if (g._ki === 'ok')  meta = '✓ ' + meta;
             if (g._ki === 'weg') meta = '✗ ' + meta;
+            if (g._streit) meta = 'contested · ' + meta;
             if (g._kiNeu && g.grund) meta = escHtml(String(g.grund).slice(0, 46));
             h += zeile(g.supply, g.bot, g.top, meta,
                        g.staerke ? g.staerke.punkte : null, gegen,
@@ -67246,7 +67333,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     malen();
     busy(true, 'Thinking…');
     fragen(null).then(function (a) {
-      verlauf.push({ role: 'assistant', content: a });
+      /* Auch hier die Bloecke entfernen — sonst steht der rohe <<SETUP>>-Text
+         in der Antwort. Genau das war auf dem Screenshot zu sehen. */
+      setupZeigen(setupLesen(a) || TV._setup);
+      verlauf.push({ role: 'assistant', content: a,
+                     anzeige: ohneZonenBlock(ohneBlock(a)) });
       malen();
     }).catch(function (e) {
       verlauf.push({ role: 'assistant', content: '⚠ ' + (e.message || 'failed') });
