@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04k';
+  window.APEX_BUILD = '2026-09-04l';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7074,6 +7074,12 @@ body.light #page-chart .tv-ki-pb select{background:#fff;border-color:rgba(0,0,0,
 #page-chart .tv-wacht:hover{border-color:var(--gold-line);color:var(--gold)}
 #page-chart .tv-wacht[aria-pressed="true"]{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}
 #page-chart .tv-wacht-st:not(:empty){flex:0 0 auto;font-size:10.5px;line-height:1.45;color:var(--ink3)}
+#page-chart .tv-lauf{flex:0 0 auto}
+#page-chart .tv-lauf:empty{display:none}
+#page-chart .tv-ki-lauf{background:var(--elevated);border-left:2px solid var(--gold-line);border-radius:0 7px 7px 0;padding:7px 10px;margin-bottom:9px;font-size:11.5px;line-height:1.55;color:var(--ink2)}
+#page-chart .tv-ki-lauf b{color:var(--ink)}
+#page-chart .tv-ki-lauf.warn{border-left-color:var(--loss)}
+body.light #page-chart .tv-ki-lauf{background:#fff}
 #page-chart .tv-ki-alarm{background:var(--gold-dim);border:0.5px solid var(--gold-line);border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:11.5px;color:var(--gold);font-weight:600}
 body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
 /* Datenfenster unter Chart und Analyse, ueber die volle Breite. Die Zahlen
@@ -64305,6 +64311,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           '<button class="tv-wacht" id="tvWachtBtn" aria-pressed="false">' +
             'Watch for setups</button>' +
           '<div class="tv-wacht-st" id="tvWachtStatus"></div>' +
+          '<div class="tv-lauf" id="tvLauf"></div>' +
           '<div class="tv-ki-out" id="tvKiOut">' +
             '<p class="tv-ki-leer">The AI reads the candles and your supply &amp; demand ' +
             'zones across three timeframes &mdash; it cannot see the chart above.</p>' +
@@ -64490,6 +64497,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                         sym: q.short_name || '', aend: q.change_percent };
             kursAnzeigen();
             preisPruefen(TV.kurs.preis);
+            laufPruefen(TV.kurs.preis);
           });
         } catch (e) { /* ohne Live-Kurs laeuft alles weiter, nur mit Kerzenkurs */ }
       };
@@ -66865,6 +66873,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var el = document.getElementById('tvSetup');
     if (!el) return;
     TV._setup = S || null;
+    laufStarten(S);
     if (!S) { el.innerHTML = ''; return; }
     var L = TV._levels, st = (L && L.stellen) || 2;
     var n = function (x) { return nf(x, st); };
@@ -66944,6 +66953,185 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       (isFinite(S.rr) ? '   ' + S.rr.toFixed(1) + 'R' : ''));
     return z.join('\n');
   }
+
+  /* ── Das laufende Setup begleiten ─────────────────────────────────
+     Der Zonenalarm meldet neue STELLEN. Das hier begleitet, was schon laeuft:
+     wo der Kurs im Verhaeltnis zu Einstieg und Stop steht, wann 1R erreicht
+     ist, wann er das Erreichte wieder hergibt, und wann ihm etwas in den Weg
+     laeuft.
+
+     Getrennt nach Art: Was RECHENBAR ist (1R erreicht, halber Weg zum Stop),
+     kommt sofort und kostenlos aus dem Live-Kurs — eine Zahl braucht kein
+     Sprachmodell und waere damit nur langsamer und unsicherer. Nur was ein
+     URTEIL verlangt (eine Gegenzone im Weg, Struktur gegen die Richtung),
+     geht an die KI. */
+  var LAUF = { an: false, marken: {}, letzteKi: 0 };
+  /* Hier und nicht oben bei den uebrigen: var wird zwar hochgezogen, die
+     ZUWEISUNG aber nicht. Weiter oben stand TV.lauf darum auf undefined. */
+  TV.lauf = LAUF;
+
+  function laufStarten(S) {
+    if (!S || S.richtung === 'none' || !isFinite(S.einstieg) || !isFinite(S.stop)) {
+      LAUF.an = false; return;
+    }
+    var risiko = Math.abs(S.einstieg - S.stop);
+    if (!(risiko > 0)) { LAUF.an = false; return; }
+    LAUF.an = true;
+    LAUF.lang = S.richtung === 'long';
+    LAUF.einstieg = S.einstieg; LAUF.stop = S.stop; LAUF.ziel = S.ziel;
+    LAUF.risiko = risiko;
+    LAUF.marken = {};
+    LAUF.hoechstesR = 0;
+    LAUF.letzteKi = 0;
+    var host = document.getElementById('tvLauf');
+    if (host) host.innerHTML = '';
+  }
+
+  function rVon(preis) {
+    if (!LAUF.an) return NaN;
+    return (LAUF.lang ? (preis - LAUF.einstieg) : (LAUF.einstieg - preis)) / LAUF.risiko;
+  }
+
+  /* Eigener Bereich, NICHT der Ausgabebereich: malen() baut den bei jeder
+     KI-Antwort neu auf und wuerde die Stationen mitloeschen. Sie sollen aber
+     stehen bleiben — "1R erreicht" ist auch fuenf Minuten spaeter noch die
+     Information, die man sucht. */
+  function laufNotiz(text, dringend) {
+    var host = document.getElementById('tvLauf');
+    if (!host) return;
+    var d = document.createElement('div');
+    d.className = 'tv-ki-lauf' + (dringend ? ' warn' : '');
+    d.innerHTML = '<b>' + new Date().toLocaleTimeString() + '</b> ' + text;
+    host.insertBefore(d, host.firstChild);
+    /* Nicht endlos wachsen lassen. */
+    while (host.children.length > 6) host.removeChild(host.lastChild);
+  }
+
+  /* Gegenzonen zwischen Einstieg und Ziel: das ist der Fall "der Kurs
+     konsolidiert an einer Supply, die unseren Long gefaehrdet". */
+  function gegenZoneVoraus(preis) {
+    var L = TV._levels;
+    if (!L || !LAUF.an) return null;
+    var treffer = null;
+    (L.ebenen || []).forEach(function (e) {
+      (e.zonen || []).forEach(function (g) {
+        if (!!g.supply !== LAUF.lang) return;          // Gegenseite
+        var kante = LAUF.lang ? g.bot : g.top;
+        if (LAUF.lang ? kante < preis : kante > preis) return;   // schon hinter uns
+        var ab = Math.abs(kante - preis);
+        if (!treffer || ab < treffer.ab) treffer = { g: g, tf: e.tf, ab: ab };
+      });
+    });
+    return treffer;
+  }
+
+  function laufPruefen(preis) {
+    if (!LAUF.an || !isFinite(preis)) return;
+    var r = rVon(preis);
+    if (!isFinite(r)) return;
+    if (r > LAUF.hoechstesR) LAUF.hoechstesR = r;
+    var st = TV._levels ? TV._levels.stellen : 2;
+    var einmal = function (name, fn) {
+      if (LAUF.marken[name]) return false;
+      LAUF.marken[name] = true; fn(); return true;
+    };
+
+    if (r <= -1)
+      einmal('stop', function () {
+        laufNotiz('Price reached the stop at <b class="notranslate" translate="no">' +
+          nf(LAUF.stop, st) + '</b>. The idea is done as written.', true);
+        LAUF.an = false;
+      });
+    else if (r <= -0.5)
+      einmal('halb', function () {
+        laufNotiz('Half the risk is used &mdash; price is at <b class="notranslate" ' +
+          'translate="no">' + nf(preis, st) + '</b>, the stop sits at ' +
+          '<b class="notranslate" translate="no">' + nf(LAUF.stop, st) + '</b>.', true);
+      });
+
+    if (r >= 1)
+      einmal('r1', function () {
+        laufNotiz('<b>1R reached.</b> Moving the stop to the entry at ' +
+          '<b class="notranslate" translate="no">' + nf(LAUF.einstieg, st) + '</b> would ' +
+          'take the risk off &mdash; it also makes a normal pullback close the trade. ' +
+          'Your call.');
+      });
+    if (r >= 2)
+      einmal('r2', function () {
+        laufNotiz('<b>2R reached</b> at <b class="notranslate" translate="no">' +
+          nf(preis, st) + '</b>.');
+      });
+    if (isFinite(LAUF.ziel) && (LAUF.lang ? preis >= LAUF.ziel : preis <= LAUF.ziel))
+      einmal('ziel', function () {
+        laufNotiz('Price reached the target at <b class="notranslate" translate="no">' +
+          nf(LAUF.ziel, st) + '</b>.');
+        LAUF.an = false;
+      });
+    /* Erreichtes wieder hergegeben — die Zahl, die man im Moment selbst
+       ungern ausrechnet. */
+    if (LAUF.hoechstesR >= 1 && r <= 0.15)
+      einmal('zurueck', function () {
+        laufNotiz('Gave back the move: it was ' + LAUF.hoechstesR.toFixed(1) +
+          'R in front, now back at the entry.', true);
+      });
+
+    /* Urteilssache: eine Gegenzone direkt voraus. Hoechstens alle zwei
+       Minuten, und nur wenn der Kurs wirklich dort ankommt. */
+    var gz = gegenZoneVoraus(preis);
+    if (gz && isFinite(WACHT.atr) && WACHT.atr > 0 && gz.ab / WACHT.atr <= 0.3) {
+      var kenn = 'gz' + zonenKennung(gz.g);
+      if (!LAUF.marken[kenn] && Date.now() - LAUF.letzteKi > MELDUNG_PAUSE) {
+        LAUF.marken[kenn] = true;
+        LAUF.letzteKi = Date.now();
+        laufKiFragen('Price is running into a ' + (gz.g.supply ? 'SUPPLY' : 'DEMAND') +
+          ' area ' + nf(gz.g.bot, st) + '-' + nf(gz.g.top, st) + ' on ' + gz.tf +
+          ', which sits against the open ' + (LAUF.lang ? 'long' : 'short') +
+          '. Current R on the idea: ' + r.toFixed(2) + '.');
+      }
+    }
+  }
+
+  var LAUF_ANWEISUNG =
+    'A trade idea is already running and something just happened to it. Comment in at ' +
+    'most 70 words on THIS idea, not on the market in general.\n' +
+    'Say what it means for the open position, what would confirm it is still fine, and ' +
+    'what would say it is not. Mention breakeven or partials only if the numbers ' +
+    'actually support it.\n' +
+    'You inform, you never instruct. This is not optional: do NOT write a verdict like ' +
+    '"HOLD", "EXIT" or "TAKE PROFIT", and do not use imperatives such as "maintain the ' +
+    'stop" or "move to breakeven". Describe what the numbers show and what would change ' +
+    'the picture, and leave every decision to the reader. Plain prose, no headings, no ' +
+    'emoji. Do not append any block.';
+
+  function laufKiFragen(anlass) {
+    var out = document.getElementById('tvKiOut');
+    if (!out || !TV._fakten) return;
+    laufNotiz('Checking what that means for the open idea&hellip;');
+    var inhalt = LAUF_ANWEISUNG + '\n\n---\n' +
+      'The open idea: ' + (LAUF.lang ? 'LONG' : 'SHORT') +
+      ' from ' + nf(LAUF.einstieg, 2) + ', stop ' + nf(LAUF.stop, 2) +
+      (isFinite(LAUF.ziel) ? ', target ' + nf(LAUF.ziel, 2) : '') + '.\n' +
+      'What just happened: ' + anlass + '\n\n' + TV._fakten;
+    fetch(COACH_WORKER_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: (window.currentUser && currentUser.uid) || 'guest',
+        system: 'Trading Coach',
+        messages: [{ role: 'user', content: inhalt }],
+      }),
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      var text = d.response ||
+        (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+      if (!text || /API Error|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
+        throw new Error(text || 'no answer');
+      verlauf.push({ role: 'assistant', content: text, anzeige: ohneBlock(text) });
+      malen();
+    }).catch(function (e) {
+      laufNotiz('Could not check the open idea: ' + escHtml(e.message || 'failed'), true);
+    });
+  }
+
+  TV.laufPruefen = laufPruefen;
 
   function analysieren() {
     var out = document.getElementById('tvKiOut');
