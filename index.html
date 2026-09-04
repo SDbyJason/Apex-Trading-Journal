@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04o';
+  window.APEX_BUILD = '2026-09-04q';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7136,6 +7136,7 @@ body.light #page-chart .tv-fk{background:#fff}
 #page-chart .tv-lv-z.klick,#page-chart .tv-fk.klick{cursor:pointer}
 #page-chart .tv-lv-z.klick:hover,#page-chart .tv-fk.klick:hover{background:rgba(var(--accent-rgb),.09)}
 #page-chart .tv-lv-z.klick:focus-visible,#page-chart .tv-fk.klick:focus-visible{outline:2px solid rgba(var(--accent-rgb),.7);outline-offset:2px}
+#page-chart .tv-lv-z.offen,#page-chart .tv-fk.offen{background:rgba(var(--accent-rgb),.16);box-shadow:inset 2px 0 0 rgba(var(--accent-rgb),.9)}
 #page-chart .tv-zone,#page-chart .tv-ideen{grid-column:1/-1}
 #page-chart .tv-zone:empty,#page-chart .tv-ideen:empty{display:none}
 #page-chart .tv-zn{margin:14px 0 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card2,var(--card))}
@@ -66641,8 +66642,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
            oben verkaufen. */
         [].concat(fokus.demand, fokus.supply).forEach(function (x) {
           var g = x.g, gegen = rich && (rich.lang !== !g.supply);
+          var fid = regZone(g, x.tf);
           h += '<div class="tv-fk klick' + (g.supply ? ' s' : ' d') + (gegen ? ' gegen' : '') +
-            '" data-z="' + escHtml(regZone(g, x.tf)) + '" role="button" tabindex="0">' +
+            (fid === ZOFF ? ' offen' : '') +
+            '" data-z="' + escHtml(fid) + '" role="button" tabindex="0">' +
             '<div class="tv-fk-kopf">' + (g.supply ? 'SUPPLY' : 'DEMAND') +
               '<span>' + (g._kiNeu ? 'AI' : x.tf) + '</span></div>' +
             '<div class="tv-fk-p notranslate" translate="no">' + n(g.bot) + '<i>–</i>' +
@@ -66761,7 +66764,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        jedes Mal weg. */
     el.onclick = function (ev) {
       var t = ev.target && ev.target.closest && ev.target.closest('[data-z]');
-      if (t) zoneOeffnen(t.getAttribute('data-z'));
+      if (!t) return;
+      /* Ein Fehler beim Aufbau der Tafel saehe von aussen genauso aus wie
+         ein toter Klick. Darum melden statt schlucken. */
+      try { zoneOeffnen(t.getAttribute('data-z')); }
+      catch (e) {
+        TV._zoneFehler = (e && e.message) || String(e);
+        var hz = document.getElementById('tvZone');
+        if (hz) hz.innerHTML = '<div class="tv-su-warn">Could not open the zone: ' +
+          escHtml(TV._zoneFehler) + '</div>';
+      }
     };
     el.onkeydown = function (ev) {
       if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -66791,7 +66803,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           Math.max(4, Math.min(100, punkte)) + '%"></i></span>' : '';
       return '<div class="tv-lv-z' + (gegen ? ' gegen' : '') + (fein ? ' fein' : '') +
         (fokus ? ' fokus' : '') + (ki === 'weg' ? ' verworfen' : '') +
-        (ki === 'ok' ? ' bestaetigt' : '') + (zid ? ' klick' : '') + '"' +
+        (ki === 'ok' ? ' bestaetigt' : '') + (zid ? ' klick' : '') +
+        (zid && zid === ZOFF ? ' offen' : '') + '"' +
         (zid ? ' data-z="' + escHtml(zid) + '" role="button" tabindex="0"' : '') + '>' +
         '<span class="tv-lv-typ ' + (supply ? 's' : 'd') + '"></span>' +
         '<span class="tv-lv-p notranslate" translate="no">' + n(bot) + '<i>–</i>' +
@@ -67668,9 +67681,17 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     ZOFF = (ZOFF === id) ? null : id;   // nochmal draufklicken schliesst
     TV._stats = false;
     zoneZeigen();
+    levelZeigen();                      // die angeklickte Zeile markieren
     var host = document.getElementById('tvZone');
-    if (ZOFF && host && host.scrollIntoView)
-      try { host.scrollIntoView({ block: 'nearest' }); } catch (e) {}
+    if (!ZOFF || !host) return;
+    /* Die Tafel steht unter dem ganzen Raster und kann weit unterhalb des
+       Bildschirms liegen. Ohne diesen Sprung sieht ein Klick aus wie
+       nichts — genau so wurde er auch gemeldet. */
+    try {
+      var r = host.getBoundingClientRect();
+      var sichtbar = r.top >= 0 && r.bottom <= (window.innerHeight || 0);
+      if (!sichtbar) host.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } catch (e) {}
   }
 
   function zoneSchliessen() { ZOFF = null; TV._formZone = null; zoneZeigen(); }
@@ -68086,9 +68107,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
 
   /* ── Speicher ─────────────────────────────────────────────────────
-     Eigenes Feld am Nutzerdokument. Das Journal wird nicht angefasst: keine
-     Kennzahl, kein Kalender, keine Auswertung dort darf sich durch eine
-     Chart-Idee bewegen. */
+     Eigenes Dokument im PRIVATEN Unterbereich des Kontos, nicht am
+     Nutzerdokument selbst. Der Unterschied ist keine Formsache:
+     `apexUsers/{uid}` ist weltlesbar (Profile, Rangliste, Feed), und was
+     jemand handelt — Instrument, Einstieg, Stop, Ergebnis — hat dort nichts
+     zu suchen. Genau daran ist im August schon die E-Mail-Adresse
+     gescheitert.
+
+     Das Journal wird dabei nicht angefasst: eigenes Dokument, eigener
+     Schluessel. Keine Kennzahl dort darf sich durch eine Chart-Idee
+     bewegen. */
   var IDEEN = null;
   var IDEEN_MAX = 400;
 
@@ -68105,8 +68133,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        dem Handy weiterlaeuft. */
     if (!TV._ideenGeholt && window.db && window.currentUID) {
       TV._ideenGeholt = true;
-      db.collection('apexUsers').doc(currentUID).get().then(function (d) {
-        var f = d.exists && d.data() && d.data().zoneIdeas;
+      db.collection('apexUsers').doc(currentUID)
+        .collection('private').doc('zoneIdeas').get().then(function (d) {
+        var f = d.exists && d.data() && d.data().liste;
         if (!Array.isArray(f) || !f.length) return;
         var da = {};
         IDEEN.forEach(function (i) { da[i.id] = 1; });
@@ -68124,7 +68153,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     try { localStorage.setItem(ideenSchluessel(), JSON.stringify(l)); } catch (e) {}
     if (window.db && window.currentUID)
       db.collection('apexUsers').doc(currentUID)
-        .update({ zoneIdeas: l }).catch(function () {});
+        .collection('private').doc('zoneIdeas')
+        .set({ liste: l, updatedAt: Date.now() }).catch(function () {});
   }
 
   function ideeAnlegen(e, K, S) {
