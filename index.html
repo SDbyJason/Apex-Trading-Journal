@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04m';
+  window.APEX_BUILD = '2026-09-04o';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7131,6 +7131,88 @@ body.light #page-chart .tv-wacht{background:#fff;border-color:rgba(0,0,0,.12)}
 #page-chart .tv-lv-z:not(.fokus):not(.flip):not(.fein) .tv-lv-p{color:var(--ink3)}
 body.light #page-chart .tv-fk{background:#fff}
 #page-chart .tv-lv-spalten{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:0 20px}
+
+/* ── Zone anklicken, Ideen, Auswertung ───────────────────────────── */
+#page-chart .tv-lv-z.klick,#page-chart .tv-fk.klick{cursor:pointer}
+#page-chart .tv-lv-z.klick:hover,#page-chart .tv-fk.klick:hover{background:rgba(var(--accent-rgb),.09)}
+#page-chart .tv-lv-z.klick:focus-visible,#page-chart .tv-fk.klick:focus-visible{outline:2px solid rgba(var(--accent-rgb),.7);outline-offset:2px}
+#page-chart .tv-zone,#page-chart .tv-ideen{grid-column:1/-1}
+#page-chart .tv-zone:empty,#page-chart .tv-ideen:empty{display:none}
+#page-chart .tv-zn{margin:14px 0 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card2,var(--card))}
+#page-chart .tv-zn.d{border-left:3px solid rgba(34,197,94,.85)}
+#page-chart .tv-zn.s{border-left:3px solid rgba(239,68,68,.85)}
+#page-chart .tv-zn-kopf{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+#page-chart .tv-zn-kopf b{font-size:12px;letter-spacing:.06em}
+#page-chart .tv-zn-tf{font-size:11px;color:var(--ink2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+#page-chart .tv-zn-p{margin-left:auto;font-size:13px;font-variant-numeric:tabular-nums}
+#page-chart .tv-zn-zu{background:none;border:0;color:var(--ink2);font-size:19px;line-height:1;cursor:pointer;padding:0 2px}
+#page-chart .tv-zn-git{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:7px 16px;margin-bottom:12px}
+#page-chart .tv-zn-git>div{display:flex;justify-content:space-between;gap:8px;font-size:12px;border-bottom:1px dotted var(--line);padding-bottom:3px}
+#page-chart .tv-zn-git span{color:var(--ink2)}
+#page-chart .tv-zn-git b{font-variant-numeric:tabular-nums}
+#page-chart .tv-zn-ktitel{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+#page-chart .tv-zn-kraft{margin-bottom:12px}
+#page-chart .tv-zn-kz{display:flex;align-items:center;gap:9px;font-size:12px;margin-bottom:3px}
+#page-chart .tv-zn-kz span{flex:0 0 128px;color:var(--ink2)}
+#page-chart .tv-zn-kz i{font-style:normal;font-size:11px;color:var(--ink2);flex:0 0 30px;text-align:right}
+#page-chart .tv-zq{flex:1 1 auto;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+#page-chart .tv-zq i{display:block;height:100%;background:rgba(var(--accent-rgb),.75)}
+#page-chart .tv-zn-ki{font-size:12px;padding:7px 10px;border-radius:8px;background:var(--bg2,rgba(127,127,127,.08));margin-bottom:10px}
+#page-chart .tv-zn-ki.ok{background:rgba(34,197,94,.12)}
+#page-chart .tv-zn-ki.weg{background:rgba(239,68,68,.12)}
+#page-chart .tv-zn-ki span{display:block;color:var(--ink2);margin-top:2px}
+#page-chart .tv-zn-zit{border-left:2px solid var(--line);padding-left:10px;margin-bottom:10px}
+#page-chart .tv-zn-zit p{margin:0 0 5px;font-size:12px;color:var(--ink2);line-height:1.6}
+#page-chart .tv-zn-fein{font-size:12px;margin-bottom:10px}
+#page-chart .tv-zn-fein div{font-variant-numeric:tabular-nums;color:var(--ink2)}
+#page-chart .tv-zn-antw{margin-bottom:12px}
+#page-chart .tv-zn-atext{font-size:12.5px;line-height:1.65;margin-bottom:8px}
+#page-chart .tv-zn-setup{border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+#page-chart .tv-zn-sdir{font-size:11px;letter-spacing:.06em;margin-bottom:5px}
+#page-chart .tv-zn-sdir.l{color:rgba(34,197,94,1)}
+#page-chart .tv-zn-sdir.s{color:rgba(239,68,68,1)}
+#page-chart .tv-su-zgrund{font-size:11px;color:var(--ink2);margin:-2px 0 5px 0}
+#page-chart .tv-zn-hint{font-size:11px;color:var(--ink2);line-height:1.55;margin-top:6px}
+#page-chart .tv-zn-knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#page-chart .tv-zn-b{font:inherit;font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+#page-chart .tv-zn-b:hover{background:rgba(var(--accent-rgb),.1)}
+#page-chart .tv-zn-b.primar{background:rgba(var(--accent-rgb),.16);border-color:rgba(var(--accent-rgb),.45)}
+#page-chart .tv-zn-b[disabled]{opacity:.55;cursor:default}
+#page-chart .tv-idf{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+#page-chart .tv-idf-z{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:8px}
+#page-chart .tv-idf-z label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink2)}
+#page-chart .tv-idf-z input,#page-chart .tv-idf-z select{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);width:118px;font-variant-numeric:tabular-nums}
+#page-chart .tv-idf-g{font-size:11px;color:var(--ink2);align-self:center}
+#page-chart .tv-idf-sum{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+#page-chart .tv-idf-sum b.schief{color:rgba(239,68,68,1)}
+#page-chart .tv-id-kopf{display:flex;align-items:center;gap:10px;margin:16px 0 8px}
+#page-chart .tv-id-kopf b{font-size:12px;letter-spacing:.06em}
+#page-chart .tv-id-kopf span{font-size:11px;color:var(--ink2)}
+#page-chart .tv-id-kopf button{margin-left:auto}
+#page-chart .tv-id{border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:8px}
+#page-chart .tv-id.stark{border-color:rgba(var(--accent-rgb),.55);box-shadow:0 0 0 1px rgba(var(--accent-rgb),.18)}
+#page-chart .tv-id.zu{opacity:.72}
+#page-chart .tv-id-z1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
+#page-chart .tv-id-dir{font-size:10px;letter-spacing:.06em;padding:1px 6px;border-radius:5px}
+#page-chart .tv-id-dir.l{background:rgba(34,197,94,.16);color:rgba(34,197,94,1)}
+#page-chart .tv-id-dir.s{background:rgba(239,68,68,.16);color:rgba(239,68,68,1)}
+#page-chart .tv-id-tf,#page-chart .tv-id-st{font-size:10.5px;color:var(--ink2)}
+#page-chart .tv-id-best{font-size:10.5px;color:rgba(var(--accent-rgb),1)}
+#page-chart .tv-id-st{margin-left:auto;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+#page-chart .tv-id-z2{font-size:11.5px;color:var(--ink2);margin-top:4px;font-variant-numeric:tabular-nums}
+#page-chart .tv-id-r{font-size:12px;margin-top:4px;font-variant-numeric:tabular-nums}
+#page-chart .tv-id-r.gut,#page-chart .tv-st-z b.gut{color:rgba(34,197,94,1)}
+#page-chart .tv-id-r.schlecht,#page-chart .tv-st-z b.schlecht{color:rgba(239,68,68,1)}
+#page-chart .tv-id-knopf{display:flex;gap:7px;margin-top:7px;flex-wrap:wrap}
+#page-chart .tv-id-knopf button{font:inherit;font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer}
+#page-chart .tv-id-knopf button:hover{color:var(--ink);background:rgba(var(--accent-rgb),.1)}
+#page-chart .tv-id-zu summary{font-size:11.5px;color:var(--ink2);cursor:pointer;margin:6px 0}
+#page-chart .tv-st-g{margin-bottom:14px}
+#page-chart .tv-st-z{display:flex;align-items:center;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px dotted var(--line)}
+#page-chart .tv-st-z span{flex:1 1 auto;color:var(--ink2)}
+#page-chart .tv-st-z b{flex:0 0 66px;text-align:right;font-variant-numeric:tabular-nums}
+#page-chart .tv-st-z i{flex:0 0 108px;text-align:right;font-style:normal;font-size:11px;color:var(--ink2);font-variant-numeric:tabular-nums}
+#page-chart .tv-st-z.duenn{opacity:.45}
 #page-chart .tv-lv-sp{min-width:0;border-left:0.5px solid var(--rim);padding-left:12px}
 #page-chart .tv-lv-sp:first-child{border-left:0;padding-left:0}
 #page-chart .tv-lv-tf{display:flex;align-items:baseline;gap:7px;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px}
@@ -14914,7 +14996,7 @@ function playbookStats(pbId){
      $ das ZEILENende, dadurch brach die mehrzeilige Checkliste nach dem
      ersten Punkt ab. Zeilenweise ist ohnehin leichter zu lesen. */
   function lesen(text) {
-    var m = /<<PLAYBOOK>>([\s\S]*?)<<\/PLAYBOOK>>/.exec(text || '');
+    var m = /<<PLAYBOOK>>([\s\S]*?)(?:<<\/PLAYBOOK>>|$)/.exec(text || '');
     if (!m) return null;
     var felder = { name: '', market: '', checklist: [], rules: '' };
     var aktuell = null;
@@ -14938,7 +15020,7 @@ function playbookStats(pbId){
     return { name: felder.name.slice(0, 80), market: felder.market.slice(0, 80),
              checklist: felder.checklist,
              rules: felder.rules.replace(/\s+/g, ' ').trim(),
-             text: text.replace(/<<PLAYBOOK>>[\s\S]*?<<\/PLAYBOOK>>/g, '').trim() };
+             text: text.replace(/<<PLAYBOOK>>[\s\S]*?(?:<<\/PLAYBOOK>>|$)/g, '').trim() };
   }
 
   function suchen() {
@@ -64336,6 +64418,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       '<div class="tv-daten" id="tvDaten">' +
         '<div class="tv-levels" id="tvLevels"></div>' +
         '<div class="tv-setup" id="tvSetup"></div>' +
+        /* Zonendetail und Ideen stehen UNTER beiden Spalten ueber die
+           volle Breite — in der 320px-Spalte waere die Werteliste eine
+           Kolonne aus einzelnen Woertern. */
+        '<div class="tv-zone" id="tvZone"></div>' +
+        '<div class="tv-ideen" id="tvIdeen"></div>' +
       '</div>' +
       '<div class="tv-hinweis" id="tvHinweis"></div>';
     host.appendChild(d);
@@ -64506,6 +64593,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             kursAnzeigen();
             preisPruefen(TV.kurs.preis);
             laufPruefen(TV.kurs.preis);
+            ideenPruefen(TV.kurs.preis);
           });
         } catch (e) { /* ohne Live-Kurs laeuft alles weiter, nur mit Kerzenkurs */ }
       };
@@ -65789,12 +65877,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'those, in their terms. Do not fall back on tools they did not pick, and do not ' +
     'treat supply/demand zones as the default lens unless they are in the list.\n\n' +
     'If no supply/demand zones are listed below, the user has that indicator switched ' +
-    'off — do NOT treat that as "no levels exist". Derive the levels yourself from the ' +
-    'raw candles and from the indicators they DID select: where price consolidated ' +
-    'before leaving in a hurry, prior session highs and lows, the levels their own ' +
-    'indicators imply. Put them in the <<ZONES>> block as "new" so they appear as ' +
-    'drawable levels. Not everyone trades supply and demand; work in the terms this ' +
-    'user chose.\n\n' +
+    'off — do NOT treat that as "no levels exist" and do NOT leave the level list ' +
+    'empty. Derive them yourself from the raw candles and from the indicators they DID ' +
+    'select: where price consolidated before leaving in a hurry, prior session highs and ' +
+    'lows, the levels their own indicators imply. Give FOUR TO EIGHT of them, spread ' +
+    'across the timeframes — at least one per timeframe that has anything worth drawing, ' +
+    'above and below the current price. One narrow level is not a usable answer. Prefix ' +
+    'each with the timeframe it belongs to. Not everyone trades supply and demand; work ' +
+    'in the terms this user chose.\n\n' +
     'The zones you are given come from an indicator. Treat them as CANDIDATES, not as ' +
     'truth: an indicator applies a fixed rule and cannot see context. You have the raw ' +
     'candles as well, so read the price action yourself — where did the market actually ' +
@@ -65803,7 +65893,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     '<<ZONES>>\n' +
     'confirm: <low>-<high> | one short reason\n' +
     'reject: <low>-<high> | one short reason\n' +
-    'new: demand|supply <low>-<high> | one short reason\n' +
+    'new: [M1|M5|M15|H1|H4] demand|supply <low>-<high> | one short reason\n' +
     '<</ZONES>>\n' +
     'Judge only zones that matter for the current price - a verdict on something 200 ' +
     'points away is noise. Every level you write there is checked against the candles ' +
@@ -65848,7 +65938,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'direction: long | short | none  (if none, leave entry, stop and target EMPTY - naming levels while calling it no setup contradicts itself)\n' +
     'entry: <price>\n' +
     'stop: <price>\n' +
-    'target: <price>\n' +
+    'target: <price> | <percent of the position to close there> | <what that level is>\n' +
+    'target: ... repeat this line for a second or third target ONLY when the user\u2019s own rules allow scaling out. With a fixed-R or single-target rule, name exactly ONE and say so in basis. Order them by distance, nearest first, and make the percentages add up to 100.\n' +
     'confidence: high | medium | low\n' +
     'basis: <one short line naming what this is built on>\n' +
     '<</SETUP>>\n' +
@@ -65895,7 +65986,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'direction: long | short | none  (if none, leave entry, stop and target EMPTY - naming levels while calling it no setup contradicts itself)\n' +
     'entry: <price>\n' +
     'stop: <price>\n' +
-    'target: <price>\n' +
+    'target: <price> | <percent of the position to close there> | <what that level is>\n' +
+    'target: ... repeat this line for a second or third target ONLY when the user\u2019s own rules allow scaling out. With a fixed-R or single-target rule, name exactly ONE and say so in basis. Order them by distance, nearest first, and make the percentages add up to 100.\n' +
     'confidence: high | medium | low\n' +
     'basis: <one short line naming what this is built on>\n' +
     '<</SETUP>>\n' +
@@ -66186,7 +66278,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'direction: long | short | none  (if none, leave entry, stop and target EMPTY - naming levels while calling it no setup contradicts itself)\n' +
     'entry: <price>\n' +
     'stop: <price>\n' +
-    'target: <price>\n' +
+    'target: <price> | <percent of the position to close there> | <what that level is>\n' +
+    'target: ... repeat this line for a second or third target ONLY when the user\u2019s own rules allow scaling out. With a fixed-R or single-target rule, name exactly ONE and say so in basis. Order them by distance, nearest first, and make the percentages add up to 100.\n' +
     'confidence: high | medium | low\n' +
     'basis: <one short line>\n' +
     '<</SETUP>>';
@@ -66283,7 +66376,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'direction: long | short | none  (if none, leave entry, stop and target EMPTY - naming levels while calling it no setup contradicts itself)\n' +
     'entry: <price>\n' +
     'stop: <price>\n' +
-    'target: <price>\n' +
+    'target: <price> | <percent of the position to close there> | <what that level is>\n' +
+    'target: ... repeat this line for a second or third target ONLY when the user\u2019s own rules allow scaling out. With a fixed-R or single-target rule, name exactly ONE and say so in basis. Order them by distance, nearest first, and make the percentages add up to 100.\n' +
     'confidence: high | medium | low\n' +
     'basis: <one short line>\n' +
     '<</SETUP>>';
@@ -66515,6 +66609,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var n = function (x) { return nf(x, L.stellen); };
     var rich = pbRichtung();
 
+    /* Bei jedem Neuaufbau frisch: die Zonenobjekte werden beim Nachrechnen
+       ersetzt, die Kennung bleibt aber dieselbe. Darum haelt das Verzeichnis
+       Objekte, waehrend die Ansicht mit der stabilen Kennung arbeitet. */
+    zReg = {};
     var fokus = fokusZonen(L.ebenen);
     var imFokus = fokus.demand.concat(fokus.supply);
     imFokus.forEach(function (x) { x.g._fokus = true; });
@@ -66543,7 +66641,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
            oben verkaufen. */
         [].concat(fokus.demand, fokus.supply).forEach(function (x) {
           var g = x.g, gegen = rich && (rich.lang !== !g.supply);
-          h += '<div class="tv-fk' + (g.supply ? ' s' : ' d') + (gegen ? ' gegen' : '') + '">' +
+          h += '<div class="tv-fk klick' + (g.supply ? ' s' : ' d') + (gegen ? ' gegen' : '') +
+            '" data-z="' + escHtml(regZone(g, x.tf)) + '" role="button" tabindex="0">' +
             '<div class="tv-fk-kopf">' + (g.supply ? 'SUPPLY' : 'DEMAND') +
               '<span>' + (g._kiNeu ? 'AI' : x.tf) + '</span></div>' +
             '<div class="tv-fk-p notranslate" translate="no">' + n(g.bot) + '<i>–</i>' +
@@ -66567,7 +66666,15 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
              '<div class="tv-lv-tf">' + e.tf +
                (isFinite(e.atr) ? '<span>ATR ' + n(e.atr) + '</span>' : '') + '</div>';
 
-        if (zonen.length) {
+        if (!zonen.length && !indAuswahl().length) {
+          h += '<div class="tv-lv-leer">No indicators selected &mdash; pick some above.</div>';
+        } else if (!zonen.length && indAuswahl().indexOf('sd') < 0) {
+          /* "no intact zones here" las sich wie eine Aussage ueber den Markt.
+             Sie war aber eine ueber die Einstellung: der Zonenindikator ist
+             gar nicht an. */
+          h += '<div class="tv-lv-leer">Supply &amp; Demand is switched off &mdash; ' +
+               'levels here come from the AI.</div>';
+        } else if (zonen.length) {
           zonen.forEach(function (g) {
             var gegen = rich && (rich.lang !== !g.supply);
             var meta = (g.teile && g.teile.length > 1 ? g.teile.length + '× · ' : '') +
@@ -66578,7 +66685,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             if (g._kiNeu && g.grund) meta = escHtml(String(g.grund).slice(0, 46));
             h += zeile(g.supply, g.bot, g.top, meta,
                        g.staerke ? g.staerke.punkte : null, gegen,
-                       false, g._fokus, g._ki);
+                       false, g._fokus, g._ki, regZone(g, e.tf));
           });
         } else {
           h += '<div class="tv-lv-leer">no intact zones here</div>';
@@ -66649,6 +66756,21 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
     el.innerHTML = h;
 
+    /* Ein Zuhoerer auf dem Behaelter statt einer pro Zeile: die Liste wird
+       bei jedem Kurswechsel neu gebaut, einzeln gebundene Zuhoerer waeren
+       jedes Mal weg. */
+    el.onclick = function (ev) {
+      var t = ev.target && ev.target.closest && ev.target.closest('[data-z]');
+      if (t) zoneOeffnen(t.getAttribute('data-z'));
+    };
+    el.onkeydown = function (ev) {
+      if (ev.key !== 'Enter' && ev.key !== ' ') return;
+      var t = ev.target && ev.target.closest && ev.target.closest('[data-z]');
+      if (!t) return;
+      ev.preventDefault();
+      zoneOeffnen(t.getAttribute('data-z'));
+    };
+
     var auf = document.getElementById('tvLvAuf');
     if (auf) auf.onclick = function () { TV._levelsOffen = !offen; levelZeigen(); };
     var neu = document.getElementById('tvLvNeu');
@@ -66663,13 +66785,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       else notfall(t, k);
     };
 
-    function zeile(supply, bot, top, meta, punkte, gegen, fein, fokus, ki) {
+    function zeile(supply, bot, top, meta, punkte, gegen, fein, fokus, ki, zid) {
       var kraft = punkte != null
         ? '<span class="tv-lv-kraft" title="strength ' + punkte + '/100"><i style="width:' +
           Math.max(4, Math.min(100, punkte)) + '%"></i></span>' : '';
       return '<div class="tv-lv-z' + (gegen ? ' gegen' : '') + (fein ? ' fein' : '') +
         (fokus ? ' fokus' : '') + (ki === 'weg' ? ' verworfen' : '') +
-        (ki === 'ok' ? ' bestaetigt' : '') + '">' +
+        (ki === 'ok' ? ' bestaetigt' : '') + (zid ? ' klick' : '') + '"' +
+        (zid ? ' data-z="' + escHtml(zid) + '" role="button" tabindex="0"' : '') + '>' +
         '<span class="tv-lv-typ ' + (supply ? 's' : 'd') + '"></span>' +
         '<span class="tv-lv-p notranslate" translate="no">' + n(bot) + '<i>–</i>' +
           n(top) + '</span>' + kraft +
@@ -66710,7 +66833,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Eine Zone, die im Kursverlauf keine Entsprechung hat, ist erfunden, und
      das muss dastehen statt als gleichwertiger Eintrag zu erscheinen. */
   function zonenUrteilLesen(text) {
-    var m = /<<ZONES>>([\s\S]*?)<<\/ZONES>>/.exec(text || '');
+    /* Der schliessende Tag darf fehlen: Sprachmodelle lassen ihn regelmaessig
+       weg, und dann blieb der ganze Block ungelesen im Chat stehen. Ohne ihn
+       gilt der Rest des Textes als Blockinhalt. */
+    var m = /<<ZONES>>([\s\S]*?)(?:<<\/ZONES>>|$)/.exec(text || '');
     if (!m) return null;
     var aus = { bestaetigt: [], verworfen: [], neu: [] };
     var zahl = function (t) {
@@ -66724,6 +66850,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var teile = rest.split('|');
       var kopf = teile[0].trim();
       var grund = (teile[1] || '').trim();
+      /* Der Zeitrahmen darf vorangestellt sein — dann landet das Level in
+         dessen Spalte statt in einem Sammeltopf. */
+      var tf = null;
+      var tm = /^(M1|M5|M15|M30|H1|H4|D1)\s+/i.exec(kopf);
+      if (tm) { tf = tm[1].toUpperCase(); kopf = kopf.slice(tm[0].length); }
       var seite = null;
       var sm = /^(demand|supply)\s+/i.exec(kopf);
       if (sm) { seite = sm[1].toLowerCase() === 'supply'; kopf = kopf.slice(sm[0].length); }
@@ -66731,7 +66862,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       if (!sp) return;
       var a = zahl(sp[1]), b = zahl(sp[2]);
       if (!isFinite(a) || !isFinite(b)) return;
-      var eintrag = { bot: Math.min(a, b), top: Math.max(a, b), grund: grund, supply: seite };
+      var eintrag = { bot: Math.min(a, b), top: Math.max(a, b), grund: grund,
+                      supply: seite, tf: tf };
       if (art === 'confirm') aus.bestaetigt.push(eintrag);
       else if (art === 'reject') aus.verworfen.push(eintrag);
       else aus.neu.push(eintrag);
@@ -66740,7 +66872,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
 
   function ohneZonenBlock(text) {
-    return String(text || '').replace(/<<ZONES>>[\s\S]*?<<\/ZONES>>/g, '').trim();
+    return String(text || '')
+      .replace(/<<ZONES>>[\s\S]*?(?:<<\/ZONES>>|$)/g, '').trim();
   }
 
   /* Gegen die Kerzen pruefen: Hat der Kurs diese Spanne ueberhaupt beruehrt,
@@ -66775,33 +66908,101 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
              zuletzt: bars.n - 1 - letzterTreffer };
   }
 
+  /* Zahlen aus einem Textstueck. Ein Komma ist ein Dezimaltrennzeichen,
+     kein Muell: wer es wegwirft, macht aus "4483,10" die Zahl 448310. Steht
+     dagegen schon ein Punkt darin, trennt das Komma eine Aufzaehlung. */
+  function zahlenAus(t) {
+    t = String(t == null ? '' : t);
+    if (t.indexOf('.') < 0) t = t.replace(/(\d),(\d)/g, '$1.$2');
+    var out = [], re = /-?\d+(?:\.\d+)?/g, m;
+    while ((m = re.exec(t))) { var x = parseFloat(m[0]); if (isFinite(x)) out.push(x); }
+    return out;
+  }
+  function zahlAus(t) { var a = zahlenAus(t); return a.length ? a[0] : NaN; }
+
   function setupLesen(text) {
-    var m = /<<SETUP>>([\s\S]*?)<<\/SETUP>>/.exec(text || '');
+    var m = /<<SETUP>>([\s\S]*?)(?:<<\/SETUP>>|$)/.exec(text || '');
     if (!m) return null;
-    var feld = {};
+    var feld = {}, roh = [], letzter = '';
+
+    /* Eine Zielzeile sieht so aus:  <preis> | <anteil>% | <was das level ist>
+       Der Grund darf selbst Striche enthalten, darum wird nur das erste
+       Stueck als Preis gelesen und ein reiner Prozentwert als Anteil
+       erkannt. Alles andere ist Begruendung. */
+    function zielZeile(s) {
+      String(s).split(';').forEach(function (stueck) {
+        var teile = String(stueck).split('|');
+        var preise = zahlenAus(teile[0]);
+        if (!preise.length) return;
+        var anteil = NaN, grund = [];
+        teile.slice(1).forEach(function (t) {
+          var pm = /^\s*(\d{1,3}(?:\.\d+)?)\s*%\s*$/.exec(t);
+          if (pm && !isFinite(anteil)) anteil = parseFloat(pm[1]);
+          else if (String(t).trim()) grund.push(String(t).trim());
+        });
+        /* Mehrere Preise in einer Zeile teilen sich die Begruendung. */
+        preise.forEach(function (p) {
+          roh.push({ p: p, anteil: anteil, grund: grund.join(' | ') });
+        });
+      });
+    }
+
     m[1].split('\n').forEach(function (zeile) {
-      var t = /^\s*([a-z]+)\s*:\s*(.*?)\s*$/i.exec(zeile);
-      if (t) feld[t[1].toLowerCase()] = t[2];
+      var t = /^\s*([a-z]+\d?)\s*:\s*(.*?)\s*$/i.exec(zeile);
+      if (t) {
+        var k = t[1].toLowerCase();
+        letzter = k;
+        if (/^targets?\d?$/.test(k)) { zielZeile(t[2]); return; }
+        feld[k] = t[2];
+        return;
+      }
+      /* Fortsetzungszeile: die weiteren Ziele stehen oft untereinander,
+         ohne dass der Schluessel wiederholt wird. */
+      if (/^targets?\d?$/.test(letzter) && /\d/.test(zeile)) zielZeile(zeile);
     });
+
     var richtung = String(feld.direction || '').toLowerCase();
     if (richtung.indexOf('long') === 0) richtung = 'long';
     else if (richtung.indexOf('short') === 0) richtung = 'short';
     else richtung = 'none';
-    var zahl = function (v) {
-      var t = String(v || '').trim();
-      /* Ein Komma ist ein Dezimaltrennzeichen, kein Muell. Wer es wegwirft,
-         macht aus "4483,10" die Zahl 448310 — und die faellt danach nur
-         noch durch die Bereichspruefung auf, statt gleich richtig zu sein. */
-      if (t.indexOf('.') < 0 && /\d,\d/.test(t)) t = t.replace(',', '.');
-      t = t.replace(/,/g, '');
-      /* Die ERSTE Zahl nehmen, statt alle Ziffern zusammenzuziehen:
-         "about 4482.12 (below the zone)" darf nicht 448212 werden. */
-      var m = /-?\d+(?:\.\d+)?/.exec(t);
-      var x = m ? parseFloat(m[0]) : NaN;
-      return isFinite(x) ? x : NaN;
-    };
-    return { richtung: richtung, einstieg: zahl(feld.entry), stop: zahl(feld.stop),
-             ziel: zahl(feld.target),
+
+    var einstieg = zahlAus(feld.entry), stop = zahlAus(feld.stop);
+
+    /* Aussortieren, was gar kein Preis sein kann. "TP1" liefert die 1,
+       "next M15 supply" die 15 — beide faellt hier heraus, weil sie in
+       keinem Verhaeltnis zum Einstieg stehen. Ohne diesen Schritt stuende
+       eine 1 als Ziel in der Karte. */
+    var L = TV._levels;
+    var ref = isFinite(einstieg) ? einstieg
+            : (isFinite(stop) ? stop : (L && isFinite(L.kurs) ? L.kurs : NaN));
+    var gesehen = {}, ziele = [];
+    roh.forEach(function (z) {
+      if (isFinite(ref) && ref !== 0 && (z.p < Math.abs(ref) * 0.2 || z.p > Math.abs(ref) * 5))
+        return;
+      var s = z.p.toFixed(6);
+      if (gesehen[s]) return;
+      gesehen[s] = 1;
+      ziele.push(z);
+    });
+
+    /* Nach Entfernung ordnen — TP1 ist das naechste. Ziele auf der falschen
+       Seite bleiben stehen und werden in der Pruefung gemeldet, statt
+       stillschweigend zu verschwinden. */
+    if (richtung !== 'none' && isFinite(einstieg)) {
+      var lang = richtung === 'long';
+      var richtig = function (z) { return lang ? z.p > einstieg : z.p < einstieg; };
+      ziele.sort(function (a, b) {
+        var ra = richtig(a) ? 0 : 1, rb = richtig(b) ? 0 : 1;
+        if (ra !== rb) return ra - rb;
+        return Math.abs(a.p - einstieg) - Math.abs(b.p - einstieg);
+      });
+    }
+
+    return { richtung: richtung, einstieg: einstieg, stop: stop,
+             ziele: ziele,
+             /* Ein Ziel bleibt als eigenes Feld erhalten: der Waechter und
+                die Kopierfunktion arbeiten damit weiter. */
+             ziel: ziele.length ? ziele[0].p : NaN,
              sicherheit: String(feld.confidence || '').toLowerCase(),
              basis: feld.basis || '' };
   }
@@ -66809,7 +67010,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Nur Text ohne den Block — der gehoert in die Karte, nicht zweimal in
      die Antwort. */
   function ohneBlock(text) {
-    return String(text || '').replace(/<<SETUP>>[\s\S]*?<<\/SETUP>>/g, '').trim();
+    return String(text || '')
+      .replace(/<<SETUP>>[\s\S]*?(?:<<\/SETUP>>|$)/g, '').trim();
   }
 
   function setupPruefen(S) {
@@ -66829,11 +67031,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         warn.push('The stop at ' + n(S.stop) + ' is on the wrong side of the entry ' +
                   n(S.einstieg) + ' for a ' + S.richtung + '.');
     }
-    if (isFinite(S.einstieg) && isFinite(S.ziel)) {
-      var zielSeite = lang ? S.ziel > S.einstieg : S.ziel < S.einstieg;
-      if (!zielSeite)
-        warn.push('The target at ' + n(S.ziel) + ' is on the wrong side of the entry ' +
-                  'for a ' + S.richtung + '.');
+    var ziele = S.ziele || [];
+    if (isFinite(S.einstieg)) {
+      ziele.forEach(function (z, i) {
+        var zielSeite = lang ? z.p > S.einstieg : z.p < S.einstieg;
+        if (!zielSeite)
+          warn.push('Target ' + (i + 1) + ' at ' + n(z.p) + ' is on the wrong side of ' +
+                    'the entry for a ' + S.richtung + '.');
+      });
     }
 
     /* Liegen die Preise ueberhaupt im beobachteten Bereich? Ein Level weit
@@ -66851,7 +67056,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       if (isFinite(L.kurs)) { if (L.kurs < lo) lo = L.kurs; if (L.kurs > hi) hi = L.kurs; }
       if (isFinite(lo) && isFinite(hi)) {
         var luft = (hi - lo) * 0.5 || 1;
-        [['entry', S.einstieg], ['stop', S.stop], ['target', S.ziel]].forEach(function (p) {
+        var zuPruefen = [['entry', S.einstieg], ['stop', S.stop]];
+        (S.ziele || []).forEach(function (z, i) {
+          zuPruefen.push(['target ' + (i + 1), z.p]);
+        });
+        zuPruefen.forEach(function (p) {
           if (isFinite(p[1]) && (p[1] < lo - luft || p[1] > hi + luft))
             warn.push('The ' + p[0] + ' ' + n(p[1]) + ' lies outside the price range in ' +
                       'the data (' + n(lo) + '–' + n(hi) + ').');
@@ -66859,20 +67068,37 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }
     }
 
-    /* R nachrechnen und mit dem eigenen Handeln vergleichen. */
-    if (isFinite(S.einstieg) && isFinite(S.stop) && isFinite(S.ziel)) {
+    /* R nachrechnen und mit dem eigenen Handeln vergleichen. Bei mehreren
+       Zielen fuer JEDES — sonst stuende hinter TP3 eine Zahl, die nie
+       geprueft wurde. */
+    if (isFinite(S.einstieg) && isFinite(S.stop) && ziele.length) {
       var risiko = Math.abs(S.einstieg - S.stop);
-      var gewinn = Math.abs(S.ziel - S.einstieg);
-      if (risiko > 0) {
-        S.rr = gewinn / risiko;
-        if (S.rr > 12)
-          warn.push('That is ' + S.rr.toFixed(1) + 'R — the target sits very far ' +
-                    'away for this stop, so it is not a realistic expectation.');
-        if (S.rr < 0.8)
-          warn.push('That is only ' + S.rr.toFixed(1) + 'R — the target is closer ' +
-                    'than the risk.');
-      }
       S.risiko = risiko;
+      if (risiko > 0) {
+        ziele.forEach(function (z, i) {
+          z.rr = Math.abs(z.p - S.einstieg) / risiko;
+          if (z.rr > 12)
+            warn.push('Target ' + (i + 1) + ' is ' + z.rr.toFixed(1) + 'R away — that ' +
+                      'sits very far from this stop, so it is not a realistic ' +
+                      'expectation.');
+          if (i === 0 && z.rr < 0.8)
+            warn.push('The first target is only ' + z.rr.toFixed(1) + 'R — closer than ' +
+                      'the risk.');
+        });
+        S.rr = ziele[0].rr;
+      }
+
+      /* Anteile: was nicht auf 100 % kommt, laesst offen, was mit dem Rest
+         geschieht — und genau daran scheitert spaeter die Auswertung. */
+      var summe = 0, mitAnteil = 0;
+      ziele.forEach(function (z) {
+        if (isFinite(z.anteil)) { summe += z.anteil; mitAnteil++; }
+      });
+      if (mitAnteil && mitAnteil < ziele.length)
+        warn.push('Only ' + mitAnteil + ' of ' + ziele.length + ' targets carry a ' +
+                  'position share — the rest is undefined.');
+      else if (mitAnteil && Math.abs(summe - 100) > 1)
+        warn.push('The position shares add up to ' + Math.round(summe) + '%, not 100%.');
       var uebl = medianStop(L && L.sym);
       if (isFinite(uebl) && risiko > 0) {
         var faktor = risiko / uebl;
@@ -66920,7 +67146,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        weggeworfen — der Nutzer soll sehen, was sie gesagt hat. */
     var neu = U.neu.map(function (e) {
       var p = zonePruefen(bars, e, atrW);
-      return { bot: e.bot, top: e.top, supply: !!e.supply, grund: e.grund,
+      return { bot: e.bot, top: e.top, supply: !!e.supply, grund: e.grund, tf: e.tf,
                ok: p.ok, pGrund: p.grund, impuls: p.impuls, zuletzt: p.zuletzt };
     });
     TV._urteil = { neu: neu, anzahlOk: U.bestaetigt.length, anzahlWeg: U.verworfen.length };
@@ -66930,28 +67156,45 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        nahmen weder an der Fokus-Auswahl teil noch am Kopieren. Wenn der
        Indikator nichts findet und die KI schon, ist genau das das Level, das
        man einzeichnen will. */
+    /* Alte KI-Level ueberall entfernen, bevor die neuen einsortiert werden. */
     L.ebenen = (L.ebenen || []).filter(function (e) { return e.tf !== 'AI'; });
+    (L.ebenen || []).forEach(function (e) {
+      e.zonen = (e.zonen || []).filter(function (g) { return !g._kiNeu; });
+    });
+
     var brauchbar = neu.filter(function (e) { return e.ok; });
     if (brauchbar.length) {
-      var atrKi = (L.ebenen[0] && L.ebenen[0].atr) || NaN;
-      L.ebenen.push({
-        tf: 'AI', atr: atrKi, stellen: L.stellen, bars: bars, flips: [],
-        hoch: NaN, tief: NaN,
-        zonen: brauchbar.map(function (e) {
-          var mitte = (e.bot + e.top) / 2;
-          var g = { supply: !!e.supply, bot: e.bot, top: e.top, broken: false,
-                    retests: 0, ab: Math.abs(mitte - L.kurs), teile: [], _kiNeu: true,
-                    grund: e.grund };
-          g.teile = [g];
-          g.kern = g;
-          /* Auch hier eine gerechnete Staerke, damit sie mit den uebrigen
-             vergleichbar ist statt bevorzugt oder benachteiligt zu werden. */
-          try { g.staerke = staerke(g, bars, atrKi, []); } catch (x) {}
-          if (g.staerke && isFinite(e.impuls))
-            g.staerke.impulsAtr = e.impuls;
-          return g;
-        }),
+      var bauen = function (e, atrRef, barsRef) {
+        var mitte = (e.bot + e.top) / 2;
+        var g = { supply: !!e.supply, bot: e.bot, top: e.top, broken: false,
+                  retests: 0, ab: Math.abs(mitte - L.kurs), teile: [], _kiNeu: true,
+                  grund: e.grund };
+        g.teile = [g]; g.kern = g;
+        try { g.staerke = staerke(g, barsRef, atrRef, []); } catch (x) {}
+        if (g.staerke && isFinite(e.impuls)) g.staerke.impulsAtr = e.impuls;
+        return g;
+      };
+      var ohneZuordnung = [];
+      brauchbar.forEach(function (e) {
+        /* Nennt die KI einen Zeitrahmen, gehoert das Level in DESSEN Spalte —
+           dort sucht man danach. Ein Sammeltopf "AI" trennt es von allem,
+           womit man es vergleichen will. */
+        var ziel = null;
+        if (e.tf) (L.ebenen || []).forEach(function (x) { if (x.tf === e.tf) ziel = x; });
+        if (ziel) ziel.zonen.push(bauen(e, ziel.atr, ziel.bars || bars));
+        else ohneZuordnung.push(e);
       });
+      (L.ebenen || []).forEach(function (e) {
+        e.zonen.sort(function (a, b) { return a.ab - b.ab; });
+      });
+      if (ohneZuordnung.length) {
+        var atrKi = (L.ebenen[0] && L.ebenen[0].atr) || NaN;
+        L.ebenen.push({
+          tf: 'AI', atr: atrKi, stellen: L.stellen, bars: bars, flips: [],
+          hoch: NaN, tief: NaN,
+          zonen: ohneZuordnung.map(function (e) { return bauen(e, atrKi, bars); }),
+        });
+      }
     }
     levelZeigen();
   }
@@ -66976,7 +67219,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var genannt = [];
       if (isFinite(S.einstieg)) genannt.push('entry ' + n(S.einstieg));
       if (isFinite(S.stop))     genannt.push('stop ' + n(S.stop));
-      if (isFinite(S.ziel))     genannt.push('target ' + n(S.ziel));
+      (S.ziele || []).forEach(function (z, i) {
+        genannt.push('target ' + (i + 1) + ' ' + n(z.p));
+      });
       if (genannt.length)
         h0 += '<div class="tv-su-warn">It marked this as no setup but still named ' +
               '<span class="notranslate" translate="no">' + genannt.join(', ') +
@@ -66993,14 +67238,24 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       '<button id="tvSuCopy" class="tv-lv-copy">Copy</button></div>';
     if (S.basis) h += '<div class="tv-su-z">' + escHtml(S.basis) + '</div>';
 
-    [['Entry', S.einstieg], ['Stop', S.stop], ['Target', S.ziel]].forEach(function (p) {
-      if (!isFinite(p[1])) return;
-      var zusatz = '';
-      if (p[0] === 'Stop' && isFinite(S.risiko)) zusatz = 'risk ' + n(S.risiko);
-      if (p[0] === 'Target' && isFinite(S.rr)) zusatz = S.rr.toFixed(1) + 'R';
-      h += '<div class="tv-su-r"><span>' + p[0] + '</span>' +
-           '<b class="notranslate" translate="no">' + n(p[1]) + '</b>' +
-           '<i class="notranslate" translate="no">' + zusatz + '</i></div>';
+    var reihe = function (name, preis, zusatz, klasse) {
+      h += '<div class="tv-su-r' + (klasse || '') + '"><span>' + name + '</span>' +
+           '<b class="notranslate" translate="no">' + n(preis) + '</b>' +
+           '<i class="notranslate" translate="no">' + (zusatz || '') + '</i></div>';
+    };
+    if (isFinite(S.einstieg)) reihe('Entry', S.einstieg, '');
+    if (isFinite(S.stop))     reihe('Stop', S.stop, isFinite(S.risiko) ? 'risk ' + n(S.risiko) : '');
+    /* Mehrere Ziele stehen untereinander, jedes mit eigenem R und Anteil.
+       Ein einzelnes Ziel behaelt seinen alten Namen — "TP1" ohne TP2 waere
+       nur Ballast. */
+    var zl = S.ziele || [];
+    zl.forEach(function (z, i) {
+      var zusatz = [];
+      if (isFinite(z.rr)) zusatz.push(z.rr.toFixed(1) + 'R');
+      if (isFinite(z.anteil)) zusatz.push(Math.round(z.anteil) + '%');
+      reihe(zl.length > 1 ? 'TP' + (i + 1) : 'Target', z.p, zusatz.join(' · '));
+      if (z.grund)
+        h += '<div class="tv-su-zgrund">' + escHtml(z.grund) + '</div>';
     });
 
     /* Die Pruefung steht NEBEN den Zahlen, nicht statt ihnen. Der Nutzer
@@ -67036,8 +67291,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (isFinite(S.einstieg)) z.push('Entry  ' + n(S.einstieg));
     if (isFinite(S.stop))     z.push('Stop   ' + n(S.stop) +
       (isFinite(S.risiko) ? '   risk ' + n(S.risiko) : ''));
-    if (isFinite(S.ziel))     z.push('Target ' + n(S.ziel) +
-      (isFinite(S.rr) ? '   ' + S.rr.toFixed(1) + 'R' : ''));
+    (S.ziele || []).forEach(function (t, i) {
+      z.push(((S.ziele.length > 1 ? 'TP' + (i + 1) + '   ' : 'Target ')) + n(t.p) +
+        (isFinite(t.rr) ? '   ' + t.rr.toFixed(1) + 'R' : '') +
+        (isFinite(t.anteil) ? '   ' + Math.round(t.anteil) + '%' : '') +
+        (t.grund ? '   ' + t.grund : ''));
+    });
     return z.join('\n');
   }
 
@@ -67066,6 +67325,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     LAUF.an = true;
     LAUF.lang = S.richtung === 'long';
     LAUF.einstieg = S.einstieg; LAUF.stop = S.stop; LAUF.ziel = S.ziel;
+    LAUF.ziele = (S.ziele || []).slice();
     LAUF.risiko = risiko;
     LAUF.marken = {};
     LAUF.hoechstesR = 0;
@@ -67148,12 +67408,23 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         laufNotiz('<b>2R reached</b> at <b class="notranslate" translate="no">' +
           nf(preis, st) + '</b>.');
       });
-    if (isFinite(LAUF.ziel) && (LAUF.lang ? preis >= LAUF.ziel : preis <= LAUF.ziel))
-      einmal('ziel', function () {
-        laufNotiz('Price reached the target at <b class="notranslate" translate="no">' +
-          nf(LAUF.ziel, st) + '</b>.');
-        LAUF.an = false;
+    /* Jedes Ziel eine eigene Station. Erst das LETZTE beendet die Idee —
+       bei einem Teilverkauf laeuft der Rest weiter, und genau dann will man
+       weiter begleitet werden. */
+    var zl = LAUF.ziele || [];
+    zl.forEach(function (z, i) {
+      if (!isFinite(z.p)) return;
+      if (!(LAUF.lang ? preis >= z.p : preis <= z.p)) return;
+      einmal('ziel' + i, function () {
+        laufNotiz('Price reached ' + (zl.length > 1 ? 'TP' + (i + 1) : 'the target') +
+          ' at <b class="notranslate" translate="no">' + nf(z.p, st) + '</b>' +
+          (isFinite(z.rr) ? ' (' + z.rr.toFixed(1) + 'R)' : '') +
+          (isFinite(z.anteil) && zl.length > 1
+            ? ' &mdash; that is the level for ' + Math.round(z.anteil) + '% of the position.'
+            : '.'));
+        if (i === zl.length - 1) LAUF.an = false;
       });
+    });
     /* Erreichtes wieder hergegeben — die Zahl, die man im Moment selbst
        ungern ausrechnet. */
     if (LAUF.hoechstesR >= 1 && r <= 0.15)
@@ -67235,6 +67506,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var anzeige = (info && info.titel) || tvSym.split(':').pop();
       var datenSym = DATEN_SYM[tvSym];
       if (info) { TV.sym = tvSym; merke('sym', tvSym); kopfAnzeigen(info); }
+      /* Zwei Namen fuer dasselbe Instrument: TradingView nennt es XAUUSD,
+         die Kursquelle XAU/USD. Beide festhalten — sonst vergleicht der
+         Nachtrag spaeter den einen mit dem anderen und laesst still alles
+         aus. */
+      TV._dsym = datenSym;
 
       if (!datenSym) {
         busy(false);
@@ -67258,6 +67534,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       ]).then(function (paar) {
       var saetze = [paar[0], paar[1]], bars = paar[0], kalender = paar[2];
       var fakten = sachstand(saetze, tf, anzeige, (info && info.name) || '', kalender);
+      /* Was ist passiert, waehrend die Seite zu war? Die feinen Kerzen sind
+         ohnehin schon da — der Nachtrag kostet keinen weiteren Abruf. */
+      ideenNachholen(bars);
 
       /* Lohnt eine Verfeinerung? Nur wenn eine ungebrochene Zone in Reichweite
          ist. Sonst waere der zusaetzliche Abruf verschenkt — und bei Gold
@@ -67354,12 +67633,898 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Beim Oeffnen der Seite: nur neu bauen, wenn es noetig ist. Ein Neubau
      wirft Zoom und Zeichnungen des Nutzers weg — das darf nicht bei jedem
      Seitenwechsel passieren. */
+  /* ── Zone anklicken, handeln, messen ──────────────────────────────
+     Bis hierher endet alles im Lesen: die Zahlen stehen da, und ob sie etwas
+     getaugt haben, weiss hinterher niemand. Der Teil hier schliesst den
+     Kreis — eine Zone wird angeklickt, die KI bewertet GENAU DIESE Stelle,
+     der Nutzer erklaert sie zu seiner Idee, und der Kurs entscheidet.
+
+     Der Sinn der Uebung ist nicht die schoene Karte, sondern die Auswertung
+     am Ende: sie muss auch sagen koennen, dass die KI nicht hilft. Darum
+     wird der Zustand beim OEFFNEN eingefroren — Staerke, Urteil, Herkunft.
+     Wer das erst beim Schliessen aufschreibt, misst sein eigenes Nachwissen.
+
+     Was hier NICHT passiert: es wird nichts ins Journal geschrieben. Diese
+     Ideen sind ein eigener Datensatz, und keine einzige Kennzahl der
+     Auswertung darf sich dadurch bewegen. */
+
+  var zReg = {};
+  function regZone(g, tf) {
+    /* Kennung aus den Preisen, nicht aus einem Zaehler: beim Nachrechnen
+       entstehen neue Objekte, die Stelle bleibt dieselbe — und damit auch
+       die geoeffnete Ansicht. */
+    var id = zonenKennung(g) + '@' + tf;
+    zReg[id] = { g: g, tf: tf };
+    return id;
+  }
+
+  var ZOFF = null;            // welche Zone gerade offen ist
+  var ZKI = {};               // was die KI zu einer Zone gesagt hat
+  var zkiLetzte = 0;
+  var ZKI_PAUSE = 8000;
+
+  function zoneOeffnen(id) {
+    if (!id) return;
+    ZOFF = (ZOFF === id) ? null : id;   // nochmal draufklicken schliesst
+    TV._stats = false;
+    zoneZeigen();
+    var host = document.getElementById('tvZone');
+    if (ZOFF && host && host.scrollIntoView)
+      try { host.scrollIntoView({ block: 'nearest' }); } catch (e) {}
+  }
+
+  function zoneSchliessen() { ZOFF = null; TV._formZone = null; zoneZeigen(); }
+
+  /* Saetze aus der letzten Antwort, die von genau dieser Stelle handeln.
+     Die KI schreibt Fliesstext ueber mehrere Zonen; hier soll nur stehen,
+     was zu DIESER gehoert. Zuordnung ueber die genannten Preise. */
+  function saetzeZurZone(g) {
+    var letzte = null;
+    for (var i = verlauf.length - 1; i >= 0; i--)
+      if (verlauf[i].role === 'assistant') { letzte = verlauf[i]; break; }
+    if (!letzte) return [];
+    var breite = Math.max(g.top - g.bot, 1e-9);
+    var lo = g.bot - breite, hi = g.top + breite;
+    var text = ohneZonenBlock(ohneBlock(letzte.content || ''));
+    /* Kein Lookbehind: aeltere Safari-Versionen werfen dabei schon beim
+       Einlesen der Datei einen Syntaxfehler — und damit stuende die ganze
+       App still, nicht nur diese Zeile. Darum eine Marke setzen und an ihr
+       trennen. */
+    return text.replace(/([.!?])\s+/g, '$1\u0001').split(/[\u0001\n]+/).filter(function (satz) {
+      return zahlenAus(satz).some(function (z) { return z >= lo && z <= hi; });
+    }).slice(0, 3);
+  }
+
+  function balken(anteil) {
+    var p = Math.max(2, Math.min(100, Math.round((anteil || 0) * 100)));
+    return '<span class="tv-zq"><i style="width:' + p + '%"></i></span>';
+  }
+
+  function zoneZeigen() {
+    var host = document.getElementById('tvZone');
+    if (!host) return;
+    if (TV._stats) { statsZeigen(host); return; }
+    if (!ZOFF) { host.innerHTML = ''; return; }
+
+    var L = TV._levels, st = (L && L.stellen) || 2;
+    var n = function (x) { return nf(x, st); };
+    var e = zReg[ZOFF];
+
+    if (!e) {
+      /* Nach dem Nachrechnen kann eine Zone verschwinden. Das ist selbst
+         eine Information — sie stillschweigend durch eine andere zu
+         ersetzen waere schlimmer als sie zu melden. */
+      host.innerHTML = '<div class="tv-zn"><div class="tv-zn-kopf"><b>Zone</b>' +
+        '<button class="tv-zn-zu" id="tvZnZu">&times;</button></div>' +
+        '<div class="tv-lv-leer">This zone is no longer in the current scan &mdash; ' +
+        'the levels were recalculated since you opened it.</div></div>';
+      var zx = document.getElementById('tvZnZu');
+      if (zx) zx.onclick = zoneSchliessen;
+      return;
+    }
+
+    var g = e.g;
+    var breite = g.top - g.bot;
+    var atr = NaN;
+    (L && L.ebenen || []).forEach(function (x) { if (x.tf === e.tf) atr = x.atr; });
+    var S = g.staerke, teil = (S && S.teil) || {};
+
+    var h = '<div class="tv-zn' + (g.supply ? ' s' : ' d') + '">' +
+      '<div class="tv-zn-kopf"><b>' + (g.supply ? 'SUPPLY' : 'DEMAND') + '</b>' +
+      '<span class="tv-zn-tf">' + escHtml(e.tf) + '</span>' +
+      '<span class="tv-zn-p notranslate" translate="no">' + n(g.bot) + '&ndash;' + n(g.top) +
+      '</span>' +
+      '<button class="tv-zn-zu" id="tvZnZu" aria-label="Close">&times;</button></div>';
+
+    /* Die harten Zahlen zuerst. Sie stammen aus der Rechnung und stehen
+       auch dann, wenn die KI gerade nichts sagen kann. */
+    var f = [];
+    f.push(['Width', n(breite) + (isFinite(atr) && atr > 0
+              ? ' &middot; ' + (breite / atr).toFixed(2) + ' ATR' : '')]);
+    if (isFinite(g.ab))
+      f.push(['Distance', n(g.ab) + (isFinite(atr) && atr > 0
+              ? ' &middot; ' + (g.ab / atr).toFixed(2) + ' ATR' : '')]);
+    if (g.kern && isFinite(g.kern.bot))
+      f.push(['Core', n(g.kern.bot) + '&ndash;' + n(g.kern.top)]);
+    if (g.teile && g.teile.length > 1) f.push(['Merged from', g.teile.length + ' zones']);
+    f.push(['Retests', String(g.retests || 0)]);
+    if (isFinite(g.juengste)) f.push(['Last touched', g.juengste + ' bars ago']);
+    h += '<div class="tv-zn-git">';
+    f.forEach(function (r) {
+      h += '<div><span>' + r[0] + '</span><b class="notranslate" translate="no">' +
+           r[1] + '</b></div>';
+    });
+    h += '</div>';
+
+    if (S) {
+      h += '<div class="tv-zn-kraft"><div class="tv-zn-ktitel">Strength <b>' +
+           S.punkte + '</b>/100</div>';
+      [['Impulse away', teil.impuls, 30], ['Untouched', teil.frisch, 25],
+       ['Tight', teil.eng, 20], ['Higher timeframe', teil.htf, 15],
+       ['Recent', teil.jung, 10]].forEach(function (t) {
+        h += '<div class="tv-zn-kz"><span>' + t[0] + '</span>' + balken(t[1]) +
+             '<i class="notranslate" translate="no">' + t[2] + '%</i></div>';
+      });
+      h += '<div class="tv-zn-hint">Each part counts as much as the number on the ' +
+           'right. This is arithmetic, not an opinion.</div></div>';
+    }
+
+    /* Was die KI ueber die Stelle gesagt hat — getrennt vom Gerechneten,
+       damit man beides auseinanderhalten kann. */
+    var urteil = g._kiNeu ? 'Found by the AI'
+               : (g._ki === 'ok' ? 'Confirmed by the AI'
+               : (g._ki === 'weg' ? 'Rejected by the AI' : 'Not judged yet'));
+    h += '<div class="tv-zn-ki ' + (g._ki === 'weg' ? 'weg' : (g._ki === 'ok' ? 'ok' : '')) +
+         '"><b>' + urteil + '</b>' +
+         (g.grund ? '<span>' + escHtml(g.grund) + '</span>' : '') + '</div>';
+    if (g._streit)
+      h += '<div class="tv-su-warn">An opposing zone overlaps this one &mdash; support ' +
+           'and resistance on the same price. Treat it as unresolved.</div>';
+
+    var saetze = saetzeZurZone(g);
+    if (saetze.length)
+      h += '<div class="tv-zn-zit">' + saetze.map(function (s) {
+        return '<p>' + zahlenSchuetzen(escHtml(s)) + '</p>'; }).join('') + '</div>';
+
+    var F = TV._fein;
+    if (F && F.ziel && F.ziel.z && zonenKennung(F.ziel.z) === zonenKennung(g) &&
+        F.daten && F.daten.sub && F.daten.sub.length) {
+      h += '<div class="tv-zn-fein"><b>Tighter zones inside it (' + escHtml(F.tf) +
+           ')</b>';
+      F.daten.sub.forEach(function (x) {
+        h += '<div class="notranslate" translate="no">' + n(x.bot) + '&ndash;' + n(x.top) +
+             '  <i>width ' + n(x.top - x.bot) + '</i></div>';
+      });
+      h += '</div>';
+    }
+
+    var K = ZKI[ZOFF];
+    if (K) {
+      h += '<div class="tv-zn-antw"><div class="tv-zn-ktitel">The AI on this zone</div>' +
+           '<div class="tv-zn-atext">' +
+           zahlenSchuetzen(escHtml(K.text)).replace(/\n/g, '<br>') + '</div>';
+      if (K.S) h += kiSetupHtml(K.S, st);
+      h += '<div class="tv-zn-hint">Asked ' +
+           new Date(K.ts).toLocaleTimeString() + '. Values from the AI, checked against ' +
+           'the data.</div></div>';
+    }
+
+    h += '<div class="tv-zn-knoepfe">' +
+      '<button id="tvZnKi" class="tv-zn-b primar">' +
+        (K ? 'Analyse again' : 'Analyse entry, stop &amp; targets') + '</button>' +
+      '<button id="tvZnFrag" class="tv-zn-b">Ask about this zone</button>' +
+      '<button id="tvZnTrade" class="tv-zn-b">I&rsquo;m trading this zone</button>' +
+      '</div>';
+
+    if (TV._formZone === ZOFF) h += formHtml(e, K);
+
+    h += '</div>';
+    host.innerHTML = h;
+
+    var zu = document.getElementById('tvZnZu');
+    if (zu) zu.onclick = zoneSchliessen;
+    var kb = document.getElementById('tvZnKi');
+    if (kb) kb.onclick = function () { zoneKiFragen(ZOFF); };
+    var fb = document.getElementById('tvZnFrag');
+    if (fb) fb.onclick = function () {
+      var feld = document.getElementById('tvKiAsk');
+      if (!feld) return;
+      feld.value = 'About the ' + (g.supply ? 'supply' : 'demand') + ' zone ' +
+        n(g.bot) + '-' + n(g.top) + ' on ' + e.tf + ': ';
+      feld.focus();
+    };
+    var tb = document.getElementById('tvZnTrade');
+    if (tb) tb.onclick = function () {
+      TV._formZone = (TV._formZone === ZOFF) ? null : ZOFF;
+      zoneZeigen();
+    };
+    if (TV._formZone === ZOFF) formBinden(e, K);
+  }
+
+  /* Die geprueften Zahlen der KI in kleiner Form — dieselbe Pruefung wie in
+     der grossen Setup-Karte, damit nicht zwei Wahrheiten nebeneinander
+     stehen. */
+  function kiSetupHtml(S, st) {
+    var n = function (x) { return nf(x, st); };
+    if (!S || S.richtung === 'none')
+      return '<div class="tv-su-hint">The AI sees no workable entry at this zone right ' +
+             'now.</div>';
+    var warn = setupPruefen(S);
+    var h = '<div class="tv-zn-setup"><div class="tv-zn-sdir ' +
+      (S.richtung === 'long' ? 'l' : 's') + '">' + S.richtung.toUpperCase() +
+      (S.sicherheit ? ' &middot; ' + escHtml(S.sicherheit) : '') + '</div>';
+    if (isFinite(S.einstieg)) h += zr('Entry', n(S.einstieg), '');
+    if (isFinite(S.stop))
+      h += zr('Stop', n(S.stop), isFinite(S.risiko) ? 'risk ' + n(S.risiko) : '');
+    (S.ziele || []).forEach(function (z, i) {
+      var zus = [];
+      if (isFinite(z.rr)) zus.push(z.rr.toFixed(1) + 'R');
+      if (isFinite(z.anteil)) zus.push(Math.round(z.anteil) + '%');
+      h += zr((S.ziele.length > 1 ? 'TP' + (i + 1) : 'Target'), n(z.p), zus.join(' · '),
+              z.grund);
+    });
+    warn.forEach(function (w) { h += '<div class="tv-su-warn">' + escHtml(w) + '</div>'; });
+    return h + '</div>';
+    function zr(a, b, c, grund) {
+      return '<div class="tv-su-r"><span>' + a + '</span>' +
+        '<b class="notranslate" translate="no">' + b + '</b>' +
+        '<i class="notranslate" translate="no">' + (c || '') + '</i></div>' +
+        (grund ? '<div class="tv-su-zgrund">' + escHtml(grund) + '</div>' : '');
+    }
+  }
+
+  var ZONE_ANWEISUNG =
+    'The user clicked ONE specific zone and wants it judged on its own. Do not review ' +
+    'the whole chart again.\n' +
+    'Answer in at most 110 words of plain prose, no headings: what this level is worth ' +
+    'given the structure and the higher timeframes, what would have to happen for an ' +
+    'entry there to make sense, and what would rule it out. Name the single biggest ' +
+    'reason it could fail.\n' +
+    'You inform, you never instruct. No imperatives, no buy or sell calls.\n' +
+    'Then append this block exactly once. Set direction to none if this zone does not ' +
+    'offer a workable entry — saying so is a real answer, and a manufactured setup ' +
+    'is worth less than an honest no:\n' +
+    '<<SETUP>>\n' +
+    'direction: long | short | none\n' +
+    'entry: <price>\n' +
+    'stop: <price>\n' +
+    'target: <price> | <percent of the position to close there> | <what that level is>\n' +
+    'target: ... repeat this line for a second or third target ONLY when the rules above allow scaling out. With a fixed-R or single-target rule, name exactly ONE. Order them by distance, nearest first, percentages adding up to 100.\n' +
+    'confidence: high | medium | low\n' +
+    'basis: <one short line naming what this is built on>\n' +
+    '<</SETUP>>\n' +
+    'The numbers are checked against the candle data after you write them and any ' +
+    'mismatch is shown next to your answer. Do the arithmetic before you commit.';
+
+  function zoneKiFragen(id) {
+    var e = zReg[id];
+    var host = document.getElementById('tvZone');
+    if (!e || !host) return;
+    if (!TV._fakten) {
+      var w = document.createElement('div');
+      w.className = 'tv-su-warn';
+      w.textContent = 'Run "Analyse chart" first — without the candle data the answer ' +
+                      'would be guesswork.';
+      host.appendChild(w);
+      return;
+    }
+    var wart = Date.now() - zkiLetzte;
+    if (wart < ZKI_PAUSE) {
+      var w2 = document.createElement('div');
+      w2.className = 'tv-su-warn';
+      w2.textContent = 'One moment — every zone you open costs an AI request. ' +
+        Math.ceil((ZKI_PAUSE - wart) / 1000) + 's.';
+      host.appendChild(w2);
+      return;
+    }
+    zkiLetzte = Date.now();
+
+    var g = e.g, L = TV._levels, st = (L && L.stellen) || 2;
+    var nn = function (x) { return nf(x, st); };
+    var kb = document.getElementById('tvZnKi');
+    if (kb) { kb.disabled = true; kb.textContent = 'Analysing this zone…'; }
+    busy(true, 'Analysing the zone…');
+
+    var beschr = 'THE ZONE THE USER CLICKED: ' + (g.supply ? 'SUPPLY' : 'DEMAND') +
+      ' on ' + e.tf + ', ' + nn(g.bot) + ' to ' + nn(g.top) +
+      (g.kern ? ', narrowest part ' + nn(g.kern.bot) + '-' + nn(g.kern.top) : '') +
+      ', ' + nn(g.ab) + ' away from price' +
+      (g.staerke ? ', computed strength ' + g.staerke.punkte + '/100' : '') +
+      ', ' + (g.retests || 0) + ' retests' +
+      (isFinite(g.juengste) ? ', last touched ' + g.juengste + ' bars ago' : '') +
+      (g._streit ? '. An opposing zone overlaps it' : '') +
+      (g._ki === 'weg' ? '. You rejected this zone in your earlier answer — say plainly ' +
+        'if you still would' : '') + '.';
+
+    fetch(COACH_WORKER_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: (window.currentUser && currentUser.uid) || 'guest',
+        system: 'Trading Coach',
+        messages: [{ role: 'user', content: ZONE_ANWEISUNG + '\n\n---\n' + beschr +
+                     '\n\n' + TV._fakten }],
+      }),
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      var text = d.response ||
+        (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+      if (!text || /API Error|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
+        throw new Error(text || 'no answer');
+      var S = setupLesen(text);
+      if (S) setupPruefen(S);          // fuellt risiko und R je Ziel
+      ZKI[id] = { text: ohneZonenBlock(ohneBlock(text)), S: S, ts: Date.now() };
+      /* Die grosse Karte mitziehen, damit unten nicht ein anderes Setup
+         steht als das, was der Nutzer gerade liest. */
+      if (S && S.richtung !== 'none') setupZeigen(S);
+      zoneZeigen();
+    }).catch(function (er) {
+      ZKI[id] = { text: '⚠ ' + (er.message || 'failed'), S: null, ts: Date.now() };
+      zoneZeigen();
+    }).then(function () { busy(false); });
+  }
+
+  /* ── Die Idee: was der Nutzer wirklich handelt ────────────────────
+     Vorbelegt, aber aenderbar. Wer die Zahlen der KI ungeprueft uebernimmt,
+     misst spaeter die KI und nicht sich selbst — und wer sie nicht aendern
+     darf, traegt hier etwas ein, das er gar nicht gehandelt hat. Die
+     Auswertung ist nur so ehrlich wie diese Felder. */
+
+  function vorschlag(e, K) {
+    var g = e.g, L = TV._levels, atr = NaN;
+    (L && L.ebenen || []).forEach(function (x) { if (x.tf === e.tf) atr = x.atr; });
+    if (K && K.S && K.S.richtung !== 'none' && isFinite(K.S.einstieg) && isFinite(K.S.stop))
+      return { richtung: K.S.richtung, einstieg: K.S.einstieg, stop: K.S.stop,
+               ziele: (K.S.ziele || []).slice(0, 3) };
+    var lang = !g.supply;
+    var einstieg = lang ? g.top : g.bot;
+    var puffer = isFinite(atr) && atr > 0 ? atr * 0.15 : (g.top - g.bot) * 0.25;
+    var stop = lang ? g.bot - puffer : g.top + puffer;
+    /* Ziel: die naechste Gegenzone. Kein rundes R erfinden — wo nichts ist,
+       bleibt das Feld leer und der Nutzer traegt es selbst ein. */
+    var ziel = null;
+    (L && L.ebenen || []).forEach(function (x) {
+      (x.zonen || []).forEach(function (o) {
+        if (!!o.supply !== lang) return;
+        var kante = lang ? o.bot : o.top;
+        if (lang ? kante <= einstieg : kante >= einstieg) return;
+        if (!ziel || Math.abs(kante - einstieg) < Math.abs(ziel - einstieg)) ziel = kante;
+      });
+    });
+    return { richtung: lang ? 'long' : 'short', einstieg: einstieg, stop: stop,
+             ziele: ziel ? [{ p: ziel, anteil: 100, grund: 'next opposing zone' }] : [] };
+  }
+
+  function formHtml(e, K) {
+    var L = TV._levels, st = (L && L.stellen) || 2;
+    var V = vorschlag(e, K);
+    var zl = (V.ziele || []).slice(0, 3);
+    while (zl.length < 3) zl.push({ p: NaN, anteil: NaN, grund: '' });
+    /* Anteile, die nicht gesetzt sind, gleichmaessig verteilen — aber nur
+       auf die Ziele, die auch einen Preis haben. */
+    var mitPreis = zl.filter(function (z) { return isFinite(z.p); }).length || 1;
+    var vor = function (x) { return isFinite(x) ? nf(x, st) : ''; };
+
+    var h = '<div class="tv-idf"><div class="tv-zn-ktitel">Your idea</div>' +
+      '<div class="tv-idf-z"><label>Direction' +
+        '<select id="tvIdDir">' +
+          '<option value="long"' + (V.richtung === 'long' ? ' selected' : '') + '>Long</option>' +
+          '<option value="short"' + (V.richtung === 'short' ? ' selected' : '') + '>Short</option>' +
+        '</select></label>' +
+      '<label>Entry<input id="tvIdEin" inputmode="decimal" value="' + vor(V.einstieg) + '"></label>' +
+      '<label>Stop<input id="tvIdStop" inputmode="decimal" value="' + vor(V.stop) + '"></label>' +
+      '</div>';
+    zl.forEach(function (z, i) {
+      var anteil = isFinite(z.anteil) ? Math.round(z.anteil)
+                 : (isFinite(z.p) ? Math.round(100 / mitPreis) : '');
+      h += '<div class="tv-idf-z"><label>TP' + (i + 1) +
+        '<input id="tvIdZ' + i + '" inputmode="decimal" value="' + vor(z.p) + '"></label>' +
+        '<label>Share %<input id="tvIdA' + i + '" inputmode="numeric" value="' +
+          anteil + '"></label>' +
+        '<span class="tv-idf-g">' + escHtml(z.grund || '') + '</span></div>';
+    });
+    h += '<div class="tv-idf-sum" id="tvIdSum"></div>' +
+      '<div class="tv-zn-hint">Prefilled from the analysis, and meant to be corrected. ' +
+      'The evaluation later is only as honest as these numbers.</div>' +
+      '<div class="tv-zn-knoepfe">' +
+        '<button id="tvIdSave" class="tv-zn-b primar">Track this idea</button>' +
+        '<button id="tvIdAbb" class="tv-zn-b">Cancel</button></div></div>';
+    return h;
+  }
+
+  function formBinden(e, K) {
+    var st = (TV._levels && TV._levels.stellen) || 2;
+    function lesen() {
+      var z = function (id) {
+        var el = document.getElementById(id);
+        return el ? zahlAus(el.value) : NaN;
+      };
+      var dir = (document.getElementById('tvIdDir') || {}).value || 'long';
+      var ziele = [];
+      for (var i = 0; i < 3; i++) {
+        var p = z('tvIdZ' + i);
+        if (!isFinite(p)) continue;
+        ziele.push({ p: p, anteil: z('tvIdA' + i), grund: '' });
+      }
+      return { richtung: dir, einstieg: z('tvIdEin'), stop: z('tvIdStop'), ziele: ziele };
+    }
+    function summe() {
+      var el = document.getElementById('tvIdSum');
+      if (!el) return;
+      var S = lesen();
+      var s = 0;
+      S.ziele.forEach(function (t) { if (isFinite(t.anteil)) s += t.anteil; });
+      setupPruefen(S);
+      var teile = [];
+      if (isFinite(S.risiko)) teile.push('risk ' + nf(S.risiko, st));
+      S.ziele.forEach(function (t, i) {
+        if (isFinite(t.rr)) teile.push('TP' + (i + 1) + ' ' + t.rr.toFixed(1) + 'R');
+      });
+      el.innerHTML = '<span class="notranslate" translate="no">' + teile.join(' · ') +
+        '</span>' + (S.ziele.length
+          ? ' <b class="' + (Math.abs(s - 100) > 1 ? 'schief' : '') + '">' +
+            Math.round(s) + '%</b>' : '');
+    }
+    ['tvIdDir', 'tvIdEin', 'tvIdStop', 'tvIdZ0', 'tvIdZ1', 'tvIdZ2',
+     'tvIdA0', 'tvIdA1', 'tvIdA2'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) { el.oninput = summe; el.onchange = summe; }
+    });
+    summe();
+
+    var ab = document.getElementById('tvIdAbb');
+    if (ab) ab.onclick = function () { TV._formZone = null; zoneZeigen(); };
+    var sp = document.getElementById('tvIdSave');
+    if (sp) sp.onclick = function () {
+      var S = lesen();
+      if (!isFinite(S.einstieg) || !isFinite(S.stop)) { summe(); return; }
+      setupPruefen(S);
+      ideeAnlegen(e, K, S);
+      TV._formZone = null;
+      ZOFF = null;
+      zoneZeigen();
+      ideenZeigen();
+    };
+  }
+
+  /* ── Speicher ─────────────────────────────────────────────────────
+     Eigenes Feld am Nutzerdokument. Das Journal wird nicht angefasst: keine
+     Kennzahl, kein Kalender, keine Auswertung dort darf sich durch eine
+     Chart-Idee bewegen. */
+  var IDEEN = null;
+  var IDEEN_MAX = 400;
+
+  function ideenSchluessel() { return 'apexZoneIdeas_' + (window.currentUID || 'guest'); }
+
+  function ideen() {
+    if (IDEEN) return IDEEN;
+    IDEEN = [];
+    try {
+      var roh = JSON.parse(localStorage.getItem(ideenSchluessel()) || '[]');
+      if (Array.isArray(roh)) IDEEN = roh;
+    } catch (e) {}
+    /* Einmal je Sitzung aus dem Konto nachladen — damit dieselbe Idee auf
+       dem Handy weiterlaeuft. */
+    if (!TV._ideenGeholt && window.db && window.currentUID) {
+      TV._ideenGeholt = true;
+      db.collection('apexUsers').doc(currentUID).get().then(function (d) {
+        var f = d.exists && d.data() && d.data().zoneIdeas;
+        if (!Array.isArray(f) || !f.length) return;
+        var da = {};
+        IDEEN.forEach(function (i) { da[i.id] = 1; });
+        f.forEach(function (i) { if (i && i.id && !da[i.id]) IDEEN.push(i); });
+        IDEEN.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+        ideenZeigen();
+      }).catch(function () {});
+    }
+    return IDEEN;
+  }
+
+  function ideenSichern() {
+    var l = ideen();
+    if (l.length > IDEEN_MAX) l.length = IDEEN_MAX;
+    try { localStorage.setItem(ideenSchluessel(), JSON.stringify(l)); } catch (e) {}
+    if (window.db && window.currentUID)
+      db.collection('apexUsers').doc(currentUID)
+        .update({ zoneIdeas: l }).catch(function () {});
+  }
+
+  function ideeAnlegen(e, K, S) {
+    var g = e.g, L = TV._levels;
+    var atr = NaN;
+    (L && L.ebenen || []).forEach(function (x) { if (x.tf === e.tf) atr = x.atr; });
+    var sel = document.getElementById('tvKiPb');
+    var pb = (window.playbooks || []).filter(function (p) {
+      return p.id === (sel && sel.value); })[0];
+
+    var rec = {
+      id: 'zi' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      ts: Date.now(),
+      sym: (L && L.sym) || TV.sym || '',
+      dsym: TV._dsym || '',
+      titel: (L && L.titel) || '',
+      tf: e.tf,
+      stellen: (L && L.stellen) || 2,
+      richtung: S.richtung,
+      einstieg: S.einstieg,
+      stop: S.stop,
+      stopUrspr: S.stop,
+      risiko: S.risiko,
+      ziele: (S.ziele || []).map(function (z) {
+        return { p: z.p, anteil: isFinite(z.anteil) ? z.anteil : null,
+                 rr: isFinite(z.rr) ? z.rr : null, grund: z.grund || '', hit: 0 };
+      }),
+      /* Eingefroren, wie es beim Oeffnen war. Spaeter nachgetragene Staerke
+         waere Nachwissen und wuerde die Auswertung beschoenigen. */
+      zone: { bot: g.bot, top: g.top, supply: !!g.supply,
+              staerke: g.staerke ? g.staerke.punkte : null,
+              teil: g.staerke ? g.staerke.teil : null,
+              retests: g.retests || 0,
+              teile: (g.teile && g.teile.length) || 1,
+              alter: isFinite(g.juengste) ? g.juengste : null,
+              ab: g.ab, atr: isFinite(atr) ? atr : null,
+              streit: !!g._streit },
+      quelle: g._kiNeu ? 'ki' : (g._ki === 'ok' ? 'beide' : 'ind'),
+      kiUrteil: g._ki || (g._kiNeu ? 'neu' : ''),
+      kiSicherheit: (K && K.S && K.S.sicherheit) || '',
+      kiBasis: (K && K.S && K.S.basis) || '',
+      playbook: pb ? pb.name : '',
+      status: 'wartend',
+      be: false,
+      hoechstesR: 0,
+      unklar: false,
+    };
+    ideen().unshift(rec);
+    ideenSichern();
+    return rec;
+  }
+
+  /* ── Verfolgen ────────────────────────────────────────────────────
+     Aus dem Live-Kurs, den das Chart-Widget ohnehin kostenlos liefert. */
+
+  function rIn(I, preis) {
+    var risiko = Math.abs(I.einstieg - I.stopUrspr);
+    if (!(risiko > 0)) return NaN;
+    return (I.richtung === 'long' ? (preis - I.einstieg) : (I.einstieg - preis)) / risiko;
+  }
+
+  /* Was am Ende wirklich herauskam: die erreichten Ziele mit ihrem Anteil,
+     der Rest zum Schlusskurs. Ohne Anteile waere das eine Schaetzung — mit
+     ihnen ist es die Zahl, die auch auf dem Konto steht. */
+  function ergebnisR(I, schluss) {
+    var risiko = Math.abs(I.einstieg - I.stopUrspr);
+    if (!(risiko > 0)) return NaN;
+    var offen = 100, r = 0;
+    (I.ziele || []).forEach(function (z) {
+      if (!z.hit) return;
+      var a = isFinite(z.anteil) && z.anteil > 0 ? z.anteil : (100 / (I.ziele.length || 1));
+      a = Math.min(a, offen);
+      offen -= a;
+      r += (a / 100) * (Math.abs(z.p - I.einstieg) / risiko);
+    });
+    if (offen > 0 && isFinite(schluss))
+      r += (offen / 100) *
+           ((I.richtung === 'long' ? (schluss - I.einstieg) : (I.einstieg - schluss)) / risiko);
+    return r;
+  }
+
+  function ideeSchliessen(I, grund, schluss) {
+    I.status = 'zu';
+    I.ergebnis = grund;                       // 'tp' | 'sl' | 'be' | 'hand'
+    I.tsZu = Date.now();
+    I.schluss = schluss;
+    I.rIst = ergebnisR(I, schluss);
+  }
+
+  function ideenPruefen(preis) {
+    if (!isFinite(preis)) return;
+    var l = ideen(), geaendert = false;
+    l.forEach(function (I) {
+      if (I.status === 'zu') return;
+      if (I.sym && TV._levels && TV._levels.sym && I.sym !== TV._levels.sym) return;
+      var lang = I.richtung === 'long';
+
+      if (I.status === 'wartend') {
+        /* Beruehrt heisst ausgeloest. Ob wirklich gefuellt wurde, weiss nur
+           der Broker — darum steht daneben, dass dies eine Annahme ist. */
+        if (lang ? preis <= I.einstieg : preis >= I.einstieg) {
+          I.status = 'offen'; I.tsOpen = Date.now(); geaendert = true;
+          laufNotiz('Your idea at <b class="notranslate" translate="no">' +
+            nf(I.einstieg, I.stellen) + '</b> was reached &mdash; counting it as open.');
+        }
+        return;
+      }
+
+      var r = rIn(I, preis);
+      if (isFinite(r) && r > (I.hoechstesR || 0)) { I.hoechstesR = r; geaendert = true; }
+
+      (I.ziele || []).forEach(function (z, i) {
+        if (z.hit || !isFinite(z.p)) return;
+        if (!(lang ? preis >= z.p : preis <= z.p)) return;
+        z.hit = Date.now(); geaendert = true;
+        laufNotiz('<b>TP' + (i + 1) + ' reached</b> at <b class="notranslate" ' +
+          'translate="no">' + nf(z.p, I.stellen) + '</b>' +
+          (isFinite(z.anteil) ? ' &mdash; ' + Math.round(z.anteil) + '% of the idea.' : '.'));
+      });
+      var alleZiele = (I.ziele || []).length &&
+        (I.ziele || []).every(function (z) { return !!z.hit; });
+      if (alleZiele) { ideeSchliessen(I, 'tp', preis); geaendert = true; }
+      else if (lang ? preis <= I.stop : preis >= I.stop) {
+        ideeSchliessen(I, I.be ? 'be' : 'sl', I.stop);
+        geaendert = true;
+        laufNotiz('Your idea closed at the ' + (I.be ? 'break-even stop' : 'stop') +
+          ' <b class="notranslate" translate="no">' + nf(I.stop, I.stellen) + '</b>.', true);
+      }
+    });
+    if (geaendert) { ideenSichern(); ideenZeigen(); }
+  }
+
+  /* Nachholen, was passiert ist, waehrend die Seite zu war. Ein Kerzenband
+     statt eines Kursstroms — genauer geht es nicht, und ungenauer waere es
+     unehrlich: beruehrt eine Kerze Stop UND Ziel, ist die Reihenfolge aus
+     ihr nicht ablesbar, und dann wird die Idee als unklar markiert statt
+     geraten. */
+  function ideenNachholen(bars) {
+    if (!bars || !bars.n) return;
+    var l = ideen(), geaendert = false;
+    l.forEach(function (I) {
+      if (I.status === 'zu') return;
+      if (I.dsym && bars.__sym && I.dsym !== bars.__sym) return;
+      var lang = I.richtung === 'long';
+      for (var k = 0; k < bars.n; k++) {
+        var tms = bars.t[k] * (bars.t[k] < 1e12 ? 1000 : 1);
+        if (tms < (I.tsOpen || I.ts)) continue;
+        var hi = bars.h[k], lo = bars.l[k];
+        if (I.status === 'wartend') {
+          if (lang ? lo <= I.einstieg : hi >= I.einstieg) {
+            I.status = 'offen'; I.tsOpen = tms; geaendert = true;
+          } else continue;
+        }
+        var stopHit = lang ? lo <= I.stop : hi >= I.stop;
+        var zielHit = (I.ziele || []).some(function (z) {
+          return !z.hit && isFinite(z.p) && (lang ? hi >= z.p : lo <= z.p);
+        });
+        if (stopHit && zielHit) { I.unklar = true; geaendert = true; }
+        (I.ziele || []).forEach(function (z) {
+          if (z.hit || !isFinite(z.p)) return;
+          if (lang ? hi >= z.p : lo <= z.p) { z.hit = tms; geaendert = true; }
+        });
+        var r = rIn(I, lang ? hi : lo);
+        if (isFinite(r) && r > (I.hoechstesR || 0)) I.hoechstesR = r;
+        if ((I.ziele || []).length &&
+            (I.ziele || []).every(function (z) { return !!z.hit; })) {
+          ideeSchliessen(I, 'tp', I.ziele[I.ziele.length - 1].p);
+          geaendert = true; break;
+        }
+        if (stopHit) {
+          ideeSchliessen(I, I.be ? 'be' : 'sl', I.stop);
+          geaendert = true; break;
+        }
+      }
+    });
+    if (geaendert) { ideenSichern(); ideenZeigen(); }
+  }
+
+  /* ── Die Liste der Ideen ──────────────────────────────────────── */
+  function ideenZeigen() {
+    var host = document.getElementById('tvIdeen');
+    if (!host) return;
+    var l = ideen();
+    var lauf = l.filter(function (I) { return I.status !== 'zu'; });
+    var zu = l.filter(function (I) { return I.status === 'zu'; });
+
+    if (!l.length) { host.innerHTML = ''; return; }
+
+    /* Mehrere Ideen sind erlaubt — aber eine davon steht besser da als die
+       anderen, und das soll man sehen, ohne zu vergleichen. Massstab ist,
+       was sich rechnen laesst: die eingefrorene Staerke, angehoben wenn die
+       KI die Zone bestaetigt hat, gesenkt wenn sie umstritten ist. */
+    var best = null;
+    lauf.forEach(function (I) {
+      var w = (I.zone && I.zone.staerke) || 0;
+      if (I.kiUrteil === 'ok') w += 10;
+      if (I.kiSicherheit === 'high') w += 8;
+      if (I.kiSicherheit === 'low') w -= 8;
+      if (I.zone && I.zone.streit) w -= 25;
+      I._rang = w;
+      if (!best || w > best._rang) best = I;
+    });
+
+    var h = '<div class="tv-id-kopf"><b>Ideas from zones</b>' +
+      '<span>' + lauf.length + ' live &middot; ' + zu.length + ' closed</span>' +
+      '<button id="tvIdStats" class="tv-lv-copy">' +
+        (TV._stats ? 'Hide results' : 'Results') + '</button></div>';
+
+    lauf.forEach(function (I) { h += ideeKarte(I, I === best && lauf.length > 1); });
+    if (zu.length) {
+      h += '<details class="tv-id-zu"><summary>' + zu.length + ' closed</summary>';
+      zu.slice(0, 12).forEach(function (I) { h += ideeKarte(I, false); });
+      h += '</details>';
+    }
+    host.innerHTML = h;
+
+    var sb = document.getElementById('tvIdStats');
+    if (sb) sb.onclick = function () {
+      TV._stats = !TV._stats;
+      if (TV._stats) ZOFF = null;
+      zoneZeigen(); ideenZeigen();
+    };
+    host.onclick = function (ev) {
+      var t = ev.target;
+      if (!t || !t.getAttribute) return;
+      var id = t.getAttribute('data-idee');
+      if (!id) return;
+      var I = ideen().filter(function (x) { return x.id === id; })[0];
+      if (!I) return;
+      var was = t.getAttribute('data-tun');
+      if (was === 'be') {
+        /* Bewusst ein Knopf und keine Automatik: wann das Risiko vom Tisch
+           geht, ist eine Entscheidung, keine Rechnung. */
+        I.stop = I.einstieg; I.be = true;
+      } else if (was === 'zu') {
+        ideeSchliessen(I, 'hand', (TV.kurs && TV.kurs.preis));
+      } else if (was === 'weg') {
+        var l2 = ideen();
+        l2.splice(l2.indexOf(I), 1);
+      } else return;
+      ideenSichern(); ideenZeigen();
+    };
+  }
+
+  function ideeKarte(I, stark) {
+    var st = I.stellen || 2, n = function (x) { return nf(x, st); };
+    var preis = TV.kurs && TV.kurs.preis;
+    var r = I.status === 'offen' && isFinite(preis) ? rIn(I, preis) : NaN;
+    var h = '<div class="tv-id' + (I.status === 'zu' ? ' zu' : '') +
+      (stark ? ' stark' : '') + '">' +
+      '<div class="tv-id-z1">' +
+        '<span class="tv-id-dir ' + (I.richtung === 'long' ? 'l' : 's') + '">' +
+          I.richtung.toUpperCase() + '</span>' +
+        '<span class="tv-id-sym">' + escHtml(I.titel || I.sym) + '</span>' +
+        '<span class="tv-id-tf">' + escHtml(I.tf) + '</span>' +
+        (stark ? '<span class="tv-id-best">strongest live idea</span>' : '') +
+        '<span class="tv-id-st ' + I.status + '">' +
+          (I.status === 'wartend' ? 'waiting for entry'
+            : I.status === 'offen' ? 'open' : (I.ergebnis || 'closed')) + '</span>' +
+      '</div>' +
+      '<div class="tv-id-z2 notranslate" translate="no">' +
+        'entry ' + n(I.einstieg) + ' &middot; stop ' + n(I.stop) +
+        (I.be ? ' (BE)' : '') +
+        (I.ziele || []).map(function (z, i) {
+          return ' &middot; TP' + (i + 1) + ' ' + n(z.p) +
+                 (isFinite(z.anteil) ? ' (' + Math.round(z.anteil) + '%)' : '') +
+                 (z.hit ? ' ✓' : '');
+        }).join('') + '</div>';
+
+    if (I.status === 'offen' && isFinite(r))
+      h += '<div class="tv-id-r notranslate" translate="no">' + r.toFixed(2) + 'R now' +
+           (I.hoechstesR ? ' &middot; peak ' + I.hoechstesR.toFixed(2) + 'R' : '') + '</div>';
+    if (I.status === 'zu' && isFinite(I.rIst))
+      h += '<div class="tv-id-r ' + (I.rIst >= 0 ? 'gut' : 'schlecht') +
+           ' notranslate" translate="no">' + I.rIst.toFixed(2) + 'R realised</div>';
+    if (I.unklar)
+      h += '<div class="tv-su-warn">One candle touched both the stop and a target &mdash; ' +
+           'the order cannot be read from the data, so this result is marked unclear ' +
+           'and is left out of the statistics.</div>';
+
+    if (I.status !== 'zu')
+      h += '<div class="tv-id-knopf">' +
+        (I.status === 'offen' && !I.be
+          ? '<button data-idee="' + I.id + '" data-tun="be">Stop to break-even</button>' : '') +
+        '<button data-idee="' + I.id + '" data-tun="zu">Close now</button>' +
+        '<button data-idee="' + I.id + '" data-tun="weg">Discard</button></div>';
+    return h + '</div>';
+  }
+
+  /* ── Auswertung ───────────────────────────────────────────────────
+     Die eine Frage, um die es geht: bringt es etwas, mit der KI zu handeln?
+     Damit die Antwort etwas wert ist, muss sie auch nein sein koennen —
+     darum steht ueberall die Anzahl daneben, und was zu duenn ist, wird
+     ausgegraut statt weggelassen. */
+  var GENUG = 30;
+
+  function statsZeigen(host) {
+    var l = ideen().filter(function (I) {
+      return I.status === 'zu' && isFinite(I.rIst) && !I.unklar;
+    });
+    var h = '<div class="tv-zn"><div class="tv-zn-kopf"><b>Results</b>' +
+      '<span class="tv-zn-tf">' + l.length + ' closed ideas</span>' +
+      '<button class="tv-zn-zu" id="tvStZu" aria-label="Close">&times;</button></div>';
+
+    if (!l.length) {
+      h += '<div class="tv-lv-leer">Nothing measured yet. Track a zone, let it finish, ' +
+           'and the numbers appear here &mdash; including the number that says this is ' +
+           'not worth doing.</div></div>';
+      host.innerHTML = h;
+      var z0 = document.getElementById('tvStZu');
+      if (z0) z0.onclick = function () { TV._stats = false; zoneZeigen(); ideenZeigen(); };
+      return;
+    }
+
+    h += gruppe('Everything', [['all', l]]);
+    h += gruppe('By zone strength', eimer(l, function (I) {
+      var s = I.zone && I.zone.staerke;
+      if (!isFinite(s)) return 'unknown';
+      return s >= 75 ? '75–100' : s >= 60 ? '60–74' : s >= 45 ? '45–59' : 'under 45';
+    }));
+    h += gruppe('By what the AI said', eimer(l, function (I) {
+      return I.kiUrteil === 'ok' ? 'confirmed'
+           : I.kiUrteil === 'weg' ? 'rejected'
+           : I.kiUrteil === 'neu' ? 'found by the AI' : 'not judged';
+    }));
+    h += gruppe('By AI confidence', eimer(l, function (I) {
+      return I.kiSicherheit || 'none given';
+    }));
+    h += gruppe('By timeframe', eimer(l, function (I) { return I.tf || '?'; }));
+    h += gruppe('By playbook', eimer(l, function (I) { return I.playbook || 'none'; }));
+
+    /* Die Reihen mit den Zielen: sie beantworten, ob die Ziele zu weit
+       gesteckt waren — eine Frage, die eine Trefferquote nie beantwortet. */
+    var mitZ = l.filter(function (I) { return (I.ziele || []).length; });
+    if (mitZ.length) {
+      var maxZ = 0;
+      mitZ.forEach(function (I) { maxZ = Math.max(maxZ, I.ziele.length); });
+      h += '<div class="tv-st-g"><div class="tv-zn-ktitel">How far they ran</div>';
+      for (var i = 0; i < maxZ; i++) {
+        var mit = mitZ.filter(function (I) { return I.ziele.length > i; });
+        var hit = mit.filter(function (I) { return !!I.ziele[i].hit; }).length;
+        if (!mit.length) continue;
+        h += '<div class="tv-st-z' + (mit.length < GENUG ? ' duenn' : '') + '">' +
+          '<span>TP' + (i + 1) + ' reached</span>' +
+          '<b class="notranslate" translate="no">' +
+            Math.round(hit / mit.length * 100) + '%</b>' +
+          '<i class="notranslate" translate="no">' + hit + ' of ' + mit.length + '</i></div>';
+      }
+      h += '</div>';
+    }
+
+    h += '<div class="tv-zn-hint">Groups with fewer than ' + GENUG + ' ideas are dimmed: ' +
+      'below that a run of luck looks exactly like an edge. Ideas where one candle ' +
+      'touched both stop and target are left out entirely.</div></div>';
+
+    host.innerHTML = h;
+    var z = document.getElementById('tvStZu');
+    if (z) z.onclick = function () { TV._stats = false; zoneZeigen(); ideenZeigen(); };
+
+    function eimer(liste, schluessel) {
+      var m = {}, ord = [];
+      liste.forEach(function (I) {
+        var k = schluessel(I);
+        if (!m[k]) { m[k] = []; ord.push(k); }
+        m[k].push(I);
+      });
+      return ord.sort().map(function (k) { return [k, m[k]]; });
+    }
+
+    function gruppe(titel, paare) {
+      var g = '<div class="tv-st-g"><div class="tv-zn-ktitel">' + titel + '</div>';
+      paare.forEach(function (p) {
+        var arr = p[1], sum = 0, gew = 0;
+        arr.forEach(function (I) { sum += I.rIst; if (I.rIst > 0) gew++; });
+        var schnitt = sum / arr.length;
+        g += '<div class="tv-st-z' + (arr.length < GENUG ? ' duenn' : '') + '">' +
+          '<span>' + escHtml(String(p[0])) + '</span>' +
+          '<b class="notranslate ' + (schnitt >= 0 ? 'gut' : 'schlecht') +
+            '" translate="no">' + (schnitt >= 0 ? '+' : '') + schnitt.toFixed(2) + 'R</b>' +
+          '<i class="notranslate" translate="no">' +
+            Math.round(gew / arr.length * 100) + '% · n=' + arr.length + '</i></div>';
+      });
+      return g + '</div>';
+    }
+  }
+
+  TV.zoneOeffnen = zoneOeffnen;
+  TV.ideen = ideen;
+  TV.ideenPruefen = ideenPruefen;
+  TV.ideenNachholen = ideenNachholen;
+  TV.ideenZeigen = ideenZeigen;
+  TV.zoneKiFragen = zoneKiFragen;
+
   TV.oeffnen = function () {
     TV.sym = TV.sym || lies('sym', STD_SYM);
     TV.tf  = TV.tf  || lies('tf',  STD_TF);
     kiZeigen(lies('ki', '1') === '1');
     playbooksFuellen();
     indFuellen();
+    ideenZeigen();
     /* Gespeicherte Level holt beobachten() nach, sobald das Widget antwortet. */
     beobachten();
     wachtSchalten(lies('wacht', '0') === '1');
