@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-22c';
+  window.APEX_BUILD = '2026-09-22d';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -66146,16 +66146,40 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     out.scrollTop = out.scrollHeight;
   }
 
+  /* Eine eigene Frist, statt auf die des Netzes zu warten. Ohne sie bricht
+     der Browser irgendwann selbst ab und sagt "Failed to fetch" — genau das
+     kam beim Nutzer an, als das Modell ueberlastet war und der Worker fuenf
+     Kandidaten durchprobierte. Eine Minute ist grosszuegig; der Worker gibt
+     nach 30 Sekunden ohnehin auf. */
+  var KI_FRIST_MS = 60000;
+
   function fragen(nachricht) {
+    var stopp = (typeof AbortController === 'function') ? new AbortController() : null;
+    var abgelaufen = false;
+    var uhr = setTimeout(function () {
+      abgelaufen = true;
+      if (stopp) stopp.abort();
+    }, KI_FRIST_MS);
+
     return fetch(COACH_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: stopp ? stopp.signal : undefined,
       body: JSON.stringify({
         uid: (window.currentUser && currentUser.uid) || 'guest',
         system: 'Trading Coach',
         messages: verlauf.map(function (m) { return { role: m.role, content: m.content }; })
                          .concat(nachricht ? [{ role: 'user', content: nachricht }] : []),
       }),
+    }).catch(function (e) {
+      /* "Failed to fetch" sagt niemandem etwas. Was hier wirklich passiert
+         ist: das Modell brauchte zu lange. */
+      if (abgelaufen)
+        throw new Error('The AI did not answer within a minute. Google\'s models are ' +
+                        'under heavy load right now — the data above is ready, so try ' +
+                        'the analysis again in a moment.');
+      throw new Error('Could not reach the AI service. Check your connection and try ' +
+                      'again.');
     }).then(function (r) {
       if (!r.ok) return r.json().catch(function () { return {}; }).then(function (e) {
         throw new Error(e.error || 'AI service error (' + r.status + ')');
@@ -66171,7 +66195,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       if (/API Error|AI unavailable|credits are depleted|Quota exceeded|Limit erreicht|Spam-Schutz|pauses until tomorrow|unusual amount of AI use|unusual number of chart analyses/i.test(text))
         throw new Error(text.replace(/^\s*⚠️\s*/, ''));
       return text;
-    });
+    }).then(function (x) { clearTimeout(uhr); return x; },
+            function (e) { clearTimeout(uhr); throw e; });
   }
 
   function busy(an, was) {
