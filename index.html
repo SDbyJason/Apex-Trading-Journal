@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-04q';
+  window.APEX_BUILD = '2026-09-22a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -3754,8 +3754,15 @@ nav {
 }
 
 /* Toast */
+/* Ueber ALLEM, auch ueber #apexUpgradeOverlay (999999), dem Dialog
+   (1000000) und den Rechtstexten (1000001). Bei 9998 lag der Toast unter
+   dem Upgrade-Fenster: die Testphase meldete dort "schon benutzt", die
+   Meldung wurde verdeckt, und der Knopf sah aus, als tue er nichts.
+   Derselbe Fehler hatte vorher schon die Bestellbestaetigung erwischt.
+   Ein Toast ist fluechtig und pointer-events:none — er kann nichts
+   blockieren, verschluckt werden kann er sehr wohl. */
 #toast {
-  position: fixed; bottom: 28px; right: 28px; z-index: 9998;
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000002;
   background: linear-gradient(145deg, rgba(17,21,25,0.97) 0%, rgba(9,11,14,0.99) 100%);
   border: 0.5px solid var(--gold-line);
   border-radius: var(--r-md);
@@ -7136,6 +7143,11 @@ body.light #page-chart .tv-fk{background:#fff}
 #page-chart .tv-lv-z.klick,#page-chart .tv-fk.klick{cursor:pointer}
 #page-chart .tv-lv-z.klick:hover,#page-chart .tv-fk.klick:hover{background:rgba(var(--accent-rgb),.09)}
 #page-chart .tv-lv-z.klick:focus-visible,#page-chart .tv-fk.klick:focus-visible{outline:2px solid rgba(var(--accent-rgb),.7);outline-offset:2px}
+#page-chart .tv-pro{padding:16px 18px;border:1px solid var(--gold-line,rgba(201,168,76,.35));border-radius:12px;background:linear-gradient(135deg,rgba(201,168,76,.10),transparent)}
+#page-chart .tv-pro-t{font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--ink);margin-bottom:7px}
+#page-chart .tv-pro-d{font-size:12.5px;line-height:1.7;color:var(--ink2);margin-bottom:12px}
+#page-chart .tv-pro-b{font:inherit;font-size:12px;font-weight:700;padding:8px 16px;border:0;border-radius:8px;background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;cursor:pointer}
+#page-chart .tv-pro-f{font-size:11px;color:var(--ink3);margin-top:9px}
 #page-chart .tv-lv-z.offen,#page-chart .tv-fk.offen{background:rgba(var(--accent-rgb),.16);box-shadow:inset 2px 0 0 rgba(var(--accent-rgb),.9)}
 #page-chart .tv-zone,#page-chart .tv-ideen{grid-column:1/-1}
 #page-chart .tv-zone:empty,#page-chart .tv-ideen:empty{display:none}
@@ -8822,7 +8834,14 @@ body.light #landingPage * {
       "featureList": [
         "Automatic trade sync from cTrader, MetaTrader 5, TradingView, ATAS and Quantower",
         "Crypto auto-sync from Binance and Bybit via read-only API keys",
-        "Statement import for 56 brokers and prop firms with free column mapping",
+        "Statement import — 95 brokers and prop firms across 56 detected statement formats, with free column mapping",
+        "Import check before anything is written — duplicates, missing stops, timezone and the file's own P&L against the journal",
+        "Connection health — every sync on one page, with an email when one stops delivering",
+        "Live chart with AI zone analysis across five timeframes, judged against your own playbook",
+        "Click a zone for entry, stop and several take-profits, then track every idea to its result",
+        "Challenge mode — your prop firm's rules enforced inside the replay",
+        "Confluence analysis — which of your conditions actually pay, alone and combined",
+        "Journal search across notes, setups, tags and mistakes",
         "68 performance metrics with custom formulas",
         "Tick-accurate market replay of any past trading day",
         "AI trading coach with live risk alerts and A-F trade reviews",
@@ -9612,6 +9631,9 @@ body.light #landingPage * {
         <li>Trading glossary — 429 terms, written out &amp; explained</li>
         <li>Basic performance stats</li>
         <li>Win rate &amp; pips tracking</li>
+        <li>Live chart — every instrument TradingView carries, with your own drawings</li>
+        <li>Search your journal — notes, setups, tags &amp; mistakes</li>
+        <li>Sign in with Google</li>
         <li>Community feed access</li>
         <li>Cloud sync across devices</li>
       </ul>
@@ -9644,6 +9666,13 @@ body.light #landingPage * {
         <li><b>Shared replay sessions</b> — set a student the same day with an empty account, then compare</li>
         <li><b>Academy</b> — 27 chapters on psychology, risk, edge &amp; backtesting, with your own numbers beside every one</li>
         <li><b>Strategy Drills</b> — practise your own setup on real history with the future hidden</li>
+        <li><b>Chart AI</b> — five timeframes read at once, zones judged against your playbook</li>
+        <li><b>Zone to trade to result</b> — entry, stop &amp; several targets per zone, then measured</li>
+        <li><b>Setup watcher</b> — tells you when price reaches a zone, and while a trade runs</li>
+        <li><b>Challenge mode</b> — your prop firm's rules enforced inside the replay</li>
+        <li><b>Confluence</b> — which of your conditions actually pay, alone and combined</li>
+        <li><b>Chart workspace</b> — toolbar, stage and dock, no page scrolling</li>
+        <li>15 drawing tools with favourites — editable afterwards, with a position tool</li>
         <li><b>Spaces</b> — run a community with voice, a feed carrying real trades and a process board</li>
         <li><b>Commitments</b> — pick one habit per chapter; Evidence measures whether it actually changed</li>
         <li><b>Your strategy as a book</b> — written up from your description, with your own trades as examples</li>
@@ -9657,7 +9686,9 @@ body.light #landingPage * {
         <li><b>AI Trading Coach</b> + proactive insights</li>
         <li>Tiltmeter &amp; Habit Tracker</li>
         <li>cTrader Auto-Sync — keeps running while the app is closed</li>
-        <li>Statement import — 56 brokers &amp; prop firms, detected automatically</li>
+        <li>Statement import — 95 brokers &amp; prop firms, 56 formats detected automatically</li>
+        <li><b>Import check</b> — see what came out of the file before a single trade is written</li>
+        <li><b>Connection health</b> — every sync on one page, plus an email when one breaks</li>
         <li><b>Auto-Tracking</b> — MT5 · ATAS · Quantower · TradingView</li>
         <li><b>Crypto Auto-Sync</b> — Binance &amp; Bybit via read-only API key</li>
         <li><b>Reports</b> — custom pivots, compare &amp; shareable links</li>
@@ -9718,6 +9749,9 @@ body.light #landingPage * {
         <tr><td>Cloud sync across devices</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Win rate, pips &amp; basic stats</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Community feed</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Live chart — every instrument TradingView carries, your own drawings, every timeframe</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Journal search — notes, setups, tags &amp; mistakes</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Sign in with Google</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>16 display currencies &amp; auto-translation</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Forex, indices, crypto, futures &amp; multi-leg options</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Partial exits &amp; scale-out logging</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
@@ -9737,7 +9771,7 @@ body.light #landingPage * {
         <tr><td>Evidence Score — a single 0–100 read on your trading, weighted to process over profit, with the full breakdown</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Tradovate Auto-Sync — live futures fills, including while the app is closed <span style="opacity:.65">· in progress, see below</span></td><td class="c no">—</td><td class="c no">soon</td></tr>
         <tr><td>Replay across 61 instruments — metals, 43 FX pairs, 10 indices, oil and crypto</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>Replay timeframes from 1 minute to weekly, with session jumps and 0.5×–10× playback</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Replay timeframes from 1 minute to weekly, with session jumps and 0.5×–100× playback</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Share a replay session — review mode, or the same day with an empty account for a student</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Describe a strategy in plain words and get testable rules back for review</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Smart-money rule vocabulary — FVG, iFVG, CHoCH, BOS, liquidity sweeps, OTE, Power of Three, ADR, Asian range, SMT</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -9773,12 +9807,20 @@ body.light #landingPage * {
         <tr><td>R-Multiple analytics — distribution, cumulative R &amp; R per setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Kelly criterion — growth-optimal risk per trade</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Hold-time analysis &amp; scale-out effectiveness</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Challenge mode — your prop firm's rules enforced inside the replay; break one and the session stops</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Confluence — which of your conditions pay alone and in combination, with a minimum sample enforced</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Chart workspace — toolbar, stage and dock in one frame, no page scrolling</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>15 drawing tools with favourites — editable afterwards, plus a position tool with live R:R</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr class="lp-compare-cat"><td colspan="3">AI &amp; Psychology</td></tr>
         <tr><td>AI Trading Coach — reads your journal, not a chatbot bolted on</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Start my day — the day's high-impact events plus your own record on this weekday and session</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Proactive AI insights (every 10 trades)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto-Tagging rules + AI tag suggestions</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Live trade alerts + auto A–F trade review</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Chart AI — five timeframes read at once, supply &amp; demand areas scored, judged against your own playbook</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Click a zone for entry, stop and several take-profits — with every number checked against the candles</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Setup watcher — an alert when price reaches a zone, and while a trade of yours is running</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Every zone idea tracked to its result — so you can see whether trading with the AI actually pays</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Tiltmeter — automatic tilt detection</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Habit Tracker + performance correlation</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Psychology score &amp; mistake heatmaps</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
@@ -9789,7 +9831,9 @@ body.light #landingPage * {
         <tr><td>Background sync — cTrader syncs while the app is closed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto-Tracking — MT5 / ATAS / Quantower / TradingView</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Crypto Auto-Sync — Binance &amp; Bybit read-only API key</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>Statement import — 56 brokers &amp; prop firms, format detected automatically</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Statement import — 95 brokers &amp; prop firms, 56 formats detected automatically</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Import check — executions, the file's own P&amp;L, duplicates, missing stops and timezone, shown before anything is written</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Connection health — every sync on one page, with an email when one stops delivering</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Free column mapping &amp; saved import presets</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Reports — custom pivots, compare &amp; share links</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>REST API keys — read your journal from any external tool</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -9801,7 +9845,7 @@ body.light #landingPage * {
         <tr><td>Mentor / Team mode — coach cockpit, feedback &amp; goals</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Being mentored as a student (coach needs Pro)</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Pre-trade rule check &amp; rules engine</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
-        <tr><td>S&amp;D Zones TradingView indicator</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>S&amp;D Zones TradingView indicator — V4, zones built only after a measured impulse</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Weekly Intelligence Reports + PDF export</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Economic calendar + event alerts</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Goal tracker</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
@@ -10516,8 +10560,8 @@ body.light #landingPage * {
 
     <div class="apex-upgrade-title">Unlock Your Full <span>Edge</span></div>
     <div class="apex-upgrade-sub">
-      Upgrade to Evidence Pro and unlock everything — Edge Lab backtesting & replay,
-      candlestick charts, AI Coach, Tiltmeter, advanced risk metrics and more.
+      Upgrade to Evidence Pro and unlock everything — Edge Lab backtesting &amp; replay,
+      the live chart read by AI, the Coach, Tiltmeter, advanced risk metrics and more.
     </div>
 
     <div class="apex-upgrade-features">
@@ -10545,6 +10589,10 @@ body.light #landingPage * {
         </div>
       </div>
 
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg></div><div><div class="apex-feat-label">The chart is free. Reading it is Pro.</div><div class="apex-feat-desc">The live chart stays open to everyone — every instrument TradingView carries, every timeframe, your own drawings. What Pro adds is what happens beside it: Evidence loads the candles of five timeframes at once, works out the supply and demand areas with a strength score broken into its five parts, and hands the whole picture to the AI &mdash; which may confirm an area, throw one out, or name one the indicator missed. Judged against <b>your</b> playbook, not against general market theory, so it works for a strategy that has nothing to do with zones</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg></div><div><div class="apex-feat-label">Click a zone and get a plan for that zone</div><div class="apex-feat-desc">Entry, stop and &mdash; where your own rules allow scaling out &mdash; several take-profits with the share of the position for each, every number checked against the candles before you see it. A target on the wrong side of the entry, a stop three times your usual, shares that do not add up to 100 % &mdash; each of those is shown next to the figure instead of being quietly passed on</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-bell ></use></svg></div><div><div class="apex-feat-label">The watcher — and it stays with a running trade</div><div class="apex-feat-desc">It tells you when price actually reaches one of your areas, and once you are in: half the risk used, 1R reached, each target taken, and the move given back after being ahead. When something with judgement in it happens &mdash; an opposing area right in the way &mdash; it asks the AI. Break-even is a button, never automatic: when the risk comes off is your decision, not a calculation</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎖️</div><div><div class="apex-feat-label">Every zone idea measured to its end</div><div class="apex-feat-desc">Say "I am trading this one" and Evidence records what the zone looked like at that moment &mdash; strength, the AI verdict, the source, your playbook &mdash; then follows the price to the result, and catches up from the candles for the hours the app was closed. Afterwards the results are split by zone strength, by AI confidence and by verdict, so the honest question gets an honest answer: does trading with it pay? Groups under thirty ideas are dimmed, and a candle that touched stop and target at once is marked unclear and left out rather than guessed</div></div></div>
       <div class="apex-feat-category"><svg class=ic aria-hidden=true><use href=#i-chart ></use></svg> Edge Lab & Quant Analytics</div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">⏮︎</div><div><div class="apex-feat-label">Market Replay — trade any past day for real</div><div class="apex-feat-desc">Rewind the real market to any date on free tick-accurate data, hide the future and trade it forward candle by candle — with real historical spreads</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg></div><div><div class="apex-feat-label">Full trade management in the replay</div><div class="apex-feat-desc">Several take-profits that scale out, break-even, trailing stops, partial closes — and drag your stop or any target straight on the chart while the trade runs</div></div></div>
@@ -10588,6 +10636,10 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🧩</div><div><div class="apex-feat-label">Proactive AI Insights</div><div class="apex-feat-desc">The coach pings you every 10 trades with behavioural patterns it found in your trading</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-dot ></use></svg></div><div><div class="apex-feat-label">Live Trade Alerts + Auto Review</div><div class="apex-feat-desc">Real-time warning when you open a risky trade (overtrading, revenge, weak session) + an automatic A–F review on close</div></div></div>
 
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-bank ></use></svg></div><div><div class="apex-feat-label">Challenge mode — practise the rules, not just the entry</div><div class="apex-feat-desc">Run a replay session under your prop firm’s actual rules: the drawdown model, the daily loss limit, the consistency requirement. Touch one and the session stops exactly as the firm would close it. The rule sets come from the prop cockpit, so there is one place in the app where "what does Topstep require" is written down &mdash; and what this trains is the part people actually fail on, which is not the entry but the day they were down and kept going</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🧩</div><div><div class="apex-feat-label">Confluence — which of your conditions actually pay</div><div class="apex-feat-desc">Your playbook checklists already record which conditions held on each trade. This scores every single one, and every pair and triple, against the trades where they all held &mdash; measured as lift against your own baseline, because "this wins 70 %" is not a finding when you already win 70 %. Combinations below the minimum sample are not shown as findings at all</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">A chart workspace, not a page that scrolls</div><div class="apex-feat-desc">Toolbar down the left, chart in the middle, your positions in a dock on the right, controls along the bottom &mdash; one frame that fits the screen. Before this the replay gave the chart 56 % of the window and put the playback controls and your open position below the fold; you could never see the chart and your own position at the same time. It is now 78.5 % with the dock closed, and nothing scrolls</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">✎</div><div><div class="apex-feat-label">15 drawing tools, and they stay editable</div><div class="apex-feat-desc">Trend lines, rays, arrows, boxes, ellipses, Fibonacci, parallel channels, a measuring tool in pips, percent and bars &mdash; plus a long and short position tool with red risk and green reward and a live R:R, every edge draggable. Select, move and resize anything after the fact, and star the ones you use onto the bar</div></div></div>
       <div class="apex-feat-category"><svg class=ic aria-hidden=true><use href=#i-chart ></use></svg> Analytics & Tracking</div>
       <div class="apex-feat-item">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-pin ></use></svg></div>
@@ -10598,6 +10650,9 @@ body.light #landingPage * {
       </div>
 
       <div class="apex-feat-category"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg> Integrations & Import</div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-clipboard ></use></svg></div><div><div class="apex-feat-label">Nothing is imported until you have seen what came out of the file</div><div class="apex-feat-desc">Every journal that quietly swallows a statement is one bad column away from being confidently wrong &mdash; half the executions dropped, the P&amp;L off by the commission, every trade on the wrong day because the broker reports in its own server time. So the import stops once and shows you: executions read and positions built, the file’s own net P&amp;L against what Evidence computed, which rows are duplicates of trades you already have, how many arrived without a stop, and which timezone was assumed &mdash; with a switch to correct it</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-signal ></use></svg></div><div><div class="apex-feat-label">Is my journal still receiving trades?</div><div class="apex-feat-desc">One page that answers it for every connection at once. A broken link is otherwise invisible: nothing errors, nothing looks missing, the journal simply stops growing and you find out weeks later &mdash; at which point you stop believing any number in the app. After three failed attempts in a row you also get an email, so you do not have to be the one checking</div></div></div>
+
       <div class="apex-feat-item apex-feat-full">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-refresh ></use></svg></div>
         <div>
@@ -10636,7 +10691,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-download ></use></svg></div>
         <div>
-          <div class="apex-feat-label">Statement Import — 70+ Brokers</div>
+          <div class="apex-feat-label">Statement Import — 95 brokers, 56 formats</div>
           <div class="apex-feat-desc">Search your broker by name — Pepperstone, IC Markets, FTMO, Topstep, Apex, XM, Vantage, Tickmill, NinjaTrader, Tradovate, Rithmic, Interactive Brokers, tastytrade, Schwab, Webull, Binance, Bybit, Kraken and more. The format is detected automatically and partial fills are grouped back into positions</div>
         </div>
       </div>
@@ -10717,7 +10772,10 @@ body.light #landingPage * {
 
     <!-- 7-day trial, no card -->
     <button id="apexStripeBtn" onclick="startFreeTrial()" style="width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold-hi));color:#07080b;font-family:var(--font-display);font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.02em"><svg class=ic aria-hidden=true><use href=#i-gift ></use></svg> Try 7 days free</button>
-    <div style="text-align:center;font-size:11px;color:var(--ink3);margin:7px 0 16px">No credit card required · ends automatically after 7 days</div>
+    <div style="text-align:center;font-size:11px;color:var(--ink3);margin:7px 0 6px">No credit card required · ends automatically after 7 days</div>
+    <!-- Die Antwort des Knopfes steht hier, nicht in einem Toast: der
+         liegt hinter diesem Fenster und war damit unsichtbar. -->
+    <div id="apexTrialNote" style="display:none;text-align:center;font-size:12px;line-height:1.55;margin:0 0 14px;padding:9px 12px;border-radius:9px"></div>
 
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="flex:1;height:1px;background:var(--rim)"></div><div style="font-size:10px;letter-spacing:.1em;color:var(--ink3);text-transform:uppercase">or go straight to Pro</div><div style="flex:1;height:1px;background:var(--rim)"></div></div>
 
@@ -26578,6 +26636,12 @@ document.addEventListener('keydown', function(e) {
     if (el.parentNode !== document.body) {
       document.body.appendChild(el);
     }
+    /* Beim Oeffnen zuruecksetzen: eine Meldung von vorhin waere jetzt
+       vielleicht gar nicht mehr wahr. */
+    var note = document.getElementById('apexTrialNote');
+    if (note) { note.style.display = 'none'; note.textContent = ''; }
+    var tb = document.getElementById('apexStripeBtn');
+    if (tb) { tb.disabled = false; tb.style.opacity = ''; }
     el.style.display = 'flex';
     el.style.cssText = 'display:flex!important;position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;background:rgba(6,7,10,0.88)!important;z-index:999999!important;align-items:center!important;justify-content:center!important;padding:20px!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow-y:auto!important;box-sizing:border-box!important;';
     document.body.style.overflow = 'hidden';
@@ -26987,18 +27051,41 @@ async function startProCheckout(plan) {
 // Grants Pro for 7 days by writing an expiry to Firestore. No Stripe involved.
 // Effective-Pro checks (client, rules, ingest worker) honour trialUntil > now,
 // so it lapses automatically — the user must actively subscribe to keep Pro.
+/* Die Meldung steht IM Fenster. Ein Toast waere hier wirkungslos: das
+   Upgrade-Fenster liegt darueber, und ein "du hast die Testphase schon
+   benutzt", das niemand sieht, ist von einem kaputten Knopf nicht zu
+   unterscheiden. Genau so war es gemeldet worden. */
+function trialNote(msg, art) {
+  const el = document.getElementById('apexTrialNote');
+  if (!el) { if (window.showToast) showToast(msg); return; }
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = art === 'bad' ? 'rgba(239,68,68,.12)' : 'var(--gold-dim)';
+  el.style.color = art === 'bad' ? 'var(--loss)' : 'var(--ink2)';
+}
+
 async function startFreeTrial() {
   if (!(window.db && window.currentUID)) { ApexDialog.alert('Please sign in first.'); return; }
+  const btn = document.getElementById('apexStripeBtn');
   const ref = db.collection('apexUsers').doc(currentUID);
+  /* Zwei Klicks waeren zwei Schreibversuche; der zweite scheitert dann an
+     der eigenen Regel (trialUsed ist dann schon true) und saehe aus wie
+     ein Fehler. */
+  if (btn) { if (btn.disabled) return; btn.disabled = true; btn.style.opacity = '.6'; }
+  const frei = function () {
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+  };
   try {
     const snap = await ref.get();
     const d = snap.exists ? (snap.data() || {}) : {};
     if (d.plan === 'pro' || d.subscriptionActive === true) {
-      if (window.showToast) showToast('You are already on Pro ✨︎'); return;
+      trialNote('You are already on Pro — there is nothing to unlock here.', 'ok');
+      frei(); return;
     }
     if (d.trialUsed === true) {
-      if (window.showToast) showToast('You have already used your free trial.');
-      return;
+      trialNote('Your free trial has already been used. The plans below keep everything ' +
+                'you had during it.', 'bad');
+      frei(); return;
     }
     const until = Date.now() + 7 * 24 * 60 * 60 * 1000; // +7 days (ms)
     await ref.set({ trialUntil: until, trialUsed: true, trialStartedAt: Date.now() }, { merge: true });
@@ -27012,7 +27099,13 @@ async function startFreeTrial() {
     setTimeout(function(){ try { location.reload(); } catch(_){} }, 900);
   } catch (e) {
     console.warn('[trial]', e);
-    ApexDialog.alert('The trial could not be started. Please try again.');
+    frei();
+    /* Den Grund mitgeben statt "bitte nochmal versuchen": bei einer
+       abgelehnten Schreibberechtigung hilft Nochmalversuchen nie, und wer
+       uns schreibt, soll die Zeile nennen koennen. */
+    trialNote('The trial could not be started (' + ((e && e.code) || (e && e.message) ||
+              'unknown') + '). Nothing was charged — you can still pick a plan below.',
+              'bad');
   }
 }
 window.startFreeTrial = startFreeTrial;
@@ -64435,6 +64528,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       indFuellen();
     });
     d.querySelector('#tvWachtBtn').addEventListener('click', function () {
+      if (!proSchranke()) return;
       wachtSchalten(!WACHT.an);
     });
     d.querySelector('#tvKiSend').addEventListener('click', nachfragen);
@@ -67504,7 +67598,45 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
   TV.laufPruefen = laufPruefen;
 
+  /* ── Pro-Schranke ────────────────────────────────────────────────
+     Der CHART bleibt frei. Er kostet uns nichts — TradingView liefert ihn,
+     und ein Journal ohne Kursbild waere ein halbes Produkt.
+
+     Was Geld kostet, sind die Kerzenabrufe und jede Frage an das Modell.
+     Genau das ist die Grenze: ansehen frei, auswerten Pro. */
+  function proAn() {
+    return typeof window.currentPlan !== 'undefined' && window.currentPlan === 'pro';
+  }
+
+  var PRO_WAND =
+    '<div class="tv-pro">' +
+      '<div class="tv-pro-t">The chart is free. The analysis is Pro.</div>' +
+      '<div class="tv-pro-d">Evidence loads the candles of five timeframes, works out ' +
+      'the supply and demand areas with their strength, and lets the AI judge them ' +
+      'against your own playbook &mdash; it can confirm a zone, throw one out or find ' +
+      'one the indicator missed. Click a zone and it works out entry, stop and several ' +
+      'targets for exactly that level; the watcher tells you when price arrives there, ' +
+      'and every idea you follow is tracked to its result, so you can see whether ' +
+      'trading with it is actually profitable.</div>' +
+      '<button class="tv-pro-b" onclick="if(window.openUpgradeModal)openUpgradeModal()">' +
+      'Unlock with Pro</button>' +
+      '<div class="tv-pro-f">Drawing on the chart, switching instrument and timeframe ' +
+      'stay free.</div>' +
+    '</div>';
+
+  /* Gibt true zurueck, wenn es weitergehen darf. Sonst steht der Grund an
+     der Stelle, an der sonst die Antwort stuende — ein stiller Abbruch
+     saehe aus wie ein Fehler. */
+  function proSchranke() {
+    if (proAn()) return true;
+    var out = document.getElementById('tvKiOut');
+    if (out) out.innerHTML = PRO_WAND;
+    if (window.openUpgradeModal) window.openUpgradeModal();
+    return false;
+  }
+
   function analysieren() {
+    if (!proSchranke()) return;
     var out = document.getElementById('tvKiOut');
     var tf = (document.getElementById('tvKiTf') || {}).value || '15min';
     if (!out) return;
@@ -67609,6 +67741,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
 
   function nachfragen() {
+    if (!proSchranke()) return;
     var feld = document.getElementById('tvKiAsk');
     if (!feld) return;
     var text = (feld.value || '').trim();
@@ -67921,6 +68054,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var e = zReg[id];
     var host = document.getElementById('tvZone');
     if (!e || !host) return;
+    if (!proSchranke()) return;
     if (!TV._fakten) {
       var w = document.createElement('div');
       w.className = 'tv-su-warn';
@@ -68555,6 +68689,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     playbooksFuellen();
     indFuellen();
     ideenZeigen();
+    if (!proAn()) {
+      var po = document.getElementById('tvKiOut');
+      /* Nur den Anfangszustand ersetzen — ein laufendes Gespraech eines
+         Kontos, dessen Abo gerade auslief, soll nicht mitten im Satz
+         verschwinden. */
+      if (po && !po.querySelector('.tv-ki-frage')) po.innerHTML = PRO_WAND;
+    }
     /* Gespeicherte Level holt beobachten() nach, sobald das Widget antwortet. */
     beobachten();
     wachtSchalten(lies('wacht', '0') === '1');
