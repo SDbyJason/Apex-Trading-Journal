@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-22a';
+  window.APEX_BUILD = '2026-09-22b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -59543,7 +59543,16 @@ body.light .apxFR-card { background: #fff; }
     return window.ApexBacktest.run({
       strategy: S, symbol: S.symbol, tf: S.tf,
       from: opts.from, to: opts.to,
-      onProgress: function (p) { onP({ phase: 'backtest', p: p }); }
+      /* ApexBacktest meldet {phase, done, total} — KEINEN Anteil. Das Objekt
+         ungerechnet weiterzureichen ergab oben Math.round(objekt * 100), also
+         "NaN %", und eine Balkenbreite von "NaN%", die der Browser verwirft. */
+      onProgress: function (p) {
+        var anteil = (p && p.total > 0) ? (p.done || 0) / p.total : 0;
+        if (!isFinite(anteil)) anteil = 0;
+        onP({ phase: (p && p.phase) || 'backtest',
+              p: Math.max(0, Math.min(1, anteil)),
+              done: p && p.done, total: p && p.total });
+      }
     }).then(function (res) {
       var bars = res.data.bid, n = bars.n;
       var spec = window.ApexReplay.specFor(S.symbol);
@@ -63064,8 +63073,14 @@ textarea.ac-in { min-height: 140px; resize: vertical; line-height: 1.65; }
     var to = Date.now(), from = to - 6 * 365 * 86400000;
     E().buildSpots(S, { from: from, to: to, onProgress: function (p) {
       var el = document.getElementById('drProg'), bar = document.getElementById('drProgBar');
-      var pct = Math.round((p.p || 0) * 100);
-      if (el) el.textContent = (p.phase === 'backtest' ? 'Testing the rules over six years — ' : 'Working — ') + pct + '%';
+      /* Der Wert wird hier zur Zahl gemacht, nicht gehofft: was als Prozent
+         auf dem Bildschirm landet, darf nie "NaN" sein koennen. */
+      var roh = p && typeof p.p === 'number' && isFinite(p.p) ? p.p : 0;
+      var pct = Math.round(Math.max(0, Math.min(1, roh)) * 100);
+      var was = p && p.phase === 'data'
+        ? 'Loading six years of bars — '
+        : (p && p.phase === 'backtest' ? 'Testing the rules over six years — ' : 'Working — ');
+      if (el) el.textContent = was + pct + '%';
       if (bar) bar.style.width = Math.max(2, pct) + '%';
     } }).then(function (res) {
       if (!res.ok && res.reason === 'too_few_signals') {
