@@ -1064,7 +1064,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-22b';
+  window.APEX_BUILD = '2026-09-22c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -15107,7 +15107,7 @@ function playbookStats(pbId){
         (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
       /* Stoerungen des Anbieters kommen als normaler Text — ungeprueft saehen
          sie aus wie ein Ergebnis. */
-      if (!text || /API Error|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
+      if (!text || /API Error|AI unavailable|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
         throw new Error(text || 'no answer from the AI');
       var pb = lesen(text);
       if (!pb || !pb.name) throw new Error('The AI did not return a usable playbook.');
@@ -66168,7 +66168,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       /* Der Worker reicht Stoerungen des Anbieters als NORMALEN Text durch —
          Guthaben leer, Kontingent, Spam-Schutz. Ungeprueft sieht so eine
          Meldung aus wie eine Analyse. */
-      if (/API Error|credits are depleted|Quota exceeded|Limit erreicht|Spam-Schutz|pauses until tomorrow|unusual amount of AI use|unusual number of chart analyses/i.test(text))
+      if (/API Error|AI unavailable|credits are depleted|Quota exceeded|Limit erreicht|Spam-Schutz|pauses until tomorrow|unusual amount of AI use|unusual number of chart analyses/i.test(text))
         throw new Error(text.replace(/^\s*⚠️\s*/, ''));
       return text;
     });
@@ -67602,7 +67602,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }).then(function (r) { return r.json(); }).then(function (d) {
       var text = d.response ||
         (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
-      if (!text || /API Error|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
+      if (!text || /API Error|AI unavailable|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
         throw new Error(text || 'no answer');
       verlauf.push({ role: 'assistant', content: text, anzeige: ohneBlock(text) });
       malen();
@@ -68117,7 +68117,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }).then(function (r) { return r.json(); }).then(function (d) {
       var text = d.response ||
         (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
-      if (!text || /API Error|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
+      if (!text || /API Error|AI unavailable|credits are depleted|Quota exceeded|pauses until tomorrow/i.test(text))
         throw new Error(text || 'no answer');
       var S = setupLesen(text);
       if (S) setupPruefen(S);          // fuellt risiko und R je Ziel
