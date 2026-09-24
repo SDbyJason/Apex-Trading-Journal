@@ -176,6 +176,46 @@
   .loading-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--rim2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
   @keyframes spin{to{transform:rotate(360deg)}}
   .ref-preview-bar{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--ink2);font-family:var(--font-mono);margin-top:8px}
+
+  /* ═══ Control Center ═══ */
+  .cc-live{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;color:var(--profit);letter-spacing:1px;text-transform:uppercase}
+  .cc-live i{width:7px;height:7px;border-radius:50%;background:var(--profit);box-shadow:0 0 8px var(--profit);animation:ccPulse 2s infinite}
+  .cc-live.off{color:var(--loss)} .cc-live.off i{background:var(--loss);box-shadow:0 0 8px var(--loss)}
+  @keyframes ccPulse{50%{opacity:.35}}
+  .cc-bell{position:relative;font-size:15px}
+  .cc-bell b{position:absolute;top:-7px;right:-7px;background:var(--loss);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;font-family:var(--font-mono)}
+  .cc-grid2{display:grid;grid-template-columns:3fr 2fr;gap:22px;align-items:start}
+  .cc-db{grid-template-columns:minmax(260px,2fr) 3fr}
+  @media(max-width:900px){.cc-grid2,.cc-db{grid-template-columns:1fr}}
+  .cc-kpis{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))!important}
+  .cc-kpi-sub{font-size:11.5px;color:var(--ink3);margin-top:6px}
+  .cc-click{cursor:pointer;transition:transform .15s,border-color .15s}.cc-click:hover{transform:translateY(-2px);border-color:var(--rim3)}
+  .cc-dim{color:var(--ink3)}
+  .cc-ev{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:0.5px solid var(--rim);cursor:pointer;transition:background .15s}
+  .cc-ev:hover{background:rgba(201,168,76,0.05)}
+  .cc-ev.new{background:rgba(201,168,76,0.07);box-shadow:inset 3px 0 0 var(--gold)}
+  .cc-ev.done{opacity:.55}
+  .cc-ev-ic{width:32px;height:32px;flex:none;border-radius:50%;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--elevated)}
+  .cc-ev-b{flex:1;min-width:0}.cc-ev-h{font-size:13.5px}.cc-ev-t{font-size:12.5px;color:var(--ink2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cc-ev-ts{font-size:11px;color:var(--ink3);font-family:var(--font-mono);white-space:nowrap}
+  .cc-todo{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:0.5px solid var(--rim);cursor:pointer;font-size:13.5px}
+  .cc-todo:hover{color:var(--gold-light)} .cc-todo>span:nth-child(2){flex:1}
+  .cc-todo-n{min-width:34px;text-align:center;border-radius:10px;padding:3px 8px;font-family:var(--font-mono);font-weight:600;font-size:13px}
+  .cc-todo-n.red{background:rgba(240,99,106,.15);color:var(--loss)} .cc-todo-n.gold{background:rgba(201,168,76,.15);color:var(--gold)}
+  .cc-legend{display:flex;gap:16px;font-size:12px;margin-bottom:10px;flex-wrap:wrap}.cc-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .cc-crumbs{padding:10px 14px;font-size:12px;border-bottom:0.5px solid var(--rim)} .cc-crumbs a{color:var(--blue);cursor:pointer}
+  #cc-db-list{max-height:68vh;overflow-y:auto}
+  .cc-doc{padding:9px 14px;border-bottom:0.5px solid var(--rim);cursor:pointer;display:flex;flex-direction:column;gap:2px;font-size:12px}
+  .cc-doc code{color:var(--ink);font-size:12px;word-break:break-all}.cc-doc:hover{background:rgba(201,168,76,.05)}.cc-doc.sel{background:rgba(201,168,76,.1);box-shadow:inset 3px 0 0 var(--gold)}
+  .cc-doc-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+  .cc-subs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .cc-json{width:100%;min-height:380px;font-family:var(--font-mono)!important;font-size:12px!important;line-height:1.5;white-space:pre;tab-size:2}
+  .cc-360{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-md);padding:16px;margin-bottom:14px}
+  .cc-360-top{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .cc-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.cc-actions a{text-decoration:none;display:inline-flex;align-items:center}
+  .cc-360-tl{margin-top:14px;max-height:200px;overflow-y:auto;font-size:12.5px;border-top:0.5px solid var(--rim);padding-top:10px}
+  .cc-360-tl>div{display:flex;gap:6px;padding:4px 0}
+  .cc-health{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:22px}
 </style>
 </head>
 <body>
@@ -233,11 +273,18 @@
 <div id="dashboard">
   <div class="top-bar">
     <div class="logo"><span class="mark"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#etMark"/></svg></span>Evidence — Control Center</div>
-    <button class="btn-small" onclick="doLogout()">Abmelden</button>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span id="cc-live" class="cc-live" title="Echtzeit-Verbindung"><i></i> Live</span>
+      <button class="btn-small cc-bell" id="cc-bell" onclick="CC.openFeed()" title="Neuigkeiten">🔔<b id="cc-bell-n" style="display:none">0</b></button>
+      <button class="btn-small" onclick="doLogout()">Abmelden</button>
+    </div>
   </div>
 
   <div class="tabs glass">
-    <button class="tab-btn active" onclick="switchTab('users')">👤 Nutzer</button>
+    <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">🏠 Übersicht</button>
+    <button class="tab-btn" data-tab="feed" onclick="switchTab('feed')">🔔 Live-Feed</button>
+    <button class="tab-btn" data-tab="revenue" onclick="switchTab('revenue')">💰 Umsatz</button>
+    <button class="tab-btn" data-tab="users" onclick="switchTab('users')">👤 Nutzer</button>
     <button class="tab-btn" onclick="switchTab('servers')">🛡️ Server &amp; Bans</button>
     <button class="tab-btn" onclick="switchTab('news')">📣 News</button>
     <button class="tab-btn" onclick="switchTab('partners')">🤝 Partner</button>
@@ -245,10 +292,83 @@
     <button class="tab-btn" onclick="switchTab('voices')">⭐ Testimonials</button>
     <button class="tab-btn" onclick="switchTab('errors')">🐞 JS-Fehler</button>
     <button class="tab-btn" onclick="switchTab('cancel')">📄 Kündigungen</button>
+    <button class="tab-btn" data-tab="db" onclick="switchTab('db')">🗄️ Datenbank</button>
+    <button class="tab-btn" data-tab="system" onclick="switchTab('system')">🩺 System</button>
+  </div>
+
+  <!-- ════════════ ÜBERSICHT ════════════ -->
+  <div id="tab-overview" class="tab-pane active">
+    <div class="stats-row cc-kpis" id="cc-kpis"></div>
+    <div class="cc-grid2">
+      <div class="card glass"><h3>📈 Anmeldungen &amp; Pro — letzte 30 Tage</h3><div id="cc-chart"><div class="empty-state"><span class="loading-spinner"></span> Lädt…</div></div></div>
+      <div class="card glass"><h3>⚠️ Braucht deine Aufmerksamkeit</h3><div id="cc-todo"></div></div>
+    </div>
+    <div class="card glass"><h3 style="display:flex;justify-content:space-between;align-items:center">⚡ Letzte Ereignisse <button class="btn-small" onclick="CC.openFeed()">Alle ansehen →</button></h3><div id="cc-recent"></div></div>
+  </div>
+
+  <!-- ════════════ UMSATZ ════════════ -->
+  <div id="tab-revenue" class="tab-pane">
+    <div class="filter-bar"><div id="rv-stamp" style="flex:1;font-size:12px;color:var(--ink3)">Direkt aus Stripe · letzte 12 Monate.</div>
+      <button class="btn-blue btn-small" onclick="CC.loadRevenue(true)">↻ Neu laden</button>
+      <a class="btn-small" href="https://dashboard.stripe.com/dashboard" target="_blank" rel="noopener" style="text-decoration:none">Stripe öffnen ↗</a></div>
+    <div class="stats-row cc-kpis" id="rv-kpis"></div>
+    <div class="cc-grid2">
+      <div class="card glass"><h3>📊 Umsatz pro Monat</h3><div id="rv-chart"><div class="empty-state">Noch nicht geladen.</div></div></div>
+      <div class="card glass"><h3>🧾 Abos</h3><div id="rv-subs"></div></div>
+    </div>
+    <div class="card glass" style="padding:0;overflow:hidden"><h3 style="padding:24px 24px 0">📅 Monatsabschluss</h3><div id="rv-months"></div></div>
+    <div class="card glass" style="padding:0;overflow:hidden"><h3 style="padding:24px 24px 0">💳 Letzte Zahlungen</h3><div id="rv-recent"></div></div>
+  </div>
+
+  <!-- ════════════ LIVE-FEED ════════════ -->
+  <div id="tab-feed" class="tab-pane">
+    <div class="filter-bar">
+      <div class="search-wrap" style="flex:1"><span class="search-icon">🔍</span>
+        <input type="text" id="cc-feed-q" placeholder="Name, E-Mail, Text suchen…" oninput="CC.renderFeed()" /></div>
+      <select id="cc-feed-type" onchange="CC.renderFeed()"></select>
+      <button class="btn-small" onclick="CC.markAllRead()">✓ Alle gelesen</button>
+      <button class="btn-small" id="cc-notif-btn" onclick="CC.toggleNotif()">🔕 Desktop-Hinweise</button>
+      <button class="btn-small" id="cc-sound-btn" onclick="CC.toggleSound()">🔈 Ton</button>
+    </div>
+    <div class="card glass" style="padding:0;overflow:hidden"><div id="cc-feed"></div></div>
+  </div>
+
+  <!-- ════════════ DATENBANK ════════════ -->
+  <div id="tab-db" class="tab-pane">
+    <div class="card glass" style="font-size:12.5px;color:var(--ink2);line-height:1.6">
+      Voller Zugriff auf jede Sammlung und jedes Dokument von Evidence. Pfad eingeben (z.&nbsp;B. <code>apexUsers</code> oder <code>apexUsers/&lt;uid&gt;/private</code>) oder oben wählen.
+      Änderungen gehen <b>sofort live</b> — jede Speicherung und Löschung wird in <code>apexAdminLog</code> protokolliert.
+    </div>
+    <div class="filter-bar">
+      <select id="cc-db-coll" onchange="CC.dbOpen(this.value)"></select>
+      <div class="search-wrap" style="flex:1"><span class="search-icon">📂</span>
+        <input type="text" id="cc-db-path" placeholder="Pfad, z.B. apexServers/abc/channels" onkeydown="if(event.key==='Enter')CC.dbOpen(this.value)" /></div>
+      <button class="btn-blue btn-small" onclick="CC.dbOpen(document.getElementById('cc-db-path').value)">Öffnen</button>
+    </div>
+    <div class="cc-grid2 cc-db">
+      <div class="card glass" style="padding:0;overflow:hidden">
+        <div class="filter-bar" style="padding:14px 14px 0;margin:0">
+          <input type="text" id="cc-db-q" placeholder="In geladenen Dokumenten suchen…" oninput="CC.dbRenderList()" style="flex:1" />
+          <button class="btn-small" onclick="CC.dbNew()">+ Neu</button>
+          <button class="btn-small" onclick="CC.dbExport()">⬇ JSON</button>
+        </div>
+        <div id="cc-db-crumbs" class="cc-crumbs"></div>
+        <div id="cc-db-list"><div class="empty-state">Sammlung wählen.</div></div>
+      </div>
+      <div class="card glass" id="cc-db-doc"><div class="empty-state">Dokument wählen.</div></div>
+    </div>
+  </div>
+
+  <!-- ════════════ SYSTEM ════════════ -->
+  <div id="tab-system" class="tab-pane">
+    <div class="filter-bar"><div style="flex:1;font-size:12px;color:var(--ink3)">Alle Cloudflare-Worker über ihren /health-Endpunkt · plus Admin-Protokoll.</div>
+      <button class="btn-blue btn-small" onclick="CC.loadSystem()">↻ Prüfen</button></div>
+    <div id="cc-health" class="cc-health"></div>
+    <div class="card glass" style="padding:0;overflow:hidden"><h3 style="padding:24px 24px 0">🧾 Admin-Protokoll (letzte 100 Änderungen)</h3><div id="cc-adminlog"></div></div>
   </div>
 
   <!-- ════════════ USERS ════════════ -->
-  <div id="tab-users" class="tab-pane active">
+  <div id="tab-users" class="tab-pane">
     <div class="stats-row">
       <div class="stat-card glass"><div class="stat-label">Gesamt User</div><div class="stat-value blue" id="stat-total">—</div></div>
       <div class="stat-card glass"><div class="stat-label">Pro User</div><div class="stat-value green" id="stat-pro">—</div></div>
@@ -260,6 +380,8 @@
         <input type="text" id="user-search" placeholder="Name, @username, E-Mail oder UID suchen…" oninput="filterUsers()" /></div>
       <select id="plan-filter" onchange="filterUsers()">
         <option value="all">Alle Pläne</option><option value="pro">Pro</option><option value="free">Free</option>
+        <option value="lifetime">Lifetime</option><option value="trial">Trial aktiv</option>
+        <option value="cancel">Kündigung vorgemerkt</option><option value="pastdue">Zahlung fehlgeschlagen</option>
       </select>
       <button class="btn-small" onclick="loadUsers()">↺ Aktualisieren</button>
     </div>
@@ -563,7 +685,9 @@ function switchTab(tab){
   document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("tab-"+tab).classList.add("active");
-  event.currentTarget.classList.add("active");
+  const btn=document.querySelector('.tab-btn[onclick="switchTab(\''+tab+'\')"]');
+  if(btn) btn.classList.add("active");
+  if(window.CC) CC.onTab(tab);
   if(tab==="servers") loadServersAndBans();
   if(tab==="news") loadAnnouncements();
   if(tab==="partners") loadPartners();
@@ -880,7 +1004,12 @@ function filterUsers(){
     const name=userName(u).toLowerCase(); const handle=(u.username||"").toLowerCase();
     const email=(u.email||"").toLowerCase(); const uid=(u.uid||"").toLowerCase();
     const matchQ=!q||name.includes(q)||handle.includes(q)||email.includes(q)||uid.includes(q);
-    const isPro=u.isPro||u.plan==="pro"; const matchPlan=planF==="all"||(planF==="pro"&&isPro)||(planF==="free"&&!isPro);
+    const isPro=u.isPro||u.plan==="pro";
+    const matchPlan=planF==="all"||(planF==="pro"&&isPro)||(planF==="free"&&!isPro)
+      ||(planF==="lifetime"&&u.lifetime===true)
+      ||(planF==="trial"&&Number(u.trialUntil||0)>Date.now()&&!isPro)
+      ||(planF==="cancel"&&u.cancelAtPeriodEnd===true)
+      ||(planF==="pastdue"&&(u.subscriptionStatus==="past_due"||u.subscriptionStatus==="unpaid"));
     return matchQ&&matchPlan;
   });
   renderUsers(filtered);
@@ -906,6 +1035,7 @@ function renderUsers(users){
       <td><div class="action-btns">
         ${isPro?`<button class="btn-danger" onclick="openPlanModal('${uid}','revoke')">– Pro</button>`:`<button class="btn-success" onclick="openPlanModal('${uid}','grant')">+ Pro</button>`}
         <button class="btn-blue" onclick="openEditModalByUid('${uid}')">✏ Edit</button>
+        <button class="btn-small" onclick="CC.user360('${uid}')" title="Alles zu diesem Nutzer">🔬 360°</button>
       </div></td></tr>`;
   }).join("");
   wrap.innerHTML=`<div class="table-wrap"><table><thead><tr>
@@ -1483,6 +1613,609 @@ function showToast(msg,isError=false){
   const t=document.getElementById("toast"); t.textContent=msg; t.className="toast show"+(isError?" error":"");
   setTimeout(()=>{ t.classList.remove("show"); },3200);
 }
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   CONTROL CENTER — Echtzeit-Überwachung + Vollzugriff
+   · Live-Feed: jedes Ereignis in Evidence (Anmeldung, Trial, Pro-Kauf,
+     Lifetime, Verlängerung, Zahlungsausfall, Kündigung, Bug, Fehler, …)
+     aus Firestore-onSnapshot, mit Glocke, Desktop-Hinweis und Ton.
+   · Übersicht: KPIs, 30-Tage-Chart, To-dos.
+   · Datenbank: jede Sammlung / jedes Dokument lesen, bearbeiten, anlegen,
+     löschen, exportieren. Jede Schreibaktion landet in apexAdminLog.
+   · Nutzer 360°: Rohdaten, Schnellaktionen, Unterlagen, Zeitleiste.
+   · System: /health aller Worker.
+   Ereignisse werden aus den Zeitstempeln der Dokumente abgeleitet — es
+   braucht dafür keinen Worker und keine neue Schreibstelle in der App.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var H = function(v){ return escapeHtml(v); };
+  var DAY = 86400000;
+  var LS = function(k, v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(e){ return null; } };
+
+  var T = {
+    signup:     {ic:'👤', l:'Neuer Nutzer',            c:'var(--blue)',    loud:true},
+    trial:      {ic:'⏳', l:'Trial gestartet',          c:'var(--gold)',    loud:true},
+    pro:        {ic:'💎', l:'Pro gekauft',              c:'var(--profit)',  loud:true},
+    lifetime:   {ic:'👑', l:'Lifetime gekauft',         c:'var(--gold-light)', loud:true},
+    renewal:    {ic:'🔁', l:'Abo verlängert',           c:'var(--profit)',  loud:false},
+    payfail:    {ic:'💳', l:'Zahlung fehlgeschlagen',   c:'var(--loss)',    loud:true},
+    cancelplan: {ic:'⚠️', l:'Kündigung vorgemerkt',     c:'var(--caution)', loud:true},
+    churn:      {ic:'📉', l:'Abo beendet',              c:'var(--loss)',    loud:true},
+    cancel:     {ic:'📄', l:'Kündigungsformular',       c:'var(--loss)',    loud:true},
+    bug:        {ic:'🐛', l:'Bug Report / Wunsch',      c:'var(--caution)', loud:true},
+    voice:      {ic:'⭐', l:'Testimonial eingereicht',  c:'var(--gold)',    loud:true},
+    appeal:     {ic:'⚖️', l:'Entbannungsantrag',        c:'var(--caution)', loud:true},
+    server:     {ic:'🛡️', l:'Neuer Server',             c:'var(--blue)',    loud:false},
+    mentor:     {ic:'🎓', l:'Mentoring gestartet',      c:'var(--blue)',    loud:false},
+    post:       {ic:'💬', l:'Community-Post',           c:'var(--ink2)',    loud:false},
+    error:      {ic:'🐞', l:'JS-Fehler',                c:'var(--loss)',    loud:false}
+  };
+
+  var S = { users:{}, emails:{}, cols:{}, unsub:[], events:[], started:false, primed:{}, notified:0,
+            meta:{}, db:{path:'', docs:[], last:null, sel:null} };
+
+  function toMs(v){
+    if(v==null || v==='') return 0;
+    if(typeof v==='number') return v < 1e12 ? v*1000 : v;
+    if(v.toMillis) return v.toMillis();
+    if(v.seconds!=null) return v.seconds*1000;
+    var t=Date.parse(v); return isNaN(t)?0:t;
+  }
+  function firstTs(d){ return toMs(d.createdAt)||toMs(d.ts)||toMs(d.created)||toMs(d.submittedAt)||toMs(d.updatedAt); }
+  function ago(ms){
+    var s=(Date.now()-ms)/1000;
+    if(s<60) return 'gerade eben'; if(s<3600) return 'vor '+Math.floor(s/60)+' Min';
+    if(s<86400) return 'vor '+Math.floor(s/3600)+' Std'; if(s<86400*7) return 'vor '+Math.floor(s/86400)+' T';
+    return new Date(ms).toLocaleDateString('de-DE');
+  }
+  function fmt(ms){ return ms? new Date(ms).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'}) : '–'; }
+  function uname(uid){ var u=S.users[uid]; return u ? userName(u) : (uid ? uid.slice(0,8)+'…' : '–'); }
+  function isPro(u){ return u.plan==='pro' || u.subscriptionActive===true || u.isPro===true; }
+  function onTrial(u){ return !isPro(u) && Number(u.trialUntil||0) > Date.now(); }
+
+  /* ─────────── Live-Verbindung ─────────── */
+  function listen(key, query){
+    S.unsub.push(query.onSnapshot(function(snap){
+      S.cols[key] = snap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
+      if(key==='users'){ S.users={}; S.cols.users.forEach(function(u){ u.uid=u._id; if(S.emails[u.uid]) u.email=S.emails[u.uid]; S.users[u.uid]=u; }); syncAllUsers(); }
+      if(key==='emails'){ S.emails={}; S.cols.emails.forEach(function(e){ S.emails[e._id]=e.email||''; });
+        Object.keys(S.users).forEach(function(k){ if(S.emails[k]) S.users[k].email=S.emails[k]; }); }
+      S.primed[key]=true; setLive(true); rebuild();
+    }, function(err){
+      console.warn('CC listen '+key+':', err.message); S.primed[key]=true; setLive(false, key+': '+err.message); rebuild();
+    }));
+  }
+  /* Das bestehende Panel arbeitet mit allUsers — mit den Live-Daten füttern,
+     damit die Nutzerliste nie veraltet ist. Nur neu zeichnen, wenn der Tab
+     sichtbar ist und niemand gerade tippt/bearbeitet. */
+  function syncAllUsers(){
+    try{
+      allUsers = Object.keys(S.users).map(function(k){ return S.users[k]; });
+      updateStats();
+      var pane=document.getElementById('tab-users');
+      if(pane && pane.classList.contains('active') && !document.getElementById('edit-modal').classList.contains('open')) filterUsers();
+    }catch(e){}
+  }
+  function setLive(ok, why){
+    var el=document.getElementById('cc-live'); if(!el) return;
+    el.classList.toggle('off', !ok); if(why) el.title='Fehler: '+why;
+  }
+
+  function start(){
+    if(S.started || !db) return; S.started=true;
+    S.notified = Date.now();
+    listen('emails', db.collection('apexUserEmails'));
+    listen('users', db.collection('apexUsers'));
+    listen('bugs', db.collection('bugReports').orderBy('createdAt','desc').limit(300));
+    listen('cancels', db.collection('apexCancellations').orderBy('ts','desc').limit(200));
+    listen('errors', db.collection('apexErrors').orderBy('ts','desc').limit(200));
+    listen('voices', db.collection('apexTestimonials').limit(500));
+    listen('appeals', db.collection('apexBanAppeals').limit(500));
+    listen('servers', db.collection('apexServers').limit(500));
+    listen('mentors', db.collection('apexMentorships').limit(500));
+    listen('posts', db.collection('apexFeed').orderBy('createdAt','desc').limit(100));
+    S.unsub.push(db.collection('apexMeta').doc('lifetimeSeats').onSnapshot(function(d){ S.meta.seats=d.exists?(d.data()||{}):{}; renderOverview(); }, function(){}));
+    initFeedControls();
+    if(!document.querySelector('.tab-pane.active')) switchTab('overview');
+  }
+  function stop(){ S.unsub.forEach(function(f){ try{f();}catch(e){} }); S.unsub=[]; S.started=false; S.primed={}; }
+
+  /* ─────────── Ereignisse ableiten ─────────── */
+  function rebuild(){
+    var ev=[];
+    function add(type, ts, o){ if(ts) ev.push(Object.assign({type:type, ts:ts}, o)); }
+    Object.keys(S.users).forEach(function(uid){
+      var u=S.users[uid], n=userName(u), m=u.email||'', base={uid:uid, who:n, sub:m};
+      add('signup', toMs(u.createdAt||u.created), base);
+      add('trial', toMs(u.trialStartedAt), Object.assign({txt:'bis '+fmt(toMs(u.trialUntil))}, base));
+      add(u.lifetime===true?'lifetime':'pro', toMs(u.planActivatedAt), base);
+      add('renewal', toMs(u.lastRenewalAt), base);
+      add('payfail', toMs(u.paymentFailedAt), Object.assign({txt:u.subscriptionStatus||''}, base));
+      if(u.cancelAtPeriodEnd===true) add('cancelplan', toMs(u.subscriptionUpdatedAt), Object.assign({txt:'läuft bis '+fmt(toMs(u.currentPeriodEnd))}, base));
+      add('churn', toMs(u.subscriptionCancelledAt), base);
+    });
+    (S.cols.bugs||[]).forEach(function(b){ add('bug', firstTs(b), {id:b._id, uid:b.uid, who:b.displayName||uname(b.uid), sub:b.email||'', txt:(b.title||b.description||'').slice(0,140), tag:b.category, done:b.status==='resolved'||b.status==='wontfix'}); });
+    (S.cols.cancels||[]).forEach(function(c){ add('cancel', firstTs(c), {id:c._id, uid:c.uid, who:c.name, sub:c.email, txt:(c.kind||'')+(c.reason?' · '+c.reason:''), done:c.status==='done'}); });
+    (S.cols.errors||[]).forEach(function(e){ add('error', firstTs(e), {id:e._id, uid:e.uid, who:uname(e.uid), txt:e.msg, sub:e.src||''}); });
+    (S.cols.voices||[]).forEach(function(v){ add('voice', firstTs(v), {id:v._id, uid:v.uid, who:v.name||uname(v.uid), txt:'★'.repeat(v.rating||0)+' '+(v.text||'').slice(0,120), done:v.approved===true}); });
+    (S.cols.appeals||[]).forEach(function(a){ add('appeal', firstTs(a), {id:a._id, uid:a.uid, who:a.name||a.userName||uname(a.uid), txt:(a.serverName||a.serverId||'')+(a.text||a.reason?' · '+(a.text||a.reason):''), done:(a.status||'pending')!=='pending'}); });
+    (S.cols.servers||[]).forEach(function(s){ add('server', firstTs(s), {id:s._id, uid:s.ownerUid, who:s.name||s._id, sub:'von '+uname(s.ownerUid)}); });
+    (S.cols.mentors||[]).forEach(function(m){ add('mentor', firstTs(m), {id:m._id, uid:m.studentUid, who:uname(m.mentorUid)+' → '+uname(m.studentUid), txt:m.status||''}); });
+    (S.cols.posts||[]).forEach(function(p){ add('post', firstTs(p), {id:p._id, uid:p.uid, who:p.name||p.displayName||uname(p.uid), txt:(p.text||p.body||'').slice(0,140)}); });
+    ev.sort(function(a,b){ return b.ts-a.ts; });
+    S.events=ev;
+
+    // Neu eingetroffene, laute Ereignisse melden — erst wenn alle Quellen
+    // einmal geladen sind, sonst "meldet" der Erststart den ganzen Bestand.
+    var all=['users','bugs','cancels','voices','appeals'].every(function(k){ return S.primed[k]; });
+    if(all){
+      var fresh=ev.filter(function(e){ return e.ts > S.notified && T[e.type].loud; });
+      if(fresh.length){ S.notified=Math.max.apply(null, fresh.map(function(e){return e.ts;})); fresh.slice(0,5).reverse().forEach(announce); }
+    }
+    updateBell(); renderOverview();
+    if(isActive('feed')) renderFeed();
+  }
+  function isActive(t){ var p=document.getElementById('tab-'+t); return p && p.classList.contains('active'); }
+
+  function lastSeen(){ return parseInt(LS('ccSeenTs')||'0',10) || (Date.now()-DAY); }
+  function unread(){ var ls=lastSeen(); return S.events.filter(function(e){ return e.ts>ls && T[e.type].loud; }); }
+  function updateBell(){
+    var n=unread().length, b=document.getElementById('cc-bell-n');
+    if(b){ b.textContent=n>99?'99+':n; b.style.display=n?'inline-block':'none'; }
+    document.title=(n?'('+n+') ':'')+'Evidence — Control Center';
+  }
+  function announce(e){
+    var t=T[e.type], line=t.ic+' '+t.l+': '+(e.who||'')+(e.txt?' — '+e.txt:'');
+    showToast(line);
+    if(LS('ccSound')==='1') beep(e.type==='pro'||e.type==='lifetime');
+    if(LS('ccNotif')==='1' && 'Notification' in window && Notification.permission==='granted'){
+      try{ var nn=new Notification(t.l, {body:(e.who||'')+(e.sub?' · '+e.sub:'')+(e.txt?'\n'+e.txt:''), tag:e.type+e.ts}); nn.onclick=function(){ window.focus(); openEvent(e); }; }catch(x){}
+    }
+  }
+  var actx=null;
+  function beep(happy){
+    try{
+      actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+      (happy?[660,880,1175]:[520]).forEach(function(f,i){
+        var o=actx.createOscillator(), g=actx.createGain(); o.frequency.value=f; o.type='sine';
+        g.gain.setValueAtTime(0.0001, actx.currentTime+i*0.12); g.gain.exponentialRampToValueAtTime(0.18, actx.currentTime+i*0.12+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+i*0.12+0.25);
+        o.connect(g); g.connect(actx.destination); o.start(actx.currentTime+i*0.12); o.stop(actx.currentTime+i*0.12+0.3);
+      });
+    }catch(x){}
+  }
+
+  /* ─────────── Feed ─────────── */
+  function initFeedControls(){
+    var sel=document.getElementById('cc-feed-type'); if(!sel || sel.options.length) return;
+    sel.innerHTML='<option value="loud">Alles Wichtige</option><option value="all">Alles (inkl. Fehler &amp; Posts)</option><option value="money">💰 Nur Geld (Pro, Lifetime, Zahlung, Kündigung)</option><option value="open">Nur offene / unerledigte</option>'+
+      Object.keys(T).map(function(k){ return '<option value="'+k+'">'+T[k].ic+' '+T[k].l+'</option>'; }).join('');
+    paintToggles();
+  }
+  function paintToggles(){
+    var nb=document.getElementById('cc-notif-btn'), sb=document.getElementById('cc-sound-btn');
+    if(nb) nb.textContent=(LS('ccNotif')==='1'?'🔔':'🔕')+' Desktop-Hinweise';
+    if(sb) sb.textContent=(LS('ccSound')==='1'?'🔊':'🔈')+' Ton';
+  }
+  var MONEY={pro:1,lifetime:1,renewal:1,payfail:1,cancelplan:1,churn:1,cancel:1,trial:1};
+  function feedRow(e, ls){
+    var t=T[e.type], isNew=e.ts>ls && t.loud;
+    return '<div class="cc-ev'+(isNew?' new':'')+(e.done?' done':'')+'" onclick="CC.openIdx('+S.events.indexOf(e)+')">'+
+      '<div class="cc-ev-ic" style="border-color:'+t.c+'">'+t.ic+'</div>'+
+      '<div class="cc-ev-b"><div class="cc-ev-h"><b style="color:'+t.c+'">'+t.l+'</b> · '+H(e.who||'–')+(e.sub?' <span class="cc-dim">'+H(e.sub)+'</span>':'')+(e.done?' <span class="badge green-badge" style="font-size:10px;padding:1px 7px">erledigt</span>':'')+'</div>'+
+      (e.txt?'<div class="cc-ev-t">'+H(e.txt)+'</div>':'')+'</div>'+
+      '<div class="cc-ev-ts" title="'+fmt(e.ts)+'">'+ago(e.ts)+'</div></div>';
+  }
+  function renderFeed(){
+    var wrap=document.getElementById('cc-feed'); if(!wrap) return;
+    var f=(document.getElementById('cc-feed-type')||{}).value||'loud';
+    var q=((document.getElementById('cc-feed-q')||{}).value||'').toLowerCase();
+    var ls=lastSeen();
+    var list=S.events.filter(function(e){
+      if(f==='loud' && !T[e.type].loud) return false;
+      if(f==='money' && !MONEY[e.type]) return false;
+      if(f==='open' && (e.done || !{bug:1,cancel:1,voice:1,appeal:1,payfail:1}[e.type])) return false;
+      if(T[f] && e.type!==f) return false;
+      return !q || [e.who,e.sub,e.txt,e.uid].join(' ').toLowerCase().indexOf(q)>=0;
+    }).slice(0,400);
+    wrap.innerHTML = list.length ? list.map(function(e){ return feedRow(e, ls); }).join('') : '<div class="empty-state">Keine Ereignisse.</div>';
+  }
+  function openEvent(e){
+    if(e.type==='bug'){ switchTab('bugreports'); setTimeout(function(){ if(typeof openBrModalById==='function' && allBugReports.some(function(b){return b._id===e.id;})) openBrModalById(e.id); }, 900); return; }
+    if(e.type==='cancel'){ switchTab('cancel'); return; }
+    if(e.type==='error'){ switchTab('errors'); return; }
+    if(e.type==='voice'){ switchTab('voices'); return; }
+    if(e.type==='appeal'){ switchTab('servers'); return; }
+    if(e.type==='server'){ dbOpen('apexServers/'+e.id); return; }
+    if(e.type==='mentor'){ dbOpen('apexMentorships/'+e.id); return; }
+    if(e.type==='post'){ dbOpen('apexFeed/'+e.id); return; }
+    if(e.uid) user360(e.uid);
+  }
+
+  /* ─────────── Übersicht ─────────── */
+  function kpi(label, val, cls, sub, click){
+    return '<div class="stat-card glass'+(click?' cc-click':'')+'"'+(click?' onclick="'+click+'"':'')+'><div class="stat-label">'+label+'</div><div class="stat-value '+(cls||'')+'">'+val+'</div>'+(sub?'<div class="cc-kpi-sub">'+sub+'</div>':'')+'</div>';
+  }
+  function usersFilter(v){ return "CC.usersBy('"+v+"')"; }
+  function renderOverview(){
+    var box=document.getElementById('cc-kpis'); if(!box) return;
+    var us=Object.keys(S.users).map(function(k){ return S.users[k]; }), now=Date.now();
+    var t0=new Date(); t0.setHours(0,0,0,0);
+    var created=function(u){ return toMs(u.createdAt||u.created); };
+    var today=us.filter(function(u){ return created(u)>=t0.getTime(); }).length;
+    var d7=us.filter(function(u){ return created(u)>=now-7*DAY; }).length;
+    var d30=us.filter(function(u){ return created(u)>=now-30*DAY; }).length;
+    var pro=us.filter(isPro), life=us.filter(function(u){ return u.lifetime===true; }).length;
+    var trial=us.filter(onTrial).length, trialUsed=us.filter(function(u){ return u.trialUsed; }).length;
+    var cancel=us.filter(function(u){ return u.cancelAtPeriodEnd===true; }).length;
+    var past=us.filter(function(u){ return u.subscriptionStatus==='past_due'||u.subscriptionStatus==='unpaid'; }).length;
+    var pro30=us.filter(function(u){ return toMs(u.planActivatedAt)>=now-30*DAY; }).length;
+    var conv=us.length? (pro.length/us.length*100).toFixed(1) : '0';
+    var seats=S.meta.seats||{};
+    box.innerHTML=
+      kpi('Nutzer gesamt', us.length, 'blue', '+'+today+' heute · +'+d7+' in 7 T', "switchTab('users')")+
+      kpi('Neu in 30 Tagen', d30, 'gold', (us.length?Math.round(d30/us.length*100):0)+' % des Bestands', "CC.openFeedType('signup')")+
+      kpi('Pro aktiv', pro.length, 'green', conv+' % Conversion · +'+pro30+' in 30 T', usersFilter('pro'))+
+      kpi('Lifetime', life, 'gold', (seats.sold!=null? seats.sold+' / 500 Plätze verkauft':'Founding-Plätze'), usersFilter('lifetime'))+
+      kpi('Trials aktiv', trial, 'blue', trialUsed+' haben je getestet', usersFilter('trial'))+
+      kpi('Kündigung vorgemerkt', cancel, cancel?'red':'', 'läuft zum Periodenende aus', usersFilter('cancel'))+
+      kpi('Zahlung offen', past, past?'red':'', 'past_due / unpaid', usersFilter('pastdue'))+
+      kpi('Community', (S.cols.servers||[]).length+' Server', '', (S.cols.mentors||[]).length+' Mentorings', "switchTab('servers')");
+
+    // To-dos
+    var openBugs=(S.cols.bugs||[]).filter(function(b){ return !b.status||b.status==='open'; }).length;
+    var openCx=(S.cols.cancels||[]).filter(function(c){ return c.status!=='done'; }).length;
+    var pendV=(S.cols.voices||[]).filter(function(v){ return v.approved!==true; }).length;
+    var pendA=(S.cols.appeals||[]).filter(function(a){ return (a.status||'pending')==='pending'; }).length;
+    var err24=(S.cols.errors||[]).filter(function(e){ return firstTs(e)>=now-DAY; }).length;
+    var todo=[
+      [openCx,'📄','Kündigungen unbearbeitet — Eingang muss bestätigt werden (§ 312k)',"switchTab('cancel')",'red'],
+      [past,'💳','Nutzer mit fehlgeschlagener Zahlung',usersFilter('pastdue'),'red'],
+      [openBugs,'🐛','Offene Bug Reports & Wünsche',"switchTab('bugreports')",'gold'],
+      [pendA,'⚖️','Entbannungsanträge warten',"switchTab('servers')",'gold'],
+      [pendV,'⭐','Testimonials warten auf Freigabe',"switchTab('voices')",'gold'],
+      [err24,'🐞','JS-Fehler in den letzten 24 Std',"switchTab('errors')",err24>20?'red':'gold']
+    ].filter(function(r){ return r[0]>0; });
+    document.getElementById('cc-todo').innerHTML = todo.length ? todo.map(function(r){
+      return '<div class="cc-todo" onclick="'+r[3]+'"><span class="cc-todo-n '+r[4]+'">'+r[0]+'</span><span>'+r[1]+' '+r[2]+'</span><span class="cc-dim">→</span></div>';
+    }).join('') : '<div class="empty-state">✓ Alles erledigt.</div>';
+
+    var ls=lastSeen();
+    document.getElementById('cc-recent').innerHTML = S.events.filter(function(e){ return T[e.type].loud; }).slice(0,12).map(function(e){ return feedRow(e, ls); }).join('') || '<div class="empty-state">Noch keine Ereignisse.</div>';
+    renderChart(us);
+  }
+  function renderChart(us){
+    var el=document.getElementById('cc-chart'); if(!el) return;
+    var days=30, t0=new Date(); t0.setHours(0,0,0,0); var start=t0.getTime()-(days-1)*DAY;
+    var su=new Array(days).fill(0), pr=new Array(days).fill(0);
+    us.forEach(function(u){
+      var a=toMs(u.createdAt||u.created), b=toMs(u.planActivatedAt);
+      if(a>=start) su[Math.min(days-1,Math.floor((a-start)/DAY))]++;
+      if(b>=start) pr[Math.min(days-1,Math.floor((b-start)/DAY))]++;
+    });
+    var max=Math.max(1, Math.max.apply(null, su), Math.max.apply(null, pr));
+    var W=600, Hh=160, bw=W/days;
+    var bars='';
+    for(var i=0;i<days;i++){
+      var h1=su[i]/max*(Hh-18), h2=pr[i]/max*(Hh-18), x=i*bw, d=new Date(start+i*DAY).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
+      bars+='<g><title>'+d+': '+su[i]+' Anmeldungen, '+pr[i]+' Pro</title>'+
+        '<rect x="'+(x+bw*0.14)+'" y="'+(Hh-h1)+'" width="'+(bw*0.36)+'" height="'+h1+'" rx="2" fill="var(--blue)" opacity=".85"/>'+
+        '<rect x="'+(x+bw*0.52)+'" y="'+(Hh-h2)+'" width="'+(bw*0.36)+'" height="'+h2+'" rx="2" fill="var(--profit)"/>'+
+        '<rect x="'+x+'" y="0" width="'+bw+'" height="'+Hh+'" fill="transparent"/></g>';
+    }
+    var sum=function(a){ return a.reduce(function(x,y){return x+y;},0); };
+    el.innerHTML='<div class="cc-legend"><span><i style="background:var(--blue)"></i>Anmeldungen ('+sum(su)+')</span><span><i style="background:var(--profit)"></i>Pro-Käufe ('+sum(pr)+')</span><span class="cc-dim">max '+max+'/Tag</span></div>'+
+      '<svg viewBox="0 0 '+W+' '+(Hh+16)+'" style="width:100%;height:auto;display:block"><line x1="0" x2="'+W+'" y1="'+Hh+'" y2="'+Hh+'" stroke="var(--rim2)"/>'+bars+
+      '<text x="0" y="'+(Hh+13)+'" fill="var(--ink3)" font-size="10">'+new Date(start).toLocaleDateString('de-DE')+'</text><text x="'+W+'" y="'+(Hh+13)+'" fill="var(--ink3)" font-size="10" text-anchor="end">heute</text></svg>';
+  }
+
+  /* ─────────── Datenbank-Explorer ─────────── */
+  var COLLS=['apexUsers','apexUserEmails','apexServers','apexFeed','apexDMs','apexMentorships','apexAnnouncements','apexTestimonials','bugReports','apexCancellations','apexErrors','apexBanAppeals','apexModNotices','apexReports','apexSharedReplays','apexReferralCodes','apexApiKeys','apexExchangeKeys','ingestTokens','tradovateTokens','apexMeta','apexLifetimeSeats','apexAdminLog'];
+  var SUBS={
+    apexUsers:['private','shared','replays','strategies','academy','drills','inbox'],
+    apexServers:['channels','feed','members','resources','modlog','invites','voice'],
+    apexMentorships:['feedback','goals'], apexDMs:['messages'], apexFeed:['comments'],
+    channels:['messages'], feed:['comments'], drills:['sessions']
+  };
+  function initDb(){
+    var sel=document.getElementById('cc-db-coll'); if(!sel || sel.options.length) return;
+    sel.innerHTML='<option value="">— Sammlung wählen —</option>'+COLLS.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+  }
+  function segs(p){ return String(p||'').trim().replace(/^\/+|\/+$/g,'').split('/').filter(Boolean); }
+  function dbOpen(path, keepTab){
+    var s=segs(path); if(!s.length) return;
+    if(!keepTab && !isActive('db')) switchTab('db');
+    var docId=null; if(s.length%2===0){ docId=s.pop(); }
+    var coll=s.join('/');
+    document.getElementById('cc-db-path').value=coll+(docId?'/'+docId:'');
+    var sel=document.getElementById('cc-db-coll'); if(sel) sel.value=COLLS.indexOf(coll)>=0?coll:'';
+    if(S.db.path!==coll){ S.db={path:coll, docs:[], last:null, sel:null, done:false}; loadMore(docId); }
+    else if(docId) selectDoc(docId);
+    renderCrumbs();
+  }
+  function renderCrumbs(){
+    var s=segs(S.db.path), out=[], acc=[];
+    s.forEach(function(x){ acc.push(x); var p=acc.join('/'); out.push('<a onclick="CC.dbOpen(\''+H(p)+'\')">'+H(x)+'</a>'); });
+    document.getElementById('cc-db-crumbs').innerHTML=out.join(' <span class="cc-dim">/</span> ')+' <span class="cc-dim">· '+S.db.docs.length+(S.db.done?'':'+')+' Dokumente</span>';
+  }
+  function loadMore(thenSelect){
+    var list=document.getElementById('cc-db-list');
+    if(!S.db.docs.length) list.innerHTML='<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+    var q=db.collection(S.db.path).orderBy(firebase.firestore.FieldPath.documentId()).limit(200);
+    if(S.db.last) q=q.startAfter(S.db.last);
+    var p=S.db.path;
+    q.get().then(function(snap){
+      if(p!==S.db.path) return;
+      snap.docs.forEach(function(d){ S.db.docs.push({id:d.id, data:d.data()}); });
+      S.db.last=snap.docs.length?snap.docs[snap.docs.length-1]:S.db.last; S.db.done=snap.docs.length<200;
+      dbRenderList(); renderCrumbs();
+      if(thenSelect) selectDoc(thenSelect);
+    }).catch(function(err){ list.innerHTML='<div class="empty-state" style="color:var(--loss)">⚠ '+H(err.message)+'</div>'; if(thenSelect) selectDoc(thenSelect); });
+  }
+  function docLabel(d){
+    var x=d.data||{}, n=x.displayName||x.name||x.title||x.username||x.email||x.msg||x.text||'';
+    if(S.db.path==='apexUsers') n=userName(Object.assign({},x))+(S.emails[d.id]?' · '+S.emails[d.id]:'');
+    return String(n).slice(0,80);
+  }
+  function dbRenderList(){
+    var q=((document.getElementById('cc-db-q')||{}).value||'').toLowerCase(), list=document.getElementById('cc-db-list');
+    var docs=S.db.docs.filter(function(d){ if(!q) return true; try{ return (d.id+' '+JSON.stringify(ser(d.data))+' '+(S.emails[d.id]||'')).toLowerCase().indexOf(q)>=0; }catch(e){ return true; } });
+    list.innerHTML=(docs.length?docs.map(function(d){
+      return '<div class="cc-doc'+(S.db.sel===d.id?' sel':'')+'" onclick="CC.dbSelect(\''+H(d.id)+'\')"><code>'+H(d.id)+'</code><span class="cc-dim">'+H(docLabel(d))+'</span></div>';
+    }).join(''):'<div class="empty-state">Keine Dokumente.</div>')+
+      (S.db.done?'':'<div style="padding:12px;text-align:center"><button class="btn-small" onclick="CC.dbMore()">Weitere laden</button></div>');
+  }
+
+  // Firestore ⇄ JSON, ohne Typen zu verlieren
+  function ser(v){
+    if(v==null || typeof v!=='object') return v;
+    if(v instanceof firebase.firestore.Timestamp) return {__ts:v.toDate().toISOString()};
+    if(v instanceof firebase.firestore.DocumentReference) return {__ref:v.path};
+    if(v instanceof firebase.firestore.GeoPoint) return {__geo:[v.latitude, v.longitude]};
+    if(Array.isArray(v)) return v.map(ser);
+    var o={}; Object.keys(v).sort().forEach(function(k){ o[k]=ser(v[k]); }); return o;
+  }
+  function des(v){
+    if(v==null || typeof v!=='object') return v;
+    if(Array.isArray(v)) return v.map(des);
+    var k=Object.keys(v);
+    if(k.length===1 && k[0]==='__ts') return firebase.firestore.Timestamp.fromDate(new Date(v.__ts));
+    if(k.length===1 && k[0]==='__ref') return db.doc(v.__ref);
+    if(k.length===1 && k[0]==='__geo') return new firebase.firestore.GeoPoint(v.__geo[0], v.__geo[1]);
+    if(k.length===1 && k[0]==='__now') return firebase.firestore.FieldValue.serverTimestamp();
+    var o={}; k.forEach(function(x){ o[x]=des(v[x]); }); return o;
+  }
+
+  function selectDoc(id){
+    S.db.sel=id; dbRenderList();
+    var box=document.getElementById('cc-db-doc'), path=S.db.path+'/'+id;
+    box.innerHTML='<div class="empty-state"><span class="loading-spinner"></span> Lädt…</div>';
+    db.doc(path).get().then(function(d){
+      var data=d.exists?d.data():{}, last=segs(S.db.path).pop();
+      var subs=(SUBS[last]||[]).map(function(sc){ return '<button class="btn-small" onclick="CC.dbOpen(\''+H(path+'/'+sc)+'\')">📁 '+sc+'</button>'; }).join('');
+      box.innerHTML=
+        '<div class="cc-doc-h"><div><div class="cc-dim" style="font-size:11px">'+H(S.db.path)+'</div><code style="font-size:13px;color:var(--gold)">'+H(id)+'</code>'+(d.exists?'':' <span class="badge dim-badge">existiert nicht</span>')+'</div>'+
+          '<button class="btn-small" onclick="navigator.clipboard.writeText(\''+H(path)+'\');showToast(\'Pfad kopiert\')">⧉ Pfad</button></div>'+
+        (last==='apexUsers'?'<div id="cc-u360"></div>':'')+
+        '<div class="cc-subs">'+subs+'<input type="text" placeholder="Unter-Sammlung…" style="width:150px;padding:6px 10px;font-size:12px" onkeydown="if(event.key===\'Enter\')CC.dbOpen(\''+H(path)+'/\'+this.value)"></div>'+
+        '<textarea id="cc-db-json" spellcheck="false" class="cc-json"></textarea>'+
+        '<div class="cc-dim" style="font-size:11px;margin-top:6px">Zeitstempel: <code>{"__ts":"2026-09-22T10:00:00Z"}</code> · Serverzeit: <code>{"__now":1}</code> · Referenz: <code>{"__ref":"pfad"}</code></div>'+
+        '<div class="modal-footer"><button class="btn-danger" onclick="CC.dbDelete()">Löschen</button><button class="btn-success" onclick="CC.dbSave()">Speichern</button></div>';
+      document.getElementById('cc-db-json').value=JSON.stringify(ser(data), null, 2);
+      if(last==='apexUsers') render360(id, data);
+    }).catch(function(err){ box.innerHTML='<div class="empty-state" style="color:var(--loss)">⚠ '+H(err.message)+'</div>'; });
+  }
+  function audit(action, path, extra){
+    try{ db.collection('apexAdminLog').add(Object.assign({ts:Date.now(), action:action, path:path, by:adminUid||''}, extra||{})); }catch(e){}
+  }
+  function dbSave(){
+    var id=S.db.sel; if(!id) return; var path=S.db.path+'/'+id, data;
+    try{ data=des(JSON.parse(document.getElementById('cc-db-json').value)); }catch(e){ showToast('Ungültiges JSON: '+e.message, true); return; }
+    if(!confirm('Dokument '+path+' komplett mit diesem Inhalt überschreiben?')) return;
+    db.doc(path).set(data).then(function(){
+      audit('set', path, {keys:Object.keys(data).slice(0,40)}); showToast('✓ Gespeichert');
+      var i=S.db.docs.findIndex(function(d){return d.id===id;}); if(i>=0) S.db.docs[i].data=data; else S.db.docs.unshift({id:id,data:data});
+      selectDoc(id);
+    }).catch(function(err){ showToast('Fehler: '+err.message, true); });
+  }
+  function dbDelete(){
+    var id=S.db.sel; if(!id) return; var path=S.db.path+'/'+id;
+    if(prompt('Zum endgültigen Löschen von '+path+' die Dokument-ID eintippen:')!==id) return;
+    var backup=document.getElementById('cc-db-json').value;
+    db.doc(path).delete().then(function(){
+      audit('delete', path, {backup:backup.slice(0,20000)}); showToast('✓ Gelöscht (Sicherung im Admin-Protokoll)');
+      S.db.docs=S.db.docs.filter(function(d){return d.id!==id;}); S.db.sel=null; dbRenderList();
+      document.getElementById('cc-db-doc').innerHTML='<div class="empty-state">Gelöscht.</div>';
+    }).catch(function(err){ showToast('Fehler: '+err.message, true); });
+  }
+  function dbNew(){
+    if(!S.db.path){ showToast('Erst eine Sammlung öffnen', true); return; }
+    var id=prompt('ID für das neue Dokument (leer = automatisch):'); if(id===null) return;
+    var ref=id.trim()?db.collection(S.db.path).doc(id.trim()):db.collection(S.db.path).doc();
+    ref.set({createdAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){
+      audit('create', ref.path); S.db.docs.unshift({id:ref.id, data:{}}); selectDoc(ref.id);
+    }).catch(function(err){ showToast('Fehler: '+err.message, true); });
+  }
+  function dbExport(){
+    if(!S.db.docs.length){ showToast('Nichts geladen', true); return; }
+    var out={}; S.db.docs.forEach(function(d){ out[d.id]=ser(d.data); });
+    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
+    a.download=S.db.path.replace(/\//g,'_')+'-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  }
+
+  /* ─────────── Nutzer 360° ─────────── */
+  function user360(uid){ switchTab('db'); dbOpen('apexUsers/'+uid, true); }
+  function render360(uid, u){
+    var el=document.getElementById('cc-u360'); if(!el) return;
+    var email=S.emails[uid]||'', pro=isPro(u), now=Date.now();
+    var status = u.lifetime ? '<span class="badge gold-badge">👑 LIFETIME</span>' : pro ? '<span class="badge green-badge">PRO</span>' : onTrial(u) ? '<span class="badge gold-badge">TRIAL bis '+fmt(toMs(u.trialUntil))+'</span>' : '<span class="badge dim-badge">Free</span>';
+    var flags=(u.cancelAtPeriodEnd?' <span class="badge" style="color:var(--caution)">kündigt zum '+fmt(toMs(u.currentPeriodEnd))+'</span>':'')+
+      ((u.subscriptionStatus==='past_due'||u.subscriptionStatus==='unpaid')?' <span class="badge" style="color:var(--loss)">'+H(u.subscriptionStatus)+'</span>':'');
+    var evs=S.events.filter(function(e){ return e.uid===uid; }).slice(0,30);
+    var bugs=(S.cols.bugs||[]).filter(function(b){ return b.uid===uid; }).length;
+    var errs=(S.cols.errors||[]).filter(function(e){ return e.uid===uid; }).length;
+    el.innerHTML='<div class="cc-360">'+
+      '<div class="cc-360-top"><div><div style="font-family:var(--font-display);font-size:18px;font-weight:700">'+H(userName(u))+'</div>'+
+        '<div class="cc-dim">'+(u.username?'@'+H(u.username)+' · ':'')+H(email||'keine E-Mail hinterlegt')+'</div>'+
+        '<div style="margin-top:8px">'+status+flags+'</div></div>'+
+        '<div class="cc-dim" style="font-size:11.5px;text-align:right;line-height:1.7">Registriert '+fmt(toMs(u.createdAt||u.created))+'<br>Pro seit '+fmt(toMs(u.planActivatedAt))+'<br>'+bugs+' Reports · '+errs+' JS-Fehler</div></div>'+
+      '<div class="cc-actions">'+
+        (pro?'<button class="btn-danger btn-small" onclick="CC.act(\''+uid+'\',\'revoke\')">– Pro entziehen</button>':'<button class="btn-success btn-small" onclick="CC.act(\''+uid+'\',\'pro30\')">+ Pro 30 Tage</button><button class="btn-success btn-small" onclick="CC.act(\''+uid+'\',\'pro\')">+ Pro unbegrenzt</button>')+
+        '<button class="btn-small" onclick="CC.act(\''+uid+'\',\'trial7\')">⏳ Trial +7 Tage</button>'+
+        '<button class="btn-small" onclick="CC.act(\''+uid+'\',\'lifetime\')">👑 Lifetime '+(u.lifetime?'aus':'an')+'</button>'+
+        '<button class="btn-small" onclick="CC.act(\''+uid+'\',\'resettrial\')">↺ Trial zurücksetzen</button>'+
+        '<button class="btn-blue btn-small" onclick="openEditModalByUid(\''+uid+'\')">✏ Profil</button>'+
+        (email?'<a class="btn-small" href="mailto:'+encodeURIComponent(email)+'">✉ Mail</a>':'')+
+        (u.stripeCustomerId?'<a class="btn-small" target="_blank" rel="noopener" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(u.stripeCustomerId)+'">💳 Stripe</a>':'')+
+        '<button class="btn-small" onclick="CC.dbOpen(\'apexUsers/'+uid+'/private\')">📓 Journal</button>'+
+        '<button class="btn-small" onclick="CC.dbOpen(\'apexUserEmails/'+uid+'\')">📧 E-Mail-Dok</button>'+
+      '</div>'+
+      (evs.length?'<div class="cc-360-tl">'+evs.map(function(e){ return '<div><span>'+T[e.type].ic+'</span> '+T[e.type].l+(e.txt?' <span class="cc-dim">— '+H(e.txt.slice(0,80))+'</span>':'')+'<span class="cc-dim" style="margin-left:auto">'+fmt(e.ts)+'</span></div>'; }).join('')+'</div>':'')+
+      '</div>';
+  }
+  function act(uid, what){
+    var u=S.users[uid]||{}, p={}, now=Date.now(), FVx=firebase.firestore.FieldValue;
+    if(what==='pro'){ p={plan:'pro', subscriptionActive:true, proExpiry:FVx.delete()}; }
+    if(what==='pro30'){ p={plan:'pro', subscriptionActive:true, proExpiry:new Date(now+30*DAY).toISOString().slice(0,10)}; }
+    if(what==='revoke'){ if(!confirm('Pro sofort entziehen? (Ein laufendes Stripe-Abo bleibt davon unberührt — dort separat kündigen.)')) return; p={plan:'free', subscriptionActive:false, lifetime:false, proExpiry:FVx.delete()}; }
+    if(what==='trial7'){ p={trialUntil:Math.max(now, Number(u.trialUntil||0))+7*DAY, trialUsed:true, trialStartedAt:u.trialStartedAt||now}; }
+    if(what==='resettrial'){ p={trialUntil:FVx.delete(), trialUsed:false, trialStartedAt:FVx.delete()}; }
+    if(what==='lifetime'){ p = u.lifetime ? {lifetime:false} : {lifetime:true, plan:'pro', subscriptionActive:true}; }
+    db.collection('apexUsers').doc(uid).update(p).then(function(){
+      audit('user:'+what, 'apexUsers/'+uid); showToast('✓ '+what+' für '+userName(u));
+      if(S.db.sel===uid) setTimeout(function(){ selectDoc(uid); }, 400);
+    }).catch(function(err){ showToast('Fehler: '+err.message, true); });
+  }
+
+  /* ─────────── System ─────────── */
+  var WORKERS=[
+    ['Payments / Checkout','https://apex-checkout.4kjyyyftv6.workers.dev'],
+    ['Stripe-Webhook','https://apex-stripe-webhook.4kjyyyftv6.workers.dev'],
+    ['Public REST API','https://apexapi.4kjyyyftv6.workers.dev'],
+    ['Broker-Ingest','https://apex-ingest.4kjyyyftv6.workers.dev'],
+    ['Exchange-Sync','https://exchangesync.4kjyyyftv6.workers.dev'],
+    ['KI-Coach','https://spring-fire-06a2.4kjyyyftv6.workers.dev'],
+    ['Kerzen','https://candles-worker.4kjyyyftv6.workers.dev'],
+    ['Dukascopy','https://dukascopy-worker.4kjyyyftv6.workers.dev'],
+    ['Wirtschaftskalender','https://econal.4kjyyyftv6.workers.dev']
+  ];
+  function loadSystem(){
+    var box=document.getElementById('cc-health');
+    box.innerHTML=WORKERS.map(function(w,i){ return '<div class="stat-card glass" id="cc-h'+i+'"><div class="stat-label">'+w[0]+'</div><div class="stat-value" style="font-size:18px">…</div></div>'; }).join('');
+    WORKERS.forEach(function(w,i){
+      var t=performance.now(), ctl=new AbortController(), to=setTimeout(function(){ ctl.abort(); }, 8000);
+      fetch(w[1]+'/health',{signal:ctl.signal,cache:'no-store'}).then(function(r){ return r.text().then(function(tx){ return {ok:r.ok, st:r.status, tx:tx}; }); })
+      .then(function(r){ clearTimeout(to); var ms=Math.round(performance.now()-t), j=null; try{ j=JSON.parse(r.tx); }catch(e){}
+        paint(i, r.ok, (r.ok?'✓ ':'✗ ')+r.status, ms+' ms'+(j&&(j.version||j.build)?' · '+(j.version||j.build):'')); })
+      .catch(function(e){ clearTimeout(to); paint(i, false, '✗ offline', e.name==='AbortError'?'Timeout 8 s':e.message); });
+    });
+    function paint(i, ok, v, sub){ var c=document.getElementById('cc-h'+i); if(!c) return;
+      c.querySelector('.stat-value').innerHTML='<span style="color:'+(ok?'var(--profit)':'var(--loss)')+'">'+H(v)+'</span>';
+      c.insertAdjacentHTML('beforeend','<div class="cc-kpi-sub">'+H(sub)+'</div>'); }
+    var lg=document.getElementById('cc-adminlog');
+    db.collection('apexAdminLog').orderBy('ts','desc').limit(100).get().then(function(snap){
+      lg.innerHTML=snap.empty?'<div class="empty-state">Noch keine Admin-Änderungen.</div>':
+        '<div class="table-wrap"><table><thead><tr><th>Zeit</th><th>Aktion</th><th>Pfad</th></tr></thead><tbody>'+snap.docs.map(function(d){ var x=d.data();
+          return '<tr><td style="font-size:12px;color:var(--ink3)">'+fmt(x.ts)+'</td><td><span class="badge '+(x.action==='delete'?'red-badge':'gold-badge')+'">'+H(x.action)+'</span></td><td><a style="cursor:pointer;color:var(--blue)" onclick="CC.dbOpen(\''+H(x.path)+'\')"><code>'+H(x.path)+'</code></a></td></tr>'; }).join('')+'</tbody></table></div>';
+    }).catch(function(err){ lg.innerHTML='<div class="empty-state" style="color:var(--loss)">⚠ '+H(err.message)+' — firestore.rules schon veröffentlicht?</div>'; });
+  }
+
+
+  /* ─────────── Umsatz (Stripe über den Checkout-Worker) ─────────── */
+  var RV=null, RVts=0;
+  function money(c, cur){ return ((c||0)/100).toLocaleString('de-DE',{style:'currency',currency:(cur||'eur').toUpperCase(),maximumFractionDigits:(Math.abs(c)>=100000?0:2)}); }
+  function loadRevenue(force){
+    if(RV && !force && Date.now()-RVts<5*60000){ renderRevenue(); return; }
+    document.getElementById('rv-kpis').innerHTML='<div class="empty-state" style="grid-column:1/-1"><span class="loading-spinner"></span> Stripe wird gelesen…</div>';
+    fetch(WORKER_URL+'/admin/revenue',{headers:adminHeaders()}).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, st:r.status, j:j}; }); })
+    .then(function(r){
+      if(!r.ok || r.j.error){ document.getElementById('rv-kpis').innerHTML='<div class="empty-state" style="grid-column:1/-1;color:var(--loss)">⚠ '+H(r.j.error||('HTTP '+r.st))+(r.st===404?' — Checkout-Worker noch nicht neu deployed?':'')+(r.st===401?' — Admin-Secret prüfen':'')+'</div>'; return; }
+      RV=r.j; RVts=Date.now(); renderRevenue();
+    }).catch(function(e){ document.getElementById('rv-kpis').innerHTML='<div class="empty-state" style="grid-column:1/-1;color:var(--loss)">⚠ '+H(e.message)+'</div>'; });
+  }
+  function renderRevenue(){
+    var r=RV; if(!r) return; var cur=r.currency;
+    var ms=r.months||[], thisM=new Date().toISOString().slice(0,7);
+    var cm=ms.filter(function(x){return x.month===thisM;})[0]||{gross:0,net:0,payments:0};
+    var last=ms.filter(function(x){return x.month<thisM;}).slice(-1)[0];
+    var sum=function(k){ return ms.reduce(function(a,x){return a+x[k];},0); };
+    var act=(r.subscriptions.active||0), past=(r.subscriptions.past_due||0);
+    var avail=(r.balance.available||[]).reduce(function(a,b){return a+b.amount;},0), pend=(r.balance.pending||[]).reduce(function(a,b){return a+b.amount;},0);
+    var delta = last && last.net ? Math.round((cm.net-last.net)/Math.abs(last.net)*100) : null;
+    document.getElementById('rv-kpis').innerHTML=
+      kpi('MRR', money(r.mrr,cur), 'green', 'ARR '+money(r.arr,cur)+' · Ø '+(act?money(r.mrr/act,cur):'–')+' / Abo')+
+      kpi('Netto diesen Monat', money(cm.net,cur), 'gold', cm.payments+' Zahlungen'+(delta!=null?' · '+(delta>=0?'+':'')+delta+' % ggü. Vormonat':''))+
+      kpi('Netto 12 Monate', money(sum('net'),cur), 'blue', 'brutto '+money(sum('gross'),cur))+
+      kpi('Aktive Abos', act, 'green', (past?past+' überfällig · ':'')+r.cancelScheduled+' kündigen')+
+      kpi('Abgänge 30 Tage', r.churned30, r.churned30?'red':'', act?('≈ '+(r.churned30/(act+r.churned30)*100).toFixed(1)+' % Churn'):'')+
+      kpi('Stripe-Guthaben', money(avail,cur), '', money(pend,cur)+' ausstehend')+
+      kpi('Gebühren 12 M', money(sum('fees'),cur), 'red', 'Erstattungen '+money(sum('refunds'),cur))+
+      kpi('Partner-Anteile 12 M', money(sum('partner'),cur), 'gold', 'an Influencer ausgezahlt');
+    document.getElementById('rv-stamp').textContent='Direkt aus Stripe · Stand '+fmt(r.generatedAt)+(r.truncated?' · ⚠ gekürzt (sehr viele Transaktionen)':'');
+
+    // Chart: brutto (hell) hinter netto
+    var W=600, Hh=170, n=Math.max(ms.length,1), bw=W/n, mx=Math.max.apply(null,[1].concat(ms.map(function(x){return x.gross;})));
+    document.getElementById('rv-chart').innerHTML=!ms.length?'<div class="empty-state">Noch keine Umsätze.</div>':
+      '<div class="cc-legend"><span><i style="background:rgba(201,168,76,.35)"></i>Brutto</span><span><i style="background:var(--profit)"></i>Netto (nach Gebühren, Erstattungen, Partnern)</span></div>'+
+      '<svg viewBox="0 0 '+W+' '+(Hh+18)+'" style="width:100%;height:auto;display:block"><line x1="0" x2="'+W+'" y1="'+Hh+'" y2="'+Hh+'" stroke="var(--rim2)"/>'+
+      ms.map(function(x,i){ var g=x.gross/mx*(Hh-20), nt=Math.max(0,x.net)/mx*(Hh-20), X=i*bw;
+        return '<g><title>'+x.month+': brutto '+money(x.gross,cur)+', netto '+money(x.net,cur)+'</title><rect x="'+(X+bw*.15)+'" y="'+(Hh-g)+'" width="'+(bw*.7)+'" height="'+g+'" rx="3" fill="rgba(201,168,76,.3)"/>'+
+          '<rect x="'+(X+bw*.3)+'" y="'+(Hh-nt)+'" width="'+(bw*.4)+'" height="'+nt+'" rx="2" fill="var(--profit)"/>'+
+          '<text x="'+(X+bw/2)+'" y="'+(Hh+13)+'" fill="var(--ink3)" font-size="10" text-anchor="middle">'+x.month.slice(5)+'/'+x.month.slice(2,4)+'</text></g>'; }).join('')+'</svg>';
+
+    var st=r.subscriptions||{}, pl=r.plans||{};
+    document.getElementById('rv-subs').innerHTML=
+      Object.keys(st).sort(function(a,b){return st[b]-st[a];}).map(function(k){ return '<div class="cc-todo" style="cursor:default"><span class="cc-todo-n '+(k==='active'?'gold':(k==='past_due'||k==='unpaid'?'red':''))+'">'+st[k]+'</span><span>'+H(k)+'</span></div>'; }).join('')+
+      '<div class="section-title" style="margin:16px 0 6px">Aktive Tarife</div>'+
+      (Object.keys(pl).map(function(k){ return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0"><span>'+H(k)+'</span><b>'+pl[k]+'×</b></div>'; }).join('')||'<div class="cc-dim">–</div>');
+
+    document.getElementById('rv-months').innerHTML='<div class="table-wrap"><table><thead><tr><th>Monat</th><th>Zahlungen</th><th>Brutto</th><th>Gebühren</th><th>Erstattungen</th><th>Partner</th><th>Netto</th></tr></thead><tbody>'+
+      ms.slice().reverse().map(function(x){ return '<tr><td><b>'+x.month+'</b></td><td>'+x.payments+'</td><td>'+money(x.gross,cur)+'</td><td style="color:var(--loss)">'+money(x.fees,cur)+'</td><td style="color:var(--loss)">'+money(x.refunds,cur)+'</td><td style="color:var(--gold)">'+money(x.partner,cur)+'</td><td style="color:var(--profit);font-weight:600">'+money(x.net,cur)+'</td></tr>'; }).join('')+'</tbody></table></div>';
+
+    document.getElementById('rv-recent').innerHTML='<div class="table-wrap"><table><thead><tr><th>Zeit</th><th>Kunde</th><th>Betrag</th><th>Status</th><th></th></tr></thead><tbody>'+
+      (r.recent||[]).map(function(c){
+        var u=Object.keys(S.users).map(function(k){return S.users[k];}).filter(function(x){ return (c.customer&&x.stripeCustomerId===c.customer)||(c.email&&x.email&&x.email.toLowerCase()===c.email.toLowerCase()); })[0];
+        var stc=c.refunded?'<span class="badge red-badge">erstattet</span>':c.status==='succeeded'?'<span class="badge green-badge">bezahlt</span>':'<span class="badge red-badge">'+H(c.status)+'</span>';
+        return '<tr><td style="font-size:12px;color:var(--ink3)">'+fmt(c.created*1000)+'</td><td>'+(u?'<a style="cursor:pointer;color:var(--blue)" onclick="CC.user360(\''+u.uid+'\')">'+H(userName(u))+'</a> ':'')+'<span class="cc-dim">'+H(c.email||c.customer||'–')+'</span></td>'+
+          '<td><b>'+money(c.amount,c.currency)+'</b></td><td>'+stc+'</td><td><a class="btn-small" style="text-decoration:none" target="_blank" rel="noopener" href="https://dashboard.stripe.com/payments/'+encodeURIComponent(c.id)+'">↗</a></td></tr>'; }).join('')+'</tbody></table></div>';
+  }
+
+  /* ─────────── öffentliche API ─────────── */
+  window.CC={
+    start:start, stop:stop,
+    onTab:function(t){
+      if(t==='feed'){ initFeedControls(); renderFeed(); setTimeout(function(){ LS('ccSeenTs', String(Date.now())); updateBell(); }, 1500); }
+      if(t==='overview') renderOverview();
+      if(t==='db') initDb();
+      if(t==='system') loadSystem();
+      if(t==='revenue') loadRevenue(false);
+    },
+    openFeed:function(){ switchTab('feed'); },
+    openFeedType:function(k){ switchTab('feed'); var s=document.getElementById('cc-feed-type'); if(s){ s.value=k; renderFeed(); } },
+    renderFeed:renderFeed,
+    markAllRead:function(){ LS('ccSeenTs', String(Date.now())); updateBell(); renderFeed(); renderOverview(); },
+    toggleNotif:function(){
+      if(LS('ccNotif')==='1'){ LS('ccNotif','0'); paintToggles(); return; }
+      if(!('Notification' in window)){ showToast('Browser unterstützt keine Desktop-Hinweise', true); return; }
+      Notification.requestPermission().then(function(p){ if(p==='granted'){ LS('ccNotif','1'); showToast('🔔 Desktop-Hinweise an'); } else showToast('Vom Browser blockiert', true); paintToggles(); });
+    },
+    toggleSound:function(){ LS('ccSound', LS('ccSound')==='1'?'0':'1'); paintToggles(); if(LS('ccSound')==='1') beep(true); },
+    openIdx:function(i){ var e=S.events[i]; if(e) openEvent(e); },
+    usersBy:function(v){ switchTab('users'); var s=document.getElementById('plan-filter'); if(s){ s.value=v; filterUsers(); } },
+    dbOpen:dbOpen, dbSelect:selectDoc, dbRenderList:dbRenderList, dbMore:function(){ loadMore(); },
+    dbSave:dbSave, dbDelete:dbDelete, dbNew:dbNew, dbExport:dbExport,
+    user360:user360, act:act, loadSystem:loadSystem, loadRevenue:loadRevenue
+  };
+
+  // Login/Logout einhaken — ohne den bestehenden Code umzubauen.
+  var _in=window.doLogin, _out=window.doLogout;
+  window.doLogin=async function(){ await _in.apply(this, arguments); if(adminUid) start(); };
+  window.doLogout=async function(){ stop(); return _out.apply(this, arguments); };
+  // Minutentakt: "vor 3 Min" aktuell halten, abgelaufene Trials neu zählen.
+  setInterval(function(){ if(S.started){ if(isActive('overview')) renderOverview(); if(isActive('feed')) renderFeed(); } }, 60000);
+})();
 </script>
 </body>
 </html>

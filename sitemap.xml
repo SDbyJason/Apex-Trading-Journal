@@ -200,4 +200,29 @@
     <changefreq>daily</changefreq>
     <priority>0.3</priority>
   </url>
+  <url>
+    <loc>https://evidencetrading.com/evidence-vs-tradezella.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://evidencetrading.com/evidence-vs-tradersync.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://evidencetrading.com/evidence-vs-edgewonk.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://evidencetrading.com/evidence-vs-tradesviz.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://evidencetrading.com/changelog.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>

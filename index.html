@@ -44,7 +44,13 @@
 <link rel="apple-touch-icon" href="https://evidencetrading.com/icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Chart.js und seine Zusatzbibliotheken: defer. Beim Seitenaufbau greift
+     niemand auf Chart zu (geprüft 23.09.2026) — gebraucht wird es erst nach der
+     Anmeldung. Ohne defer blockierten sechs Downloads das erste Bild auch für
+     jeden Besucher der Landingpage. Reihenfolge bleibt erhalten (defer führt
+     in Dokumentreihenfolge aus). Vor dem ersten Anlegen eines Charts prüfen:
+     typeof Chart !== 'undefined'. -->
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -342,7 +348,7 @@ window.APEX_PRICES = (function () {
         'sowie Fehlerberichte der App (Fehlermeldung, Stacktrace, Datei und Zeile, Browserkennung, ' +
         'aufgerufene Seite, App-Version, Nutzerkennung). Fehlerberichte enthalten <b>keine</b> ' +
         'Journalinhalte.</p>' +
-        '<p><b>Community (optional):</b> Beiträge, Kommentare, Direktnachrichten, öffentliches Profil.</p>' +
+        '<p><b>Community (optional):</b> Beiträge, Kommentare, Direktnachrichten, öffentliches Profil. Das öffentliche Profil ist standardmäßig ausgeschaltet und wird nur sichtbar, wenn du es in den Einstellungen einschaltest.</p>' +
 
         '<h3>3. Zwecke und Rechtsgrundlagen</h3>' +
         '<ul>' +
@@ -1064,7 +1070,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-22d';
+  window.APEX_BUILD = '2026-09-23a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -1156,12 +1162,12 @@ window.APEX_PRICES = (function () {
   };
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <!-- Evidence Edge Lab — candlestick trade charts -->
-<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
 <!-- Three.js wird NICHT hier geladen. Es wird ausschliesslich fuer den
      3D-Hintergrund der Landing Page gebraucht, und ein eingeloggter Nutzer
      sieht die Landing Page nie — der lud bisher ~600 KB Bibliothek fuer
@@ -8569,6 +8575,9 @@ body.light #landingPage * {
    (vorher 8.290px). */
 #landingPage #pricing  { contain-intrinsic-size: auto 3380px; }
 #landingPage #security { contain-intrinsic-size: auto 1820px; }
+#landingPage #switch   { contain-intrinsic-size: auto 1130px; }
+#landingPage #founding { contain-intrinsic-size: auto 740px;  }
+#landingPage #faq      { contain-intrinsic-size: auto 1180px; }
 @media(max-width:760px){
   #landingPage #about    { contain-intrinsic-size: auto 1390px; }
   #landingPage #product  { contain-intrinsic-size: auto 2420px; }
@@ -8798,9 +8807,108 @@ body.light #landingPage * {
 </style>
 
 
-<!-- Structured data. Two things are deliberately absent:
-     • FAQPage — the landing has no visible FAQ, and marking up content a
-       visitor cannot see is a guidelines violation, not a shortcut.
+<!-- FAQPage: gespiegelt aus dem sichtbaren Abschnitt #faq. Wer dort etwas ändert, ändert es hier mit
+     (sonst ist das Markup falsch — Richtlinienverstoss). -->
+<script type="application/ld+json" id="faqLd">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Which brokers and platforms can I connect?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Automatically: cTrader through its Open API — it keeps syncing while the app is closed — Binance and Bybit through a read-only API key, and Interactive Brokers through a Flex Query. Live from your platform: MetaTrader 5, TradingView, ATAS and Quantower report fills through a small tracker. Everything else arrives as a statement file; the format is detected automatically, and an unknown one you map once by hand."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Can Evidence place, change or close trades?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. Every broker connection is read-only, and the app contains no order logic at all. It can read your history; it cannot touch your account."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Is there a free plan?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes, and it does not expire: manual journaling, statement import from 95 brokers and from other journals, guardrails and the rules engine, the prop firm cockpit, psychology tracking, the glossary and up to three books. Pro adds the automatic syncs, Market Replay, Edge Lab and the AI coach."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "How does the trial work?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Register with an email and you get 7 days of Pro straight away. No payment details are asked for and nothing renews — after the week you are simply back on the free plan."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "How do I cancel a subscription?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Use “Verträge hier kündigen” (cancel contracts here) at the bottom of this page. It works without signing in."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "I already use another trading journal. Can I import my trade history?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. There are import presets for exports from TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk and Trademetria, and free column mapping for anything else — free on every plan. Screenshots do not come along, because those exports do not contain them. How it works."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Who can see my journal?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Only you, unless you decide otherwise. Notes, screenshots, prices and money are always private. A public profile — symbol, direction, pips, R:R and setup on the leaderboard — is off by default; you can switch it on in the settings under profile visibility. Sharing a book or your journal with a coach is also something you switch on yourself."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Is there a mobile app?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Evidence installs as an app straight from the browser on iPhone and Android, with its own icon and notifications. There is no App Store version yet."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Does the AI make numbers up?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "The numbers are counted by the app, not by the model. The AI reads the results and explains them, and it is instructed never to calculate, estimate or invent a figure. It runs on Google’s Gemini API, and only when you use an AI feature."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Which markets can I replay?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Market Replay runs on free tick-accurate Dukascopy data for 61 instruments — metals, FX pairs, indices, oil and crypto. Futures, stocks and options you can journal, import and analyse in full, but not replay."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "How is Evidence different from TradeZella or TraderSync?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Market Replay and the AI coach are in the one paid plan instead of a higher tier, the free plan does not expire, and the full backup exports everything. Side-by-side comparisons, with sources and the date we checked them: TradeZella, TraderSync, Edgewonk, TradesViz."
+   }
+  }
+ ]
+}
+</script>
+<!-- Structured data. Notes:
+     • FAQPage — since 23.09.2026 there IS a visible FAQ (#faq), so the block
+       above is legitimate. Marking up content a visitor cannot see would be a
+       guidelines violation — keep both texts identical.
      • aggregateRating — we have no verified public reviews. Inventing one is
        the single fastest way to earn a manual action.
      The prices below must stay in step with the checkout worker. -->
@@ -9145,6 +9253,7 @@ body.light #landingPage * {
     <li><a href="#replay">Replay</a></li>
     <li><a href="#ai">AI</a></li>
     <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq" class="notranslate" translate="no">FAQ</a></li>
     <li><a href="#security">Security</a></li>
   </ul>
   <div style="display:flex;gap:10px;align-items:center">
@@ -9617,6 +9726,52 @@ body.light #landingPage * {
 </section>
 <div class="lp-divider" id="voicesDivider" style="display:none"></div>
 
+<!-- ══════ UMZUG & DATENHOHEIT ══════
+     Die Import-Vorlagen für die anderen Journale gab es längst — die Seite
+     erwähnte sie nur nirgends. Jede Aussage hier ist gegen den Code geprüft
+     (P('tradezella'…) usw. im Importer, exportAccountJSON, ApexNotion,
+     Konto löschen in den Einstellungen). Keine Zeitangabe wie „2 Minuten":
+     das hängt an der Dateigröße und am Nutzer. -->
+<section class="lp-section" id="switch">
+  <div class="lp-label reveal">Coming from another journal</div>
+  <h2 class="lp-title reveal">Bring your history with you. <em>Your data stays yours.</em></h2>
+  <p class="lp-lead reveal">Most traders who try a new journal already keep one somewhere else. Starting from zero would throw away your history — and your history is the whole point of a journal.</p>
+
+  <div class="lp-steps">
+    <div class="lp-step reveal d1">
+      <span class="lp-step-n">1</span>
+      <div class="lp-step-t">Export from your current app</div>
+      <div class="lp-step-d">In <b>TradeZella</b>, <b>TraderSync</b>, <b>Tradervue</b>, <b>TradesViz</b>, <b>Edgewonk</b> or <b>Trademetria</b>, export your trades as a CSV file.</div>
+    </div>
+    <div class="lp-step reveal d2">
+      <span class="lp-step-n">2</span>
+      <div class="lp-step-t">Upload the file</div>
+      <div class="lp-step-d">There is an import preset for each of these apps. Symbol, direction, prices, size, P&amp;L, setup and notes are matched automatically. If a column does not match, you assign it once by hand, and the preset remembers it.</div>
+    </div>
+    <div class="lp-step reveal d3">
+      <span class="lp-step-n">3</span>
+      <div class="lp-step-t">Review before importing</div>
+      <div class="lp-step-d">The import check shows duplicates, missing stops and timezone problems before any trade is saved. Nothing is imported until you confirm.</div>
+    </div>
+  </div>
+  <p class="lp-fine reveal">Screenshots and chart images are not included, because these apps do not put them into their export files. Importing is free on every plan — no trial and no card needed.</p>
+
+  <div class="lp-own reveal">
+    <div>
+      <div class="lp-own-t">You can take all of your data with you</div>
+      <div class="lp-own-d">Your journal belongs to you. You can export everything, at any time.</div>
+    </div>
+    <ul class="lp-own-list">
+      <li><span class="ic-wrap"><svg class=ic aria-hidden=true><use href=#i-download ></use></svg></span><span><b>Full backup as JSON</b>&nbsp;— journal, playbooks, goals, psychology log and settings in one file.</span></li>
+      <li><span class="ic-wrap"><svg class=ic aria-hidden=true><use href=#i-clipboard ></use></svg></span><span><b>CSV, PDF and Notion</b>&nbsp;— every trade as a spreadsheet, a printable report, or pages in your own Notion workspace.</span></li>
+      <li><span class="ic-wrap"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg></span><span><b>Read-only API</b>&nbsp;— load your own numbers into your own tools.</span></li>
+      <li><span class="ic-wrap"><svg class=ic aria-hidden=true><use href=#i-trash ></use></svg></span><span><b>Delete everything</b>&nbsp;— your account and your synced journal data, in the settings, in one step.</span></li>
+    </ul>
+  </div>
+</section>
+
+<div class="lp-divider"></div>
+
 <section class="lp-section" id="pricing">
   <div class="lp-label reveal">Plans</div>
   <h2 class="lp-title reveal">Start Free. <em>Go Pro.</em></h2>
@@ -9629,6 +9784,8 @@ body.light #landingPage * {
       <div class="lp-price-desc">The essentials to start journaling and tracking your trades manually.</div>
       <ul class="lp-price-feats">
         <li>Manual trade entry &amp; journal</li>
+        <li><b>Statement import</b>&nbsp;— 95 brokers &amp; prop firms, 56 formats, checked before anything is written</li>
+        <li><b>Move from another journal</b>&nbsp;— import presets for TradeZella, TraderSync, Tradervue, TradesViz &amp; Edgewonk</li>
         <li>Forex, indices, crypto, <b>futures &amp; options</b></li>
         <li><b>Guardrails</b>&nbsp;— loss limit, trade cap &amp; revenge detection</li>
         <li><b>Prop firm cockpit</b>&nbsp;— the drawdown model your firm really uses, plus what every challenge cost and paid</li>
@@ -9695,8 +9852,6 @@ body.light #landingPage * {
         <li><b>AI Trading Coach</b> + proactive insights</li>
         <li>Tiltmeter &amp; Habit Tracker</li>
         <li>cTrader Auto-Sync — keeps running while the app is closed</li>
-        <li>Statement import — 95 brokers &amp; prop firms, 56 formats detected automatically</li>
-        <li><b>Import check</b>&nbsp;— see what came out of the file before a single trade is written</li>
         <li><b>Connection health</b>&nbsp;— every sync on one page, plus an email when one breaks</li>
         <li><b>Auto-Tracking</b>&nbsp;— MT5 · ATAS · Quantower · TradingView</li>
         <li><b>Crypto Auto-Sync</b>&nbsp;— Binance &amp; Bybit via read-only API key</li>
@@ -9846,10 +10001,11 @@ body.light #landingPage * {
         <tr><td>Background sync — cTrader syncs while the app is closed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto-Tracking — MT5 / ATAS / Quantower / TradingView</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Crypto Auto-Sync — Binance &amp; Bybit read-only API key</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>Statement import — 95 brokers &amp; prop firms, 56 formats detected automatically</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>Import check — executions, the file's own P&amp;L, duplicates, missing stops and timezone, shown before anything is written</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Statement import — 95 brokers &amp; prop firms, 56 formats detected automatically</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Import from another journal — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Import check — executions, the file's own P&amp;L, duplicates, missing stops and timezone, shown before anything is written</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Connection health — every sync on one page, with an email when one stops delivering</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>Free column mapping &amp; saved import presets</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Free column mapping &amp; saved import presets</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Reports — custom pivots, compare &amp; share links</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>REST API keys — read your journal from any external tool</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Strategy Lab — indicator rules backtested on real market data</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -9870,6 +10026,69 @@ body.light #landingPage * {
     <div style="text-align:center;margin-top:26px">
       <a href="#" class="lp-price-cta pro" style="display:inline-block;max-width:300px" onclick="goToAuthPro('register');return false;"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Start with Pro — 7 days free</a>
     </div>
+  </div>
+</section>
+
+<div class="lp-divider"></div>
+
+<!-- ══════ FOUNDING TRADERS ══════
+     Beta-Programm statt erfundener Kundenstimmen. Wer Pro dafür geschenkt
+     bekommt, wird bei einer späteren Kundenstimme als solcher gekennzeichnet
+     (FTC-Endorsement-Regeln in den USA, § 5a UWG hier) — siehe `beta` in
+     apexTestimonials und das Label in renderVoices(). Die Plätze vergibt der
+     Admin von Hand (apexBetaApplications → trialUntil). -->
+<section class="lp-section" id="founding">
+  <div class="lp-founding reveal">
+    <div class="lp-founding-main">
+      <div class="lp-label">Founding traders</div>
+      <h2 class="lp-title">Help build it. <em>Get Pro for three months.</em></h2>
+      <p class="lp-lead" style="margin-bottom:26px">We are a young product, and we would rather hear the hard truth from twenty real traders than guess. If you trade actively and keep a journal — or want to start one — apply for one of the founding places.</p>
+      <div class="lp-actions">
+        <a href="#" class="lp-btn primary" onclick="if(window.ApexBeta)ApexBeta.apply();return false;">Apply for a founding place ↗</a>
+      </div>
+    </div>
+    <ul class="lp-founding-list">
+      <li><b>Three months of Pro, free.</b> Every feature, no card.</li>
+      <li><b>Use it for your real trading</b> for at least four weeks.</li>
+      <li><b>Tell us honestly</b> what works and what does not — written feedback is enough.</li>
+      <li><b>If you allow it,</b> we may publish your review. It is always marked as a review from someone who received Pro for free.</li>
+      <li class="muted">Twenty places, chosen by hand. We reply to every application.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="lp-divider"></div>
+
+<!-- ══════ FAQ ══════
+     Sichtbar — deshalb darf es jetzt auch FAQPage-Markup geben (im <head>,
+     Wortlaut identisch halten!). Antworten gegen Code und Rechtstexte
+     geprüft; Tradovate fehlt bewusst („gebaut, noch nicht eingeschaltet"). -->
+<section class="lp-section" id="faq">
+  <div class="lp-label reveal">Questions</div>
+  <h2 class="lp-title reveal">Questions <em>before you sign up</em></h2>
+  <div class="lp-faq reveal">
+    <details><summary>Which brokers and platforms can I connect?</summary>
+      <p>Automatically: cTrader through its Open API — it keeps syncing while the app is closed — Binance and Bybit through a read-only API key, and Interactive Brokers through a Flex Query. Live from your platform: MetaTrader 5, TradingView, ATAS and Quantower report fills through a small tracker. Everything else arrives as a statement file; the format is detected automatically, and an unknown one you map once by hand.</p></details>
+    <details><summary>Can Evidence place, change or close trades?</summary>
+      <p>No. Every broker connection is read-only, and the app contains no order logic at all. It can read your history; it cannot touch your account.</p></details>
+    <details><summary>Is there a free plan?</summary>
+      <p>Yes, and it does not expire: manual journaling, statement import from 95 brokers and from other journals, guardrails and the rules engine, the prop firm cockpit, psychology tracking, the glossary and up to three books. Pro adds the automatic syncs, Market Replay, Edge Lab and the AI coach.</p></details>
+    <details><summary>How does the trial work?</summary>
+      <p>Register with an email and you get 7 days of Pro straight away. No payment details are asked for and nothing renews — after the week you are simply back on the free plan.</p></details>
+    <details><summary>How do I cancel a subscription?</summary>
+      <p>Use “Verträge hier kündigen” (cancel contracts here) at the bottom of this page. It works without signing in.</p></details>
+    <details><summary>I already use another trading journal. Can I import my trade history?</summary>
+      <p>Yes. There are import presets for exports from TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk and Trademetria, and free column mapping for anything else — free on every plan. Screenshots do not come along, because those exports do not contain them. <a href="#switch">How it works</a>.</p></details>
+    <details><summary>Who can see my journal?</summary>
+      <p>Only you, unless you decide otherwise. Notes, screenshots, prices and money are always private. A public profile — symbol, direction, pips, R:R and setup on the leaderboard — is off by default; you can switch it on in the settings under profile visibility. Sharing a book or your journal with a coach is also something you switch on yourself.</p></details>
+    <details><summary>Is there a mobile app?</summary>
+      <p>Evidence installs as an app straight from the browser on iPhone and Android, with its own icon and notifications. There is no App Store version yet.</p></details>
+    <details><summary>Does the AI make numbers up?</summary>
+      <p>The numbers are counted by the app, not by the model. The AI reads the results and explains them, and it is instructed never to calculate, estimate or invent a figure. It runs on Google’s Gemini API, and only when you use an AI feature.</p></details>
+    <details><summary>Which markets can I replay?</summary>
+      <p>Market Replay runs on free tick-accurate Dukascopy data for 61 instruments — metals, FX pairs, indices, oil and crypto. Futures, stocks and options you can journal, import and analyse in full, but not replay.</p></details>
+    <details><summary>How is Evidence different from TradeZella or TraderSync?</summary>
+      <p>Market Replay and the AI coach are in the one paid plan instead of a higher tier, the free plan does not expire, and the full backup exports everything. Side-by-side comparisons, with sources and the date we checked them: <a href="/evidence-vs-tradezella.html">TradeZella</a>, <a href="/evidence-vs-tradersync.html">TraderSync</a>, <a href="/evidence-vs-edgewonk.html">Edgewonk</a>, <a href="/evidence-vs-tradesviz.html">TradesViz</a>.</p></details>
   </div>
 </section>
 
@@ -10023,6 +10242,11 @@ body.light #landingPage * {
     <li><a href="/ctrader-trading-journal.html">cTrader trading journal</a></li>
     <li><a href="/prop-firm-trading-journal.html">Prop firm trading journal</a></li>
     <li><a href="/trading-journal-market-replay.html">Trading journal with market replay</a></li>
+    <li><a href="/evidence-vs-tradezella.html">Evidence vs TradeZella</a></li>
+    <li><a href="/evidence-vs-tradersync.html">Evidence vs TraderSync</a></li>
+    <li><a href="/evidence-vs-edgewonk.html">Evidence vs Edgewonk</a></li>
+    <li><a href="/evidence-vs-tradesviz.html">Evidence vs TradesViz</a></li>
+    <li><a href="/changelog.html">Changelog</a></li>
     <li><a href="/crypto-trading-journal.html">Crypto trading journal</a></li>
     <li><a href="/trading-community-platform.html">Trading community platform for mentors</a></li>
     <li><a href="/academy/">Free trading courses</a></li>
@@ -10718,21 +10942,7 @@ body.light #landingPage * {
           <div class="apex-feat-desc">A read-only API key from Binance or Bybit and your fills arrive by themselves every ten minutes — no export, no upload. Keys with trading or withdrawal rights are refused</div>
         </div>
       </div>
-      <div class="apex-feat-item apex-feat-full">
-        <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-download ></use></svg></div>
-        <div>
-          <div class="apex-feat-label">Statement Import — 95 brokers, 56 formats</div>
-          <div class="apex-feat-desc">Search your broker by name — Pepperstone, IC Markets, FTMO, Topstep, Apex, XM, Vantage, Tickmill, NinjaTrader, Tradovate, Rithmic, Interactive Brokers, tastytrade, Schwab, Webull, Binance, Bybit, Kraken and more. The format is detected automatically and partial fills are grouped back into positions</div>
-        </div>
-      </div>
-      <div class="apex-feat-item apex-feat-full">
-        <div class="apex-feat-icon">🧩</div>
-        <div>
-          <div class="apex-feat-label">Free Column Mapping</div>
-          <div class="apex-feat-desc">Broker not in the list? Assign the columns of any CSV or Excel export yourself and save the mapping as your own preset — including exports from TradeZella, TraderSync and Tradervue</div>
-        </div>
-      </div>
-
+            
       <div class="apex-feat-category"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Tools & Productivity</div>
       <div class="apex-feat-item apex-feat-full">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-rocket ></use></svg></div>
@@ -12821,6 +13031,7 @@ function _authAction(type) {
           <button class="at-plat-btn"        data-plat="tradingview" onclick="ApexAutoTrack.select('tradingview')"><svg class=ic aria-hidden=true><use href=#i-trend-up ></use></svg> TradingView</button>
           <button class="at-plat-btn"        data-plat="atas"       onclick="ApexAutoTrack.select('atas')"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg> ATAS</button>
           <button class="at-plat-btn"        data-plat="quantower"  onclick="ApexAutoTrack.select('quantower')">🧊 Quantower</button>
+          <button class="at-plat-btn"        data-plat="ninjatrader" onclick="ApexAutoTrack.select('ninjatrader')"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg> NinjaTrader <span class="at-soon">beta</span></button>
           <button class="at-plat-btn"        data-plat="tradovate"  onclick="ApexAutoTrack.select('tradovate')"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg> Tradovate <span class="at-soon">soon</span></button>
           <button class="at-plat-btn"        data-plat="exchange"   onclick="ApexAutoTrack.select('exchange')"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> Crypto &amp; IBKR</button>
         </div>
@@ -12842,6 +13053,7 @@ function _authAction(type) {
         <!-- Crypto & IBKR — key-based connections, filled by ApexExchange -->
         <div class="at-panel" data-plat="exchange"   style="display:none" id="apxExHost"></div>
         <div class="at-panel" data-plat="quantower"  style="display:none" id="atPanel-quantower"></div>
+        <div class="at-panel" data-plat="ninjatrader" style="display:none" id="atPanel-ninjatrader"></div>
       </div>
     </div><!-- /spanel-ctrader -->
 
@@ -13066,7 +13278,7 @@ function _authAction(type) {
               <select class="privacy-select" style="width:100%" id="setting-profileVisibility2" onchange="savePrivacySetting('profileVisibility',this.value)" aria-label="Who can see your profile">
                 <option value="everyone">Everyone (public)</option>
                 <option value="friends">Friends only</option>
-                <option value="nobody">Nobody (private)</option>
+                <option value="nobody" selected>Nobody (private)</option>
               </select>
             </div>
             <div>
@@ -13859,6 +14071,10 @@ window.addEventListener('load', () => {
       var mBtn = document.getElementById('modeToggleBtn');
       if (mBtn) mBtn.style.display = '';
       await loadFromCloud();
+      // Chart.js lädt per defer — erst nach dem Einlesen der Seite. Kommt die
+      // Anmeldung früher zurück, auf DOMContentLoaded warten (bis dahin sind
+      // alle defer-Skripte garantiert ausgeführt).
+      if (document.readyState === 'loading') await new Promise(function (r) { document.addEventListener('DOMContentLoaded', r, { once: true }); });
       bootApp();
     } else {
       // Demo mode drives the app itself — never fall back to the landing page.
@@ -13977,7 +14193,7 @@ async function _doRegister() {
       friends:            [],
       friendsOutgoing:    [],
       friendsIncoming:    [],
-      profileVisibility:  'everyone',
+      profileVisibility:  'nobody',     // Privacy by Default (DSGVO Art. 25) — seit 23.09.2026
       dmVisibility:       'everyone',
       dmEnabled:          true,
       createdAt:          firebase.firestore.FieldValue.serverTimestamp(),
@@ -14183,7 +14399,7 @@ async function ensureUserProfile(user) {
       friends:           [],
       friendsOutgoing:   [],
       friendsIncoming:   [],
-      profileVisibility: 'everyone',
+      profileVisibility: 'nobody',      // Privacy by Default (DSGVO Art. 25) — seit 23.09.2026
       dmVisibility:      'everyone',
       dmEnabled:         true,
       createdAt:         firebase.firestore.FieldValue.serverTimestamp(),
@@ -14406,7 +14622,28 @@ async function loadFromCloud() {
     setSyncStatus('loading');
     const doc = await db.collection('apexUsers').doc(currentUID).get();
     if (doc.exists) {
-      window.currentProfileVisibility = doc.data().profileVisibility || 'everyone';
+      window.currentProfileVisibility = doc.data().profileVisibility || 'nobody';
+      /* Einmalige Umstellung auf „privat" (23.09.2026). Bis dahin wurde jedes
+         Konto mit „everyone" angelegt — eine Voreinstellung, keine Wahl, und
+         beides lässt sich im Nachhinein nicht unterscheiden. Wer „friends"
+         oder „nobody" gewählt hat, bleibt, wie er ist. Wer auf „everyone" stand,
+         wird privat und bekommt EINMAL den Knopf, es wieder öffentlich zu machen. */
+      if (!doc.data().privacyDefaultV2 && !window.APEX_DEMO) {
+        var _wasPublic = window.currentProfileVisibility === 'everyone';
+        var _upd = { privacyDefaultV2: Date.now() };
+        if (_wasPublic) { _upd.profileVisibility = 'nobody'; window.currentProfileVisibility = 'nobody'; }
+        db.collection('apexUsers').doc(currentUID).update(_upd).then(function(){
+          if (_wasPublic) setTimeout(function(){ if (window.apexPrivacyNotice) apexPrivacyNotice(); }, 2500);
+        }).catch(function(e){ console.warn('privacy default', e); });
+      }
+      // Die lokale Kopie folgt dem Server — sonst veröffentlicht ein zweites
+      // Gerät mit altem lokalem Wert das Profil wieder.
+      try {
+        var _as = JSON.parse(localStorage.getItem('apexSettings') || '{}');
+        _as.profileVisibility = window.currentProfileVisibility;
+        localStorage.setItem('apexSettings', JSON.stringify(_as));
+        if (typeof appSettings === 'object') appSettings.profileVisibility = window.currentProfileVisibility;
+      } catch(_e) {}
       /* The journal lives in owner-only private docs, sharded by year so it
          is not capped at Firestore's 1 MiB per document. Two legacy layouts
          still have to be migrated on first load: the single private/journal
@@ -14510,7 +14747,8 @@ async function pushToCloud() {
     if (!jr.ok) throw (jr.error || new Error('journal save failed'));
 
     // Public profile/leaderboard data — STRICTLY gated by the visibility setting.
-    var _vis = (typeof appSettings==='object' && appSettings.profileVisibility) || window.currentProfileVisibility || 'everyone';
+    // Serverwert zuerst (siehe loadFromCloud) — Voreinstellung privat.
+    var _vis = window.currentProfileVisibility || (typeof appSettings==='object' && appSettings.profileVisibility) || 'nobody';
     if (_vis === 'everyone') {
       await db.collection('apexUsers').doc(currentUID).update({
         publicJournal: buildPublicJournal(journalData),
@@ -15588,7 +15826,7 @@ function switchSettingsTab(tab) {
 var appSettings = {};
 function loadSettings() {
   try { appSettings = JSON.parse(localStorage.getItem('apexSettings') || '{}'); } catch(e) { appSettings = {}; }
-  var defaults = { leaderboard: true, dm: true, pipbanner: true, piptooltip: true, profileVisibility: 'everyone', dmVisibility: 'everyone', pnlCurrency: 'USD' };
+  var defaults = { leaderboard: true, dm: true, pipbanner: true, piptooltip: true, profileVisibility: 'nobody', dmVisibility: 'everyone', pnlCurrency: 'USD' };
   appSettings = Object.assign({}, defaults, appSettings);
   Object.keys(appSettings).forEach(function(k) {
     var el = document.getElementById('setting-' + k);
@@ -18294,7 +18532,7 @@ function renderCommunity() {
         snap.forEach(doc => {
           const d = doc.data();
           // Strict visibility: only 'everyone' profiles appear publicly (self always included)
-          if (doc.id !== currentUID && (d.profileVisibility || 'everyone') !== 'everyone') return;
+          if (doc.id !== currentUID && (d.profileVisibility || 'nobody') !== 'everyone') return;
           const mainSymbol = d.mainSymbol || '';
           traders.push({
             uid:         doc.id,
@@ -18307,7 +18545,7 @@ function renderCommunity() {
             lastUpdated: d.lastUpdated,
             dmEnabled:   d.dmEnabled !== false,
             dmVisibility:       d.dmVisibility || 'everyone',
-            profileVisibility:  d.profileVisibility || 'everyone',
+            profileVisibility:  d.profileVisibility || 'nobody',
             profilePic:  d.profilePic || null,
             plan:        (d.plan === 'pro' || d.subscriptionActive === true) ? 'pro' : 'free',
             mine:        doc.id === currentUID
@@ -18741,8 +18979,29 @@ function toggleBlockedPanel() {
 }
 
 // Privacy-Einstellung speichern
+/* Einmaliger Hinweis nach der Umstellung auf „privat" (siehe loadFromCloud).
+   Wer vorher bewusst öffentlich war, ist mit einem Klick zurück. */
+function apexPrivacyNotice() {
+  if (!window.ApexDialog) return;
+  ApexDialog.confirm('Your profile is now private by default.\n\n' +
+    'Until today every new account started public, which showed symbol, direction, pips, R:R and setup of your trades on the leaderboard and your profile. ' +
+    'We switched that off for everyone who had not chosen otherwise. Your journal itself was never public and is unchanged.\n\n' +
+    'Want to appear on the leaderboard again?',
+    { okText: 'Make my profile public', cancelText: 'Keep it private' }
+  ).then(function (ok) {
+    if (!ok) return;
+    savePrivacySetting('profileVisibility', 'everyone').then(function () {
+      try { var sel = document.getElementById('setting-profileVisibility2'); if (sel) sel.value = 'everyone'; } catch (e) {}
+      if (typeof pushToCloud === 'function') pushToCloud();
+      if (window.showToast) showToast('Your profile is public again — change it any time under Settings → Privacy');
+    });
+  });
+}
+window.apexPrivacyNotice = apexPrivacyNotice;
+
 async function savePrivacySetting(key, val) {
   appSettings[key] = val;
+  if (key === 'profileVisibility') window.currentProfileVisibility = val;
   localStorage.setItem('apexSettings', JSON.stringify(appSettings));
   if (db && currentUID) {
     try {
@@ -19251,7 +19510,7 @@ async function openProfile(uid, name) {
     profileTargetData = d;
 
     // Privacy-Check: Darf ich dieses Profil sehen?
-    const visibility = d.profileVisibility || 'everyone';
+    const visibility = d.profileVisibility || 'nobody';
     const isFriend   = myFriends.includes(uid);
     const isSelf     = uid === currentUID;
     const isBlocked  = myBlockedUsers.includes(uid);
@@ -23277,6 +23536,7 @@ function injectExportButtons() {
     '<button class="export-btn pdf-btn" onclick="exportPDF()">&#8595; Export PDF Report</button>' +
     '<button class="export-btn json-btn" onclick="exportAccountJSON()" ' +
       'title="Everything: journal, playbooks, goals, psych log, settings">&#8595; Full backup (JSON)</button>' +
+    '<button class="export-btn" onclick="ApexWeekCard.open()" title="Your week as an image for X, Discord or Telegram — nothing is posted automatically">&#8599; Share my week</button>' +
     '<button class="export-btn" onclick="ApexSessionReview.run()" ' +
       'title="Review this trading session — sequence, discipline and what to change tomorrow">&#9679; Review session</button>';
   toolbar.appendChild(div);
@@ -37211,6 +37471,67 @@ body.light .pt-sugg{background:var(--layer)}
     '}'
   ].join('\n');
 
+  /* NinjaTrader 8 — AddOn. Eigene Übersetzung mit dem eingebauten
+     NinjaScript-Editor, kein Visual Studio nötig. posId = Konto|Instrument,
+     damit der Drainer Ein- und Ausstieg derselben Position paart.
+     Am 23.09.2026 geschrieben, NICHT an einer echten NT8-Installation
+     kompiliert — deshalb im UI als „beta" markiert. */
+  ART.ninjatrader = [
+    '#region Using declarations',
+    'using System;',
+    'using System.Globalization;',
+    'using System.Net.Http;',
+    'using System.Text;',
+    'using NinjaTrader.Cbi;',
+    '#endregion',
+    '',
+    'namespace NinjaTrader.NinjaScript.AddOns',
+    '{',
+    '    public class EvidenceTracker : AddOnBase',
+    '    {',
+    '        static readonly HttpClient Http = new HttpClient();',
+    '        const string Webhook = "__EVIDENCE_WEBHOOK__";',
+    '',
+    '        // invariant culture — a German Windows would otherwise send "2350,4" (broken JSON)',
+    '        static string F(object v) => Convert.ToString(v, CultureInfo.InvariantCulture);',
+    '',
+    '        protected override void OnStateChange()',
+    '        {',
+    '            if (State == State.SetDefaults)',
+    '            {',
+    '                Name = "EvidenceTracker";',
+    '                Description = "Sends your fills to Evidence Trading (read-only).";',
+    '            }',
+    '            else if (State == State.Configure)',
+    '            {',
+    '                lock (Account.All)',
+    '                    foreach (Account a in Account.All) a.ExecutionUpdate += OnExecution;',
+    '            }',
+    '            else if (State == State.Terminated)',
+    '            {',
+    '                lock (Account.All)',
+    '                    foreach (Account a in Account.All) a.ExecutionUpdate -= OnExecution;',
+    '            }',
+    '        }',
+    '',
+    '        private void OnExecution(object sender, ExecutionEventArgs e)',
+    '        {',
+    '            var x = e.Execution;',
+    '            if (x == null || x.Instrument == null) return;',
+    '            string dir = e.MarketPosition == MarketPosition.Long ? "long" : "short";',
+    '            long ms = new DateTimeOffset(x.Time).ToUnixTimeMilliseconds();',
+    '            string sym = x.Instrument.FullName;',
+    '            string pos = x.Account.Name + "|" + sym;',
+    '            string js = "{\\"source\\":\\"ninjatrader\\",\\"event\\":\\"fill\\",\\"symbol\\":\\"" + sym',
+    '                + "\\",\\"dir\\":\\"" + dir + "\\",\\"posId\\":\\"" + pos',
+    '                + "\\",\\"price\\":" + F(x.Price) + ",\\"volume\\":" + F(x.Quantity)',
+    '                + ",\\"time\\":" + ms + "}";',
+    '            _ = Http.PostAsync(Webhook, new StringContent(js, Encoding.UTF8, "application/json"));',
+    '        }',
+    '    }',
+    '}'
+  ].join('\n');
+
   ART.quantower = [
     'using System;',
     'using System.Globalization;',
@@ -37330,6 +37651,26 @@ body.light .pt-sugg{background:var(--layer)}
         '<li><b>Nothing arrives</b> → the strategy must be <i>started</i> on the chart, and it only sees fills made while it is running.</li></ul>')+
       NOTE+'</div>';
 
+    if(plat==='ninjatrader') return '<div class="at-card">'+
+      '<div class="at-head"><div class="at-title"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg> NinjaTrader 8 — AddOn</div><span class="at-badge">Free · NinjaScript · beta</span></div>'+
+      '<p class="at-desc">A small NinjaScript AddOn posts every fill from your NinjaTrader accounts to Evidence. Fills on the same account and instrument are paired automatically — the entry opens the trade, the opposite fill closes it. It only listens; it cannot place or change orders.</p>'+
+      '<div class="at-ok" style="border-color:rgba(var(--gold-rgb),.35)">Beta: this AddOn is new. If it does not compile on your NinjaTrader version, send us the error from the NinjaScript Editor (Settings → Bug report) and we fix it.</div>'+
+      step('1','Copy your personal webhook URL', '<p>Already injected into the code below — no manual pasting needed.</p>'+field())+
+      step('2','Create the AddOn in NinjaTrader', '<ul>'+
+        '<li>In NinjaTrader: <b>New → NinjaScript Editor</b>.</li>'+
+        '<li>In the editor, right-click the <b>AddOns</b> folder → <b>New AddOn</b>, name it <code>EvidenceTracker</code>.</li>'+
+        '<li>Replace the whole file with the code below and press <kbd>F5</kbd> to compile. No Visual Studio needed.</li></ul>'+code(ART.ninjatrader, 'EvidenceTracker.cs'))+
+      step('3','Start it', '<ul>'+
+        '<li>Connect your accounts first, then <b>restart NinjaTrader</b> — the AddOn subscribes to every account that is connected when it starts.</li>'+
+        '<li>Sim accounts (<code>Sim101</code>) are sent too; delete those trades in the journal, or use a separate Evidence account for sim.</li></ul>'+
+        '<div class="at-ok">✅︎ Place a test trade — it appears in Evidence within ~30&nbsp;s. The opposite fill closes it with the exit price.</div>')+
+      step('4','Troubleshooting', '<ul>'+
+        '<li><b>Compile errors</b> → NinjaScript API names can differ between NT8 builds; the editor shows the line. Send it to us and we adjust the code.</li>'+
+        '<li><b>Nothing arrives</b> → the account was connected after NinjaTrader started. Restart NinjaTrader with the connection active.</li>'+
+        '<li><b>Numbers/JSON issues on German Windows</b> → already handled: all numbers use invariant culture (decimal point).</li>'+
+        '<li><b>Scale-ins and partial exits</b> → a second fill in the same direction is ignored; the first opposite fill closes the trade. Adjust size or exit in the journal if you scale.</li></ul>')+
+      NOTE+'</div>';
+
     if(plat==='quantower') return '<div class="at-card">'+
       '<div class="at-head"><div class="at-title">🧊 Quantower — Plugin</div><span class="at-badge">Free · C#</span></div>'+
       '<p class="at-desc">A Quantower plugin subscribes to trade events and posts each fill (incl. the position ID) to Evidence. Fills on the same position are paired automatically — entry opens the trade, the closing fill sets the exit.</p>'+
@@ -37353,7 +37694,7 @@ body.light .pt-sugg{background:var(--layer)}
   }
 
   function buildPanels(){
-    ['mt5','tradingview','atas','quantower'].forEach(function(p){
+    ['mt5','tradingview','atas','quantower','ninjatrader'].forEach(function(p){
       var host=document.getElementById('atPanel-'+p);
       if(host){ host.innerHTML = panel(p); noTranslate(host); }
     });
@@ -37380,11 +37721,11 @@ body.light .pt-sugg{background:var(--layer)}
       '<button onclick="if(typeof openUpgradeModal===\'function\')openUpgradeModal()" style="padding:10px 24px;background:linear-gradient(135deg,#c9a84c,#e8c96a);border:none;border-radius:10px;color:#07080b;font-family:var(--font-display);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.03em"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Upgrade to Pro</button>'+
     '</div>';
   }
-  var LOCK_NAMES = { mt5:'MetaTrader 5', tradingview:'TradingView', atas:'ATAS', quantower:'Quantower' };
+  var LOCK_NAMES = { mt5:'MetaTrader 5', tradingview:'TradingView', atas:'ATAS', quantower:'Quantower', ninjatrader:'NinjaTrader' };
   function renderLocks(){
     if(_lockShown) return;
     _lockShown = true;
-    ['mt5','tradingview','atas','quantower'].forEach(function(p){
+    ['mt5','tradingview','atas','quantower','ninjatrader'].forEach(function(p){
       var host=document.getElementById('atPanel-'+p);
       if(host) host.innerHTML = lockCard(LOCK_NAMES[p]);
     });
@@ -43141,7 +43482,9 @@ body.light .pt-sugg{background:var(--layer)}
     window.pushToCloud = function(){ return Promise.resolve(); };
     window.loadFromCloud = function(){ return Promise.resolve(); };
 
-    try{ bootApp(); }catch(e){ console.warn('demo boot', e); }
+    // siehe Anmelde-Callback: Chart.js kommt per defer
+    var go = function(){ try{ bootApp(); }catch(e){ console.warn('demo boot', e); } };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go, { once: true }); else go();
     banner();
 
     setTimeout(seedMentor, 2200);
@@ -43473,7 +43816,8 @@ body.light .pt-sugg{background:var(--layer)}
         '<div class="lp-voice-who">'+
           '<div class="lp-voice-av">'+(v.avatar?'<img src="'+esc(v.avatar)+'" alt="">':esc(init))+'</div>'+
           '<div><div class="lp-voice-n">'+esc(v.name||'Evidence user')+'</div>'+
-          '<div class="lp-voice-r">'+esc(v.role||'Trader')+'</div></div>'+
+          '<div class="lp-voice-r">'+esc(v.role||'Trader')+'</div>'+
+          (v.beta ? '<div class="lp-voice-beta">Founding trader · received Pro for free</div>' : '')+'</div>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -43652,7 +43996,7 @@ body.light .pt-sugg{background:var(--layer)}
       '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
         '<span style="font-size:20px"><svg class=ic aria-hidden=true><use href=#i-star ></use></svg></span>'+
         '<div style="flex:1;min-width:220px">'+
-          '<div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--ink)">How is Evidence working out for you?</div>'+
+          '<div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--ink)">How is it going with Evidence?</div>'+
           '<div style="font-size:12px;color:var(--ink3);margin-top:2px">You have logged enough trades to have an opinion. Two sentences would genuinely help.</div>'+
         '</div>'+
         '<button class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="ApexTestimonials.openFromPrompt()">Write it</button>'+
@@ -43689,6 +44033,8 @@ body.light .pt-sugg{background:var(--layer)}
     d.collection('apexTestimonials').doc(u).set({
       uid: u, name: name, role: role, text: text.slice(0,MAX_LEN),
       rating: rating, plan: window.currentPlan||'free',
+      // Founding trader (Pro geschenkt) → wird öffentlich gekennzeichnet.
+      beta: !!window._apexBetaMember,
       approved: false, featured: false, createdAt: Date.now()
     }).then(function(){
       toast('Thank you — we will read it before anything goes public');
@@ -56751,13 +57097,27 @@ self.addEventListener('message', async (ev) => {
      terms, and the fields stay editable everywhere they are used. */
   var PRESETS = {
     custom:      { label: 'Custom / other',            target: 0,  daily: 0,  max: 0,  dd: 'static',   consistency: 0,  minDays: 0,  tz: 'UTC',              reset: 0 },
-    ftmo:        { label: 'FTMO — 2-step',             target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 4,  tz: 'Europe/Prague',    reset: 0 },
+    /* checked/src/note: nur wo die Zahlen gegen eine Quelle geprüft sind.
+       Ohne checked zeigt das Cockpit „noch nicht erneut geprüft". */
+    ftmo:        { label: 'FTMO — 2-step',             target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 4,  tz: 'Europe/Prague',    reset: 0,
+                   checked: '2026-09-23', src: 'https://ftmo.com/en/trading-objectives/', note: 'Verification phase: 5% target. Daily loss resets at midnight Prague time.' },
     ftmoswing:   { label: 'FTMO — Swing',              target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 4,  tz: 'Europe/Prague',    reset: 0 },
-    the5ers:     { label: 'The5ers — High Stakes',     target: 8,  daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 3,  tz: 'Europe/Prague',    reset: 0 },
+    the5ers:     { label: 'The5ers — High Stakes',     target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 3,  tz: 'Europe/Prague',    reset: 0,
+                   checked: '2026-09-23', src: 'https://the5ers.com/high-stakes/', note: 'Step 2: 5% target. Minimum days are profitable days of at least 0.5%.' },
     fundednext:  { label: 'FundedNext — Evaluation',   target: 10, daily: 5,  max: 10, dd: 'static',   consistency: 0,  minDays: 5,  tz: 'Europe/Prague',    reset: 0 },
     e8:          { label: 'E8 Markets',                target: 8,  daily: 5,  max: 8,  dd: 'static',   consistency: 0,  minDays: 0,  tz: 'Europe/Prague',    reset: 0 },
-    apex:        { label: 'Apex Trader Funding',       target: 6,  daily: 0,  max: 6,  dd: 'trailing', consistency: 30, minDays: 7,  tz: 'America/New_York', reset: 17 },
-    topstep:     { label: 'Topstep — Trading Combine', target: 6,  daily: 2,  max: 4,  dd: 'eod',      consistency: 50, minDays: 2,  tz: 'America/Chicago',  reset: 17 },
+    /* 23.09.2026: vorher max 6 / consistency 30 / minDays 7 — das sind keine
+       Evaluationsregeln. Apex' eigenes Hilfecenter sperrt automatisches Lesen,
+       die Werte stammen aus drei übereinstimmenden unabhängigen Quellen. */
+    apex:        { label: 'Apex Trader Funding — 50K evaluation', target: 6, daily: 0, max: 5, dd: 'trailing', consistency: 0, minDays: 0, tz: 'America/New_York', reset: 17,
+                   checked: '2026-09-23', src: 'https://tradetanto.com/learn/apex-trader-funding-rules-what-you-need-to-know',
+                   note: 'From independent summaries — Apex’s own help centre could not be read: $3,000 target, $2,500 threshold trailing your intraday high and stopping $100 above the start, no daily loss limit or consistency rule during the evaluation. Other sizes use other amounts.' },
+    /* 23.09.2026: Konsistenz 55 % laut Topstep (vorher 50). Das Tageslimit ist
+       im Combine laut unabhängigen Quellen ein freiwilliges Zusatzmodul, das nur
+       pausiert statt durchfallen lässt — deshalb 0 und ein Hinweis. */
+    topstep:     { label: 'Topstep — Trading Combine', target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 55, minDays: 2,  tz: 'America/Chicago',  reset: 17,
+                   checked: '2026-09-23', src: 'https://help.topstep.com/en/articles/8284197-trading-combine-parameters',
+                   note: 'Best day below 55% of the target; trading day runs from 5:00 PM CT. The daily loss limit is an optional add-on that pauses trading instead of failing the account — enter it above if you use it (50K: $1,000 = 2%).' },
     takeprofit:  { label: 'TakeProfit Trader',         target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 0,  minDays: 5,  tz: 'America/Chicago',  reset: 17 },
     mff:         { label: 'MyFundedFutures — Starter',  target: 6,  daily: 0,  max: 4,  dd: 'eod',      consistency: 40, minDays: 1, tz: 'America/New_York', reset: 17 },
     mffexpert:   { label: 'MyFundedFutures — Expert',   target: 6,  daily: 2,  max: 3,  dd: 'eod',      consistency: 0,  minDays: 1, tz: 'America/New_York', reset: 17 },
@@ -57712,6 +58072,17 @@ self.addEventListener('message', async (ev) => {
       '</div>';
   }
 
+  /* Wann und wo die Regeln einer Vorlage geprüft wurden. Firmen ändern ihre
+     Bedingungen oft — ein sichtbares Datum ist ehrlicher als stille Zahlen. */
+  function presetCheck(key) {
+    var p = PRESETS[key];
+    if (!p || key === 'custom') return 'Enter your programme’s rules. Terms change — always verify against your own contract.';
+    if (!p.checked) return 'Rules not re-checked since this preset was added — verify them against your firm’s current terms.';
+    var d = new Date(p.checked + 'T12:00:00Z').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    return 'Rules checked ' + esc(d) + (p.src ? ' · <a href="' + esc(p.src) + '" target="_blank" rel="noopener nofollow" style="color:var(--gold)">source</a>' : '') +
+      (p.note ? '<br>' + esc(p.note) : '') + '<br>Terms change — always verify against your own contract.';
+  }
+
   function renderSetup(cfg) {
     var opts = Object.keys(PRESETS).map(function (k) {
       return '<option value="' + k + '"' + (cfg.preset === k ? ' selected' : '') + '>' + esc(PRESETS[k].label) + '</option>';
@@ -57724,7 +58095,7 @@ self.addEventListener('message', async (ev) => {
       '<div class="pf-fields">' +
         '<div class="pf-field"><label for="pfPreset">Firm / programme</label>' +
           '<select id="pfPreset" aria-label="Prop firm programme" onchange="ApexPropPlus.applyPreset(this.value)">' + opts + '</select>' +
-          '<div class="pf-hint">Terms change — always verify against your own contract.</div></div>' +
+          '<div class="pf-hint">' + presetCheck(cfg.preset) + '</div></div>' +
         fld('Account size (' + sym().trim() + ')', 'pfBalance', cfg.balance, 'balance', 'number', 'Starting balance of this cycle', 'min="0" step="100"') +
         fld('Profit target (%)', 'pfTarget', cfg.target, 'target', 'number', '', 'min="0" step="0.5"') +
         fld('Daily loss limit (%)', 'pfDaily', cfg.daily, 'daily', 'number', '0 = none', 'min="0" step="0.5"') +
@@ -70260,10 +70631,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         }).catch(function(){}));
     }
 
-    ['mt5','tradingview','atas','quantower'].forEach(function(p){
+    ['mt5','tradingview','atas','quantower','ninjatrader'].forEach(function(p){
       if (!m[p]) return;   // never delivered anything — not a connection yet
       var NAMES = { mt5:'📊 MetaTrader 5', tradingview:'📈 TradingView',
-                    atas:'🎯 ATAS', quantower:'🧊 Quantower' };
+                    atas:'🎯 ATAS', quantower:'🧊 Quantower', ninjatrader:'NinjaTrader' };
       out.push({ id:p, name:NAMES[p], connected:true, detail:'via webhook',
                  last:m[p], error:'',
                  action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('" + p + "')" });
@@ -70811,7 +71182,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     x.fillText('Counted from my journal, not self-reported', W/2, H-180);
 
     x.fillStyle = GOLD; x.font = '600 26px Georgia, serif';
-    x.fillText('evidence-trading.com', W/2, H-95);
+    x.fillText('evidencetrading.com', W/2, H-95);   // Domain ohne Bindestrich (war falsch)
 
     return c;
   }
@@ -72115,6 +72486,28 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     });
   }
 
+  /* ── Wörterbücher, die nur in einem Bereich gelten ──
+     Die Landingpage braucht kurze Schlüssel wie „Plans" oder „check", die
+     in der App etwas anderes heissen können. Ein Eintrag hier wirkt nur
+     unterhalb von `sel` und hat dort Vorrang vor T. */
+  var SCOPED = [];
+  I.addScoped = function(sel, table){
+    var idx = {}; Object.keys(table).forEach(function(k){ idx[norm(k)] = table[k]; });
+    SCOPED.push({ sel: sel, idx: idx });
+  };
+  function scopedRow(text, el){
+    if (!SCOPED.length || !el || !el.closest) return null;
+    for (var i = 0; i < SCOPED.length; i++){
+      if (el.closest(SCOPED[i].sel)){ var r = SCOPED[i].idx[norm(text)]; if (r) return r; }
+    }
+    return null;
+  }
+  function lookupAt(text, code, el){
+    var r = scopedRow(text, el);
+    if (r){ var v = r[LANGS.indexOf(code)]; if (v && v !== text) return v; }
+    return lookup(text, code);
+  }
+
   function lookup(text, code){
     var row = T[text] || index()[norm(text)];
     if (row){
@@ -72163,9 +72556,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         /* 90 Zeichen war die Grenze, solange nur Labels im Wörterbuch standen.
            Mit Stufe 2 stehen dort ganze Absätze — die längsten knapp 300. */
         if (!v || !v.trim() || v.length > 320) return NodeFilter.FILTER_REJECT;
-        if (!T[v.trim()] && !index()[norm(v)] &&
-            !tmplIndex()[norm(v).replace(NUM_RE, '{n}')]) return NodeFilter.FILTER_REJECT;
         var p = n.parentNode;
+        if (!T[v.trim()] && !index()[norm(v)] && !scopedRow(v, p) &&
+            !tmplIndex()[norm(v).replace(NUM_RE, '{n}')]) return NodeFilter.FILTER_REJECT;
         if (!p) return NodeFilter.FILTER_REJECT;
         var t = p.nodeName;
         if (t==='SCRIPT'||t==='STYLE'||t==='TEXTAREA'||t==='TITLE') return NodeFilter.FILTER_REJECT;
@@ -72182,7 +72575,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       root.querySelectorAll('[' + attr + ']').forEach(function(el){
         var raw = el.getAttribute(attr);
         if (!raw) return;
-        var t = lookup(raw.trim(), code);
+        var t = lookupAt(raw.trim(), code, el);
         if (!t) return;
         /* Das Original merken, sonst kann ein zweiter Durchlauf nach einem
            Sprachwechsel die bereits übersetzte Fassung nicht mehr zuordnen. */
@@ -72192,7 +72585,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       // Beim Sprachwechsel vom gemerkten Original aus neu übersetzen.
       root.querySelectorAll('[data-i18n-' + attr + ']').forEach(function(el){
         var orig = el.getAttribute('data-i18n-' + attr);
-        var t = lookup(String(orig).trim(), code);
+        var t = lookupAt(String(orig).trim(), code, el);
         if (t) el.setAttribute(attr, t);
       });
     });
@@ -72224,7 +72617,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     root.querySelectorAll('[data-i18n]').forEach(function(el){
       var orig = el.getAttribute('data-i18n');
       var k = orig.trim();
-      var t = lookup(k, code);
+      var t = lookupAt(k, code, el.parentNode || el);
       if (!t) return;
       // Exakt wie beim ersten Mal — samt Leerraum links und rechts.
       if (orig.indexOf(k) >= 0) el.textContent = orig.replace(k, t);
@@ -72235,7 +72628,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     while ((n = walk.nextNode())) todo.push(n);
     todo.forEach(function(node){
       var src = node.nodeValue, key = src.trim();
-      var hit = lookup(key, code);
+      var hit = lookupAt(key, code, node.parentNode);
       if (!hit) return;
       /* <option> cannot hold an element child, so the text is replaced in
          place there and the select is marked instead. */
@@ -77111,7 +77504,9 @@ body:not(.lp-on) #lpProgress{ display:none; }
 #landingPage .lp-menu .lp-menu-cta a{ flex:1; text-align:center; border:1px solid var(--lp-line); font-family:var(--lp-display); font-weight:600; }
 #landingPage .lp-menu .lp-menu-cta a.solid{ background:linear-gradient(135deg,var(--lp-gold-hi),var(--lp-gold)); color:#0a0a0a!important; border-color:transparent; }
 @keyframes lpMenuIn{ from{ opacity:0; transform:translateY(-8px) scale(.98); } to{ opacity:1; transform:none; } }
-@media(max-width:1200px){
+#landingPage .nav-links a{ white-space:nowrap; }
+#landingPage .nav-links{ gap:clamp(18px,1.9vw,34px); }
+@media(max-width:1320px){
   #landingPage .nav-links{ display:none; }
   #landingPage .lp-menu-btn{ display:inline-flex; flex-direction:column; align-items:center; justify-content:center; }
 }
@@ -77300,6 +77695,60 @@ body:not(.lp-on) #lpProgress{ display:none; }
   #landingPage .lp-menu.open, #landingPage .lp-compare tr.lp-cmp-in td{ animation:none; }
   #landingPage .lp-replay-viz .c{ opacity:1; transform:none; transition:none; }
 }
+
+/* ── Umzug, Datenhoheit, Founding, FAQ (23.09.2026) ── */
+#landingPage .lp-steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; counter-reset:st; }
+#landingPage .lp-step{ position:relative; border:1px solid var(--lp-line); border-radius:16px; padding:26px 24px 24px; background:linear-gradient(180deg,var(--lp-surface),var(--lp-bg)); }
+#landingPage .lp-step + .lp-step::before{ content:""; position:absolute; top:44px; left:-19px; width:20px; height:1px; background:linear-gradient(90deg,transparent,var(--lp-gold)); }
+#landingPage .lp-step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:50%; margin-bottom:14px;
+  font-family:var(--lp-display); font-weight:800; color:#0a0a0a; background:linear-gradient(135deg,var(--lp-gold-hi),var(--lp-gold)); box-shadow:0 6px 18px rgba(var(--gold-rgb),.3); }
+#landingPage .lp-step-t{ font-family:var(--lp-display); font-weight:700; font-size:1.1rem; color:var(--lp-text); margin-bottom:8px; }
+#landingPage .lp-step-d{ color:var(--lp-mute); font-size:.95rem; }
+#landingPage .lp-step-d b{ color:var(--lp-text); font-weight:600; }
+#landingPage .lp-fine{ color:var(--lp-mute); font-size:.88rem; margin:16px 0 0; max-width:80ch; opacity:.85; }
+#landingPage .lp-own{ display:grid; grid-template-columns:1fr 1.25fr; gap:36px; align-items:center; margin-top:44px; padding:34px;
+  border:1px solid rgba(var(--gold-rgb),.25); border-radius:20px; background:radial-gradient(ellipse at 0% 0%,rgba(var(--gold-rgb),.08),transparent 60%), var(--lp-surface); }
+#landingPage .lp-own-t{ font-family:var(--lp-display); font-weight:700; font-size:clamp(1.3rem,2.6vw,1.8rem); color:var(--lp-text); line-height:1.15; margin-bottom:10px; }
+#landingPage .lp-own-d{ color:var(--lp-mute); }
+#landingPage .lp-own-list{ list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+#landingPage .lp-own-list li{ display:flex; gap:12px; align-items:flex-start; color:var(--lp-mute); font-size:.95rem; }
+#landingPage .lp-own-list b{ color:var(--lp-text); font-weight:600; }
+#landingPage .ic-wrap{ flex:none; width:32px; height:32px; border-radius:9px; display:grid; place-items:center; color:var(--lp-gold);
+  background:rgba(var(--gold-rgb),.1); border:1px solid rgba(var(--gold-rgb),.2); }
+#landingPage .ic-wrap .ic{ width:16px; height:16px; }
+#landingPage .lp-founding{ display:grid; grid-template-columns:1.2fr 1fr; gap:40px; align-items:center; padding:clamp(28px,4vw,48px);
+  border:1px solid rgba(var(--gold-rgb),.3); border-radius:24px; position:relative; overflow:hidden;
+  background:radial-gradient(ellipse at 100% 0%,rgba(var(--gold-rgb),.12),transparent 55%), linear-gradient(180deg,var(--lp-surface),var(--lp-bg)); }
+#landingPage .lp-founding-list{ list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+#landingPage .lp-founding-list li{ position:relative; padding-left:28px; color:var(--lp-mute); font-size:.97rem; }
+#landingPage .lp-founding-list li::before{ content:""; position:absolute; left:0; top:.45em; width:14px; height:14px; border-radius:50%;
+  background:radial-gradient(circle,var(--lp-gold) 35%,rgba(var(--gold-rgb),.2) 40%); }
+#landingPage .lp-founding-list li.muted{ opacity:.7; font-size:.88rem; }
+#landingPage .lp-founding-list li.muted::before{ display:none; }
+#landingPage .lp-founding-list b{ color:var(--lp-text); font-weight:600; }
+#landingPage .lp-faq{ max-width:860px; display:grid; gap:10px; }
+#landingPage .lp-faq details{ border:1px solid var(--lp-line); border-radius:14px; background:linear-gradient(180deg,var(--lp-surface),var(--lp-bg)); transition:border-color .3s, background .3s; }
+#landingPage .lp-faq details[open]{ border-color:rgba(var(--gold-rgb),.38); }
+#landingPage .lp-faq summary{ list-style:none; cursor:pointer; padding:18px 52px 18px 22px; position:relative; color:var(--lp-text); font-weight:600; font-size:1.02rem; }
+#landingPage .lp-faq summary::-webkit-details-marker{ display:none; }
+#landingPage .lp-faq summary::after{ content:"+"; position:absolute; right:20px; top:50%; transform:translateY(-50%); width:24px; height:24px; border-radius:50%;
+  display:grid; place-items:center; color:var(--lp-gold); border:1px solid var(--lp-line); font-size:16px; transition:transform .3s cubic-bezier(.2,.8,.2,1), background .3s; }
+#landingPage .lp-faq details[open] summary::after{ transform:translateY(-50%) rotate(45deg); background:rgba(var(--gold-rgb),.1); }
+#landingPage .lp-faq summary:hover{ color:var(--lp-gold-hi); }
+#landingPage .lp-faq details p{ margin:0; padding:0 22px 20px; color:var(--lp-mute); max-width:72ch; }
+#landingPage .lp-faq details[open] p{ animation:lpRowIn .35s cubic-bezier(.2,.8,.2,1) both; }
+/* Weiches Aufklappen, wo der Browser es kann (Chrome 131+, Safari 18.4+) */
+@supports (interpolate-size: allow-keywords){
+  #landingPage .lp-faq{ interpolate-size:allow-keywords; }
+  #landingPage .lp-faq details::details-content{ height:0; overflow:hidden; transition:height .35s cubic-bezier(.2,.8,.2,1), content-visibility .35s allow-discrete; }
+  #landingPage .lp-faq details[open]::details-content{ height:auto; }
+}
+@media(max-width:900px){
+  #landingPage .lp-steps, #landingPage .lp-own, #landingPage .lp-founding{ grid-template-columns:1fr; }
+  #landingPage .lp-step + .lp-step::before{ display:none; }
+  #landingPage .lp-own{ gap:22px; padding:24px; }
+}
+#landingPage .lp-voice-beta{ display:inline-block; margin-top:6px; font-family:var(--lp-mono); font-size:10.5px; letter-spacing:.04em; color:var(--lp-mute); border:1px solid var(--lp-line); border-radius:999px; padding:2px 9px; }
 
 /* ════════════ APP ════════════ */
 
@@ -77642,6 +78091,640 @@ body.light::before{ opacity:.45; }
 
   function boot() { try { landing(); } catch (e) { console.warn('[polish] landing', e); } try { app(); } catch (e) { console.warn('[polish] app', e); } }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+<!-- ══════════════════════════════════════════════════════════════════
+     Evidence — Founding traders (window.ApexBeta)
+     Bewerbung um einen der 20 Plätze (3 Monate Pro gegen ehrliches
+     Feedback). Gespeichert in apexBetaApplications/{uid}, status 'new'.
+     Der Admin entscheidet von Hand: status → 'accepted' und trialUntil auf
+     apexUsers/{uid} setzen (Datenbank-Explorer im Admin-Panel).
+     Wer angenommen ist, bekommt an einer späteren Kundenstimme beta:true —
+     die Landingpage kennzeichnet sie dann als „received Pro for free".
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+  if (window.ApexBeta) return;
+  var B = {}; window.ApexBeta = B;
+  var KEY = 'apexBetaIntent';
+  function me() { return window.currentUID || null; }
+  function demo() { return !!window.APEX_DEMO || me() === 'demo'; }
+  function DB() { return (!demo() && window.db && me()) ? window.db : null; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function toast(m) { try { if (window.showToast) showToast(m); } catch (e) { } }
+  var MARKETS = ['Forex', 'Futures', 'Indices', 'Metals', 'Crypto', 'Stocks', 'Options'];
+
+  B.apply = function () {
+    if (demo()) { toast('The demo cannot apply — create a free account first.'); return; }
+    if (!me()) {
+      try { localStorage.setItem(KEY, '1'); } catch (e) { }
+      if (window.goToAuth) goToAuth('register');
+      return;
+    }
+    B.open();
+  };
+
+  B.open = function () {
+    var d = DB(); if (!d) { toast('Please sign in first'); return; }
+    try { localStorage.removeItem(KEY); } catch (e) { }
+    d.collection('apexBetaApplications').doc(me()).get().then(function (doc) {
+      var old = doc.exists ? doc.data() : null;
+      if (old && old.status && old.status !== 'new') { show(old, true); return; }
+      show(old || {}, false);
+    }).catch(function () { show({}, false); });
+  };
+
+  function show(a, decided) {
+    var ex = document.getElementById('betaModal'); if (ex) ex.remove();
+    var m = document.createElement('div'); m.className = 'bk-modal'; m.id = 'betaModal';
+    var body;
+    if (decided) {
+      body = '<div class="mb"><p style="margin:0;color:var(--ink2);line-height:1.6">' +
+        (a.status === 'accepted' ? 'You are one of the founding traders — thank you. Pro is active on your account; tell us anything, any time, under Settings → Bug Report &amp; Rating.'
+          : 'Thank you for applying. This round is full — we keep your application and will write to you if a place opens up.') + '</p></div>';
+    } else {
+      var mk = a.markets || [];
+      body = '<div class="mb">' +
+        '<p class="note" style="margin-top:0">Three months of Pro for honest feedback. Twenty places, chosen by hand — we reply to every application.</p>' +
+        '<h4>What do you trade?</h4><div class="pl" id="btMk">' + MARKETS.map(function (x) { return '<button type="button" class="bk-chip' + (mk.indexOf(x) >= 0 ? ' on' : '') + '" data-m="' + x + '">' + x + '</button>'; }).join('') + '</div>' +
+        '<h4>Platform / broker</h4><input class="bk-input" id="btPf" style="width:100%" maxlength="120" placeholder="e.g. cTrader with IC Markets, NinjaTrader, MT5" value="' + esc(a.platform || '') + '">' +
+        '<h4>How long have you been trading?</h4><select class="bk-input" id="btEx" style="width:100%">' +
+          [['', 'Choose…'], ['lt1', 'Less than a year'], ['1to3', '1–3 years'], ['gt3', 'More than 3 years']].map(function (o) { return '<option value="' + o[0] + '"' + (a.experience === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
+        '<label class="ck"><input type="checkbox" id="btProp"' + (a.prop ? ' checked' : '') + '><span>I trade a prop firm account or challenge</span></label>' +
+        '<h4>How do you journal today?</h4><input class="bk-input" id="btJn" style="width:100%" maxlength="160" placeholder="Another journal, a spreadsheet, a notebook — or not at all" value="' + esc(a.journal || '') + '">' +
+        '<h4>Why do you want in?</h4><textarea class="bk-input" id="btWhy" style="width:100%;min-height:96px;box-sizing:border-box;resize:vertical" maxlength="1200" placeholder="What would a journal have to do to actually change your trading?">' + esc(a.why || '') + '</textarea>' +
+        '<label class="ck"><input type="checkbox" id="btOk"' + (a.consent ? ' checked' : '') + '><span>I will use it for my real trading for at least four weeks and give honest feedback.<small>If I later write a review, it is shown with a note that I received Pro for free.</small></span></label>' +
+        '<div id="btErr" class="note warn" style="display:none"></div>' +
+        '</div><div class="mf"><button class="apex-btn apex-btn--ghost" id="btCancel">Cancel</button><button class="apex-btn apex-btn--solid" id="btSend">' + (a.createdAt ? 'Update application' : 'Send application') + '</button></div>';
+    }
+    m.innerHTML = '<div class="bx" role="dialog" aria-modal="true" aria-label="Founding traders"><div class="mh"><b>Founding traders</b><button class="apex-icon-btn" aria-label="Close" id="btX">✕︎</button></div>' + body + '</div>';
+    document.body.appendChild(m);
+    try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(m); } catch (e) { }
+    var close = function () { m.remove(); };
+    m.addEventListener('mousedown', function (e) { if (e.target === m) close(); });
+    m.querySelector('#btX').onclick = close;
+    if (decided) return;
+    m.querySelector('#btCancel').onclick = close;
+    m.querySelectorAll('[data-m]').forEach(function (b) { b.onclick = function () { b.classList.toggle('on'); }; });
+    m.querySelector('#btSend').onclick = function () {
+      var err = m.querySelector('#btErr'), go = this;
+      var data = {
+        uid: me(), name: String(window.currentName || '').slice(0, 60),
+        markets: Array.prototype.map.call(m.querySelectorAll('[data-m].on'), function (b) { return b.dataset.m; }),
+        platform: m.querySelector('#btPf').value.trim().slice(0, 120),
+        experience: m.querySelector('#btEx').value,
+        prop: m.querySelector('#btProp').checked,
+        journal: m.querySelector('#btJn').value.trim().slice(0, 160),
+        why: m.querySelector('#btWhy').value.trim().slice(0, 1200),
+        consent: m.querySelector('#btOk').checked,
+        status: 'new', createdAt: a.createdAt || Date.now(), updatedAt: Date.now()
+      };
+      var bad = !data.markets.length ? 'Pick at least one market.' : !data.experience ? 'Tell us how long you have been trading.' :
+        data.why.length < 30 ? 'A few more words on why, please — at least 30 characters.' : !data.consent ? 'Please confirm the four weeks of real trading.' : '';
+      if (bad) { err.textContent = bad; err.style.display = ''; return; }
+      go.disabled = true; go.textContent = 'Sending…';
+      DB().collection('apexBetaApplications').doc(me()).set(data).then(function () {
+        close(); toast('Application sent — we reply to every one.');
+      }).catch(function (e) {
+        go.disabled = false; go.textContent = 'Send application';
+        err.textContent = 'Could not send (' + ((e && e.code) || e) + ').'; err.style.display = '';
+      });
+    };
+  }
+
+  /* Status merken, damit eine spätere Kundenstimme korrekt gekennzeichnet wird. */
+  B.status = null;
+  function loadStatus() {
+    var d = DB(); if (!d) return;
+    d.collection('apexBetaApplications').doc(me()).get().then(function (doc) {
+      B.status = doc.exists ? (doc.data().status || 'new') : null;
+      window._apexBetaMember = B.status === 'accepted';
+    }).catch(function () { });
+  }
+
+  // Nach der Registrierung/Anmeldung: Bewerbung öffnen, wenn sie von der Landingpage aus begonnen wurde.
+  var last = null;
+  setInterval(function () {
+    var u = me(); if (!u || u === last || !window.db) return;
+    last = u; loadStatus();
+    var want = false; try { want = localStorage.getItem(KEY) === '1'; } catch (e) { }
+    if (want && !demo()) setTimeout(B.open, 1800);
+  }, 1500);
+  // Direktlink aus Mails: ?founding=1
+  try { if (/[?&]founding=1\b/.test(location.search)) localStorage.setItem(KEY, '1'); } catch (e) { }
+})();
+</script>
+<!-- ══════════════════════════════════════════════════════════════════
+     Landingpage — handgeschriebene Übersetzungen (de, es, pt, fr)
+     Gilt NUR in #landingPage (ApexI18n.addScoped), damit kurze Schlüssel wie
+     „Plans" oder „check" in der App nichts falsch ersetzen. Alles, was hier
+     fehlt, übersetzt weiter Google. Schlüssel = exakter englischer Textknoten.
+     Anrede wie in der App: du / tú / você / vous.
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+  var LP = {
+    // Navigation
+    'Overview':        ['Überblick', 'Resumen', 'Visão geral', 'Aperçu'],
+    'Live Demo':       ['Live-Demo', 'Demo en vivo', 'Demo ao vivo', 'Démo en direct'],
+    'Features':        ['Funktionen', 'Funciones', 'Recursos', 'Fonctionnalités'],
+    'Replay':          ['Replay', 'Replay', 'Replay', 'Replay'],
+    'AI':              ['KI', 'IA', 'IA', 'IA'],
+    'Pricing':         ['Preise', 'Precios', 'Preços', 'Tarifs'],
+    'Security':        ['Sicherheit', 'Seguridad', 'Segurança', 'Sécurité'],
+    'Login':           ['Anmelden', 'Iniciar sesión', 'Entrar', 'Connexion'],
+    'Register →':      ['Registrieren →', 'Registrarse →', 'Criar conta →', 'S’inscrire →'],
+    // Hero
+    'Professional Trading Intelligence': ['Professionelle Trading-Analyse', 'Análisis profesional de trading', 'Análise profissional de trading', 'Analyse de trading professionnelle'],
+    'The trading journal that fills itself': ['Das Trading-Journal, das sich selbst füllt', 'El diario de trading que se llena solo', 'O diário de trading que se preenche sozinho', 'Le journal de trading qui se remplit tout seul'],
+    'Auto-synced from your broker, quant analytics and market replay — in one place.': [
+      'Automatisch von deinem Broker synchronisiert, Quant-Analysen und Market Replay – an einem Ort.',
+      'Sincronizado con tu bróker, análisis cuantitativo y market replay, todo en un solo lugar.',
+      'Sincronizado com sua corretora, análise quantitativa e market replay — tudo em um só lugar.',
+      'Synchronisé avec votre courtier, analyses quantitatives et market replay — au même endroit.'],
+    'Other journals show you what happened.': ['Andere Journale zeigen dir, was passiert ist.', 'Otros diarios te muestran lo que pasó.', 'Outros diários mostram o que aconteceu.', 'Les autres journaux vous montrent ce qui s’est passé.'],
+    'Evidence measures whether you changed.': ['Evidence misst, ob du dich verändert hast.', 'Evidence mide si has cambiado.', 'O Evidence mede se você mudou.', 'Evidence mesure si vous avez changé.'],
+    'measures whether you changed.': ['misst, ob du dich verändert hast.', 'mide si has cambiado.', 'mede se você mudou.', 'mesure si vous avez changé.'],
+    'Create Free Account ↗': ['Kostenloses Konto erstellen ↗', 'Crear cuenta gratis ↗', 'Criar conta grátis ↗', 'Créer un compte gratuit ↗'],
+    'See it live ↓':   ['Live ansehen ↓', 'Verlo en vivo ↓', 'Ver ao vivo ↓', 'Voir en direct ↓'],
+    'Sign In →':       ['Anmelden →', 'Iniciar sesión →', 'Entrar →', 'Se connecter →'],
+    'Read-Only Broker Access': ['Broker-Zugriff nur lesend', 'Acceso de solo lectura al bróker', 'Acesso somente leitura à corretora', 'Accès courtier en lecture seule'],
+    'No Trade Execution': ['Keine Orderausführung', 'Sin ejecución de órdenes', 'Sem execução de ordens', 'Aucune exécution d’ordres'],
+    // Live-Demo
+    'See it working':  ['So sieht es aus', 'Míralo en acción', 'Veja funcionando', 'Voyez-le en action'],
+    'The real app,':   ['Die echte App,', 'La app real,', 'O app de verdade,', 'La vraie application,'],
+    'running right here': ['direkt hier im Browser', 'funcionando aquí mismo', 'rodando aqui mesmo', 'qui tourne ici même'],
+    'Start the interactive demo': ['Interaktive Demo starten', 'Iniciar la demo interactiva', 'Iniciar a demo interativa', 'Lancer la démo interactive'],
+    'Open the full demo ↗': ['Ganze Demo öffnen ↗', 'Abrir la demo completa ↗', 'Abrir a demo completa ↗', 'Ouvrir la démo complète ↗'],
+    'Create free account →': ['Kostenloses Konto erstellen →', 'Crear cuenta gratis →', 'Criar conta grátis →', 'Créer un compte gratuit →'],
+    'Try before you trust': ['Erst testen, dann vertrauen', 'Pruébalo antes de confiar', 'Teste antes de confiar', 'Essayez avant de faire confiance'],
+    '7 days Pro, no card': ['7 Tage Pro, ohne Karte', '7 días de Pro, sin tarjeta', '7 dias de Pro, sem cartão', '7 jours de Pro, sans carte'],
+    'Your journal stays yours': ['Dein Journal bleibt deins', 'Tu diario sigue siendo tuyo', 'Seu diário continua seu', 'Votre journal reste à vous'],
+    // Über
+    'What is': ['Was ist', 'Qué es', 'O que é', 'Qu’est-ce que'],
+    'A Journal Built for': ['Ein Journal für', 'Un diario hecho para', 'Um diário feito para', 'Un journal conçu pour'],
+    'Serious Traders': ['ernsthafte Trader', 'traders serios', 'traders sérios', 'les traders sérieux'],
+    'Read-Only Access': ['Nur-Lese-Zugriff', 'Acceso de solo lectura', 'Acesso somente leitura', 'Accès en lecture seule'],
+    'Trades Placed or Modified': ['Trades platziert oder geändert', 'Operaciones abiertas o modificadas', 'Operações abertas ou alteradas', 'Trades passés ou modifiés'],
+    'Edge Lab Tools': ['Edge-Lab-Werkzeuge', 'Herramientas de Edge Lab', 'Ferramentas do Edge Lab', 'Outils Edge Lab'],
+    'Days Pro, No Card': ['Tage Pro, ohne Karte', 'días de Pro, sin tarjeta', 'dias de Pro, sem cartão', 'jours de Pro, sans carte'],
+    // Funktionen
+    'Capabilities':    ['Funktionen', 'Capacidades', 'Recursos', 'Capacités'],
+    // „Key <em>Features</em>“ = zwei Textknoten → ergibt „Die wichtigsten Funktionen“, „Principales Funciones“ …
+    'Key':             ['Die wichtigsten', 'Principales', 'Principais', 'Principales'],
+    'Importing your trades': ['Deine Trades importieren', 'Importar tus operaciones', 'Importar suas operações', 'Importer vos trades'],
+    'without typing them': ['ohne sie abzutippen', 'sin escribirlas a mano', 'sem digitá-las', 'sans les saisir'],
+    'Your trading journal': ['Dein Trading-Journal', 'Tu diario de trading', 'Seu diário de trading', 'Votre journal de trading'],
+    'the part you actually sit in every evening': ['der Teil, in dem du jeden Abend sitzt', 'la parte en la que te sientas cada noche', 'a parte em que você se senta toda noite', 'la partie où vous passez chaque soirée'],
+    'Where your edge really is': ['Wo dein Vorteil wirklich liegt', 'Dónde está de verdad tu ventaja', 'Onde está de verdade sua vantagem', 'Où se trouve vraiment votre avantage'],
+    'numbers, not impressions': ['Zahlen statt Eindrücke', 'números, no impresiones', 'números, não impressões', 'des chiffres, pas des impressions'],
+    'The part that loses the money': ['Der Teil, der das Geld verliert', 'La parte que pierde el dinero', 'A parte que perde o dinheiro', 'La partie qui perd l’argent'],
+    'you, on a bad day': ['du, an einem schlechten Tag', 'tú, en un mal día', 'você, num dia ruim', 'vous, un mauvais jour'],
+    'Not on your own': ['Nicht allein', 'No estás solo', 'Você não está sozinho', 'Pas seul'],
+    'and the small tools around it': ['und die kleinen Werkzeuge drumherum', 'y las pequeñas herramientas a su alrededor', 'e as pequenas ferramentas em volta', 'et les petits outils autour'],
+    'Live Auto-Tracking': ['Live-Auto-Tracking', 'Seguimiento automático en vivo', 'Rastreamento automático ao vivo', 'Suivi automatique en direct'],
+    'Crypto — direct connection': ['Krypto – direkte Verbindung', 'Cripto: conexión directa', 'Cripto — conexão direta', 'Crypto — connexion directe'],
+    'Academy':         ['Academy', 'Academia', 'Academia', 'Académie'],
+    'Trading Glossary': ['Trading-Glossar', 'Glosario de trading', 'Glossário de trading', 'Glossaire du trading'],
+    'Set up in three steps': ['In drei Schritten eingerichtet', 'Configurado en tres pasos', 'Configurado em três passos', 'Configuré en trois étapes'],
+    'Auto-Sync — or import anything else': ['Auto-Sync – oder alles andere importieren', 'Auto-sync, o importa todo lo demás', 'Auto-sync — ou importe todo o resto', 'Auto-sync — ou importez tout le reste'],
+    'Structured trading journal': ['Strukturiertes Trading-Journal', 'Diario de trading estructurado', 'Diário de trading estruturado', 'Journal de trading structuré'],
+    'Calendar, Setups & Playbooks': ['Kalender, Setups & Playbooks', 'Calendario, setups y playbooks', 'Calendário, setups e playbooks', 'Calendrier, setups et playbooks'],
+    'Auto-Tagging & Chart Frames': ['Auto-Tagging & Chart-Rahmen', 'Etiquetado automático y marcos de gráfico', 'Tags automáticas e quadros de gráfico', 'Tags automatiques et cadres de graphique'],
+    'Dashboard & Statistics': ['Dashboard & Statistik', 'Panel y estadísticas', 'Painel e estatísticas', 'Tableau de bord et statistiques'],
+    'Edge Lab — 10 Quant Tools': ['Edge Lab – 10 Quant-Werkzeuge', 'Edge Lab: 10 herramientas cuantitativas', 'Edge Lab — 10 ferramentas quantitativas', 'Edge Lab — 10 outils quantitatifs'],
+    'Reports You Can Send': ['Berichte zum Weitergeben', 'Informes que puedes enviar', 'Relatórios que você pode enviar', 'Des rapports à partager'],
+    'An AI coach that reads your journal': ['Ein KI-Coach, der dein Journal liest', 'Un coach de IA que lee tu diario', 'Um coach de IA que lê seu diário', 'Un coach IA qui lit votre journal'],
+    'A Warning Before, a Grade After': ['Vorher eine Warnung, danach eine Note', 'Un aviso antes, una nota después', 'Um aviso antes, uma nota depois', 'Un avertissement avant, une note après'],
+    'Psychology & Rules': ['Psychologie & Regeln', 'Psicología y reglas', 'Psicologia e regras', 'Psychologie et règles'],
+    'Mentor & Team Mode': ['Mentor- & Team-Modus', 'Modo mentor y equipo', 'Modo mentor e equipe', 'Mode mentor et équipe'],
+    'Community & Your Language': ['Community & deine Sprache', 'Comunidad y tu idioma', 'Comunidade e seu idioma', 'Communauté et votre langue'],
+    'The Rest of the Desk': ['Der Rest vom Schreibtisch', 'El resto del escritorio', 'O resto da mesa', 'Le reste du bureau'],
+    // Schlagwörter
+    'Learn':           ['Lernen', 'Aprender', 'Aprender', 'Apprendre'],
+    'Guided start':    ['Geführter Start', 'Inicio guiado', 'Início guiado', 'Démarrage guidé'],
+    'Read-only keys':  ['Nur-Lese-Schlüssel', 'Claves de solo lectura', 'Chaves somente leitura', 'Clés en lecture seule'],
+    '4 platforms':     ['4 Plattformen', '4 plataformas', '4 plataformas', '4 plateformes'],
+    'Routine':         ['Routine', 'Rutina', 'Rotina', 'Routine'],
+    'Less admin':      ['Weniger Verwaltung', 'Menos trabajo manual', 'Menos trabalho manual', 'Moins d’administratif'],
+    'Analytics':       ['Analyse', 'Análisis', 'Análise', 'Analyse'],
+    'Reports':         ['Berichte', 'Informes', 'Relatórios', 'Rapports'],
+    'Discipline':      ['Disziplin', 'Disciplina', 'Disciplina', 'Discipline'],
+    'Tools':           ['Werkzeuge', 'Herramientas', 'Ferramentas', 'Outils'],
+    // Replay
+    "Practise, don't guess": ['Üben statt raten', 'Practica, no adivines', 'Pratique, não adivinhe', 'Entraînez-vous, ne devinez pas'],
+    'Trade a day that': ['Handle einen Tag, der', 'Opera un día que', 'Opere um dia que', 'Tradez une journée qui'],
+    'already happened': ['schon vorbei ist', 'ya ocurrió', 'já aconteceu', 'a déjà eu lieu'],
+    'Not a simulator with made-up prices': ['Kein Simulator mit erfundenen Kursen', 'No es un simulador con precios inventados', 'Não é um simulador com preços inventados', 'Pas un simulateur aux prix inventés'],
+    'Manage it like a real position': ['Wie eine echte Position verwalten', 'Gestiónala como una posición real', 'Gerencie como uma posição real', 'Gérez-la comme une vraie position'],
+    'It admits what it cannot know': ['Es sagt, was es nicht wissen kann', 'Admite lo que no puede saber', 'Admite o que não pode saber', 'Il admet ce qu’il ne peut pas savoir'],
+    'Study it properly': ['Gründlich studieren', 'Estúdialo a fondo', 'Estude com calma', 'Étudiez-le à fond'],
+    'Set the same day for someone else': ['Denselben Tag für jemand anderen stellen', 'Prepara el mismo día para otra persona', 'Prepare o mesmo dia para outra pessoa', 'Proposez la même journée à quelqu’un d’autre'],
+    'Open Market Replay in the demo ↗': ['Market Replay in der Demo öffnen ↗', 'Abrir Market Replay en la demo ↗', 'Abrir o Market Replay na demo ↗', 'Ouvrir Market Replay dans la démo ↗'],
+    'See plans ↓':     ['Preise ansehen ↓', 'Ver planes ↓', 'Ver planos ↓', 'Voir les offres ↓'],
+    // Academy
+    'Learn, then prove it changed': ['Lernen – und dann belegen, dass es wirkt', 'Aprende y demuestra que cambió', 'Aprenda e comprove que mudou', 'Apprenez, puis prouvez que ça a changé'],
+    'The only trading course that can': ['Der einzige Trading-Kurs, der', 'El único curso de trading que puede', 'O único curso de trading que consegue', 'Le seul cours de trading qui peut'],
+    'check':           ['prüft,', 'comprobar', 'verificar', 'vérifier'],
+    'whether it worked': ['ob er gewirkt hat', 'si funcionó', 'se funcionou', 's’il a fonctionné'],
+    'Your own numbers under every chapter': ['Deine eigenen Zahlen unter jedem Kapitel', 'Tus propios números en cada capítulo', 'Seus próprios números em cada capítulo', 'Vos propres chiffres sous chaque chapitre'],
+    'One commitment per chapter': ['Ein Vorsatz pro Kapitel', 'Un compromiso por capítulo', 'Um compromisso por capítulo', 'Un engagement par chapitre'],
+    'The questions come back': ['Die Fragen kommen wieder', 'Las preguntas vuelven', 'As perguntas voltam', 'Les questions reviennent'],
+    'Your strategy, written up as a book': ['Deine Strategie, als Buch aufgeschrieben', 'Tu estrategia, escrita como un libro', 'Sua estratégia, escrita como um livro', 'Votre stratégie, rédigée comme un livre'],
+    // Spaces
+    'For mentors and groups': ['Für Mentoren und Gruppen', 'Para mentores y grupos', 'Para mentores e grupos', 'Pour les mentors et les groupes'],
+    'Posts that carry the actual trades': ['Beiträge mit den echten Trades', 'Publicaciones con las operaciones reales', 'Posts com as operações reais', 'Des posts avec les vrais trades'],
+    'A board that ranks process, not profit': ['Eine Rangliste für Prozess statt Gewinn', 'Un ranking de proceso, no de beneficio', 'Um ranking de processo, não de lucro', 'Un classement du processus, pas du profit'],
+    "Nobody's journal is visible by default": ['Kein Journal ist von sich aus sichtbar', 'Ningún diario es visible por defecto', 'Nenhum diário é visível por padrão', 'Aucun journal n’est visible par défaut'],
+    'Publish your playbooks and courses': ['Veröffentliche deine Playbooks und Kurse', 'Publica tus playbooks y cursos', 'Publique seus playbooks e cursos', 'Publiez vos playbooks et vos cours'],
+    'Who has gone quiet': ['Wer still geworden ist', 'Quién se ha quedado callado', 'Quem ficou em silêncio', 'Qui s’est tu'],
+    'Voice rooms and real moderation': ['Sprachräume und echte Moderation', 'Salas de voz y moderación real', 'Salas de voz e moderação de verdade', 'Salons vocaux et vraie modération'],
+    // KI
+    'One system, not seven features': ['Ein System, nicht sieben Funktionen', 'Un sistema, no siete funciones', 'Um sistema, não sete recursos', 'Un système, pas sept fonctionnalités'],
+    'and never does the maths': ['und rechnet nie selbst', 'y nunca hace los cálculos', 'e nunca faz as contas', 'et ne fait jamais les calculs'],
+    'What it does today': ['Was sie heute kann', 'Lo que hace hoy', 'O que ela faz hoje', 'Ce qu’elle fait aujourd’hui'],
+    'Warns you while it is still avoidable': ['Warnt dich, solange es noch vermeidbar ist', 'Te avisa cuando aún se puede evitar', 'Avisa enquanto ainda dá para evitar', 'Vous prévient tant que c’est encore évitable'],
+    'Turns plain words into testable rules': ['Macht aus einfachen Worten prüfbare Regeln', 'Convierte palabras sencillas en reglas comprobables', 'Transforma palavras simples em regras testáveis', 'Transforme des mots simples en règles testables'],
+    'Tags, writes and explains': ['Taggt, schreibt und erklärt', 'Etiqueta, escribe y explica', 'Marca, escreve e explica', 'Tague, rédige et explique'],
+    'Says when it does not know': ['Sagt, wenn sie es nicht weiss', 'Dice cuando no lo sabe', 'Diz quando não sabe', 'Dit quand elle ne sait pas'],
+    'Where your data goes:': ['Wohin deine Daten gehen:', 'Adónde van tus datos:', 'Para onde vão seus dados:', 'Où vont vos données :'],
+    // Kundenstimmen
+    'From people who use it': ['Von Leuten, die es nutzen', 'De quienes lo usan', 'De quem usa', 'Par ceux qui l’utilisent'],
+    'What traders':    ['Was Trader', 'Lo que los traders', 'O que os traders', 'Ce que les traders'],
+    'actually say':    ['wirklich sagen', 'dicen de verdad', 'realmente dizem', 'en disent vraiment'],
+    // Umzug
+    'Coming from another journal': ['Du kommst von einem anderen Journal?', '¿Vienes de otro diario?', 'Vem de outro diário?', 'Vous venez d’un autre journal ?'],
+    'Bring your history with you.': ['Nimm deine Historie mit.', 'Trae tu historial contigo.', 'Traga seu histórico.', 'Emportez votre historique.'],
+    'Your data stays yours.': ['Deine Daten bleiben deine.', 'Tus datos siguen siendo tuyos.', 'Seus dados continuam seus.', 'Vos données restent les vôtres.'],
+    'Export from your current app': ['Aus deiner bisherigen App exportieren', 'Exporta desde tu app actual', 'Exporte do seu app atual', 'Exportez depuis votre application actuelle'],
+    'Upload the file': ['Datei hochladen', 'Sube el archivo', 'Envie o arquivo', 'Importez le fichier'],
+    'Review before importing': ['Vor dem Import prüfen', 'Revisa antes de importar', 'Revise antes de importar', 'Vérifiez avant d’importer'],
+    'You can take all of your data with you': ['Du kannst alle deine Daten mitnehmen', 'Puedes llevarte todos tus datos', 'Você pode levar todos os seus dados', 'Vous pouvez emporter toutes vos données'],
+    'Full backup as JSON': ['Vollständige Sicherung als JSON', 'Copia completa en JSON', 'Backup completo em JSON', 'Sauvegarde complète en JSON'],
+    'CSV, PDF and Notion': ['CSV, PDF und Notion', 'CSV, PDF y Notion', 'CSV, PDF e Notion', 'CSV, PDF et Notion'],
+    'Read-only API':   ['Nur-Lese-API', 'API de solo lectura', 'API somente leitura', 'API en lecture seule'],
+    'Delete everything': ['Alles löschen', 'Borrar todo', 'Apagar tudo', 'Tout supprimer'],
+    // Preise
+    'Plans':           ['Tarife', 'Planes', 'Planos', 'Offres'],
+    'Start Free.':     ['Kostenlos starten.', 'Empieza gratis.', 'Comece grátis.', 'Commencez gratuitement.'],
+    'Go Pro.':         ['Wechsle zu Pro.', 'Pásate a Pro.', 'Vá de Pro.', 'Passez à Pro.'],
+    'Free Forever':    ['Für immer kostenlos', 'Gratis para siempre', 'Grátis para sempre', 'Gratuit pour toujours'],
+    '/ month':         ['/ Monat', '/ mes', '/ mês', '/ mois'],
+    'Get Started Free': ['Kostenlos starten', 'Empezar gratis', 'Começar grátis', 'Commencer gratuitement'],
+    'Most Popular':    ['Am beliebtesten', 'El más popular', 'Mais popular', 'Le plus populaire'],
+    'Everything in Free': ['Alles aus Free', 'Todo lo de Free', 'Tudo do Free', 'Tout ce qu’il y a dans Free'],
+    // Founding traders
+    'Founding traders': ['Gründungs-Trader', 'Traders fundadores', 'Traders fundadores', 'Traders fondateurs'],
+    'Help build it.':  ['Bau es mit auf.', 'Ayúdanos a construirlo.', 'Ajude a construir.', 'Aidez à le construire.'],
+    'Get Pro for three months.': ['Drei Monate Pro geschenkt.', 'Consigue Pro durante tres meses.', 'Ganhe três meses de Pro.', 'Obtenez Pro pendant trois mois.'],
+    'Apply for a founding place ↗': ['Um einen Gründungsplatz bewerben ↗', 'Solicitar una plaza fundadora ↗', 'Candidatar-se a uma vaga fundadora ↗', 'Postuler pour une place fondatrice ↗'],
+    // FAQ
+    'Questions':       ['Fragen', 'Preguntas', 'Perguntas', 'Questions'],
+    'before you sign up': ['vor der Anmeldung', 'antes de registrarte', 'antes de se cadastrar', 'avant de vous inscrire'],
+    'Which brokers and platforms can I connect?': ['Welche Broker und Plattformen kann ich verbinden?', '¿Qué brókers y plataformas puedo conectar?', 'Quais corretoras e plataformas posso conectar?', 'Quels courtiers et plateformes puis-je connecter ?'],
+    'Is there a free plan?': ['Gibt es einen kostenlosen Tarif?', '¿Hay un plan gratuito?', 'Existe um plano gratuito?', 'Existe-t-il une offre gratuite ?'],
+    'How does the trial work?': ['Wie funktioniert die Testphase?', '¿Cómo funciona la prueba?', 'Como funciona o teste?', 'Comment fonctionne l’essai ?'],
+    'How do I cancel a subscription?': ['Wie kündige ich ein Abo?', '¿Cómo cancelo una suscripción?', 'Como cancelo uma assinatura?', 'Comment résilier un abonnement ?'],
+    'I already use another trading journal. Can I import my trade history?': ['Ich nutze schon ein anderes Trading-Journal. Kann ich meine Trade-Historie importieren?', 'Ya uso otro diario de trading. ¿Puedo importar mi historial de operaciones?', 'Já uso outro diário de trading. Posso importar meu histórico de operações?', 'J’utilise déjà un autre journal de trading. Puis-je importer mon historique ?'],
+    'Who can see my journal?': ['Wer kann mein Journal sehen?', '¿Quién puede ver mi diario?', 'Quem pode ver meu diário?', 'Qui peut voir mon journal ?'],
+    'Is there a mobile app?': ['Gibt es eine App fürs Handy?', '¿Hay una app móvil?', 'Existe um app para celular?', 'Existe-t-il une application mobile ?'],
+    'Does the AI make numbers up?': ['Erfindet die KI Zahlen?', '¿La IA se inventa números?', 'A IA inventa números?', 'L’IA invente-t-elle des chiffres ?'],
+    'Which markets can I replay?': ['Welche Märkte kann ich im Replay handeln?', '¿Qué mercados puedo reproducir?', 'Quais mercados posso reproduzir no replay?', 'Quels marchés puis-je rejouer ?'],
+    // Abschluss
+    'Stop guessing.':  ['Hör auf zu raten.', 'Deja de adivinar.', 'Pare de adivinhar.', 'Arrêtez de deviner.'],
+    'Start measuring.': ['Fang an zu messen.', 'Empieza a medir.', 'Comece a medir.', 'Commencez à mesurer.'],
+    'Create free account ↗': ['Kostenloses Konto erstellen ↗', 'Crear cuenta gratis ↗', 'Criar conta grátis ↗', 'Créer un compte gratuit ↗'],
+    'Open the live demo': ['Live-Demo öffnen', 'Abrir la demo en vivo', 'Abrir a demo ao vivo', 'Ouvrir la démo en direct']
+  };
+  window.APEX_LP_I18N = LP;   // für Tests und Abdeckungsmessung
+  /* Neue App-Dialoge (23.09.2026): Schnelleintrag, Wochenkarte, Founding-Bewerbung. */
+  var DLG = {
+    'Log a trade': ['Trade erfassen', 'Registrar una operación', 'Registrar uma operação', 'Enregistrer un trade'],
+    'Symbol': ['Symbol', 'Símbolo', 'Ativo', 'Symbole'],
+    'Direction': ['Richtung', 'Dirección', 'Direção', 'Sens'],
+    'Result (pips)': ['Ergebnis (Pips)', 'Resultado (pips)', 'Resultado (pips)', 'Résultat (pips)'],
+    'R:R (optional)': ['R:R (optional)', 'R:R (opcional)', 'R:R (opcional)', 'R:R (facultatif)'],
+    'Setup (optional)': ['Setup (optional)', 'Setup (opcional)', 'Setup (opcional)', 'Setup (facultatif)'],
+    'One sentence (optional)': ['Ein Satz (optional)', 'Una frase (opcional)', 'Uma frase (opcional)', 'Une phrase (facultatif)'],
+    'Save trade': ['Trade speichern', 'Guardar operación', 'Salvar operação', 'Enregistrer le trade'],
+    'Open the full journal instead': ['Lieber das ganze Journal öffnen', 'Abrir el diario completo', 'Abrir o diário completo', 'Ouvrir plutôt le journal complet'],
+    'What did you trade?': ['Welches Setup war es?', '¿Qué setup operaste?', 'Qual setup você operou?', 'Quel setup avez-vous tradé ?'],
+    'Why did you take it — and how did it feel?': ['Warum hast du ihn genommen – und wie hat es sich angefühlt?', '¿Por qué la tomaste y cómo te sentiste?', 'Por que você entrou — e como se sentiu?', 'Pourquoi l’avoir pris — et qu’avez-vous ressenti ?'],
+    'e.g. XAUUSD': ['z. B. XAUUSD', 'p. ej. XAUUSD', 'ex.: XAUUSD', 'ex. XAUUSD'],
+    '+12.5 or −8': ['+12.5 oder −8', '+12.5 o −8', '+12.5 ou −8', '+12.5 ou −8'],
+    'e.g. 2': ['z. B. 2', 'p. ej. 2', 'ex.: 2', 'ex. 2'],
+    'This week': ['Diese Woche', 'Esta semana', 'Esta semana', 'Cette semaine'],
+    'Last week': ['Letzte Woche', 'La semana pasada', 'Semana passada', 'La semaine dernière'],
+    'Last 30 days': ['Letzte 30 Tage', 'Últimos 30 días', 'Últimos 30 dias', '30 derniers jours'],
+    'Save image': ['Bild speichern', 'Guardar imagen', 'Salvar imagem', 'Enregistrer l’image'],
+    'Copy': ['Kopieren', 'Copiar', 'Copiar', 'Copier'],
+    'Close': ['Schliessen', 'Cerrar', 'Fechar', 'Fermer'],
+    'Show my P&L in dollars': ['Mein P&L in Dollar zeigen', 'Mostrar mi P&L en dólares', 'Mostrar meu P&L em dólares', 'Afficher mon P&L en dollars'],
+    'Put my invite link on it': ['Meinen Einladungslink draufsetzen', 'Añadir mi enlace de invitación', 'Incluir meu link de convite', 'Ajouter mon lien d’invitation'],
+    'Founding traders': ['Gründungs-Trader', 'Traders fundadores', 'Traders fundadores', 'Traders fondateurs'],
+    'What do you trade?': ['Was handelst du?', '¿Qué operas?', 'O que você opera?', 'Que tradez-vous ?'],
+    'Platform / broker': ['Plattform / Broker', 'Plataforma / bróker', 'Plataforma / corretora', 'Plateforme / courtier'],
+    'How long have you been trading?': ['Wie lange tradest du schon?', '¿Cuánto tiempo llevas operando?', 'Há quanto tempo você opera?', 'Depuis combien de temps tradez-vous ?'],
+    'How do you journal today?': ['Wie führst du heute Journal?', '¿Cómo llevas tu diario hoy?', 'Como você registra suas operações hoje?', 'Comment tenez-vous votre journal aujourd’hui ?'],
+    'Why do you want in?': ['Warum möchtest du dabei sein?', '¿Por qué quieres participar?', 'Por que você quer participar?', 'Pourquoi voulez-vous participer ?'],
+    'Send application': ['Bewerbung senden', 'Enviar solicitud', 'Enviar candidatura', 'Envoyer la candidature'],
+    'Update application': ['Bewerbung aktualisieren', 'Actualizar solicitud', 'Atualizar candidatura', 'Mettre à jour la candidature'],
+    'Cancel': ['Abbrechen', 'Cancelar', 'Cancelar', 'Annuler']
+  };
+  window.APEX_DLG_I18N = DLG;
+  function go() {
+    if (!window.ApexI18n || !ApexI18n.addScoped) { setTimeout(go, 300); return; }
+    if (go.done) return; go.done = true;
+    ApexI18n.addScoped('#landingPage', LP);
+    ApexI18n.addScoped('#qtSheet, #weekCardOverlay, #betaModal', DLG);
+    var lp = document.getElementById('landingPage');
+    try { if (lp && ApexI18n.apply) ApexI18n.apply(lp); } catch (e) { }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+})();
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   WEEK CARD  —  ApexWeekCard   (23.09.2026)
+
+   Ein teilbares Bild der Woche für X, Discord, Telegram — der Kanal, über
+   den Tradervue gross geworden ist. Gleiche Regeln wie ApexProof: Canvas
+   statt DOM (ein PNG überlebt das Einfügen überall, und es kann nichts
+   zeigen, was nicht ausdrücklich übergeben wurde), nichts wird irgendwo
+   gepostet, Geldbeträge nur auf Wunsch, nie Kontogrösse oder Broker.
+   Mit Zustimmung trägt das Bild den eigenen Empfehlungslink.
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  var C = {}; window.ApexWeekCard = C;
+  var W = 1080, H = 1080;
+
+  function trades() { try { return typeof getAllTrades === 'function' ? getAllTrades() : []; } catch (e) { return []; } }
+  function num(v) { var n = parseFloat(v); return isFinite(n) ? n : null; }
+  function isLong(d) { try { return apexIsLong(d); } catch (e) { return /^(buy|long)$/i.test(String(d || '')); } }
+  function rOf(t) { var r = num(t.rr); if (r == null) return null; var p = num(t.pips); if (p != null && p < 0 && r > 0) r = -r; return r; }
+  function pnlOf(t) { try { if (typeof calcTradePnl === 'function') { var v = calcTradePnl(t); if (v != null && isFinite(v)) return +v; } } catch (e) { } return num(t.pnl); }
+  function key(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+  function range(kind) {
+    var now = new Date(); now.setHours(12, 0, 0, 0);
+    var dow = (now.getDay() + 6) % 7;             // Montag = 0
+    var start = new Date(now), end = new Date(now);
+    if (kind === 'last') { start.setDate(now.getDate() - dow - 7); end.setDate(now.getDate() - dow - 1); }
+    else if (kind === '30') { start.setDate(now.getDate() - 29); }
+    else { start.setDate(now.getDate() - dow); }
+    return { from: key(start), to: key(end), start: start, end: end };
+  }
+
+  /* Reine Rechnung — getestet über ApexWeekCard.stats(list). */
+  function stats(list) {
+    var s = { n: list.length, wins: 0, losses: 0, r: 0, rN: 0, pips: 0, money: 0, moneyN: 0, clean: 0, curve: [], best: null };
+    var cumR = 0, cumP = 0;
+    // R nur, wenn JEDER Trade ein R hat — sonst wäre die Summe eine Mischung.
+    s.useR = list.length > 0 && list.every(function (t) { return rOf(t) != null; });
+    list.forEach(function (t) {
+      var p = num(t.pips), r = rOf(t), m = pnlOf(t), v = r != null ? r : p;
+      if (v > 0) s.wins++; else if (v < 0) s.losses++;
+      if (r != null) { s.r += r; s.rN++; cumR += r; }
+      if (p != null) { s.pips += p; cumP += p; }
+      if (m != null) { s.money += m; s.moneyN++; }
+      if (!(t.mistakes || []).length) s.clean++;
+      s.curve.push(s.useR ? cumR : cumP);
+      if (r != null && (s.best == null || r > s.best)) s.best = r;
+    });
+    s.wr = (s.wins + s.losses) ? Math.round(s.wins / (s.wins + s.losses) * 100) : null;
+    s.cleanPct = s.n ? Math.round(s.clean / s.n * 100) : null;
+    return s;
+  }
+  C.stats = stats;
+
+  function rr(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
+  function fmtSigned(v, dec, unit) { if (v == null) return '—'; var s = (Math.round(v * Math.pow(10, dec)) / Math.pow(10, dec)).toFixed(dec); return (v > 0 ? '+' : '') + s + (unit || ''); }
+
+  function draw(o) {
+    var c = document.createElement('canvas'); c.width = W; c.height = H;
+    var x = c.getContext('2d'), s = o.stats;
+    var GOLD = '#c9a84c', INK = '#f2f3f5', INK3 = '#8b8f99', POS = '#3ecf8e', NEG = '#f0636a';
+    var g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#0b0d12'); g.addColorStop(1, '#14161d');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    var glow = x.createRadialGradient(W * 0.85, 60, 10, W * 0.85, 60, 520); glow.addColorStop(0, 'rgba(201,168,76,.16)'); glow.addColorStop(1, 'rgba(201,168,76,0)');
+    x.fillStyle = glow; x.fillRect(0, 0, W, H);
+    x.strokeStyle = 'rgba(201,168,76,.24)'; x.lineWidth = 2; rr(x, 40, 40, W - 80, H - 80, 34); x.stroke();
+
+    x.textAlign = 'left';
+    x.fillStyle = GOLD; x.font = '600 24px Georgia, serif'; x.fillText('EVIDENCE TRADING', 96, 128);
+    x.fillStyle = INK; x.font = '700 58px Georgia, serif'; x.fillText(o.title, 96, 206);
+    x.fillStyle = INK3; x.font = '400 28px Georgia, serif'; x.fillText(o.rangeLabel, 96, 252);
+
+    var net = s.useR ? fmtSigned(s.r, 1, 'R') : fmtSigned(s.pips, 1, ' pips');
+    var tiles = [
+      ['TRADES', String(s.n), INK],
+      ['WIN RATE', s.wr == null ? '—' : s.wr + '%', INK],
+      [s.useR ? 'NET R' : 'NET PIPS', net, (s.useR ? s.r : s.pips) >= 0 ? POS : NEG],
+      ['CLEAN TRADES', s.cleanPct == null ? '—' : s.cleanPct + '%', s.cleanPct >= 70 ? POS : s.cleanPct >= 40 ? GOLD : NEG]
+    ];
+    var tw = (W - 192 - 24) / 2, th = 150;
+    tiles.forEach(function (t, i) {
+      var tx = 96 + (i % 2) * (tw + 24), ty = 300 + Math.floor(i / 2) * (th + 24);
+      rr(x, tx, ty, tw, th, 22); x.fillStyle = 'rgba(255,255,255,.035)'; x.fill();
+      x.strokeStyle = 'rgba(255,255,255,.06)'; x.lineWidth = 1.5; x.stroke();
+      x.fillStyle = INK3; x.font = '600 20px Georgia, serif'; x.fillText(t[0], tx + 28, ty + 48);
+      x.fillStyle = t[2]; x.font = '700 64px Georgia, serif'; x.fillText(t[1], tx + 28, ty + 118);
+    });
+    if (o.showMoney && s.moneyN) {
+      x.fillStyle = INK3; x.font = '400 24px Georgia, serif';
+      x.fillText('P&L ' + (s.money >= 0 ? '+' : '−') + '$' + Math.abs(s.money).toLocaleString('en-US', { maximumFractionDigits: 0 }), 96, 676);
+    }
+
+    // Kurve der Woche
+    var cx0 = 96, cy0 = 700, cw = W - 192, ch = 170, pts = s.curve;
+    rr(x, cx0, cy0, cw, ch, 20); x.fillStyle = 'rgba(255,255,255,.025)'; x.fill();
+    if (pts.length >= 2) {
+      var all = pts.concat([0]), mn = Math.min.apply(null, all), mx = Math.max.apply(null, all), span = (mx - mn) || 1;
+      var X = function (i) { return cx0 + 24 + i * (cw - 48) / (pts.length - 1); }, Y = function (v) { return cy0 + 20 + (1 - (v - mn) / span) * (ch - 40); };
+      x.strokeStyle = 'rgba(255,255,255,.12)'; x.setLineDash([6, 6]); x.beginPath(); x.moveTo(cx0 + 24, Y(0)); x.lineTo(cx0 + cw - 24, Y(0)); x.stroke(); x.setLineDash([]);
+      var last = pts[pts.length - 1], col = last >= 0 ? POS : NEG;
+      var fill = x.createLinearGradient(0, cy0, 0, cy0 + ch); fill.addColorStop(0, last >= 0 ? 'rgba(62,207,142,.28)' : 'rgba(240,99,106,.28)'); fill.addColorStop(1, 'rgba(0,0,0,0)');
+      x.beginPath(); x.moveTo(X(0), Y(0)); pts.forEach(function (v, i) { x.lineTo(X(i), Y(v)); }); x.lineTo(X(pts.length - 1), Y(0)); x.closePath(); x.fillStyle = fill; x.fill();
+      x.beginPath(); pts.forEach(function (v, i) { if (i) x.lineTo(X(i), Y(v)); else x.moveTo(X(i), Y(v)); }); x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round'; x.stroke();
+      x.beginPath(); x.arc(X(pts.length - 1), Y(last), 9, 0, Math.PI * 2); x.fillStyle = col; x.fill();
+    } else {
+      x.fillStyle = INK3; x.font = '400 26px Georgia, serif'; x.textAlign = 'center'; x.fillText('Not enough trades for a curve yet', W / 2, cy0 + ch / 2 + 8); x.textAlign = 'left';
+    }
+
+    x.textAlign = 'center';
+    x.fillStyle = INK3; x.font = '400 23px Georgia, serif';
+    x.fillText('Counted from my journal, not self-reported' + (s.useR ? '' : ' · pips'), W / 2, H - 132);
+    x.fillStyle = GOLD; x.font = '600 26px Georgia, serif';
+    x.fillText(o.link, W / 2, H - 88);
+    return c;
+  }
+  C.canvas = draw;
+
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var st = { period: 'this', money: false, ref: true };
+
+  C.open = function (period) {
+    if (period) st.period = period;
+    var ov = document.getElementById('weekCardOverlay');
+    if (!ov) {
+      ov = document.createElement('div'); ov.id = 'weekCardOverlay';
+      ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:100001;display:flex;align-items:center;justify-content:center;padding:16px';
+      ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+      document.body.appendChild(ov);
+    }
+    var rg = range(st.period), list = trades().filter(function (t) { return t._date >= rg.from && t._date <= rg.to; })
+      .sort(function (a, b) { return (a._date + (a.entryTime || '')).localeCompare(b._date + (b.entryTime || '')); });
+    var s = stats(list);
+    var code = null; try { code = window.ApexReferral && ApexReferral.code && ApexReferral.code(); } catch (e) { }
+    var link = 'evidencetrading.com' + (st.ref && code ? '/?ref=' + code : '');
+    var fmt = function (d) { return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }); };
+    var canvas = draw({ stats: s, showMoney: st.money, link: link,
+      title: st.period === '30' ? 'My last 30 days' : 'My trading week',
+      rangeLabel: fmt(rg.start) + ' – ' + fmt(rg.end) + ', ' + rg.end.getFullYear() });
+    var url = canvas.toDataURL('image/png');
+    var chip = function (k, l) { return '<button data-p="' + k + '" style="padding:7px 12px;border-radius:999px;cursor:pointer;font-size:12px;border:0.5px solid ' + (st.period === k ? 'var(--gold)' : 'var(--rim2)') + ';background:' + (st.period === k ? 'rgba(var(--gold-rgb),.14)' : 'transparent') + ';color:' + (st.period === k ? 'var(--gold)' : 'var(--ink2)') + '">' + l + '</button>'; };
+    ov.innerHTML = '<div style="background:var(--elevated);border:0.5px solid var(--rim2);border-radius:16px;padding:18px;max-width:min(480px,100%);width:100%;animation:apxPop .3s cubic-bezier(.2,.9,.25,1.12) both">' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">' + chip('this', 'This week') + chip('last', 'Last week') + chip('30', 'Last 30 days') + '</div>' +
+      '<img src="' + url + '" alt="Your week as an image" style="width:100%;border-radius:12px;display:block">' +
+      '<label style="display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ink2);margin-top:12px;cursor:pointer"><input type="checkbox" id="wcMoney"' + (st.money ? ' checked' : '') + ' style="accent-color:var(--gold)"> Show my P&amp;L in dollars</label>' +
+      (code ? '<label style="display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ink2);margin-top:6px;cursor:pointer"><input type="checkbox" id="wcRef"' + (st.ref ? ' checked' : '') + ' style="accent-color:var(--gold)"> Put my invite link on it</label>' : '') +
+      '<div style="display:flex;gap:8px;margin-top:14px">' +
+        '<button id="wcSave" style="flex:1;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;font-weight:700;font-size:13px;cursor:pointer">Save image</button>' +
+        '<button id="wcCopy" style="flex:1;padding:11px;border-radius:10px;cursor:pointer;border:0.5px solid var(--rim2);background:transparent;color:var(--ink2);font-weight:600;font-size:13px">Copy</button>' +
+        '<button id="wcClose" style="padding:11px 14px;border-radius:10px;cursor:pointer;border:0.5px solid var(--rim2);background:transparent;color:var(--ink3);font-size:13px">Close</button>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--ink4);margin-top:10px;line-height:1.55">Nothing is posted anywhere. The image contains only what you see — never your account size or broker. “Clean trades” are trades without a mistake tag.</div></div>';
+    try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(ov); } catch (e) { }
+    ov.querySelectorAll('[data-p]').forEach(function (b) { b.onclick = function () { C.open(b.dataset.p); }; });
+    var mo = ov.querySelector('#wcMoney'); if (mo) mo.onchange = function () { st.money = mo.checked; C.open(); };
+    var rf = ov.querySelector('#wcRef'); if (rf) rf.onchange = function () { st.ref = rf.checked; C.open(); };
+    ov.querySelector('#wcClose').onclick = function () { ov.remove(); };
+    ov.querySelector('#wcSave').onclick = function () { var a = document.createElement('a'); a.href = url; a.download = 'evidence-week.png'; document.body.appendChild(a); a.click(); a.remove(); };
+    ov.querySelector('#wcCopy').onclick = function () {
+      canvas.toBlob(function (blob) {
+        try { navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); showToast('✓ Copied — paste it anywhere'); }
+        catch (e) { showToast('Use “Save image” — this browser cannot copy images'); }
+      });
+    };
+  };
+})();
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   QUICK TRADE  —  ApexQuick   (23.09.2026)
+
+   Journaling scheitert an der Gewohnheit, nicht an Funktionen. Dieses Blatt
+   erfasst einen Trade in wenigen Tipps: Symbol, Richtung, Ergebnis, Setup,
+   ein Satz. Gedacht für den Kurzbefehl am App-Symbol (manifest → shortcuts,
+   ?quick=trade) — also am Handy direkt nach dem Trade.
+
+   Schreibt über denselben Weg wie „New trade" im Journal
+   (journalData[tag].trades.push + save()), nichts Eigenes.
+   Richtung als „Buy"/„Sell" — so speichert es auch die Auswahl im Journal.
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  var Q = {}; window.ApexQuick = Q;
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function hhmm() { var d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function recent(field, n) {
+    var seen = {}, out = [];
+    try {
+      getAllTrades().slice().sort(function (a, b) { return (b._date || '').localeCompare(a._date || ''); }).forEach(function (t) {
+        var v = String(t[field] || '').trim(); if (!v || seen[v.toUpperCase()]) return; seen[v.toUpperCase()] = 1; out.push(v);
+      });
+    } catch (e) { }
+    return out.slice(0, n);
+  }
+  function css() {
+    if (document.getElementById('qtCss')) return;
+    var s = document.createElement('style'); s.id = 'qtCss';
+    s.textContent =
+      '#qtSheet{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;animation:apxFade .2s ease both}' +
+      '#qtSheet .qt-b{width:min(520px,100%);max-height:92vh;overflow:auto;background:var(--elevated);border:0.5px solid var(--rim2);border-bottom:none;border-radius:22px 22px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -20px 50px rgba(0,0,0,.45);animation:qtUp .38s cubic-bezier(.2,.9,.25,1.05) both}' +
+      '@keyframes qtUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}' +
+      '#qtSheet .qt-grip{width:42px;height:4px;border-radius:4px;background:var(--rim3);margin:4px auto 12px}' +
+      '#qtSheet h3{margin:0 0 12px;font-family:var(--font-display);font-size:var(--fs-lg);color:var(--ink)}' +
+      '#qtSheet label{display:block;font-size:var(--fs-micro);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:14px 0 6px;font-weight:700}' +
+      '#qtSheet input,#qtSheet textarea{width:100%;box-sizing:border-box;background:var(--surface);border:0.5px solid var(--rim2);border-radius:12px;color:var(--ink);padding:13px 14px;font-size:16px;font-family:var(--font-body);outline:none}' +
+      '#qtSheet input:focus,#qtSheet textarea:focus{border-color:var(--gold)}' +
+      '#qtSheet .qt-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}' +
+      '#qtSheet .qt-chip{padding:7px 12px;border-radius:999px;border:0.5px solid var(--rim2);background:transparent;color:var(--ink2);font-size:13px;cursor:pointer}' +
+      '#qtSheet .qt-dir{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
+      '#qtSheet .qt-dir button{padding:14px;border-radius:12px;border:0.5px solid var(--rim2);background:var(--surface);color:var(--ink2);font-size:15px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s,color .2s}' +
+      '#qtSheet .qt-dir button.on.l{background:rgba(var(--profit-rgb),.14);border-color:var(--profit);color:var(--profit)}' +
+      '#qtSheet .qt-dir button.on.s{background:rgba(var(--loss-rgb),.14);border-color:var(--loss);color:var(--loss)}' +
+      '#qtSheet .qt-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
+      '#qtSheet .qt-go{margin-top:18px;width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--gold-hi,#e8c96a),var(--gold));color:var(--on-gold,#07080b);font-weight:800;font-size:15px;cursor:pointer}' +
+      '#qtSheet .qt-err{color:var(--loss);font-size:13px;margin-top:8px;min-height:18px}' +
+      '#qtSheet .qt-more{display:block;text-align:center;margin-top:10px;color:var(--ink3);font-size:13px;background:none;border:none;cursor:pointer;width:100%}';
+    document.head.appendChild(s);
+  }
+
+  Q.open = function () {
+    if (!window.journalData || typeof save !== 'function') { if (window.showToast) showToast('Sign in first'); return; }
+    css();
+    var ex = document.getElementById('qtSheet'); if (ex) ex.remove();
+    var st = { dir: '' };
+    var syms = recent('symbol', 6), setups = recent('setup', 5);
+    var m = document.createElement('div'); m.id = 'qtSheet';
+    m.innerHTML = '<div class="qt-b" role="dialog" aria-modal="true" aria-label="Log a trade"><div class="qt-grip"></div>' +
+      '<h3>Log a trade</h3>' +
+      '<label for="qtSym">Symbol</label><input id="qtSym" autocomplete="off" autocapitalize="characters" placeholder="e.g. XAUUSD">' +
+      (syms.length ? '<div class="qt-chips">' + syms.map(function (s) { return '<button type="button" class="qt-chip notranslate" translate="no" data-sym="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' : '') +
+      '<label>Direction</label><div class="qt-dir notranslate" translate="no"><button type="button" class="l" data-d="Buy">Long</button><button type="button" class="s" data-d="Sell">Short</button></div>' +
+      '<div class="qt-row"><div><label for="qtPips">Result (pips)</label><input id="qtPips" type="number" inputmode="decimal" step="0.1" placeholder="+12.5 or −8"></div>' +
+      '<div><label for="qtRR">R:R (optional)</label><input id="qtRR" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 2"></div></div>' +
+      '<label for="qtSetup">Setup (optional)</label><input id="qtSetup" autocomplete="off" placeholder="What did you trade?">' +
+      (setups.length ? '<div class="qt-chips">' + setups.map(function (s) { return '<button type="button" class="qt-chip notranslate" translate="no" data-setup="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' : '') +
+      '<label for="qtNote">One sentence (optional)</label><textarea id="qtNote" rows="2" placeholder="Why did you take it — and how did it feel?"></textarea>' +
+      '<div class="qt-err" id="qtErr"></div>' +
+      '<button type="button" class="qt-go" id="qtGo">Save trade</button>' +
+      '<button type="button" class="qt-more" id="qtMore">Open the full journal instead</button></div>';
+    document.body.appendChild(m);
+    try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(m); } catch (e) { }
+    var $ = function (s) { return m.querySelector(s); };
+    m.addEventListener('mousedown', function (e) { if (e.target === m) m.remove(); });
+    m.querySelectorAll('[data-sym]').forEach(function (b) { b.onclick = function () { $('#qtSym').value = b.dataset.sym; }; });
+    m.querySelectorAll('[data-setup]').forEach(function (b) { b.onclick = function () { $('#qtSetup').value = b.dataset.setup; }; });
+    m.querySelectorAll('[data-d]').forEach(function (b) { b.onclick = function () { st.dir = b.dataset.d; m.querySelectorAll('[data-d]').forEach(function (x) { x.classList.toggle('on', x === b); }); }; });
+    $('#qtMore').onclick = function () { m.remove(); try { nav('journal'); } catch (e) { } };
+    $('#qtGo').onclick = function () {
+      var sym = $('#qtSym').value.trim().toUpperCase().slice(0, 24), pips = $('#qtPips').value.trim(), rr = $('#qtRR').value.trim();
+      var err = !sym ? 'Add a symbol.' : !st.dir ? 'Long or short?' : pips === '' ? 'Add the result in pips (negative for a loss).' : '';
+      if (err) { $('#qtErr').textContent = err; return; }
+      var key = today();
+      if (!journalData[key]) journalData[key] = { trades: [], notes: '', disc: 5, conf: 5, focus: 5, pat: 5 };
+      journalData[key].trades.push({ symbol: sym, market: '', dir: st.dir, entry: '', sl: '', tp: '', exit: '', pips: String(parseFloat(pips)),
+        rr: rr === '' ? '' : String(Math.abs(parseFloat(rr))), session: '', tf: '', setup: $('#qtSetup').value.trim().slice(0, 60), lots: '', grade: '',
+        entryTime: hhmm(), exitTime: '', mfe: '', mae: '', mistakes: [], positives: [], note: $('#qtNote').value.trim().slice(0, 500), source: 'quick' });
+      try { if (window.invalidateTradeCache) invalidateTradeCache(); } catch (e) { }
+      save();
+      m.remove();
+      if (window.showToast) showToast('✓ Trade saved — add details in the journal any time');
+      try { var pg = document.querySelector('.page.active'); if (pg && pg.id === 'page-journal' && window.renderTrades) renderTrades(); if (pg && pg.id === 'page-overview' && window.updateOverview) updateOverview(); } catch (e) { }
+    };
+    setTimeout(function () { try { $('#qtSym').focus(); } catch (e) { } }, 200);
+  };
+
+  /* Kurzbefehle am App-Symbol: ?quick=trade und ?go=<seite>. Wartet, bis
+     die App gestartet ist (Shell sichtbar), und räumt den Parameter danach
+     aus der Adresse, damit ein Neuladen das Blatt nicht erneut öffnet. */
+  (function shortcuts() {
+    var q = location.search.match(/[?&]quick=trade\b/), g = location.search.match(/[?&]go=([a-z]+)\b/);
+    if (!q && !g) return;
+    var tries = 0, iv = setInterval(function () {
+      var shell = document.getElementById('shell');
+      if (++tries > 80) { clearInterval(iv); return; }
+      if (!shell || !shell.classList.contains('visible') || !window.currentUID) return;
+      clearInterval(iv);
+      try { history.replaceState(null, '', location.pathname + location.search.replace(/[?&](quick|go)=[a-z]+/g, '').replace(/^&/, '?') + location.hash); } catch (e) { }
+      if (g && ['journal', 'overview', 'calendar', 'stats', 'books'].indexOf(g[1]) >= 0) { try { nav(g[1]); } catch (e) { } }
+      if (q) setTimeout(Q.open, 300);
+    }, 400);
+  })();
 })();
 </script>
 </body>

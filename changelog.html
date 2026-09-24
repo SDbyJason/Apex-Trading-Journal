@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog — what is new in Evidence | Evidence</title>
+<meta name="description" content="Everything that shipped in Evidence Trading, newest first — journal, sync, replay, prop firm tools and more.">
+<link rel="canonical" href="https://evidencetrading.com/changelog.html">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/changelog.html">
+<meta property="og:title" content="Changelog — what is new in Evidence">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400&family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080b;--panel:#0d0f13;--line:rgba(255,255,255,.09);--gold:#c9a84c;
+--gold-hi:#e8c96a;--ink:#f2efe9;--ink2:#c8c2b6;--mute:#8b8578;--pos:#3ecf8e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);
+font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:0 22px}
+header.nav{border-bottom:1px solid var(--line);position:sticky;top:0;
+background:rgba(7,8,11,.9);backdrop-filter:blur(10px);z-index:10}
+header.nav .wrap{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--ink);font-size:15px}
+.brand-mark{width:28px;height:28px;border-radius:8px;display:block;flex:none}
+.nav-cta{margin-left:auto;border:1px solid rgba(201,168,76,.4);border-radius:9px;
+padding:8px 16px;font-size:13.5px;font-weight:600}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3rem);line-height:1.12;
+letter-spacing:-.02em;color:var(--ink);margin:48px 0 14px;font-weight:800}
+h2{font-family:'Syne',sans-serif;font-size:clamp(1.35rem,3vw,1.75rem);color:var(--ink);
+margin:44px 0 12px;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.05rem;color:var(--ink);margin:28px 0 8px;font-weight:700}
+.lede{font-size:1.12rem;color:var(--ink2);margin-bottom:30px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.16em;
+text-transform:uppercase;color:var(--gold);margin-top:44px}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;
+background:rgba(255,255,255,.015)}
+.card.gold{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.05)}
+.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;margin:22px 0;font-size:14.5px;display:block;overflow-x:auto}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:700;font-size:13px}
+td.y{color:var(--pos);font-weight:700}td.n{color:var(--mute)}
+ul{padding-left:20px}li{margin-bottom:9px}
+code{font-family:'DM Mono',monospace;font-size:13.5px;background:rgba(255,255,255,.05);
+padding:2px 6px;border-radius:5px;color:var(--ink)}
+.cta{display:inline-block;background:linear-gradient(135deg,var(--gold-hi),var(--gold));
+color:#07080b;font-weight:800;padding:13px 26px;border-radius:11px;margin:8px 10px 8px 0;
+font-size:15px}
+.cta:hover{text-decoration:none;filter:brightness(1.06)}
+.cta.ghost{background:none;color:var(--gold);border:1px solid rgba(201,168,76,.4)}
+footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0 50px;
+font-size:13px;color:var(--mute)}
+footer a{color:var(--mute)}
+footer .links{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px}
+.related{display:grid;gap:10px;margin:18px 0}
+.related a{border:1px solid var(--line);border-radius:11px;padding:13px 15px;
+color:var(--ink);font-weight:600;font-size:14.5px}
+.related a:hover{border-color:rgba(201,168,76,.4);text-decoration:none}
+.related a span{display:block;color:var(--mute);font-weight:400;font-size:13px;margin-top:2px}
+.note{font-size:13.5px;color:var(--mute);border-left:2px solid var(--line);
+padding-left:14px;margin:20px 0}
+.entry{position:relative;padding:4px 0 18px 22px;border-left:1px solid var(--line);margin-left:6px}
+.entry::before{content:"";position:absolute;left:-5px;top:12px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.15)}
+.entry time{font-family:'DM Mono',monospace;font-size:12px;color:var(--mute);letter-spacing:.04em}
+.entry h3{margin:4px 0 4px}.entry p{margin:0}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="/"><svg class="brand-mark" viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg><span>Evidence Trading</span></a>
+  <a class="nav-cta" href="/">Open the app →</a>
+</div></header>
+<main class="wrap">
+<div class="eyebrow">Changelog</div>
+<h1>What is new in Evidence</h1>
+<p class="lede">Everything that shipped, newest first. Only things you can use today — nothing announced that is not switched on.</p>
+<h2>September 2026</h2>
+<div class="entry"><time datetime="2026-09-23">September 23, 2026</time><h3>Private by default</h3><p>New profiles start private. Accounts that had never chosen were switched to private too, with one click to go public again. Your journal itself was never public.</p></div>
+<div class="entry"><time datetime="2026-09-23">September 23, 2026</time><h3>Imports are free</h3><p>Statement import from 95 brokers, the import check and the presets for TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk and Trademetria are part of the free plan.</p></div>
+<div class="entry"><time datetime="2026-09-23">September 23, 2026</time><h3>Books</h3><p>Notebooks that look and turn like real books: handwriting fonts, images, drawing with pen pressure, trade cards from your journal, and read-only sharing with a server, your coach or your students.</p></div>
+<div class="entry"><time datetime="2026-09-23">September 23, 2026</time><h3>A calmer, faster-to-read site</h3><p>A menu on smaller screens, a clearer pricing section with the full comparison one click away, a visible FAQ, and smoother motion throughout the app.</p></div>
+<div class="entry"><time datetime="2026-09-02">September 2, 2026</time><h3>Chart page with an AI read</h3><p>TradingView charts for every instrument it carries, plus an AI read of the actual numbers across three timeframes.</p></div>
+<div class="entry"><time datetime="2026-09-01">September 1, 2026</time><h3>Sign in with Google</h3><p>One click instead of a password.</p></div>
+<div class="entry"><time datetime="2026-09-01">September 1, 2026</time><h3>Spaces, grown up</h3><p>Servers sorted by recent activity, replies, mentions, pinned messages, channel search and invites that expire.</p></div>
+<h2>August 2026</h2>
+<div class="entry"><time datetime="2026-08-31">August 31, 2026</time><h3>Chart workspace</h3><p>Replay laid out like a trading platform: drawing tools in a side column, the chart across the rest of the screen, the order panel docked.</p></div>
+<div class="entry"><time datetime="2026-08-29">August 29, 2026</time><h3>Sync you can trust</h3><p>Failure emails for crypto exchanges and Interactive Brokers, connection status that is the same on every device, and a duplicate check for synced trades.</p></div>
+<div class="entry"><time datetime="2026-08-29">August 29, 2026</time><h3>Monthly reports, Notion export, dashboards</h3><p>A monthly review by email, your journal as Notion pages, and drag-and-drop dashboards in Edge Lab.</p></div>
+<div class="entry"><time datetime="2026-08-28">August 28, 2026</time><h3>Import check</h3><p>Before a statement is written to your journal you see duplicates, missing stops, timezone problems and the file’s own P&amp;L next to Evidence’s.</p></div>
+<div class="entry"><time datetime="2026-08-28">August 28, 2026</time><h3>Prop firm challenge mode</h3><p>Practise under your firm’s real drawdown and daily-loss rules, and check past trades against them retroactively.</p></div>
+<div class="entry"><time datetime="2026-08-28">August 28, 2026</time><h3>Journal search and replay up to 100×</h3><p>Search notes, setups, tags and mistakes; play a replay at up to a hundred times real speed.</p></div>
+<div class="entry"><time datetime="2026-08-18">August 18, 2026</time><h3>Drills</h3><p>Describe your strategy, and practise it on real historical spots — including the ones where the rule fires and still loses. Scored on following the rule, never on the result.</p></div>
+<div class="entry"><time datetime="2026-08-11">August 11, 2026</time><h3>Weekly review by email</h3><p>Every Sunday, your week in numbers. One-click unsubscribe.</p></div>
+<div class="entry"><time datetime="2026-08-08">August 8, 2026</time><h3>Trading glossary</h3><p>429 trading terms and abbreviations, written out and explained.</p></div>
+<div class="entry"><time datetime="2026-08-07">August 7, 2026</time><h3>Crypto and Interactive Brokers sync</h3><p>Binance and Bybit through a read-only API key, Interactive Brokers through a Flex Query.</p></div>
+<div class="entry"><time datetime="2026-08-06">August 6, 2026</time><h3>Public API</h3><p>A read-only REST API for your own numbers.</p></div>
+<div class="entry"><time datetime="2026-08-05">August 5, 2026</time><h3>Statement import, rebuilt</h3><p>Formats detected automatically, free column mapping, and presets you save once.</p></div>
+<div class="entry"><time datetime="2026-08-05">August 5, 2026</time><h3>Risk and prop tools</h3><p>R-multiples and Kelly sizing, futures and options, guardrails against revenge trading, and a prop firm cockpit that models the drawdown your firm really uses.</p></div>
+<div class="entry"><time datetime="2026-08-01">August 1, 2026</time><h3>APEX is now Evidence Trading</h3><p>Same app, new name — and a new home at evidencetrading.com.</p></div>
+<div class="card gold" style="margin-top:40px">
+<h3>Try the latest version</h3>
+<p>The demo always runs the current app on sample data — no account needed.</p>
+<a class="cta" href="/?demo=1">Open the live demo →</a>
+<a class="cta ghost" href="/">Create a free account</a>
+</div>
+</main>
+<footer><div class="wrap">
+  <div class="links"><a href="/">Home</a><a href="/?demo=1">Live demo</a><a href="/evidence-vs-tradezella.html">vs TradeZella</a><a href="/evidence-vs-tradersync.html">vs TraderSync</a><a href="/evidence-vs-edgewonk.html">vs Edgewonk</a><a href="/evidence-vs-tradesviz.html">vs TradesViz</a></div>
+  <div>© 2026 Evidence Trading · Evidence reads your trade history. It never places, changes or closes a trade.</div>
+</div></footer>
+</body>
+</html>
