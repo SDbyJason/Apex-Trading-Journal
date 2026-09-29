@@ -1070,7 +1070,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-29k';
+  window.APEX_BUILD = '2026-09-29l';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -40335,9 +40335,9 @@ body.light .pt-sugg{background:var(--layer)}
         '<div style="font-size:11px;color:var(--ink3)">Recap of '+r.dateLabel+'</div></div>'+
         '<button onclick="this.closest(\'#recapCard\').remove();ApexRecap._seen();" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:15px" aria-label="Close">✕</button></div>'+
       '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px">'+
-        '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:800;color:'+col+'">'+(r.net>=0?'+':'')+r.net.toFixed(1)+'</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">net pips</div></div>'+
-        '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:800">'+r.wr+'%</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">win rate</div></div>'+
-        '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:800">'+r.n+'</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">trades</div></div>'+
+        '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:'+col+'">'+(r.net>=0?'+':'')+r.net.toFixed(1)+'</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">net pips</div></div>'+
+        '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">'+r.wr+'%</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">win rate</div></div>'+
+        '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">'+r.n+'</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">trades</div></div>'+
         (r.bestSess?'<div><div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--gold);margin-top:3px">'+r.bestSess+'</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">your best session</div></div>':'')+
       '</div>'+
       '<div style="font-size:13px;color:var(--ink2);line-height:1.55;background:var(--surface);border-radius:8px;padding:10px 12px"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg> <b style="color:var(--ink)">Today\'s focus:</b> '+r.focus+'</div>';
@@ -50486,7 +50486,7 @@ self.addEventListener('message', async (ev) => {
       'body.light .arp-sell:hover{background:linear-gradient(135deg,rgba(var(--loss-rgb),0.20),rgba(var(--loss-rgb),0.07))}',
       '.arp-buy:disabled,.arp-sell:disabled{opacity:.4;cursor:not-allowed}',
       '.arp-quote{display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;font-variant-numeric:tabular-nums}',
-      '.arp-quote b{font-family:var(--font-display);font-size:20px;font-weight:800}',
+      '.arp-quote b{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums}',
       '.arp-quote .bid{color:var(--loss)}.arp-quote .ask{color:var(--profit)}',
       '.arp-quote .sp{color:var(--ink3);font-size:12px}',
       '.arp-keys{font-size:11px;color:var(--ink4);margin-top:8px;line-height:1.6}',
@@ -84415,5 +84415,33 @@ body.light::before{ opacity:.45; }
   var n=0, iv=setInterval(function(){ n++; hook(); if((mount() && hooked && (!window.APEX_DEMO || X._seeded)) || n>120) clearInterval(iv); }, 700);
 })();
 </script>
+<style id="apexNumbersUnified">
+/* ════════════════════════════════════════════════════════════════════
+   ONE style for every headline figure (29.09.2026, Jason: "in Edge Lab the
+   numbers look stretched compared with the dashboard").
+   Measured before: 34 different number styles — Syne at 600/700/800 with
+   and without tightening, DM Mono at 500/600/700. Syne 800 without the
+   −0.03em tracking is what read as "stretched".
+   The dashboard KPI is the reference: Syne 700, −0.03em, tabular figures.
+   Small figures in tables and rows stay DM Mono — that is the second
+   (and only other) number style.
+   ════════════════════════════════════════════════════════════════════ */
+.kpi-val, .esc-num, .goal-current, .pb-val,
+.d2-big, .d2-ratio b, .d2-streak b, .d2-sc .v, .d2-tile .g b,
+.j2-res b, .j2-day .dn, .ds-kpi-val, .pnl-val,
+.stat-row-val, .cal-pips, .c2-sum b, .c2-ynav b,
+#page-edgelab .val, .el-kpi .val, .dw-value,
+#page-propfirm .val, #page-propfirm .val > span,
+.gauge-score, .pc-tilt-score, .tm-rank, .tm-count, .mh-count, .streak-number, .disc-lvl b, .disc-stat b,
+.acx-kpi b, .rpt-tile b, .rpt-pos, .sc-stat-val, .ic-val, .trc-stat-val,
+.mt-ck .v, .mt-kpi .v, .s2-vs b, .s2-kv b, .st2-me .nm, .mt-dhead h3,
+#page-overview .d2-sc .v {
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+  font-variant-numeric: tabular-nums;
+  font-stretch: normal;
+}
+</style>
 </body>
 </html>
