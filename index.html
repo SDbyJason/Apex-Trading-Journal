@@ -1070,7 +1070,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-29c';
+  window.APEX_BUILD = '2026-09-29d';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -47243,15 +47243,30 @@ self.addEventListener('message', async (ev) => {
      top-down trader actually wants behind a Daily bias. */
   var MAX_DAYS = 1900;
 
-  function fetchDays(m, days, side, onProgress) {
+  function fetchDays(m, days, side, onProgress, skip) {
+    // Days the trader already chose to start without are not asked for
+    // again — that would only repeat the wait they just decided to skip.
+    var one = function (d) { return (skip && skip[d]) ? Promise.resolve(FAILED) : getDay(m, d, side); };
     if (days.length <= 45) {
       return Promise.all(days.map(function (d) {
-        var p = getDay(m, d, side);
+        var p = one(d);
         return onProgress ? p.then(function (v) { onProgress(1, days.length); return v; }) : p;
       }));
     }
-    return mapLimit(days, FETCH_CONCURRENCY,
-      function (d) { return getDay(m, d, side); }, onProgress);
+    return mapLimit(days, FETCH_CONCURRENCY, one, onProgress);
+  }
+
+  /* The throttling error, with the missing day starts (UTC ms) attached. */
+  function busyError(missing, total) {
+    var failed = missing.length;
+    var err = new Error(failed >= total
+      ? 'The price feed (Dukascopy) is throttling requests right now and sent nothing for this range. Try again in a minute.'
+      : 'The price feed (Dukascopy) is throttling requests right now — ' + failed + ' of ' + total +
+        ' days did not load. The rest is saved, so trying again only fetches what is missing.');
+    err.code = 'FEED_BUSY';
+    err.missing = missing.slice().sort(function (a, b) { return a - b; });
+    err.total = total;
+    return err;
   }
 
   /* ─────────────── public API ─────────────── */
@@ -47289,25 +47304,30 @@ self.addEventListener('message', async (ev) => {
           Math.round(MAX_DAYS / 365) + ' years per call)'));
       }
 
-      return fetchDays(m, days, side, opts && opts.onProgress)
+      var skip = null;
+      if (opts && opts.allowGaps && opts.skipDays && opts.skipDays.length) {
+        skip = {}; opts.skipDays.forEach(function (d) { skip[d] = 1; });
+      }
+      return fetchDays(m, days, side, opts && opts.onProgress, skip)
         .then(function (list) {
           /* A day the feed refused is a HOLE, not a quiet day. A short range
              with a hole is refused outright — a replay with Wednesday
              silently missing teaches the wrong thing. A long HTF range may
              carry a few (one missing day on a two-year Daily chart is one
              candle), and says so via failedDays. Loaded days are cached,
-             so trying again only fetches the holes. */
-          var failed = list.filter(function (d) { return d && d.failed; }).length;
-          if (failed && (list.length <= 45 || failed / list.length > 0.03)) {
-            var err = new Error(failed === list.length
-              ? 'The price feed (Dukascopy) is throttling requests right now and sent nothing for this range. Try again in a minute.'
-              : 'The price feed (Dukascopy) is throttling requests right now — ' + failed + ' of ' + list.length +
-                ' days did not load. The rest is saved, so trying again only fetches what is missing.');
-            err.code = 'FEED_BUSY';
-            throw err;
+             so trying again only fetches the holes.
+             The error names the missing days (err.missing), so the replay
+             can offer to start WITHOUT them — a deliberate choice the user
+             makes, passed back in as opts.allowGaps. */
+          var missing = [];
+          list.forEach(function (d, i) { if (d && d.failed) missing.push(days[i]); });
+          var failed = missing.length;
+          if (failed && !(opts && opts.allowGaps) && (list.length <= 45 || failed / list.length > 0.03)) {
+            throw busyError(missing, list.length);
           }
+          if (failed === list.length) throw busyError(missing, list.length);
           var out = aggregate(concat(list, from, to), tfMs);
-          if (failed) out.failedDays = failed;
+          if (failed) { out.failedDays = failed; out.missingDays = missing; }
           return out;
         });
     },
@@ -47421,10 +47441,23 @@ self.addEventListener('message', async (ev) => {
       var onP = opts && opts.onProgress, seen = 0;
       var total = onP ? dayList(from, to).length * 2 : 0;
       var tick = onP ? function () { onP(++seen, total); } : null;
-      return Promise.all([
-        API.getBars(sym, from, to, tf, { side: 'bid', onProgress: tick }),
-        API.getBars(sym, from, to, tf, { side: 'ask', onProgress: tick })
-      ]).then(function (r) {
+      var gaps = !!(opts && opts.allowGaps);
+      /* Both legs run to the end even if one is refused, so the error names
+         every missing day of BOTH sides — otherwise "start without these
+         days" would drop the bid holes and then trip over the ask ones. */
+      var busy = [];
+      var leg = function (side) {
+        return API.getBars(sym, from, to, tf, { side: side, onProgress: tick, allowGaps: gaps,
+                                                skipDays: gaps && opts ? opts.skipDays : null })
+          .catch(function (e) { if (e && e.code === 'FEED_BUSY') { busy.push(e); return null; } throw e; });
+      };
+      return Promise.all([leg('bid'), leg('ask')]).then(function (r) {
+        if (busy.length) {
+          var set = {}, tot = 0;
+          busy.forEach(function (e) { (e.missing || []).forEach(function (d) { set[d] = 1; }); tot = Math.max(tot, e.total || 0); });
+          [r[0], r[1]].forEach(function (x) { ((x && x.missingDays) || []).forEach(function (d) { set[d] = 1; }); });
+          throw busyError(Object.keys(set).map(Number), tot);
+        }
         var bid = r[0], ask = r[1];
         var n = 0, i = 0, j = 0;
         var kt = new Float64Array(Math.min(bid.n, ask.n));
@@ -47447,8 +47480,12 @@ self.addEventListener('message', async (ev) => {
         var B = pick(bid, bi), A = pick(ask, aj);
         for (var k = 0; k < n; k++) spread[k] = A.c[k] - B.c[k];
         var out = { n: n, bid: B, ask: A, spread: spread };
-        var fd = Math.max(bid.failedDays || 0, ask.failedDays || 0);
+        var md = {};
+        (bid.missingDays || []).concat(ask.missingDays || []).forEach(function (d) { md[d] = 1; });
+        var mdl = Object.keys(md).map(Number).sort(function (a, b) { return a - b; });
+        var fd = Math.max(bid.failedDays || 0, ask.failedDays || 0, mdl.length);
         if (fd) out.failedDays = fd;
+        if (mdl.length) out.missingDays = mdl;
         return out;
       });
     },
@@ -49298,11 +49335,15 @@ self.addEventListener('message', async (ev) => {
   /** Load a range and position the cursor after the warm-up context.
       onProgress(done,total) fires while the day files come down — a Daily or
       Weekly session pulls years of them and needs to say so. */
-  Session.prototype.load = function (from, to, onProgress) {
+  Session.prototype.load = function (from, to, onProgress, opts) {
     var self = this;
     if (!window.ApexMarketData) return Promise.reject(new Error('ApexMarketData not loaded'));
+    // A session started "without the missing days" keeps that choice when
+    // the timeframe changes — the same days are still missing.
+    if (opts && opts.allowGaps) this._allowGaps = true;
     return window.ApexMarketData.getBidAsk(this.symbol, from, to, this.tf,
-                                           { onProgress: onProgress }).then(function (d) {
+                                           { onProgress: onProgress, allowGaps: !!this._allowGaps,
+                                             skipDays: opts && opts.skipDays }).then(function (d) {
       if (!d.n) throw new Error('No market data in that range (weekend or holiday?)');
       // Remember the requested window. Re-deriving it from the loaded bars on a
       // timeframe switch made the session grow by a day every time.
@@ -50278,6 +50319,10 @@ self.addEventListener('message', async (ev) => {
       '.arp-date-blind{display:flex;align-items:center;gap:8px;height:var(--arp-h);box-sizing:border-box;padding:0 12px;border-radius:10px;' +
         'border:0.5px dashed var(--gold-line);color:var(--ink3);font-size:13px;background:rgba(var(--gold-rgb),.04)}',
       '.arp-date-blind .ic{width:15px;height:15px;color:var(--gold)}',
+      /* Feed throttled: which days are missing, and the two ways on. */
+      '.arp-err .arp-gapinfo{color:var(--ink2);font-size:var(--fs-sm);line-height:1.55;margin-top:8px}',
+      '.arp-err .arp-gapinfo b{color:var(--ink)}',
+      '.arp-err .arp-erracts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}',
       '.arp-dice.rolling .ic{animation:arpSpin .8s linear infinite}',
       '@keyframes arpSpin{to{transform:rotate(360deg)}}',
       /* option column in the footer */
@@ -51324,9 +51369,7 @@ self.addEventListener('message', async (ev) => {
       '<p class="el-sub">Rewind the real market to any date and trade it forward candle by candle — the future stays hidden.</p>' +
       resumeHtml() +
       presetsHtml() +
-      (S.err ? '<div class="el-note" style="color:var(--loss)"><svg class=ic aria-hidden=true><use href=#i-alert ></use></svg> ' + esc(S.err) +
-        (S.errRetry ? ' <button type="button" class="apex-btn apex-btn--sm apex-btn--ghost" data-arp-retry style="margin-left:6px">Try again</button>' : '') +
-        '</div>' : '') +
+      (S.err ? errBoxHtml() : '') +
       '<div class="arp-row">' +
         '<div class="el-fld arp-f-sym"><label for="arpSym">Instrument</label>' +
           (mysteryHidden
@@ -53160,7 +53203,8 @@ self.addEventListener('message', async (ev) => {
       bindSessionEvents(body);
       bindCockpit(body);
       restoreTickMode();
-      return S.session.load(rec.from, rec.to, loadProgress());
+      var gaps = !!S._allowGaps, skipD = S._skipDays; S._allowGaps = false; S._skipDays = null;
+      return S.session.load(rec.from, rec.to, loadProgress(), { allowGaps: gaps, skipDays: gaps ? skipD : null });
     }).then(function () {
       unBusy();
       if (!S.chart || !S.session || S.chart._tot()) return;
@@ -53205,9 +53249,9 @@ self.addEventListener('message', async (ev) => {
         : '“' + rec.name + '” reopened — ' + (rec.stats ? rec.stats.trades : 0) + ' trade(s)');
     }).catch(function (e) {
       unBusy();
-      // The resume banner / saved list is still there to try again from.
-      S.err = (e && e.message) || String(e);
-      S.errRetry = false;
+      // The resume banner / saved list is still there to try again from —
+      // and a throttled feed gets the same two choices as a fresh start.
+      noteLoadError(e, { rec: rec, how: how });
       if (window.ApexWorkspace) window.ApexWorkspace.unmount();
       S._discard = true;
       teardown(); S.session = null; render(body);
@@ -53304,6 +53348,7 @@ self.addEventListener('message', async (ev) => {
     readSetupForm();
     S.err = null;
     S.errRetry = false;
+    S.errGaps = null; S._retryRec = null; S._allowGaps = false; S._skipDays = null;
     // A fresh run is a fresh backtest — never write over the one last opened.
     S.savedId = null; S.savedName = null;
     S.revealed = false;
@@ -53357,9 +53402,56 @@ self.addEventListener('message', async (ev) => {
       showLoad();
     };
   }
+  /* Missing days as the trader reads them: "Tue 8 Sep". The day starts are
+     UTC, so they are formatted in UTC — in New York a 00:00 UTC start would
+     otherwise read as the day before. */
+  function gapLabels(list) {
+    return (list || []).map(function (ms) {
+      return new Date(ms).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+    });
+  }
+  function gapText(list) {
+    var a = gapLabels(list);
+    return a.length > 6 ? a.slice(0, 6).join(', ') + ' and ' + (a.length - 6) + ' more' : a.join(', ');
+  }
+  /* A throttled feed leaves the trader two honest choices: wait for the
+     missing days, or start without them knowing exactly which ones. Blind
+     mode never names the dates — that would give the session away. */
+  function errBoxHtml() {
+    var g = S.errGaps, n = g && g.missing ? g.missing.length : 0;
+    var canGap = !!(S.errRetry && n && g.total && n < g.total);
+    return '<div class="el-note arp-err" style="color:var(--loss)"><svg class=ic aria-hidden=true><use href=#i-alert ></use></svg> ' + esc(S.err) +
+      (canGap
+        ? '<div class="arp-gapinfo">' +
+            (S.blind ? n + ' day' + (n === 1 ? '' : 's') + ' of this session ' + (n === 1 ? 'is' : 'are') + ' missing.'
+                     : 'Missing: <b class="notranslate" translate="no">' + esc(gapText(g.missing)) + '</b>.') +
+            ' Wait a minute and try again, or start now without ' + (n === 1 ? 'it' : 'them') +
+            ' — the chart then jumps from the day before to the day after.</div>'
+        : '') +
+      ((S.errRetry || canGap)
+        ? '<div class="arp-erracts">' +
+            (S.errRetry ? '<button type="button" class="apex-btn apex-btn--sm apex-btn--ghost" data-arp-retry>Try again</button>' : '') +
+            (canGap ? '<button type="button" class="apex-btn apex-btn--sm apex-btn--solid" data-arp-gaps>Start without ' +
+                      (n === 1 ? 'this day' : 'these ' + n + ' days') + '</button>' : '') +
+          '</div>'
+        : '') +
+      '</div>';
+  }
+  /* Remember what failed so both buttons know what to do next. */
+  function noteLoadError(e, retryRec) {
+    var busy = !!(e && e.code === 'FEED_BUSY');
+    S.err = (e && e.message) || String(e);
+    S.errRetry = busy;
+    S.errGaps = busy ? { missing: (e.missing || []).slice(), total: e.total || 0 } : null;
+    S._retryRec = busy ? (retryRec || null) : null;
+  }
   function warnGaps() {
-    var n = S.session && S.session.data && S.session.data.failedDays;
-    if (n) toast('⚠ ' + n + ' day(s) could not be loaded from the data source — the chart has gaps there');
+    var d = S.session && S.session.data, n = d && d.failedDays;
+    if (!n) return;
+    var list = d.missingDays || [];
+    toast(S.blind || !list.length
+      ? '⚠ Started without ' + n + ' missing day' + (n === 1 ? '' : 's') + ' — the chart jumps over ' + (n === 1 ? 'it' : 'them')
+      : '⚠ Started without ' + gapText(list) + ' — the chart jumps over ' + (n === 1 ? 'that day' : 'those days'));
   }
 
   function launch(body) {
@@ -53415,7 +53507,8 @@ self.addEventListener('message', async (ev) => {
       /* A 5-minute session is one day file and lands instantly. A 2-year
          Daily session is a thousand of them, and a cockpit that simply sits
          there for a minute reads as broken. */
-      return S.session.load(from, to, loadProgress());
+      var gaps = !!S._allowGaps, skipD = S._skipDays; S._allowGaps = false; S._skipDays = null;
+      return S.session.load(from, to, loadProgress(), { allowGaps: gaps, skipDays: gaps ? skipD : null });
     }).then(function () {
       /* Die Sitzung kann waehrend des Ladens beendet worden sein — der Nutzer
          drueckt "End session" oder wechselt den Edge-Lab-Reiter, und
@@ -53458,10 +53551,9 @@ self.addEventListener('message', async (ev) => {
       S._rollNote = '';
     }).catch(function (e) {
       unBusy();
-      S.err = e && e.message || String(e);
       // A throttled feed is worth a second go; the days that did load are
       // cached, so the retry only asks for the missing ones.
-      S.errRetry = !!(e && e.code === 'FEED_BUSY');
+      noteLoadError(e, null);
       S.session = null;
       if (window.ApexWorkspace) window.ApexWorkspace.unmount();
       S._discard = true;
@@ -53680,7 +53772,21 @@ self.addEventListener('message', async (ev) => {
           .then(function (ok) { if (ok) { memDel('Resume'); keepForm(); render(body); } });
         return;
       }
-      if (near('data-arp-retry')) { start(body); return; }
+      if (near('data-arp-retry')) {
+        var rr = S._retryRec;
+        if (rr) { S.err = null; S.errRetry = false; S.errGaps = null; S._retryRec = null; openRecord(rr.rec, body, rr.how); }
+        else start(body);
+        return;
+      }
+      if (near('data-arp-gaps')) {
+        var gr = S._retryRec;
+        S._skipDays = (S.errGaps && S.errGaps.missing) ? S.errGaps.missing.slice() : null;
+        S.err = null; S.errRetry = false; S.errGaps = null; S._retryRec = null;
+        S._allowGaps = true;
+        // Same instrument, same days — a blind session keeps its drawn date.
+        if (gr) openRecord(gr.rec, body, gr.how); else launch(body);
+        return;
+      }
       if (near('data-arp-goto-pb')) {
         try { if (typeof window.nav === 'function') window.nav('playbooks'); } catch (err) {}
       }
