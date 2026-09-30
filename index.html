@@ -1094,7 +1094,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-30f';
+  window.APEX_BUILD = '2026-09-30g';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -34855,6 +34855,13 @@ body.light #page-channels .cs-members{background:rgba(0,0,0,0.025)}
      clip-path statt overflow:hidden: erzeugt keinen Scroll-Container und
      laesst das Scrollen der Seite in Ruhe. */
   #page-channels .cs-focus .cs-main{position:relative;clip-path:inset(0)}
+  /* Zweite Absicherung, falls ein Browser das Abschneiden nicht mitmacht
+     (Handy-Screenshot 30.09.2026, nach dem ersten Fix weiter sichtbar):
+     zugeklappt ist die Schublade unsichtbar und nicht anklickbar. visibility
+     schaltet erst NACH dem Wegschieben um, beim Aufklappen sofort — so
+     bleibt die Schiebe-Animation erhalten. */
+  #page-channels .cs-focus .cs-chans{visibility:hidden;transition:transform .22s,visibility 0s linear .22s}
+  #page-channels .cs-focus.chans-open .cs-chans{visibility:visible;transition:transform .22s,visibility 0s linear 0s}
   #page-channels .cs-focus .cs-chat{display:flex}
 }
 #page-channels .cs-chans{border-right:0.5px solid var(--rim);overflow-y:auto;padding:0;background:rgba(0,0,0,0.12)}
