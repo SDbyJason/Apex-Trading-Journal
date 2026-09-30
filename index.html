@@ -1094,7 +1094,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-30a';
+  window.APEX_BUILD = '2026-09-30c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -8738,6 +8738,39 @@ body.light #landingPage * {
 #landingPage .lp-spot-item .d{ color:var(--lp-mute); font-size:.9rem; line-height:1.6; }
 @media(max-width:900px){ #landingPage .lp-spot-grid{ grid-template-columns:1fr; gap:18px; } #landingPage .lp-spot{ padding:30px 22px; } }
 #landingPage .lp-tag.green{ color:var(--lp-pos); border-color:rgba(var(--profit-rgb),.3); }
+/* MT5 Cloud Sync spotlight */
+#landingPage .lp-mt5pill{ display:inline-flex; align-items:center; gap:8px; margin:18px 0 0; padding:9px 16px; border-radius:999px;
+  border:1px solid rgba(var(--gold-rgb),.4); background:rgba(var(--gold-rgb),.08); color:var(--lp-text); font-size:.9rem; text-decoration:none;
+  transition:border-color .25s, transform .25s; }
+#landingPage .lp-mt5pill b{ color:var(--lp-gold); font-weight:600; }
+#landingPage .lp-mt5pill span{ color:var(--lp-gold); }
+#landingPage .lp-mt5pill:hover{ border-color:var(--lp-gold); transform:translateY(-1px); }
+#landingPage .lp-mt5flow{ display:flex; align-items:center; gap:0; margin:0 0 34px; }
+#landingPage .lp-mt5node{ flex:0 0 auto; width:190px; text-align:center; padding:18px 12px; border:1px solid var(--lp-line); border-radius:16px; background:var(--lp-surface2); }
+#landingPage .lp-mt5node.hi{ border-color:rgba(var(--gold-rgb),.45); box-shadow:0 0 0 4px rgba(var(--gold-rgb),.06), 0 12px 40px rgba(var(--gold-rgb),.10); }
+#landingPage .lp-mt5ic{ width:42px; height:42px; margin:0 auto 10px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  background:rgba(var(--gold-rgb),.1); color:var(--lp-gold); }
+#landingPage .lp-mt5ic .ic{ width:20px; height:20px; }
+#landingPage .lp-mt5node b{ display:block; color:var(--lp-text); font-size:.95rem; }
+#landingPage .lp-mt5node span{ display:block; color:var(--lp-mute); font-size:.8rem; margin-top:3px; }
+#landingPage .lp-mt5line{ flex:1; height:2px; min-width:24px; background:var(--lp-line); position:relative; overflow:hidden; }
+#landingPage .lp-mt5line i{ position:absolute; top:0; left:-30%; width:30%; height:100%;
+  background:linear-gradient(90deg,transparent,var(--lp-gold),transparent); animation:lpMt5Flow 2.2s linear infinite; }
+@keyframes lpMt5Flow{ to{ left:100%; } }
+@media (prefers-reduced-motion:reduce){ #landingPage .lp-mt5line i{ animation:none; left:35%; } }
+#landingPage .lp-mt5steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:0 0 34px; }
+#landingPage .lp-mt5steps>div{ color:var(--lp-mute); font-size:.9rem; line-height:1.6; padding:14px 16px; border:1px solid var(--lp-line); border-radius:14px; }
+#landingPage .lp-mt5steps b{ color:var(--lp-text); }
+#landingPage .lp-mt5steps span{ display:inline-flex; width:24px; height:24px; border-radius:50%; align-items:center; justify-content:center; margin-right:8px;
+  font-family:var(--lp-mono); font-size:12px; color:var(--lp-gold); border:1px solid rgba(var(--gold-rgb),.45); }
+@media(max-width:900px){
+  #landingPage .lp-mt5flow{ flex-direction:column; }
+  #landingPage .lp-mt5node{ width:100%; max-width:320px; }
+  #landingPage .lp-mt5line{ width:2px; height:26px; min-width:0; flex:none; }
+  #landingPage .lp-mt5line i{ left:0; top:-30%; width:100%; height:30%; background:linear-gradient(180deg,transparent,var(--lp-gold),transparent); animation-name:lpMt5FlowV; }
+  #landingPage .lp-mt5steps{ grid-template-columns:1fr; }
+}
+@keyframes lpMt5FlowV{ to{ top:100%; } }
 
 /* pricing */
 #landingPage .lp-pricing{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; max-width:860px; margin:0 auto; }
@@ -9361,6 +9394,7 @@ body.light #landingPage * {
     <li><a href="#about">Overview</a></li>
     <li><a href="#product">Live Demo</a></li>
     <li><a href="#features">Features</a></li>
+    <li><a href="#mt5sync">MT5 Sync</a></li>
     <li><a href="#replay">Replay</a></li>
     <li><a href="#ai">AI</a></li>
     <li><a href="#pricing">Pricing</a></li>
@@ -9401,8 +9435,9 @@ body.light #landingPage * {
       <span class="lp-badge gold">cTrader · MT5 · ATAS · Quantower · TradingView · Binance · Bybit · IBKR</span>
       <span class="lp-badge blue">No Trade Execution</span>
     </div>
+    <a href="#mt5sync" class="lp-mt5pill reveal d4"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg> <b>MT5 Cloud Sync</b> — trades from your phone, journaled automatically <span>→</span></a>
     <p class="lp-desc reveal d5">
-      Your trades arrive on their own — synced from cTrader, tracked live from your platform, or imported from a file. Evidence turns them into a structured journal, the statistics that show where your edge really is, an AI coach that reads your behaviour, and a replay that lets you trade any past day again, candle by candle.
+      Your trades arrive on their own — synced from MetaTrader 5 and cTrader even while you trade from your phone, tracked live from your platform, or imported from a file. Evidence turns them into a structured journal, the statistics that show where your edge really is, an AI coach that reads your behaviour, and a replay that lets you trade any past day again, candle by candle.
     </p>
   </div>
   <div class="lp-scroll"><span>Scroll</span><div class="line"></div></div>
@@ -9475,7 +9510,7 @@ body.light #landingPage * {
   <div class="lp-about">
     <div>
       <p class="reveal"><strong>Evidence Trading</strong>&nbsp;is an analytics and journaling application for active traders. It gives you a structured way to record what you did, hard numbers on whether it worked, and a place to practise the parts that did not.</p>
-      <p class="reveal d1">Getting trades in is not your job. Evidence syncs closed trades from the <strong>cTrader Open API</strong>&nbsp;— <strong>even while the app is closed</strong>, so a trade you took on your phone and forgot is journalled with its stop and target intact. It tracks trades live from <strong>MT5, ATAS, Quantower and TradingView</strong>, or imports a statement from <strong><span id="lpBrokers">56</span> brokers and platforms</strong>&nbsp;— futures, stocks, options, crypto and FX alike. Search your broker by name and the right format is picked for you. Not on the list? Map the columns once, save it as your own preset, done. And you can always write a trade by hand. Every broker connection is strictly <strong>read-only</strong>: Evidence never touches open positions, pending orders or any execution layer.</p>
+      <p class="reveal d1">Getting trades in is not your job. Evidence syncs closed trades from the <strong>cTrader Open API</strong>&nbsp;— <strong>even while the app is closed</strong>, so a trade you took on your phone and forgot is journalled with its stop and target intact. <strong>MetaTrader 5</strong>&nbsp;connects the same way: log in once with the read-only investor password and every trade reaches the journal — including the ones you place in the MT5 phone app, with no Expert Advisor and no PC left running. It tracks trades live from <strong>ATAS, Quantower and TradingView</strong>, or imports a statement from <strong><span id="lpBrokers">56</span> brokers and platforms</strong>&nbsp;— futures, stocks, options, crypto and FX alike. Search your broker by name and the right format is picked for you. Not on the list? Map the columns once, save it as your own preset, done. And you can always write a trade by hand. Every broker connection is strictly <strong>read-only</strong>: Evidence never touches open positions, pending orders or any execution layer.</p>
       <p class="reveal d2">From there it goes further than a logbook. Edge Lab runs the quant work on your own history — risk of ruin, MFE/MAE, what-if scenarios, Monte-Carlo projections. Strategy Lab takes an idea you can describe in a sentence, turns it into rules you click together, and tests it over years of real market data — with a parameter optimiser and a walk-forward check that tells you whether the result was an edge or just curve fitting. Market Replay rewinds the real market to any past day so you can trade it forward candle by candle. And an AI coach reads the journal you are building: it grades closed trades, names the behavioural patterns behind your losing streaks, and warns you while you are opening a trade that looks like the last mistake.</p>
     </div>
     <div class="lp-stats">
@@ -9496,6 +9531,12 @@ body.light #landingPage * {
 
   <div class="lp-group reveal"><span class="n">01</span><span class="h">Importing your trades</span><span class="s">without typing them</span></div>
   <div class="lp-grid">
+    <div class="lp-card reveal d1">
+      <span class="lp-card-icon"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg></span>
+      <div class="lp-card-title">MT5 Cloud Sync</div>
+      <div class="lp-card-desc">Enter server, account number and the <strong>read-only investor password</strong> once. Our MT5 server keeps the account in view around the clock, so every trade lands in your journal — opened on the phone, the desktop or a VPS — with SL/TP, commission and swap. No Expert Advisor, no PC left running. <a href="#mt5sync" style="color:var(--lp-gold)">How it works →</a></div>
+      <span class="lp-tag">MetaTrader 5</span>
+    </div>
     <div class="lp-card reveal d1">
       <span class="lp-card-icon"><svg class=ic aria-hidden=true><use href=#i-refresh ></use></svg></span>
       <div class="lp-card-title">cTrader Auto-Sync</div>
@@ -9635,6 +9676,61 @@ body.light #landingPage * {
       <div class="lp-card-title">The Rest of the Desk</div>
       <div class="lp-card-desc">Economic calendar with event alerts, position-size and risk calculators, the S&amp;D Zones TradingView indicator — and an installable app with notifications on phone and desktop.</div>
       <span class="lp-tag green">Tools</span>
+    </div>
+  </div>
+</section>
+
+<div class="lp-divider"></div>
+
+<!-- ══════ MT5 CLOUD SYNC SPOTLIGHT ══════
+     One of the two most important capabilities (with the journal itself):
+     most retail and prop traders are on MT5, and most of them trade from the
+     phone at some point — exactly the trades an EA on a PC never sees.
+     Keep it honest: MT5 only, investor password is stored (encrypted), and
+     a broker with an unusual server can fail to connect. ══════ -->
+<section class="lp-section" id="mt5sync">
+  <div class="lp-label reveal">MetaTrader 5 · Cloud Sync</div>
+  <h2 class="lp-title reveal">Trade on your phone. It's <em>already journaled.</em></h2>
+  <p class="lp-lead reveal">Log in once with your account's investor password. From then on our MT5 server keeps your account in view around the clock — every trade you open, adjust or close reaches your journal, whether you placed it in the MT5 phone app, on your desktop or on a VPS. No Expert Advisor to install, no PC left running.</p>
+
+  <div class="lp-spot reveal">
+    <div class="lp-mt5flow" aria-hidden="true">
+      <div class="lp-mt5node"><div class="lp-mt5ic"><svg class=ic><use href=#i-signal ></use></svg></div><b>Your MT5 account</b><span>phone · desktop · VPS</span></div>
+      <div class="lp-mt5line"><i></i></div>
+      <div class="lp-mt5node hi"><div class="lp-mt5ic"><svg class=ic><use href=#i-shield ></use></svg></div><b>Evidence MT5 server</b><span>read-only · 24/7</span></div>
+      <div class="lp-mt5line"><i></i></div>
+      <div class="lp-mt5node"><div class="lp-mt5ic"><svg class=ic><use href=#i-book ></use></svg></div><b>Your journal</b><span>waiting when you open it</span></div>
+    </div>
+
+    <h3>Three fields, about a minute</h3>
+    <div class="lp-mt5steps">
+      <div><span>1</span><b>Server</b> exactly as MT5 shows it — e.g. your prop firm's demo or live server.</div>
+      <div><span>2</span><b>Account number</b> and the <b>investor password</b> — the read-only one, not your trading password.</div>
+      <div><span>3</span><b>History</b> — bring in the last 30 or 90 days, or start fresh.</div>
+    </div>
+
+    <div class="lp-spot-grid">
+      <div class="lp-spot-item">
+        <div class="t">Read-only by design</div>
+        <div class="d">The investor password cannot place, change or close an order — that is how MetaTrader itself is built, not a promise we make. Evidence sees trades; it can never take one.</div>
+      </div>
+      <div class="lp-spot-item">
+        <div class="t">Numbers straight from the broker</div>
+        <div class="d">Entry, exit, lot size, stop and target — including every SL/TP change while the trade is open — and the exact result with commission and swap, not a recalculation.</div>
+      </div>
+      <div class="lp-spot-item">
+        <div class="t">Built for prop accounts</div>
+        <div class="d">Connect up to three MT5 accounts — a challenge, a funded account and a personal one side by side. Each lands in its own account, so one switch filters the whole journal to it. If a sync ever stops, you get an email instead of a silent gap.</div>
+      </div>
+      <div class="lp-spot-item">
+        <div class="t">Stored encrypted, deleted when you leave</div>
+        <div class="d">The password is kept AES-256 encrypted on our MT5 server — never in the app database, never in a log — and deleted the moment you disconnect, delete your account, or seven days after Pro ends.</div>
+      </div>
+    </div>
+    <p class="lp-cover"><b>Where the line is, plainly:</b> MetaTrader 5 only — MT4 keeps the free Expert Advisor route. A handful of brokers run custom servers that cannot be reached this way; if yours is one of them you will know within a minute, and the Expert Advisor still works.</p>
+    <div class="lp-actions">
+      <a href="#" class="lp-btn primary" onclick="goToAuth('register');return false;">Start 7 days Pro — no card ↗</a>
+      <a href="?demo=1&amp;screen=mt5sync" target="_blank" rel="noopener" class="lp-btn ghost">See it in the demo ↗</a>
     </div>
   </div>
 </section>
@@ -38621,9 +38717,10 @@ body.light .pt-sugg{background:var(--layer)}
   ART.mt5 = [
     '//+------------------------------------------------------------------+',
     '//|  Evidence Auto-Tracker.mq5  —  posts your trades to your Evidence journal |',
-    '//|  v2.0 · tracks: open / close (incl. broker PnL) / SL-TP changes   |',
+    '//|  v2.1 · tracks: open / close (incl. broker PnL) / SL-TP changes   |',
+    '//|         + which MT5 account each trade belongs to                 |',
     '//+------------------------------------------------------------------+',
-    '#property version   "2.00"',
+    '#property version   "2.10"',
     '',
     'input string EvidenceWebhook = "__EVIDENCE_WEBHOOK__";',
     '',
@@ -38651,6 +38748,24 @@ body.light .pt-sugg{background:var(--layer)}
     '      Print("Evidence: server answered ", code, " ", CharArrayToString(res));',
     '}',
     '',
+    '// JSON-safe text (broker and server names can contain anything)',
+    'string JsonEsc(string s)',
+    '{',
+    '   StringReplace(s, "\\\\", "\\\\\\\\");',
+    '   StringReplace(s, "\\"", "\\\\\\"");',
+    '   return(s);',
+    '}',
+    '',
+    '// Which MT5 account a trade belongs to, so Evidence files it under the right',
+    '// account. Same id as the MT5 cloud sync (login@server), so both land together.',
+    'string AcctJson()',
+    '{',
+    '   string type = (AccountInfoInteger(ACCOUNT_TRADE_MODE) == ACCOUNT_TRADE_MODE_DEMO) ? "demo" : "live";',
+    '   return StringFormat(",\\"acct\\":\\"%I64d@%s\\",\\"acctBroker\\":\\"%s\\",\\"acctCurrency\\":\\"%s\\",\\"acctType\\":\\"%s\\"",',
+    '                       AccountInfoInteger(ACCOUNT_LOGIN), JsonEsc(AccountInfoString(ACCOUNT_SERVER)),',
+    '                       JsonEsc(AccountInfoString(ACCOUNT_COMPANY)), AccountInfoString(ACCOUNT_CURRENCY), type);',
+    '}',
+    '',
     'void OnTradeTransaction(const MqlTradeTransaction &trans,',
     '                        const MqlTradeRequest &request,',
     '                        const MqlTradeResult &result)',
@@ -38660,10 +38775,11 @@ body.light .pt-sugg{background:var(--layer)}
     '   {',
     '      string mjs = StringFormat(',
     '         "{\\"source\\":\\"mt5\\",\\"event\\":\\"modify\\",\\"posId\\":\\"%I64d\\","+',
-    '         "\\"symbol\\":\\"%s\\",\\"sl\\":%s,\\"tp\\":%s,\\"time\\":%I64d}",',
+    '         "\\"symbol\\":\\"%s\\",\\"sl\\":%s,\\"tp\\":%s,\\"time\\":%I64d",',
     '         (long)trans.position, trans.symbol,',
     '         DoubleToString(trans.price_sl, 8), DoubleToString(trans.price_tp, 8),',
     '         (long)TimeCurrent() * 1000);',
+    '      mjs += AcctJson() + "}";',
     '      PostJson(mjs);',
     '      return;',
     '   }',
@@ -38718,6 +38834,7 @@ body.light .pt-sugg{background:var(--layer)}
     '                         DoubleToString(pnl, 2), DoubleToString(comm, 2),',
     '                         DoubleToString(swap, 2));',
     '   }',
+    '   js += AcctJson();',
     '   js += "}";',
     '   PostJson(js);',
     '}'
@@ -39172,6 +39289,7 @@ body.light .pt-sugg{background:var(--layer)}
   }
 
   function closeTrade(t, e){
+    if(e.acct && !t.acct) t.acct = String(e.acct);
     if(e.price!=null) t.exit=String(e.price);
     t.closeTime = e.time || Date.now();
     if(e.pnl!=null) t.pnl = e.pnl;                       // exact broker P&L (MT5)
@@ -39222,6 +39340,9 @@ body.light .pt-sugg{background:var(--layer)}
     // Same id under the name the browser sync uses, so a later /api/deals
     // run updates this row instead of appending a second one.
     if (e.source === 'ctrader' && e.posId) t.ctraderId = String(e.posId);
+    // Broker account (MT5 cloud sync / EA 2.1): ApexAccounts files the trade
+    // under its own account instead of one bucket per platform.
+    if (e.acct) t.acct = String(e.acct);
     if (alreadyJournalled(t)) { _dupes++; return null; }
     ensureDay(dayKey(ot)).trades.push(t);
     try { if(window.ApexSnapshot) ApexSnapshot.onTradeOpened({ symbol:t.symbol, dir:t.dir, entry:t.entry, sl:t.sl, tp:t.tp, openTime:ot, snapKey:t.extId }); } catch(_){}
@@ -39239,6 +39360,7 @@ body.light .pt-sugg{background:var(--layer)}
       return;
     }
     try { if (window.ApexSyncHealth) ApexSyncHealth.noteEvent(e.source || 'webhook'); } catch(_){}
+    try { if (e.acct && window.ApexAccounts && ApexAccounts.noteMeta) ApexAccounts.noteMeta(e); } catch(_){}
     var byId = e.posId ? findByExt(extId(e), e) : null;
     // known position that is already closed → duplicate delivery; never fall
     // back to symbol matching or we'd touch an unrelated open trade
@@ -39263,6 +39385,7 @@ body.light .pt-sugg{background:var(--layer)}
         manuallyEdited:false, pnl:(e.pnl!=null?e.pnl:''),
         commission:(e.commission!=null?e.commission:''), swap:(e.swap!=null?e.swap:'') };
       if (e.source === 'ctrader' && e.posId) orphan.ctraderId = String(e.posId);
+      if (e.acct) orphan.acct = String(e.acct);
       /* Wie bei openTrade und closeTrade: der Zeitstempel ist da, aber die
          Anzeigefelder des Journals heissen entryTime/exitTime. Ohne das stand
          bei einem verwaisten Ausstieg die Uhrzeit im Datensatz und trotzdem
@@ -39330,7 +39453,8 @@ body.light .pt-sugg{background:var(--layer)}
     }).catch(function(e){ console.warn('[inbox] drain', e); }).then(function(){ _draining=false; });
   }
 
-  window.ApexInbox = { drain: drain, _dupes: function(){ return _dupes; } };
+  // _apply: test hook (browser tests feed events without Firestore)
+  window.ApexInbox = { drain: drain, _dupes: function(){ return _dupes; }, _apply: applyEvent };
 
   // Start once the user is known; poll every 30s + an initial pull
   var started=false;
@@ -42584,6 +42708,48 @@ body.light .pt-sugg{background:var(--layer)}
     csv:       { name:'CSV Import',     platform:'Other' }
   };
 
+  /* Broker-account metadata (name, broker, currency, demo/live) arrives with
+     the inbox events of the MT5 cloud sync / EA 2.1. Kept here, not on every
+     trade, and used once — when the account for that login is created. */
+  function metaKey(){ return 'apexAcctMeta_'+uid(); }
+  function metaAll(){ try{ return JSON.parse(localStorage.getItem(metaKey())||'{}')||{}; }catch(e){ return {}; } }
+  A.noteMeta = function(e){
+    if(!e || !e.acct) return;
+    var m = metaAll(), k = String(e.acct), cur = m[k] || {};
+    var next = { name:e.acctName||cur.name||'', broker:e.acctBroker||cur.broker||'', currency:e.acctCurrency||cur.currency||'',
+                 type:e.acctType||cur.type||'', source:e.source||cur.source||'' };
+    if(JSON.stringify(next)===JSON.stringify(cur)) return;
+    m[k] = next;
+    try{ localStorage.setItem(metaKey(), JSON.stringify(m)); }catch(err){}
+  };
+  A.accountForAcct = function(acct){ return A.byOrigin('acct:'+String(acct)); };
+
+  function acctAccount(o, t){
+    var acct = o.slice(5), meta = metaAll()[acct] || {};
+    var src = String(t.source||meta.source||'').toLowerCase();
+    var login = acct.split('@')[0];
+    var platform = src==='mt5' ? 'MetaTrader 5' : src==='mt4' ? 'MetaTrader 4' : (ORIGIN_META[src]||{}).platform || 'Other';
+    /* The Expert Advisor (before 2.1) filed every MT5 trade under one
+       "MetaTrader 5" account. The first MT5 login that now arrives WITH an
+       account number adopts that account, so a trader's EA history and the
+       cloud sync of the same login end up together instead of split in two. */
+    if(src && ORIGIN_META[src]){
+      var legacy = load().filter(function(a){
+        return !a.archived && (a.origins||[]).indexOf(src)>=0 &&
+               !(a.origins||[]).some(function(x){ return x.indexOf('acct:')===0; });
+      })[0];
+      if(legacy){
+        legacy.origins = (legacy.origins||[]).concat([o]);
+        if(legacy.name===ORIGIN_META[src].name && meta.name) legacy.name = meta.name;
+        if(!legacy.broker && meta.broker) legacy.broker = meta.broker;
+        return legacy;
+      }
+    }
+    return A.create({ name: meta.name || (platform.replace('MetaTrader ','MT')+' '+login), broker: meta.broker||'',
+                      platform: platform, type: meta.type==='demo'?'demo':'live', currency: meta.currency||'USD',
+                      origins:[o], note: acct.indexOf('@')>0 ? 'Server '+acct.split('@').slice(1).join('@') : '' });
+  }
+
   // Ensure every trade carries an account id. Creates accounts for new origins.
   A.autoAssign = function(opts){
     opts = opts||{};
@@ -42600,8 +42766,13 @@ body.light .pt-sugg{background:var(--layer)}
         // an active account that was explicitly picked wins for manual entries
         if(o==='manual' && _active && _active!=='all' && A.get(_active)) acc = A.get(_active);
       }
+      if(!acc && o.indexOf('acct:')===0){
+        var before = load().length;
+        acc = acctAccount(o, t);
+        if(load().length > before) created.push(acc);
+      }
       if(!acc){
-        var meta = ORIGIN_META[o] || { name: o.indexOf('acct:')===0 ? ('Account '+o.slice(5)) : (o.charAt(0).toUpperCase()+o.slice(1)), platform:'Other' };
+        var meta = ORIGIN_META[o] || { name: o.charAt(0).toUpperCase()+o.slice(1), platform:'Other' };
         acc = A.create({ name:meta.name, platform:meta.platform, origins:[o], type: o==='manual'?'live':'live' });
         created.push(acc);
       }
@@ -45297,6 +45468,12 @@ body.light .pt-sugg{background:var(--layer)}
       // Edge Lab renders its own tabs after nav(), so the tab switch has to
       // come after it — not instead of it.
       try{ if(START==='edgelab' && START_ELTAB && window.EdgeLab) EdgeLab.go(START_ELTAB); }catch(e){}
+      // ?screen=mt5sync opens Settings › Auto Tracking › MT5 with the cloud-sync
+      // card (ApexMeta hooks ApexAutoTrack.select only after ~1.5 s, hence the wait)
+      try{ if(START==='mt5sync') setTimeout(function(){
+        nav('settings'); switchSettingsTab('ctrader'); ApexAutoTrack.select('mt5');
+        setTimeout(function(){ var h=document.getElementById('mtSyncHost'); if(h) h.scrollIntoView({block:'start'}); }, 300);
+      }, 1800); }catch(e){}
       // ?screen=channels opens the official server with its conversation
       try{ if(START==='channels' && window.ApexServers) setTimeout(function(){ ApexServers.open('apex-public'); }, 400); }catch(e){}
       try{ if(typeof renderCalendar==='function') renderCalendar(); }catch(e){}
@@ -77533,6 +77710,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var p = document.getElementById('mtPass'); if (p) p.focus();
   };
   M.cancelEdit = function(){ _s.edit = null; _s.error = ''; render(); };
+  /* Jump to the journal filtered to this MT5 login. The account is created by
+     ApexAccounts from the login@server id the sync puts on every trade — so
+     until the first trade has arrived there is nothing to filter to yet. */
+  M.showTrades = function(id){
+    var a = _s.accounts.filter(function(x){ return x.id === id; })[0];
+    var acc = a && window.ApexAccounts && ApexAccounts.accountForAcct(a.login + '@' + a.server);
+    if (!acc) { toast('No trades from this account yet — they appear here after the first sync'); return; }
+    try { ApexAccounts.setActive(acc.id); } catch(e){}
+    try { nav('journal'); } catch(e){}
+  };
   M.toggleHelp = function(){ _s.help = !_s.help; render(); };
 
   var _srvT = null;
@@ -77582,7 +77769,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       '<div class="mc-acts">' +
         (a.status === 'auth_failed'
           ? '<button class="mc-b pri" onclick="ApexMeta.edit(\'' + esc(a.id) + '\')">' + ic('key') + ' Update password</button>'
-          : '<button class="mc-b" onclick="ApexMeta.restart(\'' + esc(a.id) + '\')">' + ic('refresh') + ' Reconnect</button>' +
+          : '<button class="mc-b" onclick="ApexMeta.showTrades(\'' + esc(a.id) + '\')">' + ic('list') + ' View trades</button>' +
+            '<button class="mc-b" onclick="ApexMeta.restart(\'' + esc(a.id) + '\')">' + ic('refresh') + ' Reconnect</button>' +
             '<button class="mc-b" onclick="ApexMeta.edit(\'' + esc(a.id) + '\')">' + ic('key') + ' Change password</button>') +
         '<button class="mc-b warn" onclick="ApexMeta.disconnect(\'' + esc(a.id) + '\')">' + ic('trash') + ' Disconnect</button>' +
       '</div>' +
