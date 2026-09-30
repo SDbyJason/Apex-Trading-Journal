@@ -1094,7 +1094,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-30g';
+  window.APEX_BUILD = '2026-09-30h';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7402,6 +7402,302 @@ body.light #page-chart .tv-voll{background:rgba(255,255,255,.75)}
 body.light #page-chart .tv-chip{background:#fff;border-color:rgba(0,0,0,.12)}
 body.light #page-chart .tv-buehne{background:#fff;border-color:rgba(0,0,0,.09)}
 @media(max-width:760px){#page-chart{height:calc(100vh - 170px)}}
+/* ══════════════════════════════════════════════════════════════════
+   CHART-COCKPIT (30.09.2026) — Kopfleiste, volle Hoehe, KI-Panel,
+   Marktlage, R-Leiste. Nachgelagert und nur ueberschreibend: die
+   Regeln oben bleiben die Grundlage, hier steht nur, was anders ist.
+══════════════════════════════════════════════════════════════════ */
+/* Die Zonen- und Ideen-Regeln oben benutzen --line/--card/--bg2, die es im
+   Design-System nie gab — ihre Rahmen fielen dadurch still weg. Hier auf
+   die echten Tokens abgebildet. */
+#page-chart{--line:var(--rim2);--card:var(--elevated);--card2:var(--layer);--bg2:var(--elevated)}
+/* Kopfleiste */
+#page-chart .tv-kopf{display:flex;align-items:center;gap:16px;margin-bottom:12px;padding:10px 12px 10px 16px;border:0.5px solid var(--rim);border-radius:var(--r-md);background:linear-gradient(180deg,var(--elevated),var(--layer))}
+#page-chart .tv-kopf>*{order:0}
+#page-chart .tv-inst{flex:0 0 auto;display:flex;flex-direction:column;gap:3px;min-width:0}
+#page-chart .tv-inst-z1{display:flex;align-items:center;gap:8px;min-width:0}
+#page-chart .tv-inst-name{font-family:var(--font-display);font-size:var(--fs-base);font-weight:700;color:var(--ink);white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+#page-chart .tv-inst-sym{font-family:var(--font-mono);font-size:var(--fs-label);color:var(--ink3);white-space:nowrap}
+#page-chart .tv-faehig{font-size:var(--fs-micro);font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;white-space:nowrap;cursor:help}
+#page-chart .tv-faehig:empty{display:none}
+#page-chart .tv-faehig.ja{color:var(--gold);background:var(--gold-dim);border:0.5px solid var(--gold-line)}
+#page-chart .tv-faehig.nein{color:var(--ink3);border:0.5px solid var(--rim2)}
+#page-chart .tv-inst-z2{display:flex;align-items:center;gap:9px}
+#page-chart .tv-live{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:var(--ink3);opacity:.45}
+#page-chart .tv-live.an{background:var(--profit);opacity:1;animation:tvPuls 2.2s ease-out infinite}
+@keyframes tvPuls{0%{box-shadow:0 0 0 0 rgba(var(--profit-rgb),.55)}70%{box-shadow:0 0 0 7px rgba(var(--profit-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--profit-rgb),0)}}
+#page-chart .tv-preis{font-family:var(--font-display);font-size:22px;line-height:1.1;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--ink)}
+#page-chart .tv-preis.rauf{animation:tvRauf 1s ease-out}
+#page-chart .tv-preis.runter{animation:tvRunter 1s ease-out}
+@keyframes tvRauf{0%{color:var(--profit)}100%{color:var(--ink)}}
+@keyframes tvRunter{0%{color:var(--loss)}100%{color:var(--ink)}}
+#page-chart .tv-aend{font-family:var(--font-mono);font-size:var(--fs-sm);padding:1px 7px;border-radius:6px;color:var(--ink3)}
+#page-chart .tv-aend:empty{display:none}
+#page-chart .tv-aend.plus{color:var(--profit);background:var(--profit-dim)}
+#page-chart .tv-aend.minus{color:var(--loss);background:var(--loss-dim)}
+#page-chart .tv-schnell{flex:1 1 auto;min-width:0;display:flex;gap:6px;overflow-x:auto;padding:2px 0;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);mask-image:linear-gradient(90deg,#000 90%,transparent)}
+#page-chart .tv-schnell::-webkit-scrollbar{display:none}
+#page-chart .tv-chip{padding:6px 12px;font-size:var(--fs-sm);border-radius:999px;background:transparent}
+#page-chart .tv-chip.on{box-shadow:inset 0 0 0 0.5px var(--gold-line)}
+#page-chart .tv-kitoggle{display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:var(--r-sm)}
+#page-chart .tv-kitoggle .ic{width:14px;height:14px}
+
+/* Volle Hoehe: Chart und Panel fuellen das Fenster (gemessen in hoeheSetzen) */
+@media(min-width:981px){
+  #page-chart .tv-haupt{grid-template-columns:minmax(0,1fr) 364px;align-items:stretch}
+  #page-chart .tv-buehne,#page-chart .tv-ki{height:clamp(460px,calc(100vh - var(--tv-oben,210px) - 16px),1060px);min-height:0}
+}
+
+/* KI-Panel */
+#page-chart .tv-ki{gap:10px;padding:14px;border-radius:var(--r-md);background:var(--layer)}
+#page-chart .tv-ki-kopf{flex:0 0 auto;padding-bottom:10px;border-bottom:0.5px solid var(--rim)}
+#page-chart .tv-ki-titel{display:flex;align-items:center;gap:10px;min-width:0}
+#page-chart .tv-ki-logo{flex:0 0 auto;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(var(--gold-rgb),.26),rgba(var(--gold-rgb),.05));border:0.5px solid var(--gold-line);color:var(--gold)}
+#page-chart .tv-ki-logo .ic{width:16px;height:16px}
+#page-chart .tv-ki-titel b{display:block;font-family:var(--font-display);font-size:var(--fs-base);color:var(--ink)}
+#page-chart .tv-ki-alter{display:block;font-size:var(--fs-xs);color:var(--ink3);margin-top:1px}
+#page-chart .tv-ki-einst{flex:0 0 auto;display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px}
+#page-chart .tv-feld{display:flex;flex-direction:column;gap:4px;min-width:0}
+#page-chart .tv-feld>span{font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+#page-chart .tv-feld select{width:100%;min-width:0;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-sm);color:var(--ink);padding:7px 9px;font-family:var(--font-body);font-size:var(--fs-sm);cursor:pointer}
+#page-chart .tv-feld select:focus{outline:none;border-color:var(--gold-line)}
+#page-chart .tv-ki-pb{gap:4px}
+#page-chart .tv-ki-pbhint{flex:0 0 auto;margin-top:-4px;font-size:var(--fs-label)}
+#page-chart .tv-ind{border-radius:var(--r-sm)}
+#page-chart .tv-ind summary{font-size:var(--fs-xs);padding:8px 10px}
+#page-chart .tv-ki-go{flex:0 0 auto;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--gold),var(--gold-hi));color:var(--on-gold);border:0;border-radius:var(--r-sm);padding:11px 14px;font-size:var(--fs-md);font-weight:700;box-shadow:0 8px 20px -10px rgba(var(--gold-rgb),.8)}
+#page-chart .tv-ki-go .ic{width:15px;height:15px}
+#page-chart .tv-ki-go:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
+#page-chart .tv-ki-go.laeuft,#page-chart .tv-ki-go.laeuft:disabled{opacity:1;background:var(--gold-dim);color:var(--gold);box-shadow:inset 0 0 0 0.5px var(--gold-line);cursor:progress}
+#page-chart .tv-ki-go.laeuft:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(var(--gold-rgb),.22),transparent);transform:translateX(-100%);animation:tvGlanz 1.3s linear infinite}
+@keyframes tvGlanz{to{transform:translateX(100%)}}
+#page-chart .tv-wacht{display:flex;align-items:center;gap:10px;text-align:left;background:transparent;border:0.5px solid var(--rim2);border-radius:var(--r-sm);padding:8px 11px;font-size:var(--fs-sm);color:var(--ink2)}
+#page-chart .tv-wacht[aria-pressed="true"]{background:var(--profit-dim);border-color:rgba(var(--profit-rgb),.4);color:var(--ink)}
+#page-chart .tv-sw{flex:0 0 auto;position:relative;width:30px;height:17px;border-radius:999px;background:var(--rim2);transition:background .2s}
+#page-chart .tv-sw:after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--ink3);transition:left .2s,background .2s}
+#page-chart .tv-wacht[aria-pressed="true"] .tv-sw{background:rgba(var(--profit-rgb),.35)}
+#page-chart .tv-wacht[aria-pressed="true"] .tv-sw:after{left:15px;background:var(--profit)}
+#page-chart .tv-wacht-st:not(:empty){margin-top:-5px;font-size:var(--fs-label)}
+
+/* Schritte einer Analyse */
+#page-chart .tv-schritte:empty{display:none}
+#page-chart .tv-schritte{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:6px 12px;padding:9px 11px;border-radius:var(--r-sm);background:var(--elevated);border:0.5px solid var(--rim)}
+#page-chart .tv-sch{display:flex;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--ink3)}
+#page-chart .tv-sch i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink3)}
+#page-chart .tv-sch.fertig{color:var(--ink2)}
+#page-chart .tv-sch.fertig i{background:var(--profit);border-color:var(--profit)}
+#page-chart .tv-sch.jetzt{color:var(--gold);font-weight:600}
+#page-chart .tv-sch.jetzt i{border-color:var(--gold);animation:tvPunkt .8s ease-in-out infinite alternate}
+@keyframes tvPunkt{to{background:var(--gold)}}
+#page-chart .tv-sch-balken{flex:1 0 100%;height:3px;border-radius:2px;background:var(--rim2);overflow:hidden}
+#page-chart .tv-sch-balken i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold-hi));transition:width .6s ease}
+
+#page-chart .tv-skel{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+#page-chart .tv-skel i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--rim) 0%,var(--rim2) 50%,var(--rim) 100%);background-size:200% 100%;animation:tvSkel 1.4s ease-in-out infinite}
+#page-chart .tv-skel i:nth-child(2){width:86%}
+#page-chart .tv-skel i:nth-child(3){width:92%}
+#page-chart .tv-skel i:nth-child(4){width:60%}
+@keyframes tvSkel{0%{background-position:100% 0}100%{background-position:-100% 0}}
+/* Veraltet */
+#page-chart .tv-veraltet:empty{display:none}
+#page-chart .tv-veraltet{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:7px 8px 7px 10px;border-radius:var(--r-sm);background:color-mix(in srgb,var(--caution) 12%,transparent);border:0.5px solid color-mix(in srgb,var(--caution) 40%,transparent)}
+#page-chart .tv-veraltet .ic{flex:0 0 auto;width:14px;height:14px;color:var(--caution)}
+#page-chart .tv-veraltet span{flex:1 1 auto;min-width:0;font-size:var(--fs-xs);line-height:1.45;color:var(--ink2)}
+#page-chart .tv-veraltet button{flex:0 0 auto;font:inherit;font-size:var(--fs-xs);font-weight:600;padding:4px 10px;border-radius:6px;border:0.5px solid color-mix(in srgb,var(--caution) 50%,transparent);background:transparent;color:var(--caution);cursor:pointer}
+
+/* Antwort */
+#page-chart .tv-ki-out{padding-right:3px;scrollbar-width:thin}
+#page-chart .tv-ab-liste{display:flex;flex-direction:column;gap:8px}
+#page-chart .tv-ab{border:0.5px solid var(--rim);border-radius:10px;padding:9px 11px 10px;background:var(--elevated)}
+#page-chart .tv-ab.frei{background:none;border:0;padding:0 2px}
+#page-chart .tv-ab-k{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:var(--fs-micro);letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--gold)}
+#page-chart .tv-ab-k .ic{width:12px;height:12px}
+#page-chart .tv-ab-t,#page-chart .tv-ki-antwort{font-size:var(--fs-sm);line-height:1.62;color:var(--ink2)}
+#page-chart .tv-ab-t p{margin:0 0 5px}
+#page-chart .tv-ab-t p:last-child{margin-bottom:0}
+#page-chart .tv-ab-t ul,#page-chart .tv-ab.frei ul{margin:2px 0 4px;padding-left:16px}
+#page-chart .tv-ab-t li{margin:2px 0}
+#page-chart .tv-ab-t b{color:var(--ink)}
+#page-chart .tv-ab.ab-scale{box-shadow:inset 2px 0 0 var(--gold-line)}
+#page-chart .tv-ab.ab-bulb{background:linear-gradient(135deg,rgba(var(--gold-rgb),.07),var(--elevated) 60%)}
+#page-chart .tv-px{font-family:var(--font-mono);font-size:.94em;color:var(--ink);background:rgba(var(--gold-rgb),.11);border-radius:4px;padding:0 4px;cursor:copy;transition:background .15s,color .15s}
+#page-chart .tv-px:hover{background:rgba(var(--gold-rgb),.24)}
+#page-chart .tv-px.kopiert{background:rgba(var(--profit-rgb),.22);color:var(--profit)}
+#page-chart .tv-mark{display:inline-block;font-size:var(--fs-micro);font-weight:800;letter-spacing:.06em;padding:1px 6px;border-radius:4px;vertical-align:1px}
+#page-chart .tv-mark.ja{color:var(--profit);background:var(--profit-dim)}
+#page-chart .tv-mark.nein{color:var(--loss);background:var(--loss-dim)}
+#page-chart .tv-konf{margin-left:auto;font-size:var(--fs-micro);letter-spacing:.08em;padding:2px 8px;border-radius:999px;color:var(--ink2);background:var(--rim)}
+#page-chart .tv-konf.high{color:var(--profit);background:var(--profit-dim)}
+#page-chart .tv-konf.medium{color:var(--gold);background:var(--gold-dim)}
+#page-chart .tv-konf.low{color:var(--loss);background:var(--loss-dim)}
+#page-chart .tv-ki-frage{border-radius:12px 12px 3px 12px;margin-top:10px}
+#page-chart .tv-ki-antwort{margin-bottom:6px}
+#page-chart .tv-alt-kopf{display:flex;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--caution);margin-bottom:8px;line-height:1.4}
+#page-chart .tv-alt-kopf .ic{flex:0 0 auto;width:13px;height:13px}
+#page-chart .tv-alt{opacity:.7}
+
+/* Leerer Zustand */
+#page-chart .tv-leer{padding:4px 2px}
+#page-chart .tv-leer-t{font-family:var(--font-display);font-size:var(--fs-md);font-weight:700;color:var(--ink);margin-bottom:10px;line-height:1.35}
+#page-chart .tv-leer ul{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+#page-chart .tv-leer li{position:relative;padding-left:18px;font-size:var(--fs-sm);color:var(--ink2);line-height:1.5}
+#page-chart .tv-leer li:before{content:'';position:absolute;left:2px;top:6px;width:6px;height:6px;border-radius:1px;background:var(--gold);transform:rotate(45deg)}
+#page-chart .tv-leer li b{color:var(--ink);font-weight:600}
+#page-chart .tv-leer-f{font-size:var(--fs-xs);color:var(--ink3);line-height:1.5;padding-top:10px;border-top:0.5px solid var(--rim)}
+
+/* Schnellfragen + Eingabe */
+#page-chart .tv-ki-chips:empty{display:none}
+#page-chart .tv-ki-chips{flex:0 0 auto;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
+#page-chart .tv-ki-chips::-webkit-scrollbar{display:none}
+#page-chart .tv-fchip{flex:0 0 auto;font:inherit;font-size:var(--fs-xs);padding:5px 10px;border-radius:999px;border:0.5px solid var(--rim2);background:var(--elevated);color:var(--ink2);cursor:pointer;white-space:nowrap;transition:.15s}
+#page-chart .tv-fchip:hover{border-color:var(--gold-line);color:var(--gold)}
+#page-chart .tv-ki-ask input{border-radius:var(--r-sm);padding:9px 11px}
+#page-chart .tv-ki-ask button{display:grid;place-items:center;width:38px;padding:0;border-radius:var(--r-sm)}
+#page-chart .tv-ki-ask button .ic{width:14px;height:14px}
+
+/* Marktlage */
+#page-chart .tv-daten{grid-template-columns:minmax(0,1fr) 364px}
+#page-chart .tv-lage{grid-column:1/-1}
+#page-chart .tv-lage:empty{display:none}
+#page-chart .tv-lage{border:0.5px solid var(--rim);border-radius:var(--r-md);padding:12px 14px 14px;background:var(--layer)}
+#page-chart .tv-lage-kopf{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+#page-chart .tv-lage-kopf b{font-family:var(--font-display);font-size:var(--fs-md);color:var(--ink)}
+#page-chart .tv-gleich{font-size:var(--fs-xs);font-weight:600;padding:2px 9px;border-radius:999px;border:0.5px solid var(--rim2);color:var(--ink2)}
+#page-chart .tv-gleich.up{color:var(--profit);border-color:rgba(var(--profit-rgb),.4);background:var(--profit-dim)}
+#page-chart .tv-gleich.down{color:var(--loss);border-color:rgba(var(--loss-rgb),.4);background:var(--loss-dim)}
+#page-chart .tv-lage-f{margin-left:auto;font-size:var(--fs-label);color:var(--ink3)}
+#page-chart .tv-lage-git{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:12px}
+#page-chart .tv-tf-reihe{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px}
+#page-chart .tv-tfk{display:flex;flex-direction:column;gap:2px;min-width:0;border:0.5px solid var(--rim);border-top:2px solid var(--rim2);border-radius:9px;padding:8px 10px;background:var(--elevated)}
+#page-chart .tv-tfk-k{display:flex;justify-content:space-between;align-items:center;font-size:var(--fs-label);font-weight:700;letter-spacing:.1em;color:var(--ink3)}
+#page-chart .tv-tfk-k .ic{width:14px;height:14px}
+#page-chart .tv-tfk b{font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:-0.03em;color:var(--ink)}
+#page-chart .tv-tfk i{font-style:normal;font-family:var(--font-mono);font-size:var(--fs-label);color:var(--ink3)}
+#page-chart .tv-tfk em{font-style:normal;font-size:var(--fs-label);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-chart .tv-tfk.up{border-top-color:var(--profit)}
+#page-chart .tv-tfk.up b,#page-chart .tv-tfk.up .ic{color:var(--profit)}
+#page-chart .tv-tfk.down{border-top-color:var(--loss)}
+#page-chart .tv-tfk.down b,#page-chart .tv-tfk.down .ic{color:var(--loss)}
+#page-chart .tv-tfk.unclear b,#page-chart .tv-tfk.unclear .ic{color:var(--ink2)}
+#page-chart .tv-nah-reihe{display:flex;flex-direction:column;gap:6px;min-width:0}
+#page-chart .tv-nah{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:1px;align-items:center;padding:7px 11px;border-radius:9px;border:0.5px solid var(--rim);border-left:3px solid var(--rim2);background:var(--elevated)}
+#page-chart .tv-nah span{grid-column:1/-1;font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink3)}
+#page-chart .tv-nah b{font-family:var(--font-mono);font-size:var(--fs-md);font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-chart .tv-nah i{font-style:normal;font-family:var(--font-mono);font-size:var(--fs-label);color:var(--ink3);white-space:nowrap}
+#page-chart .tv-nah.d{border-left-color:var(--profit)}
+#page-chart .tv-nah.d span{color:var(--profit)}
+#page-chart .tv-nah.s{border-left-color:var(--loss)}
+#page-chart .tv-nah.s span{color:var(--loss)}
+#page-chart .tv-nah.drin{background:rgba(var(--gold-rgb),.09);border-color:var(--gold-line)}
+#page-chart .tv-nah.drin span{color:var(--gold)}
+#page-chart .tv-nah.leer b{font-family:var(--font-body);font-size:var(--fs-sm);color:var(--ink3)}
+#page-chart .tv-nah.klick{cursor:pointer;transition:background .15s}
+#page-chart .tv-nah.klick:hover{background:rgba(var(--gold-rgb),.08)}
+#page-chart .tv-nah.klick:focus-visible{outline:2px solid rgba(var(--gold-rgb),.7);outline-offset:2px}
+
+/* Level & Setup: lesbarer */
+#page-chart .tv-levels:not(:empty){padding:12px 14px;border-radius:var(--r-md);background:var(--layer)}
+#page-chart .tv-lv-auf{font-size:var(--fs-md)}
+#page-chart .tv-lv-z{font-size:var(--fs-sm);border-radius:5px;padding:0 4px;margin:0 -4px}
+#page-chart .tv-lv-m{font-size:var(--fs-xs)}
+#page-chart .tv-lv-tf{font-size:var(--fs-label)}
+#page-chart .tv-lv-tf span,#page-chart .tv-lv-sw,#page-chart .tv-lv-leer{font-size:var(--fs-xs)}
+#page-chart .tv-lv-note{font-size:var(--fs-xs);color:var(--ink3);line-height:1.5;padding:7px 10px;border-radius:var(--r-sm);background:var(--elevated);margin-bottom:10px}
+#page-chart .tv-lv-note b{color:var(--ink2);font-weight:600}
+#page-chart .tv-fk{border-radius:10px;padding:9px 11px}
+#page-chart .tv-fk.d{border-left-color:var(--profit)}
+#page-chart .tv-fk.s{border-left-color:var(--loss)}
+#page-chart .tv-fk.d .tv-fk-kopf{color:var(--profit)}
+#page-chart .tv-fk.s .tv-fk-kopf{color:var(--loss)}
+#page-chart .tv-fk-p{font-size:var(--fs-lg);font-weight:700;letter-spacing:-0.03em}
+#page-chart .tv-setup:not(:empty){padding:12px 14px;border-radius:var(--r-md)}
+#page-chart .tv-su-kopf{margin-bottom:8px}
+#page-chart .tv-su-kopf b{font-size:var(--fs-md)}
+#page-chart .tv-su-dir{flex:0 0 auto;padding:2px 8px;border-radius:999px;font-size:var(--fs-micro)}
+#page-chart .tv-su-dir.l{color:var(--profit);background:var(--profit-dim)}
+#page-chart .tv-su-dir.s{color:var(--loss);background:var(--loss-dim)}
+#page-chart .tv-su-dir.k{background:var(--rim)}
+#page-chart .tv-su-kopf .tv-lv-copy{margin-left:auto}
+#page-chart .tv-su-z{font-size:var(--fs-xs);line-height:1.45}
+#page-chart .tv-su-r{font-size:var(--fs-sm);line-height:1.9;border-bottom:0.5px dashed var(--rim)}
+#page-chart .tv-su-r span{flex:0 0 50px;font-size:var(--fs-xs)}
+#page-chart .tv-su-r b{font-family:var(--font-mono);font-size:var(--fs-md);font-weight:500}
+#page-chart .tv-su-r i{font-size:var(--fs-label);text-align:right}
+#page-chart .tv-su-warn,#page-chart .tv-su-hint{font-size:var(--fs-xs)}
+
+/* Zonendetail & Ideen im selben Stil */
+#page-chart .tv-zn{background:var(--layer);border:0.5px solid var(--rim);border-radius:var(--r-md);padding:14px 16px}
+#page-chart .tv-zn.d{border-left:3px solid var(--profit)}
+#page-chart .tv-zn.s{border-left:3px solid var(--loss)}
+#page-chart .tv-zn-kopf b{font-family:var(--font-display);font-size:var(--fs-md)}
+#page-chart .tv-zn-tf{border-color:var(--rim2)}
+#page-chart .tv-zn-p{font-family:var(--font-mono)}
+#page-chart .tv-zn-git>div{border-bottom:0.5px dashed var(--rim2)}
+#page-chart .tv-zn-git b{font-family:var(--font-mono);font-weight:500}
+#page-chart .tv-zq{background:var(--rim2)}
+#page-chart .tv-zq i{background:linear-gradient(90deg,var(--gold),var(--gold-hi))}
+#page-chart .tv-zn-ki{background:var(--elevated);border:0.5px solid var(--rim)}
+#page-chart .tv-zn-ki.ok{background:var(--profit-dim);border-color:rgba(var(--profit-rgb),.35)}
+#page-chart .tv-zn-ki.weg{background:var(--loss-dim);border-color:rgba(var(--loss-rgb),.35)}
+#page-chart .tv-zn-zit{border-left-color:var(--gold-line)}
+#page-chart .tv-zn-b{border:0.5px solid var(--rim2);border-radius:var(--r-sm);padding:7px 13px}
+#page-chart .tv-zn-b:hover{border-color:var(--gold-line);color:var(--gold);background:var(--gold-dim)}
+#page-chart .tv-zn-b.primar{background:linear-gradient(135deg,var(--gold),var(--gold-hi));color:var(--on-gold);border:0;font-weight:700}
+#page-chart .tv-zn-setup,#page-chart .tv-id{border:0.5px solid var(--rim2);background:var(--elevated)}
+#page-chart .tv-id.stark{border-color:var(--gold-line);box-shadow:0 0 0 1px rgba(var(--gold-rgb),.15)}
+#page-chart .tv-idf{border-top-color:var(--rim)}
+#page-chart .tv-idf-z input,#page-chart .tv-idf-z select{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-sm)}
+body.light #page-chart .tv-zn{background:#fff;border-color:rgba(0,0,0,.09)}
+body.light #page-chart .tv-zn-ki,body.light #page-chart .tv-zn-setup,body.light #page-chart .tv-id{background:var(--void)}
+
+/* R-Leiste */
+#page-chart .tv-leiter{margin:12px 0 6px}
+#page-chart .tv-lt-bahn{position:relative;height:40px;margin:0 12px}
+#page-chart .tv-lt-bahn:before{content:'';position:absolute;left:0;right:0;top:17px;height:4px;border-radius:2px;background:var(--rim2)}
+#page-chart .tv-lt-risk,#page-chart .tv-lt-rew{position:absolute;top:17px;height:4px;border-radius:2px}
+#page-chart .tv-lt-risk{background:rgba(var(--loss-rgb),.75)}
+#page-chart .tv-lt-rew{background:rgba(var(--profit-rgb),.75)}
+#page-chart .tv-lt-m{position:absolute;top:13px;width:2px;height:12px;margin-left:-1px;border-radius:1px;background:var(--ink2)}
+#page-chart .tv-lt-m em{position:absolute;top:15px;left:50%;transform:translateX(-50%);font-style:normal;font-size:var(--fs-micro);font-weight:700;letter-spacing:.05em;color:var(--ink3);white-space:nowrap}
+#page-chart .tv-lt-m.stop{background:var(--loss)}
+#page-chart .tv-lt-m.stop em{color:var(--loss)}
+#page-chart .tv-lt-m.entry{background:var(--ink);width:3px;margin-left:-1.5px;height:16px;top:11px}
+#page-chart .tv-lt-m.entry em{color:var(--ink2);top:19px}
+#page-chart .tv-lt-m.ziel{background:var(--profit)}
+#page-chart .tv-lt-m.ziel em{top:-13px;color:var(--profit)}
+#page-chart .tv-lt-live{position:absolute;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(var(--gold-rgb),.25);transition:left .45s ease;top:14px}
+#page-chart .tv-lt-fuss{display:flex;align-items:center;gap:14px;font-size:var(--fs-xs);color:var(--ink3);margin-top:4px}
+#page-chart .tv-lt-fuss b{color:var(--ink2);font-family:var(--font-mono);font-weight:500}
+#page-chart .tv-lt-jetzt{margin-left:auto}
+#page-chart .tv-lt-jetzt.plus b{color:var(--profit)}
+#page-chart .tv-lt-jetzt.minus b{color:var(--loss)}
+
+/* Hell */
+body.light #page-chart .tv-kopf{background:#fff;border-color:rgba(0,0,0,.09)}
+body.light #page-chart .tv-chip{background:transparent}
+body.light #page-chart .tv-chip.on{background:var(--gold-dim)}
+body.light #page-chart .tv-lage,body.light #page-chart .tv-levels:not(:empty){background:#fff;border-color:rgba(0,0,0,.09)}
+body.light #page-chart .tv-tfk,body.light #page-chart .tv-nah,body.light #page-chart .tv-ab,body.light #page-chart .tv-schritte,body.light #page-chart .tv-lv-note,body.light #page-chart .tv-fchip{background:var(--void)}
+body.light #page-chart .tv-feld select{background:#fff;border-color:rgba(0,0,0,.12)}
+
+/* Schmal */
+@media(max-width:1180px){#page-chart .tv-lage-git{grid-template-columns:1fr}}
+@media(max-width:980px){
+  #page-chart .tv-kopf{flex-wrap:wrap;gap:10px 12px;padding:10px 12px}
+  #page-chart .tv-schnell{order:3;flex:1 0 100%}
+  #page-chart .tv-kitoggle{margin-left:auto}
+  #page-chart .tv-buehne{height:62vh;min-height:340px}
+  #page-chart .tv-daten{grid-template-columns:1fr}
+}
+@media(max-width:760px){#page-chart{height:auto}}
+@media(max-width:560px){
+  #page-chart .tv-tf-reihe{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #page-chart .tv-preis{font-size:19px}
+  #page-chart .tv-kitoggle span{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  #page-chart .tv-live.an,#page-chart .tv-ki-go.laeuft:after,#page-chart .tv-sch.jetzt i,#page-chart .tv-preis{animation:none!important}
+}
 #page-live .lc-tfrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
 #page-live .lc-tf{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink3);border-radius:8px;padding:7px 14px;font-family:var(--font-body);font-size:12.5px;cursor:pointer;transition:.15s}
 #page-live .lc-tf:hover{border-color:var(--gold-line);color:var(--ink)}
@@ -10039,7 +10335,7 @@ body.light #landingPage * {
         <li><b>Shared replay sessions</b>&nbsp;— set a student the same day with an empty account, then compare</li>
         <li><b>Academy</b>&nbsp;— 27 chapters on psychology, risk, edge &amp; backtesting, with your own numbers beside every one</li>
         <li><b>Strategy Drills</b>&nbsp;— practise your own setup on real history with the future hidden</li>
-        <li><b>Chart AI</b>&nbsp;— five timeframes read at once, zones judged against your playbook</li>
+        <li><b>Chart AI</b>&nbsp;— five timeframes read at once, zones judged against your playbook, setup with a live R ladder</li>
         <li><b>Zone to trade to result</b>&nbsp;— entry, stop &amp; several targets per zone, then measured</li>
         <li><b>Setup watcher</b>&nbsp;— tells you when price reaches a zone, and while a trade runs</li>
         <li><b>Challenge mode</b>&nbsp;— your prop firm's rules enforced inside the replay</li>
@@ -10193,7 +10489,7 @@ body.light #landingPage * {
         <tr><td>Proactive AI insights (every 10 trades)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto-Tagging rules + AI tag suggestions</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Live trade alerts + auto A–F trade review</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>Chart AI — five timeframes read at once, supply &amp; demand areas scored, judged against your own playbook</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Chart AI — five timeframes read at once, supply &amp; demand areas scored, judged against your own playbook, setup with a live R ladder</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Click a zone for entry, stop and several take-profits — with every number checked against the candles</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Setup watcher — an alert when price reaches a zone, and while a trade of yours is running</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Every zone idea tracked to its result — so you can see whether trading with the AI actually pays</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -11055,7 +11351,7 @@ body.light #landingPage * {
         </div>
       </div>
 
-      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg></div><div><div class="apex-feat-label">The chart is free. Reading it is Pro.</div><div class="apex-feat-desc">The live chart stays open to everyone — every instrument TradingView carries, every timeframe, your own drawings. What Pro adds is what happens beside it: Evidence loads the candles of five timeframes at once, works out the supply and demand areas with a strength score broken into its five parts, and hands the whole picture to the AI &mdash; which may confirm an area, throw one out, or name one the indicator missed. Judged against <b>your</b> playbook, not against general market theory, so it works for a strategy that has nothing to do with zones</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg></div><div><div class="apex-feat-label">The chart is free. Reading it is Pro.</div><div class="apex-feat-desc">The live chart stays open to everyone — every instrument TradingView carries, every timeframe, your own drawings. What Pro adds is what happens beside it: Evidence loads the candles of five timeframes at once, works out the supply and demand areas with a strength score broken into its five parts, and hands the whole picture to the AI &mdash; which may confirm an area, throw one out, or name one the indicator missed. Judged against <b>your</b> playbook, not against general market theory, so it works for a strategy that has nothing to do with zones. A market read shows the trend and the latest structure break on every timeframe next to the nearest zone on each side, and the setup card draws stop, entry and targets to scale with the live price moving along them</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg></div><div><div class="apex-feat-label">Click a zone and get a plan for that zone</div><div class="apex-feat-desc">Entry, stop and &mdash; where your own rules allow scaling out &mdash; several take-profits with the share of the position for each, every number checked against the candles before you see it. A target on the wrong side of the entry, a stop three times your usual, shares that do not add up to 100 % &mdash; each of those is shown next to the figure instead of being quietly passed on</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-bell ></use></svg></div><div><div class="apex-feat-label">The watcher — and it stays with a running trade</div><div class="apex-feat-desc">It tells you when price actually reaches one of your areas, and once you are in: half the risk used, 1R reached, each target taken, and the move given back after being ahead. When something with judgement in it happens &mdash; an opposing area right in the way &mdash; it asks the AI. Break-even is a button, never automatic: when the risk comes off is your decision, not a calculation</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🎖️</div><div><div class="apex-feat-label">Every zone idea measured to its end</div><div class="apex-feat-desc">Say "I am trading this one" and Evidence records what the zone looked like at that moment &mdash; strength, the AI verdict, the source, your playbook &mdash; then follows the price to the result, and catches up from the candles for the hours the app was closed. Afterwards the results are split by zone strength, by AI confidence and by verdict, so the honest question gets an honest answer: does trading with it pay? Groups under thirty ideas are dimmed, and a candle that touched stop and target at once is marked unclear and left out rather than guessed</div></div></div>
@@ -69722,9 +70018,28 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var d = document.createElement('div');
     d.className = 'page'; d.id = 'page-chart';
     d.innerHTML =
+      /* Kopfleiste: WAS laeuft, zu welchem Kurs, und ob die KI es auswerten
+         kann. Vorher stand hier eine einzige graue 13px-Zeile — Kurs und
+         Instrument waren das Unauffaelligste auf der ganzen Seite. */
       '<div class="tv-kopf">' +
-        '<div class="tv-jetzt notranslate" translate="no" id="tvJetzt"></div>' +
-        '<button class="tv-kitoggle" id="tvKiToggle" aria-expanded="true">' +
+        '<div class="tv-inst">' +
+          '<div class="tv-inst-z1">' +
+            '<b class="tv-inst-name" id="tvName">Chart</b>' +
+            '<span class="tv-inst-sym notranslate" translate="no" id="tvSymKurz"></span>' +
+            '<span class="tv-faehig" id="tvFaehig"></span>' +
+          '</div>' +
+          '<div class="tv-inst-z2 notranslate" translate="no">' +
+            '<span class="tv-live" id="tvLive" title="Live price from the chart"></span>' +
+            '<b class="tv-preis" id="tvPreis">&mdash;</b>' +
+            '<span class="tv-aend" id="tvAend"></span>' +
+          '</div>' +
+          /* Bleibt fuer alte Aufrufer bestehen, ist aber unsichtbar. */
+          '<div class="tv-jetzt notranslate" translate="no" id="tvJetzt" hidden></div>' +
+        '</div>' +
+        '<div class="tv-schnell" id="tvSchnell" role="toolbar" aria-label="Instruments the AI can analyse"></div>' +
+        '<button class="tv-kitoggle" id="tvKiToggle" aria-expanded="true" ' +
+          'title="Show or hide the AI panel">' +
+          '<svg class=ic aria-hidden=true><use href=#i-brain ></use></svg>' +
           '<span id="tvKiToggleT">Hide AI</span></button>' +
       '</div>' +
       '<div class="tv-haupt">' +
@@ -69735,37 +70050,46 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         '</div>' +
         '<aside class="tv-ki" id="tvKi">' +
           '<div class="tv-ki-kopf">' +
-            '<b>AI analysis</b>' +
-            '<select id="tvKiTf" aria-label="Entry timeframe" ' +
-              'title="Every timeframe is scanned — this is the one entries aim at">' +
-              '<option value="1min">Entry M1</option>' +
-              '<option value="5min">Entry M5</option>' +
-              '<option value="15min" selected>Entry M15</option>' +
-              '<option value="1h">Entry H1</option>' +
-              '<option value="4h">Entry H4</option>' +
-            '</select>' +
+            '<div class="tv-ki-titel">' +
+              '<span class="tv-ki-logo"><svg class=ic aria-hidden=true><use href=#i-brain ></use></svg></span>' +
+              '<div><b>AI analysis</b><span class="tv-ki-alter" id="tvKiAlter">Reads 5 timeframes</span></div>' +
+            '</div>' +
           '</div>' +
+          '<div class="tv-ki-einst">' +
+            '<label class="tv-feld"><span>Entry on</span>' +
+              '<select id="tvKiTf" aria-label="Entry timeframe" ' +
+                'title="Every timeframe is scanned — this is the one entries aim at">' +
+                '<option value="1min">M1</option>' +
+                '<option value="5min">M5</option>' +
+                '<option value="15min" selected>M15</option>' +
+                '<option value="1h">H1</option>' +
+                '<option value="4h">H4</option>' +
+              '</select></label>' +
+            '<label class="tv-feld tv-ki-pb"><span>Playbook</span>' +
+              '<select id="tvKiPb" aria-label="Playbook"></select></label>' +
+          '</div>' +
+          '<span class="tv-ki-pbhint">Your rules from <b>Analysis &rsaquo; Playbooks</b> ' +
+            '&mdash; edit or add them there.</span>' +
           '<details class="tv-ind" id="tvInd">' +
             '<summary id="tvIndKopf">Indicators the AI sees</summary>' +
             '<div class="tv-ind-liste" id="tvIndListe"></div>' +
           '</details>' +
-          '<div class="tv-ki-pb">' +
-            '<select id="tvKiPb" aria-label="Playbook"></select>' +
-            '<span class="tv-ki-pbhint">Your rules from <b>Analysis &rsaquo; Playbooks</b> ' +
-            '&mdash; edit or add them there.</span>' +
-          '</div>' +
-          '<button class="tv-ki-go" id="tvKiGo">Analyse chart</button>' +
+          '<button class="tv-ki-go" id="tvKiGo">' +
+            '<svg class=ic aria-hidden=true><use href=#i-zap ></use></svg>' +
+            '<span id="tvKiGoT">Analyse chart</span></button>' +
           '<button class="tv-wacht" id="tvWachtBtn" aria-pressed="false">' +
-            'Watch for setups</button>' +
+            '<span class="tv-sw" aria-hidden="true"></span>' +
+            '<span class="tv-wacht-t" id="tvWachtT">Watch for setups</span></button>' +
           '<div class="tv-wacht-st" id="tvWachtStatus"></div>' +
+          '<div class="tv-schritte" id="tvSchritte" aria-live="polite"></div>' +
           '<div class="tv-lauf" id="tvLauf"></div>' +
-          '<div class="tv-ki-out" id="tvKiOut">' +
-            '<p class="tv-ki-leer">The AI reads the candles and your supply &amp; demand ' +
-            'zones across three timeframes &mdash; it cannot see the chart above.</p>' +
-          '</div>' +
+          '<div class="tv-veraltet" id="tvVeraltet"></div>' +
+          '<div class="tv-ki-out" id="tvKiOut">' + LEER_HTML + '</div>' +
+          '<div class="tv-ki-chips" id="tvKiChips"></div>' +
           '<div class="tv-ki-ask">' +
             '<input id="tvKiAsk" placeholder="Ask a follow-up…" autocomplete="off">' +
-            '<button id="tvKiSend" aria-label="Send">&rarr;</button>' +
+            '<button id="tvKiSend" aria-label="Send">' +
+              '<svg class=ic aria-hidden=true><use href=#i-send ></use></svg></button>' +
           '</div>' +
         '</aside>' +
       '</div>' +
@@ -69773,6 +70097,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
          Breite. Die Zahlen zum Handeln sollen nicht in einer schmalen
          Seitenspalte stehen, wo man sie scrollen muss. */
       '<div class="tv-daten" id="tvDaten">' +
+        /* Marktlage: gerechnet, nicht von der KI — steht auch ohne Antwort. */
+        '<div class="tv-lage" id="tvLage"></div>' +
         '<div class="tv-levels" id="tvLevels"></div>' +
         '<div class="tv-setup" id="tvSetup"></div>' +
         /* Zonendetail und Ideen stehen UNTER beiden Spalten ueber die
@@ -69798,7 +70124,101 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     d.querySelector('#tvKiAsk').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); nachfragen(); }
     });
+    /* Schnellwahl und Schnellfragen: ein Zuhoerer am Behaelter, weil beide
+       Leisten neu gebaut werden. */
+    d.querySelector('#tvSchnell').addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-sym]');
+      if (b) symbolWechseln(b.getAttribute('data-sym'));
+    });
+    d.querySelector('#tvKiChips').addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-frage]');
+      if (!b) return;
+      var f = document.getElementById('tvKiAsk');
+      if (f) { f.value = b.getAttribute('data-frage'); nachfragen(); }
+    });
+    /* Preise in der Antwort kopieren sich per Klick — man tippt sie sonst
+       von Hand in TradingView ab. */
+    d.querySelector('#tvKiOut').addEventListener('click', function (e) {
+      var z = e.target.closest && e.target.closest('.tv-px');
+      if (!z) return;
+      var t = z.textContent.trim();
+      var fertig = function () {
+        z.classList.add('kopiert');
+        setTimeout(function () { z.classList.remove('kopiert'); }, 1100);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(t).then(fertig).catch(function () {});
+    });
+    schnellFuellen();
+    if (window.addEventListener && !TV._hoeheAn) {
+      TV._hoeheAn = true;
+      window.addEventListener('resize', function () { hoeheSetzen(); });
+    }
   };
+
+  /* ── Leere Anzeige, Schnellwahl, Hoehe ────────────────────────────── */
+  var LEER_HTML =
+    '<div class="tv-leer">' +
+      '<div class="tv-leer-t">Get a read of this chart in about 20 seconds</div>' +
+      '<ul>' +
+        '<li><b>Five timeframes</b> &mdash; M1 to H4, from the real candles</li>' +
+        '<li><b>Your indicators and playbook</b> &mdash; judged by your rules, not generic theory</li>' +
+        '<li><b>Levels, setup and R</b> &mdash; every number checked against the data</li>' +
+      '</ul>' +
+      '<div class="tv-leer-f">The AI cannot see the chart image &mdash; it reads the numbers behind it, ' +
+      'which is more precise.</div>' +
+    '</div>';
+
+  /* Die Instrumente, fuer die es Kerzen gibt — nur die kann die KI lesen.
+     Alles andere bleibt ueber TradingViews eigene Suche erreichbar. */
+  var SCHNELL = [
+    ['OANDA:XAUUSD', 'Gold'], ['OANDA:XAGUSD', 'Silver'],
+    ['OANDA:EURUSD', 'EURUSD'], ['OANDA:GBPUSD', 'GBPUSD'], ['OANDA:USDJPY', 'USDJPY'],
+    ['OANDA:AUDUSD', 'AUDUSD'], ['OANDA:USDCAD', 'USDCAD'],
+    ['OANDA:NAS100USD', 'NAS100'], ['OANDA:SPX500USD', 'SPX500'],
+    ['OANDA:US30USD', 'US30'], ['OANDA:DE30EUR', 'GER40'],
+    ['BINANCE:BTCUSDT', 'BTC'], ['BINANCE:ETHUSDT', 'ETH'],
+  ];
+
+  function schnellFuellen() {
+    var el = document.getElementById('tvSchnell');
+    if (!el) return;
+    var jetzt = TV.sym || lies('sym', STD_SYM);
+    el.innerHTML = SCHNELL.map(function (x) {
+      return '<button class="tv-chip notranslate' + (x[0] === jetzt ? ' on' : '') +
+        '" translate="no" data-sym="' + x[0] + '" aria-pressed="' +
+        (x[0] === jetzt ? 'true' : 'false') + '">' + x[1] + '</button>';
+    }).join('');
+  }
+
+  /* Wechsel per Chip. Das Widget kann das Instrument nur beim Aufbau setzen,
+     also wird neu aufgebaut — ausgeloest vom Nutzer, nie von selbst.
+     Alles, was zum alten Instrument gehoert, geht dabei mit: Level, Setup,
+     Gespraech. Stehengelassen saehen sie gueltig aus. */
+  function symbolWechseln(sym) {
+    if (!sym || sym === TV.sym) return;
+    TV.sym = sym; merke('sym', sym);
+    TV._titel = ''; TV.kurs = null; TV._fein = null; TV._levels = null;
+    TV._analyse = null; TV._urteil = null;
+    verlauf = []; TV._fakten = '';
+    letzteLaden();
+    setupZeigen(null); levelZeigen(); malen();
+    if (!proAn()) { var po = document.getElementById('tvKiOut'); if (po) po.innerHTML = PRO_WAND; }
+    schnellFuellen();
+    kopfSetzen(sym.split(':').pop(), sym);
+    bauen();
+  }
+
+  /* Chart und Panel fuellen die Hoehe des Fensters. Gemessen wird der
+     Abstand nach oben, denn Kopf und Navigation sind je nach Breite
+     unterschiedlich hoch — eine feste Zahl passte nur an einem Geraet. */
+  function hoeheSetzen() {
+    var seite = document.getElementById('page-chart');
+    var haupt = seite && seite.querySelector('.tv-haupt');
+    if (!haupt || !seite.classList.contains('active')) return;
+    var oben = haupt.getBoundingClientRect().top + (window.scrollY || 0);
+    seite.style.setProperty('--tv-oben', Math.max(80, Math.round(oben)) + 'px');
+  }
 
   /* Viele wollen nur den Chart. Der KI-Bereich ist deshalb zuklappbar, und
      der Zustand bleibt erhalten — wer ihn einmal weggeklappt hat, soll ihn
@@ -69845,21 +70265,56 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                     '60': '1h', '240': '4h', 'D': '1day' };
 
   function kopfAnzeigen(info) {
-    var el = document.getElementById('tvJetzt');
-    if (!el) return;
     TV._titel = info ? (info.titel + '  ·  ' + info.name) : '';
+    if (info) kopfSetzen(info.titel || info.name, info.voll || info.name);
     kursAnzeigen();
   }
 
-  function kursAnzeigen() {
-    var el = document.getElementById('tvJetzt');
-    if (!el) return;
-    var t = TV._titel || '';
-    if (TV.kurs && isFinite(TV.kurs.preis)) {
-      var p = TV.kurs.preis;
-      t += '  ·  ' + p.toFixed(p > 100 ? 2 : (p > 10 ? 3 : 5));
+  /* Name, Kuerzel und ob die KI es lesen kann. */
+  function kopfSetzen(titel, voll) {
+    var n = document.getElementById('tvName'), s = document.getElementById('tvSymKurz');
+    var f = document.getElementById('tvFaehig');
+    if (n) n.textContent = titel || '';
+    if (s) s.textContent = voll || '';
+    if (f) {
+      var ja = !!DATEN_SYM[voll];
+      f.className = 'tv-faehig ' + (ja ? 'ja' : 'nein');
+      f.textContent = ja ? 'AI ready' : 'Chart only';
+      f.title = ja ? 'Evidence has candle data for this instrument — the AI can analyse it.'
+                   : 'No candle data for this instrument — the chart works, the AI cannot read it.';
     }
-    el.textContent = t;
+    var el = document.getElementById('tvJetzt');
+    if (el) el.textContent = TV._titel || '';
+    if (TV.sym) schnellFuellen();
+  }
+
+  function kursAnzeigen() {
+    var pr = document.getElementById('tvPreis'), ae = document.getElementById('tvAend');
+    var lv = document.getElementById('tvLive');
+    var k = TV.kurs;
+    if (!pr) return;
+    if (k && isFinite(k.preis)) {
+      var p = k.preis, alt = TV._letzterPreis;
+      pr.textContent = p.toFixed(p > 100 ? 2 : (p > 10 ? 3 : 5));
+      /* Kurz aufleuchten in Richtung der Bewegung — wie in jedem Terminal. */
+      if (isFinite(alt) && alt !== p) {
+        pr.classList.remove('rauf', 'runter'); void pr.offsetWidth;
+        pr.classList.add(p > alt ? 'rauf' : 'runter');
+      }
+      TV._letzterPreis = p;
+      var a = Number(k.aend);
+      if (ae) {
+        ae.textContent = isFinite(a) ? (a > 0 ? '+' : '') + a.toFixed(2) + '%' : '';
+        ae.className = 'tv-aend' + (isFinite(a) ? (a > 0 ? ' plus' : (a < 0 ? ' minus' : '')) : '');
+      }
+      if (lv) lv.className = 'tv-live an';
+      leiterLive(p);
+      veraltetPruefen(p);
+    } else {
+      pr.innerHTML = '&mdash;';
+      if (ae) ae.textContent = '';
+      if (lv) lv.className = 'tv-live';
+    }
   }
 
   /* Nur benutzen, wenn der Kurs zum angezeigten Instrument gehoert und frisch
@@ -71083,7 +71538,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var roh = [], flips = [];
       var zn = zonenAn ? zonenVon(b, kurs, stellen, a, roh, flips, name) : [];
       ebenen.push({ tf: name, atr: a, stellen: stellen, zonen: roh, flips: flips,
-                    bars: b, faktor: faktor, hoch: st && st.hoch, tief: st && st.tief });
+                    bars: b, faktor: faktor, hoch: st && st.hoch, tief: st && st.tief,
+                    trend: st && !st.fehler ? st.trend : '',
+                    bos: st && !st.fehler ? st.bos : -1,
+                    choch: st && !st.fehler ? st.choch : -1 });
       var iw = indikatorBlock(b, gewaehlt, stellen, kurs, name);
       if (iw) z.push(iw);
       if (!zonenAn) {
@@ -71376,8 +71834,135 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
 
   function blase(rolle, text) {
+    if (rolle !== 'user' && TV._strukturiert !== false) return antwortHtml(text);
     return '<div class="tv-ki-' + (rolle === 'user' ? 'frage' : 'antwort') + '">' +
            zahlenSchuetzen(escHtml(text)).replace(/\n/g, '<br>') + '</div>';
+  }
+
+  /* ── Antwort in Abschnitte ────────────────────────────────────────
+     Die KI schreibt mit festen Ueberschriften (CONTEXT, LEVELS, IF/THEN …),
+     weil der Prompt es so verlangt. Als Fliesstext war das eine Wand; hier
+     wird jede Ueberschrift zu einer eigenen Karte. Erkannt wird nur, was
+     wirklich am Zeilenanfang steht — ein "levels" mitten im Satz bleibt
+     Text. Kommt keine Ueberschrift, bleibt es ein normaler Absatz. */
+  var KOEPFE = [
+    ['PLAYBOOK CHECK', 'check', 'Playbook check'],
+    ['LEVELS TO WORK WITH', 'ruler', 'Levels to work with'],
+    ['YOUR OWN READ', 'bulb', 'Own read'],
+    ['CONTEXT', 'globe', 'Context'],
+    ['LEVELS', 'target', 'Levels'],
+    ['IF/THEN', 'scale', 'If / then'],
+    ['IF / THEN', 'scale', 'If / then'],
+    ['CONFIDENCE', 'signal', 'Confidence'],
+  ];
+
+  function kopfVon(zeile) {
+    /* Das Modell setzt gern ein Emoji oder Markdown davor ("🌐 CONTEXT",
+       "**Context**"). Alles vor dem ersten Buchstaben faellt weg. Gross-
+       geschrieben zaehlt immer; gemischt nur, wenn die Zeile ausgezeichnet
+       ist — sonst wuerde "Levels matter because…" zur Ueberschrift. */
+    var markiert = /^[^A-Za-z]*(\*\*|#)/.test(zeile);
+    var z = zeile.replace(/\*\*/g, '').replace(/^[^A-Za-z]+/, '');
+    for (var i = 0; i < KOEPFE.length; i++) {
+      var k = KOEPFE[i][0];
+      var anfang = z.slice(0, k.length);
+      if (anfang === k || (markiert && anfang.toUpperCase() === k)) {
+        var rest = z.slice(k.length);
+        /* Nur echte Ueberschriften: danach kommt ein Trenner oder nichts. */
+        if (rest && !/^\s*[-–—:.]/.test(rest) && /^\s*[a-z]/.test(rest)) continue;
+        return { k: KOEPFE[i], rest: rest.replace(/^\s*[-–—:.]\s*/, '') };
+      }
+    }
+    return null;
+  }
+
+  /* Preise hervorheben (klickbar zum Kopieren), MET/NOT MET als Marken.
+     Zahlen bleiben dabei vor der Uebersetzung geschuetzt. */
+  function inlineHtml(t) {
+    var h = escHtml(t)
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      .replace(/\bNOT MET\b/g, '\u0001N\u0001')
+      .replace(/\bMET\b/g, '\u0001M\u0001');
+    var L = TV._levels, grenze = L && isFinite(L.kurs) ? L.kurs
+            : (TV.kurs && isFinite(TV.kurs.preis) ? TV.kurs.preis : NaN);
+    h = h.replace(/\d+(?:[.,]\d+)?/g, function (m) {
+      var v = parseFloat(m.replace(',', '.'));
+      /* Ein Preis liegt in der Naehe des Kurses; "3 candles" oder "45%" nicht. */
+      var istPreis = isFinite(grenze) && isFinite(v) && v > grenze * 0.8 && v < grenze * 1.25 &&
+                     (/[.,]/.test(m) || grenze >= 500);
+      return istPreis
+        ? '<span class="tv-px notranslate" translate="no" title="Click to copy">' + m + '</span>'
+        : '<span class="notranslate" translate="no">' + m + '</span>';
+    });
+    return h.replace(/\u0001N\u0001/g, '<span class="tv-mark nein">NOT MET</span>')
+            .replace(/\u0001M\u0001/g, '<span class="tv-mark ja">MET</span>');
+  }
+
+  function antwortHtml(text) {
+    var zeilen = String(text || '').replace(/\r/g, '').split('\n');
+    var teile = [], akt = { k: null, z: [] };
+    zeilen.forEach(function (z) {
+      var k = kopfVon(z);
+      if (k) {
+        if (akt.k || akt.z.join('').trim()) teile.push(akt);
+        akt = { k: k.k, z: k.rest ? [k.rest] : [] };
+      } else akt.z.push(z);
+    });
+    if (akt.k || akt.z.join('').trim()) teile.push(akt);
+    if (!teile.some(function (t) { return t.k; }))
+      return '<div class="tv-ki-antwort">' + absatzHtml(zeilen) + '</div>';
+
+    return '<div class="tv-ki-antwort tv-ab-liste">' + teile.map(function (t) {
+      if (!t.k) return '<div class="tv-ab frei">' + absatzHtml(t.z) + '</div>';
+      var inhalt = absatzHtml(t.z);
+      var marke = '';
+      if (t.k[1] === 'signal') {
+        var m = /\b(high|medium|low)\b/i.exec(t.z.join(' '));
+        if (m) marke = '<span class="tv-konf ' + m[1].toLowerCase() + '">' + m[1].toLowerCase() + '</span>';
+      }
+      return '<section class="tv-ab ab-' + t.k[1] + '">' +
+        '<div class="tv-ab-k"><svg class=ic aria-hidden=true><use href=#i-' + t.k[1] +
+        ' ></use></svg><span>' + t.k[2] + '</span>' + marke + '</div>' +
+        '<div class="tv-ab-t">' + inhalt + '</div></section>';
+    }).join('') + '</div>';
+  }
+
+  /* Aufzaehlungen bleiben Aufzaehlungen, der Rest wird zu Absaetzen. */
+  function absatzHtml(zeilen) {
+    var h = '', liste = false;
+    zeilen.forEach(function (z) {
+      var t = z.trim();
+      if (!t) { if (liste) { h += '</ul>'; liste = false; } return; }
+      var pkt = /^([-*•]|\d+[.)])\s+/.exec(t);
+      if (pkt) {
+        if (!liste) { h += '<ul>'; liste = true; }
+        h += '<li>' + inlineHtml(t.slice(pkt[0].length)) + '</li>';
+      } else {
+        if (liste) { h += '</ul>'; liste = false; }
+        h += '<p>' + inlineHtml(t) + '</p>';
+      }
+    });
+    if (liste) h += '</ul>';
+    return h;
+  }
+
+  /* Schnellfragen — nur, wenn es eine Analyse gibt, auf die sie sich
+     beziehen koennen. */
+  var FRAGEN = [
+    ['What would invalidate this?', 'What exactly would invalidate this read? Name the price.'],
+    ['Where would a stop sit?', 'Where would a stop sit for the strongest zone, and how does that compare to my usual stop distance?'],
+    ['Strongest zone?', 'Which single zone is the strongest right now and why that one?'],
+    ['Explain simply', 'Explain this read in plain words for someone newer to trading, in 5 short sentences.'],
+    ['News risk?', 'Is there any economic release close that changes this read?'],
+  ];
+
+  function chipsZeigen() {
+    var el = document.getElementById('tvKiChips');
+    if (!el) return;
+    if (!verlauf.length || !proAn()) { el.innerHTML = ''; return; }
+    el.innerHTML = FRAGEN.map(function (f) {
+      return '<button class="tv-fchip" data-frage="' + escHtml(f[1]) + '">' + f[0] + '</button>';
+    }).join('');
   }
 
   function malen() {
@@ -71385,13 +71970,75 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (!out) return;
     var h = verlauf.filter(function (m) { return !m.versteckt; })
                    .map(function (m) { return blase(m.role, m.anzeige || m.content); }).join('');
+    if (!h && TV._letzte && TV._letzte.sym === TV.sym) {
+      /* Die letzte Analyse dieses Instruments, deutlich als alt markiert.
+         Ohne Datenlage kann man darauf nicht nachfragen — also nur lesen. */
+      var min = Math.round((Date.now() - TV._letzte.ts) / 60000);
+      h = '<div class="tv-alt-kopf"><svg class=ic aria-hidden=true><use href=#i-clock ></use></svg>' +
+          'Last read · ' + (min < 60 ? min + ' min' : Math.round(min / 60) + ' h') +
+          ' ago &mdash; run it again for current prices</div>' +
+          '<div class="tv-alt">' + antwortHtml(TV._letzte.text) + '</div>';
+    }
     if (TV._fakten) {
       h += '<details class="tv-ki-fakten"><summary>Data the AI was given</summary>' +
            '<pre class="notranslate" translate="no">' + escHtml(TV._fakten) + '</pre></details>';
     }
-    out.innerHTML = h || '<p class="tv-ki-leer">The AI reads the candles and your ' +
-      'supply &amp; demand zones across three timeframes &mdash; it cannot see the chart above.</p>';
-    out.scrollTop = out.scrollHeight;
+    out.innerHTML = h || LEER_HTML;
+    out.scrollTop = verlauf.length > 2 ? out.scrollHeight : 0;
+    chipsZeigen();
+    alterZeigen();
+  }
+
+  /* "Analysed 4 min ago" im Panelkopf. */
+  function alterZeigen() {
+    var el = document.getElementById('tvKiAlter');
+    if (!el) return;
+    var A = TV._analyse;
+    if (!A || A.sym !== TV.sym) { el.textContent = 'Reads 5 timeframes'; return; }
+    var min = Math.round((Date.now() - A.ts) / 60000);
+    el.textContent = min < 1 ? 'Analysed just now' : 'Analysed ' + (min < 60 ? min + ' min' : Math.round(min / 60) + ' h') + ' ago';
+  }
+
+  /* Letzte Antwort je Instrument merken — nur der Text, keine Datenlage. */
+  function letzteMerken(text) {
+    try {
+      var o = { sym: TV.sym, ts: Date.now(), text: String(text).slice(0, 6000) };
+      localStorage.setItem('apexTV_last_' + TV.sym, JSON.stringify(o));
+      TV._letzte = o;
+    } catch (e) {}
+  }
+  function letzteLaden() {
+    try {
+      var o = JSON.parse(localStorage.getItem('apexTV_last_' + TV.sym) || 'null');
+      /* Aelter als ein halber Tag hilft niemandem mehr. */
+      TV._letzte = (o && o.ts && Date.now() - o.ts < 12 * 3600 * 1000) ? o : null;
+    } catch (e) { TV._letzte = null; }
+  }
+
+  /* Veraltet? Mehr als ein ATR des Einstiegs-Zeitrahmens seit der Analyse,
+     oder mehr als 20 Minuten. Die Zahlen bleiben stehen — aber man soll
+     sehen, dass sie von vorhin sind. */
+  function veraltetPruefen(preis) {
+    var el = document.getElementById('tvVeraltet');
+    var A = TV._analyse;
+    if (!el) return;
+    if (!A || A.sym !== TV.sym || !isFinite(A.kurs)) { el.innerHTML = ''; return; }
+    var jetzt = Date.now();
+    if (TV._veraltetTs && jetzt - TV._veraltetTs < 2000) return;
+    TV._veraltetTs = jetzt;
+    var weg = isFinite(preis) ? Math.abs(preis - A.kurs) : 0;
+    var atr = A.atr;
+    var min = (jetzt - A.ts) / 60000;
+    var zuWeit = isFinite(atr) && atr > 0 && weg > atr;
+    if (!zuWeit && min < 20) { el.innerHTML = ''; return; }
+    var st = (TV._levels && TV._levels.stellen) || 2;
+    el.innerHTML = '<svg class=ic aria-hidden=true><use href=#i-alert ></use></svg><span>' +
+      (zuWeit ? 'Price moved <b class="notranslate" translate="no">' + nf(weg, st) +
+                '</b> (' + (weg / atr).toFixed(1) + ' ATR) since this read.'
+              : 'This read is ' + Math.round(min) + ' min old.') +
+      '</span><button type="button" id="tvVeraltetGo">Refresh</button>';
+    var b = document.getElementById('tvVeraltetGo');
+    if (b) b.onclick = analysieren;
   }
 
   /* Eine eigene Frist, statt auf die des Netzes zu warten. Ohne sie bricht
@@ -71447,10 +72094,51 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             function (e) { clearTimeout(uhr); throw e; });
   }
 
+  /* Die Schritte einer Analyse sichtbar machen. Zwanzig Sekunden hinter
+     einem Knopf mit "Loading…" fuehlen sich an wie ein Haenger; eine Leiste,
+     die weiterlaeuft, nicht. Die Texte kommen unveraendert aus den alten
+     Aufrufen und werden hier nur einem Schritt zugeordnet. */
+  var SCHRITTE = [
+    { t: 'Instrument', bei: /Reading chart/, d: 'Reading the instrument from the chart…' },
+    { t: 'Candles',    bei: /Loading/,       d: 'Loading candles and scanning M1 to H4 — structure, ATR and your indicators…' },
+    { t: 'Refine',     bei: /Refining/,      d: 'A zone is within reach — loading finer candles for a tighter entry…' },
+    { t: 'AI read',    bei: /Analysing|Thinking|zone/, d: 'The AI is reading the numbers against your rules. Every level it names is checked afterwards.' },
+  ];
+
   function busy(an, was) {
     var k = document.getElementById('tvKiGo'), e = document.getElementById('tvKiAsk');
-    if (k) { k.disabled = an; k.textContent = an ? (was || 'Working…') : 'Analyse chart'; }
+    var kt = document.getElementById('tvKiGoT');
+    if (k) {
+      k.disabled = an;
+      k.classList.toggle('laeuft', !!an);
+      if (kt) kt.textContent = an ? (was || 'Working…') : (verlauf.length ? 'Analyse again' : 'Analyse chart');
+      else k.textContent = an ? (was || 'Working…') : 'Analyse chart';
+    }
     if (e) e.disabled = an;
+    var sc = document.getElementById('tvSchritte');
+    if (!sc) return;
+    if (!an) { sc.innerHTML = ''; TV._schritt = -1; return; }
+    var idx = -1;
+    SCHRITTE.forEach(function (x, i) { if (x.bei.test(was || '')) idx = i; });
+    /* Rueckfragen und Zonenfragen haben nur den letzten Schritt. */
+    var nurKi = /Thinking|zone/.test(was || '');
+    if (idx < 0) idx = Math.max(0, TV._schritt || 0);
+    TV._schritt = idx;
+    var liste = nurKi ? [SCHRITTE[3]] : SCHRITTE;
+    var akt = nurKi ? 0 : idx;
+    sc.innerHTML = liste.map(function (x, i) {
+      var st = i < akt ? 'fertig' : (i === akt ? 'jetzt' : '');
+      return '<span class="tv-sch ' + st + '"><i></i>' + x.t + '</span>';
+    }).join('') + '<div class="tv-sch-balken"><i style="width:' +
+      Math.round(((akt + 0.5) / liste.length) * 100) + '%"></i></div>';
+    /* Solange noch keine Antwort dasteht, sagt der Ausgabebereich, was
+       gerade passiert — plus Platzhalterzeilen, damit die Flaeche nicht
+       leer wirkt. Eine laufende Unterhaltung bleibt unangetastet. */
+    var out = document.getElementById('tvKiOut');
+    if (!nurKi && out && !out.querySelector('.tv-ki-frage, .tv-ab-liste, .tv-ki-antwort')) {
+      out.innerHTML = '<p class="tv-ki-leer">' + liste[akt].d + '</p>' +
+        '<div class="tv-skel"><i></i><i></i><i></i><i></i></div>';
+    }
   }
 
   /* ── Waechter ─────────────────────────────────────────────────────
@@ -71526,7 +72214,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var k = document.getElementById('tvWachtBtn');
     if (k) {
       k.setAttribute('aria-pressed', an ? 'true' : 'false');
-      k.textContent = an ? 'Watching' : 'Watch for setups';
+      var wt = document.getElementById('tvWachtT');
+      if (wt) wt.textContent = an ? 'Watching for setups' : 'Watch for setups';
+      else k.textContent = an ? 'Watching' : 'Watch for setups';
     }
     var st = document.getElementById('tvWachtStatus');
     if (st) st.textContent = an
@@ -71888,7 +72578,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         titel: L.titel, sym: L.sym, kurs: L.kurs, stellen: L.stellen, ts: Date.now(),
         ebenen: (L.ebenen || []).map(function (e) {
           return { tf: e.tf, atr: e.atr, stellen: e.stellen, zonen: e.zonen,
-                   flips: e.flips, hoch: e.hoch, tief: e.tief };
+                   flips: e.flips, hoch: e.hoch, tief: e.tief,
+                   trend: e.trend, bos: e.bos, choch: e.choch };
         }),
       };
       localStorage.setItem('apexTV_lv_' + L.sym, JSON.stringify(schlank));
@@ -71992,11 +72683,103 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return { demand: nimm(false), supply: nimm(true) };
   }
 
+  /* ── Marktlage ────────────────────────────────────────────────────
+     Ein Blick statt fuenf Spalten: Trend je Zeitrahmen, juengster
+     Strukturbruch und die naechste Zone auf jeder Seite. Alles gerechnet —
+     es steht auch dann, wenn die KI nicht antwortet, und kostet nichts. */
+  var TREND_TXT = { up: 'Up', down: 'Down', unclear: 'Range' };
+
+  function lageZeigen() {
+    var el = document.getElementById('tvLage');
+    var L = TV._levels;
+    if (!el) return;
+    if (!L || !L.ebenen || !L.ebenen.length) { el.innerHTML = ''; return; }
+    var n = function (x) { return nf(x, L.stellen); };
+    var live = liveKurs(L.sym);
+    var kurs = live != null ? live : L.kurs;
+    /* Nur echte Zeitrahmen als Kachel — die Ebene "AI" (von der KI gefundene
+       Zonen) hat keinen eigenen Trend. H4 zuerst, wie man liest. */
+    var ebenen = L.ebenen.filter(function (e) { return /^(M1|M5|M15|H1|H4)$/.test(e.tf); }).reverse();
+
+    var auf = 0, ab = 0, bekannt = 0;
+    var kacheln = ebenen.map(function (e) {
+      var t = e.trend || '';
+      if (t === 'up') auf++;
+      if (t === 'down') ab++;
+      if (t) bekannt++;
+      var pfeil = t === 'up' ? 'i-trend-up' : (t === 'down' ? 'i-trend-dn' : 'i-scale');
+      var ereignis = '';
+      if (isFinite(e.choch) && e.choch >= 0 && (e.bos < 0 || e.choch <= e.bos))
+        ereignis = 'CHoCH ' + e.choch + ' bars ago';
+      else if (isFinite(e.bos) && e.bos >= 0) ereignis = 'BOS ' + e.bos + ' bars ago';
+      return '<div class="tv-tfk ' + (t || 'leer') + '">' +
+        '<div class="tv-tfk-k"><span>' + e.tf + '</span>' +
+          (t ? '<svg class=ic aria-hidden=true><use href=#' + pfeil + ' ></use></svg>' : '') + '</div>' +
+        '<b>' + (t ? TREND_TXT[t] || t : '—') + '</b>' +
+        '<i class="notranslate" translate="no">' + (isFinite(e.atr) ? 'ATR ' + n(e.atr) : '') + '</i>' +
+        (ereignis ? '<em>' + ereignis + '</em>' : '<em>&nbsp;</em>') +
+      '</div>';
+    }).join('');
+
+    var gleich = '', gk = 'gemischt';
+    if (bekannt) {
+      if (auf === bekannt) { gleich = 'All timeframes up'; gk = 'up'; }
+      else if (ab === bekannt) { gleich = 'All timeframes down'; gk = 'down'; }
+      else if (auf >= bekannt - 1 && auf > ab) { gleich = 'Mostly up (' + auf + '/' + bekannt + ')'; gk = 'up'; }
+      else if (ab >= bekannt - 1 && ab > auf) { gleich = 'Mostly down (' + ab + '/' + bekannt + ')'; gk = 'down'; }
+      else gleich = 'Timeframes disagree (' + auf + ' up · ' + ab + ' down)';
+    }
+
+    /* Naechste Zone je Seite, ueber alle Zeitrahmen. Liegt der Kurs IN einer
+       Zone, ist das die wichtigste Aussage von allen. */
+    var unten = null, oben = null, drin = null;
+    L.ebenen.forEach(function (e) {
+      (e.zonen || []).forEach(function (g) {
+        if (!isFinite(g.bot) || !isFinite(g.top) || g._ki === 'weg') return;
+        if (kurs >= g.bot && kurs <= g.top) { if (!drin) drin = { g: g, tf: e.tf }; return; }
+        if (!g.supply && g.top < kurs && (!unten || kurs - g.top < kurs - unten.g.top)) unten = { g: g, tf: e.tf };
+        if (g.supply && g.bot > kurs && (!oben || g.bot - kurs < oben.g.bot - kurs)) oben = { g: g, tf: e.tf };
+      });
+    });
+    var atrE = (L.ebenen.filter(function (e) { return e.tf === 'M15'; })[0] || L.ebenen[0]).atr;
+    var nahZelle = function (x, seite) {
+      if (!x) return '<div class="tv-nah leer"><span>' + (seite === 'd' ? 'Demand below' : 'Supply above') +
+        '</span><b>none in range</b></div>';
+      var weg = seite === 'd' ? kurs - x.g.top : x.g.bot - kurs;
+      return '<div class="tv-nah ' + seite + ' klick" data-z="' + escHtml(regZone(x.g, x.tf)) +
+        '" role="button" tabindex="0">' +
+        '<span>' + (seite === 'd' ? 'Demand below' : 'Supply above') + ' · ' + x.tf + '</span>' +
+        '<b class="notranslate" translate="no">' + n(x.g.bot) + ' – ' + n(x.g.top) + '</b>' +
+        '<i class="notranslate" translate="no">' + n(weg) + ' away' +
+          (isFinite(atrE) && atrE > 0 ? ' · ' + (weg / atrE).toFixed(1) + ' ATR' : '') + '</i></div>';
+    };
+
+    el.innerHTML =
+      '<div class="tv-lage-kopf"><b>Market read</b>' +
+        (gleich ? '<span class="tv-gleich ' + gk + '">' + gleich + '</span>' : '') +
+        '<span class="tv-lage-f">computed from the candles &mdash; not AI</span></div>' +
+      '<div class="tv-lage-git">' +
+        '<div class="tv-tf-reihe">' + kacheln + '</div>' +
+        '<div class="tv-nah-reihe">' +
+          (drin ? '<div class="tv-nah ' + (drin.g.supply ? 's' : 'd') + ' drin klick" data-z="' +
+                  escHtml(regZone(drin.g, drin.tf)) + '" role="button" tabindex="0">' +
+                  '<span>Price is inside · ' + drin.tf + '</span><b class="notranslate" translate="no">' +
+                  (drin.g.supply ? 'Supply ' : 'Demand ') + n(drin.g.bot) + ' – ' + n(drin.g.top) +
+                  '</b><i>right now</i></div>' : '') +
+          nahZelle(oben, 's') + nahZelle(unten, 'd') +
+        '</div>' +
+      '</div>';
+    el.onclick = function (ev) {
+      var t = ev.target && ev.target.closest && ev.target.closest('[data-z]');
+      if (t) zoneOeffnen(t.getAttribute('data-z'));
+    };
+  }
+
   function levelZeigen() {
     var el = document.getElementById('tvLevels');
     var L = TV._levels;
     if (!el) return;
-    if (!L || !L.ebenen || !L.ebenen.length) { el.innerHTML = ''; return; }
+    if (!L || !L.ebenen || !L.ebenen.length) { el.innerHTML = ''; lageZeigen(); return; }
 
     var offen = TV._levelsOffen !== false;
     var n = function (x) { return nf(x, L.stellen); };
@@ -72006,6 +72789,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        ersetzt, die Kennung bleibt aber dieselbe. Darum haelt das Verzeichnis
        Objekte, waehrend die Ansicht mit der stabilen Kennung arbeitet. */
     zReg = {};
+    /* Nach dem Leeren des Verzeichnisses, sonst waeren die Zonen der
+       Marktlage nicht mehr anklickbar. */
+    try { lageZeigen(); } catch (e) { TV._lageFehler = (e && e.message) || String(e); }
     var fokus = fokusZonen(L.ebenen);
     var imFokus = fokus.demand.concat(fokus.supply);
     imFokus.forEach(function (x) { x.g._fokus = true; });
@@ -72051,6 +72837,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         });
         h += '</div>';
       }
+      var sdAus = false;
       h += '<div class="tv-lv-spalten">';
       L.ebenen.forEach(function (e) {
         var zonen = (e.zonen || []).slice(0, 5);
@@ -72066,9 +72853,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         } else if (!zonen.length && indAuswahl().indexOf('sd') < 0) {
           /* "no intact zones here" las sich wie eine Aussage ueber den Markt.
              Sie war aber eine ueber die Einstellung: der Zonenindikator ist
-             gar nicht an. */
-          h += '<div class="tv-lv-leer">Supply &amp; Demand is switched off &mdash; ' +
-               'levels here come from the AI.</div>';
+             gar nicht an. Der Hinweis steht EINMAL oben, nicht in jeder
+             Spalte — fuenfmal derselbe Satz war nur Rauschen. */
+          sdAus = true;
         } else if (zonen.length) {
           zonen.forEach(function (g) {
             var gegen = rich && (rich.lang !== !g.supply);
@@ -72107,6 +72894,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         h += '</div>';
       });
       h += '</div>';
+      if (sdAus)
+        h = h.replace('<div class="tv-lv-spalten">', '<div class="tv-lv-note">Supply &amp; Demand is ' +
+          'switched off under <b>Indicators the AI sees</b> &mdash; the zones here come from the AI, ' +
+          'swing highs and lows from the candles.</div><div class="tv-lv-spalten">');
 
       /* Der Feineinstieg gehoert unter die Spalten, nicht in eine davon —
          er bezieht sich auf genau eine Zone und wuerde sonst so aussehen,
@@ -72609,7 +73400,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (!el) return;
     TV._setup = S || null;
     laufStarten(S);
-    if (!S) { el.innerHTML = ''; return; }
+    if (!S) { el.innerHTML = ''; TV._leiter = null; return; }
     var L = TV._levels, st = (L && L.stellen) || 2;
     var n = function (x) { return nf(x, st); };
 
@@ -72663,6 +73454,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         h += '<div class="tv-su-zgrund">' + escHtml(z.grund) + '</div>';
     });
 
+    h += leiterHtml(S, n);
+
     /* Die Pruefung steht NEBEN den Zahlen, nicht statt ihnen. Der Nutzer
        sieht, was die KI gesagt hat, und wo es der Datenlage widerspricht. */
     warn.forEach(function (w) {
@@ -72675,6 +73468,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
          'against your plan.</div>';
 
     el.innerHTML = h;
+    if (TV.kurs && isFinite(TV.kurs.preis)) leiterLive(TV.kurs.preis);
     var k = document.getElementById('tvSuCopy');
     if (k) k.onclick = function () {
       var t = setupText();
@@ -72684,6 +73478,64 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         }).catch(function () { notfall(t, k); });
       else notfall(t, k);
     };
+  }
+
+  /* ── R-Leiste ──────────────────────────────────────────────────────
+     Stop, Einstieg und Ziele massstabsgetreu auf einer Linie, dazu der
+     Live-Kurs. Man sieht auf einen Blick, wie gross das Risiko im
+     Verhaeltnis zum Weg ist — und wo der Kurs gerade steht. */
+  function leiterHtml(S, n) {
+    TV._leiter = null;
+    if (!S || !isFinite(S.einstieg) || !isFinite(S.stop)) return '';
+    var ziele = (S.ziele || []).filter(function (z) { return isFinite(z.p); });
+    var lang = S.richtung === 'long';
+    var risiko = Math.abs(S.einstieg - S.stop);
+    if (!(risiko > 0)) return '';
+    var werte = [S.einstieg, S.stop].concat(ziele.map(function (z) { return z.p; }));
+    var lo = Math.min.apply(null, werte), hi = Math.max.apply(null, werte);
+    var rand = (hi - lo) * 0.06 || risiko * 0.2;
+    lo -= rand; hi += rand;
+    /* Fuer Short laeuft die Leiste gespiegelt: links Stop, rechts Ziel —
+       so bedeutet "rechts" immer "in Richtung Gewinn". */
+    var pos = function (p) {
+      var x = (p - lo) / (hi - lo) * 100;
+      return Math.max(0, Math.min(100, lang ? x : 100 - x));
+    };
+    TV._leiter = { lo: lo, hi: hi, lang: lang, einstieg: S.einstieg, risiko: risiko, st: n };
+    var pE = pos(S.einstieg), pS = pos(S.stop);
+    var pZ = ziele.length ? pos(ziele[ziele.length - 1].p) : pE;
+    var h = '<div class="tv-leiter" aria-hidden="true">' +
+      '<div class="tv-lt-bahn">' +
+        '<span class="tv-lt-risk" style="left:' + Math.min(pS, pE) + '%;width:' + Math.abs(pE - pS) + '%"></span>' +
+        '<span class="tv-lt-rew" style="left:' + Math.min(pE, pZ) + '%;width:' + Math.abs(pZ - pE) + '%"></span>' +
+        '<span class="tv-lt-m stop" style="left:' + pS + '%"><em>SL</em></span>' +
+        '<span class="tv-lt-m entry" style="left:' + pE + '%"><em>Entry</em></span>';
+    ziele.forEach(function (z, i) {
+      h += '<span class="tv-lt-m ziel" style="left:' + pos(z.p) + '%"><em>' +
+           (ziele.length > 1 ? 'TP' + (i + 1) : 'TP') + '</em></span>';
+    });
+    h += '<span class="tv-lt-live" id="tvLeiterLive" hidden></span>' +
+      '</div>' +
+      '<div class="tv-lt-fuss"><span>Risk <b class="notranslate" translate="no">' + n(risiko) + '</b></span>' +
+      (ziele.length && isFinite(ziele[ziele.length - 1].rr)
+        ? '<span>Reward <b class="notranslate" translate="no">' + ziele[ziele.length - 1].rr.toFixed(1) + 'R</b></span>' : '') +
+      '<span class="tv-lt-jetzt" id="tvLeiterJetzt"></span></div>' +
+    '</div>';
+    return h;
+  }
+
+  function leiterLive(p) {
+    var T = TV._leiter, m = document.getElementById('tvLeiterLive');
+    var j = document.getElementById('tvLeiterJetzt');
+    if (!T || !m || !isFinite(p)) return;
+    var x = (p - T.lo) / (T.hi - T.lo) * 100;
+    x = Math.max(0, Math.min(100, T.lang ? x : 100 - x));
+    m.hidden = false; m.style.left = x + '%';
+    var r = (T.lang ? p - T.einstieg : T.einstieg - p) / T.risiko;
+    if (j) {
+      j.innerHTML = 'Now <b class="notranslate" translate="no">' + (r > 0 ? '+' : '') + r.toFixed(2) + 'R</b>';
+      j.className = 'tv-lt-jetzt ' + (r >= 0 ? 'plus' : 'minus');
+    }
   }
 
   function setupText() {
@@ -72939,8 +73791,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var tf = (document.getElementById('tvKiTf') || {}).value || '15min';
     if (!out) return;
 
+    out.innerHTML = '';
     busy(true, 'Reading chart…');
-    out.innerHTML = '<p class="tv-ki-leer">Reading the instrument from the chart…</p>';
 
     /* Erst fragen, was im Chart laeuft. Der Nutzer waehlt in TradingViews
        eigener Suche, und die kennt nur das Widget selbst. */
@@ -72965,8 +73817,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }
 
       verlauf = []; TV._fakten = ''; setupZeigen(null);
+      out.innerHTML = '';
       busy(true, 'Loading…');
-      out.innerHTML = '<p class="tv-ki-leer">Loading candles, scanning M1 to H4…</p>';
 
       /* Zwei Abrufe: fein fuer M1/M5, grob fuer M15/H1/H4. Beide parallel,
          damit es sich nicht anfuehlt wie doppelt so lang. */
@@ -72977,6 +73829,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       ]).then(function (paar) {
       var saetze = [paar[0], paar[1]], bars = paar[0], kalender = paar[2];
       var fakten = sachstand(saetze, tf, anzeige, (info && info.name) || '', kalender);
+      lageZeigen();
       /* Was ist passiert, waehrend die Seite zu war? Die feinen Kerzen sind
          ohnehin schon da — der Nachtrag kostet keinen weiteren Abruf. */
       ideenNachholen(bars);
@@ -73027,8 +73880,15 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
              aus dem Text nehmen, damit sie nicht doppelt erscheinen. */
           setupZeigen(setupLesen(text));
           urteilAnwenden(zonenUrteilLesen(text), bars);
-          verlauf.push({ role: 'assistant', content: text,
-                         anzeige: ohneZonenBlock(ohneBlock(text)) });
+          var sauber = ohneZonenBlock(ohneBlock(text));
+          verlauf.push({ role: 'assistant', content: text, anzeige: sauber });
+          /* Fuer die Veraltet-Warnung: Kurs und ATR des Einstiegs-Zeitrahmens
+             zum Zeitpunkt der Analyse. */
+          var Lx = TV._levels, eb = Lx && (Lx.ebenen || []).filter(function (e) {
+            return e.tf === TF_NAME[tf]; })[0];
+          TV._analyse = { sym: TV.sym, ts: Date.now(), kurs: Lx && Lx.kurs,
+                          atr: eb ? eb.atr : NaN };
+          letzteMerken(sauber);
           malen();
         });
       });
@@ -73987,6 +74847,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     playbooksFuellen();
     indFuellen();
     ideenZeigen();
+    schnellFuellen();
+    if (!TV._titel) kopfSetzen(TV.sym.split(':').pop(), TV.sym);
+    /* Die letzte Antwort zu diesem Instrument zeigen, solange es kein
+       laufendes Gespraech gibt. */
+    if (!verlauf.length) { letzteLaden(); if (proAn()) malen(); }
+    hoeheSetzen();
+    setTimeout(hoeheSetzen, 250);
     if (!proAn()) {
       var po = document.getElementById('tvKiOut');
       /* Nur den Anfangszustand ersetzen — ein laufendes Gespraech eines
