@@ -62,10 +62,10 @@
      Set this to the deployed tradovate-worker.js URL; until then the settings
      panel says so plainly instead of offering a button that cannot work. -->
 <script>window.APEX_TRADOVATE_URL = '';</script>
-<!-- MetaTrader auto-sync worker (metaapi-worker.js). Empty until it is
-     deployed and a MetaApi token exists: the card then shows the Expert
-     Advisor route instead of a button that cannot work. -->
-<script>window.APEX_METAAPI_URL = '';</script>
+<!-- MT5 cloud sync (mt5-link-worker.js → own MT5 server via Cloudflare Tunnel).
+     Empty until the worker is deployed: the card then says "coming soon" and
+     points at the Expert Advisor instead of offering a button that cannot work. -->
+<script>window.APEX_MT5_URL = '';</script>
 <!-- Evidence public REST API worker (read-only journal access via user API keys) -->
 <script>window.APEX_API_URL = 'https://apexapi.4kjyyyftv6.workers.dev';</script>
 
@@ -251,7 +251,7 @@ window.APEX_PRICES = (function () {
     city:   '77855 Achern',
     phone:  '+49 176 21375344',
     mail:   'jziborius@gmail.com',
-    stand:  '31.07.2026'
+    stand:  '30.09.2026'
   };
 
   function addr(sep) {
@@ -324,6 +324,17 @@ window.APEX_PRICES = (function () {
         'Take-Profit-Marken deiner offenen Positionen. Der Zugriff bleibt <b>ausschließlich lesend</b>. ' +
         'Schaltest du die Funktion aus oder trennst du die Broker-Verbindung, wird das gespeicherte ' +
         'Token gelöscht. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).</p>' +
+        '<p><b>MT5-Cloud-Sync (optional, nur Pro):</b> Verbindest du ein MetaTrader-5-Konto mit ' +
+        'Kontonummer, Servername und <b>Investor-Passwort</b>, speichern wir diese Angaben auf unserem ' +
+        'eigenen MT5-Server (Windows-Server in Deutschland). Das Investor-Passwort wird dort ' +
+        '<b>verschlüsselt gespeichert</b> (AES-256-GCM; der Schlüssel liegt nur auf diesem Server, nicht ' +
+        'in der Datenbank) und nie protokolliert. Das Investor-Passwort ist bei MetaTrader ' +
+        '<b>ausschließlich lesend</b>: damit können keine Orders erteilt, geändert oder geschlossen werden. ' +
+        'Der Server hält eine Verbindung zu deinem Konto und überträgt deine Positionen (Instrument, ' +
+        'Richtung, Volumen, Kurse, Stop und Ziel, Zeitpunkte, Ergebnis inkl. Kommission und Swap) sowie ' +
+        'Kontostand, Equity, Hebel, Kontowährung und Brokername in dein Journal — beim ersten Verbinden ' +
+        'auf Wunsch auch die Positionen der letzten 30 oder 90 Tage. In deinem Konto speichern wir dazu ' +
+        'einen Verbindungsstatus. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).</p>' +
         '<p><b>Auto-Tracking (optional):</b> Tracker auf MT5, ATAS, Quantower oder TradingView senden ' +
         'Ausführungsdaten (Instrument, Richtung, Volumen, Kurs, Zeit, ggf. Broker-P&amp;L).</p>' +
         '<p><b>Börsen- und IBKR-Anbindung (optional):</b> Hinterlegst du einen <b>Lese-API-Schlüssel</b> ' +
@@ -368,8 +379,12 @@ window.APEX_PRICES = (function () {
         'Pages ausgeliefert. Dabei wird deine IP-Adresse an GitHub übertragen und in Server-Logs ' +
         'verarbeitet. Serverstandort USA; Drittlandtransfer auf Grundlage der Standardvertragsklauseln.</p>' +
         '<p><b>Cloudflare, Inc. — Workers:</b> Zahlungs-Webhooks, Marktdaten-Proxy, Auto-Tracking-' +
-        'Eingang, Börsen-Synchronisierung. Drittlandtransfer auf Grundlage der ' +
-        'Standardvertragsklauseln.</p>' +
+        'Eingang, Börsen-Synchronisierung, Verbindungsweg (Tunnel) zum MT5-Server. Drittlandtransfer ' +
+        'auf Grundlage der Standardvertragsklauseln. Das Investor-Passwort wird dabei nur ' +
+        'durchgeleitet, nicht gespeichert.</p>' +
+        '<p><b>Dein Broker bzw. deine Prop-Firm (MetaQuotes-Handelsserver):</b> nur wenn du den ' +
+        'MT5-Cloud-Sync nutzt. Übertragen werden Kontonummer und Investor-Passwort zur Anmeldung, ' +
+        'wie bei jeder MetaTrader-Anmeldung.</p>' +
         '<p><b>Binance, Bybit, Interactive Brokers:</b> nur wenn du diese Anbindung selbst ' +
         'einrichtest. Übertragen wird ausschließlich dein eigener Lese-Schlüssel zur ' +
         'Authentifizierung; es fließen keine Daten aus deinem Journal dorthin.</p>' +
@@ -412,6 +427,10 @@ window.APEX_PRICES = (function () {
         'Kontos werden sie unverzüglich entfernt; ausgenommen sind Daten mit gesetzlicher ' +
         'Aufbewahrungspflicht (Rechnungen: 10 Jahre, § 147 AO). Fehlerberichte löschen wir nach ' +
         '90 Tagen. Kündigungen bewahren wir zum Nachweis 3 Jahre auf.</p>' +
+        '<p><b>MT5-Cloud-Sync:</b> Investor-Passwort und Zugangsdaten werden gelöscht, sobald du die ' +
+        'Verbindung trennst, dein Evidence-Konto löschst oder MetaTrader die Anmeldung beim ersten ' +
+        'Verbinden ablehnt — und automatisch 7 Tage nach Ende deines Pro-Zugangs. Bereits ins Journal ' +
+        'übertragene Trades bleiben erhalten, bis du sie oder dein Konto löschst.</p>' +
 
         '<h3>6. Deine Rechte</h3>' +
         '<p>Du hast das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), ' +
@@ -465,6 +484,11 @@ window.APEX_PRICES = (function () {
         'für den Nutzer zumutbar ist und der geschuldete Kernnutzen erhalten bleibt. Geschuldet ist ' +
         'eine Verfügbarkeit von 99 % im Jahresmittel, ausgenommen Wartung und Störungen, die der ' +
         'Anbieter nicht zu vertreten hat — insbesondere Ausfälle bei Vorleistern.</p>' +
+        '<p>Automatische Broker-Anbindungen (u. a. MT5-Cloud-Sync, cTrader, Börsen) hängen von ' +
+        'Schnittstellen und Servern Dritter ab. Der Anbieter bemüht sich um eine lückenlose ' +
+        'Übertragung, schuldet sie aber nicht; nicht jeder Broker oder Handelsserver lässt sich ' +
+        'anbinden. Maßgeblich für Kontostand und Ergebnisse bleiben stets die Aufzeichnungen des ' +
+        'Brokers.</p>' +
 
         '<h3>§ 3 Vertragsschluss</h3>' +
         '<p>Die Darstellung auf der Website ist kein bindendes Angebot. Mit Anklicken der Schaltfläche ' +
@@ -1070,7 +1094,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-29l';
+  window.APEX_BUILD = '2026-09-30a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -8880,7 +8904,7 @@ body.light #landingPage * {
    "name": "Which brokers and platforms can I connect?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "Automatically: cTrader through its Open API — it keeps syncing while the app is closed — Binance and Bybit through a read-only API key, and Interactive Brokers through a Flex Query. Live from your platform: MetaTrader 5, TradingView, ATAS and Quantower report fills through a small tracker. Everything else arrives as a statement file; the format is detected automatically, and an unknown one you map once by hand."
+    "text": "Automatically: cTrader through its Open API — it keeps syncing while the app is closed — Binance and Bybit through a read-only API key, and Interactive Brokers through a Flex Query, and MetaTrader 5 through its read-only investor password — trades from the MT5 phone app included. Live from your platform: MetaTrader 5, TradingView, ATAS and Quantower report fills through a small tracker. Everything else arrives as a statement file; the format is detected automatically, and an unknown one you map once by hand."
    }
   },
   {
@@ -9939,6 +9963,7 @@ body.light #landingPage * {
         <li><b>AI Trading Coach</b> + proactive insights</li>
         <li>Tiltmeter &amp; Habit Tracker</li>
         <li>cTrader Auto-Sync — keeps running while the app is closed</li>
+        <li>MT5 Cloud Sync — log in with your investor password, phone trades included</li>
         <li><b>Connection health</b>&nbsp;— every sync on one page, plus an email when one breaks</li>
         <li><b>Auto-Tracking</b>&nbsp;— MT5 · ATAS · Quantower · TradingView</li>
         <li><b>Crypto Auto-Sync</b>&nbsp;— Binance &amp; Bybit via read-only API key</li>
@@ -10086,6 +10111,7 @@ body.light #landingPage * {
         <tr class="lp-compare-cat"><td colspan="3">Integrations, Reports &amp; Tools</td></tr>
         <tr><td>cTrader Auto-Sync (Live &amp; Demo)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Background sync — cTrader syncs while the app is closed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>MT5 Cloud Sync — investor password, no EA or PC needed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto-Tracking — MT5 / ATAS / Quantower / TradingView</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Crypto Auto-Sync — Binance &amp; Bybit read-only API key</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Statement import — 95 brokers &amp; prop firms, 56 formats detected automatically</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
@@ -10156,7 +10182,7 @@ body.light #landingPage * {
   <h2 class="lp-title reveal">Questions <em>before you sign up</em></h2>
   <div class="lp-faq reveal">
     <details><summary>Which brokers and platforms can I connect?</summary>
-      <p>Automatically: cTrader through its Open API — it keeps syncing while the app is closed — Binance and Bybit through a read-only API key, and Interactive Brokers through a Flex Query. Live from your platform: MetaTrader 5, TradingView, ATAS and Quantower report fills through a small tracker. Everything else arrives as a statement file; the format is detected automatically, and an unknown one you map once by hand.</p></details>
+      <p>Automatically: cTrader through its Open API — it keeps syncing while the app is closed — Binance and Bybit through a read-only API key, and Interactive Brokers through a Flex Query, and MetaTrader 5 through its read-only investor password — trades from the MT5 phone app included. Live from your platform: MetaTrader 5, TradingView, ATAS and Quantower report fills through a small tracker. Everything else arrives as a statement file; the format is detected automatically, and an unknown one you map once by hand.</p></details>
     <details><summary>Can Evidence place, change or close trades?</summary>
       <p>No. Every broker connection is read-only, and the app contains no order logic at all. It can read your history; it cannot touch your account.</p></details>
     <details><summary>Is there a free plan?</summary>
@@ -11007,6 +11033,13 @@ body.light #landingPage * {
         <div>
           <div class="apex-feat-label">Background Sync — cTrader</div>
           <div class="apex-feat-desc">We keep watching your account on our server, so trades and their SL/TP reach your journal even when Evidence is closed. Opt-in, encrypted, read-only — switch it off and nothing stays server-side</div>
+        </div>
+      </div>
+      <div class="apex-feat-item apex-feat-full">
+        <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg></div>
+        <div>
+          <div class="apex-feat-label">MT5 Cloud Sync</div>
+          <div class="apex-feat-desc">Connect up to 3 MetaTrader 5 accounts with the read-only investor password — every trade reaches your journal, including trades from the MT5 phone app, with no Expert Advisor and no PC running. Optional import of the last 30 or 90 days</div>
         </div>
       </div>
       <div class="apex-feat-item apex-feat-full">
@@ -39258,6 +39291,10 @@ body.light .pt-sugg{background:var(--layer)}
     }
     // open
     if(byId && isOpenTrade(byId)) return;               // duplicate open event
+    /* Same position id, already closed: a re-delivery, not a new trade.
+       Happens when the MT5 cloud sync imports history the Expert Advisor
+       had already journalled — both send source 'mt5' with the same id. */
+    if(dupClosed) return;
     openTrade(e);
   }
 
@@ -74663,6 +74700,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         }).catch(function(){}));
     }
 
+    /* MT5 cloud sync — mt5-link-worker.js mirrors each account's state
+       into private/mt5Cloud on every status call and cron tick. */
+    jobs.push(priv('mt5Cloud').then(function(d){
+      ((d && d.accounts) || []).forEach(function(a){
+        var bad = a.status === 'auth_failed' ? 'MetaTrader rejected the login — update the investor password.'
+                : (a.status === 'error' || (a.failCount || 0) >= 3) ? 'Not syncing — retrying automatically.' : '';
+        out.push({ id:'mt5c_' + a.id, name:'MetaTrader 5 · ' + esc(a.name || a.login),
+                   connected: a.status !== 'stopped', detail: a.login + ' · ' + a.server + ' · cloud',
+                   last: a.lastOk || 0, error: bad,
+                   action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('mt5')" });
+      });
+    }));
+
     ['mt5','tradingview','atas','quantower','ninjatrader'].forEach(function(p){
       if (!m[p]) return;   // never delivered anything — not a connection yet
       var NAMES = { mt5:'📊 MetaTrader 5', tradingview:'📈 TradingView',
@@ -77317,33 +77367,36 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
 <script>
 /* ══════════════════════════════════════════════════════════════════
-   METATRADER AUTO-SYNC  —  ApexMeta
+   METATRADER 5 CLOUD-SYNC  —  ApexMeta
 
-   Until now MetaTrader arrived here through an Expert Advisor the
-   trader had to install, which works and is also the step most people
-   never finish. This is the other route: the account's INVESTOR
-   password, handed to a server that keeps a terminal connected and
-   reads it on a schedule.
+   The Expert Advisor works, and it is also the step most traders never
+   finish — and it cannot see trades placed from the MT5 phone app while
+   the PC is off. This is the other route: the account's INVESTOR
+   password goes to our own MT5 server (mt5-bridge/server.py), which
+   keeps a terminal logged in and forwards every trade exactly like the
+   EA does. Works for trades placed anywhere, phone included.
 
-   Two things about that password are worth saying plainly in the UI,
-   because they are the entire objection: it is read-only at the
-   MetaTrader protocol level — it physically cannot place, modify or
-   close an order, that is MetaQuotes' design and not our promise — and
-   we never store it. It goes straight to the platform that runs the
-   terminal, which hands back an account id, and the id is all we keep.
+   What the UI must say plainly about that password, because it is the
+   whole objection:
+     • it is read-only at the MetaTrader protocol level — it cannot
+       place, modify or close an order (MetaQuotes' design, not a promise),
+     • it IS stored — encrypted (AES-256) on our MT5 server, never in the
+       database, never in logs — and deleted on disconnect, account
+       deletion, or 7 days after Pro ends.
 
-   Talks to metaapi-worker.js. Pro only, and capped per user, because
-   every connected account costs money every month.
+   Talks to mt5-link-worker.js with the Firebase ID token; the worker
+   decides uid, plan and where the trades go. Pro only, 3 accounts.
    ══════════════════════════════════════════════════════════════════ */
 (function(){
   var M = {}; window.ApexMeta = M;
 
-  function base(){ return String(window.APEX_METAAPI_URL || '').replace(/\/$/, ''); }
+  function base(){ return String(window.APEX_MT5_URL || '').replace(/\/$/, ''); }
   function esc(s){
-    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
   }
   function toast(m){ try { if (window.showToast) showToast(m); } catch(e){} }
+  function ic(n){ return '<svg class="ic" aria-hidden="true"><use href="#i-' + n + '"></use></svg>'; }
   function ago(ms){
     if (!ms) return 'never';
     var d = Date.now() - Number(ms);
@@ -77352,21 +77405,79 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (d < 86400000) return Math.floor(d/3600000) + ' h ago';
     return Math.floor(d/86400000) + ' d ago';
   }
+  function money(v, cur){
+    if (v == null || isNaN(v)) return '';
+    return Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (cur ? ' ' + cur : '');
+  }
+  var isDemo = function(){ return window.currentUID === 'demo'; };
 
-  var _state = { links: [], limit: 3, loaded: false, busy: false };
+  var ERR = {
+    auth_failed:        'MetaTrader rejected the login. Check the account number, the server name and that you used the investor password.',
+    pro_required:       'MetaTrader cloud sync is part of Pro.',
+    limit_reached:      'You already have 3 MetaTrader accounts connected. Disconnect one to add another.',
+    rate_limited:       'Too many attempts. Please wait an hour and try again.',
+    already_linked:     'This MetaTrader account is already connected to another Evidence profile.',
+    server_full:        'The sync server is at capacity right now. Please try again later.',
+    server_unreachable: 'The sync server is not reachable right now. Your data is safe; please try again in a few minutes.',
+    bad_login:          'The account number should only contain digits.',
+    bad_server:         'Please enter the server name.',
+    bad_password:       'Please enter the investor password.',
+    not_signed_in:      'Please sign in again.'
+  };
+  function errText(code){ return ERR[code] || 'Could not connect (' + esc(code || 'unknown') + ').'; }
+
+  var ST = {
+    live:        { label: 'Live',            tone: 'var(--profit)' },
+    connecting:  { label: 'Connecting…',     tone: 'var(--gold)' },
+    auth_failed: { label: 'Login rejected',  tone: 'var(--loss)' },
+    error:       { label: 'Retrying',        tone: 'var(--loss)' },
+    stopped:     { label: 'Stopped',         tone: 'var(--ink3)' },
+    off:         { label: 'Starting',        tone: 'var(--ink3)' }
+  };
+
+  var _s = { accounts: [], limit: 3, loaded: false, busy: false, step: 0, error: '', edit: null,
+             help: false, servers: [], timer: null };
+
+  function call(method, path, body){
+    var user = null;
+    try { user = window.firebase && firebase.auth().currentUser; } catch(e){}
+    if (!user) return Promise.reject({ error: 'not_signed_in' });
+    return user.getIdToken().then(function(t){
+      return fetch(base() + path, {
+        method: method,
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+        body: body ? JSON.stringify(body) : undefined
+      });
+    }).then(function(r){
+      return r.json().catch(function(){ return { ok: false, error: 'server_unreachable' }; });
+    }, function(){ return { ok: false, error: 'server_unreachable' }; });
+  }
+
+  function demoAccounts(){
+    return [{ id: 'demo', name: 'FTMO Challenge', login: 51234567, server: 'FTMO-Demo', status: 'live',
+              lastOk: Date.now() - 4000, trades: 37, historyDays: 30, historyImport: 22,
+              account: { currency: 'USD', balance: 101842.5, equity: 102110.2, leverage: 100,
+                         company: 'FTMO S.R.O.', demo: true },
+              lastTrade: { event: 'close', symbol: 'XAUUSD', time: Math.floor(Date.now()/1000) - 1800 } }];
+  }
 
   M.refresh = function(){
+    if (isDemo()) { _s.accounts = demoAccounts(); _s.loaded = true; render(); return Promise.resolve(); }
     if (!base() || !window.currentUID) { render(); return Promise.resolve(); }
-    return fetch(base() + '/status?uid=' + encodeURIComponent(window.currentUID))
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        _state.links = d.links || [];
-        _state.limit = d.limit || 3;
-        _state.loaded = true;
-        render();
-      })
-      .catch(function(){ _state.loaded = true; render(); });
+    return call('GET', '/status').then(function(d){
+      if (d && d.ok) { _s.accounts = d.accounts || []; _s.limit = d.limit || 3; }
+      _s.loaded = true; render(); schedule();
+    });
   };
+
+  // Poll while something is still settling, slowly otherwise while the card is on screen.
+  function schedule(){
+    clearTimeout(_s.timer);
+    var host = document.getElementById('mtSyncHost');
+    if (!host || !host.isConnected) return;
+    var settling = _s.accounts.some(function(a){ return a.status === 'connecting' || a.status === 'off'; });
+    _s.timer = setTimeout(M.refresh, settling ? 4000 : 60000);
+  }
 
   M.connect = function(){
     if (apexDemoBlocked('connecting a broker')) return;
@@ -77375,62 +77486,160 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       try { if (typeof openUpgradeModal === 'function') openUpgradeModal(); } catch(e){}
       return;
     }
-    var login = (document.getElementById('mtLogin') || {}).value;
-    var pass  = (document.getElementById('mtPass') || {}).value;
-    var srv   = (document.getElementById('mtServer') || {}).value;
-    var plat  = (document.getElementById('mtPlatform') || {}).value || 'mt5';
-    if (!login || !pass || !srv) { toast('⚠ Login, investor password and server are all needed'); return; }
+    var v = function(id){ var el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; };
+    var body = { login: v('mtLogin'), server: v('mtServer'), password: (document.getElementById('mtPass') || {}).value || '',
+                 name: v('mtName'), historyDays: Number(v('mtHist') || 30) };
+    if (!/^\d{3,12}$/.test(body.login)) { _s.error = ERR.bad_login; render(); return; }
+    if (!body.server) { _s.error = ERR.bad_server; render(); return; }
+    if (!body.password) { _s.error = ERR.bad_password; render(); return; }
 
-    _state.busy = true; render();
-    fetch(base() + '/link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ uid: window.currentUID, login: login, password: pass,
-                             server: srv, platform: plat, label: srv })
-    })
-      .then(function(r){ return r.json().then(function(b){ return { ok: r.ok, b: b }; }); })
-      .then(function(res){
-        _state.busy = false;
-        if (!res.ok || res.b.error){
-          /* The platform's own error text is usually unhelpful ("Invalid
-             account"), so the worker attaches the two causes that account
-             for nearly all of them. Show that, not the raw message. */
-          var msg = res.b.hint || res.b.message || 'Could not connect';
-          if (res.b.error === 'account_limit')
-            msg = 'You have ' + _state.limit + ' MetaTrader accounts connected, which is the limit. ' +
-                  'Disconnect one to add another.';
-          toast('⚠ ' + msg);
-          render();
-          return;
-        }
-        var p = document.getElementById('mtPass'); if (p) p.value = '';
-        toast('✓ Connected — your trades will start arriving within a few minutes');
-        M.refresh();
-      })
-      .catch(function(){ _state.busy = false; toast('⚠ Could not reach the sync service'); render(); });
+    _s.busy = true; _s.error = ''; _s.step = 1; render();
+    var t2 = setTimeout(function(){ if (_s.busy) { _s.step = 2; render(); } }, 3500);
+    call('POST', '/connect', body).then(function(d){
+      clearTimeout(t2);
+      _s.busy = false; _s.step = 0;
+      if (!d || (!d.ok && !d.pending)) { _s.error = errText(d && d.error); render(); return; }
+      _s.edit = null;
+      toast(d.ok ? 'MetaTrader connected — new trades now sync automatically'
+                 : 'Connected — finishing the first sync in the background');
+      M.refresh();
+    });
   };
 
-  M.disconnect = function(accountId){
+  M.disconnect = function(id){
     if (apexDemoBlocked('disconnecting an account')) return;
-    if (!window.currentUID) return;
-    fetch(base() + '/unlink', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ uid: window.currentUID, accountId: accountId })
-    }).then(function(){ toast('Disconnected'); M.refresh(); })
-      .catch(function(){ toast('⚠ Could not disconnect'); });
+    var a = _s.accounts.filter(function(x){ return x.id === id; })[0];
+    if (!a) return;
+    if (!confirm('Disconnect ' + a.login + ' (' + a.server + ')?\n\nSyncing stops and the stored investor password is deleted. ' +
+                 'Trades already in your journal stay.')) return;
+    call('POST', '/disconnect', { id: id }).then(function(d){
+      toast(d && d.ok ? 'Disconnected — password deleted' : errText(d && d.error));
+      M.refresh();
+    });
   };
 
-  function linkRow(l){
-    var bad = l.status !== 'active' || l.errorCount > 0;
-    return '<div class="mt-link">' +
-      '<div class="mt-link-main">' +
-        '<div class="mt-link-name notranslate" translate="no">' + esc(l.label || l.server) +
-          ' <span class="mt-badge">' + esc(String(l.platform).toUpperCase()) + '</span></div>' +
-        '<div class="mt-link-meta">last sync ' + esc(ago(l.lastPollAt)) +
-          (l.lastCount ? ' · ' + l.lastCount + ' event' + (l.lastCount === 1 ? '' : 's') : '') + '</div>' +
-        (bad && l.lastError ? '<div class="mt-link-err">' + esc(l.lastError) + '</div>' : '') +
+  M.restart = function(id){
+    if (apexDemoBlocked('reconnecting an account')) return;
+    call('POST', '/restart', { id: id }).then(function(d){
+      toast(d && d.ok ? 'Reconnecting…' : errText(d && d.error));
+      M.refresh();
+    });
+  };
+
+  // "Update password": the form, pre-filled with the account, same /connect call (it upserts).
+  M.edit = function(id){
+    _s.edit = _s.accounts.filter(function(x){ return x.id === id; })[0] || null;
+    _s.error = ''; render();
+    var p = document.getElementById('mtPass'); if (p) p.focus();
+  };
+  M.cancelEdit = function(){ _s.edit = null; _s.error = ''; render(); };
+  M.toggleHelp = function(){ _s.help = !_s.help; render(); };
+
+  var _srvT = null;
+  M.serverInput = function(el){
+    clearTimeout(_srvT);
+    var q = el.value.trim();
+    if (q.length < 2 || !base() || isDemo()) return;
+    _srvT = setTimeout(function(){
+      call('GET', '/servers?q=' + encodeURIComponent(q)).then(function(d){
+        var dl = document.getElementById('mtServerList');
+        if (!dl || !d || !d.servers) return;
+        dl.innerHTML = d.servers.map(function(s){ return '<option value="' + esc(s) + '">'; }).join('');
+      });
+    }, 250);
+  };
+
+  function accountCard(a){
+    var st = ST[a.status] || ST.off;
+    var acc = a.account || {};
+    var stale = a.status === 'live' && a.lastOk && Date.now() - a.lastOk > 15*60000;
+    if (stale) st = { label: 'Delayed', tone: 'var(--gold)' };
+    var lt = a.lastTrade;
+    return '<div class="mc-acc">' +
+      '<div class="mc-acc-top">' +
+        '<span class="mc-dot" style="background:' + st.tone + '"></span>' +
+        '<div class="mc-acc-main">' +
+          '<div class="mc-acc-name"><span class="notranslate" translate="no">' + esc(a.name || a.login) + '</span>' +
+            (acc.demo != null ? ' <span class="mc-tag">' + (acc.demo ? 'Demo' : 'Live account') + '</span>' : '') + '</div>' +
+          '<div class="mc-acc-sub notranslate" translate="no">' + esc(a.login) + ' · ' + esc(a.server) +
+            (acc.company ? ' · ' + esc(acc.company) : '') + '</div>' +
+        '</div>' +
+        '<span class="mc-state" style="color:' + st.tone + '">' + st.label + '</span>' +
       '</div>' +
-      '<button class="mt-btn" onclick="ApexMeta.disconnect(\'' + esc(l.accountId) + '\')">Disconnect</button>' +
+      (acc.balance != null ? '<div class="mc-kpis">' +
+        '<div><span>Balance</span><b class="notranslate" translate="no">' + money(acc.balance, acc.currency) + '</b></div>' +
+        '<div><span>Equity</span><b class="notranslate" translate="no">' + money(acc.equity, acc.currency) + '</b></div>' +
+        '<div><span>Synced trades</span><b>' + (a.trades || 0) + '</b></div>' +
+        '<div><span>Last sync</span><b>' + esc(ago(a.lastOk)) + '</b></div>' +
+      '</div>' : '') +
+      (a.historyImport != null && a.historyDays ? '<div class="mc-note">' + ic('download') +
+        ' Imported ' + a.historyImport + ' position' + (a.historyImport === 1 ? '' : 's') + ' from the last ' + a.historyDays + ' days</div>' : '') +
+      (lt ? '<div class="mc-note">' + ic('zap') + ' Last event: ' + (lt.event === 'close' ? 'closed' : lt.event === 'open' ? 'opened' : esc(lt.event)) +
+        ' <span class="notranslate" translate="no">' + esc(lt.symbol) + '</span> · ' + esc(ago(lt.time * 1000)) + '</div>' : '') +
+      (a.status === 'auth_failed' ? '<div class="mc-err">' + ic('alert') + ' ' +
+        esc(a.detail && /lesbar/.test(a.detail) ? 'Please enter the investor password again.' : ERR.auth_failed) + '</div>' : '') +
+      (a.status === 'error' ? '<div class="mc-err">' + ic('alert') + ' Connection problem — retrying automatically.</div>' : '') +
+      '<div class="mc-acts">' +
+        (a.status === 'auth_failed'
+          ? '<button class="mc-b pri" onclick="ApexMeta.edit(\'' + esc(a.id) + '\')">' + ic('key') + ' Update password</button>'
+          : '<button class="mc-b" onclick="ApexMeta.restart(\'' + esc(a.id) + '\')">' + ic('refresh') + ' Reconnect</button>' +
+            '<button class="mc-b" onclick="ApexMeta.edit(\'' + esc(a.id) + '\')">' + ic('key') + ' Change password</button>') +
+        '<button class="mc-b warn" onclick="ApexMeta.disconnect(\'' + esc(a.id) + '\')">' + ic('trash') + ' Disconnect</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function stepper(){
+    var steps = ['Sending securely', 'Logging in to MetaTrader', 'Importing history'];
+    return '<div class="mc-steps">' + steps.map(function(s, i){
+      var n = i + 1, cls = _s.step > n ? 'done' : _s.step === n ? 'on' : '';
+      return '<div class="mc-step ' + cls + '"><span>' + (_s.step > n ? ic('check') : n) + '</span>' + s + '</div>';
+    }).join('') + '</div>';
+  }
+
+  function form(){
+    var e = _s.edit;
+    return '<div class="mc-form">' +
+      (e ? '<div class="mc-form-h">' + ic('key') + ' New investor password for <span class="notranslate" translate="no">' +
+           esc(e.login) + ' · ' + esc(e.server) + '</span></div>' : '') +
+      '<div class="mc-grid">' +
+        '<label class="mc-f wide"><span>Server</span>' +
+          '<input id="mtServer" class="mc-in" list="mtServerList" placeholder="e.g. FTMO-Demo" autocomplete="off" ' +
+          'autocapitalize="off" spellcheck="false" oninput="ApexMeta.serverInput(this)"' + (e ? ' value="' + esc(e.server) + '" readonly' : '') + '>' +
+          '<datalist id="mtServerList"></datalist></label>' +
+        '<label class="mc-f"><span>Account number</span>' +
+          '<input id="mtLogin" class="mc-in" placeholder="51234567" inputmode="numeric" autocomplete="off"' + (e ? ' value="' + esc(e.login) + '" readonly' : '') + '></label>' +
+        '<label class="mc-f"><span>Investor password</span>' +
+          '<input id="mtPass" class="mc-in" type="password" placeholder="Read-only password" autocomplete="new-password"></label>' +
+        (e ? '' :
+        '<label class="mc-f"><span>Name <i>(optional)</i></span>' +
+          '<input id="mtName" class="mc-in" placeholder="e.g. FTMO 100k" maxlength="40" autocomplete="off"></label>' +
+        '<label class="mc-f"><span>Import history</span>' +
+          '<select id="mtHist" class="mc-in"><option value="30" selected>Last 30 days</option>' +
+          '<option value="90">Last 90 days</option><option value="0">None — only new trades</option></select></label>') +
+      '</div>' +
+      (_s.error ? '<div class="mc-err">' + ic('alert') + ' ' + _s.error + '</div>' : '') +
+      (_s.busy ? stepper() : '') +
+      '<div class="mc-acts">' +
+        '<button class="mc-b pri big" onclick="ApexMeta.connect()"' + (_s.busy ? ' disabled' : '') + '>' +
+          (_s.busy ? 'Connecting…' : (e ? ic('check') + ' Save password' : ic('link') + ' Connect account')) + '</button>' +
+        (e ? '<button class="mc-b" onclick="ApexMeta.cancelEdit()">Cancel</button>' : '') +
+        '<button class="mc-b ghost" onclick="ApexMeta.toggleHelp()">' + ic('bulb') + ' Where do I find these?</button>' +
+      '</div>' +
+      (_s.help ? help() : '') +
+    '</div>';
+  }
+
+  function help(){
+    return '<div class="mc-help">' +
+      '<b>Investor password</b><p>A second, read-only password every MT5 account has. ' +
+      'Prop firms (FTMO, FundedNext, The5ers …) show it in the account dashboard next to the login. ' +
+      'Brokers send it in the welcome email — or set one in the <b>MT5 desktop app</b>: ' +
+      'Tools → Options → Server → Change → “Change investor (read only) password”.</p>' +
+      '<b>Server</b><p>In the MT5 phone app: Settings → your account (the line under the name). ' +
+      'On desktop: File → Login to Trade Account. It must match exactly, including the suffix.</p>' +
+      '<b>Using the Expert Advisor already?</b><p>Remove it from the chart once this account shows “Live”, ' +
+      'otherwise the same trades arrive twice.</p>' +
     '</div>';
   }
 
@@ -77438,78 +77647,98 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var host = document.getElementById('mtSyncHost');
     if (!host) return;
 
-    if (!base()){
-      /* No worker configured yet. Deliberately not a dead "Connect"
-         button: the EA route below this card works today, and pointing at
-         it is more use than a control that fails. */
-      host.innerHTML = '<div class="at-card">' +
-        '<div class="mt-h"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg> MetaTrader Auto-Sync <span class="mt-soon">in preparation</span></div>' +
-        '<div class="mt-p">Connecting MT4/MT5 with your investor password — no Expert Advisor to install, ' +
-        'and it keeps syncing while the app is closed — is built but not switched on yet. ' +
-        'The Expert Advisor below already does the same job today.</div>' +
-      '</div>';
+    if (!base() && !isDemo()){
+      host.innerHTML = '<div class="at-card mc-card">' +
+        '<div class="mc-h">' + ic('link') + ' MT5 Cloud Sync <span class="mc-soon">coming soon</span></div>' +
+        '<div class="mc-p">Connect MT5 with your investor password — no Expert Advisor, no PC, trades from the phone app included. ' +
+        'Until it is switched on, the Expert Advisor below does the same job.</div></div>';
       return;
     }
-
-    var full = _state.links.length >= _state.limit;
-    host.innerHTML = '<div class="at-card">' +
-      '<div class="mt-h"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg> MetaTrader Auto-Sync</div>' +
-      '<div class="mt-p">Connect MT4 or MT5 with the account\'s <b>investor password</b>&nbsp;— no Expert Advisor, ' +
-        'nothing to install, and it keeps running while the app is closed. ' +
-        '<b>The investor password is read-only in MetaTrader itself:</b> it can view the account and cannot ' +
-        'place, modify or close an order. That is how MetaQuotes built it, not a promise we are making.<br><br>' +
-        'We never store it. It goes to the service that runs the terminal, which returns an account id — ' +
-        'the id is all that is kept here.</div>' +
-
-      (_state.links.length ? '<div class="mt-links">' + _state.links.map(linkRow).join('') + '</div>' : '') +
-
-      (full
-        ? '<div class="mt-p" style="margin-top:10px">You have reached the limit of ' + _state.limit +
-          ' connected MetaTrader accounts. Disconnect one to add another.</div>'
-        : '<div class="mt-form">' +
-            '<select id="mtPlatform" class="mt-in">' +
-              '<option value="mt5">MetaTrader 5</option><option value="mt4">MetaTrader 4</option></select>' +
-            '<input id="mtLogin" class="mt-in" placeholder="Account number" autocomplete="off" inputmode="numeric">' +
-            '<input id="mtPass" class="mt-in" type="password" placeholder="Investor password" autocomplete="off">' +
-            '<input id="mtServer" class="mt-in wide" placeholder="Server — exactly as MetaTrader shows it" autocomplete="off">' +
-            '<button class="mt-connect" onclick="ApexMeta.connect()"' + (_state.busy ? ' disabled' : '') + '>' +
-              (_state.busy ? 'Connecting…' : 'Connect') + '</button>' +
-          '</div>' +
-          '<div class="mt-hint">The server name is in MetaTrader under <b>File → Open an Account</b>, or on the ' +
-            'welcome email from your broker or prop firm. It has to match exactly, including the suffix ' +
-            '(<span class="notranslate" translate="no">ICMarketsSC-Live12</span>, ' +
-            '<span class="notranslate" translate="no">FTMO-Demo</span>).</div>') +
+    var locked = window.currentPlan !== 'pro' && !isDemo();
+    var full = _s.accounts.length >= _s.limit;
+    host.innerHTML = '<div class="at-card mc-card">' +
+      '<div class="mc-h">' + ic('link') + ' MT5 Cloud Sync <span class="mc-pro">Pro</span></div>' +
+      '<div class="mc-p">Log in once with your <b>investor password</b> — every trade then lands in your journal automatically, ' +
+        'including trades placed in the <b>MT5 phone app</b>. No Expert Advisor, no PC left running.</div>' +
+      '<div class="mc-trust">' +
+        '<div>' + ic('eye') + '<span><b>Read-only by design.</b> The investor password cannot place, change or close a trade — that is how MetaTrader works.</span></div>' +
+        '<div>' + ic('lock') + '<span><b>Stored encrypted.</b> AES-256 on our MT5 server, never in the app database or logs.</span></div>' +
+        '<div>' + ic('trash') + '<span><b>Deleted on disconnect</b> — and automatically 7 days after Pro ends.</span></div>' +
+      '</div>' +
+      (_s.accounts.length ? '<div class="mc-list">' + _s.accounts.map(accountCard).join('') + '</div>' : '') +
+      (locked
+        ? '<button class="mc-b pri big" onclick="openUpgradeModal()">' + ic('crown') + ' Unlock with Pro</button>'
+        : (_s.edit || !full ? form()
+          : '<div class="mc-p mc-full">' + _s.accounts.length + ' of ' + _s.limit + ' accounts connected. Disconnect one to add another.</div>')) +
     '</div>';
+    schedule();
   }
   M.render = render;
 
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.createElement('style');
     el.textContent =
-      '.mt-h{font-family:var(--font-display);font-weight:700;color:var(--ink);font-size:14px;margin-bottom:8px}' +
-      '.mt-soon{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);' +
-        'border:0.5px solid var(--rim2);border-radius:20px;padding:2px 8px;margin-left:6px}' +
-      '.mt-p{font-size:13px;color:var(--ink3);line-height:1.65}' +
-      '.mt-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}' +
-      '.mt-in{background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);' +
-        'padding:8px 10px;font-size:13px;font-family:var(--font-body);min-width:150px}' +
-      '.mt-in.wide{flex:1;min-width:220px}' +
-      '.mt-connect{padding:8px 20px;border-radius:8px;border:none;' +
-        'background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;' +
-        'font-weight:700;font-size:13px;cursor:pointer}' +
-      '.mt-connect:disabled{opacity:.5;cursor:default}' +
-      '.mt-hint{font-size:11px;color:var(--ink4);margin-top:9px;line-height:1.6}' +
-      '.mt-links{display:flex;flex-direction:column;gap:8px;margin-top:12px}' +
-      '.mt-link{display:flex;gap:10px;align-items:center;padding:9px 11px;border:0.5px solid var(--rim2);' +
-        'border-radius:10px;background:var(--elevated)}' +
-      '.mt-link-main{flex:1;min-width:0}' +
-      '.mt-link-name{font-size:13px;font-weight:600;color:var(--ink)}' +
-      '.mt-badge{font-size:10px;letter-spacing:.06em;color:var(--ink4);border:0.5px solid var(--rim2);' +
-        'border-radius:20px;padding:1px 6px;margin-left:5px}' +
-      '.mt-link-meta{font-size:11px;color:var(--ink3);margin-top:2px}' +
-      '.mt-link-err{font-size:11px;color:var(--loss);margin-top:3px}' +
-      '.mt-btn{padding:6px 11px;border-radius:8px;border:0.5px solid var(--rim2);background:transparent;' +
-        'color:var(--ink3);font-size:12px;cursor:pointer}';
+      '.mc-card{padding:18px}' +
+      '.mc-h{font-family:var(--font-display);font-weight:700;color:var(--ink);font-size:var(--fs-lg);margin-bottom:8px;display:flex;align-items:center;gap:8px}' +
+      '.mc-soon,.mc-pro{font-size:var(--fs-micro);letter-spacing:.08em;text-transform:uppercase;border-radius:20px;padding:2px 8px}' +
+      '.mc-soon{color:var(--ink4);border:0.5px solid var(--rim2)}' +
+      '.mc-pro{color:var(--gold);background:var(--gold-dim);border:0.5px solid var(--gold-line)}' +
+      '.mc-p{font-size:var(--fs-md);color:var(--ink2);line-height:1.65}' +
+      '.mc-full{margin-top:12px}' +
+      '.mc-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}' +
+      '.mc-trust>div{display:flex;gap:8px;align-items:flex-start;font-size:var(--fs-xs);color:var(--ink2);line-height:1.5;' +
+        'background:var(--surface);border:0.5px solid var(--rim);border-radius:var(--r-md);padding:10px}' +
+      '.mc-trust .ic{flex-shrink:0;color:var(--gold);margin-top:1px}' +
+      '.mc-trust b{color:var(--ink)}' +
+      '.mc-list{display:flex;flex-direction:column;gap:10px;margin-top:14px}' +
+      '.mc-acc{border:0.5px solid var(--rim2);border-radius:var(--r-md);background:var(--elevated);padding:12px 14px}' +
+      '.mc-acc-top{display:flex;gap:10px;align-items:center}' +
+      '.mc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 3px rgba(255,255,255,.04)}' +
+      '.mc-acc-main{flex:1;min-width:0}' +
+      '.mc-acc-name{font-size:var(--fs-base);font-weight:600;color:var(--ink)}' +
+      '.mc-acc-sub{font-size:var(--fs-xs);color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      '.mc-tag{font-size:var(--fs-micro);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);border:0.5px solid var(--rim2);border-radius:20px;padding:1px 6px;margin-left:4px;vertical-align:middle}' +
+      '.mc-state{font-size:var(--fs-sm);font-weight:600;white-space:nowrap}' +
+      '.mc-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}' +
+      '.mc-kpis>div{background:var(--surface);border:0.5px solid var(--rim);border-radius:10px;padding:8px 10px;min-width:0}' +
+      '.mc-kpis span{display:block;font-size:var(--fs-label);text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}' +
+      '.mc-kpis b{display:block;font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--ink);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      '.mc-note{font-size:var(--fs-xs);color:var(--ink2);margin-top:8px;display:flex;gap:6px;align-items:center}' +
+      '.mc-note .ic{color:var(--gold)}' +
+      '.mc-err{font-size:var(--fs-sm);color:var(--loss);margin-top:10px;display:flex;gap:6px;align-items:flex-start;line-height:1.5;' +
+        'background:rgba(var(--loss-rgb),.06);border:0.5px solid rgba(var(--loss-rgb),.25);border-radius:10px;padding:8px 10px}' +
+      '.mc-err .ic{flex-shrink:0;margin-top:2px}' +
+      '.mc-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}' +
+      '.mc-b{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:0.5px solid var(--rim2);' +
+        'background:transparent;color:var(--ink2);font-size:var(--fs-sm);font-weight:600;cursor:pointer;font-family:var(--font-body)}' +
+      '.mc-b:hover{border-color:var(--gold-line);color:var(--ink)}' +
+      '.mc-b.pri{background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#07080b;border-color:transparent}' +
+      '.mc-b.big{padding:10px 18px;font-size:var(--fs-md)}' +
+      '.mc-b.warn:hover{border-color:rgba(var(--loss-rgb),.5);color:var(--loss)}' +
+      '.mc-b.ghost{border-color:transparent;color:var(--ink3)}' +
+      '.mc-b:disabled{opacity:.55;cursor:default}' +
+      '.mc-form{margin-top:16px;border-top:0.5px solid var(--rim);padding-top:14px}' +
+      '.mc-form-h{font-size:var(--fs-md);color:var(--ink);font-weight:600;margin-bottom:10px;display:flex;gap:6px;align-items:center}' +
+      '.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
+      '.mc-f{display:flex;flex-direction:column;gap:5px;min-width:0}' +
+      '.mc-f.wide{grid-column:1/-1}' +
+      '.mc-f>span{font-size:var(--fs-label);text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:600}' +
+      '.mc-f i{text-transform:none;letter-spacing:0;font-style:normal;color:var(--ink3);font-weight:400}' +
+      '.mc-in{background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink);padding:10px 11px;' +
+        'font-size:var(--fs-base);font-family:var(--font-body);min-width:0;width:100%;box-sizing:border-box}' +
+      '.mc-in:focus{outline:none;border-color:var(--gold-line)}' +
+      '.mc-in[readonly]{opacity:.65}' +
+      '.mc-steps{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}' +
+      '.mc-step{display:flex;gap:7px;align-items:center;font-size:var(--fs-sm);color:var(--ink4)}' +
+      '.mc-step span{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;' +
+        'font-size:var(--fs-xs);border:0.5px solid var(--rim2);font-family:var(--font-mono)}' +
+      '.mc-step.on{color:var(--ink)}.mc-step.on span{border-color:var(--gold);color:var(--gold);animation:mcPulse 1.2s ease-in-out infinite}' +
+      '.mc-step.done{color:var(--profit)}.mc-step.done span{border-color:var(--profit);color:var(--profit)}' +
+      '@keyframes mcPulse{50%{box-shadow:0 0 0 4px rgba(var(--gold-rgb),.18)}}' +
+      '.mc-help{margin-top:12px;background:var(--surface);border:0.5px solid var(--rim);border-radius:var(--r-md);padding:12px 14px;font-size:var(--fs-sm);color:var(--ink)}' +
+      '.mc-help p{margin:3px 0 10px;color:var(--ink3);line-height:1.6}.mc-help p:last-child{margin-bottom:0}' +
+      '@media (max-width:640px){.mc-trust{grid-template-columns:1fr}.mc-kpis{grid-template-columns:1fr 1fr}.mc-grid{grid-template-columns:1fr}' +
+        '.mc-acts .mc-b.big{flex:1;justify-content:center}}';
     document.head.appendChild(el);
 
     /* The MT5 panel is built by ApexAutoTrack when it is selected, so the
