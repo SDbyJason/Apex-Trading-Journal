@@ -1094,7 +1094,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-30c';
+  window.APEX_BUILD = '2026-09-30d';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -9009,7 +9009,7 @@ body.light #landingPage * {
    "name": "Which markets can I replay?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "Market Replay runs on free tick-accurate Dukascopy data for 61 instruments — metals, FX pairs, indices, oil and crypto. Futures, stocks and options you can journal, import and analyse in full, but not replay."
+    "text": "Market Replay runs on free tick-accurate Dukascopy data for 61 instruments — metals, FX pairs, indices, oil and crypto. The main CME futures (ES, NQ, YM, GC, CL and their micros) can be replayed with exact contract values in whole contracts, on the matching CFD price data rather than CME's own feed, so price levels sit a small basis away from the futures chart. Stocks and options you can journal, import and analyse in full, but not replay."
    }
   },
   {
@@ -9750,7 +9750,7 @@ body.light #landingPage * {
     <h3>Not a simulator with made-up prices</h3>
     <p><b><span id="lpCount">61</span> instruments</b>, from free tick-accurate Dukascopy data, on every timeframe from one minute to weekly — so a top-down read runs on the same screen as the entry. You buy at the ask and sell at the bid using the spread that actually existed at that moment, not a convenient constant.<span id="lpHist"></span></p>
     <p class="lp-cover">Gold and silver · the seven FX majors and 21 crosses · 15 minors including SEK, NOK, PLN, TRY, ZAR, MXN, CNH and SGD · Nasdaq&nbsp;100, S&amp;P&nbsp;500, Dow&nbsp;30, DAX&nbsp;40, FTSE&nbsp;100, CAC&nbsp;40, IBEX&nbsp;35, Nikkei&nbsp;225, ASX&nbsp;200, Hang&nbsp;Seng · WTI and Brent · Bitcoin, Ethereum, Litecoin and XRP.</p>
-    <p class="lp-cover"><b>Where the line is, plainly:</b> replay exists for the markets where tick-accurate data actually exists. Futures, stocks and options you can journal, import and analyse in full — including the prop-firm tooling — but not replay. That is a data-licensing wall, not an oversight, and we would rather say so than let you find out after you subscribe.</p>
+    <p class="lp-cover"><b>Where the line is, plainly:</b> replay exists for the markets where tick-accurate data actually exists. Futures replay on the CFD that tracks each contract — ES, NQ, YM, GC, CL and the micros, with the exchange's tick values and whole contracts — because CME's own data is licensed; levels therefore sit a small basis away from the futures chart. Stocks and options you can journal, import and analyse in full — including the prop-firm tooling — but not replay. That is a data-licensing wall, not an oversight, and we would rather say so than let you find out after you subscribe.</p>
     <div class="lp-spot-grid">
       <div class="lp-spot-item">
         <div class="t">Manage it like a real position</div>
@@ -10018,6 +10018,8 @@ body.light #landingPage * {
       <ul class="lp-price-feats">
         <li>Everything in Free</li>
         <li><b>Market Replay</b>&nbsp;— rewind any past day &amp; trade it candle by candle</li>
+        <li><b>Futures replay</b>&nbsp;— ES, NQ, YM, GC, CL &amp; micros in whole contracts with CME tick values (CFD price data)</li>
+        <li><b>Multi-chart replay</b>&nbsp;— optional 2 or 4 synced charts on higher timeframes, the forming candle built only from what you have seen</li>
         <li>Replay trade management — multi-TP, break-even, trailing &amp; partials</li>
         <li>Saved backtests — reopen a run and keep trading it</li>
         <li><b>Edge Lab</b>&nbsp;— Backtest, Trade &amp; Day Replay, Monte-Carlo</li>
@@ -10140,6 +10142,8 @@ body.light #landingPage * {
         <tr><td>Options exposure — net delta, gamma, theta &amp; vega by underlying and expiry</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Session review — give-back, size drift, revenge windows &amp; rule adherence</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Market Replay — trade any past day candle by candle</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Futures replay — ES, NQ, YM, GC, CL &amp; micros in whole contracts (CFD price data)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Multi-chart replay — 2 or 4 synced charts, no look-ahead</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Evidence Score — a single 0–100 read on your trading, weighted to process over profit, with the full breakdown</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Tradovate Auto-Sync — live futures fills, including while the app is closed <span style="opacity:.65">· in progress, see below</span></td><td class="c no">—</td><td class="c no">soon</td></tr>
         <tr><td>Replay across 61 instruments — metals, 43 FX pairs, 10 indices, oil and crypto</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -10296,7 +10300,7 @@ body.light #landingPage * {
     <details><summary>Does the AI make numbers up?</summary>
       <p>The numbers are counted by the app, not by the model. The AI reads the results and explains them, and it is instructed never to calculate, estimate or invent a figure. It runs on Google’s Gemini API, and only when you use an AI feature.</p></details>
     <details><summary>Which markets can I replay?</summary>
-      <p>Market Replay runs on free tick-accurate Dukascopy data for 61 instruments — metals, FX pairs, indices, oil and crypto. Futures, stocks and options you can journal, import and analyse in full, but not replay.</p></details>
+      <p>Market Replay runs on free tick-accurate Dukascopy data for 61 instruments — metals, FX pairs, indices, oil and crypto. The main CME futures (ES, NQ, YM, GC, CL and their micros) can be replayed with exact contract values in whole contracts, on the matching CFD price data rather than CME's own feed, so price levels sit a small basis away from the futures chart. Stocks and options you can journal, import and analyse in full, but not replay.</p></details>
     <details><summary>How is Evidence different from TradeZella or TraderSync?</summary>
       <p>Market Replay and the AI coach are in the one paid plan instead of a higher tier, the free plan does not expire, and the full backup exports everything. Side-by-side comparisons, with sources and the date we checked them: <a href="/evidence-vs-tradezella.html">TradeZella</a>, <a href="/evidence-vs-tradersync.html">TraderSync</a>, <a href="/evidence-vs-edgewonk.html">Edgewonk</a>, <a href="/evidence-vs-tradesviz.html">TradesViz</a>.</p></details>
   </div>
@@ -11087,7 +11091,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-bank ></use></svg></div><div><div class="apex-feat-label">Prop firm cockpit — the drawdown model your firm really uses</div><div class="apex-feat-desc">Most trackers know one kind of drawdown. Firms use three, and the difference is where accounts die: at Apex Trader Funding your trailing threshold climbs with your equity and then <b>stops the moment it reaches your starting balance</b>&nbsp;— this one models that, along with end-of-day trailing and static floors, measured against your intraday low rather than your closing balance. The consistency rule is reported as headroom in money, not a progress bar: the largest single day you can still book without a payout being refused. Every prop and funded account keeps its own rules, so a Topstep and an Apex Trader Funding challenge run side by side without one overwriting the other</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-note ></use></svg></div><div><div class="apex-feat-label">What the whole prop business actually cost you</div><div class="apex-feat-desc">Entry fees, resets, activation fees and payouts per challenge, entered once and turned into the numbers nobody can otherwise answer: total spent against total received, return on everything spent, and a pass rate per firm — counted only over attempts you have marked decided, so a challenge still running never counts as a failure. No bank connection, because four fields once a month do not justify handing over a bank account</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg></div><div><div class="apex-feat-label">Tradovate Auto-Sync — built, not yet switched on</div><div class="apex-feat-desc">The connection is written and waiting: read-only, through Tradovate's own consent screen, with the access token stored where the app itself cannot read it. What is holding it up is not on our side — Tradovate does not currently grant API access to prop-firm accounts (Topstep, Apex, MyFundedFutures), which is exactly the group it was built for, and we are not shipping a Connect button that fails for most of the people who would press it. <b>Until then, and this works today:</b> futures fills come in by CSV — map the columns once and Evidence recognises that format by itself afterwards, prop accounts included</div></div></div>
-      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-globe ></use></svg></div><div><div class="apex-feat-label">61 instruments, every one of them checked</div><div class="apex-feat-desc">Gold and silver, the seven FX majors with 21 crosses and 15 minors, ten indices from the Nasdaq to the Hang Seng, WTI, Brent and four crypto. Each was fetched from the feed before it was listed — so nothing in the dropdown opens an empty chart. Futures, stocks and options are journalled and analysed in full but deliberately not replayed: that is a data-licensing wall, and we say so rather than let you find it after subscribing</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-globe ></use></svg></div><div><div class="apex-feat-label">61 instruments, every one of them checked</div><div class="apex-feat-desc">Gold and silver, the seven FX majors with 21 crosses and 15 minors, ten indices from the Nasdaq to the Hang Seng, WTI, Brent and four crypto. Each was fetched from the feed before it was listed — so nothing in the dropdown opens an empty chart. Futures (ES, NQ, YM, GC, CL and micros) replay on that CFD data with CME tick values and whole contracts. Stocks and options are journalled and analysed in full but deliberately not replayed: that is a data-licensing wall, and we say so rather than let you find it after subscribing</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-calendar ></use></svg></div><div><div class="apex-feat-label">Daily and weekly replay, with real navigation</div><div class="apex-feat-desc">Every timeframe from one minute to weekly, so the higher-timeframe read happens in the replay instead of beside it — plus 0.5× to 10× playback and jumps straight to the Asian, London, New York or US cash open, or to any date in the session</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">↗️</div><div><div class="apex-feat-label">Share a replay session</div><div class="apex-feat-desc">Send a session as a link. Either they watch your orders, stops and targets play out — or they get the same instrument, the same dates and an empty account and trade that day themselves. Your entries do not travel in that mode, on purpose</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg></div><div><div class="apex-feat-label">Candlestick Trade Charts</div><div class="apex-feat-desc">See every trade on real candles — drag entry / SL / TP directly on the chart and it updates your journal</div></div></div>
@@ -46957,7 +46961,18 @@ self.addEventListener('message', async (ev) => {
     WTI:'LIGHTCMDUSD',  USOIL:'LIGHTCMDUSD', XTIUSD:'LIGHTCMDUSD', CL:'LIGHTCMDUSD',
     UKOIL:'BRENTCMDUSD', BRENT:'BRENTCMDUSD', XBRUSD:'BRENTCMDUSD',
     // crypto
-    BTCUSDT:'BTCUSD', ETHUSDT:'ETHUSD', LTCUSDT:'LTCUSD', XRPUSDT:'XRPUSD'
+    BTCUSDT:'BTCUSD', ETHUSDT:'ETHUSD', LTCUSDT:'LTCUSD', XRPUSDT:'XRPUSD',
+    /* Futures PROXIES — CME futures charted on the matching Dukascopy CFD
+       (CME data is licensed; the CFD is free and moves tick for tick with the
+       front month, offset by the cash/futures basis). The ids are deliberately
+       NOT the plain roots: a real ES trade in the journal must never be drawn
+       on CFD prices that sit 20-60 points away from its fills. Only Market
+       Replay and the Strategy Lab offer these, and they label them "CFD data". */
+    ESPROXY:'USA500IDXUSD',  MESPROXY:'USA500IDXUSD',
+    NQPROXY:'USATECHIDXUSD', MNQPROXY:'USATECHIDXUSD',
+    YMPROXY:'USA30IDXUSD',   MYMPROXY:'USA30IDXUSD',
+    GCPROXY:'XAUUSD',        MGCPROXY:'XAUUSD',
+    CLPROXY:'LIGHTCMDUSD',   MCLPROXY:'LIGHTCMDUSD'
   };
 
   // Verified: FX 100000 · JPY-quoted & metals & indices & oil 1000 · crypto 10
@@ -47133,8 +47148,26 @@ self.addEventListener('message', async (ev) => {
   var NET_RETRY_MS = [1200, 3000, 6500];
   var NET_OWN_LIMIT_MS = [20000, 25000, 30000];
   var _netActive = 0, _netQueue = [];
+  /* Background (prefetch) work has its own queue and never competes with a
+     request someone is waiting for: it only starts when the foreground queue
+     is empty, with at most NET_BG_MAX in flight, and it shares the NET_MAX
+     ceiling so the feed never sees more than before. */
+  var NET_BG_MAX = 1;
+  var _bgActive = 0, _bgQueue = [];
   function netPump() {
-    while (_netActive < NET_MAX && _netQueue.length) _netQueue.shift()();
+    while (_netActive + _bgActive < NET_MAX && _netQueue.length) _netQueue.shift()();
+    while (!_netQueue.length && _bgActive < NET_BG_MAX &&
+           _netActive + _bgActive < NET_MAX && _bgQueue.length) _bgQueue.shift()();
+  }
+  function netBgSlot(fn) {
+    return new Promise(function (res, rej) {
+      _bgQueue.push(function () {
+        _bgActive++;
+        var fin = function () { _bgActive--; netPump(); };
+        Promise.resolve().then(fn).then(function (v) { fin(); res(v); }, function (e) { fin(); rej(e); });
+      });
+      netPump();
+    });
   }
   function netSlot(fn) {
     return new Promise(function (res, rej) {
@@ -47198,14 +47231,62 @@ self.addEventListener('message', async (ev) => {
   var FAILED = { n: 0, failed: true, t: EMPTY.t, o: EMPTY.o, h: EMPTY.h, l: EMPTY.l, c: EMPTY.c, v: EMPTY.v };
 
   var _inflight = {};
+  var _bgInflight = {};
+
+  /* ─────────────── background prefetch ───────────────
+     Fetches day files the trader is LIKELY to open next (the next session,
+     the day picked on the setup screen) so that opening them is a cache hit.
+     Deliberately timid, because the feed throttles (28.09.2026):
+       • its own low-priority queue, one file at a time (netBgSlot);
+       • no retries — the first refusal pauses ALL prefetching for
+         BG_PAUSE_MS, so a busy feed is left alone for the requests that
+         matter;
+       • a newer prefetch cancels the older one (generation counter), so
+         flicking through dates on the setup screen does not queue a backlog;
+       • only files not already cached, and a refusal is never cached.     */
+  var BG_PAUSE_MS = 60000;
+  var _bgPausedUntil = 0, _bgGen = 0;
+
+  function bgDay(m, dayMs, side, gen) {
+    var key = dayKey(m, dayMs, side);
+    if (_inflight[key] || _bgInflight[key]) return Promise.resolve('dup');
+    return idbGet(key).then(function (hit) {
+      if (hit) return 'cached';
+      return netBgSlot(function () {
+        if (gen !== _bgGen) return 'stale';
+        if (Date.now() < _bgPausedUntil) return 'paused';
+        if (_inflight[key] || _bgInflight[key]) return 'dup';
+        var p = askWorker({ kind: 'm1', url: m1Url(m, dayMs, side), slotMs: dayMs, scale: m.scale })
+          .then(function (r) {
+            var bars = r.empty ? EMPTY
+              : { n: r.n, t: r.t, o: r.o, h: r.h, l: r.l, c: r.c, v: r.v };
+            return idbPut({ key: key, used: Date.now(), bars: bars })
+              .then(evictIfNeeded, function () {}).then(function () { return bars; });
+          });
+        _bgInflight[key] = p;
+        return p.then(function () { delete _bgInflight[key]; return 'fetched'; },
+                      function (e) {
+                        delete _bgInflight[key];
+                        _bgPausedUntil = Date.now() + BG_PAUSE_MS;
+                        console.info('[ApexMarketData] prefetch paused: ' + ((e && e.message) || e));
+                        return 'failed';
+                      });
+      });
+    }).catch(function () { return 'failed'; });
+  }
 
   function getDay(m, dayMs, side) {
     side = side === 'ask' ? 'ask' : 'bid';
     var key = dayKey(m, dayMs, side);
     if (_inflight[key]) return _inflight[key];
 
-    var p = idbGet(key).then(function (hit) {
-      if (hit) { idbTouch(key); return hit.bars; }
+    /* A prefetch may already be downloading exactly this file. Wait for it
+       rather than asking the feed twice — and if it failed, fall through to
+       the normal paced fetch with its retries, which a prefetch never has. */
+    var bgp = _bgInflight[key];
+    var p = (bgp ? bgp.then(function (bars) { return { bars: bars }; }, function () { return idbGet(key); })
+                 : idbGet(key)).then(function (hit) {
+      if (hit) { if (!bgp) idbTouch(key); return hit.bars; }
 
       var d = new Date(dayMs);
       var url = WORKER_URL.replace(/\/$/, '') + '/m1?' + new URLSearchParams({
@@ -47654,6 +47735,16 @@ self.addEventListener('message', async (ev) => {
       ['Crypto', [
         ['BTCUSD', 'Bitcoin'], ['ETHUSD', 'Ethereum'],
         ['LTCUSD', 'Litecoin'], ['XRPUSD', 'XRP']
+      ]],
+      /* CME contract sizes (tick value, whole contracts) on CFD prices — see
+         the PROXY note in EXPLICIT. Every underlying CFD above was fetched and
+         verified before it was listed; these reuse exactly those files. */
+      ['Futures (CFD data)', [
+        ['ES_PROXY',  'ES · E-mini S&P 500'],   ['MES_PROXY', 'MES · Micro E-mini S&P 500'],
+        ['NQ_PROXY',  'NQ · E-mini Nasdaq 100'], ['MNQ_PROXY', 'MNQ · Micro E-mini Nasdaq 100'],
+        ['YM_PROXY',  'YM · E-mini Dow'],        ['MYM_PROXY', 'MYM · Micro E-mini Dow'],
+        ['GC_PROXY',  'GC · Gold'],              ['MGC_PROXY', 'MGC · Micro Gold'],
+        ['CL_PROXY',  'CL · Crude Oil'],         ['MCL_PROXY', 'MCL · Micro Crude Oil']
       ]]
     ],
 
@@ -47668,7 +47759,11 @@ self.addEventListener('message', async (ev) => {
 
     /** How many instruments the replay covers — for the marketing copy, so
         the number on the landing page can never drift from the list. */
-    instrumentCount: function () { return API.instruments().length; },
+    instrumentCount: function () {
+      // Futures proxies re-use CFD files already counted — listing them as
+      // ten more markets would be a claim the data does not back.
+      return API.instruments().filter(function (x) { return !/_PROXY$/.test(x[0]); }).length;
+    },
 
     /**
      * The first date this instrument has data for — measured, not claimed.
@@ -47756,15 +47851,35 @@ self.addEventListener('message', async (ev) => {
       });
     },
 
-    /** Warm the cache without blocking — used to stay ahead of replay playback. */
-    prefetch: function (sym, from, to) {
+    /**
+     * Warm the cache in the background — see "background prefetch".
+     * Never blocks, never throws, never retries. A newer call cancels the
+     * previous one. Resolves to a count summary, e.g.
+     * { fetched: 4, cached: 2, failed: 0, paused: 0, stale: 0, dup: 0 }
+     * (paused = the feed refused recently, stale = a newer prefetch took
+     * over, dup = the file was already being fetched).
+     * @param {object} [opts] { sides: ['bid','ask'] (default both), maxDays: 10 }
+     */
+    prefetch: function (sym, from, to, opts) {
+      var gen = ++_bgGen;
+      var sum = { fetched: 0, cached: 0, failed: 0, paused: 0, stale: 0, dup: 0 };
       var m = mapSymbol(sym);
-      if (!m) return Promise.resolve(0);
-      var days = dayList(from, to).slice(0, 30);
-      return Promise.all(days.map(function (d) { return getDay(m, d); }))
-        .then(function (l) { return l.length; })
-        .catch(function () { return 0; });
+      if (!m || !(to >= from)) return Promise.resolve(sum);
+      var sides = (opts && opts.sides) || ['bid', 'ask'];
+      var maxDays = Math.max(1, Math.min(30, (opts && opts.maxDays) || 10));
+      // Weekends are NOT filtered: crypto trades on Saturday, and an empty
+      // day costs one tiny 204 that is then cached as empty.
+      var days = dayList(from, to).slice(0, maxDays);
+      var jobs = [];
+      days.forEach(function (d) { sides.forEach(function (s) { jobs.push(bgDay(m, d, s, gen)); }); });
+      return Promise.all(jobs).then(function (r) {
+        r.forEach(function (x) { if (sum[x] != null) sum[x]++; });
+        return sum;
+      });
     },
+
+    /** Stop any queued prefetch (running files still finish and get cached). */
+    cancelPrefetch: function () { _bgGen++; },
 
     /** Raw ticks for one hour — tick-precision replay of the forming bar. */
     getTicks: function (sym, hourMs) {
@@ -48851,6 +48966,17 @@ self.addEventListener('message', async (ev) => {
   function specFor(sym) {
     var s = String(sym || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
     var sp;
+    /* Futures proxy (ES_PROXY …): the exchange contract from FUTURES_SPECS —
+       the same table the journal uses, so one tick means the same everywhere.
+       pip = one tick; contract = $ per 1.00 of price (the multiplier), so
+       P&L = move × contracts × multiplier, exactly as at the exchange.
+       lotStep 1: futures trade in whole contracts only. */
+    var fm = s.match(/^([A-Z0-9]{1,3})PROXY$/);
+    var fs = fm && typeof FUTURES_SPECS !== 'undefined' ? FUTURES_SPECS[fm[1]] : null;
+    if (fs) {
+      return { contract: fs.pipValuePerLot / fs.pipSize, quote: 'USD', kind: 'future',
+               pipSize: fs.pipSize, lotStep: 1, root: fm[1], label: fs.label, proxy: true };
+    }
     if (/^XAU/.test(s))                                sp = { contract: 100,    quote: s.slice(3) || 'USD', kind: 'metal',     pipSize: 0.10 };
     else if (/^XAG/.test(s))                           sp = { contract: 5000,   quote: s.slice(3) || 'USD', kind: 'metal',     pipSize: 0.001 };
     else if (/^(XPT|XPD)/.test(s))                     sp = { contract: 100,    quote: s.slice(3) || 'USD', kind: 'metal',     pipSize: 0.10 };
@@ -48890,7 +49016,19 @@ self.addEventListener('message', async (ev) => {
       var t = (typeof window.getPipSpec === 'function') ? window.getPipSpec(s) : null;
       if (t && t.pipSize > 0) sp.pipSize = t.pipSize;
     } catch (e) {}
+    sp.lotStep = 0.01;
     return sp;
+  }
+
+  /* Size rounded to the instrument's step (0.01 lots, or 1 contract).
+     `down` floors instead of rounding — used where a size is derived from a
+     risk budget, so rounding can never risk more than was asked for. The
+     final toFixed strips float dust (0.1+0.2). */
+  function roundLots(x, step, down) {
+    step = step > 0 ? step : 0.01;
+    var q = x / step;
+    q = down ? Math.floor(q + 1e-9) : Math.round(q);
+    return +(q * step).toFixed(step < 1 ? 2 : 0);
   }
 
   /* Price decimals that follow the pip size: one digit finer than a pip, the
@@ -48910,7 +49048,7 @@ self.addEventListener('message', async (ev) => {
      rebuild the account after a rewind, so if the broker marked targets
      `hit` on the caller's own array the rebuild would start from an
      already-filled position. */
-  function buildTargets(list, side, lots) {
+  function buildTargets(list, side, lots, step) {
     var out = (list || [])
       .filter(function (x) { return x && isFinite(+x.price); })
       .map(function (x) { return { price: +x.price, lots: (x.lots != null && +x.lots > 0) ? +x.lots : null,
@@ -48921,8 +49059,8 @@ self.addEventListener('message', async (ev) => {
     out.forEach(function (x) {
       // No size given → this target takes everything still open at that point.
       var want = (x.lots == null) ? left : Math.min(x.lots, left);
-      x.lots = Math.max(0, Math.round(want * 100) / 100);
-      left = Math.round((left - x.lots) * 100) / 100;
+      x.lots = Math.max(0, roundLots(want, step));
+      left = roundLots(left - x.lots, step);
     });
     out = out.filter(function (x) { return x.lots > 0; });
     out.forEach(function (x, i) { x.n = i + 1; });   // TP1 is the nearest
@@ -48988,6 +49126,18 @@ self.addEventListener('message', async (ev) => {
 
   Broker.prototype.valuePerPoint = function (lots) { return lots * this.spec.contract; };
 
+  /* Futures trade in whole contracts. A size derived from a risk budget
+     (Strategy Lab) is floored, never rounded up — 1.7 contracts of risk is
+     1 contract, not 2. Below one contract the order is refused rather than
+     silently upsized. Lot-based instruments pass through untouched. */
+  Broker.prototype._wholeLots = function (lots) {
+    var step = this.spec.lotStep || 0.01;
+    if (step < 1 || !(lots > 0)) return lots;
+    var n = roundLots(lots, step, true);
+    if (n < step) throw new Error('Futures trade in whole contracts — the size is below 1 contract');
+    return n;
+  };
+
   /* ─────────────── pip arithmetic ───────────────
      One place, used by everything. If a number in the UI is labelled "pips"
      it went through here. */
@@ -49028,7 +49178,7 @@ self.addEventListener('message', async (ev) => {
     opt = opt || {};
     if (!this.bar) throw new Error('No price yet — step the replay first');
     if (this.blownUp) throw new Error('Account is blown — reset to continue');
-    lots = +lots;
+    lots = this._wholeLots(+lots);
     if (!(lots > 0)) throw new Error('Lots must be greater than zero');
 
     var entry = side === 'buy' ? this.bar.ask.c : this.bar.bid.c;
@@ -49040,7 +49190,7 @@ self.addEventListener('message', async (ev) => {
 
     // Targets: either the list (scaling out) or a single tp, never both.
     var tps = buildTargets(opt.tps && opt.tps.length ? opt.tps
-                           : (opt.tp != null && isFinite(opt.tp) ? [{ price: +opt.tp }] : []), side, lots);
+                           : (opt.tp != null && isFinite(opt.tp) ? [{ price: +opt.tp }] : []), side, lots, this.spec.lotStep);
     var exitRef = side === 'buy' ? this.bar.bid.c : this.bar.ask.c;
     this._validateStops(side, exitRef, opt.sl, tps);
 
@@ -49102,6 +49252,7 @@ self.addEventListener('message', async (ev) => {
   Broker.prototype.pending = function (type, price, lots, opt) {
     opt = opt || {};
     if (!this.bar) throw new Error('No price yet — step the replay first');
+    lots = this._wholeLots(+lots);
     var side = /^buy/.test(type) ? 'buy' : 'sell';
     var q = this.quote();
     if (type === 'buyLimit'  && price >= q.ask) throw new Error('A buy limit must sit below the current ask');
@@ -49110,7 +49261,7 @@ self.addEventListener('message', async (ev) => {
     if (type === 'sellStop'  && price >= q.bid) throw new Error('A sell stop must sit below the current bid');
 
     var tps = buildTargets(opt.tps && opt.tps.length ? opt.tps
-                           : (opt.tp != null && isFinite(opt.tp) ? [{ price: +opt.tp }] : []), side, +lots);
+                           : (opt.tp != null && isFinite(opt.tp) ? [{ price: +opt.tp }] : []), side, +lots, this.spec.lotStep);
     this._validateStops(side, +price, opt.sl, tps);
 
     var o = { id: this.nextId(), type: type, side: side, price: +price, lots: +lots,
@@ -49154,9 +49305,9 @@ self.addEventListener('message', async (ev) => {
     var tps = null;
 
     if (chg.tps) {
-      tps = buildTargets(chg.tps, p.side, p.lots);
+      tps = buildTargets(chg.tps, p.side, p.lots, this.spec.lotStep);
     } else if ('tp' in chg) {
-      tps = buildTargets(chg.tp == null ? [] : [{ price: +chg.tp }], p.side, p.lots);
+      tps = buildTargets(chg.tp == null ? [] : [{ price: +chg.tp }], p.side, p.lots, this.spec.lotStep);
     } else if (chg.tpAt) {
       // Keep every other target exactly as it is — this is the chart-drag path.
       var moved = (p.tps || []).map(function (x) {
@@ -49165,7 +49316,7 @@ self.addEventListener('message', async (ev) => {
       if (chg.tpAt.price == null) moved = moved.filter(function (x) { return x.n !== chg.tpAt.n; });
       // Only the open ones are re-sorted and re-validated; filled ones are history.
       var done = moved.filter(function (x) { return x.hit; });
-      tps = buildTargets(moved.filter(function (x) { return !x.hit; }), p.side, p.lots);
+      tps = buildTargets(moved.filter(function (x) { return !x.hit; }), p.side, p.lots, this.spec.lotStep);
       tps = done.concat(tps);
     }
 
@@ -49206,9 +49357,10 @@ self.addEventListener('message', async (ev) => {
   Broker.prototype.closeFraction = function (posId, frac, reason) {
     var p = this.positions.find(function (x) { return x.id === posId; });
     if (!p) return null;
-    var part = Math.round(p.lots * Math.max(0, Math.min(1, +frac || 0)) * 100) / 100;
+    var step = this.spec.lotStep || 0.01;
+    var part = roundLots(p.lots * Math.max(0, Math.min(1, +frac || 0)), step);
     // Never round a partial down to nothing — the smallest tradable size wins.
-    if (part <= 0) part = 0.01;
+    if (part <= 0) part = step;
     if (part >= p.lots) part = null;                 // null = close it all
     return this.close(posId, part, reason || 'partial');
   };
@@ -49227,7 +49379,14 @@ self.addEventListener('message', async (ev) => {
 
     var diff = p.side === 'buy' ? (price - p.entry) : (p.entry - price);
     var comm = this.commission * part;
-    var pnl  = diff * this.valuePerPoint(part) - comm;
+    /* The entry commission was already taken from the balance when the
+       position opened (market/_fillPending). The TRADE's P&L must still carry
+       its share, or every trade reads better than the account moved — found
+       30.09.2026: 2 ES, $4 round turn, the trade said $971, the account made
+       $967. So the trade is net of both sides; the balance only gets the part
+       it has not been charged yet. */
+    var entryShare = p.commission * frac;
+    var pnl  = diff * this.valuePerPoint(part) - comm - entryShare;
 
     var tr = {
       id: p.id, side: p.side, lots: part, entry: p.entry, exit: price,
@@ -49239,10 +49398,10 @@ self.addEventListener('message', async (ev) => {
       partial: part < p.lots
     };
 
-    this.balance += pnl;
+    this.balance += pnl + entryShare;
     if (part >= p.lots) this.positions.splice(idx, 1);
     else {
-      p.lots = Math.round((p.lots - part) * 100) / 100;
+      p.lots = roundLots(p.lots - part, this.spec.lotStep);
       p.commission *= (1 - frac);
       // Take half off by hand and the remaining ladder keeps its shape: each
       // outstanding target shrinks by the same fraction. Without this the old
@@ -49250,9 +49409,10 @@ self.addEventListener('message', async (ev) => {
       // the far targets would silently lose their allocation. A target that
       // fills itself is excluded — it already consumed exactly its own size.
       if (!/^tp/.test(String(reason))) {
+        var stp = this.spec.lotStep || 0.01;
         (p.tps || []).forEach(function (x) {
           if (x.hit) return;
-          x.lots = Math.max(0.01, Math.round(x.lots * (1 - frac) * 100) / 100);
+          x.lots = Math.max(stp, roundLots(x.lots * (1 - frac), stp));
         });
       }
       p.tp = nearestTarget(p);
@@ -49268,7 +49428,10 @@ self.addEventListener('message', async (ev) => {
   Broker.prototype._mark = function () {
     if (!this.bar) { this.equity = this.balance; return; }
     var self = this, bid = this.bar.bid.c, ask = this.bar.ask.c, float = 0;
-    this.positions.forEach(function (p) { float += self.positionPnl(p, bid, ask); });
+    /* positionPnl is net of the entry commission (that is what the trader
+       should see on an open position), but the balance has ALREADY paid it —
+       adding it back here keeps equity from charging it twice. */
+    this.positions.forEach(function (p) { float += self.positionPnl(p, bid, ask) + (p.commission || 0); });
     this.equity = this.balance + float;
   };
 
@@ -49311,7 +49474,7 @@ self.addEventListener('message', async (ev) => {
 
       var comm = self.commission * o.lots;
       var p = { id: o.id, side: o.side, lots: o.lots, entry: fill, openT: bar.t,
-                sl: o.sl, tps: buildTargets(o.tps, o.side, o.lots), commission: comm,
+                sl: o.sl, tps: buildTargets(o.tps, o.side, o.lots, self.spec.lotStep), commission: comm,
                 trailPips: o.trailPips || 0, comment: o.comment, tag: o.tag || null };
       p.tp = nearestTarget(p);
       self.positions.push(p);
@@ -49530,6 +49693,11 @@ self.addEventListener('message', async (ev) => {
   Broker.prototype._recomputeBalance = function () {
     var b = this.startBalance;
     this.trades.forEach(function (t) { b += t.pnl; });
+    /* Closed trades carry both commission sides in their P&L. A position
+       that is still OPEN has paid its entry commission to the balance but is
+       in no trade yet — without this, resolving from ticks while a position
+       runs would hand that commission back. */
+    this.positions.forEach(function (p) { b -= (p.commission || 0); });
     this.balance = b;
     this._mark();
   };
@@ -49583,6 +49751,7 @@ self.addEventListener('message', async (ev) => {
     this.chart  = opts.chart || null;
     this.broker = opts.broker || new Broker({ symbol: this.symbol, balance: opts.balance,
                                               spec: specFor(this.symbol),
+                                              commission: opts.commission,   // per lot/contract, per side
                                               autoBreakEven: opts.autoBreakEven });
     this.levelPainter = opts.levelPainter || null;
 
@@ -49949,6 +50118,50 @@ self.addEventListener('message', async (ev) => {
     this.data = null;
   };
 
+  /* ─────────────── higher-timeframe view at the cursor ───────────────
+     The extra charts of the multi-chart layout show the SAME market on a
+     higher timeframe. The whole difficulty is the candle that is still
+     forming: at 10:23 the 10:00 H1 candle may only contain 10:00–10:23. A
+     finished H1 candle from the feed would show where the hour closes —
+     the future, handed over on the second chart.
+
+     So the live part is never taken from the feed. It is aggregated here from
+     exactly the bars the main chart has revealed (main[0 .. cursor-1]), plus
+     `gap`: the 1-minute bars between the start of the first higher-timeframe
+     bucket and the first main bar, when the main data does not begin on a
+     bucket boundary (a "Start at" window reaching into the previous day).
+     Everything BEFORE that first bucket is finished history and comes from
+     the feed as ordinary candles.
+
+     Pure function, no chart, no DOM — so the no-look-ahead rule is a unit
+     test (broker.test.js), not a hope.
+       gap, main : { n, t, o, h, l, c }   (t in ms, ascending)
+       cursor    : how many main bars are revealed
+       tfMs      : the higher timeframe (≤ one day; weeks align differently)
+     Returns rows { time (s), open, high, low, close }, ascending. */
+  function htfCandles(gap, main, cursor, tfMs) {
+    var out = [], cur = null, curB = -1;
+    function add(t, o, h, l, c) {
+      var b = Math.floor(t / tfMs) * tfMs;
+      if (b !== curB) {
+        curB = b;
+        cur = { time: Math.floor(b / 1000), open: o, high: h, low: l, close: c };
+        out.push(cur);
+      } else {
+        if (h > cur.high) cur.high = h;
+        if (l < cur.low) cur.low = l;
+        cur.close = c;
+      }
+    }
+    var first = (main && main.n) ? main.t[0] : Infinity, i;
+    if (gap && gap.n) {
+      for (i = 0; i < gap.n; i++) if (gap.t[i] < first) add(gap.t[i], gap.o[i], gap.h[i], gap.l[i], gap.c[i]);
+    }
+    var n = Math.max(0, Math.min(main ? main.n : 0, cursor | 0));
+    for (i = 0; i < n; i++) add(main.t[i], main.o[i], main.h[i], main.l[i], main.c[i]);
+    return out;
+  }
+
   /* ─────────────── public ─────────────── */
   window.ApexReplay = {
     Broker: Broker,
@@ -49956,6 +50169,7 @@ self.addEventListener('message', async (ev) => {
     specFor: specFor,
     digitsFor: digitsFor,
     buildTargets: buildTargets,
+    htfCandles: htfCandles,
     createBroker: function (o) { return new Broker(o); },
     createSession: function (o) { return new Session(o); }
   };
@@ -50178,6 +50392,11 @@ self.addEventListener('message', async (ev) => {
     days: 1,
     tf: '5m',
     balance: 10000,
+    /* Commission per lot or contract, ROUND TURN, in the quote currency —
+       the way brokers and prop firms quote it ("$4.12 per contract"). The
+       broker charges half on entry and half on exit. 0 = none; no default
+       is invented, because the real figure depends on the broker. */
+    commRT: 0,
     /* Funded mode: when on, the replay account IS a prop account — its size,
        its floor and its rules. Off is a plain backtest on own capital. */
     funded: false,
@@ -50487,6 +50706,20 @@ self.addEventListener('message', async (ev) => {
       '.arp-row .arp-f-at{flex:.9 1 140px;max-width:200px}',
       '.arp-row .arp-f-len{flex:.8 1 120px;max-width:220px}',
       '.arp-row .arp-f-bal{flex:.9 1 130px;max-width:240px}',
+      '.arp-row .arp-f-comm{flex:.7 1 120px;max-width:190px}',
+      /* multi-chart layout — see setLayout() */
+      '.arp-lay{display:inline-flex;gap:2px;align-items:center}',
+      '.arp-lay .arp-tool[disabled]{opacity:.35;cursor:not-allowed}',
+      '.arp-split{display:grid;gap:1px;height:440px;width:100%;min-height:0;background:var(--rim);border-radius:12px;overflow:hidden}',
+      '.arp-split.lay-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}',
+      '.arp-split.lay-4{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr)}',
+      '.arp-split>.arp-chart{height:auto!important;min-height:0;border:0;border-radius:0}',
+      '.arp-pane{position:relative;min-width:0;min-height:0;background:var(--layer);display:flex;flex-direction:column}',
+      '.arp-pane-hd{position:absolute;top:6px;left:8px;z-index:3;display:flex;gap:6px;align-items:center;font-size:var(--fs-xs);color:var(--ink3)}',
+      '.arp-pane-hd select{font:inherit;font-weight:600;color:var(--ink);background:var(--raised);border:0.5px solid var(--rim2);border-radius:var(--r-sm);padding:2px 6px}',
+      '.arp-pane-ch{flex:1 1 auto;min-height:0}',
+      '.aw-stage>.arp-split.aw-chart-slot{height:auto!important;border-radius:0}',
+      '@media(max-width:760px){.arp-split{height:520px}.arp-split.lay-2{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr)}}',
       '.arp-setup .el-fld label{font-size:10px;letter-spacing:.08em;color:var(--ink4);line-height:1}',
       '.arp-setup .el-fld input,.arp-setup .el-fld select{-webkit-appearance:none;appearance:none;box-sizing:border-box;' +
         'width:100%;min-width:0;height:var(--arp-h);margin:0;background:var(--surface);border:0.5px solid var(--rim2,var(--rim));' +
@@ -50811,7 +51044,7 @@ self.addEventListener('message', async (ev) => {
      which instrument you usually replay does not need to follow you to another
      device, and a lost entry costs one click. Saved backtests
      (ApexReplayStore) stay the durable record. */
-  var SETUP_KEYS = ['symbol', 'tf', 'days', 'balance', 'funded', 'fundedFirm', 'fundedSize',
+  var SETUP_KEYS = ['symbol', 'tf', 'days', 'balance', 'commRT', 'funded', 'fundedFirm', 'fundedSize',
                     'startAt', 'blind', 'mystery', 'playbook', 'rndKind'];
   function memKey(k) { return 'apexReplay' + k + '_' + (window.currentUID || 'local'); }
   function memGet(k, d) {
@@ -51041,7 +51274,9 @@ self.addEventListener('message', async (ev) => {
      is reviewed. Optionally the instrument too. The price scale stays: a
      chart without prices cannot be traded, and a level is not a date. */
   function hidden() { return !!(S.blind && !S.revealed); }
-  function symLabel() { return (hidden() && S.mystery) ? 'Mystery' : S.symbol; }
+  /* A futures proxy shows as its root ("ES"), never as the internal id
+     "ES_PROXY" — the id only exists to keep it apart from real ES trades. */
+  function symLabel() { return (hidden() && S.mystery) ? 'Mystery' : String(S.symbol).replace(/_PROXY$/, ''); }
   function blindDay(ms) {
     var d0 = S.dayStart || 0;
     return 'Day ' + (Math.floor((ms - d0) / 86400000) + 1);
@@ -51485,13 +51720,13 @@ self.addEventListener('message', async (ev) => {
            ', profit factor ' + (a.pf == null ? 'n/a' : a.pf === Infinity ? 'infinite' : a.pf.toFixed(2)) +
            ', average R ' + (a.avgR != null ? a.avgR.toFixed(2) : 'n/a') + ', max drawdown ' + a.maxDD.toFixed(2));
     if (a.avgWinPips != null || a.avgLossPips != null) {
-      L.push('Average winner ' + (a.avgWinPips != null ? a.avgWinPips.toFixed(1) : '-') + ' pips, average loser ' +
-             (a.avgLossPips != null ? a.avgLossPips.toFixed(1) : '-') + ' pips; hold time winners ' + fmtHold(a.holdWin) +
+      L.push('Average winner ' + (a.avgWinPips != null ? a.avgWinPips.toFixed(1) : '-') + ' ' + pipWord() + ', average loser ' +
+             (a.avgLossPips != null ? a.avgLossPips.toFixed(1) : '-') + ' ' + pipWord() + '; hold time winners ' + fmtHold(a.holdWin) +
              ', losers ' + fmtHold(a.holdLoss));
     }
     a.trades.forEach(function (t, i) {
-      L.push('Trade ' + (i + 1) + ': ' + t.side + ' ' + t.lots + ' lots, entry ' + sessionOf(t.openT) + ' session, ' +
-             t.pips.toFixed(1) + ' pips' + (t.r != null ? ' (' + t.r.toFixed(2) + 'R)' : '') +
+      L.push('Trade ' + (i + 1) + ': ' + t.side + ' ' + t.lots + ' ' + lotWord().toLowerCase() + ', entry ' + sessionOf(t.openT) + ' session, ' +
+             t.pips.toFixed(1) + ' ' + pipWord() + (t.r != null ? ' (' + t.r.toFixed(2) + 'R)' : '') +
              (t.risk === 0 ? ', no stop' : '') + ', held ' + fmtHold(t.hold) + ', P&L ' + t.pnl.toFixed(2));
     });
     a.findings.forEach(function (f) {
@@ -51586,14 +51821,59 @@ self.addEventListener('message', async (ev) => {
     render(body);
   }
 
+  /* Start (UTC ms) of the session "Next day ▸" would open: the first
+     weekday after the range just played. null = no later day has data yet.
+     One function for both the button and the prefetch, so the day that is
+     warmed is exactly the day that is opened. */
+  function nextSessionStart(dateIso, days) {
+    var t = Date.parse(dateIso + 'T00:00:00Z');
+    if (isNaN(t)) return null;
+    t += Math.max(1, Math.round(days || 1)) * 86400000;
+    while (new Date(t).getUTCDay() === 0 || new Date(t).getUTCDay() === 6) t += 86400000;
+    return t > Date.now() - 86400000 ? null : t;
+  }
+
+  /* ─────────────── prefetch ───────────────
+     Warms the cache for the session the trader is most likely to open next,
+     so it starts from IndexedDB instead of waiting on a throttled feed. The
+     data layer does the careful part (low priority, one file at a time, no
+     retries, pauses on the first refusal, newer call cancels older). Here we
+     only decide WHAT to warm:
+       • never in blind mode — the date must stay unknown, and warming the
+         next day would also be a guess;
+       • never Daily/Weekly (years of files — 5 days of it helps nobody) or
+         seconds timeframes (a different, tick-based path);
+       • at most PREFETCH_MAX_DAYS days, bid and ask;
+       • not on a metered "save data" connection.                         */
+  var PREFETCH_MAX_DAYS = 5;
+  function prefetchSession(sym, tf, startMs, days) {
+    var md = window.ApexMarketData;
+    if (!md || !md.prefetch || startMs == null || !sym) return;
+    if (S.blind || SUBMIN[tf] || tf === '1d' || tf === '1w') return;
+    try { if (navigator.connection && navigator.connection.saveData) return; } catch (e) {}
+    var n = Math.min(PREFETCH_MAX_DAYS, Math.max(1, Math.ceil(days || 1)));
+    md.prefetch(sym, startMs, startMs + n * 86400000 - 60000, { maxDays: n }).then(function (r) {
+      if (r && (r.fetched || r.failed)) console.info('[Replay] prefetch ' + sym + ' ' + isoDay(startMs) + ':', r);
+    });
+  }
+  /* Called once a session is on screen. The wait lets the chart, drawings
+     and indicators finish their own work first. */
+  function schedulePrefetchNext() {
+    if (S._pfTimer) clearTimeout(S._pfTimer);
+    S._pfTimer = setTimeout(function () {
+      S._pfTimer = null;
+      if (!S.session || S.blind) return;
+      prefetchSession(S.symbol, S.tf, nextSessionStart(S.date, S.days), S.days);
+    }, 4000);
+  }
+
   /* Same settings, the next session. After a blind one that means a fresh
      draw; otherwise the first weekday after the range just played. */
   function nextSession(body) {
     var nextDate = null;
     if (!S.blind && S.date) {
-      var t = Date.parse(S.date + 'T00:00:00Z') + Math.max(1, Math.round(S.days || 1)) * 86400000;
-      while (new Date(t).getUTCDay() === 0 || new Date(t).getUTCDay() === 6) t += 86400000;
-      if (t > Date.now() - 86400000) { toast('⚠ There is no later day with data yet'); return; }
+      var t = nextSessionStart(S.date, S.days);
+      if (t == null) { toast('⚠ There is no later day with data yet'); return; }
       nextDate = isoDay(t);
     }
     if (window.ApexWorkspace) window.ApexWorkspace.unmount();
@@ -51674,6 +51954,8 @@ self.addEventListener('message', async (ev) => {
         '</select></span></div>' +
         '<div class="el-fld arp-f-bal"><label for="arpBal">Start balance</label><input id="arpBal" type="number" inputmode="decimal" value="' + S.balance + '" min="100" step="100"' +
           (S.funded ? ' disabled title="Set by the funded account size"' : '') + '></div>' +
+        '<div class="el-fld arp-f-comm"><label for="arpComm" title="Per lot (FX, metals, CFDs) or per contract (futures), round turn — charged half on entry, half on exit">Commission <span class="arp-sub" style="display:inline">round turn</span></label>' +
+          '<input id="arpComm" type="number" inputmode="decimal" value="' + (+S.commRT || 0) + '" min="0" step="0.01"></div>' +
       '</div>' +
       '<div class="arp-foot">' +
         '<div class="arp-opts">' +
@@ -51820,6 +52102,7 @@ self.addEventListener('message', async (ev) => {
       '</div>' +
       '<div style="flex:1"></div>' +
       '<div class="arp-tgroup">' + tfBarHtml() + '</div>' +
+      layoutHtml() +
       /* Indicators: one button, and the chart is untouched until it is opened.
          The count sits in the label so you can see at a glance that something
          is drawn on your candles. */
@@ -51851,12 +52134,17 @@ self.addEventListener('message', async (ev) => {
     var swatches  = tools.querySelector('.arp-swatches');
     /* Die uebrigen .arp-tgroup in der Reihenfolge, in der toolbarHtml() sie
        schreibt: [Werkzeuge, Farben, Rueckgaengig/Loeschen, Zoom, Zeitfenster]. */
-    var rest = groups.filter(function (g) {
-      return g !== toolGroup && g !== swatches && g.classList.contains('arp-tgroup');
-    });
-    var editGroup = rest[0] || null;   // Rueckgaengig + alles loeschen
-    var zoomGroup = rest[1] || null;   // hinein/heraus/live/einpassen
-    var tfGroup   = rest[2] || null;   // Zeitfenster
+    /* Nach INHALT zuordnen, nicht nach Position: als die Magnet/Liste-Gruppe
+       dazukam, verrutschte die Zaehlung um eins — Rueckgaengig landete oben,
+       die Zeitfenster-Leiste blieb in der alten Werkzeugleiste zurueck
+       (gefunden 30.09.2026). */
+    var groupWith = function (sel) {
+      return groups.filter(function (g) { return g.classList.contains('arp-tgroup') && g.querySelector(sel); })[0] || null;
+    };
+    var magnetGroup = groupWith('[data-arp-magnet]');   // Magnet + Zeichnungs-Liste
+    var editGroup = groupWith('[data-arp-undo]');       // Rueckgaengig + alles loeschen
+    var zoomGroup = groupWith('[data-arp-zoomin]');     // hinein/heraus/live/einpassen
+    var tfGroup   = groupWith('[data-arp-tf]');         // Zeitfenster
 
     var head = chart.parentElement.querySelector('div');   // Kopfzeile der Karte
     var chartCard = chart.closest('.el-card');
@@ -51873,13 +52161,14 @@ self.addEventListener('message', async (ev) => {
       legendLabel: symLabel,
       sub: S.tf,
       top: [tfGroup,
+            document.getElementById('arpLayout'),
             document.querySelector('[data-arp-ind]'),
             document.querySelector('[data-arp-settings]'),
             zoomGroup].filter(Boolean),
       topRight: [document.getElementById('arpQuote'),
                  document.getElementById('arpSave')].filter(Boolean),
       exit: document.getElementById('arpExit'),
-      rail: [toolGroup, swatches, editGroup].filter(Boolean),
+      rail: [toolGroup, swatches, magnetGroup, editGroup].filter(Boolean),
       panels: [document.getElementById('arpInd'),
                document.getElementById('arpStyle')].filter(Boolean),
       dock: dockNodes,
@@ -51927,9 +52216,9 @@ self.addEventListener('message', async (ev) => {
                hängt, und man will sie ändern können, ohne zum Ticket zu scrollen.
                „Lots" ist ein Fachwort und bleibt unübersetzt. */
             '<span class="arp-oc-mid notranslate" translate="no">' +
-              '<input id="arpOcLots" class="arp-oc-lots" type="number" step="0.01" min="0.01" ' +
-                'inputmode="decimal" aria-label="Lots">' +
-              '<span class="arp-oc-unit">Lots</span>' +
+              '<input id="arpOcLots" class="arp-oc-lots" type="number" ' + lotAttrs() + ' ' +
+                'inputmode="decimal" aria-label="' + lotWord() + '">' +
+              '<span class="arp-oc-unit">' + lotWord() + '</span>' +
             '</span>' +
             '<button class="arp-oc sell" id="arpOcSell" title="Sell at the bid (S)">SELL</button>' +
           '</div>' +
@@ -52007,7 +52296,7 @@ self.addEventListener('message', async (ev) => {
             }).join('') +
           '</div>' +
           '<div class="arp-ticket" id="arpTicket">' +
-            '<div class="el-fld"><label>Lots</label><input id="arpLots" type="number" value="' + S.lots + '" step="0.01" min="0.01"></div>' +
+            '<div class="el-fld"><label>' + lotWord() + '</label><input id="arpLots" type="number" value="' + S.lots + '" ' + lotAttrs() + '></div>' +
             '<div class="el-fld" id="arpPriceFld" style="display:' + (S.orderKind === 'market' ? 'none' : '') + '">' +
               '<label>Price</label><input id="arpPrice" type="number" step="any" placeholder="level"></div>' +
             /* "pips" is protected from auto-translation: Google Translate turns
@@ -52015,9 +52304,9 @@ self.addEventListener('message', async (ev) => {
                the exact confusion between pips and price units this ticket
                exists to remove. See apexKeepName() for the same treatment of
                usernames. */
-            '<div class="el-fld"><label>Stop (<span translate="no" class="notranslate">pips</span>)</label>' +
+            '<div class="el-fld"><label>Stop (<span translate="no" class="notranslate">' + pipWord() + '</span>)</label>' +
               '<input id="arpSl" type="number" value="' + S.slPips + '" step="1" min="0"></div>' +
-            '<div class="el-fld"><label>Trail (<span translate="no" class="notranslate">pips</span>)</label>' +
+            '<div class="el-fld"><label>Trail (<span translate="no" class="notranslate">' + pipWord() + '</span>)</label>' +
               '<input id="arpTrail" type="number" value="' + S.trailPips + '" step="1" min="0" title="0 = no trailing stop. Otherwise the stop follows price at this distance and never moves back."></div>' +
           '</div>' +
           /* Only the "add a rung" control lives here — the target FIELDS are
@@ -52050,6 +52339,237 @@ self.addEventListener('message', async (ev) => {
      Every distance the user sees or types is a pip count. The broker converts;
      these only format. */
   function brk() { return S.session ? S.session.broker : null; }
+
+  /* Lots vs contracts. Futures proxies trade whole contracts (spec.lotStep 1);
+     everything else keeps 0.01-lot steps. Read from the SYMBOL, not the
+     broker: the cockpit HTML is built before the session exists. */
+  function lotStep() {
+    try { var sp = window.ApexReplay.specFor(S.symbol); return (sp && sp.lotStep) || 0.01; } catch (e) { return 0.01; }
+  }
+  function isContracts() { return lotStep() >= 1; }
+  /* A futures move is counted in TICKS — same arithmetic as a pip (one
+     step of spec.pipSize), only the word differs. */
+  function pipWord() { return isContracts() ? 'ticks' : 'pips'; }
+  function pipAbbr() { return isContracts() ? 't' : 'p'; }
+  function lotWord() { return isContracts() ? 'Contracts' : 'Lots'; }
+  function lotAttrs() { return isContracts() ? 'step="1" min="1"' : 'step="0.01" min="0.01"'; }
+  function fmtLots(x) { return isContracts() ? String(Math.round(+x || 0)) : (+x || 0).toFixed(2); }
+  /* A typed size snapped to what the instrument trades. Contracts FLOOR
+     (1.7 → 1): the ticket must never risk more than the number typed. */
+  function snapLots(x) {
+    var st = lotStep();
+    if (!(x > 0)) return st;
+    return st >= 1 ? Math.max(1, Math.floor(x + 1e-9)) : Math.max(0.01, Math.round(x * 100) / 100);
+  }
+  /* Switching between a lot instrument and a futures proxy: 0.10 lots is
+     not a contract size, and 3 contracts must not come back as 3.00 lots of
+     gold. Each kind keeps its own last size. Called before the cockpit is
+     built, on a fresh start and when a saved session is reopened. */
+
+  /* ─────────────── multi-chart layout (optional) ───────────────
+     Off by default: one chart, exactly as before. The layout switch in the
+     toolbar offers 1, 2 or 4 charts. The extra charts show the same
+     instrument on HIGHER timeframes (top-down reading: H4 bias, H1 structure,
+     5m entry), each with its own timeframe picker, and all of them follow
+     the one replay clock.
+
+     No look-ahead. The candle still forming on an extra chart is built by
+     ApexReplay.htfCandles() from the bars the main chart has revealed —
+     never the feed's finished candle. Only history from BEFORE the session's
+     first bucket is loaded from the feed, and that is all in the past.
+
+     Only higher timeframes, up to Daily: a lower timeframe would need data
+     the session never loaded, and weekly buckets start on Monday, which the
+     simple bucketing here does not do.
+
+     Remembered per viewer (localStorage): the layout and each pane's
+     timeframe. A phone gets at most two charts, stacked.                */
+  var PANE_TFS = ['15m', '1h', '4h', '1d'];
+  var PANE_CTX_DAYS = { '15m': 3, '30m': 4, '1h': 7, '4h': 25, '1d': 120 };
+  function paneChoices() {
+    var main = TF_MS[S.tf] || 300000;
+    return PANE_TFS.filter(function (t) { return (TF_MS[t] || 0) > main; });
+  }
+  function maxLayout() {
+    var n = paneChoices().length;
+    if (!n) return 1;
+    if (window.matchMedia && window.matchMedia('(max-width:760px)').matches) return 2;
+    // Four charts need at least two distinct higher timeframes to be worth it.
+    return n >= 2 ? 4 : 2;
+  }
+  function layoutHtml() {
+    var mx = maxLayout();
+    var cur = Math.min(S.layout || 1, mx);
+    return '<span class="arp-lay" id="arpLayout" role="group" aria-label="Chart layout">' +
+      [1, 2, 4].map(function (n) {
+        var off = n > mx;
+        return '<button type="button" class="arp-tool' + (n === cur ? ' on' : '') + '" data-arp-layout="' + n + '"' +
+          (off ? ' disabled' : '') +
+          ' title="' + (n === 1 ? 'One chart' : n + ' charts — the extra ones show higher timeframes') +
+          (off ? ' (not available on this timeframe or screen)' : '') + '" aria-label="' + n + ' chart' + (n > 1 ? 's' : '') + '">' +
+          (n === 1 ? '▣' : n === 2 ? '◫' : '⊞') + '</button>';
+      }).join('') + '</span>';
+  }
+  function paneTfsFor(count) {
+    var ch = paneChoices(), saved = memGet('PaneTfs', []) || [], out = [];
+    for (var i = 0; i < count; i++) {
+      var want = saved[i];
+      if (ch.indexOf(want) < 0) want = ch[Math.min(i, ch.length - 1)];
+      out.push(want);
+    }
+    return out;
+  }
+
+  function destroyPanes() {
+    (S.panes || []).forEach(function (p) {
+      p.dead = true;
+      if (p.inst) { try { p.inst.destroy(); } catch (e) {} }
+    });
+    S.panes = [];
+    var wrap = document.getElementById('arpSplit');
+    var main = document.getElementById('arpChart');
+    if (wrap && main && main.parentElement === wrap) {
+      // Put the main chart back exactly where the wrapper stood, with the
+      // workspace's sizing class carried back to it.
+      wrap.parentElement.insertBefore(main, wrap);
+      if (wrap.classList.contains('aw-chart-slot')) main.classList.add('aw-chart-slot');
+    }
+    if (wrap && wrap.parentElement) wrap.parentElement.removeChild(wrap);
+  }
+
+  function setLayout(n, remember) {
+    n = Math.min(n | 0 || 1, maxLayout());
+    S.layout = n;
+    if (remember) memSet('Layout', n);
+    document.querySelectorAll('[data-arp-layout]').forEach(function (b) {
+      b.classList.toggle('on', +b.getAttribute('data-arp-layout') === n);
+    });
+    destroyPanes();
+    var main = document.getElementById('arpChart');
+    if (n <= 1 || !main || !S.session || !S.session.data) return;
+
+    /* The main chart node is MOVED into the wrapper, never rebuilt: its
+       Lightweight Charts instance, drawings overlay and drag listeners all
+       live on it. In the workspace the wrapper takes over the stage slot. */
+    var wrap = document.createElement('div');
+    wrap.id = 'arpSplit';
+    wrap.className = 'arp-split lay-' + n;
+    if (main.classList.contains('aw-chart-slot')) { wrap.classList.add('aw-chart-slot'); main.classList.remove('aw-chart-slot'); }
+    main.parentElement.insertBefore(wrap, main);
+    wrap.appendChild(main);
+
+    var tfs = paneTfsFor(n - 1);
+    S.panes = tfs.map(function (tf, i) {
+      var box = document.createElement('div');
+      box.className = 'arp-pane';
+      box.innerHTML = '<div class="arp-pane-hd notranslate" translate="no">' +
+          '<select data-arp-panetf="' + i + '" aria-label="Timeframe of chart ' + (i + 2) + '">' +
+            paneChoices().map(function (t) { return '<option value="' + t + '"' + (t === tf ? ' selected' : '') + '>' + t + '</option>'; }).join('') +
+          '</select><span class="arp-pane-st"></span></div>' +
+        '<div class="arp-pane-ch"></div>';
+      wrap.appendChild(box);
+      var p = { tf: tf, box: box, inst: null, hist: [], gap: null, lastC: -1, lastLen: -1, dead: false };
+      startPane(p);
+      return p;
+    });
+    var ws = window.ApexWorkspace;
+    if (ws && ws.isOn() && ws.chart && ws.chart() && ws.chart().chart) { try { ws.chart().chart.timeScale().applyOptions({}); } catch (e) {} }
+  }
+
+  function paneStatus(p, txt) {
+    var el = p.box.querySelector('.arp-pane-st');
+    if (el) el.textContent = txt || '';
+  }
+
+  function startPane(p) {
+    var host = p.box.querySelector('.arp-pane-ch');
+    window.ApexChart.create(host, { symbol: S.symbol, timeframe: p.tf, volume: false }).then(function (inst) {
+      if (p.dead) { inst.destroy(); return; }
+      p.inst = inst;
+      if (window.ApexChartStyle) {
+        var st = window.ApexChartStyle.load();
+        try { inst.setStyle(st); } catch (e) {}
+      }
+      if (hidden()) {
+        // Blind session: no dates anywhere, on any chart.
+        try { inst.chart.applyOptions({ timeScale: { visible: false }, localization: { timeFormatter: function () { return ''; } } }); } catch (e) {}
+      }
+      loadPaneHistory(p);
+    });
+  }
+
+  /* History = finished candles strictly before the first bucket of the
+     session, plus the 1-minute gap into that bucket when the main data starts
+     mid-bucket. Both are in the past of every cursor position. */
+  function loadPaneHistory(p) {
+    var md = window.ApexMarketData, d = S.session && S.session.data;
+    if (!md || !d || !d.bid || !d.bid.n) return;
+    var tfMs = TF_MS[p.tf], first = d.bid.t[0];
+    var b0 = Math.floor(first / tfMs) * tfMs;
+    var from = b0 - (PANE_CTX_DAYS[p.tf] || 7) * 86400000;
+    p.dataRef = d; p.hist = []; p.gap = null; p.lastC = -1;
+    paneStatus(p, 'loading…');
+    paintPane(p);                             // live part shows immediately
+    var histP = md.getBars(S.symbol, from, b0 - 60000, p.tf, { side: 'bid', allowGaps: true })
+      .catch(function () { return null; });
+    var gapP = (first > b0)
+      ? md.getBars(S.symbol, b0, first - 60000, '1m', { side: 'bid', allowGaps: true }).catch(function () { return null; })
+      : Promise.resolve(null);
+    Promise.all([histP, gapP]).then(function (r) {
+      if (p.dead || p.dataRef !== (S.session && S.session.data)) return;
+      var h = r[0], rows = [];
+      if (h && h.n) for (var i = 0; i < h.n; i++) {
+        if (h.t[i] >= b0) break;              // belt and braces: nothing from the live bucket
+        rows.push({ time: Math.floor(h.t[i] / 1000), open: h.o[i], high: h.h[i], low: h.l[i], close: h.c[i] });
+      }
+      p.hist = rows;
+      p.gap = r[1];
+      p.lastC = -1;
+      /* An unaligned start with no gap data would make the first live candle
+         incomplete, not wrong-in-the-future — say so rather than hide it. */
+      paneStatus(p, (first > b0 && !(r[1] && r[1].n)) ? 'first candle partial' : (h ? '' : 'history unavailable'));
+      if (p.inst && rows.length) {
+        try { p.inst.series.applyOptions({ priceFormat: { type: 'price', precision: digits(), minMove: Math.pow(10, -digits()) } }); } catch (e) {}
+      }
+      paintPane(p);
+      try { p.inst.chart.timeScale().scrollToRealTime(); } catch (e) {}
+    });
+  }
+
+  /* Called on every replay state change. Cheap in the common case: when the
+     cursor moved forward inside the same higher-timeframe candle, only that
+     candle is updated. */
+  function paintPane(p) {
+    if (p.dead || !p.inst || p.inst._tot() || !S.session || !S.session.data) return;
+    var d = S.session.data;
+    if (p.dataRef !== d) { loadPaneHistory(p); return; }    // timeframe switch reloaded the main data
+    var c = S.session.cursor;
+    var live = window.ApexReplay.htfCandles(p.gap, d.bid, c, TF_MS[p.tf]);
+    var len = p.hist.length + live.length;
+    if (c >= p.lastC && len === p.lastLen && live.length) {
+      p.inst.series.update(live[live.length - 1]);
+    } else {
+      p.inst.series.setData(p.hist.concat(live));
+    }
+    p.lastC = c; p.lastLen = len;
+  }
+  function paintPanes() { (S.panes || []).forEach(paintPane); }
+  function restoreLayout() {
+    var n = +memGet('Layout', 1) || 1;
+    S.layout = 1;
+    if (n > 1) setLayout(n, false);
+  }
+
+  function syncSizeKind() {
+    if (isContracts()) {
+      if (S._sizeKind !== 'c') { S._lotsFx = S.lots; S.lots = S._lotsC || 1; }
+      S.lots = snapLots(S.lots);
+      S._sizeKind = 'c';
+    } else {
+      if (S._sizeKind === 'c') { S._lotsC = S.lots; S.lots = S._lotsFx || 0.10; }
+      S._sizeKind = 'l';
+    }
+  }
   function digits() {
     var b = brk();
     return b ? b.digits() : 2;
@@ -52060,7 +52580,7 @@ self.addEventListener('message', async (ev) => {
   }
   function fmtPips(p, signed) {
     if (p == null || !isFinite(p)) return '—';
-    var s = (signed && p > 0 ? '+' : '') + p.toFixed(1) + 'p';
+    var s = (signed && p > 0 ? '+' : '') + p.toFixed(1) + pipAbbr();
     return s;
   }
   function fmtPx(px) {
@@ -52087,7 +52607,7 @@ self.addEventListener('message', async (ev) => {
       var del = (S.targets.length > 1)
         ? '<button class="arp-del" data-tgt-del="' + i + '" title="Remove target ' + n + '" aria-label="Remove target ' + n + '">✕</button>' : '';
       return '<div class="el-fld" data-tgt-cell>' +
-          '<label>TP' + n + ' (<span translate="no" class="notranslate">pips</span>)</label>' +
+          '<label>TP' + n + ' (<span translate="no" class="notranslate">' + pipWord() + '</span>)</label>' +
           '<input type="number" min="0" step="1" data-tgt-pips="' + i + '" value="' + (t.pips != null ? t.pips : '') + '">' +
         '</div>' +
         '<div class="el-fld" data-tgt-cell>' +
@@ -52154,7 +52674,7 @@ self.addEventListener('message', async (ev) => {
     if (ocL && document.activeElement !== ocL) {
       var lotsFld = document.getElementById('arpLots');
       var lots = parseFloat(lotsFld && lotsFld.value) || S.lots || 0;
-      if (lots > 0) ocL.value = lots.toFixed(2);
+      if (lots > 0) ocL.value = fmtLots(snapLots(lots));
     }
 
     var pl = document.getElementById('arpPlay'); if (pl) pl.innerHTML = st.playing ? '<svg class=ic aria-hidden=true><use href=#i-pause ></use></svg>' : '<svg class=ic aria-hidden=true><use href=#i-play ></use></svg>';
@@ -52182,7 +52702,7 @@ self.addEventListener('message', async (ev) => {
         kpi('Equity', money(b.equity), pnl >= 0 ? 'pos' : 'neg', 'Balance ' + money(b.balance)) +
         kpi('Open P&L', money(b.equity - b.balance), (b.equity - b.balance) >= 0 ? 'pos' : 'neg', st.openPositions + ' position(s)') +
         kpi('Net', money(s.net), s.net >= 0 ? 'pos' : 'neg', s.trades + ' trade(s)') +
-        kpi('Net pips', s.trades ? fmtPips(s.netPips, true) : '—', s.netPips >= 0 ? 'pos' : 'neg', '1 pip = ' + s.pipSize) +
+        kpi('Net ' + pipWord(), s.trades ? fmtPips(s.netPips, true) : '—', s.netPips >= 0 ? 'pos' : 'neg', '1 ' + pipWord().slice(0, -1) + ' = ' + s.pipSize) +
         kpi('Win rate', s.trades ? (s.winRate * 100).toFixed(0) + '%' : '—', '', s.wins + 'W / ' + s.losses + 'L') +
         kpi('Profit factor', s.trades ? (s.profitFactor === Infinity ? '∞' : s.profitFactor.toFixed(2)) : '—', '', '') +
         kpi('Max drawdown', money(-s.maxDrawdown), 'neg', '') +
@@ -52222,9 +52742,24 @@ self.addEventListener('message', async (ev) => {
       var ps = b.pipSize();
       // translate="no": this line is the definition of a pip, so it is the last
       // place that may be machine-translated into "Kerne" or "Punkte".
-      pr.innerHTML = '<span translate="no" class="notranslate"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg> ' + esc(symLabel()) +
-        ': 1 pip = <b>' + ps + '</b> of price · 50 pips = <b>' + fmtPx(ps * 50) + '</b> · at ' +
-        S.lots + ' lots 1 pip = <b>' + money(b.pipValue(S.lots)) + '</b></span>';
+      if (isContracts()) {
+        /* Futures proxy: say what a tick is worth, and say plainly where the
+           prices come from. The CFD's spread is the CFD's (about two ES ticks
+           where the future trades one), so fills are slightly WORSE than at
+           the exchange — never better. That is stated, not "corrected": a
+           made-up exchange spread would be exactly the invented number the
+           replay refuses to use anywhere else. */
+        pr.innerHTML = '<span translate="no" class="notranslate"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg> ' + esc(symLabel()) +
+          ': 1 tick = <b>' + ps + '</b> · 1 point = <b>' + money(b.spec.contract) + '</b> per contract · at ' +
+          fmtLots(S.lots) + ' contract' + (S.lots == 1 ? '' : 's') + ' 1 tick = <b>' + money(b.pipValue(S.lots)) + '</b>' +
+          (S.commRT ? ' · commission ' + money(S.commRT) + ' round turn' : '') + '</span>' +
+          '<span class="arp-sub" style="display:block;margin-top:4px">CFD price data: levels sit a small basis away from the futures chart, and the spread is the CFD\'s — slightly wider than the exchange\'s, so fills here are, if anything, a little worse.</span>';
+      } else {
+        pr.innerHTML = '<span translate="no" class="notranslate"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg> ' + esc(symLabel()) +
+          ': 1 pip = <b>' + ps + '</b> of price · 50 pips = <b>' + fmtPx(ps * 50) + '</b> · at ' +
+          S.lots + ' lots 1 pip = <b>' + money(b.pipValue(S.lots)) + '</b>' +
+          (S.commRT ? ' · commission ' + money(S.commRT) + ' round turn' : '') + '</span>';
+      }
     }
 
     paintOpen(); paintPending(); paintTrades();
@@ -52248,7 +52783,7 @@ self.addEventListener('message', async (ev) => {
       return;
     }
     var d = digits();
-    el.innerHTML = '<table class="arp-pos"><thead><tr><th>Side</th><th>Lots</th><th>Entry</th>' +
+    el.innerHTML = '<table class="arp-pos"><thead><tr><th>Side</th><th>' + lotWord() + '</th><th>Entry</th>' +
         '<th>Stop</th><th>Targets</th><th>P&L</th><th></th></tr></thead><tbody>' +
       b.positions.map(function (p) {
         var pl   = b.positionPnl(p, q.bid, q.ask);
@@ -52263,7 +52798,7 @@ self.addEventListener('message', async (ev) => {
         return '<tr>' +
           '<td style="color:' + (p.side === 'buy' ? 'var(--profit)' : 'var(--loss)') + '">' +
             p.side.toUpperCase() + ' ' + tags + '</td>' +
-          '<td>' + p.lots.toFixed(2) + '</td>' +
+          '<td>' + fmtLots(p.lots) + '</td>' +
           '<td>' + p.entry.toFixed(d) + '<span class="arp-sub">now ' + here.toFixed(d) + '</span></td>' +
           '<td><input class="arp-inline" type="number" step="any" data-arp-sl="' + p.id + '" value="' +
             (p.sl != null ? p.sl.toFixed(d) : '') + '" placeholder="—">' +
@@ -52276,7 +52811,7 @@ self.addEventListener('message', async (ev) => {
                   '<span class="u" style="font-size:10px;color:var(--ink4)">TP' + x.n + '</span>' +
                   '<input class="arp-inline" type="number" step="any" data-arp-tp="' + p.id + ':' + x.n + '" value="' + x.price.toFixed(d) + '">' +
                   '<span class="arp-sub" style="display:inline;min-width:74px">' +
-                    fmtPips(Math.abs(pipsOf(x.price - p.entry))) + ' · ' + x.lots.toFixed(2) + ' lots</span>' +
+                    fmtPips(Math.abs(pipsOf(x.price - p.entry))) + ' · ' + fmtLots(x.lots) + ' ' + (isContracts() && +x.lots === 1 ? 'contract' : lotWord().toLowerCase()) + '</span>' +
                   '<button class="arp-del" data-rmtp="' + p.id + ':' + x.n + '" title="Remove this target" aria-label="Remove this target">✕</button>' +
                 '</div>';
               }).join('')
@@ -52290,7 +52825,7 @@ self.addEventListener('message', async (ev) => {
         '<tr class="arp-manage"><td colspan="7"><div class="arp-mgr">' +
           '<button class="arp-x" data-be="' + p.id + '" title="Move the stop to entry (+ the offset), so the trade cannot lose any more">⇢ Break-even</button>' +
           '<input class="arp-inline xs" type="number" step="1" min="0" value="0" data-beoff="' + p.id + '" title="Pips beyond entry — covers spread and commission">' +
-          '<span>pips past entry</span>' +
+          '<span>' + pipWord() + ' past entry</span>' +
           '<span class="sep"></span>' +
           '<span>Close</span>' +
           '<button class="arp-x" data-frac="' + p.id + ':0.25">25%</button>' +
@@ -52303,7 +52838,7 @@ self.addEventListener('message', async (ev) => {
           '<span class="sep"></span>' +
           '<span>+ Target</span>' +
           '<input class="arp-inline xs" type="number" step="1" min="1" placeholder="pips" data-addpips="' + p.id + '">' +
-          '<input class="arp-inline xs" type="number" step="0.01" min="0.01" placeholder="lots" data-addlots="' + p.id + '">' +
+          '<input class="arp-inline xs" type="number" ' + lotAttrs() + ' placeholder="' + lotWord().toLowerCase() + '" data-addlots="' + p.id + '">' +
           '<button class="arp-x" data-addtp="' + p.id + '">Add</button>' +
         '</div></td></tr>';
       }).join('') + '</tbody></table>' +
@@ -52317,13 +52852,13 @@ self.addEventListener('message', async (ev) => {
     var b = S.session.broker, d = digits();
     if (!b.orders.length) { card.style.display = 'none'; el.innerHTML = ''; return; }
     card.style.display = '';
-    el.innerHTML = '<table class="arp-pos"><thead><tr><th>Type</th><th>Lots</th><th>Level</th><th>SL</th><th>Targets</th><th></th></tr></thead><tbody>' +
+    el.innerHTML = '<table class="arp-pos"><thead><tr><th>Type</th><th>' + lotWord() + '</th><th>Level</th><th>SL</th><th>Targets</th><th></th></tr></thead><tbody>' +
       b.orders.map(function (o) {
         return '<tr><td style="color:' + (o.side === 'buy' ? 'var(--profit)' : 'var(--loss)') + '">' + esc(o.type) + '</td>' +
-          '<td>' + o.lots.toFixed(2) + '</td><td>' + o.price.toFixed(d) + '</td>' +
+          '<td>' + fmtLots(o.lots) + '</td><td>' + o.price.toFixed(d) + '</td>' +
           '<td>' + (o.sl != null ? o.sl.toFixed(d) : '—') + '</td>' +
           '<td>' + ((o.tps && o.tps.length)
-            ? o.tps.map(function (x) { return 'TP' + x.n + ' ' + x.price.toFixed(d) + ' (' + x.lots.toFixed(2) + ')'; }).join('<br>')
+            ? o.tps.map(function (x) { return 'TP' + x.n + ' ' + x.price.toFixed(d) + ' (' + fmtLots(x.lots) + ')'; }).join('<br>')
             : '—') + '</td>' +
           '<td><button class="arp-x" data-cancel="' + o.id + '">Cancel</button></td></tr>';
       }).join('') + '</tbody></table>';
@@ -52339,7 +52874,7 @@ self.addEventListener('message', async (ev) => {
       (amb ? '<div class="el-note arp-amb"><svg class=ic aria-hidden=true><use href=#i-alert ></use></svg> ' + amb + ' trade(s) had the stop AND the target inside one candle. ' +
              'The loss was booked, because a candle cannot tell you which came first. ' +
              '<button class="el-btn" id="arpResolve" style="margin-left:6px">Resolve from tick data</button></div>' : '') +
-      '<table class="arp-pos"><thead><tr><th>Time</th><th>Side</th><th>Lots</th><th>Entry</th><th>Exit</th><th>Why</th><th>Pips</th><th>R</th>' +
+      '<table class="arp-pos"><thead><tr><th>Time</th><th>Side</th><th>' + lotWord() + '</th><th>Entry</th><th>Exit</th><th>Why</th><th>' + (isContracts() ? 'Ticks' : 'Pips') + '</th><th>R</th>' +
         (planCol ? '<th>Plan</th>' : '') + '<th>P&L</th></tr></thead><tbody>' +
       b.trades.slice().reverse().map(function (t) {
         var pips = (t.pips != null) ? t.pips : pipsOf(t.points);
@@ -52351,7 +52886,7 @@ self.addEventListener('message', async (ev) => {
           : '<td>—</td>') : '';
         return '<tr><td>' + fmtTime(t.closeT) + '</td>' +
           '<td style="color:' + (t.side === 'buy' ? 'var(--profit)' : 'var(--loss)') + '">' + t.side.toUpperCase() + '</td>' +
-          '<td>' + t.lots.toFixed(2) + (t.partial ? ' <span class="arp-sub" style="display:inline">part</span>' : '') + '</td>' +
+          '<td>' + fmtLots(t.lots) + (t.partial ? ' <span class="arp-sub" style="display:inline">part</span>' : '') + '</td>' +
           '<td>' + t.entry.toFixed(digits()) + '</td><td>' + t.exit.toFixed(digits()) + '</td>' +
           '<td>' + t.reason + (t.ambiguous ? ' <span class="arp-amb" title="Stop and target were both inside this candle">?</span>' : '') +
                    (t.resolved ? ' <span style="color:var(--profit)" title="Confirmed against tick data">✓</span>' : '') + '</td>' +
@@ -52366,7 +52901,7 @@ self.addEventListener('message', async (ev) => {
   /* ─────────────── actions ─────────────── */
   function readTicket() {
     var g = function (id) { var e = document.getElementById(id); return e ? e.value : null; };
-    S.lots      = parseFloat(g('arpLots')) || S.lots || 0.01;
+    S.lots      = snapLots(parseFloat(g('arpLots')) || S.lots || lotStep());
     var sl      = parseFloat(g('arpSl'));
     if (!isNaN(sl)) S.slPips = Math.max(0, sl);
     var tr      = parseFloat(g('arpTrail'));
@@ -52396,7 +52931,7 @@ self.addEventListener('message', async (ev) => {
       alloc += pct;
       out.push({
         price: b.round(side === 'buy' ? ref + b.pipsToPx(pips) : ref - b.pipsToPx(pips)),
-        lots: Math.round(lots * pct / 100 * 100) / 100
+        lots: isContracts() ? Math.round(lots * pct / 100) : Math.round(lots * pct / 100 * 100) / 100
       });
     });
     return out;
@@ -52458,7 +52993,7 @@ self.addEventListener('message', async (ev) => {
 
     b.positions.forEach(function (p) {
       lv.push({ key: 'e' + p.id, kind: 'entry', posId: p.id, price: p.entry,
-                title: p.side.toUpperCase() + ' ' + p.lots.toFixed(2) });
+                title: p.side.toUpperCase() + ' ' + fmtLots(p.lots) });
       if (p.sl != null) {
         lv.push({ key: 's' + p.id, kind: 'sl', posId: p.id, price: p.sl, drag: true, width: 2,
                   title: 'SL ' + fmtPips(Math.abs(pipsOf(p.sl - p.entry))) +
@@ -52469,7 +53004,7 @@ self.addEventListener('message', async (ev) => {
         lv.push({ key: 't' + p.id + '_' + x.n, kind: 'tp', posId: p.id, n: x.n, price: x.price,
                   drag: true, width: 2,
                   title: 'TP' + x.n + ' ' + fmtPips(Math.abs(pipsOf(x.price - p.entry))) +
-                         ' · ' + x.lots.toFixed(2) });
+                         ' · ' + fmtLots(x.lots) });
       });
     });
 
@@ -52702,6 +53237,15 @@ self.addEventListener('message', async (ev) => {
     if (S._ac) { try { S._ac.abort(); } catch (e) {} }
     S._ac = (typeof AbortController === 'function') ? new AbortController() : null;
     var sig = S._ac ? { signal: S._ac.signal } : false;
+    body.addEventListener('change', function (e) {
+      var sel = e.target;
+      if (!sel || !sel.hasAttribute || !sel.hasAttribute('data-arp-panetf')) return;
+      var i = +sel.getAttribute('data-arp-panetf'), p = (S.panes || [])[i];
+      if (!p) return;
+      var saved = memGet('PaneTfs', []) || [];
+      saved[i] = sel.value; memSet('PaneTfs', saved);
+      setLayout(S.layout, false);             // rebuild with the new choice
+    }, sig);
     bindScrub();
     paintPlaybook();
     on('arpReviewBtn', 'click', function () { openReview('manual', body); });
@@ -52829,7 +53373,7 @@ self.addEventListener('message', async (ev) => {
         var tp2 = val('[data-trailin="' + trId + '"]');
         act(function () {
           S.session.modify(+trId, { trailPips: isNaN(tp2) ? 0 : tp2 });
-          toast(tp2 > 0 ? 'Trailing stop: ' + tp2 + ' pips' : 'Trailing stop off');
+          toast(tp2 > 0 ? 'Trailing stop: ' + tp2 + ' ' + pipWord() : 'Trailing stop off');
         });
         return;
       }
@@ -52857,7 +53401,7 @@ self.addEventListener('message', async (ev) => {
           var now = (b.positions.find(function (x) { return x.id === +addId; }) || { tps: [] })
                       .tps.filter(function (x) { return !x.hit; }).length;
           toast(now > before
-            ? 'Target added at ' + pips + ' pips'
+            ? 'Target added at ' + pips + ' ' + pipWord()
             : '⚠ No size left to allocate — shrink another target first');
         });
         return;
@@ -53026,6 +53570,9 @@ self.addEventListener('message', async (ev) => {
       var tf = g('data-arp-tf');
       if (tf && tf !== S.tf) { switchTimeframe(tf); return; }
 
+      var lay = g('data-arp-layout');
+      if (lay && !t.disabled) { setLayout(+lay, true); return; }
+
       if (t.id === 'arpResolve') {
         t.disabled = true; t.textContent = 'Checking ticks…';
         S.session.broker.resolveAmbiguous().then(function (n) {
@@ -53146,6 +53693,15 @@ self.addEventListener('message', async (ev) => {
     });
     S.session.setTimeframe(tf).then(function () {
       if (S.draw) S.draw.sync();
+      /* Extra charts only show HIGHER timeframes than the main one, so the
+         choice (and whether 2 or 4 charts are possible at all) is rebuilt. */
+      if (S.layout > 1 || (S.panes && S.panes.length)) {
+        var want = +memGet('Layout', S.layout) || S.layout;
+        setLayout(want, false);
+      }
+      document.querySelectorAll('[data-arp-layout]').forEach(function (b) {
+        b.disabled = +b.getAttribute('data-arp-layout') > maxLayout();
+      });
       if (wasPlaying) S.session.play();
       paint();
     }).catch(function (e) { toast('⚠ ' + (e.message || 'timeframe switch failed')); });
@@ -53220,6 +53776,7 @@ self.addEventListener('message', async (ev) => {
       symbol: S.symbol, tf: S.tf,
       from: s._from, to: s._to,
       balance: S.balance,
+      commRT: +S.commRT || 0,
       autoBE: !!S.autoBE,
       cursor: s.cursor,
       total: s.data.n,
@@ -53350,7 +53907,7 @@ self.addEventListener('message', async (ev) => {
     body.innerHTML = '<div class="el-card"><div class="el-note">Opening the shared session…</div></div>';
 
     window.ApexReplayStore.loadShared(id).then(function (rec) {
-      S.symbol = rec.symbol; S.tf = rec.tf; S.balance = rec.balance || 10000;
+      S.symbol = rec.symbol; S.tf = rec.tf; S.balance = rec.balance || 10000; S.commRT = +rec.commRT || 0;
       S.autoBE = !!rec.autoBE;
       // Never their save slot: pressing 💾 keeps a copy under the viewer's
       // own account rather than trying to write back to the owner's.
@@ -53371,6 +53928,7 @@ self.addEventListener('message', async (ev) => {
         chart.onIndicatorsInvalid(applyIndicators);
         S.session = window.ApexReplay.createSession({
           symbol: S.symbol, timeframe: S.tf, chart: chart, balance: S.balance,
+          commission: (+S.commRT || 0) / 2,
           autoBreakEven: S.autoBE, levelPainter: paintLevels
         });
         chart.enableLevelDrag({
@@ -53430,11 +53988,11 @@ self.addEventListener('message', async (ev) => {
      this device ('resume'). A resumed one keeps pointing at the save it came
      from, so pressing Save updates that entry instead of adding a copy. */
   function openRecord(rec, body, how) {
-    S.symbol = rec.symbol; S.tf = rec.tf; S.balance = rec.balance || 10000;
+    S.symbol = rec.symbol; S.tf = rec.tf; S.balance = rec.balance || 10000; S.commRT = +rec.commRT || 0;
     S.autoBE = !!rec.autoBE;
     if (rec.setup) {
       applySetup(rec.setup);
-      S.symbol = rec.symbol; S.tf = rec.tf; S.balance = rec.balance || S.balance;
+      S.symbol = rec.symbol; S.tf = rec.tf; S.balance = rec.balance || S.balance; S.commRT = +rec.commRT || 0;
     } else {
       // Saved before sessions carried their setup: a plain backtest.
       S.funded = false; S.blind = false; S.mystery = false; S.playbook = ''; S.startAt = 'auto';
@@ -53447,6 +54005,7 @@ self.addEventListener('message', async (ev) => {
     S.pbChecks = [];
     S.err = null;
 
+    syncSizeKind();
     body.innerHTML = cockpitHtml();
     var unBusy = watchBusy();
     showLoad();
@@ -53460,6 +54019,7 @@ self.addEventListener('message', async (ev) => {
       applyBlindAxis();
       S.session = window.ApexReplay.createSession({
         symbol: S.symbol, timeframe: S.tf, chart: chart, balance: S.balance,
+        commission: (+S.commRT || 0) / 2,
         autoBreakEven: S.autoBE, levelPainter: paintLevels
       });
       chart.enableLevelDrag({
@@ -53510,6 +54070,7 @@ self.addEventListener('message', async (ev) => {
       paint(true);
       startResumeTimer();
       enterWorkspace(body);
+      restoreLayout();
       toast(how === 'resume'
         ? '▶ Picked up where you left off — ' + (rec.stats ? rec.stats.trades : 0) + ' trade(s)'
         : '“' + rec.name + '” reopened — ' + (rec.stats ? rec.stats.trades : 0) + ' trade(s)');
@@ -53527,7 +54088,7 @@ self.addEventListener('message', async (ev) => {
   /* The session events every entry point needs. 'end' opens the review —
      running out of data is the natural end of a session. */
   function bindSessionEvents(body) {
-    S.session.on('state', function (st) { paint(); challengeTick(st); });
+    S.session.on('state', function (st) { paint(); challengeTick(st); if (S.panes && S.panes.length) paintPanes(); });
     S.session.on('end', function () {
       if (S._rebuilding) return;
       toast('Replay finished — end of data');
@@ -53607,6 +54168,7 @@ self.addEventListener('message', async (ev) => {
     } else if (el('arpBal')) {
       S.balance = parseFloat(el('arpBal').value) || 10000;
     }
+    if (el('arpComm')) S.commRT = Math.max(0, parseFloat(el('arpComm').value) || 0);
     if (!S.blind) S.mystery = false;
   }
 
@@ -53735,6 +54297,7 @@ self.addEventListener('message', async (ev) => {
     var target = SUBMIN[S.tf] ? null : startAtMs(dayStart);
     if (target != null) from = Math.min(from, target - 60 * (TF_MS[S.tf] || 300000));
 
+    syncSizeKind();
     body.innerHTML = cockpitHtml();
     var unBusy = watchBusy();
     showLoad();
@@ -53747,6 +54310,7 @@ self.addEventListener('message', async (ev) => {
       applyBlindAxis();
       S.session = window.ApexReplay.createSession({
         symbol: S.symbol, timeframe: S.tf, chart: chart, balance: S.balance,
+        commission: (+S.commRT || 0) / 2,
         autoBreakEven: S.autoBE,
         // The session paints levels through us so every target and its pip
         // distance ends up on the chart, not just a single SL/TP pair.
@@ -53812,6 +54376,8 @@ self.addEventListener('message', async (ev) => {
       paint();
       startResumeTimer();
       enterWorkspace(body);
+      restoreLayout();
+      schedulePrefetchNext();
       if (S.blind) toast('Blind session' + (S._rollNote ? ' · ' + S._rollNote : '') + ' — the date is revealed in the review');
       else if (S._rollNote) toast(S._rollNote);
       S._rollNote = '';
@@ -53830,6 +54396,7 @@ self.addEventListener('message', async (ev) => {
 
   function teardown() {
     if (S._resumeTimer) { clearInterval(S._resumeTimer); S._resumeTimer = null; }
+    if (S._pfTimer) { clearTimeout(S._pfTimer); S._pfTimer = null; }
     // Leaving the tab or the page is not ending the session: keep it to
     // offer back. endSession() sets _discard for the deliberate case.
     if (!S._discard) { try { snapshotResume(); } catch (e) {} }
@@ -53840,6 +54407,7 @@ self.addEventListener('message', async (ev) => {
     // Drawings hold window-level pointer listeners and a ResizeObserver, so
     // they must go before the chart they are projected onto.
     if (S.draw) { try { S.draw.destroy(); } catch (e) {} S.draw = null; }
+    try { destroyPanes(); } catch (e) {}
     if (S.session) { try { S.session.destroy(); } catch (e) {} }
     if (S.chart) { try { S.chart.destroy(); } catch (e) {} S.chart = null; }
     S.session = null;
@@ -53891,6 +54459,7 @@ self.addEventListener('message', async (ev) => {
       S.rndKind = v('arpRndKind') || S.rndKind;
       if (document.getElementById('arpPbSel')) S.playbook = v('arpPbSel') || '';
       if (!S.funded) S.balance = parseFloat(v('arpBal')) || S.balance;
+      if (v('arpComm') != null) S.commRT = Math.max(0, parseFloat(v('arpComm')) || 0);
     }
     var rerender = function () { keepForm(); render(body); };
 
@@ -53937,6 +54506,29 @@ self.addEventListener('message', async (ev) => {
     var symSel = document.getElementById('arpSym');
     if (symSel) symSel.addEventListener('change', function () { S.symbol = this.value; showHistory(); });
     showHistory();
+
+    /* Warm the day that is picked while the trader is still on this screen,
+       so "Start" is usually a cache hit. Read from the fields without writing
+       S (a half-typed date must not leak into state). Debounced: flicking
+       through dates only warms where the trader stops. */
+    function warmPicked() {
+      if (S._pfTimer) clearTimeout(S._pfTimer);
+      S._pfTimer = setTimeout(function () {
+        S._pfTimer = null;
+        var v = function (id) { return (document.getElementById(id) || {}).value; };
+        if (!document.getElementById('arpStart')) return;       // left the setup screen
+        var bl = document.getElementById('arpBlind');
+        if (S.blind || (bl && bl.checked)) return;
+        var d = Date.parse((v('arpDate') || S.date) + 'T00:00:00Z');
+        if (isNaN(d) || d > Date.now()) return;
+        prefetchSession(v('arpSym') || S.symbol, v('arpTf') || S.tf, d, parseFloat(v('arpDays')) || S.days);
+      }, 1500);
+    }
+    ['arpSym', 'arpDate', 'arpDays'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('change', warmPicked);
+    });
+    warmPicked();
 
     /* Toggling funded mode re-renders the setup: the balance field becomes
        read-only and the firm's rules appear, so the trader sees what they are
