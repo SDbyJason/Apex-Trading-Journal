@@ -10225,6 +10225,7 @@ body.light #landingPage * {
   <div class="lp-label reveal">From people who use it</div>
   <h2 class="lp-title reveal">What traders <em>actually say</em></h2>
   <p class="lp-lead reveal">Written by verified Evidence users inside the app and published only after review. Nothing here is scripted or bought.</p>
+  <div class="lp-voices-sum" id="lpVoicesSum"></div>
   <div class="lp-voices" id="lpVoices"></div>
 </section>
 <div class="lp-divider" id="voicesDivider" style="display:none"></div>
@@ -10320,6 +10321,7 @@ body.light #landingPage * {
         <li>Saved backtests — reopen a run and keep trading it</li>
         <li><b>Edge Lab</b>&nbsp;— Backtest, Trade &amp; Day Replay, Monte-Carlo</li>
         <li><b>Stat Lab</b>&nbsp;— 68 metrics in 6 groups, sliced by any of 12 dimensions</li>
+        <li><b>Edge &amp; Leaks</b>&nbsp;— every condition in your journal tested against your other trades, with a correction for testing many at once</li>
         <li><b>Your own metrics</b>&nbsp;— build formulas from any statistic</li>
         <li><b>Tick-precision replay</b>&nbsp;— real fills when stop &amp; target share a candle</li>
         <li><b>Options exposure</b>&nbsp;— net Greeks by underlying &amp; expiry</li>
@@ -10434,6 +10436,7 @@ body.light #landingPage * {
         <tr><td>Referral programme — a free month of Pro for every friend who subscribes</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr class="lp-compare-cat"><td colspan="3">Edge Lab &amp; Quant Analytics</td></tr>
         <tr><td>Stat Lab — 68 metrics in 6 groups, broken down by any of 12 dimensions</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Edge &amp; Leaks — what to do more of and what to stop, statistically tested</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Custom metrics — write your own formula over any statistic</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Options exposure — net delta, gamma, theta &amp; vega by underlying and expiry</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Session review — give-back, size drift, revenge windows &amp; rule adherence</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -10757,6 +10760,7 @@ body.light #landingPage * {
     <li><a href="/evidence-vs-edgewonk.html">Evidence vs Edgewonk</a></li>
     <li><a href="/evidence-vs-tradesviz.html">Evidence vs TradesViz</a></li>
     <li><a href="/changelog.html">Changelog</a></li>
+    <li><a href="https://sdbyjason.github.io/status/" rel="noopener">System status</a></li>
     <li><a href="/crypto-trading-journal.html">Crypto trading journal</a></li>
     <li><a href="/trading-community-platform.html">Trading community platform for mentors</a></li>
     <li><a href="/academy/">Free trading courses</a></li>
@@ -11369,6 +11373,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg></div><div><div class="apex-feat-label">Strategy Drills — recognition, not reading</div><div class="apex-feat-desc">Describe your strategy, confirm the rules Evidence proposes, and it finds every place in years of real history where they applied. Then it shows them one at a time with the right-hand side of the chart hidden and asks what you would do. Four kinds of location, and the important one is the setup that was <em>valid and lost</em> — a trainer built only from winners teaches that a correct setup wins, and the first real loss then reads as a broken strategy. Scored on whether you followed the rules; the money is shown afterwards and counts for nothing</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-search ></use></svg></div><div><div class="apex-feat-label">Tick-precise fills, not guessed ones</div><div class="apex-feat-desc">When a candle contains both your stop and your target, most replays pick one and move on. Evidence resolves it from the real tick stream of that minute — the bid and the ask as they actually printed — so the trade closes where it would have closed</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-search ></use></svg></div><div><div class="apex-feat-label">Stat Lab — 68 metrics, sliced any way</div><div class="apex-feat-desc">The full catalogue — edge, risk, R, timing and execution — broken down by setup, symbol, session, timeframe, entry hour, account or month, and exportable as CSV</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg></div><div><div class="apex-feat-label">Edge &amp; Leaks — what to keep, what to stop</div><div class="apex-feat-desc">Every symbol, setup, session, hour and habit in your journal — including the ones nobody tags, like the third trade of the day or trading right after a loss — tested against your other trades. Only findings that survive a correction for testing many conditions at once are shown, and a leak can be turned into a guardrail warning with one click</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🧮</div><div><div class="apex-feat-label">Build your own metrics</div><div class="apex-feat-desc">Write a formula over any statistic — your metric then appears everywhere the built-in ones do, and can be used inside other formulas</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">⏱️</div><div><div class="apex-feat-label">Tick-precision replay fills</div><div class="apex-feat-desc">When a stop and a target fall in the same candle, the real Dukascopy tick order decides which came first — instead of always assuming the stop won</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">◎</div><div><div class="apex-feat-label">Options exposure</div><div class="apex-feat-desc">Net delta, gamma, theta and vega across the book, with a heatmap by underlying and expiry</div></div></div>
@@ -15689,7 +15694,7 @@ function playbookStats(pbId){
   var adhSum=0, fully=[], partial=[];
   if(clLen){ valid.forEach(function(t){ var c=Math.min((t.pbChecks||[]).length,clLen); adhSum+=c/clLen; if(c>=clLen) fully.push(parseFloat(t.pips)); else partial.push(parseFloat(t.pips)); }); }
   function avg(a){ return a.length? a.reduce(function(x,y){return x+y;},0)/a.length : null; }
-  return { n:n, total:all.length, wr:wr, pf:pf, exp:exp, net:net, adhPct:(clLen&&n)?Math.round(adhSum/n*100):null, avgFully:avg(fully), avgPartial:avg(partial), fullyN:fully.length, partialN:partial.length, clLen:clLen };
+  return { vals:valid.map(function(t){return parseFloat(t.pips);}), wins:winsArr.length, n:n, total:all.length, wr:wr, pf:pf, exp:exp, net:net, adhPct:(clLen&&n)?Math.round(adhSum/n*100):null, avgFully:avg(fully), avgPartial:avg(partial), fullyN:fully.length, partialN:partial.length, clLen:clLen };
 }
 /* ══════════════════════════════════════════════════════════════════════
    Strategie aus Trade-Rueckblicken  (window.ApexPbFinder)
@@ -15983,7 +15988,7 @@ function renderPlaybooks(){
   var wrap=document.getElementById('playbookList'); if(!wrap) return;
   if(!window.playbooks.length){ wrap.innerHTML='<div class="glass-card" style="text-align:center;color:var(--ink3);padding:40px 20px">No playbooks yet. Create your first one above.</div>'; return; }
   wrap.innerHTML=window.playbooks.map(function(pb){
-    var s=playbookStats(pb.id);
+    var s=playbookStats(pb.id), C=window.ApexConfidence;
     function pips(v){ return v==null?'—':((v>=0?'+':'')+v.toFixed(1)); }
     var pfStr=s.pf===Infinity?'∞':(s.n?s.pf.toFixed(2):'—');
     var netCol=s.net>=0?'var(--profit)':'var(--loss)';
@@ -15994,7 +15999,8 @@ function renderPlaybooks(){
       var diff=(s.avgFully!=null&&s.avgPartial!=null)?(s.avgFully-s.avgPartial):null;
       adhHtml='<div style="margin-top:12px;padding:10px 14px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:10px;font-size:12px;color:var(--ink2)">'+
         '🎯 Rule adherence: <b style="color:var(--ink)">'+s.adhPct+'%</b>'+
-        ((diff!=null && s.fullyN>0 && s.partialN>0) ? (' · regelkonform <b style="color:var(--profit)">'+pips(s.avgFully)+'</b> vs. '+pips(s.avgPartial)+' Pips/Trade'+(diff>0?(' → <b style="color:var(--profit)">+'+diff.toFixed(1)+' Pips Edge durch Disziplin</b>'):'')) : '')+
+        ((diff!=null && s.fullyN>0 && s.partialN>0) ? (' · by the rules <b style="color:var(--profit)">'+pips(s.avgFully)+'</b> vs. '+pips(s.avgPartial)+' pips/trade'+(diff>0?(' → <b style="color:var(--profit)">+'+diff.toFixed(1)+' pips edge from discipline</b>'):'')+
+          (window.ApexConfidence && (s.fullyN<30||s.partialN<30) ? ' <span class="cf-chip cf-low" title="Compares '+s.fullyN+' rule-following with '+s.partialN+' other trades. Under 30 on either side, a difference like this is mostly noise.">'+s.fullyN+' vs '+s.partialN+' trades</span>' : '')) : '')+
       '</div>';
     }
     return '<div class="glass-card" style="margin-bottom:16px">'+
@@ -16005,10 +16011,10 @@ function renderPlaybooks(){
           '<button onclick="deletePlaybook(\''+pb.id+'\')" style="background:var(--loss-dim);border:0.5px solid rgba(var(--loss-rgb),0.3);color:var(--loss);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px">Delete</button></div>'+
       '</div>'+
       '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px">'+
-        '<div class="kpi" style="padding:12px"><div class="kpi-label">Trades</div><div class="kpi-val" style="font-size:20px">'+s.n+'</div></div>'+
-        '<div class="kpi" style="padding:12px"><div class="kpi-label">Win rate</div><div class="kpi-val" style="font-size:20px">'+(s.n?s.wr+'%':'—')+'</div></div>'+
+        '<div class="kpi" style="padding:12px"><div class="kpi-label">Trades</div><div class="kpi-val" style="font-size:20px">'+s.n+'</div>'+(C&&s.n?'<div class="cf-line">'+C.chip({n:s.n,level:C.level(s.n)})+'</div>':'')+'</div>'+
+        '<div class="kpi" style="padding:12px"><div class="kpi-label">Win rate</div><div class="kpi-val" style="font-size:20px">'+(s.n?s.wr+'%':'—')+'</div>'+(C&&s.n?'<div class="cf-line">'+C.chip(C.rate(s.wins,s.n),{range:true,fmt:function(x){return Math.round(x*100)+'%';}})+'</div>':'')+'</div>'+
         '<div class="kpi" style="padding:12px"><div class="kpi-label">Profit factor</div><div class="kpi-val" style="font-size:20px;color:var(--gold)">'+pfStr+'</div></div>'+
-        '<div class="kpi" style="padding:12px"><div class="kpi-label">Expectancy</div><div class="kpi-val" style="font-size:20px">'+(s.n?pips(s.exp):'—')+'</div></div>'+
+        '<div class="kpi" style="padding:12px"><div class="kpi-label">Expectancy</div><div class="kpi-val" style="font-size:20px">'+(s.n?pips(s.exp):'—')+'</div>'+(C&&s.n>1?'<div class="cf-line">'+C.chip(C.mean(s.vals),{range:true,fmt:function(x){return pips(x);}})+'</div>':'')+'</div>'+
         '<div class="kpi" style="padding:12px"><div class="kpi-label">Net pips</div><div class="kpi-val" style="font-size:20px;color:'+netCol+'">'+(s.n?pips(s.net):'—')+'</div></div>'+
       '</div>'+adhHtml+checklistHtml+rulesHtml+
     '</div>';
@@ -18176,6 +18182,17 @@ function updateOverview() {
     set('ov-pnl-delta', allTrades.length+' trades', netPips>=0?'up':'down');
   }
   set('ov-wr', allTrades.length ? wr+'%' : '—');
+  /* Is the P&L an edge or a streak? A t-range on the per-trade result says
+     whether it is distinguishable from zero yet. */
+  if (window.ApexConfidence && allTrades.length) {
+    var pdEl = document.getElementById('ov-pnl-delta');
+    var perTrade = hasPnlData
+      ? allTrades.map(function(t){ var pc = calcTradePnl(t); return pc ? toDisplayCurrency(pc.pnlUsd) : null; }).filter(function(v){ return v != null; })
+      : allTrades.map(function(t){ return parseFloat(t.pips||0); });
+    var symC = hasPnlData ? getPnlSymbol() : '';
+    if (pdEl) ovConfLine(pdEl, ApexConfidence.chip(ApexConfidence.mean(perTrade), {
+      range:true, suffix:hasPnlData?' /trade':' pips/trade', fmt:function(x){ return (x<0?'−':'')+symC+Math.abs(x).toFixed(hasPnlData?0:1); } }));
+  }
   // Win Rate delta: show W/L/total or placeholder
   const wrDeltaEl = document.getElementById('ov-wr-delta');
   if (wrDeltaEl) {
@@ -18185,6 +18202,8 @@ function updateOverview() {
     } else {
       wrDeltaEl.textContent = wins.length+'W · '+losses.length+'L · '+allTrades.length+' total';
       wrDeltaEl.className = 'kpi-delta ' + (wr >= 50 ? 'up' : 'down');
+      ovConfLine(wrDeltaEl, window.ApexConfidence && ApexConfidence.chip(ApexConfidence.rate(wins.length, wins.length+losses.length),
+          { range:true, fmt:function(x){ return Math.round(x*100)+'%'; } }));
     }
   }
   set('ov-rr', avgRR);
@@ -18194,6 +18213,16 @@ function updateOverview() {
 
   renderRecentTrades(allTrades.slice(-8).reverse());
   updatePersonalBests();
+}
+
+/* The KPI deltas are small pills; a chip inside one gets clipped. So the
+   confidence chip sits on its own line right under the pill, replaced on
+   every refresh. */
+function ovConfLine(afterEl, html) {
+  if (!afterEl) return;
+  var nx = afterEl.nextElementSibling;
+  if (nx && nx.classList.contains('cf-line')) nx.remove();
+  if (html) afterEl.insertAdjacentHTML('afterend', '<div class="cf-line">' + html + '</div>');
 }
 
 function set(id, txt, cls) {
@@ -30092,6 +30121,649 @@ function goToAuthPro(screen) {
      Evidence STAT ENGINE — the metric catalogue and the formula language
      ════════════════════════════════════════════════════════════════════ -->
 <script>
+/* ══════════════════════════════════════════════════════════════════
+   CONFIDENCE  —  ApexConfidence
+
+   Every number in a journal is a sample statistic, and most of them are
+   computed from far fewer trades than it feels like. "62 % win rate" on
+   13 trades and on 400 trades look identical on screen — and only one of
+   them is information. This module puts the sample size and a 95 % range
+   next to a number, so the trader can see which is which.
+
+   Three methods, picked by what the number is:
+     rate(k, n)       Wilson score interval — for win rates and other
+                      proportions. Unlike the textbook normal interval it
+                      stays inside 0–100 % and behaves at small n.
+     mean(values)     t-interval — expectancy, average R, average P&L.
+                      Reports whether the range still includes zero, which
+                      is the question that actually matters for an edge.
+     boot(rows, fn)   percentile bootstrap — for anything else (profit
+                      factor, drawdown, custom formulas). Deterministic
+                      seed, so the same journal always shows the same range.
+
+   Levels are by sample size, deliberately blunt:
+     < 10 anecdotal · < 30 low · < 100 moderate · ≥ 100 solid
+   The range carries the finer information; the level is for the glance.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var C = {}; window.ApexConfidence = C;
+
+  var LEVELS = [
+    { max: 10,       key: 'anecdotal', label: 'Anecdotal' },
+    { max: 30,       key: 'low',       label: 'Low confidence' },
+    { max: 100,      key: 'moderate',  label: 'Moderate' },
+    { max: Infinity, key: 'solid',     label: 'Solid' }
+  ];
+  C.level = function(n){
+    n = Number(n) || 0;
+    for (var i = 0; i < LEVELS.length; i++) if (n < LEVELS[i].max) return LEVELS[i];
+    return LEVELS[LEVELS.length - 1];
+  };
+
+  var Z = 1.959964;
+  /* Two-sided 97.5 % Student-t quantiles; beyond 30 df the normal value is
+     within 2 % and good enough for a range shown to one decimal. */
+  var T975 = [0, 12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228,
+              2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086,
+              2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042];
+  function tq(df){ return df <= 0 ? NaN : (df < T975.length ? T975[df] : (df < 60 ? 2.00 : (df < 120 ? 1.98 : Z))); }
+
+  C.rate = function(k, n){
+    k = Number(k) || 0; n = Number(n) || 0;
+    if (n <= 0) return { n: 0, p: null, lo: null, hi: null, level: C.level(0) };
+    var p = k / n, z2 = Z * Z;
+    var den = 1 + z2 / n;
+    var mid = (p + z2 / (2 * n)) / den;
+    var half = (Z * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n))) / den;
+    return { kind: 'rate', n: n, p: p, lo: Math.max(0, mid - half), hi: Math.min(1, mid + half), level: C.level(n) };
+  };
+
+  C.mean = function(vals){
+    var v = (vals || []).map(Number).filter(function(x){ return isFinite(x); });
+    var n = v.length;
+    if (!n) return { kind: 'mean', n: 0, mean: null, lo: null, hi: null, level: C.level(0) };
+    var m = v.reduce(function(a, b){ return a + b; }, 0) / n;
+    if (n < 2) return { kind: 'mean', n: n, mean: m, lo: null, hi: null, level: C.level(n) };
+    var ss = v.reduce(function(a, b){ return a + (b - m) * (b - m); }, 0);
+    var sd = Math.sqrt(ss / (n - 1)), half = tq(n - 1) * sd / Math.sqrt(n);
+    var lo = m - half, hi = m + half;
+    return { kind: 'mean', n: n, mean: m, sd: sd, lo: lo, hi: hi, level: C.level(n),
+             sign: lo > 0 ? 1 : (hi < 0 ? -1 : 0) };   // 0 = cannot tell from zero
+  };
+
+  /* mulberry32 — tiny, seedable, good enough for resampling. */
+  function rng(seed){
+    return function(){
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  C.resamples = function(rows, B, seed){
+    var r = rng(seed || 20260930), n = rows.length, out = [];
+    for (var b = 0; b < B; b++){
+      var s = new Array(n);
+      for (var i = 0; i < n; i++) s[i] = rows[(r() * n) | 0];
+      out.push(s);
+    }
+    return out;
+  };
+  function pctile(sorted, q){
+    if (!sorted.length) return null;
+    var pos = (sorted.length - 1) * q, lo = Math.floor(pos), hi = Math.ceil(pos);
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+  }
+  /** Percentile interval of fn over resamples. Infinite/null draws are
+      dropped; if more than a tenth are, the range is not reported. */
+  C.fromDraws = function(draws, n){
+    var ok = draws.filter(function(x){ return x != null && isFinite(x); }).sort(function(a, b){ return a - b; });
+    if (n < 5 || ok.length < draws.length * 0.9)
+      return { kind: 'boot', n: n, lo: null, hi: null, level: C.level(n) };
+    return { kind: 'boot', n: n, lo: pctile(ok, 0.025), hi: pctile(ok, 0.975), level: C.level(n) };
+  };
+  C.boot = function(rows, fn, B){
+    rows = rows || [];
+    var draws = C.resamples(rows, B || 200).map(function(s){ try { return fn(s); } catch(e){ return null; } });
+    return C.fromDraws(draws, rows.length);
+  };
+
+  /* ── Comparing two groups ──
+     Welch's t-test (unequal variances — a setup's trades and everything
+     else never have the same spread) with an exact Student-t tail from
+     the regularised incomplete beta function. */
+  function lgamma(x){
+    var c = [76.18009172947146, -86.50532032941677, 24.01409824083091,
+             -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+    var y = x, tmp = x + 5.5; tmp -= (x + 0.5) * Math.log(tmp);
+    var ser = 1.000000000190015;
+    for (var j = 0; j < 6; j++) ser += c[j] / ++y;
+    return -tmp + Math.log(2.5066282746310005 * ser / x);
+  }
+  function betacf(a, b, x){
+    var qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+    if (Math.abs(d) < 1e-30) d = 1e-30; d = 1 / d; var h = d;
+    for (var m = 1; m <= 200; m++){
+      var m2 = 2 * m, aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+      d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30;
+      c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+      d = 1 / d; h *= d * c;
+      aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+      d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30;
+      c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+      d = 1 / d; var del = d * c; h *= del;
+      if (Math.abs(del - 1) < 3e-12) break;
+    }
+    return h;
+  }
+  function ibeta(a, b, x){
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    var bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+    return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+  }
+  /** Two-sided p-value of a t statistic with df degrees of freedom. */
+  C.tPValue = function(t, df){
+    if (!isFinite(t) || !(df > 0)) return 1;
+    return ibeta(df / 2, 0.5, df / (df + t * t));
+  };
+  C.welch = function(a, b){
+    var na = a.length, nb = b.length;
+    if (na < 2 || nb < 2) return { t: 0, df: 0, p: 1, diff: 0 };
+    var ma = a.reduce(function(x, y){ return x + y; }, 0) / na;
+    var mb = b.reduce(function(x, y){ return x + y; }, 0) / nb;
+    var va = a.reduce(function(x, y){ return x + (y - ma) * (y - ma); }, 0) / (na - 1);
+    var vb = b.reduce(function(x, y){ return x + (y - mb) * (y - mb); }, 0) / (nb - 1);
+    var se2 = va / na + vb / nb;
+    if (!(se2 > 0)) return { t: 0, df: 0, p: ma === mb ? 1 : 0, diff: ma - mb };
+    var t = (ma - mb) / Math.sqrt(se2);
+    var df = se2 * se2 / ((va * va) / (na * na * (na - 1)) + (vb * vb) / (nb * nb * (nb - 1)));
+    return { t: t, df: df, p: C.tPValue(t, df), diff: ma - mb, ma: ma, mb: mb };
+  };
+  /** Benjamini–Hochberg: which of these p-values survive at false-discovery rate q. */
+  C.bh = function(ps, q){
+    q = q || 0.10;
+    var idx = ps.map(function(p, i){ return i; }).sort(function(i, j){ return ps[i] - ps[j]; });
+    var m = ps.length, cut = -1;
+    idx.forEach(function(i, r){ if (ps[i] <= (r + 1) / m * q) cut = r; });
+    var keep = ps.map(function(){ return false; });
+    for (var r = 0; r <= cut; r++) keep[idx[r]] = true;
+    return keep;
+  };
+
+  /* Trades needed for a win-rate range of ±w (worst case p = 0.5 unless given). */
+  C.needFor = function(halfWidth, p){
+    p = p == null ? 0.5 : p;
+    return Math.ceil(p * (1 - p) * Math.pow(Z / halfWidth, 2));
+  };
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; });
+  }
+
+  /** Plain-English sentence for a tooltip. fmt formats a bound. */
+  C.explain = function(r, fmt){
+    fmt = fmt || function(x){ return String(Math.round(x * 100) / 100); };
+    var s = 'Based on ' + r.n + ' trade' + (r.n === 1 ? '' : 's') + ' (' + r.level.label.toLowerCase() + ').';
+    if (r.lo != null && r.hi != null)
+      s += ' 95% range: ' + fmt(r.lo) + ' to ' + fmt(r.hi) + '.';
+    else if (r.n < 5) s += ' Too few to estimate a range.';
+    if (r.kind === 'mean' && r.sign === 0 && r.n >= 2) s += ' The range includes zero — this is not yet distinguishable from no edge.';
+    if (r.kind === 'mean' && r.sign === 1) s += ' The whole range is above zero.';
+    if (r.kind === 'mean' && r.sign === -1) s += ' The whole range is below zero.';
+    if (r.kind === 'rate' && r.lo != null && r.lo <= 0.5 && r.hi >= 0.5) s += ' It cannot yet tell whether the true rate is above or below 50%.';
+    if (r.kind === 'rate' && r.n < C.needFor(0.05, r.p)) s += ' About ' + C.needFor(0.05, r.p) + ' trades give a ±5-point range.';
+    return s;
+  };
+
+  /** Small chip: "n 23 · Low". opts.fmt formats bounds, opts.range shows them inline. */
+  C.chip = function(r, opts){
+    if (!r) return '';
+    opts = opts || {};
+    var lv = r.level || C.level(r.n);
+    var txt = 'n ' + r.n.toLocaleString('en-US');
+    // the count already stands in the cell next to it — say only what it means
+    if (opts.levelOnly) txt = lv.label.replace(' confidence', '');
+    else if (opts.range && r.lo != null && r.hi != null){
+      var f = opts.fmt || function(x){ return String(Math.round(x * 100) / 100); };
+      txt += ' · ' + f(r.lo) + (r.lo < 0 ? ' to ' : '–') + f(r.hi) + (opts.suffix || '');
+    } else if (!opts.compact) txt += ' · ' + lv.label.replace(' confidence', '');
+    /* Outlined in gold when the range cannot yet settle the question the
+       number is usually read for: is there an edge at all (mean vs 0), is
+       it a winning rate (rate vs 50 %). Plenty of trades can still leave
+       that open, so the colour of the level alone would overstate it. */
+    var flag = ((r.kind === 'mean' && r.sign === 0 && r.n >= 2) ||
+                (r.kind === 'rate' && r.lo != null && r.lo <= 0.5 && r.hi >= 0.5)) ? ' cf-zero' : '';
+    return '<span class="cf-chip cf-' + lv.key + flag + '" tabindex="0" title="' + esc(C.explain(r, opts.fmt)) + '">' +
+           esc(txt) + '</span>';
+  };
+
+  /* Cell dimming for tables: a figure from a tiny bucket is shown, but
+     visibly quieter than one that is worth reading. */
+  C.cellClass = function(n){ return n < 10 ? 'cf-cell-anec' : (n < 30 ? 'cf-cell-low' : ''); };
+
+  function css(){
+    if (document.getElementById('cfCSS')) return;
+    var s = document.createElement('style'); s.id = 'cfCSS';
+    s.textContent =
+      '.cf-chip{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:1px 7px;border-radius:999px;' +
+        'font-size:10.5px;font-weight:600;letter-spacing:.02em;line-height:1.6;vertical-align:middle;white-space:nowrap;' +
+        'font-variant-numeric:tabular-nums;cursor:help;border:0.5px solid transparent;font-family:var(--font-body,inherit)}' +
+      '.cf-chip::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.9}' +
+      '.cf-anecdotal{color:var(--loss,#e0503f);background:rgba(224,80,63,.10);border-color:rgba(224,80,63,.28)}' +
+      '.cf-low{color:var(--gold,#c9a84c);background:rgba(var(--gold-rgb,201,168,76),.10);border-color:rgba(var(--gold-rgb,201,168,76),.30)}' +
+      '.cf-moderate{color:var(--ink2,#a39e93);background:rgba(255,255,255,.04);border-color:var(--rim2,rgba(255,255,255,.12))}' +
+      '.cf-solid{color:var(--profit,#2fbf71);background:rgba(47,191,113,.09);border-color:rgba(47,191,113,.28)}' +
+      '.cf-zero{box-shadow:inset 0 0 0 0.5px var(--gold,#c9a84c)}' +
+      '.cf-range{display:block;font-size:11px;color:var(--ink3);margin-top:2px;font-variant-numeric:tabular-nums}' +
+      '.cf-cell-low{opacity:.72}.cf-cell-anec{opacity:.45}' +
+      '.cf-legend{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:11px;color:var(--ink3);margin-top:8px}' +
+      '.cf-legend .cf-chip{margin-left:0}' +
+      '.cf-line{margin-top:5px}.cf-line .cf-chip{margin-left:0}' +
+      '.cf-hint{text-decoration:underline dotted rgba(var(--gold-rgb,201,168,76),.55);text-underline-offset:3px;cursor:help}';
+    document.head.appendChild(s);
+  }
+  C.legend = function(){
+    return '<div class="cf-legend"><span>Sample size:</span>' +
+      LEVELS.map(function(l, i){
+        var lo = i ? LEVELS[i - 1].max : 0;
+        var rng = l.max === Infinity ? lo + '+' : (lo + '–' + (l.max - 1));
+        return '<span class="cf-chip cf-' + l.key + '" title="' + l.label + '">' + rng + ' · ' + l.label.replace(' confidence', '') + '</span>';
+      }).join('') +
+      '<span>Hover a chip for the 95% range.</span></div>';
+  };
+  /* ── Every table with a "Trades" column, app-wide ──
+     Reports, playbook, session, backtest and prop tables were each written
+     separately, and giving each its own confidence code would leave the
+     next new table without it. So this reads the table the way a person
+     does: find the Trades column, read n per row, and then
+       - add the sample-size chip to that cell,
+       - dim rows under 30 trades,
+       - put the Wilson 95 % range on a win-rate cell in the same row.
+     Tables where a row is a single day (prop daily log, calendar) are
+     skipped: there n is how busy the day was, not a sample. */
+  var SKIP = '.pf-table,.cf-skip,[data-cf-skip]';
+  function headIdx(cells, re){
+    for (var i = 0; i < cells.length; i++) if (re.test((cells[i].textContent || '').trim())) return i;
+    return -1;
+  }
+  function enhanceTable(tb){
+    if (tb.closest(SKIP)) return;
+    var rows = tb.rows; if (!rows || rows.length < 2) return;
+    var sig = rows.length + ':' + (rows[rows.length - 1].textContent || '').length;
+    if (tb.getAttribute('data-cf') === sig) return;
+    var head = rows[0].cells;
+    var ti = headIdx(head, /^trades\b/i);
+    if (ti < 0) return;
+    if (headIdx(head, /^(date|day)$/i) === 0) { tb.setAttribute('data-cf', sig); return; }
+    var wi = headIdx(head, /^(win ?rate|winrate|win ?%|win%)$/i);
+    for (var r = 1; r < rows.length; r++){
+      var cells = rows[r].cells; if (!cells[ti] || cells[ti].tagName === 'TH') continue;
+      var tc = cells[ti];
+      var n = parseInt(String(tc.textContent || '').replace(/[^0-9]/g, ''), 10);
+      if (!(n >= 0)) continue;
+      if (!tc.querySelector('.cf-chip'))
+        tc.insertAdjacentHTML('beforeend', C.chip({ n: n, level: C.level(n) }, { levelOnly: true }));
+      var cls = C.cellClass(n);
+      if (cls && !/cf-cell-/.test(rows[r].className)) rows[r].classList.add(cls);
+      if (wi >= 0 && cells[wi] && !cells[wi].title){
+        var p = parseFloat(String(cells[wi].textContent).replace(',', '.'));
+        if (isFinite(p) && n > 0){
+          var res = C.rate(Math.round(p / 100 * n), n);
+          cells[wi].title = C.explain(res, function(x){ return Math.round(x * 100) + '%'; });
+          cells[wi].classList.add('cf-hint');
+        }
+      }
+    }
+    tb.setAttribute('data-cf', rows.length + ':' + (rows[rows.length - 1].textContent || '').length);
+  }
+  C.enhance = function(root){
+    try { (root || document).querySelectorAll('table').forEach(enhanceTable); } catch(e){}
+  };
+  function watch(){
+    css();
+    var pending = 0;
+    new MutationObserver(function(){
+      if (pending) return;
+      pending = setTimeout(function(){ pending = 0; C.enhance(); }, 250);
+    }).observe(document.body, { childList: true, subtree: true });
+    C.enhance();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+})();
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   FIND MY EDGE / FIND MY LEAK  —  ApexEdgeFinder
+
+   The question every trader actually has — "what should I do more of,
+   and what should I stop doing?" — answered from their own journal,
+   without them having to know which report to open.
+
+   It tests every condition the journal can see (symbol, setup, session,
+   weekday, entry hour, direction, tags, mistakes, and the behavioural
+   ones nobody tags: third trade of the day, trading after a loss,
+   oversized positions, no stop, very short or very long holds) and
+   every pair of the common ones, against all the OTHER trades.
+
+   Being honest about it is the whole feature. Test sixty conditions and
+   three will look remarkable by pure chance, so a finding has to pass:
+     1. Welch's t-test of these trades against the rest,
+     2. Benjamini–Hochberg at a 10 % false-discovery rate across EVERY
+        condition tested — the multiple-comparison correction most
+        "insight" features skip,
+     3. a stability check: the difference points the same way in the
+        first and the second half of the journal.
+   Passing all three → "Confirmed". Passing the raw test or the stability
+   check with a small p → "Worth watching", labelled as such. Everything
+   else is not shown, and the page says how many were tested and dropped.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var F = {}; window.ApexEdgeFinder = F;
+
+  var MIN_N = 12, MIN_N_PAIR = 15, MIN_HALF = 5, FDR_Q = 0.10, PAIR_POOL = 18;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; });
+  }
+  function num(v){ if (v === '' || v == null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function isLong(t){ try { return window.apexIsLong ? apexIsLong(t.dir) : /buy|long/i.test(String(t.dir)); } catch(e){ return false; } }
+  function hourOf(t){
+    var m = /^(\d{1,2}):/.exec(String(t.time || t.entryTime || ''));
+    if (m) return parseInt(m[1], 10);
+    var o = num(t.openTime); return o ? new Date(o).getHours() : null;
+  }
+  function holdMin(t){
+    var o = num(t.openTime), c = num(t.closeTime);
+    return (o && c && c > o) ? (c - o) / 60000 : null;
+  }
+  function median(a){
+    if (!a.length) return null; var s = a.slice().sort(function(x, y){ return x - y; });
+    var m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+  var WD = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday', Sat:'Saturday', Sun:'Sunday' };
+
+  /* Per-trade context the behavioural conditions need: position in the
+     day, what happened just before, and the trader's usual size. rows must
+     be in chronological order ({t, v}). */
+  function withContext(rows){
+    var sizes = rows.map(function(r){ return num(r.t.lots); }).filter(function(v){ return v != null && v > 0; });
+    var medLots = sizes.length >= 10 ? median(sizes) : null;
+    var byDay = {};
+    rows.forEach(function(r){ var d = r.t._date || ''; (byDay[d] = byDay[d] || []).push(r); });
+    Object.keys(byDay).forEach(function(d){
+      var run = 0, dayNet = 0;
+      byDay[d].forEach(function(r, i){
+        r.idx = i; r.prev = i ? byDay[d][i - 1].v : null; r.lossRun = run; r.dayNetBefore = dayNet;
+        run = r.v < 0 ? run + 1 : 0; dayNet += r.v;
+      });
+    });
+    return { rows: rows, medLots: medLots };
+  }
+
+  /* Every condition true for one trade. Kind-prefixed so a tag called
+     "London" and the London session never merge into one bucket. */
+  function conditionsOf(r, medLots){
+    var t = r.t, out = [];
+    if (t.symbol)  out.push('Symbol: ' + String(t.symbol).toUpperCase());
+    if (t.setup)   out.push('Setup: ' + t.setup);
+    if (t.session) out.push('Session: ' + t.session);
+    if (t.tf)      out.push('Timeframe: ' + t.tf);
+    if (t.dir)     out.push('Direction: ' + (isLong(t) ? 'Long' : 'Short'));
+    if (t._dow && WD[t._dow]) out.push('Weekday: ' + WD[t._dow]);
+    var h = hourOf(t);
+    if (h != null) out.push('Entry hour: ' + String(h).padStart(2, '0') + ':00–' + String(h).padStart(2, '0') + ':59');
+    if (t.acct) out.push('Account: ' + t.acct);
+    if (t.playbook){
+      var pb = (window.playbooks || []).filter(function(p){ return p.id === t.playbook; })[0];
+      if (pb && pb.name) out.push('Playbook: ' + pb.name);
+    }
+    (t.tags || []).concat(t.autoTags || []).forEach(function(x){ if (x) out.push('Tag: ' + x); });
+    (t.mistakes || []).forEach(function(x){ if (x) out.push('Mistake: ' + x); });
+    // behavioural — the ones people do not tag, and usually the real leak
+    if (r.idx === 0) out.push('Behaviour: First trade of the day');
+    if (r.idx >= 2)  out.push('Behaviour: Third or later trade of the day');
+    if (r.prev != null && r.prev < 0) out.push('Behaviour: Right after a losing trade');
+    if (r.lossRun >= 2) out.push('Behaviour: After two or more losses in a row');
+    if (r.idx > 0 && r.dayNetBefore < 0) out.push('Behaviour: Day already in the red');
+    if (r.idx > 0 && r.dayNetBefore > 0) out.push('Behaviour: Day already in the green');
+    var lots = num(t.lots);
+    if (medLots && lots != null && lots >= medLots * 1.5) out.push('Behaviour: Size 1.5× your usual or more');
+    if (t.sl === '' || t.sl == null || num(t.sl) === 0) out.push('Behaviour: No stop-loss set');
+    var hm = holdMin(t);
+    if (hm != null && hm < 5)   out.push('Behaviour: Held under 5 minutes');
+    if (hm != null && hm > 240) out.push('Behaviour: Held over 4 hours');
+    var seen = {};
+    return out.filter(function(c){ if (seen[c]) return false; seen[c] = 1; return true; });
+  }
+  F.conditionsOf = conditionsOf;
+
+  function sum(a){ return a.reduce(function(x, y){ return x + y; }, 0); }
+
+  /**
+   * The analysis. rows: [{t, v}] in chronological order.
+   * Returns { n, tested, edges:[], leaks:[], dropped }.
+   */
+  F.analyse = function(rows, opts){
+    opts = opts || {};
+    var C = window.ApexConfidence;
+    var ctx = withContext(rows.map(function(r){ return { t: r.t, v: r.v }; }));
+    var R = ctx.rows;
+    if (R.length < 30 || !C) return { n: R.length, tested: 0, edges: [], leaks: [], dropped: 0, tooFew: true };
+    R.forEach(function(r){ r.c = conditionsOf(r, ctx.medLots); });
+    var half = Math.floor(R.length / 2);
+
+    var freq = {};
+    R.forEach(function(r){ r.c.forEach(function(c){ freq[c] = (freq[c] || 0) + 1; }); });
+    var singles = Object.keys(freq).filter(function(c){ return freq[c] >= MIN_N && R.length - freq[c] >= MIN_N; });
+    var pool = singles.slice().sort(function(a, b){ return freq[b] - freq[a]; }).slice(0, PAIR_POOL);
+    var sets = singles.map(function(c){ return [c]; });
+    for (var i = 0; i < pool.length; i++)
+      for (var j = i + 1; j < pool.length; j++){
+        // two values of the same kind (Symbol: A + Symbol: B) can never co-occur
+        if (pool[i].split(':')[0] === pool[j].split(':')[0] && pool[i].indexOf('Behaviour') !== 0) continue;
+        sets.push([pool[i], pool[j]]);
+      }
+
+    var tests = [];
+    sets.forEach(function(set){
+      var inV = [], outV = [], inA = [], outA = [], inB = [], outB = [];
+      R.forEach(function(r, k){
+        var hit = set.every(function(c){ return r.c.indexOf(c) >= 0; });
+        (hit ? inV : outV).push(r.v);
+        if (k < half) (hit ? inA : outA).push(r.v); else (hit ? inB : outB).push(r.v);
+      });
+      if (inV.length < (set.length > 1 ? MIN_N_PAIR : MIN_N) || outV.length < MIN_N) return;
+      var w = C.welch(inV, outV);
+      var dA = (inA.length >= MIN_HALF && outA.length >= MIN_HALF) ? (sum(inA) / inA.length - sum(outA) / outA.length) : null;
+      var dB = (inB.length >= MIN_HALF && outB.length >= MIN_HALF) ? (sum(inB) / inB.length - sum(outB) / outB.length) : null;
+      tests.push({
+        set: set, n: inV.length, net: sum(inV), mean: w.ma, restMean: w.mb, diff: w.diff, p: w.p,
+        wr: inV.filter(function(v){ return v > 0; }).length / inV.length,
+        stable: dA != null && dB != null && (dA > 0) === (dB > 0) && (dA > 0) === (w.diff > 0),
+        halves: [dA, dB],
+        /* What these trades did compared with an average trade of yours:
+           the money the condition is responsible for, not just its net. */
+        impact: (w.ma - w.mb) * inV.length
+      });
+    });
+
+    var sig = C.bh(tests.map(function(x){ return x.p; }), FDR_Q);
+    tests.forEach(function(x, k){
+      x.fdr = sig[k];
+      x.verdict = (x.fdr && x.stable) ? 'confirmed'
+                : ((x.p < 0.05 || (x.stable && x.p < 0.20)) ? 'watch' : null);
+    });
+
+    /* A pair is only worth showing if it says more than its parts: it must
+       beat the stronger of its two single conditions in the same direction. */
+    var bySingle = {};
+    tests.forEach(function(x){ if (x.set.length === 1) bySingle[x.set[0]] = x; });
+    var shown = tests.filter(function(x){
+      if (!x.verdict) return false;
+      if (x.set.length === 1) return true;
+      var a = bySingle[x.set[0]], b = bySingle[x.set[1]];
+      var best = Math.max(Math.abs(a ? a.diff : 0), Math.abs(b ? b.diff : 0));
+      return Math.abs(x.diff) > best * 1.25;
+    });
+
+    var rank = function(a, b){
+      var va = a.verdict === 'confirmed' ? 1 : 0, vb = b.verdict === 'confirmed' ? 1 : 0;
+      return (vb - va) || (Math.abs(b.impact) - Math.abs(a.impact));
+    };
+    var edges = shown.filter(function(x){ return x.diff > 0 && x.mean > 0; }).sort(rank);
+    var leaks = shown.filter(function(x){ return x.diff < 0 && x.net < 0; }).sort(rank);
+    return { n: R.length, tested: tests.length, edges: edges, leaks: leaks,
+             dropped: tests.length - edges.length - leaks.length, medLots: ctx.medLots };
+  };
+
+  /* For the guardrail: does a just-logged trade match a flagged leak?
+     dayTrades are that day's trades in order, the trade included. */
+  F.matches = function(t, dayTrades, key, medLots, dayKey){
+    /* Trades straight from journalData carry no _date/_dow (getAllTrades
+       adds those), so a weekday leak would never match without this. */
+    var dk = dayKey || (function(){ var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })();
+    var dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(dk + 'T12:00:00').getDay()];
+    var vals = (dayTrades || []).map(function(x){
+      var y = x._dow ? x : Object.assign({}, x, { _date: dk, _dow: dow });
+      if (x === t) t = y;
+      return { t: y, v: F.valueOf(x) || 0 };
+    });
+    var ctx = withContext(vals);
+    var me = ctx.rows.filter(function(r){ return r.t === t; })[0] || ctx.rows[ctx.rows.length - 1];
+    if (!me) return false;
+    var keys = String(key).split(' + ');
+    var c = conditionsOf(me, medLots);
+    return keys.every(function(k){ return c.indexOf(k) >= 0; });
+  };
+  F.valueOf = function(t){
+    try {
+      var c = window.calcTradePnl ? calcTradePnl(t) : null;
+      if (c && c.pnlUsd != null && !isNaN(c.pnlUsd)) return window.toDisplayCurrency ? toDisplayCurrency(c.pnlUsd) : c.pnlUsd;
+    } catch(e){}
+    return num(t.pips);
+  };
+
+  /* ── UI ── */
+  var _last = null, _fmt = null, _abs = null;
+  function condHtml(set){
+    return set.map(function(c){
+      var i = c.indexOf(': ');
+      return '<span class="ef-cond notranslate" translate="no"><i>' + esc(c.slice(0, i)) + '</i>' + esc(c.slice(i + 2)) + '</span>';
+    }).join('<span class="ef-and">and</span>');
+  }
+  function findingHtml(x, kind){
+    var f = _fmt, C = window.ApexConfidence;
+    var conf = x.verdict === 'confirmed'
+      ? '<span class="ef-badge ef-ok" title="Passed the significance test after correcting for all ' + _last.tested + ' conditions tested, and points the same way in both halves of your journal.">Confirmed</span>'
+      : '<span class="ef-badge ef-watch" title="Not yet strong enough to survive the correction for testing many conditions at once. Keep logging — it will either firm up or disappear.">Worth watching</span>';
+    var headline = kind === 'leak'
+      ? 'Cost you <b class="neg">' + _abs(x.net) + '</b> over ' + x.n + ' trades'
+      : 'Made you <b class="pos">' + _abs(x.net) + '</b> over ' + x.n + ' trades';
+    var key = x.set.join(' + ');
+    return '<div class="ef-item ef-' + kind + '">' +
+      '<div class="ef-top">' + conf + '<div class="ef-conds">' + condHtml(x.set) + '</div></div>' +
+      '<div class="ef-head">' + headline + '</div>' +
+      '<div class="ef-stats">' +
+        '<span><b>' + f(x.mean) + '</b> per trade vs <b>' + f(x.restMean) + '</b> on your other trades</span>' +
+        '<span>win rate <b>' + Math.round(x.wr * 100) + '%</b>' + (C ? C.chip(C.rate(Math.round(x.wr * x.n), x.n), { range: true, fmt: function(v){ return Math.round(v * 100) + '%'; } }) : '') + '</span>' +
+        '<span>p = ' + (x.p < 0.001 ? '&lt;0.001' : x.p.toFixed(3)) + '</span>' +
+        '<span>' + (x.stable ? 'same direction in both halves of your journal' : 'not yet consistent across both halves') + '</span>' +
+      '</div>' +
+      (kind === 'leak'
+        ? '<div class="ef-act"><span>Without these trades your net would have been <b>' + _abs(x.net) + '</b> higher.</span>' +
+          '<button class="ef-btn" onclick="ApexEdgeFinder.guard(\'' + esc(key).replace(/'/g, "\\'") + '\')">Warn me when I do this</button></div>'
+        : '<div class="ef-act"><span><b>' + _abs(x.impact) + '</b> more than the same number of your average trades would have made.</span>' +
+          (/^(Symbol|Setup|Session|Tag|Mistake|Timeframe): /.test(x.set[0])
+            ? '<button class="ef-btn" onclick="ApexEdgeFinder.filterJournal(\'' + esc(key).replace(/'/g, "\\'") + '\')">Show these trades</button>' : '') +
+          '</div>') +
+    '</div>';
+  }
+
+  F.render = function(body, rows){
+    var ga = window.getPnlSymbol ? getPnlSymbol() : '$';
+    var money = rows.some(function(r){ try { return !!calcTradePnl(r.t); } catch(e){ return false; } });
+    var grp = function(v, d){ return Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+    _fmt = function(v){ if (v == null || !isFinite(v)) return '—';
+      return money ? (v < 0 ? '−' : '+') + ga + grp(v, 2) : (v < 0 ? '−' : '+') + grp(v, 1) + ' pips'; };
+    _abs = function(v){ return money ? ga + grp(v, 2) : grp(v, 1) + ' pips'; };
+    var a = _last = F.analyse(rows);
+    if (a.tooFew){
+      body.innerHTML = '<div class="el-card"><h3>Edge &amp; Leaks</h3><div class="el-empty">This needs at least 30 trades with a result — you have ' + a.n +
+        '. Below that, almost any pattern it could find would be chance, and telling you to stop trading Tuesdays on the strength of four trades would do more harm than good.</div></div>';
+      return;
+    }
+    var list = function(arr, kind){
+      if (!arr.length) return '<div class="ef-none">' + (kind === 'leak'
+        ? 'No leak stands out from noise. That is a real result: nothing in your journal is costing you money consistently enough to single out.'
+        : 'No edge stands out from noise yet. Your results are not concentrated in any condition strongly enough to say so with confidence.') + '</div>';
+      return arr.slice(0, 8).map(function(x){ return findingHtml(x, kind); }).join('');
+    };
+    body.innerHTML =
+      '<div class="el-card">' +
+        '<h3>Edge &amp; Leaks</h3>' +
+        '<p class="el-sub">Every condition in your journal — ' + a.tested + ' of them, singly and in pairs, over ' + a.n +
+          ' trades — tested against all your other trades. Only what survives the statistics is shown.</p>' +
+        '<div class="ef-method">A finding is <b>Confirmed</b> when it passes a significance test after correcting for all ' + a.tested +
+          ' tests at once (Benjamini–Hochberg, 10% false-discovery rate) <i>and</i> points the same way in the first and second half of your journal. ' +
+          '<b>Worth watching</b> means promising but not there yet. ' + a.dropped + ' condition' + (a.dropped === 1 ? '' : 's') +
+          ' looked no different from chance and ' + (a.dropped === 1 ? 'is' : 'are') + ' not shown.</div>' +
+      '</div>' +
+      '<div class="ef-grid">' +
+        '<div class="el-card"><div class="el-section-title">Find my leak · stop doing this</div>' + list(a.leaks, 'leak') + '</div>' +
+        '<div class="el-card"><div class="el-section-title">Find my edge · do more of this</div>' + list(a.edges, 'edge') + '</div>' +
+      '</div>';
+  };
+
+  /* Flag a leak as a guardrail: the next matching trade logged triggers a
+     warning in the guardrail banner. Stored with the other guardrail rules. */
+  F.guard = function(key){
+    if (!window.ApexGuard) { if (window.showToast) showToast('Guardrails are not available'); return; }
+    var cfg = ApexGuard.get(), list = (cfg.avoid || []).slice();
+    if (list.indexOf(key) < 0) list.push(key);
+    ApexGuard.set({ avoid: list, enabled: true });
+    if (window.showToast) showToast('✓ Guardrail added — you will be warned when a trade matches');
+  };
+  F.filterJournal = function(key){
+    try {
+      if (window.ApexJournalSearch && ApexJournalSearch.open) {
+        var first = String(key).split(' + ')[0], v = first.slice(first.indexOf(': ') + 2);
+        ApexJournalSearch.open(v);
+        return;
+      }
+    } catch(e){}
+    if (window.showToast) showToast('Open the journal search (Ctrl/Cmd + K) and search for it');
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var s = document.createElement('style');
+    s.textContent =
+      '.ef-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}' +
+      '@media(max-width:900px){.ef-grid{grid-template-columns:1fr}}' +
+      '.ef-method{font-size:12px;color:var(--ink3);line-height:1.65;margin-top:8px}' +
+      '.ef-method b{color:var(--ink2)}' +
+      '.ef-item{padding:13px 0;border-top:0.5px solid var(--rim)}' +
+      '.ef-item:first-of-type{border-top:0}' +
+      '.ef-top{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}' +
+      '.ef-conds{display:flex;flex-wrap:wrap;gap:5px;align-items:center}' +
+      '.ef-cond{font-size:12.5px;font-weight:600;color:var(--ink);background:var(--layer);border:0.5px solid var(--rim2);border-radius:6px;padding:2px 8px}' +
+      '.ef-cond i{font-style:normal;color:var(--ink3);font-weight:500;margin-right:5px}' +
+      '.ef-and{font-size:11px;color:var(--ink3)}' +
+      '.ef-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:5px;cursor:help;white-space:nowrap}' +
+      '.ef-ok{color:#0b0b0c;background:var(--gold,#c9a84c)}' +
+      '.ef-watch{color:var(--gold,#c9a84c);border:0.5px solid rgba(var(--gold-rgb,201,168,76),.5)}' +
+      '.ef-head{font-size:14px;color:var(--ink2);margin-top:8px}' +
+      '.ef-stats{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink3);margin-top:5px}' +
+      '.ef-stats b{color:var(--ink);font-variant-numeric:tabular-nums}' +
+      '.ef-act{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:9px;font-size:12px;color:var(--ink2)}' +
+      '.ef-btn{padding:6px 12px;border-radius:8px;border:0.5px solid rgba(var(--gold-rgb,201,168,76),.5);background:rgba(var(--gold-rgb,201,168,76),.1);color:var(--gold,#c9a84c);font-weight:600;font-size:12px;cursor:pointer;font-family:var(--font-body)}' +
+      '.ef-none{font-size:13px;color:var(--ink3);line-height:1.6;padding:6px 0}';
+    document.head.appendChild(s);
+  });
+})();
+</script>
+<script>
 /* ════════════════════════════════════════════════════════════════
    Evidence — stat engine  (window.ApexStats)
    ────────────────────────────────────────────────────────────────
@@ -31131,6 +31803,29 @@ function goToAuthPro(screen) {
   };
   var DEFAULT_SLOTS=['net','wr','expectancy','pf','sharpe','maxdd','avgWin','avgLoss'];
 
+  /* Sample size and 95 % range per slot (see ApexConfidence). Each slot
+     gets the method that fits what it is: Wilson for a rate, t for a mean,
+     bootstrap for ratios. Counts and extremes only get the n chip — a
+     "range" on a max-drawdown from resampled trades would suggest a
+     precision it does not have. */
+  function slotConf(k, vals, m){
+    var C=window.ApexConfidence; if(!C || !vals.length) return '';
+    var money=function(x){ return fmtMoney(x,0); }, num=function(x){ return fmtNum(x,2); };
+    var wins=vals.filter(function(v){return v>0;}), losses=vals.filter(function(v){return v<0;});
+    var r=null, f=num;
+    if(k==='wr'){ r=C.rate(wins.length, vals.length); f=function(x){ return pct(x*100,0); }; }
+    else if(k==='expectancy'||k==='net'){ r=C.mean(vals); f=money; }
+    else if(k==='avgWin'){ r=C.mean(wins); f=money; }
+    else if(k==='avgLoss'){ r=C.mean(losses); f=money; }
+    else if(k==='pf'){ r=C.boot(vals,function(s){ var w=0,l=0; s.forEach(function(v){ if(v>0) w+=v; else l-=v; }); return l>0?w/l:null; }); }
+    else if(k==='payoff'){ r=C.boot(vals,function(s){ var w=0,wn=0,l=0,ln=0; s.forEach(function(v){ if(v>0){w+=v;wn++;} else if(v<0){l-=v;ln++;} }); return (wn&&ln)?(w/wn)/(l/ln):null; }); }
+    else if(k==='sharpe'){ r=C.boot(vals,function(s){ var mu=s.reduce(function(a,b){return a+b;},0)/s.length; var sd=Math.sqrt(s.reduce(function(a,b){return a+(b-mu)*(b-mu);},0)/Math.max(1,s.length-1)); return sd>0?mu/sd:null; }); }
+    else r={ n:vals.length, level:C.level(vals.length) };
+    /* Net P&L is a total; its uncertainty is the per-trade mean's, so the
+       range is labelled per trade rather than pretending to bound the sum. */
+    return '<div class="cf-line">'+C.chip(r,{ range: r.lo!=null, fmt:f, suffix: k==='net'?' /trade':'' })+'</div>';
+  }
+
   function streaks(vals){
     var w=0,l=0,mw=0,ml=0;
     vals.forEach(function(v){ if(v>0){w++;l=0;if(w>mw)mw=w;} else if(v<0){l++;w=0;if(l>ml)ml=l;} else {w=0;l=0;} });
@@ -31167,7 +31862,7 @@ function goToAuthPro(screen) {
 
   /* ───────────────────── PAGE shell ───────────────────── */
   var TABS=[
-    ['metrics','Metrics'],['dash','Dashboards'],['stats','Stat Lab'],['options','Options'],['rrisk','R & Risk'],['timing','Timing & Exits'],
+    ['metrics','Metrics'],['finder','Edge & Leaks'],['dash','Dashboards'],['stats','Stat Lab'],['options','Options'],['rrisk','R & Risk'],['timing','Timing & Exits'],
     ['mfemae','MFE / MAE'],['whatif','What-If'],['replay','Replay'],
     ['sim','Market Replay'],
     /* Strategy Lab is the automated counterpart of Market Replay: rules over
@@ -31234,11 +31929,11 @@ function goToAuthPro(screen) {
     if(subt) subt.style.display='';
     document.querySelectorAll('#elSubtabs .el-subtab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-eltab')===EL.tab); });
     var rows=sortedValued();
-    if(!rows.length && ['metrics','stats','rrisk','timing','mfemae','whatif','replay','backtest','gallery'].indexOf(EL.tab)>=0){
+    if(!rows.length && ['metrics','finder','stats','rrisk','timing','mfemae','whatif','replay','backtest','gallery'].indexOf(EL.tab)>=0){
       body.innerHTML='<div class="el-card"><div class="el-empty"><div class="big"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg></div>No trades with a determinable result yet.<br>Log trades with pips or P&L to unlock Edge Lab analytics.</div></div>';
       return;
     }
-    ({ metrics:renderMetrics, dash:renderDashboards, stats:renderStatLab, options:renderOptions, rrisk:renderRRisk, timing:renderTiming,
+    ({ metrics:renderMetrics, finder:function(b,r){ if(window.ApexEdgeFinder) ApexEdgeFinder.render(b,r); }, dash:renderDashboards, stats:renderStatLab, options:renderOptions, rrisk:renderRRisk, timing:renderTiming,
        mfemae:renderMfeMae, whatif:renderWhatIf, replay:renderReplay,
        sim:renderMarketReplay, strategy:renderStrategyLab,
        backtest:renderBacktest, gallery:renderGallery, missed:renderMissed, share:renderShare }[EL.tab]||renderMetrics)(body, rows);
@@ -31514,12 +32209,17 @@ function goToAuthPro(screen) {
               '<div class="lbl">'+esc(m.label)+(m.custom?' <span class="el-pill">custom</span>':'')+'</div>'+
               '<div class="val '+(v==null?'':(v>0?'pos':(v<0?'neg':'')))+'">'+
                 (m.broken?'<span class="neg">formula error</span>':esc(S.format(v,m.unit)))+'</div>'+
+              (v==null||m.broken?'':'<div class="cf-line" data-cfm="'+esc(m.id)+'">'+
+                (window.ApexConfidence?ApexConfidence.chip({n:all.length,level:ApexConfidence.level(all.length)}):'')+'</div>')+
               (m.hint?'<div class="hint">'+esc(m.hint)+'</div>':'')+
             '</div>';
           }).join('')+'</div></div>';
       }).join('');
-      host.innerHTML = html || '<div class="el-card"><div class="el-empty">No metric matches that search.</div></div>';
+      host.innerHTML = (html && window.ApexConfidence ? '<div class="el-card" style="padding:10px 16px">'+ApexConfidence.legend()+
+          '<div class="el-sub" id="slCfState" style="margin:6px 0 0">Estimating 95% ranges by resampling your trades…</div></div>' : '') +
+        (html || '<div class="el-card"><div class="el-empty">No metric matches that search.</div></div>');
       host.innerHTML += customEditorHtml();
+      slBootstrap(all, mets);
       return;
     }
 
@@ -31529,7 +32229,9 @@ function goToAuthPro(screen) {
     if(keys.length>40) keys=keys.slice(0,40);
 
     var head='<tr><th>Metric</th><th>All</th>'+keys.map(function(k){
-      return '<th>'+esc(k)+'<br><span style="opacity:.55;font-weight:400">'+buckets[k].length+'</span></th>'; }).join('')+'</tr>';
+      var C=window.ApexConfidence;
+      return '<th>'+esc(k)+'<br>'+(C?C.chip({n:buckets[k].length,level:C.level(buckets[k].length)},{compact:true}):
+        '<span style="opacity:.55;font-weight:400">'+buckets[k].length+'</span>')+'</th>'; }).join('')+'</tr>';
 
     var bodyRows=mets.map(function(m){
       var allV=m.calcRows(all);
@@ -31537,16 +32239,63 @@ function goToAuthPro(screen) {
         '<td>'+esc(S.format(allV,m.unit))+'</td>'+
         keys.map(function(k){
           var v=m.calcRows(buckets[k]);
-          return '<td class="'+(v==null?'':(v>0?'pos':(v<0?'neg':'')))+'">'+esc(S.format(v,m.unit))+'</td>';
+          var dim=window.ApexConfidence?ApexConfidence.cellClass(buckets[k].length):'';
+          return '<td class="'+(v==null?'':(v>0?'pos':(v<0?'neg':'')))+' '+dim+'">'+esc(S.format(v,m.unit))+'</td>';
         }).join('')+'</tr>';
     }).join('');
 
     host.innerHTML='<div class="el-card"><div class="el-section-title">'+
       esc(S.DIMENSIONS[SL_STATE.dim].label)+' breakdown</div>'+
       '<p class="el-sub">Every metric, per '+esc(S.DIMENSIONS[SL_STATE.dim].label.toLowerCase())+
-      '. Columns are ordered by trade count'+(Object.keys(buckets).length>40?', showing the top 40':'')+'.</p>'+
+      '. Columns are ordered by trade count'+(Object.keys(buckets).length>40?', showing the top 40':'')+
+      '. Columns with fewer than 30 trades are dimmed — a difference there is mostly noise.</p>'+
+      (window.ApexConfidence?ApexConfidence.legend():'')+
       '<div style="overflow-x:auto"><table class="el-table"><thead>'+head+'</thead><tbody>'+bodyRows+'</tbody></table></div></div>'+
       customEditorHtml();
+  }
+
+  /* Every Stat Lab metric gets a 95 % range from the same 150 resamples of
+     the trades. One context per resample serves all 68 built-ins, so the
+     cost is 150 contexts, not 150 × 68. Runs in slices between frames so the
+     page stays responsive; a newer render cancels an older run. */
+  var _slBootRun=0;
+  /* No range for these. Resampling treats trades as independent draws, so
+     anything that depends on their ORDER (drawdowns, streaks, Calmar, Ulcer,
+     recovery) or on a single extreme trade (best / worst) would get a range
+     that looks precise and is meaningless. Counts are not estimates at all.
+     They keep the sample-size chip only. */
+  var SL_NO_RANGE={ maxDD:1, maxDDpct:1, ddDuration:1, recovery:1, calmar:1, ulcer:1, kratio:1,
+    maxWinStreak:1, maxLossStreak:1, currentStreak:1, best:1, worst:1, bestR:1, worstR:1,
+    bestDay:1, worstDay:1, tradingDays:1, tradesPerDay:1 };
+  function slBootstrap(all, mets){
+    mets = mets.filter(function(m){ return !m.broken && !SL_NO_RANGE[m.id] && m.unit!=='int'; });
+    var C=window.ApexConfidence, S=window.ApexStats; if(!C||!S||all.length<5) { var st0=document.getElementById('slCfState'); if(st0) st0.textContent='Ranges need at least 5 trades.'; return; }
+    var run=++_slBootRun, B=150, samples=C.resamples(all,B), cat={};
+    S.catalogue().forEach(function(m){ cat[m.id]=m; });
+    var draws={}; mets.forEach(function(m){ draws[m.id]=[]; });
+    var i=0;
+    function slice(){
+      if(run!==_slBootRun) return;
+      var end=Math.min(B,i+10);
+      for(;i<end;i++){
+        var smp=samples[i], ctx=null;
+        try{ ctx=S.context(smp); }catch(e){}
+        mets.forEach(function(m){
+          var v=null;
+          try{ v = m.custom ? m.calcRows(smp) : (ctx&&cat[m.id]?cat[m.id].calc(ctx):null); }catch(e){}
+          draws[m.id].push(v);
+        });
+      }
+      if(i<B){ setTimeout(slice,0); return; }
+      mets.forEach(function(m){
+        var el=document.querySelector('[data-cfm="'+(window.CSS&&CSS.escape?CSS.escape(m.id):m.id)+'"]'); if(!el) return;
+        var r=C.fromDraws(draws[m.id], all.length);
+        el.innerHTML=C.chip(r,{ range:r.lo!=null, fmt:function(x){ return S.format(x,m.unit); } });
+      });
+      var st=document.getElementById('slCfState');
+      if(st) st.textContent='95% ranges from '+B+' resamples of your '+all.length+' trades. Counts, streaks, drawdowns and single best/worst figures show the sample size only — resampling cannot bound a number that depends on trade order or on one trade.';
+    }
+    setTimeout(slice,30);
   }
 
   function customEditorHtml(){
@@ -31663,6 +32412,7 @@ function goToAuthPro(screen) {
       return '<div class="el-kpi"><span class="gear" title="Configure slots" onclick="EdgeLab.toggleSlotPicker()"><svg class=ic aria-hidden=true><use href=#i-settings ></use></svg></span>'+
         '<div class="lbl">'+esc(sd.label)+'</div>'+
         '<div class="val '+cls+'">'+sd.calc(m,x)+'</div>'+
+        slotConf(k, vals, m)+
         (sd.hint?'<div class="hint">'+esc(sd.hint)+'</div>':'')+'</div>';
     }).join('');
 
@@ -31679,7 +32429,8 @@ function goToAuthPro(screen) {
       .sort(function(a,b){return b.m.expectancy-a.m.expectancy;});
     var setupTable='<table class="el-table"><thead><tr><th>Setup</th><th>Trades</th><th>Win%</th><th>Avg Win</th><th>Avg Loss</th><th>Expectancy</th><th>Profit Factor</th><th>Net</th></tr></thead><tbody>'+
       setupRows.map(function(r){ var mm=r.m;
-        return '<tr><td>'+esc(r.s)+'</td><td>'+mm.n+'</td><td>'+pct(mm.wr*100,0)+'</td>'+
+        var C=window.ApexConfidence, ec=C?C.mean(bySetup[r.s]):null;
+        return '<tr class="'+(C?C.cellClass(mm.n):'')+'"><td>'+esc(r.s)+'</td><td>'+mm.n+(C?C.chip(ec,{compact:true,fmt:function(x){return fmtMoney(x,0);}}):'')+'</td><td>'+pct(mm.wr*100,0)+'</td>'+
           '<td class="pos">'+fmtMoney(mm.avgWin,0)+'</td><td class="neg">'+fmtMoney(-mm.avgLoss,0)+'</td>'+
           '<td class="'+(mm.expectancy>=0?'pos':'neg')+'">'+fmtMoney(mm.expectancy)+'</td>'+
           '<td>'+(mm.pf===Infinity?'∞':fmtNum(mm.pf,2))+'</td>'+
@@ -32201,10 +32952,10 @@ function goToAuthPro(screen) {
         (missing?' — <span class="el-tag-mismatch">'+missing+' skipped (no entry/stop logged)</span>':'')+'</p>'+
         '<div class="el-kpis">'+
           kpi('Total R', (totalR>=0?'+':'−')+Math.abs(totalR).toFixed(1)+'R', totalR>=0?'pos':'neg','Sum of all R-multiples')+
-          kpi('Expectancy', fmtNum(m.expectancy,2)+'R', m.expectancy>=0?'pos':'neg','Avg R per trade')+
+          kpi('Expectancy', fmtNum(m.expectancy,2)+'R'+(window.ApexConfidence?ApexConfidence.chip(ApexConfidence.mean(rvals),{range:true,fmt:function(x){return fmtNum(x,2)+'R';}}):''), m.expectancy>=0?'pos':'neg','Avg R per trade')+
           kpi('Avg Win', '+'+fmtNum(m.avgWin,2)+'R','pos')+
           kpi('Avg Loss', '−'+fmtNum(m.avgLoss,2)+'R','neg')+
-          kpi('Win Rate', pct(m.wr*100), '', m.wins+'W / '+m.losses+'L')+
+          kpi('Win Rate', pct(m.wr*100)+(window.ApexConfidence?ApexConfidence.chip(ApexConfidence.rate(m.wins,m.n),{range:true,fmt:function(x){return pct(x*100,0);}}):''), '', m.wins+'W / '+m.losses+'L')+
           kpi('Payoff', m.avgLoss>0?fmtNum(m.avgWin/m.avgLoss,2):'∞','','Avg win R / avg loss R')+
           kpi('Max Drawdown', '−'+fmtNum(ddR.abs,1)+'R','neg','Deepest peak-to-trough in R')+
           kpi('Best / Worst', fmtNum(Math.max.apply(null,rvals),1)+'R / '+fmtNum(Math.min.apply(null,rvals),1)+'R','two')+
@@ -32226,7 +32977,8 @@ function goToAuthPro(screen) {
       '<div class="el-card"><h3>R by Setup</h3><p class="el-sub">Which setups actually carry the account</p>'+
         '<table class="el-table"><thead><tr><th>Setup</th><th>Trades</th><th>Win%</th><th>Avg Win</th><th>Avg Loss</th><th>Expectancy</th><th>Total R</th></tr></thead><tbody>'+
         setupRows.map(function(r){
-          return '<tr><td>'+esc(r.s)+'</td><td>'+r.m.n+'</td><td>'+pct(r.m.wr*100,0)+'</td>'+
+          var C=window.ApexConfidence;
+          return '<tr class="'+(C?C.cellClass(r.m.n):'')+'"><td>'+esc(r.s)+'</td><td>'+r.m.n+(C?C.chip(C.mean(bySetup[r.s]),{compact:true,fmt:function(x){return fmtNum(x,2)+'R';}}):'')+'</td><td>'+pct(r.m.wr*100,0)+'</td>'+
             '<td class="pos">+'+fmtNum(r.m.avgWin,2)+'R</td><td class="neg">−'+fmtNum(r.m.avgLoss,2)+'R</td>'+
             '<td class="'+(r.m.expectancy>=0?'pos':'neg')+'">'+fmtNum(r.m.expectancy,2)+'R</td>'+
             '<td class="'+(r.sum>=0?'pos':'neg')+'">'+(r.sum>=0?'+':'−')+Math.abs(r.sum).toFixed(1)+'R</td></tr>';
@@ -40811,7 +41563,9 @@ body.light .pt-sugg{background:var(--layer)}
         '<button onclick="this.closest(\'#recapCard\').remove();ApexRecap._seen();" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:15px" aria-label="Close">✕</button></div>'+
       '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px">'+
         '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:'+col+'">'+(r.net>=0?'+':'')+r.net.toFixed(1)+'</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">net pips</div></div>'+
-        '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">'+r.wr+'%</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">win rate</div></div>'+
+        '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">'+r.wr+'%</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">win rate</div>'+
+          /* one session is a handful of trades — say so next to the percentage */
+          (window.ApexConfidence&&r.n?'<div class="cf-line">'+ApexConfidence.chip({n:r.n,level:ApexConfidence.level(r.n)})+'</div>':'')+'</div>'+
         '<div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">'+r.n+'</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">trades</div></div>'+
         (r.bestSess?'<div><div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--gold);margin-top:3px">'+r.bestSess+'</div><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">your best session</div></div>':'')+
       '</div>'+
@@ -46779,9 +47533,36 @@ body.light .pt-sugg{background:var(--layer)}
   function stars(n){ n = Math.max(1, Math.min(5, parseInt(n,10)||5)); var s=''; for(var i=0;i<5;i++) s += i<n ? '★' : '☆'; return s; }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
+  /* The admin stamps `verified` from the author's actual journal when the
+     review is approved (apexadmin.html → journalFacts); users cannot write
+     it (firestore.rules). So this line is a check, not a claim. */
+  function verifiedLine(v){
+    var f = v.verified;
+    if(!f || !f.trades) return '';
+    var since = '';
+    if(f.firstDay){
+      var d = new Date(f.firstDay + 'T12:00:00Z');
+      if(!isNaN(d)) since = ' since ' + d.toLocaleDateString('en-US', { month:'short', year:'numeric' });
+    }
+    return '<div class="lp-voice-ver" title="Checked against this trader\'s journal when the review was approved">'+
+      '<span aria-hidden="true">✓</span> Verified user · ' + Number(f.trades).toLocaleString('en-US') +
+      ' trade' + (f.trades === 1 ? '' : 's') + ' journaled' + since + '</div>';
+  }
+  function renderSummary(list){
+    var el = $('lpVoicesSum'); if(!el) return;
+    var rated = list.filter(function(v){ return v.rating; });
+    if(rated.length < 3){ el.innerHTML = ''; return; }   // an average of two is not a number worth showing
+    var avg = rated.reduce(function(a,v){ return a + (+v.rating||0); }, 0) / rated.length;
+    var ver = list.filter(function(v){ return v.verified && v.verified.trades; }).length;
+    el.innerHTML = '<span class="lp-voices-avg">' + avg.toFixed(1) + '</span>' +
+      '<span class="lp-voice-stars">' + stars(Math.round(avg)) + '</span>' +
+      '<span>' + rated.length + ' published review' + (rated.length === 1 ? '' : 's') +
+      (ver ? ' · ' + ver + ' verified against the author\'s journal' : '') + '</span>';
+  }
   function renderVoices(list){
     var host = $('lpVoices'), sec = $('voices'), div = $('voicesDivider');
     if(!host || !sec || !list.length) return;
+    renderSummary(list);
     host.innerHTML = list.slice(0,6).map(function(v){
       var init = (v.name||'A').trim()[0].toUpperCase();
       return '<div class="lp-voice">'+
@@ -46791,6 +47572,7 @@ body.light .pt-sugg{background:var(--layer)}
           '<div class="lp-voice-av">'+(v.avatar?'<img src="'+esc(v.avatar)+'" alt="">':esc(init))+'</div>'+
           '<div><div class="lp-voice-n">'+esc(v.name||'Evidence user')+'</div>'+
           '<div class="lp-voice-r">'+esc(v.role||'Trader')+'</div>'+
+          verifiedLine(v)+
           (v.beta ? '<div class="lp-voice-beta">Founding trader · received Pro for free</div>' : '')+'</div>'+
         '</div>'+
       '</div>';
@@ -46813,6 +47595,8 @@ body.light .pt-sugg{background:var(--layer)}
             q.forEach(function(d){ var o=d.data()||{}; o.id=d.id; out.push(o); });
             out.sort(function(a,b){
               var f=(b.featured?1:0)-(a.featured?1:0); if(f) return f;
+              // verified reviews first — never sorted by star rating
+              var v=((b.verified&&b.verified.trades)?1:0)-((a.verified&&a.verified.trades)?1:0); if(v) return v;
               return (b.createdAt||0)-(a.createdAt||0);
             });
             renderVoices(out);
@@ -46897,7 +47681,7 @@ body.light .pt-sugg{background:var(--layer)}
       '<div style="font-size:11px;color:var(--ink3);margin:6px 0 12px" id="vcCount"></div>'+
       '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--ink2);line-height:1.5;margin-bottom:14px">'+
         '<input type="checkbox" id="vcOk" style="margin-top:2px;width:15px;height:15px;accent-color:var(--gold)">'+
-        '<span>Evidence may publish this text together with the name and line above on the website. No email, no account data, and I can have it removed at any time.</span>'+
+        '<span>Evidence may publish this text together with the name and line above on the website, plus a "Verified user" line showing how many trades I have journaled and since which month. Before publishing, Evidence checks those two numbers against my journal. No email, no P&amp;L, no other account data, and I can have it removed at any time.</span>'+
       '</label>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
         '<button class="btn-primary" onclick="ApexTestimonials.submit()">'+(mine?'Update':'Send it in')+'</button>'+
@@ -61840,7 +62624,8 @@ self.addEventListener('message', async (ev) => {
     cooldownMin: 0,      // minutes to wait after a loss
     revenge: true,       // detect fast oversized re-entries after a loss
     revengeWindowMin: 15,
-    revengeSizeMult: 1.5
+    revengeSizeMult: 1.5,
+    avoid: []            // leaks flagged in Edge Lab → Edge & Leaks (ApexEdgeFinder keys)
   };
 
   function uid() { return window.currentUID || 'local'; }
@@ -61997,6 +62782,21 @@ self.addEventListener('message', async (ev) => {
       }
     }
 
+    // ── flagged leaks (Edge & Leaks) ──
+    if (cfg.avoid && cfg.avoid.length && trades.length && window.ApexEdgeFinder) {
+      var lotsAll = [];
+      try { lotsAll = (window.getAllTrades ? getAllTrades() : []).map(function (t) { return num(t.lots); }).filter(function (v) { return v != null && v > 0; }); } catch (e) {}
+      lotsAll.sort(function (a, b) { return a - b; });
+      var med = lotsAll.length >= 10 ? lotsAll[lotsAll.length >> 1] : null;
+      var last = trades[trades.length - 1];
+      cfg.avoid.forEach(function (key) {
+        try {
+          if (ApexEdgeFinder.matches(last, trades, key, med))
+            res.warnings.push({ rule: 'avoid', msg: 'Your last trade matches a leak you flagged: ' + esc(key.replace(/Behaviour: /g, '').replace(/ \+ /g, ' and ')) + '. Historically this has cost you money — is this one different?' });
+        } catch (e) {}
+      });
+    }
+
     paint(res);
     return res;
   };
@@ -62085,6 +62885,17 @@ self.addEventListener('message', async (ev) => {
           ? fld('Revenge window (min)', 'guard-revengeWindowMin', cfg.revengeWindowMin, 'revengeWindowMin', 'How soon counts as "immediately"', 1, 1) +
             fld('Oversize multiple', 'guard-revengeSizeMult', cfg.revengeSizeMult, 'revengeSizeMult', '1.5 = 50% bigger than usual', 0.1, 1)
           : '') +
+        /* Leaks flagged from Edge Lab → Edge & Leaks. Each can be dropped here. */
+        '<div class="guard-field" style="grid-column:1/-1"><label>Flagged leaks</label>' +
+          ((cfg.avoid && cfg.avoid.length)
+            ? cfg.avoid.map(function (k, i) {
+                return '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--ink2)">' +
+                  '<span class="notranslate" translate="no" style="flex:1">' + esc(k.replace(/Behaviour: /g, '').replace(/ \+ /g, ' and ')) + '</span>' +
+                  '<button type="button" style="background:none;border:0.5px solid var(--rim2);color:var(--ink3);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:11px" ' +
+                  'onclick="ApexGuard.dropAvoid(' + i + ')">Remove</button></div>';
+              }).join('')
+            : '<div class="guard-hint">None yet. In Edge Lab → Edge &amp; Leaks, "Warn me when I do this" adds a leak here.</div>') +
+        '</div>' +
       '</div>';
     anchor.parentNode.insertBefore(card, anchor.nextSibling);
   }
@@ -62095,6 +62906,11 @@ self.addEventListener('message', async (ev) => {
         'oninput="ApexGuard.set({' + key + ': parseFloat(this.value)||0})">' +
       '<div class="guard-hint">' + esc(hint) + '</div></div>';
   }
+  G.dropAvoid = function (i) {
+    var list = (load().avoid || []).slice(); list.splice(i, 1);
+    G.set({ avoid: list });
+    G.refreshSettings();
+  };
   G.refreshSettings = function () {
     var card = document.getElementById('guardSettingsCard');
     if (card && card.parentNode) card.parentNode.removeChild(card);
@@ -76291,16 +77107,181 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       .catch(function(){ return null; });
   }
 
+  /* >>> SYNC RECON — pure, no DOM; .claude/tests/syncledger.test.js runs it.
+
+     Holds the journal against the server's ledger (see the SYNC LEDGER block
+     in the sync workers) for one connection:
+       - missing:  closes the broker reported that are not closed journal
+                   rows on that day. Only for platforms that send an explicit
+                   close; fill-based ones (futures, exchanges, ATAS) pair
+                   several fills into one trade, so counting them would cry
+                   wolf on every partial exit.
+       - P&L:      broker-reported P&L (as recorded by the server) against the
+                   P&L Evidence calculates itself from entry, exit and size.
+                   A trade Evidence cannot price (unknown contract spec) falls
+                   back to the broker figure and is counted, never guessed.
+     The difference is "over" when it exceeds max($1, 0.5 % of the gross
+     broker P&L moved) — below that it is rounding and spread on commission. */
+  var FILL_SOURCES = { tradovate:1, binance:1, bybit:1, ibkr:1, atas:1, quantower:1 };
+  var RECON_DAYS = 30, DRAIN_GRACE_MS = 10 * 60000;
+  function reconLedger(ledgers, trades, o){
+    o = o || {};
+    var now = o.now || Date.now();
+    var absTh = o.absThreshold != null ? o.absThreshold : 1;
+    var pctTh = o.pctThreshold != null ? o.pctThreshold : 0.005;
+    var from = new Date(now - RECON_DAYS * 86400000).toISOString().slice(0, 10);
+    var today = new Date(now).toISOString().slice(0, 10);
+    var days = {}, lastEventAt = 0, received = 0, dupes = 0, source = '';
+    (ledgers || []).forEach(function(L){
+      source = source || L.source;
+      received += Number(L.received || 0); dupes += Number(L.dupes || 0);
+      lastEventAt = Math.max(lastEventAt, Number(L.lastEventAt || 0));
+      var d = {}; try { d = JSON.parse(L.days || '{}') || {}; } catch(e){}
+      Object.keys(d).forEach(function(k){
+        var r = days[k] || (days[k] = { c:0, p:0, pn:0 });
+        r.c += Number(d[k].c || 0); r.p += Number(d[k].p || 0); r.pn += Number(d[k].pn || 0);
+      });
+    });
+    var fillBased = !!FILL_SOURCES[source];
+    /* The newest events may still be sitting in the inbox, not yet drained. */
+    var settling = (now - lastEventAt) < DRAIN_GRACE_MS;
+
+    var jDays = {};
+    (trades || []).forEach(function(x){
+      var t = x.t;
+      if (!t || t.exit === '' || t.exit == null) return;
+      var dk = t.closeTime ? new Date(Number(t.closeTime)).toISOString().slice(0, 10) : x.day;
+      if (!dk || dk < from) return;
+      var r = jDays[dk] || (jDays[dk] = { c:0, broker:0, calc:0, uncalc:0 });
+      r.c++;
+      var b = parseFloat(t.pnl), hasB = isFinite(b);
+      var c = o.calc ? o.calc(t) : null;
+      if (c == null || !isFinite(c)) { r.uncalc++; c = hasB ? b : 0; }
+      r.calc += c;
+      if (hasB) r.broker += b;
+    });
+
+    var out = { source: source, received: received, dupes: dupes, lastEventAt: lastEventAt,
+                closes: 0, journalCloses: 0, missing: fillBased ? null : 0,
+                brokerPnl: null, evidencePnl: 0, diff: null, over: false,
+                uncalc: 0, diffDays: [], threshold: absTh };
+    var hasBrokerPnl = false, gross = 0, evAll = 0, evCmp = 0;
+    Object.keys(days).sort().forEach(function(dk){
+      if (dk < from) return;
+      if (dk === today && settling) return;
+      var L = days[dk], J = jDays[dk] || { c:0, broker:0, calc:0, uncalc:0 };
+      out.closes += L.c; out.journalCloses += J.c;
+      if (!fillBased) out.missing += Math.max(0, L.c - J.c);
+      evAll += J.calc; out.uncalc += J.uncalc;
+      if (L.pn > 0){
+        hasBrokerPnl = true;
+        evCmp += J.calc;
+        out.brokerPnl = (out.brokerPnl || 0) + L.p;
+        gross += Math.abs(L.p);
+        var dd = J.calc - L.p;
+        if (Math.abs(dd) > absTh) out.diffDays.push({ day: dk, broker: round2(L.p), evidence: round2(J.calc), diff: round2(dd) });
+      }
+    });
+    /* Compared only over days the broker reported P&L for — otherwise a day
+       of fills without P&L would show up as a phantom difference. */
+    out.evidencePnl = round2(hasBrokerPnl ? evCmp : evAll);
+    if (hasBrokerPnl){
+      out.brokerPnl = round2(out.brokerPnl);
+      out.diff = round2(out.evidencePnl - out.brokerPnl);
+      out.threshold = round2(Math.max(absTh, pctTh * gross));
+      out.over = Math.abs(out.diff) > out.threshold;
+    }
+    out.diffDays.reverse();
+    return out;
+  }
+  function round2(v){ return Math.round(v * 100) / 100; }
+  /* <<< SYNC RECON */
+
+  H.reconLedger = reconLedger;
+
+  /* Evidence's own P&L for a trade, from entry, exit and size only — the
+     broker's figure is deliberately NOT consulted, otherwise the comparison
+     would be the broker against itself. null when the contract is unknown. */
+  function evidenceCalc(t){
+    try {
+      var e = parseFloat(t.entry), x = parseFloat(t.exit), l = parseFloat(t.lots);
+      if (!isFinite(e) || !isFinite(x) || !isFinite(l) || l <= 0) return null;
+      var sp = getPipSpec(t.symbol);
+      if (!sp || !sp.pipSize || !sp.pipValuePerLot) return null;
+      var pips = (x - e) * (apexIsLong(t.dir) ? 1 : -1) / sp.pipSize;
+      var r = calcTradePnl({ symbol: t.symbol, pips: String(pips), lots: String(l) });
+      return r && isFinite(r.pnlUsd) ? r.pnlUsd : null;
+    } catch(err){ return null; }
+  }
+
+  /* The server's record of what each connection delivered. Read-only for the
+     owner (firestore.rules), so it stays independent of the journal. */
+  function ledgers(){
+    if (!window.db || !window.currentUID) return Promise.resolve([]);
+    return window.db.collection('apexUsers').doc(window.currentUID)
+      .collection('syncHealth').get()
+      .then(function(snap){ var o = []; snap.forEach(function(d){ var v = d.data() || {}; v._id = d.id; o.push(v); }); return o; })
+      .catch(function(){ return []; });
+  }
+
+  function journalTrades(source, acct){
+    var out = [], jd = window.journalData || {};
+    Object.keys(jd).forEach(function(day){
+      ((jd[day] && jd[day].trades) || []).forEach(function(t){
+        if (!t || t.source !== source) return;
+        if (acct != null && String(t.acct || '') !== String(acct)) return;
+        out.push({ t: t, day: day });
+      });
+    });
+    return out;
+  }
+
+  /* Mismatch threshold — the trader can raise it for accounts where a
+     commission model makes a small standing difference expected. */
+  function thresholdAbs(){
+    try { var v = parseFloat(localStorage.getItem('apexSyncPnlThreshold')); return v > 0 ? v : 1; }
+    catch(e){ return 1; }
+  }
+  H.setThreshold = function(){
+    var cur = thresholdAbs();
+    var v = prompt('Flag a P&L difference above how many dollars? (always at least 0.5 % of the P&L moved)', String(cur));
+    if (v == null) return;
+    v = parseFloat(v);
+    if (!(v > 0)) { if (window.showToast) showToast('Enter an amount above 0'); return; }
+    try { localStorage.setItem('apexSyncPnlThreshold', String(v)); } catch(e){}
+    render();
+  };
+
+  /* One alert per connection per day and per kind — a standing difference
+     should not ping every time the tab is opened. */
+  function alertOnce(key, kind, text){
+    var k = 'apexSyncAlert_' + (window.currentUID || 'guest') + '_' + key + '_' + kind;
+    var today = new Date().toISOString().slice(0, 10);
+    try { if (localStorage.getItem(k) === today) return; localStorage.setItem(k, today); } catch(e){ return; }
+    try { if (window.pushNotif) pushNotif('warn', text, "nav('settings');switchSettingsTab('ctrader');"); } catch(e){}
+    try { if (window.ApexPWA && ApexPWA.notify) ApexPWA.notify('Evidence · sync check', { body: text.replace(/<[^>]+>/g, ''), tag: 'sync-' + key + '-' + kind }); } catch(e){}
+  }
+
   /* A connection is stale when it has not delivered anything for a day
      while claiming to be connected. Not an error — brokers are closed at
      the weekend — but worth saying, because a link that broke on Tuesday
      and a quiet Sunday look identical until you name the difference. */
+  /* Green / yellow / red. Red means trades are not arriving: a reported
+     failure, or three days of silence (longer than any weekend). Yellow means
+     they arrive but something does not add up — quiet for over a day and a
+     half, closes missing from the journal, or P&L off by more than the
+     threshold. */
   function grade(c){
     if (c.error)  return { key:'error', label:'Needs attention', tone:'var(--loss)' };
     if (!c.connected) return { key:'off', label:'Not connected', tone:'var(--ink3)' };
     var quiet = Date.now() - Number(c.last || 0);
+    if (c.last && quiet > 72*3600000)
+      return { key:'error', label:'No data for ' + Math.floor(quiet/86400000) + ' d', tone:'var(--loss)' };
     if (c.last && quiet > 36*3600000)
       return { key:'stale', label:'No data for ' + Math.floor(quiet/86400000) + ' d', tone:'var(--gold)' };
+    var r = c.recon;
+    if (r && r.missing) return { key:'warn', label:r.missing + ' missing', tone:'var(--gold)' };
+    if (r && r.over)    return { key:'warn', label:'P&L mismatch', tone:'var(--gold)' };
     return { key:'ok', label:'Live', tone:'var(--profit)' };
   }
 
@@ -76318,7 +77299,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                  last: d.lastSync || 0,
                  error: d.lastError || '',
                  action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('ctrader')",
-                 sync: 'ctrader' });
+                 sync: 'ctrader', lsrc: 'ctrader' });
     }));
 
     jobs.push(priv('tradovate').then(function(d){
@@ -76329,7 +77310,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                  last: d.lastSync || 0,
                  error: d.status === 'reauth_required'
                         ? 'Tradovate rejected the stored authorisation — reconnect required.' : '',
-                 action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('tradovate')" });
+                 action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('tradovate')",
+                 lsrc: 'tradovate' });
     }));
 
     /* Exchange & IBKR keys — the worker writes its own result back into
@@ -76345,7 +77327,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                        last: d.lastRun || 0,
                        error: d.lastError === 'pro_required'
                               ? 'Auto-sync for exchanges is a Pro feature.' : (d.lastError || ''),
-                       action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('exchange')" });
+                       action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('exchange')",
+                       lkey: 'ex_' + doc.id, lsrc: String(d.exchange || '').toLowerCase() });
           });
         }).catch(function(){}));
     }
@@ -76359,20 +77342,69 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         out.push({ id:'mt5c_' + a.id, name:'MetaTrader 5 · ' + esc(a.name || a.login),
                    connected: a.status !== 'stopped', detail: a.login + ' · ' + a.server + ' · cloud',
                    last: a.lastOk || 0, error: bad,
-                   action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('mt5')" });
+                   action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('mt5')",
+                   lsrc: 'mt5', lacct: String(a.login || '') });
       });
     }));
 
-    ['mt5','tradingview','atas','quantower','ninjatrader'].forEach(function(p){
-      if (!m[p]) return;   // never delivered anything — not a connection yet
-      var NAMES = { mt5:'📊 MetaTrader 5', tradingview:'📈 TradingView',
-                    atas:'🎯 ATAS', quantower:'🧊 Quantower', ninjatrader:'NinjaTrader' };
-      out.push({ id:p, name:NAMES[p], connected:true, detail:'via webhook',
-                 last:m[p], error:'',
-                 action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('" + p + "')" });
-    });
+    var _ledgers = [];
+    jobs.push(ledgers().then(function(L){ _ledgers = L; }));
 
     return Promise.all(jobs).then(function(){
+      var NAMES = { mt5:'📊 MetaTrader 5', tradingview:'📈 TradingView',
+                    atas:'🎯 ATAS', quantower:'🧊 Quantower', ninjatrader:'NinjaTrader' };
+      var WEBHOOK = ['mt5','tradingview','atas','quantower','ninjatrader'];
+      /* Webhook platforms: one row per account the server has on record.
+         That record is shared by every device, so the old "never synced on
+         this laptop" false alarm is gone. The device-local stamp is only a
+         fallback for deliveries from before the ledger existed. */
+      var claimed = {};
+      out.forEach(function(c){ if (c.lsrc === 'mt5' && c.lacct) claimed['mt5|' + c.lacct] = 1; });
+      var webhookSeen = {};
+      _ledgers.forEach(function(L){
+        if (WEBHOOK.indexOf(L.source) < 0) return;
+        if (claimed[L.source + '|' + (L.account || '')]) return;
+        webhookSeen[L.source] = 1;
+        out.push({ id:'wh_' + L._id, name:NAMES[L.source],
+                   connected:true, detail:(L.label || L.account || 'default account') + ' · via webhook',
+                   last:Math.max(Number(L.lastEventAt || 0), Number(m[L.source] || 0)), error:'',
+                   action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('" + L.source + "')",
+                   lkey: L._id, lsrc: L.source, lacct: String(L.account || '') });
+      });
+      WEBHOOK.forEach(function(p){
+        if (!m[p] || webhookSeen[p]) return;   // never delivered anything — not a connection yet
+        out.push({ id:p, name:NAMES[p], connected:true, detail:'via webhook',
+                   last:m[p], error:'',
+                   action: "nav('settings');switchSettingsTab('ctrader');ApexAutoTrack.select('" + p + "')" });
+      });
+
+      /* Reconcile every row that has a ledger behind it. */
+      var th = thresholdAbs();
+      out.forEach(function(c){
+        var mine = _ledgers.filter(function(L){
+          if (c.lkey) return L._id === c.lkey;
+          if (!c.lsrc || L.source !== c.lsrc) return false;
+          return c.lacct ? String(L.account || '') === c.lacct : true;
+        });
+        if (!mine.length) return;
+        var src = c.lsrc || mine[0].source;
+        /* Only filter journal rows by account when this platform tags them
+           with one — cTrader background events do not, so filtering there
+           would find nothing and report every close as missing. */
+        var acct = null;
+        if (c.lacct != null && c.lacct !== '') acct = c.lacct;
+        else if (c.lkey && mine[0].account && journalTrades(src, null).some(function(x){ return x.t.acct; }))
+          acct = String(mine[0].account);
+        c.recon = reconLedger(mine, journalTrades(src, acct), { calc: evidenceCalc, absThreshold: th });
+        var nm = String(c.name).replace(/^[^A-Za-z]+/, '');
+        if (c.recon.missing)
+          alertOnce(c.id, 'missing', '<strong>' + esc(nm) + '</strong>: ' + c.recon.missing +
+            ' closed trade' + (c.recon.missing === 1 ? '' : 's') + ' reported by the broker are not in your journal');
+        if (c.recon.over)
+          alertOnce(c.id, 'pnl', '<strong>' + esc(nm) + '</strong>: P&amp;L differs from the broker by ' +
+            money(c.recon.diff) + ' over the last 30 days');
+      });
+
       /* A failure the server reported by mail and inbox outranks whatever
          the connector's own document happens to say. */
       var f = m['!fail'];
@@ -76396,6 +77428,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         '<div class="sh-meta">' + (c.detail ? esc(c.detail) + ' · ' : '') +
           'last sync ' + esc(ago(c.last)) + '</div>' +
         (c.error ? '<div class="sh-err">' + esc(c.error) + '</div>' : '') +
+        reconHtml(c) +
       '</div>' +
       '<div class="sh-act">' +
         (c.sync === 'ctrader'
@@ -76403,6 +77436,47 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         '<button class="sh-btn" onclick="' + c.action + '">Open</button>' +
       '</div>' +
     '</div>';
+  }
+
+  function money(v){
+    if (v == null || !isFinite(v)) return 'n/a';
+    var s = Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (v < 0 ? '−$' : '$') + s;
+  }
+  function signed(v){ return (v > 0 ? '+' : '') + money(v); }
+
+  function reconHtml(c){
+    var r = c.recon;
+    if (!r) return '';
+    var stats = '<div class="sh-stats">' +
+      '<span><b>' + r.received.toLocaleString('en-US') + '</b> events received</span>' +
+      '<span><b>' + r.journalCloses + '</b>/' + r.closes + ' closes journaled (30 d)</span>' +
+      '<span class="' + (r.missing ? 'sh-warn' : '') + '">' +
+        (r.missing == null ? 'Missing: n/a (fill-based)' : '<b>' + r.missing + '</b> missing') + '</span>' +
+      '<span><b>' + r.dupes + '</b> duplicate' + (r.dupes === 1 ? '' : 's') + ' caught</span>' +
+    '</div>';
+    var pnl;
+    if (r.brokerPnl == null){
+      pnl = '<div class="sh-pnl sh-na">P&amp;L check: n/a — this platform does not report its own P&amp;L</div>';
+    } else {
+      pnl = '<div class="sh-pnl' + (r.over ? ' sh-pnl-over' : '') + '">' +
+        '<span>Broker <b>' + money(r.brokerPnl) + '</b></span>' +
+        '<span>Evidence <b>' + money(r.evidencePnl) + '</b></span>' +
+        '<span class="sh-delta">Δ <b>' + signed(r.diff) + '</b></span>' +
+        '<span class="sh-th">limit ±' + money(r.threshold) + '</span>' +
+      '</div>';
+      if (r.uncalc) pnl += '<div class="sh-note">' + r.uncalc + ' trade' + (r.uncalc === 1 ? '' : 's') +
+        ' used the broker figure — Evidence has no contract spec to price ' + (r.uncalc === 1 ? 'it' : 'them') + ' independently.</div>';
+      if (r.diffDays.length){
+        pnl += '<details class="sh-days"><summary>' + r.diffDays.length + ' day' + (r.diffDays.length === 1 ? '' : 's') +
+          ' with a difference</summary><table><tr><th>Day</th><th>Broker</th><th>Evidence</th><th>Δ</th></tr>' +
+          r.diffDays.slice(0, 30).map(function(d){
+            return '<tr><td>' + esc(d.day) + '</td><td>' + money(d.broker) + '</td><td>' + money(d.evidence) +
+              '</td><td class="sh-delta">' + signed(d.diff) + '</td></tr>';
+          }).join('') + '</table></details>';
+      }
+    }
+    return stats + pnl;
   }
 
   H.syncNow = function(which){
@@ -76428,19 +77502,27 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         return;
       }
       var bad = rows.filter(function(c){ return grade(c).key === 'error'; }).length;
+      var warn = rows.filter(function(c){ var k = grade(c).key; return k === 'warn' || k === 'stale'; }).length;
       host.innerHTML = '<div class="glass-card">' +
         '<div style="display:flex;align-items:center;gap:10px">' +
           '<div class="gc-title" style="margin:0;flex:1">Connection status</div>' +
+          '<button class="sh-btn" onclick="ApexSyncHealth.setThreshold()">Limit $' + thresholdAbs() + '</button>' +
           '<button class="sh-btn" onclick="ApexSyncHealth.render()">Refresh</button>' +
         '</div>' +
         (bad ? '<div class="sh-banner">' + bad + ' connection' + (bad===1?'':'s') +
                ' need' + (bad===1?'s':'') + ' attention — no new trades are arriving from ' +
                (bad===1?'it':'them') + '.</div>' : '') +
+        (!bad && warn ? '<div class="sh-banner sh-banner-warn">' + warn + ' connection' + (warn===1?'':'s') +
+               ' deliver' + (warn===1?'s':'') + ' trades, but something does not add up — see below.</div>' : '') +
         '<div class="sh-list">' + rows.map(rowHtml).join('') + '</div>' +
-        '<div class="sh-foot">We also email you if a connection fails three times in a row, ' +
+        '<div class="sh-foot">Broker figures come from what our servers received from the broker, ' +
+          'not from your journal, so they are an independent check. Evidence P&amp;L is recalculated ' +
+          'from entry, exit and size. Compared over the last 30 days, before fees. ' +
+          'We also email you if a connection fails three times in a row, ' +
           'so a broken link cannot sit unnoticed for weeks. Last-delivery times are shared ' +
           'across your devices — a platform that delivered on your laptop is not reported ' +
-          'as silent here.</div>' +
+          'as silent here. Service-wide problems are posted on the ' +
+          '<a href="https://sdbyjason.github.io/status/" target="_blank" rel="noopener" style="color:var(--gold)">status page</a>.</div>' +
       '</div>';
     });
   }
@@ -76465,7 +77547,26 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         'font-family:var(--font-body)}' +
       '.sh-banner{margin-top:10px;padding:9px 11px;border-radius:8px;font-size:12px;' +
         'background:rgba(240,99,106,.12);color:var(--loss)}' +
-      '.sh-foot{font-size:11px;color:var(--ink4);margin-top:11px;line-height:1.6}';
+      '.sh-foot{font-size:11px;color:var(--ink4);margin-top:11px;line-height:1.6}' +
+      '.sh-banner-warn{background:rgba(var(--gold-rgb,201,168,76),.12);color:var(--gold,#c9a84c)}' +
+      '.sh-stats{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink3);margin-top:6px}' +
+      '.sh-stats b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}' +
+      '.sh-warn,.sh-warn b{color:var(--gold,#c9a84c)}' +
+      '.sh-pnl{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin-top:7px;padding:7px 10px;' +
+        'border-radius:8px;font-size:12px;color:var(--ink3);background:rgba(0,0,0,.28);' +
+        'border:0.5px solid rgba(var(--gold-rgb,201,168,76),.22)}' +
+      '.sh-pnl b{color:var(--ink);font-variant-numeric:tabular-nums}' +
+      '.sh-pnl-over{border-color:rgba(var(--gold-rgb,201,168,76),.6)}' +
+      '.sh-pnl-over .sh-delta b{color:var(--gold,#c9a84c)}' +
+      '.sh-th{margin-left:auto;font-size:11px;color:var(--ink3)}' +
+      '.sh-na{background:none;border-style:dashed;color:var(--ink4)}' +
+      '.sh-note{font-size:11px;color:var(--ink4);margin-top:5px;line-height:1.5}' +
+      '.sh-days{margin-top:6px;font-size:12px;color:var(--ink3)}' +
+      '.sh-days summary{cursor:pointer;color:var(--gold,#c9a84c);font-weight:600}' +
+      '.sh-days table{width:100%;border-collapse:collapse;margin-top:6px;font-variant-numeric:tabular-nums}' +
+      '.sh-days th{text-align:left;font-weight:600;color:var(--ink4);font-size:11px;padding:3px 6px 3px 0}' +
+      '.sh-days td{padding:3px 6px 3px 0;border-top:0.5px solid var(--rim2)}' +
+      '@media(max-width:600px){.sh-row{flex-wrap:wrap}.sh-act{width:100%;justify-content:flex-end}.sh-th{margin-left:0}}';
     document.head.appendChild(css);
   });
 
@@ -83716,6 +84817,9 @@ body:not(.lp-on) #lpProgress{ display:none; }
   #landingPage .lp-step + .lp-step::before{ display:none; }
   #landingPage .lp-own{ gap:22px; padding:24px; }
 }
+#landingPage .lp-voice-ver{ margin-top:6px; font-family:var(--lp-mono); font-size:10.5px; letter-spacing:.03em; color:var(--gold,#c9a84c); }
+#landingPage .lp-voices-sum{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px 12px; margin:-6px 0 22px; color:var(--lp-mute); font-size:.9rem; }
+#landingPage .lp-voices-avg{ font-size:1.6rem; font-weight:700; color:var(--gold,#c9a84c); font-variant-numeric:tabular-nums; }
 #landingPage .lp-voice-beta{ display:inline-block; margin-top:6px; font-family:var(--lp-mono); font-size:10.5px; letter-spacing:.04em; color:var(--lp-mute); border:1px solid var(--lp-line); border-radius:999px; padding:2px 9px; }
 
 /* ════════════ APP ════════════ */
@@ -85175,15 +86279,21 @@ body.light::before{ opacity:.45; }
     var ts=0, tsSign=0; for(var i=0;i<srt.length;i++){ var s=val(srt[i])>0?1:-1; if(!tsSign) tsSign=s; if(s!==tsSign) break; ts++; }
     var dd=days.slice().reverse().filter(function(d){ return d.v!==0; }), ds=0, dsSign=0; for(var j=0;j<dd.length;j++){ var s2=dd[j].v>0?1:-1; if(!dsSign) dsSign=s2; if(s2!==dsSign) break; ds++; }
     var ratio=al?aw/al:null;
+    var C=window.ApexConfidence, fm=function(x){ return fmt(x,true); };
+    function cf(r, o){ return C ? '<div class="cf-line">'+C.chip(r, o)+'</div>' : ''; }
+    var pfConf = C ? C.boot(vals, function(s){ var w=0,l=0; s.forEach(function(v){ if(v>0) w+=v; else l-=v; }); return l>0?w/l:null; }) : null;
     var tiles=
       '<div class="d2-tile"><div class="l">Profit factor</div><div class="g">'+gauge(isFinite(pf)?pf/3:1, pf>=1?'var(--profit)':'var(--loss)')+
-        '<b class="'+(pf>=1?'pos':'neg')+'">'+(isFinite(pf)?pf.toFixed(2):'∞')+'</b></div><div class="s">'+fmt(gw,true)+' won · '+fmt(-gl,true)+' lost</div></div>'+
+        '<b class="'+(pf>=1?'pos':'neg')+'">'+(isFinite(pf)?pf.toFixed(2):'∞')+'</b></div><div class="s">'+fmt(gw,true)+' won · '+fmt(-gl,true)+' lost</div>'+
+        cf(pfConf,{range:pfConf&&pfConf.lo!=null,fmt:function(x){return x.toFixed(2);}})+'</div>'+
       '<div class="d2-tile"><div class="l">Day win %</div><div class="g">'+gauge((dw+dl)?dw/(dw+dl):0,'var(--gold)')+
-        '<b>'+((dw+dl)?Math.round(dw/(dw+dl)*100):0)+'%</b></div><div class="s"><span class="pos">'+dw+' green</span> · <span class="neg">'+dl+' red</span> days</div></div>'+
+        '<b>'+((dw+dl)?Math.round(dw/(dw+dl)*100):0)+'%</b></div><div class="s"><span class="pos">'+dw+' green</span> · <span class="neg">'+dl+' red</span> days</div>'+
+        (C&&(dw+dl)?'<div class="cf-line">'+C.chip(C.rate(dw,dw+dl),{range:true,fmt:function(x){return Math.round(x*100)+'%';}}).replace(/trades?\b/g,function(w){return w==='trade'?'day':'days';})+'</div>':'')+'</div>'+
       '<div class="d2-tile"><div class="l">Avg win : avg loss</div><div class="d2-ratio"><b>'+(ratio==null?'—':ratio.toFixed(2))+'</b>'+
         '<div class="bar"><i class="w" style="flex:'+(aw||0.0001)+'"></i><i class="lo" style="flex:'+(al||0.0001)+'"></i></div></div>'+
         '<div class="s"><span class="pos">'+fmt(aw,true)+'</span> vs <span class="neg">'+fmt(-al,true)+'</span></div></div>'+
-      '<div class="d2-tile"><div class="l">Expectancy</div><div class="d2-big '+(exp>=0?'pos':'neg')+'">'+fmt(exp,true)+'</div><div class="s">per trade over '+vals.length+' trades</div></div>'+
+      '<div class="d2-tile"><div class="l">Expectancy</div><div class="d2-big '+(exp>=0?'pos':'neg')+'">'+fmt(exp,true)+'</div><div class="s">per trade over '+vals.length+' trades</div>'+
+        cf(C?C.mean(vals):null,{range:true,fmt:fm})+'</div>'+
       '<div class="d2-tile"><div class="l">Current streak</div><div class="d2-streak"><span class="'+(tsSign>0?'pos':'neg')+'"><b>'+ts+'</b> '+(tsSign>0?'win':'loss')+(ts===1?'':'s')+'</span>'+
         '<span class="'+(dsSign>0?'pos':'neg')+'"><b>'+ds+'</b> '+(dsSign>0?'green':'red')+' day'+(ds===1?'':'s')+'</span></div><div class="s">most recent first</div></div>';
     return card('tiles','Key figures','<div class="d2-tiles">'+tiles+'</div>');
