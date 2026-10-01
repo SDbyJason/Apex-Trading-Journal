@@ -1094,7 +1094,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-09-30h';
+  window.APEX_BUILD = '2026-10-01a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -12867,29 +12867,33 @@ function _authAction(type) {
     </div>
   </div>
 
-  <!-- ══════ INSIGHTS ══════ -->
+  <!-- ══════ INSIGHTS ══════
+       Layout (01.10.2026): the coach first, then the trader's own numbers
+       (cards → what the data says → what to do), and the generic weekly
+       market briefing last. The cards, the feed and the actions are drawn
+       by window.ApexInsights (end of file); the IDs below are the hooks the
+       older modules still look for — keep them. -->
   <div class="page" id="page-insights">
     <div class="ph">
       <div class="ph-eyebrow">AI-Powered</div>
       <h1 data-i18n-head="Trade Insights">Trade <span style="color:var(--gold)">Insights</span></h1>
-      <p>Pattern recognition and psychological analysis from your trade history</p>
+      <p>What your journal says about your trading — every figure computed from your own trades, then explained</p>
     </div>
 
-    <!-- AI COACH SECTION (moved to top — most valuable feature) -->
     <div class="coach-wrap" id="coachWrap">
 
       <!-- LOCKED STATE (shown to free users) -->
       <div class="coach-locked-banner" id="coachLocked" style="display:none">
         <span class="coach-lock-icon"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg></span>
         <h3>AI Trading Coach</h3>
-        <p>Get personalised analysis, pattern feedback and coaching directly on your trade data. Every figure it quotes is computed from your journal first — the model explains them, it does not invent them. Exclusive for Evidence Pro members.</p>
+        <p>Ask your journal anything — why Fridays go wrong, what happens after a loss, which setup actually pays. Every figure the coach quotes is computed from your trades first; the model explains them, it does not invent them.</p>
         <div class="coach-badge-row">
-          <div class="coach-feature-badge"><span>✦</span> Pattern Analysis</div>
-          <div class="coach-feature-badge"><span>✦</span> Mistake Coaching</div>
-          <div class="coach-feature-badge"><span>✦</span> Live Q&amp;A</div>
-          <div class="coach-feature-badge"><span>✦</span> Psychology Feedback</div>
+          <div class="coach-feature-badge"><svg class=ic aria-hidden=true><use href=#i-search ></use></svg> Pattern analysis</div>
+          <div class="coach-feature-badge"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg> Mistake coaching</div>
+          <div class="coach-feature-badge"><svg class=ic aria-hidden=true><use href=#i-bot ></use></svg> Live Q&amp;A</div>
+          <div class="coach-feature-badge"><svg class=ic aria-hidden=true><use href=#i-brain ></use></svg> Psychology feedback</div>
         </div>
-        <button onclick="openUpgradeModal()" style="margin-top:12px;padding:10px 24px;background:linear-gradient(135deg,var(--gold),var(--gold-hi));border:none;border-radius:10px;color:#07080b;font-family:var(--font-display);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.03em"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Upgrade to Pro</button>
+        <button type="button" class="apex-btn apex-btn--solid" onclick="openUpgradeModal()"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Upgrade to Pro</button>
       </div>
 
       <!-- ACTIVE COACH (shown to pro users) -->
@@ -12898,114 +12902,76 @@ function _authAction(type) {
           <div class="coach-avatar"><svg class=ic aria-hidden=true><use href=#i-bot ></use></svg></div>
           <div class="coach-title-block">
             <div class="gc-title">AI Trading Coach</div>
-            <div class="coach-subtitle">Your journal is the context · figures are computed, not guessed</div>
+            <div class="coach-subtitle" id="coachBasis">Your journal is the context · figures are computed, not guessed</div>
           </div>
+          <button type="button" class="apex-btn apex-btn--ghost apex-btn--sm coach-new-btn" id="coachNewBtn" onclick="ApexInsights.newChat()" title="Start a new conversation"><svg class=ic aria-hidden=true><use href=#i-refresh ></use></svg> New chat</button>
           <div class="coach-pro-badge">PRO</div>
         </div>
 
-        <div class="coach-chat-area" id="coachChat">
+        <div class="coach-chat-area" id="coachChat" role="log" aria-live="polite" aria-label="Conversation with the AI coach">
           <div class="coach-msg">
             <div class="coach-msg-icon"><svg class=ic aria-hidden=true><use href=#i-bot ></use></svg></div>
-            <div class="coach-msg-bubble">
-              Hey trader — I'm your AI Coach. I have full access to your journal data and can help you identify patterns, weaknesses, and opportunities in your trading. What do you want to work on?
-            </div>
+            <div class="coach-msg-bubble">I'm your AI Coach. I read the figures the app computes from your journal — by weekday, hour, session, setup and symbol, what happens after a loss, and how the last 30 days compare. What do you want to work on?</div>
           </div>
         </div>
 
-        <div class="coach-typing" id="coachTyping">
-          <div class="coach-msg-icon" style="background:var(--gold-dim);font-size:11px"><svg class=ic aria-hidden=true><use href=#i-bot ></use></svg></div>
-          <div class="coach-typing-dots">
-            <span></span><span></span><span></span>
-          </div>
-          <span>Coach is analysing...</span>
+        <div class="coach-typing" id="coachTyping" aria-hidden="true">
+          <div class="coach-msg-icon"><svg class=ic aria-hidden=true><use href=#i-bot ></use></svg></div>
+          <div class="coach-typing-dots"><span></span><span></span><span></span></div>
+          <span id="coachTypingText">Reading your journal…</span>
         </div>
 
         <div class="coach-quick-btns" id="coachQuickBtns">
-          <button class="coach-quick-btn" onclick="coachQuick('Analyse my biggest weaknesses based on my trades')"><svg class=ic aria-hidden=true><use href=#i-search ></use></svg> My weaknesses</button>
-          <button class="coach-quick-btn" onclick="coachQuick('Which setup performs best for me?')"><svg class=ic aria-hidden=true><use href=#i-chart ></use></svg> Best setup</button>
-          <button class="coach-quick-btn" onclick="coachQuick('How is my risk management?')"><svg class=ic aria-hidden=true><use href=#i-shield ></use></svg> Risk management</button>
-          <button class="coach-quick-btn" onclick="coachQuick('What session should I focus on?')"><svg class=ic aria-hidden=true><use href=#i-clock ></use></svg> Best session</button>
-          <button class="coach-quick-btn" onclick="coachQuick('Give me a full performance review')"><svg class=ic aria-hidden=true><use href=#i-clipboard ></use></svg> Full review</button>
+          <button type="button" class="coach-quick-btn" onclick="coachQuick('Give me a full performance review')"><svg class=ic aria-hidden=true><use href=#i-clipboard ></use></svg> Full review</button>
+          <button type="button" class="coach-quick-btn" onclick="coachQuick('Analyse my biggest weaknesses based on my trades')"><svg class=ic aria-hidden=true><use href=#i-search ></use></svg> My weaknesses</button>
+          <button type="button" class="coach-quick-btn" onclick="coachQuick('How is my risk management?')"><svg class=ic aria-hidden=true><use href=#i-shield ></use></svg> Risk management</button>
         </div>
 
         <div class="coach-input-row">
           <textarea
             class="coach-input"
             id="coachInput"
-            placeholder="Ask your coach anything about your trading..."
+            placeholder="Ask about your trading…"
             rows="1"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCoachMsg();}"
-            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+            aria-label="Message to the AI coach"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();sendCoachMsg(true);}"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'"
           ></textarea>
-          <button class="coach-send-btn" id="coachSendBtn" onclick="sendCoachMsg(true)" title="Send">➤</button>
+          <button type="button" class="coach-send-btn" id="coachSendBtn" onclick="sendCoachMsg(true)" title="Send (Enter)" aria-label="Send"><svg class=ic aria-hidden=true><use href=#i-send ></use></svg></button>
         </div>
+        <div class="coach-foot" id="coachFoot">Enter to send · Shift + Enter for a new line</div>
       </div>
 
     </div>
 
-    <!-- Weekly Intelligence Report is dynamically injected here by initWeeklyReport() -->
+    <div class="ins2-sec">
+      <div class="ins2-sec-hd">
+        <h2 class="ins2-h">At a glance</h2>
+        <span class="ins2-basis" id="ins2Basis"></span>
+      </div>
+      <div class="insights-grid" id="insightCards">
+        <div class="insight-card ins2-skel"></div>
+        <div class="insight-card ins2-skel"></div>
+        <div class="insight-card ins2-skel"></div>
+        <div class="insight-card ins2-skel"></div>
+        <div class="insight-card ins2-skel"></div>
+        <div class="insight-card ins2-skel"></div>
+      </div>
+    </div>
+
+    <div class="ins2-cols">
+      <div class="glass-card ins2-col">
+        <div class="gc-title">What the data says</div>
+        <div class="ai-feed" id="aiFeed"></div>
+      </div>
+      <div class="glass-card ins2-col">
+        <div class="gc-title">What to do next</div>
+        <div id="actionRecs"></div>
+      </div>
+    </div>
+
+    <!-- Weekly Intelligence Report is injected here by initWeeklyReport() -->
     <div id="weeklyReportAnchor"></div>
-
-    <div class="glass-card">
-      <div class="gc-title" style="margin-bottom:1.25rem">AI Observations</div>
-      <div class="ai-feed" id="aiFeed">
-        <div class="ai-feed-item">
-          <div class="ai-feed-icon gold"><svg class=ic aria-hidden=true><use href=#i-bulb ></use></svg></div>
-          <div class="ai-feed-body">
-            <div class="ai-feed-title">Getting Started</div>
-            <div class="ai-feed-text">Log at least 10 trades with complete data — symbol, session, setup, and mistakes — to unlock AI-powered pattern analysis. The more you log, the smarter your insights become.</div>
-            <div class="ai-feed-time">System · Now</div>
-          </div>
-        </div>
-        <div class="ai-feed-item">
-          <div class="ai-feed-icon info"><svg class=ic aria-hidden=true><use href=#i-chart ></use></svg></div>
-          <div class="ai-feed-body">
-            <div class="ai-feed-title">Psychology Tracking Enabled</div>
-            <div class="ai-feed-text">Rate your discipline, confidence, focus, and patience every day. Over time, the system will correlate your mental state with your P&L to identify peak performance conditions.</div>
-            <div class="ai-feed-time">Insight Engine · Ready</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="insights-grid" id="insightCards">
-      <div class="insight-card gold-accent">
-        <div class="ic-eye">Best Setup</div>
-        <div class="ic-val">—</div>
-        <div class="ic-desc">Log setups to see which performs best for you.</div>
-        <div class="ic-badge gold">Awaiting data</div>
-      </div>
-      <div class="insight-card profit-accent">
-        <div class="ic-eye">Best Session</div>
-        <div class="ic-val">—</div>
-        <div class="ic-desc">Tag your trade sessions to discover your edge.</div>
-        <div class="ic-badge profit">Awaiting data</div>
-      </div>
-      <div class="insight-card loss-accent">
-        <div class="ic-eye">Biggest Weakness</div>
-        <div class="ic-val">—</div>
-        <div class="ic-desc">Mistake tags will reveal your recurring patterns.</div>
-        <div class="ic-badge loss">Awaiting data</div>
-      </div>
-      <div class="insight-card info-accent">
-        <div class="ic-eye">Avg Hold Time</div>
-        <div class="ic-val">—</div>
-        <div class="ic-desc">Timeframe data will show your optimal hold duration.</div>
-        <div class="ic-badge" style="background:rgba(91,155,213,0.1);color:var(--info)">Awaiting data</div>
-      </div>
-      <div class="insight-card gold-accent">
-        <div class="ic-eye">Risk Consistency</div>
-        <div class="ic-val">—</div>
-        <div class="ic-desc">Track your position sizing discipline over time.</div>
-        <div class="ic-badge gold">Awaiting data</div>
-      </div>
-      <div class="insight-card profit-accent">
-        <div class="ic-eye">Market Edge</div>
-        <div class="ic-val">—</div>
-        <div class="ic-desc">Which market gives you the highest win rate?</div>
-        <div class="ic-badge profit">Awaiting data</div>
-      </div>
-    </div>
   </div>
 
   <!-- ══════ ECONOMIC NEWS ══════ -->
@@ -18858,191 +18824,19 @@ function renderEmotionPerformance() {
 }
 
 // ─── INSIGHTS ─────────────────────────
+/* The Insights page is drawn by window.ApexInsights (its own <script> at the
+   end of the file). This name stays because the nav, the account switcher's
+   VIEW_FNS wrapper and the trade-save hooks all call it.
+
+   What it replaced (01.10.2026): six cards that ranked setups, sessions and
+   symbols by WIN RATE over as few as two trades, an "Avg Hold Time" card
+   that actually showed the most-used timeframe, a "Risk Consistency" card
+   that measured the spread of RESULTS rather than of risk, and a net figure
+   that added BTC pips to EURUSD pips. */
 function updateInsights() {
-  const all = getAllTrades();
-
-  // ── Insight Cards ──────────────────────────────────────────────
-  function setCard(idx, val, desc, badgeText, badgeClass) {
-    const cards = document.querySelectorAll('#insightCards .insight-card');
-    if (!cards[idx]) return;
-    const valEl   = cards[idx].querySelector('.ic-val');
-    const descEl  = cards[idx].querySelector('.ic-desc');
-    const badgeEl = cards[idx].querySelector('.ic-badge');
-    if (valEl)   valEl.textContent   = val;
-    if (descEl)  descEl.textContent  = desc;
-    if (badgeEl && badgeText) {
-      badgeEl.textContent = badgeText;
-      if (badgeClass) { badgeEl.className = 'ic-badge ' + badgeClass; }
-    }
+  if (window.ApexInsights && typeof ApexInsights.render === 'function') {
+    try { ApexInsights.render(); } catch (e) { console.warn('Insights render failed:', e); }
   }
-
-  if (all.length < 5) {
-    // Keep default "Awaiting data" state — just update the description
-    const needed = 5 - all.length;
-    document.querySelectorAll('#insightCards .ic-desc').forEach(el => {
-      el.textContent = `Log ${needed} more trade${needed!==1?'s':''} to unlock this insight.`;
-    });
-    // AI feed: show minimal hint
-    renderAiFeed(all);
-    return;
-  }
-
-  // ── 0: Best Setup ──────────────────────────────────────────────
-  const setupMap = {};
-  all.forEach(t => {
-    if (!t.setup) return;
-    if (!setupMap[t.setup]) setupMap[t.setup] = { wins:0, total:0 };
-    setupMap[t.setup].total++;
-    if (parseFloat(t.pips||0) > 0) setupMap[t.setup].wins++;
-  });
-  const setups = Object.keys(setupMap).filter(s => setupMap[s].total >= 2);
-  if (setups.length) {
-    const best = setups.sort((a,b) => (setupMap[b].wins/setupMap[b].total) - (setupMap[a].wins/setupMap[a].total))[0];
-    const d = setupMap[best];
-    const wr = Math.round(d.wins/d.total*100);
-    setCard(0, best, `${wr}% win rate over ${d.total} trades.`, wr+'% WR', wr>=50?'gold':'');
-  } else {
-    setCard(0, '—', 'Not enough setup data yet (need ≥2 per setup).', 'Building…', 'gold');
-  }
-
-  // ── 1: Best Session ────────────────────────────────────────────
-  const sessMap = {};
-  all.forEach(t => {
-    if (!t.session) return;
-    if (!sessMap[t.session]) sessMap[t.session] = { wins:0, total:0 };
-    sessMap[t.session].total++;
-    if (parseFloat(t.pips||0) > 0) sessMap[t.session].wins++;
-  });
-  const sessions = Object.keys(sessMap).filter(s => sessMap[s].total >= 2);
-  if (sessions.length) {
-    const best = sessions.sort((a,b) => (sessMap[b].wins/sessMap[b].total) - (sessMap[a].wins/sessMap[a].total))[0];
-    const d = sessMap[best];
-    const wr = Math.round(d.wins/d.total*100);
-    setCard(1, best, `${wr}% win rate — your strongest session.`, wr+'% WR', 'profit');
-  } else {
-    setCard(1, '—', 'Tag sessions (London / NY / Asian) to compare.', 'Building…', 'profit');
-  }
-
-  // ── 2: Biggest Weakness (most frequent mistake on losing trades) ─
-  const mistakeCount = {};
-  all.filter(t => parseFloat(t.pips||0) < 0).forEach(t => {
-    (t.mistakes||[]).forEach(m => { mistakeCount[m] = (mistakeCount[m]||0)+1; });
-  });
-  const mistakes = Object.keys(mistakeCount);
-  if (mistakes.length) {
-    const worst = mistakes.sort((a,b) => mistakeCount[b]-mistakeCount[a])[0];
-    setCard(2, worst, `Occurred ${mistakeCount[worst]}× on losing trades.`, mistakeCount[worst]+'× logged', 'loss');
-  } else {
-    setCard(2, '—', 'No mistake tags on losses yet — start tagging to see patterns.', 'No data', 'loss');
-  }
-
-  // ── 3: Most traded timeframe / symbol as proxy for "hold time" ─
-  const tfMap = {};
-  all.forEach(t => {
-    if (!t.tf) return;
-    tfMap[t.tf] = (tfMap[t.tf]||0) + 1;
-  });
-  const tfs = Object.keys(tfMap);
-  if (tfs.length) {
-    const topTf = tfs.sort((a,b) => tfMap[b]-tfMap[a])[0];
-    setCard(3, topTf, `Most used timeframe across ${tfMap[topTf]} trades.`, tfMap[topTf]+' trades', '');
-  } else {
-    setCard(3, '—', 'Add a timeframe field to your trades to track this.', 'No data', '');
-  }
-
-  // ── 4: Risk Consistency (std-dev of lots/pips risk) ──────────
-  const pipVals = all.map(t => parseFloat(t.pips||0)).filter(v => v !== 0);
-  if (pipVals.length >= 3) {
-    const avg = pipVals.reduce((a,b)=>a+b,0)/pipVals.length;
-    const std = Math.sqrt(pipVals.map(v=>(v-avg)**2).reduce((a,b)=>a+b,0)/pipVals.length);
-    const cv  = avg !== 0 ? Math.abs(std/avg*100).toFixed(0) : '?';
-    const label = cv < 50 ? 'Consistent' : cv < 100 ? 'Variable' : 'Inconsistent';
-    setCard(4, label, `Pip std-dev: ${std.toFixed(1)} · Avg: ${avg.toFixed(1)} pips.`, cv+'% CV', cv < 50 ? 'gold' : '');
-  } else {
-    setCard(4, '—', `Need ${3-pipVals.length} more completed trades.`, 'Building…', 'gold');
-  }
-
-  // ── 5: Market Edge (best symbol by WR) ────────────────────────
-  const symMap = {};
-  all.forEach(t => {
-    const sym = (t.symbol||'').toUpperCase();
-    if (!sym) return;
-    if (!symMap[sym]) symMap[sym] = { wins:0, total:0 };
-    symMap[sym].total++;
-    if (parseFloat(t.pips||0) > 0) symMap[sym].wins++;
-  });
-  const syms = Object.keys(symMap).filter(s => symMap[s].total >= 2);
-  if (syms.length) {
-    const bestSym = syms.sort((a,b) => (symMap[b].wins/symMap[b].total) - (symMap[a].wins/symMap[a].total))[0];
-    const d = symMap[bestSym];
-    const wr = Math.round(d.wins/d.total*100);
-    setCard(5, bestSym, `${wr}% win rate over ${d.total} trades — your edge.`, wr+'% WR', 'profit');
-  } else {
-    setCard(5, '—', 'Need ≥2 trades per symbol to compare markets.', 'Building…', 'profit');
-  }
-
-  // ── AI Observations Feed ─────────────────────────────────────
-  renderAiFeed(all);
-}
-
-function renderAiFeed(all) {
-  const feed = document.getElementById('aiFeed');
-  if (!feed) return;
-  const items = [];
-  const n = all.length;
-  const wins   = all.filter(t => parseFloat(t.pips||0) > 0);
-  const losses = all.filter(t => parseFloat(t.pips||0) < 0);
-  const wr     = n ? Math.round(wins.length/n*100) : 0;
-  const netPips= all.reduce((a,t)=>a+parseFloat(t.pips||0),0);
-
-  if (n === 0) {
-    items.push({ icon:'<svg class=ic aria-hidden=true><use href=#i-bulb ></use></svg>', cls:'gold', title:'Getting Started', text:'Log your first trades to see AI-powered observations appear here.', time:'System · Now' });
-  } else {
-    // Always show trade count summary
-    items.push({ icon:'<svg class=ic aria-hidden=true><use href=#i-trend-up ></use></svg>', cls:'gold', title:`${n} Trade${n!==1?'s':''} Logged`,
-      text:`Win rate: ${wr}% (${wins.length}W / ${losses.length}L). Net P&L: ${netPips>=0?'+':''}${netPips.toFixed(1)} pips.`,
-      time:'Auto-updated · Now' });
-
-    if (n >= 5) {
-      // Win streak observation
-      let streak = 0, cur = 0;
-      all.forEach(t => { if(parseFloat(t.pips||0)>0){cur++;streak=Math.max(streak,cur);}else cur=0; });
-      if (streak >= 3) items.push({ icon:'<svg class=ic aria-hidden=true><use href=#i-flame ></use></svg>', cls:'profit', title:'Hot Streak Detected', text:`Your longest win streak is ${streak} consecutive trades. Stay disciplined and don't over-leverage during runs.`, time:'Pattern Engine' });
-
-      // Best session
-      const sessMap = {};
-      all.forEach(t => { if(!t.session)return; if(!sessMap[t.session])sessMap[t.session]={w:0,n:0}; sessMap[t.session].n++; if(parseFloat(t.pips||0)>0)sessMap[t.session].w++; });
-      const sessKeys = Object.keys(sessMap).filter(s=>sessMap[s].n>=2);
-      if (sessKeys.length) {
-        const best = sessKeys.sort((a,b)=>(sessMap[b].w/sessMap[b].n)-(sessMap[a].w/sessMap[a].n))[0];
-        const bwr = Math.round(sessMap[best].w/sessMap[best].n*100);
-        items.push({ icon:'⏰︎', cls:'info', title:'Best Session: '+best, text:`You win ${bwr}% of trades in the ${best} session. Consider focusing more of your screen time here.`, time:'Session Analysis' });
-      }
-
-      // Biggest mistake
-      const mc = {};
-      all.filter(t=>parseFloat(t.pips||0)<0).forEach(t=>(t.mistakes||[]).forEach(m=>{mc[m]=(mc[m]||0)+1;}));
-      const mKeys = Object.keys(mc);
-      if (mKeys.length) {
-        const worst = mKeys.sort((a,b)=>mc[b]-mc[a])[0];
-        items.push({ icon:'⚠', cls:'loss', title:'Recurring Mistake: '+worst, text:`"${worst}" appears ${mc[worst]}× on your losing trades. This is your #1 pattern to fix.`, time:'Mistake Tracker' });
-      }
-
-      // WR observation
-      if (wr >= 60) items.push({ icon:'<svg class=ic aria-hidden=true><use href=#i-trend-up ></use></svg>', cls:'profit', title:'Strong Win Rate', text:`${wr}% win rate is above average. Make sure your R:R justifies the frequency — don't cut winners short.`, time:'Performance Check' });
-      else if (wr < 40 && n >= 8) items.push({ icon:'<svg class=ic aria-hidden=true><use href=#i-trend-dn ></use></svg>', cls:'loss', title:'Win Rate Below 40%', text:`${wr}% over ${n} trades. Review your entry criteria — are you taking setups below your rules?`, time:'Performance Check' });
-    }
-  }
-
-  feed.innerHTML = items.map(it => `
-    <div class="ai-feed-item">
-      <div class="ai-feed-icon ${it.cls}">${it.icon}</div>
-      <div class="ai-feed-body">
-        <div class="ai-feed-title">${it.title}</div>
-        <div class="ai-feed-text">${it.text}</div>
-        <div class="ai-feed-time">${it.time}</div>
-      </div>
-    </div>`).join('');
 }
 
 // ─── CALCULATORS ──────────────────────
@@ -24400,49 +24194,13 @@ function exportWeeklySummaryPDF() {
 })();
 
 // ── 5. PATTERN AUTO-TAGGING ───────────────────────────────────
-function renderPatternAlerts() {
-  var container = document.getElementById('patternAlertContainer');
-  if (!container) return;
-  var all = getAllTrades();
-  var now = new Date(); var cutoff = new Date(now); cutoff.setDate(now.getDate()-7);
-  var week = all.filter(function(t){ return t._date && new Date(t._date)>=cutoff; });
-  var alerts = [];
+/* Rendered into #patternAlertContainer — an element that no longer existed
+   anywhere in the page, so these alerts (this week's repeated mistakes,
+   frustrated/euphoric exits) were computed and never shown. They now live
+   in the "What the data says" feed of window.ApexInsights. The name stays
+   because boot and nav hooks still call it. */
+function renderPatternAlerts() {}
 
-  var mc = {};
-  week.filter(function(t){return parseFloat(t.pips||0)<0;}).forEach(function(t){(t.mistakes||[]).forEach(function(m){mc[m]=(mc[m]||0)+1;});});
-  Object.entries(mc).sort(function(a,b){return b[1]-a[1];}).forEach(function(e){
-    if (e[1]>=2) alerts.push({icon:'<svg class=ic aria-hidden=true><use href=#i-refresh ></use></svg>',title:e[1]+'\u00d7 "'+e[0]+'" this week',desc:'Recurring pattern. Review your rules around this before the next session.'});
-  });
-
-  var dayL={}; var dayA={};
-  all.filter(function(t){return t._date;}).forEach(function(t){
-    var d=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(t._date).getDay()];
-    dayA[d]=(dayA[d]||0)+1;
-    if(parseFloat(t.pips||0)<0) dayL[d]=(dayL[d]||0)+1;
-  });
-  Object.entries(dayL).forEach(function(e){
-    var r=dayA[e[0]]?e[1]/dayA[e[0]]:0;
-    if(r>=0.70&&dayA[e[0]]>=3) alerts.push({icon:'<svg class=ic aria-hidden=true><use href=#i-calendar ></use></svg>',title:e[0]+' is your worst day ('+Math.round(r*100)+'% loss rate)',desc:'Consider reducing size or skipping '+e[0]+'s until you identify the cause.'});
-  });
-
-  var emo={};
-  all.filter(function(t){return t.exitEmotion;}).forEach(function(t){emo[t.exitEmotion]=(emo[t.exitEmotion]||0)+1;});
-  if((emo['😤 Frustrated']||0)>=3) alerts.push({icon:'<svg class=ic aria-hidden=true><use href=#i-flame ></use></svg>',title:'Frustration at exit detected ('+(emo['😤 Frustrated']||0)+'\u00d7)',desc:'May indicate premature exits or revenge trades. Review those sessions.'});
-  if((emo['🚀 Euphoric']||0)>=3) alerts.push({icon:'<svg class=ic aria-hidden=true><use href=#i-rocket ></use></svg>',title:'Euphoria pattern at exit ('+(emo['🚀 Euphoric']||0)+'\u00d7)',desc:'Watch for overconfidence after winning streaks \u2014 avoid over-sizing.'});
-
-  container.innerHTML = alerts.length ? alerts.map(function(a){
-    return '<div class="pattern-alert"><div class="pattern-alert-icon">'+a.icon+'</div><div class="pattern-alert-body"><div class="pattern-alert-title">'+a.title+'</div><div class="pattern-alert-desc">'+a.desc+'</div></div></div>';
-  }).join('') : '';
-}
-
-(function() {
-  var _orig = window.updateInsights;
-  window.updateInsights = function() {
-    if (_orig) _orig.apply(this, arguments);
-    renderPatternAlerts();
-    renderActionRecommendations();
-  };
-})();
 
 // ── 6. EXIT EMOTION TRACKER ───────────────────────────────────
 var EXIT_EMOTIONS = ['😐 Neutral','😌 Confident','😤 Frustrated','😰 Anxious','😊 Happy','😡 Angry','🤔 Uncertain','🚀 Euphoric'];
@@ -24592,72 +24350,10 @@ function resetEquityZoom(btn) {
 })();
 
 // ── 8. ACTION RECOMMENDATIONS ─────────────────────────────────
-function renderActionRecommendations() {
-  var anchor = document.getElementById('aiFeed'); if (!anchor) return;
-  var container = document.getElementById('actionRecs');
-  if (!container) {
-    var title = document.createElement('div');
-    title.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--gold);margin-top:22px;margin-bottom:12px;padding-top:16px;border-top:0.5px solid var(--gold-line)';
-    title.innerHTML = '<svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Action Recommendations';
-    container = document.createElement('div'); container.id='actionRecs';
-    anchor.parentNode.insertBefore(title, anchor.nextSibling);
-    anchor.parentNode.insertBefore(container, title.nextSibling);
-  }
-  var all = getAllTrades(); if (all.length<5) { container.innerHTML=''; return; }
-  var recs = [];
-
-  var mc={}; all.filter(function(t){return parseFloat(t.pips||0)<0;}).forEach(function(t){(t.mistakes||[]).forEach(function(m){mc[m]=(mc[m]||0)+1;});});
-  var topM=Object.entries(mc).sort(function(a,b){return b[1]-a[1];})[0];
-  if(topM&&topM[1]>=2) recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-target ></use></svg>',cls:'loss',pri:'high',title:'Fix Your #1 Leak: "'+topM[0]+'"',text:'This mistake appears '+topM[1]+'\u00d7 on losing trades. Before every entry ask: "Am I committing '+topM[0]+'?" Only enter if the answer is No.'});
-
-  var sm={}; all.forEach(function(t){if(!t.session)return;if(!sm[t.session])sm[t.session]={w:0,n:0};sm[t.session].n++;if(parseFloat(t.pips||0)>0)sm[t.session].w++;});
-  var sk=Object.keys(sm).filter(function(s){return sm[s].n>=3;});
-  if(sk.length>=2){sk.sort(function(a,b){return(sm[b].w/sm[b].n)-(sm[a].w/sm[a].n);});var best=sk[0],worst=sk[sk.length-1];var bwr=Math.round(sm[best].w/sm[best].n*100),wwr=Math.round(sm[worst].w/sm[worst].n*100);if(bwr-wwr>=20)recs.push({icon:'⏰︎',cls:'gold',pri:'med',title:'Double Down on '+best+' Session ('+bwr+'% WR)',text:'You win '+bwr+'% in '+best+' vs '+wwr+'% in '+worst+'. Shift screen time to '+best+' and consider halving size in '+worst+'.'});}
-
-  var da={},dl={}; all.forEach(function(t){if(!t._date)return;var d=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(t._date).getDay()];da[d]=(da[d]||0)+1;if(parseFloat(t.pips||0)<0)dl[d]=(dl[d]||0)+1;});
-  var dk=Object.keys(da).filter(function(d){return da[d]>=2;});
-  if(dk.length){var wd=dk.sort(function(a,b){return (dl[a]||0)/da[a]-(dl[b]||0)/da[b];})[0];var wdlr=Math.round((dl[wd]||0)/da[wd]*100);if(wdlr>=60)recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-calendar ></use></svg>',cls:'loss',pri:'high',title:wd+' is Costing You ('+wdlr+'% loss rate)',text:'For the next 2 weeks, skip '+wd+' or trade demo only. Re-evaluate after 20 sessions.'});}
-
-  var rrs=all.filter(function(t){return t.rr;}).map(function(t){return parseFloat(t.rr);});
-  if(rrs.length>=5){var below=rrs.filter(function(v){return v<1;}).length;if(below/rrs.length>0.40)recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-scale ></use></svg>',cls:'gold',pri:'med',title:'Improve Your R:R (avg '+(rrs.reduce(function(a,b){return a+b;},0)/rrs.length).toFixed(1)+')',text:Math.round(below/rrs.length*100)+'% of trades have R:R < 1:1. Ensure TP is always at least as far as SL from entry.'});}
-
-  var wins=all.filter(function(t){return parseFloat(t.pips||0)>0;});
-  var wr=all.length?Math.round(wins.length/all.length*100):0;
-  if(wr>=65&&all.length>=10) recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-star ></use></svg>',cls:'profit',pri:'low',title:"Protect Your Edge \u2014 Don't Over-Trade",text:'Your '+wr+'% WR is excellent. Increasing trade frequency dilutes edge. Take only A+ setups.'});
-  else if(wr<40&&all.length>=10) recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-search ></use></svg>',cls:'loss',pri:'high',title:'Review Entry Criteria ('+wr+'% WR over '+all.length+' trades)',text:'Pull up your last 10 losing trades. Find what they have in common and eliminate that trigger.'});
-
-  // ── Playbook adherence & edge (uses the Playbooks module) ──
-  try {
-    var _pbs = (window.playbooks||[]);
-    if (_pbs.length && typeof playbookStats==='function') {
-      var _assigned = all.filter(function(t){return t.playbook;}).length;
-      var _ps = _pbs.map(function(p){ return { p:p, s:playbookStats(p.id) }; }).filter(function(x){ return x.s.n>=1; });
-      // 1) Low adherence, but discipline clearly pays
-      _ps.forEach(function(x){ var s=x.s;
-        if(s.clLen && s.n>=4 && s.adhPct!=null && s.adhPct<80 && s.avgFully!=null && s.avgPartial!=null && (s.avgFully-s.avgPartial)>=3 && s.fullyN>=2 && s.partialN>=2){
-          var d=(s.avgFully-s.avgPartial).toFixed(1);
-          recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-clipboard ></use></svg>',cls:'loss',pri:'high',title:'Stick to "'+x.p.name+'" — only '+s.adhPct+'% rule-adherence',text:'When you tick the full checklist you average '+(s.avgFully>=0?'+':'')+s.avgFully.toFixed(1)+' pips, vs '+(s.avgPartial>=0?'+':'')+s.avgPartial.toFixed(1)+' when you skip steps — that\'s '+d+' pips of edge left on the table. Don\'t enter this setup unless every box is ticked.'});
-        }
-      });
-      // 2) Best & worst playbook by expectancy
-      var _ranked=_ps.filter(function(x){return x.s.n>=3;}).sort(function(a,b){return b.s.exp-a.s.exp;});
-      if(_ranked.length){
-        var _top=_ranked[0];
-        if(_top.s.exp>0) recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg>',cls:'profit',pri:'low',title:'Your edge is "'+_top.p.name+'" (+'+_top.s.exp.toFixed(1)+' pips/trade)',text:'Your strongest playbook over '+_top.s.n+' trades — '+_top.s.wr+'% WR, profit factor '+(_top.s.pf===Infinity?'∞':_top.s.pf.toFixed(2))+'. Put more size and screen-time here.'});
-        var _bot=_ranked[_ranked.length-1];
-        if(_ranked.length>=2 && _bot.s.exp<0 && _bot.s.n>=5) recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-ban ></use></svg>',cls:'loss',pri:'high',title:'"'+_bot.p.name+'" is bleeding ('+_bot.s.exp.toFixed(1)+' pips/trade)',text:'Over '+_bot.s.n+' trades this playbook loses money. Pause it for 2 weeks or rewrite its entry criteria before trading it live again.'});
-      }
-      // 3) Untracked trades
-      var _unt=all.length?Math.round((all.length-_assigned)/all.length*100):0;
-      if(all.length>=10 && _unt>=40) recs.push({icon:'<svg class=ic aria-hidden=true><use href=#i-pin ></use></svg>',cls:'gold',pri:'med',title:_unt+'% of your trades have no playbook',text:'Assign a playbook to each trade so Evidence can show which strategy actually carries your edge — and which one to cut.'});
-    }
-  } catch(e) {}
-
-  container.innerHTML = recs.length ? recs.map(function(r){
-    var labels={high:'<svg class=ic aria-hidden=true><use href=#i-dot ></use></svg> High Priority',med:'<svg class=ic aria-hidden=true><use href=#i-dot ></use></svg> Medium Priority',low:'<svg class=ic aria-hidden=true><use href=#i-dot ></use></svg> Low Priority'};
-    return '<div class="action-rec-card"><div class="action-rec-icon '+r.cls+'">'+r.icon+'</div><div class="action-rec-body"><div class="action-rec-title">'+r.title+'</div><div class="action-rec-text">'+r.text+'</div><div class="action-rec-priority '+r.pri+'">'+labels[r.pri]+'</div></div></div>';
-  }).join('') : '';
-}
+/* Moved into window.ApexInsights ("What to do next"), which ranks them
+   with the same sample-size rules as the cards and no longer repeats what
+   the feed already says. Kept as a name for the boot and nav hooks. */
+function renderActionRecommendations() {}
 
 // ── 9. PROFILE EQUITY CURVE ───────────────────────────────────
 (function() {
@@ -25814,8 +25510,12 @@ function joinChallenge(id) {
 // ⚡ YOUR CLOUDFLARE WORKER URL — set this after deploying the worker
 var COACH_WORKER_URL = 'https://spring-fire-06a2.4kjyyyftv6.workers.dev';
 
-var coachHistory = []; // {role, content}
+var coachHistory = []; // legacy name, kept for anything that still reads it
 var coachBusy    = false;
+/* The conversation as it is SENT: plain questions and plain answers. The
+   journal context is attached to the newest question only, at send time
+   (ApexInsights.send). It used to be glued into every stored question, so
+   the same context went to the model up to three times per request. */
 var coachMessages = [];
 
 function initCoach() {
@@ -25826,12 +25526,8 @@ function initCoach() {
   if (currentPlan === 'pro') {
     locked.style.display = 'none';
     active.style.display  = 'block';
-    var chat = document.getElementById('coachChat');
-    if (chat && currentName) {
-      var bubble = chat.querySelector('.coach-msg-bubble');
-      if (bubble) bubble.innerHTML =
-        'Hey <strong>' + currentName + '</strong> 👋 I\'m your AI Coach. I have full access to your journal data and can analyse your patterns, mistakes, and edge. What do you want to work on today?';
-    }
+    // greeting, restored conversation, data-driven suggestions
+    if (window.ApexInsights && ApexInsights.coachReady) { try { ApexInsights.coachReady(); } catch (e) {} }
   } else {
     locked.style.display = 'block';
     active.style.display  = 'none';
@@ -25872,12 +25568,18 @@ var COACH_MIN_SAMPLE = 6;
 
 function coachNum(v) { var n = parseFloat(v); return isFinite(n) ? n : null; }
 
-/** Result of a trade in the unit the trader records: pips first, money after. */
+/* One unit per context, chosen once in buildCoachContext the same way the
+   Insights page chooses it (the dashboard's $/pips preference, unless most
+   trades lack that value). It used to be "pips if present, else money" PER
+   TRADE — two units inside one average — and the context never said which
+   unit its numbers were in, so the model was free to call 6,943 pips $6,943. */
+var _coachUnit = 'pips';
 function coachValueOf(t) {
-  var p = coachNum(t.pips);
-  if (p != null) return p;
-  try { var c = window.calcTradePnl ? window.calcTradePnl(t) : null; return c ? c.pnlDisplay : null; }
-  catch (e) { return null; }
+  if (_coachUnit === 'money') {
+    try { var c = window.calcTradePnl ? window.calcTradePnl(t) : null; return (c && c.pnlDisplay != null && isFinite(c.pnlDisplay)) ? +c.pnlDisplay : null; }
+    catch (e) { return null; }
+  }
+  return coachNum(t.pips);
 }
 
 /** Aggregate one bucket of trades into the handful of numbers worth sending. */
@@ -25931,6 +25633,9 @@ function buildCoachContext() {
     return (coachNum(a.openTime) || Date.parse(a.date + 'T12:00:00') || 0) -
            (coachNum(b.openTime) || Date.parse(b.date + 'T12:00:00') || 0);
   });
+  try { _coachUnit = window.ApexInsights ? ApexInsights.unitFor(allTrades, ApexInsights.prefUnit()) : 'pips'; } catch (e) { _coachUnit = 'pips'; }
+  var unitName = _coachUnit === 'money'
+    ? 'the account currency (' + (window.getPnlSymbol ? getPnlSymbol() : '$') + ')' : 'pips';
 
   var overall = coachAgg(allTrades);
   if (!overall) return 'TRADER: ' + (currentName || 'Unknown') + '\nNo trades with a determinable result yet.';
@@ -26029,6 +25734,7 @@ function buildCoachContext() {
     'TRADER: ' + (currentName || 'Unknown'),
     '',
     'ALL FIGURES BELOW ARE ALREADY COMPUTED FROM THE FULL JOURNAL. Use them as given.',
+    'UNIT: every result, average, net and win/loss size below is in ' + unitName + '. Quote them in that unit and no other.',
     'Any slice with fewer than ' + COACH_MIN_SAMPLE + ' trades has been omitted as too small to mean anything.',
     '',
     'OVERALL (' + allTrades.length + ' trades logged): ' + JSON.stringify(overall),
@@ -26066,10 +25772,6 @@ function buildCoachContext() {
   return lines.join('\n');
 }
 
-// ── Cooldown-Timer-State ──────────────────────────────────────
-var _coachCooldownEnd  = 0;   // Timestamp wann der Cooldown endet
-var _coachCooldownTimer = null; // interval handle
-
 /* Must stay in step with MIN_GAP_MS in coachworker_v3.js. This is the polite
    local guard against a held-down send button; the worker enforces the real
    limit (a short gap plus a burst allowance, keyed on the user).
@@ -26077,240 +25779,43 @@ var _coachCooldownTimer = null; // interval handle
    It was 60 seconds, matching the old one-message-per-minute rule. Sixty
    seconds between questions is not a conversation — the follow-up to any
    answer hit the wall, which is the wrong shape entirely for "ask your
-   journal anything". */
+   journal anything".
+
+   The countdown used to be posted INTO the conversation ("One moment… 4s",
+   then "You can now send another message.") after every single answer, so
+   half of a chat was housekeeping. It now lives on the send button, and the
+   input stays usable — you can type the follow-up while it runs. */
 var COACH_COOLDOWN_MS = 4000;
+var _coachCooldownEnd  = 0;
+var _coachCooldownTimer = null;
 
 function startCoachCooldown() {
   _coachCooldownEnd = Date.now() + COACH_COOLDOWN_MS;
   window.coachLocalCooldown = true;
-
   var sendBtn = document.getElementById('coachSendBtn');
-  var input   = document.getElementById('coachInput');
-  if (input)   input.disabled   = true;
-  if (sendBtn) sendBtn.disabled = true;
-
-  // Countdown-Nachricht ins Chat einfügen
-  var chat = document.getElementById('coachChat');
-  var cdDiv = null;
-  if (chat) {
-    cdDiv = document.createElement('div');
-    cdDiv.className = 'coach-msg';
-    cdDiv.id = 'coachCooldownMsg';
-    cdDiv.innerHTML =
-      '<div class="coach-msg-icon" style="font-size:14px"><svg class=ic aria-hidden=true><use href=#i-hourglass ></use></svg></div>' +
-      '<div class="coach-msg-bubble" style="font-size:12px;color:var(--ink3)" id="coachCooldownText">' +
-        'One moment\u2026' +
-      '</div>';
-    chat.appendChild(cdDiv);
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  if (_coachCooldownTimer) clearInterval(_coachCooldownTimer);
-  _coachCooldownTimer = setInterval(function() {
-    var remaining = Math.ceil((_coachCooldownEnd - Date.now()) / 1000);
-
-    // Countdown-Text aktualisieren
-    var cdText = document.getElementById('coachCooldownText');
-    if (cdText) {
-      if (remaining > 0) {
-        cdText.innerHTML = 'One moment\u2026 <strong>' + remaining + '</strong>s';
-      }
-    }
-
-    if (remaining <= 0) {
-      // Cooldown abgelaufen
-      clearInterval(_coachCooldownTimer);
-      _coachCooldownTimer = null;
-      window.coachLocalCooldown = false;
-
-      // Countdown-Nachricht entfernen
-      if (cdDiv && cdDiv.parentNode) cdDiv.parentNode.removeChild(cdDiv);
-
-      // Input und Button wieder freischalten
-      var sb = document.getElementById('coachSendBtn');
-      var inp = document.getElementById('coachInput');
-      if (sb)  { sb.disabled = false; }
-      if (inp) { inp.disabled = false; inp.focus(); }
-
-      // Kurze Bestätigung
-      appendCoachMsg('coach', '✅︎ You can now send another message.');
-    }
-  }, 1000);
-}
-
-async function sendCoachMsg(isManual) {
-  if (!isManual) {
-    console.log("🤖 Automatischer Hintergrund-Aufruf blockiert.");
-    return;
-  }
-
-  // Cooldown aktiv → kein Reload, nur blockieren (Hinweis läuft bereits im Chat)
-  if (window.coachLocalCooldown) return;
-  if (coachBusy) return;
-
-  if (typeof coachMessages === 'undefined') { window.coachMessages = []; }
-
-  var input = document.getElementById('coachInput');
-  if (!input) return;
-  var text = input.value.trim();
-  if (!text) return;
-
-  appendCoachMsg('user', text);
-  input.value = '';
-  setCoachBusy(true);
-
-  // Live-Daten aus journalData aufbereiten
-  var firebaseContext = "HINTERGRUND-INFOS ZUM TRADER (LIVE AUS FIRESTORE):\n";
-  try {
-    var allTrades = getAllTrades();
-    if (allTrades.length > 0) {
-      var valid   = allTrades.filter(function(t) { return t.pips !== '' && t.pips !== undefined; });
-      var wins    = valid.filter(function(t) { return parseFloat(t.pips) > 0; });
-      var losses  = valid.filter(function(t) { return parseFloat(t.pips) < 0; });
-      var wr      = valid.length ? Math.round(wins.length / valid.length * 100) : 0;
-      var netPips = valid.reduce(function(a, t) { return a + parseFloat(t.pips || 0); }, 0);
-      firebaseContext += "- Trader: " + (currentName || 'Unbekannt') + "\n";
-      firebaseContext += "- Plan: " + (currentPlan || 'free') + "\n";
-      firebaseContext += "- Gesamt-Trades: " + allTrades.length + "\n";
-      firebaseContext += "- Trades mit Pips-Daten: " + valid.length + "\n";
-      firebaseContext += "- Wins: " + wins.length + " | Losses: " + losses.length + "\n";
-      firebaseContext += "- Win-Rate: " + wr + "%\n";
-      firebaseContext += "- Net Pips gesamt: " + netPips.toFixed(1) + "\n";
-      var setups = {};
-      allTrades.forEach(function(t) {
-        if (t.setup) {
-          if (!setups[t.setup]) setups[t.setup] = { total: 0, wins: 0 };
-          setups[t.setup].total++;
-          if (parseFloat(t.pips || 0) > 0) setups[t.setup].wins++;
-        }
-      });
-      if (Object.keys(setups).length) firebaseContext += "- Setup-Performance: " + JSON.stringify(setups) + "\n";
-      var sessions = {};
-      allTrades.forEach(function(t) {
-        if (t.session) {
-          if (!sessions[t.session]) sessions[t.session] = { total: 0, wins: 0 };
-          sessions[t.session].total++;
-          if (parseFloat(t.pips || 0) > 0) sessions[t.session].wins++;
-        }
-      });
-      if (Object.keys(sessions).length) firebaseContext += "- Session-Performance: " + JSON.stringify(sessions) + "\n";
-      var mistakes = {};
-      allTrades.forEach(function(t) {
-        (t.mistakes || []).forEach(function(m) { mistakes[m] = (mistakes[m] || 0) + 1; });
-      });
-      if (Object.keys(mistakes).length) firebaseContext += "- Frequent mistakes: " + JSON.stringify(mistakes) + "\n";
-      var recent = allTrades.slice(-5).map(function(t) {
-        return (t._date || t.date || '') + ' ' + (t.symbol || '?') + ' ' +
-               (t.dir || '') + ' ' + (t.pips || '?') + ' pips [' + (t.setup || 'kein Setup') + ']';
-      });
-      firebaseContext += "- Letzte 5 Trades: " + recent.join(' | ') + "\n";
-    } else {
-      firebaseContext += "- No trades in the journal yet.\n";
-      firebaseContext += "- Trader: " + (currentName || 'Unbekannt') + "\n";
-    }
-  } catch(e) {
-    console.warn("Coach: failed to prepare journal data:", e);
-    firebaseContext += "- Journal data could not be read.\n";
-  }
-
-  // ── Trader Profile Context ──────────────────────────────────
-  var profileContext = '';
-  try {
-    var profExp      = (document.getElementById('coachProfileExperience') || {}).value || '';
-    var profPairs    = (document.getElementById('coachProfilePairs')      || {}).value || '';
-    var profStrategy = (document.getElementById('coachProfileStrategy')   || {}).value || '';
-    var profFirm     = (document.getElementById('coachProfileFirmName')   || {}).value || '';
-    var profPhase    = (document.getElementById('coachProfilePhase')      || {}).value || '';
-    if (profExp || profPairs || profStrategy || profFirm || profPhase) {
-      profileContext += '\nTRADER PROFILE:\n';
-      if (profExp)      profileContext += '- Experience Level: ' + profExp + '\n';
-      if (profPairs)    profileContext += '- Preferred Pairs/Instruments: ' + profPairs + '\n';
-      if (profStrategy) profileContext += '- Trading Strategy: ' + profStrategy + '\n';
-      if (profFirm)     profileContext += '- Prop Firm: ' + profFirm + '\n';
-      if (profPhase)    profileContext += '- Account Phase: ' + profPhase + '\n';
-    }
-  } catch(e) {}
-
-  // ── Prop Firm Drawdown Context ──────────────────────────────
-  var propContext = '';
-  try {
-    var pfData = getPropFirmData ? getPropFirmData() : {};
-    if (pfData && pfData.enabled) {
-      var pfStats = computePropFirmDDStats ? computePropFirmDDStats() : null;
-      var pfAccountSize = parseFloat(pfData.accountSize) || 0;
-      var pfDailyLimitPct  = parseFloat(pfData.dailyLimit) || 0;
-      var pfTotalLimitPct  = parseFloat(pfData.totalLimit) || 0;
-      var pfPipVal = parseFloat(pfData.pipValue) || 0;
-      propContext += '\nPROP FIRM ACCOUNT STATUS:\n';
-      if (pfAccountSize)    propContext += '- Account Size: $' + pfAccountSize.toLocaleString() + '\n';
-      if (pfDailyLimitPct)  propContext += '- Daily Loss Limit: ' + pfDailyLimitPct + '%';
-      if (pfAccountSize && pfDailyLimitPct) propContext += ' ($' + (pfAccountSize * pfDailyLimitPct / 100).toFixed(0) + ')';
-      propContext += '\n';
-      if (pfTotalLimitPct)  propContext += '- Max Total Drawdown: ' + pfTotalLimitPct + '%';
-      if (pfAccountSize && pfTotalLimitPct) propContext += ' ($' + (pfAccountSize * pfTotalLimitPct / 100).toFixed(0) + ')';
-      propContext += '\n';
-      if (pfStats) {
-        var pipVal = pfPipVal || 1;
-        var dailyUsedPct = pfDailyLimitPct > 0 && pfAccountSize > 0
-          ? ((pfStats.daily * pipVal) / pfAccountSize * 100).toFixed(2) : '?';
-        var dailyRemainingPct = pfDailyLimitPct > 0
-          ? Math.max(0, pfDailyLimitPct - parseFloat(dailyUsedPct)).toFixed(2) : '?';
-        var totalUsedPct = pfTotalLimitPct > 0 && pfAccountSize > 0
-          ? ((pfStats.total * pipVal) / pfAccountSize * 100).toFixed(2) : '?';
-        var totalRemainingPct = pfTotalLimitPct > 0
-          ? Math.max(0, pfTotalLimitPct - parseFloat(totalUsedPct)).toFixed(2) : '?';
-        propContext += '- Daily Drawdown Used: ' + pfStats.daily + ' pips (' + dailyUsedPct + '%) — Remaining: ' + dailyRemainingPct + '%\n';
-        propContext += '- Total Drawdown Used: ' + pfStats.total + ' pips (' + totalUsedPct + '%) — Remaining: ' + totalRemainingPct + '%\n';
-      }
-    }
-  } catch(e) {}
-
-  var promptForAi = firebaseContext + profileContext + propContext + "\nFrage des Traders: " + text;
-  coachMessages.push({ role: 'user', content: promptForAi });
-  if (coachMessages.length > 8) { coachMessages = coachMessages.slice(-8); }
-
-  try {
-    var res = await fetch(COACH_WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        uid: currentUser ? currentUser.uid : 'guest',
-        system: "Trading Coach",
-        messages: coachMessages
-      })
-    });
-
-    if (!res.ok) {
-      var errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || 'Server error (status ' + res.status + ')');
-    }
-
-    var data = await res.json();
-    var reply = '';
-    if (data.response) {
-      reply = data.response;
-    } else if (data.choices && data.choices[0] && data.choices[0].message) {
-      reply = data.choices[0].message.content;
-    } else {
-      reply = '🤖 Error: unexpected response format from the server.';
-    }
-
-    if (reply.includes("Quota exceeded") || reply.includes("Limit erreicht") || reply.includes("Spam-Schutz")) {
-      appendCoachMsg('coach', reply);
-      setCoachBusy(false);
+  var paint = function () {
+    var left = Math.ceil((_coachCooldownEnd - Date.now()) / 1000);
+    var btn = document.getElementById('coachSendBtn');
+    if (left > 0) {
+      if (btn) { btn.disabled = true; btn.setAttribute('data-wait', left); }
       return;
     }
+    clearInterval(_coachCooldownTimer); _coachCooldownTimer = null;
+    window.coachLocalCooldown = false;
+    if (btn) { btn.disabled = false; btn.removeAttribute('data-wait'); }
+  };
+  if (_coachCooldownTimer) clearInterval(_coachCooldownTimer);
+  _coachCooldownTimer = setInterval(paint, 250);
+  if (sendBtn) paint();
+}
 
-    coachMessages.push({ role: 'assistant', content: reply });
-    appendCoachMsg('coach', reply);
-
-  } catch(e) {
-    console.error("Coach error:", e);
-    appendCoachMsg('coach', '⚠ Connection error:\n' + e.message);
-  }
-
-  setCoachBusy(false);
-  startCoachCooldown(); // ← Cooldown NACH dem Antwort-Empfang starten
+/* isManual guards against background callers (an old auto-send path). The
+   Enter key passed nothing, so it was treated as one of those and dropped —
+   only the button ever sent. Both pass true now. */
+async function sendCoachMsg(isManual) {
+  if (!isManual) return;
+  if (!window.ApexInsights || !ApexInsights.send) return;
+  return ApexInsights.send();
 }
 
 function saveCoachProfile() {
@@ -26349,39 +25854,16 @@ function loadCoachProfile() {
 }
 
 function coachQuick(text) {
-  var input = document.getElementById('coachInput');
-  if (input) { input.value = text; }
-  sendCoachMsg(true);
+  if (window.ApexInsights && ApexInsights.ask) return ApexInsights.ask(text);
 }
 
 function appendCoachMsg(role, text) {
-  var chat = document.getElementById('coachChat');
-  if (!chat) return;
-  var div = document.createElement('div');
-  div.className = 'coach-msg' + (role === 'user' ? ' user-msg' : '');
-  var icon = document.createElement('div');
-  icon.className = 'coach-msg-icon';
-  icon.textContent = role === 'user' ? (currentName ? currentName[0].toUpperCase() : 'U') : '🤖';
-  var bubble = document.createElement('div');
-  bubble.className = 'coach-msg-bubble';
-  bubble.innerHTML = text.replace(/\n/g, '<br>');
-  div.appendChild(icon);
-  div.appendChild(bubble);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+  if (window.ApexInsights && ApexInsights.appendMsg) ApexInsights.appendMsg(role, text);
 }
 
 function setCoachBusy(busy) {
   coachBusy = busy;
-  var typing  = document.getElementById('coachTyping');
-  var sendBtn = document.getElementById('coachSendBtn');
-  var input   = document.getElementById('coachInput');
-  if (typing)  typing.classList.toggle('active', busy);
-  // Nur sperren wenn busy — entsperren übernimmt startCoachCooldown
-  if (busy) {
-    if (sendBtn) sendBtn.disabled = true;
-    if (input)   input.disabled   = true;
-  }
+  if (window.ApexInsights && ApexInsights.setBusy) ApexInsights.setBusy(busy);
 }
 // ══════════════════════════════════════
 //  AUTO TRADE ANALYSE
@@ -27294,7 +26776,13 @@ var _analyseDebounce = null;
     }
 
     // ── Patch buildCoachContext ───────────────────────────────────
+    /* Once. This ran on every send and after every check-in, and each run
+       wrapped the previous wrapper — after five questions the PSYCH LOG
+       section went to the model five times. */
+    var _psychPatched = false;
     function patchCoachContextWithPsych() {
+      if (_psychPatched) return;
+      _psychPatched = true;
       var _origBuildCoachContext = window.buildCoachContext;
       window.buildCoachContext = function() {
         var base = _origBuildCoachContext ? _origBuildCoachContext() : '';
@@ -27323,10 +26811,13 @@ var _analyseDebounce = null;
     // Also patch sendCoachMsg to always include latest psych data in context
     (function patchSendCoachMsgForPsych() {
       var _origSend = window.sendCoachMsg;
+      var _psychTriedAt = 0;
       window.sendCoachMsg = async function(isManual) {
-        // re-load psych data silently before sending
-        if (db && currentUID && Object.keys(psychLog).length === 0) {
-          await loadPsychTrend();
+        // re-load psych data silently before sending — at most once a minute,
+        // not one Firestore read per question for someone who never checks in
+        if (isManual && db && currentUID && Object.keys(psychLog).length === 0 && Date.now() - _psychTriedAt > 60000) {
+          _psychTriedAt = Date.now();
+          try { await loadPsychTrend(); } catch (e) {}
         }
         patchCoachContextWithPsych();
         return _origSend.apply(this, arguments);
@@ -27658,33 +27149,20 @@ var _analyseDebounce = null;
 
       // PRO GATE: locked teaser for non-pro
       if (!isProNow) {
-        // Show locked teaser instead
         var locked = document.createElement('div');
         locked.id = 'wrCard';
-        locked.className = 'wr-card';
+        locked.className = 'wr-card wr-locked';
         locked.setAttribute('data-mode','locked');
-        locked.style.cssText = 'opacity:0.85;user-select:none';
-        locked.innerHTML = `
-          <div class="wr-header">
-            <div class="wr-title"><svg class=ic aria-hidden=true><use href=#i-calendar ></use></svg> Weekly Intelligence Report</div>
-            <div class="wr-meta" style="color:var(--gold)"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg> PRO</div>
-          </div>
-          <div class="wr-body">
-            <div style="text-align:center;padding:20px 0;color:var(--ink3);font-size:13px">
-              <div style="font-size:28px;margin-bottom:10px"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg></div>
-              <strong style="color:var(--ink2);display:block;margin-bottom:6px">Pro Feature</strong>
-              Weekly market intelligence reports are exclusive to Evidence Pro members.<br>
-              <button onclick="openUpgradeModal()" style="margin-top:10px;padding:8px 20px;background:linear-gradient(135deg,#c9a84c,#e8c96a);border:none;border-radius:8px;color:#07080b;font-family:var(--font-display);font-size:12px;font-weight:700;cursor:pointer"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Upgrade to Pro</button>
-            </div>
-          </div>
-        `;
-        var anchor = document.getElementById('weeklyReportAnchor');
-        if (anchor) anchor.replaceWith(locked);
-        else {
-          var ph = insightsPage.querySelector('.ph');
-          if (ph) ph.insertAdjacentElement('afterend', locked);
-          else insightsPage.prepend(locked);
-        }
+        locked.innerHTML =
+          '<div class="wr-header">' +
+            '<div class="wr-title"><svg class=ic aria-hidden=true><use href=#i-calendar ></use></svg> Weekly Intelligence Report</div>' +
+            '<div class="wr-meta wr-pro"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg> PRO</div>' +
+          '</div>' +
+          '<div class="wr-lock-body">' +
+            '<p>A Monday briefing before your first session: the week\u2019s scheduled high-impact releases, the instruments worth watching, one psychology trap and one discipline rule to hold.</p>' +
+            '<button type="button" class="apex-btn apex-btn--solid apex-btn--sm" onclick="openUpgradeModal()"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Upgrade to Pro</button>' +
+          '</div>';
+        placeCard(locked);
         return;
       }
 
@@ -27692,81 +27170,79 @@ var _analyseDebounce = null;
       card.id  = 'wrCard';
       card.className = 'wr-card';
       card.setAttribute('data-mode','live');
-      card.innerHTML = `
-        <div class="wr-header">
-          <div class="wr-title"><svg class=ic aria-hidden=true><use href=#i-calendar ></use></svg> Weekly Intelligence Report</div>
-          <div class="wr-meta" id="wrMeta">Loading...</div>
-        </div>
-        <div class="wr-body" id="wrBody">
-          <div class="wr-skeleton">
-            <div class="wr-skel-line" style="width:85%"></div>
-            <div class="wr-skel-line" style="width:70%"></div>
-            <div class="wr-skel-line" style="width:90%"></div>
-            <div class="wr-skel-line" style="width:60%"></div>
-            <div class="wr-skel-line" style="width:78%"></div>
-          </div>
-        </div>
-      `;
-      // Insert at the weekly report anchor (between Coach and AI Observations)
-      var anchor = document.getElementById('weeklyReportAnchor');
-      if (anchor) {
-        anchor.replaceWith(card);
-      } else {
-        var ph = insightsPage.querySelector('.ph');
-        if (ph) ph.insertAdjacentElement('afterend', card);
-        else insightsPage.prepend(card);
-      }
+      card.innerHTML =
+        '<div class="wr-header">' +
+          '<div class="wr-title"><svg class=ic aria-hidden=true><use href=#i-calendar ></use></svg> Weekly Intelligence Report</div>' +
+          '<div class="wr-meta" id="wrMeta">Loading\u2026</div>' +
+        '</div>' +
+        '<div class="wr-body" id="wrBody">' +
+          '<div class="wr-skeleton">' +
+            '<div class="wr-skel-line" style="width:85%"></div><div class="wr-skel-line" style="width:70%"></div>' +
+            '<div class="wr-skel-line" style="width:90%"></div><div class="wr-skel-line" style="width:60%"></div>' +
+          '</div>' +
+        '</div>';
+      placeCard(card);
+      if (_report) paintReport(_report); else loadWeeklyReport();
+    }
 
-      loadWeeklyReport();
+    // Bottom of the page: the trader's own numbers come first, the generic
+    // market briefing after them.
+    function placeCard(el) {
+      var anchor = document.getElementById('weeklyReportAnchor');
+      if (anchor) { anchor.replaceWith(el); return; }
+      var page = document.getElementById('page-insights');
+      if (page) page.appendChild(el);
     }
 
     // ── Load from Worker (which reads from KV) ───────────────────
+    /* It used to mark itself "loaded" even when the request failed, so one
+       network hiccup left the card saying "Could not load" until a reload.
+       Now: a timeout, a Retry button, and the result is kept so a rebuilt
+       card (plan resolving late) paints at once instead of re-fetching. */
+    var _report = null, _loading = false;
     async function loadWeeklyReport() {
-      if (_reportLoaded) return;
+      if (_reportLoaded || _loading) return;
+      _loading = true;
+      var ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+      var to = ctl ? setTimeout(function () { ctl.abort(); }, 15000) : null;
       try {
-        var res  = await fetch(WEEKLY_URL, { method: 'GET' });
+        var res  = await fetch(WEEKLY_URL, { method: 'GET', signal: ctl ? ctl.signal : undefined });
+        if (!res.ok) throw new Error('status ' + res.status);
         var data = await res.json();
-
-        var body = document.getElementById('wrBody');
-        var meta = document.getElementById('wrMeta');
-        if (!body) return;
-
-        if (!data || !data.report) {
-          body.textContent = 'No report available yet. The weekly intelligence report is published every Monday morning.';
-          if (meta) meta.textContent = 'Not yet generated';
-          _reportLoaded = true;
-          return;
-        }
-
-        // Format the report: CAPS section headers get styled
-        var formatted = data.report.replace(
-          /^([A-Z][A-Z &\/\-—]+)$/gm,
-          '<span class="wr-section-header">$1</span>'
-        );
-        body.innerHTML = formatted;
-
-        if (meta && data.generatedAt) {
-          var d = new Date(data.generatedAt);
-          meta.textContent = 'Week ' + data.week + ' · Generated ' +
-            d.toLocaleDateString(undefined, { weekday:'short', day:'numeric', month:'short' });
-        }
+        _report = data || {};
         _reportLoaded = true;
-
-      } catch(e) {
-        var body2 = document.getElementById('wrBody');
-        if (body2) body2.textContent = '⚠ Could not load report: ' + e.message;
-        _reportLoaded = true;
+        paintReport(_report);
+      } catch (e) {
+        var body = document.getElementById('wrBody'), meta = document.getElementById('wrMeta');
+        if (meta) meta.textContent = 'Not loaded';
+        if (body) {
+          body.innerHTML = '<div class="wr-empty">The report could not be loaded' +
+            (e && e.name === 'AbortError' ? ' — the server took too long.' : '.') +
+            ' <button type="button" class="apex-btn apex-btn--ghost apex-btn--sm" id="wrRetry"><svg class=ic aria-hidden=true><use href=#i-refresh ></use></svg> Retry</button></div>';
+          var r = document.getElementById('wrRetry');
+          if (r) r.onclick = function () { body.innerHTML = '<div class="wr-skeleton"><div class="wr-skel-line" style="width:80%"></div><div class="wr-skel-line" style="width:65%"></div></div>'; loadWeeklyReport(); };
+        }
+      } finally {
+        if (to) clearTimeout(to);
+        _loading = false;
       }
     }
 
-    // Reload report when user navigates to insights page
-    var _origShowPage = window.showPage;
-    window.showPage = function(page) {
-      if (_origShowPage) _origShowPage.apply(this, arguments);
-      if (page === 'insights' && !_reportLoaded) {
-        setTimeout(loadWeeklyReport, 500);
+    function paintReport(data) {
+      var body = document.getElementById('wrBody');
+      var meta = document.getElementById('wrMeta');
+      if (!body) return;
+      if (!data || !data.report) {
+        body.innerHTML = '<div class="wr-empty">No report yet — it is published every Monday at 07:00 UTC.</div>';
+        if (meta) meta.textContent = 'Not yet generated';
+        return;
       }
-    };
+      if (window.ApexInsights && ApexInsights.renderReport) {
+        ApexInsights.renderReport(body, meta, data);
+        return;
+      }
+      body.textContent = data.report;
+    }
 
     // ── Init ─────────────────────────────────────────────────────
     function tryInit() {
@@ -87468,5 +86944,1149 @@ body.light::before{ opacity:.45; }
   font-stretch: normal;
 }
 </style>
+<style id="apex-insights2">
+/* ════════════════════════════════════════════════════════════════════
+   AI Insights v2 (01.10.2026) — styles for window.ApexInsights.
+   Additive: the base rules (.insight-card, .coach-*, .ai-feed-*, .wr-*)
+   stay where they are; this layer reshapes them for the new page.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── sections ── */
+#page-insights .coach-wrap { margin-top: 1.25rem; }
+#page-insights .ins2-sec { margin-top: 26px; }
+#page-insights .ins2-sec-hd { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 2px 10px; flex-wrap: wrap; }
+#page-insights .ins2-h { margin: 0; font-size: var(--fs-label); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); font-family: var(--font-body); }
+#page-insights .ins2-basis { font-size: var(--fs-xs); color: var(--ink3); font-variant-numeric: tabular-nums; }
+#page-insights .ins2-cols { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; align-items: start; }
+#page-insights .ins2-col .gc-title { margin-bottom: 14px; }
+
+/* ── cards ── */
+#page-insights .insights-grid { gap: 14px; margin-bottom: 0; }
+#page-insights .ins2-card { --tone: var(--ink3); --tone-rgb: 150,150,150; display: flex; flex-direction: column; padding: 18px 18px 14px; min-height: 230px; min-width: 0; }
+#page-insights .ins2-card.tone-profit { --tone: var(--profit); --tone-rgb: var(--profit-rgb); }
+#page-insights .ins2-card.tone-loss   { --tone: var(--loss);   --tone-rgb: var(--loss-rgb); }
+#page-insights .ins2-card.tone-gold   { --tone: var(--gold);   --tone-rgb: var(--gold-rgb); }
+#page-insights .ins2-card::after { display: none; }
+#page-insights .ins2-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, var(--tone), transparent 75%); opacity: .85; }
+#page-insights .ins2-card.is-empty::before { opacity: .25; }
+#page-insights .ins2-card .ic-eye { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; font-size: var(--fs-label); }
+#page-insights .ins2-card .ic-eye .ic { color: var(--tone); width: 13px; height: 13px; }
+#page-insights .ins2-val { font-size: 26px; line-height: 1.15; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#page-insights .ins2-val.ins2-txt { font-size: 22px; }
+#page-insights .ins2-card.is-empty .ins2-val { color: var(--ink3); }
+#page-insights .ins2-metric { font-size: var(--fs-md); color: var(--ink2); line-height: 1.5; font-variant-numeric: tabular-nums; }
+#page-insights .ins2-metric b, #page-insights .ai-feed-text b, #page-insights .action-rec-text b { color: var(--ink); font-weight: 600; }
+#page-insights b.pos { color: var(--profit) !important; }
+#page-insights b.neg { color: var(--loss) !important; }
+#page-insights .ins2-card .ic-desc { margin-top: 10px; font-size: var(--fs-sm); color: var(--ink3); line-height: 1.55; }
+#page-insights .ins2-foot { margin-top: auto; padding-top: 12px; display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; }
+#page-insights .ins2-foot .cf-chip { margin-left: 0; }
+#page-insights .ins2-askb { margin-left: auto; }
+
+/* this vs that — two bars on one scale */
+#page-insights .ins2-cmp { display: grid; gap: 5px; margin-top: 12px; }
+#page-insights .ins2-cmp-row { display: grid; grid-template-columns: 86px minmax(0, 1fr) auto; align-items: center; gap: 8px; font-size: var(--fs-xs); color: var(--ink3); }
+#page-insights .ins2-cmp-row span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#page-insights .ins2-cmp-row i { display: block; height: 6px; border-radius: 99px; background: var(--layer); overflow: hidden; }
+#page-insights .ins2-cmp-row i b { display: block; height: 100%; border-radius: 99px; background: var(--profit); transition: width .5s cubic-bezier(.2,.7,.2,1); }
+#page-insights .ins2-cmp-row i b.neg { background: var(--loss); }
+#page-insights .ins2-cmp-row i b.dim { opacity: .45; }
+#page-insights .ins2-cmp-row em { font-style: normal; font-family: var(--font-mono); color: var(--ink2); font-size: var(--fs-xs); text-align: right; min-width: 62px; }
+
+/* links and badges */
+#page-insights .ins2-link { background: none; border: 0; padding: 2px 0; color: var(--gold); font: 600 var(--fs-xs) var(--font-body); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; letter-spacing: .02em; }
+#page-insights .ins2-link:hover { color: var(--gold-hi); text-decoration: underline; text-underline-offset: 3px; }
+#page-insights .ins2-link .ic { transform: rotate(180deg); width: 12px; height: 12px; }
+#page-insights .ins2-badge { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 99px; font-size: var(--fs-micro); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; vertical-align: 2px; color: var(--gold); background: rgba(var(--gold-rgb), .1); border: 0.5px solid rgba(var(--gold-rgb), .3); }
+#page-insights .ins2-badge.ok { color: var(--profit); background: rgba(var(--profit-rgb), .1); border-color: rgba(var(--profit-rgb), .3); }
+#page-insights .ins2-cond { color: var(--ink3); font-weight: 500; }
+#page-insights .ins2-and { color: var(--ink3); font-weight: 400; font-style: italic; }
+
+/* skeleton + empty */
+#page-insights .ins2-skel { min-height: 230px; background: linear-gradient(90deg, var(--elevated), var(--raised), var(--elevated)); background-size: 200% 100%; animation: wrSkel 1.4s ease-in-out infinite; }
+#page-insights .ins2-skel::after { display: none; }
+#page-insights .ins2-empty { grid-column: 1 / -1; display: flex; gap: 14px; align-items: center; padding: 22px; border: 0.5px dashed var(--rim2); border-radius: var(--r-lg); color: var(--ink3); font-size: var(--fs-md); line-height: 1.55; }
+#page-insights .ins2-empty > .ic { width: 26px; height: 26px; color: var(--gold); }
+#page-insights .ins2-empty b { display: block; color: var(--ink); font-size: var(--fs-base); margin-bottom: 2px; }
+#page-insights .ins2-none { display: flex; align-items: center; gap: 8px; padding: 14px; border-radius: var(--r-md); background: var(--layer); color: var(--ink3); font-size: var(--fs-sm); }
+#page-insights .ins2-none .ic { color: var(--profit); }
+
+/* ── what the data says ── */
+#page-insights .ai-feed { gap: 8px; }
+#page-insights .ins2-fi { padding: 12px 14px; gap: 12px; background: var(--layer); border-color: var(--rim); box-shadow: none; border-radius: var(--r-md); }
+#page-insights .ins2-fi .ai-feed-icon { width: 30px; height: 30px; border-radius: var(--r-sm); }
+#page-insights .ai-feed-icon .ic { width: 15px; height: 15px; }
+#page-insights .ai-feed-icon.gold   { background: var(--gold-dim); color: var(--gold); }
+#page-insights .ai-feed-icon.profit { background: var(--profit-dim); color: var(--profit); }
+#page-insights .ai-feed-icon.loss   { background: var(--loss-dim); color: var(--loss); }
+#page-insights .ai-feed-icon.info   { background: rgba(91,155,213,.12); color: var(--info); }
+#page-insights .ins2-fi .ai-feed-title { font-size: var(--fs-md); margin-bottom: 3px; }
+#page-insights .ins2-fi .ai-feed-text { font-size: var(--fs-sm); line-height: 1.6; }
+#page-insights .ins2-fmeta { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; margin-top: 7px; }
+#page-insights .ins2-fmeta .cf-chip { margin-left: 0; }
+#page-insights .ins2-src { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); }
+
+/* ── what to do next ── */
+#page-insights #actionRecs { margin-top: 0; display: flex; flex-direction: column; gap: 8px; }
+#page-insights .action-rec-card { margin: 0; padding: 12px 14px; gap: 12px; border-radius: var(--r-md); border-left: 2px solid var(--rim2); }
+#page-insights .action-rec-card.pri-high { border-left-color: var(--loss); }
+#page-insights .action-rec-card.pri-med  { border-left-color: var(--caution); }
+#page-insights .action-rec-card.pri-low  { border-left-color: var(--profit); }
+#page-insights .action-rec-icon { width: 30px; height: 30px; }
+#page-insights .action-rec-icon .ic { width: 15px; height: 15px; }
+#page-insights .action-rec-icon.loss { color: var(--loss); }
+#page-insights .action-rec-icon.gold { color: var(--gold); }
+#page-insights .action-rec-icon.profit { color: var(--profit); }
+#page-insights .action-rec-title { font-size: var(--fs-md); }
+#page-insights .action-rec-text { font-size: var(--fs-sm); line-height: 1.55; }
+#page-insights .ins2-arow { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+#page-insights .ins2-arow .action-rec-priority { margin-top: 0; }
+
+/* ── coach ── */
+#page-insights .coach-locked-banner .coach-feature-badge .ic { color: var(--gold); }
+#page-insights .coach-header { gap: 12px; margin-bottom: 14px; }
+#page-insights .coach-avatar { color: var(--on-gold, #07080b); }
+#page-insights .coach-subtitle { color: var(--ink3); font-weight: 500; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+#page-insights .coach-header .coach-new-btn { margin-left: auto; }
+#page-insights .coach-header .coach-new-btn ~ .coach-pro-badge { margin-left: 0; }
+#page-insights .coach-chat-area { min-height: 0; max-height: min(56vh, 520px); padding: 14px; gap: 12px; scroll-behavior: smooth; }
+#page-insights .coach-msg-icon .ic { width: 13px; height: 13px; }
+#page-insights .coach-msg .coach-msg-icon { color: var(--gold); }
+#page-insights .coach-msg.user-msg .coach-msg-icon { color: var(--ink2); font-weight: 700; font-size: 11px; }
+#page-insights .coach-msg-bubble { position: relative; max-width: min(88%, 720px); }
+#page-insights .coach-msg.user-msg .coach-msg-bubble { white-space: pre-wrap; overflow-wrap: anywhere; }
+#page-insights .coach-msg-bubble p { margin: 0 0 8px; }
+#page-insights .coach-msg-bubble p:last-child { margin-bottom: 0; }
+#page-insights .coach-msg-bubble .cm-h { margin: 12px 0 6px; font-size: var(--fs-label); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+#page-insights .coach-msg-bubble .cm-h:first-child { margin-top: 2px; }
+#page-insights .coach-msg-bubble .cm-li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 4px; margin: 0 0 5px; }
+#page-insights .coach-msg-bubble .cm-b { color: var(--gold); font-weight: 600; font-variant-numeric: tabular-nums; }
+#page-insights .coach-msg-bubble strong { color: var(--ink); }
+#page-insights .cm-tools { position: absolute; right: 6px; bottom: -12px; display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+#page-insights .coach-msg:hover .cm-tools, #page-insights .cm-tools:focus-within { opacity: 1; }
+#page-insights .cm-tool { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 0.5px solid var(--rim2); background: var(--raised); color: var(--ink3); cursor: pointer; }
+#page-insights .cm-tool:hover { color: var(--gold); border-color: var(--gold-line); }
+#page-insights .cm-tool .ic { width: 12px; height: 12px; }
+#page-insights .ins2-notice .coach-msg-bubble { background: rgba(var(--loss-rgb), .06) !important; border-color: rgba(var(--loss-rgb), .25) !important; color: var(--ink2) !important; font-size: var(--fs-sm); }
+#page-insights .ins2-notice .coach-msg-icon { background: rgba(var(--loss-rgb), .12) !important; color: var(--loss) !important; }
+#page-insights .cm-retry { display: flex; margin-top: 8px; }
+#page-insights .coach-typing { padding: 0; }
+#page-insights .coach-chat-area .coach-typing.active { display: flex; }
+#page-insights .coach-typing .coach-msg-icon { background: var(--gold-dim); color: var(--gold); }
+#page-insights .coach-typing #coachTypingText { font-variant-numeric: tabular-nums; }
+#page-insights .coach-quick-btns { margin-top: 12px; gap: 6px; }
+#page-insights .coach-quick-btn { display: inline-flex; align-items: center; gap: 6px; }
+#page-insights .coach-quick-btn .ic { width: 13px; height: 13px; }
+#page-insights .coach-quick-btn.ins2-sug { border-color: rgba(var(--gold-rgb), .3); color: var(--gold); background: rgba(var(--gold-rgb), .06); }
+#page-insights .coach-quick-btn.ins2-sug:hover { background: rgba(var(--gold-rgb), .14); }
+#page-insights .coach-input-row { margin-top: 12px; }
+#page-insights .coach-send-btn .ic { width: 17px; height: 17px; }
+#page-insights .coach-send-btn[data-wait] .ic { display: none; }
+#page-insights .coach-send-btn[data-wait]::after { content: attr(data-wait); font: 700 14px var(--font-display); }
+#page-insights #coachActive > div:not(.coach-input-row):has(> #cgCoachTrigger) { display: none; }
+#page-insights .coach-icon-btn { width: 44px; height: 44px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-md); background: var(--elevated); border: 0.5px solid var(--rim2); color: var(--ink2); cursor: pointer; transition: color .15s, border-color .15s; }
+#page-insights .coach-icon-btn:hover { color: var(--gold); border-color: var(--gold-line); }
+#page-insights .coach-icon-btn .ic { width: 18px; height: 18px; }
+#page-insights .coach-foot { margin-top: 6px; font-size: var(--fs-micro); color: var(--ink3); text-align: right; letter-spacing: .04em; }
+
+/* ── weekly report ── */
+#page-insights .wr-card { margin-top: 26px; }
+#page-insights .wr-body { white-space: normal; }
+#page-insights .wr-tools { display: flex; justify-content: flex-end; margin: -6px 0 6px; }
+#page-insights .wr-toggle { background: none; border: 0; color: var(--info); font: 600 var(--fs-xs) var(--font-body); cursor: pointer; padding: 2px 0; }
+#page-insights .wr-toggle:hover { text-decoration: underline; text-underline-offset: 3px; }
+#page-insights .wr-sec { border-top: 0.5px solid var(--rim); }
+#page-insights .wr-sec:first-of-type { border-top: 0; }
+#page-insights .wr-sec summary { display: flex; align-items: center; gap: 10px; padding: 12px 2px; cursor: pointer; list-style: none; color: var(--ink); font-weight: 600; font-size: var(--fs-base); }
+#page-insights .wr-sec summary::-webkit-details-marker { display: none; }
+#page-insights .wr-sec summary > .ic { color: var(--info); width: 15px; height: 15px; }
+#page-insights .wr-sec summary:hover { color: var(--info); }
+#page-insights .wr-chev { margin-left: auto; width: 8px; height: 8px; border-right: 1.5px solid var(--ink3); border-bottom: 1.5px solid var(--ink3); transform: rotate(45deg); transition: transform .2s; margin-right: 4px; }
+#page-insights .wr-sec[open] .wr-chev { transform: rotate(-135deg); }
+#page-insights .wr-sec-body { padding: 0 2px 14px 27px; max-width: 78ch; }
+#page-insights .wr-sec-body p { margin: 0 0 10px; font-size: var(--fs-md); line-height: 1.75; color: var(--ink2); }
+#page-insights .wr-sec-body p:last-child { margin-bottom: 0; }
+#page-insights .wr-foot { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; padding-top: 12px; border-top: 0.5px solid var(--rim); font-size: var(--fs-xs); color: var(--ink3); line-height: 1.55; }
+#page-insights .wr-foot .ic { color: var(--info); margin-top: 2px; }
+#page-insights .wr-foot a { color: var(--info); }
+#page-insights .wr-stale { color: var(--caution); }
+#page-insights .wr-empty { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: var(--fs-md); color: var(--ink3); }
+#page-insights .wr-pro { color: var(--gold) !important; }
+#page-insights .wr-lock-body { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+#page-insights .wr-lock-body p { margin: 0; flex: 1 1 320px; font-size: var(--fs-md); color: var(--ink2); line-height: 1.65; }
+
+/* ── light mode ── */
+body.light #page-insights .ins2-fi, body.light #page-insights .action-rec-card { background: #faf9f6; border-color: rgba(0,0,0,.07); }
+body.light #page-insights .ins2-cmp-row i { background: rgba(0,0,0,.06); }
+body.light #page-insights .ins2-skel { background: linear-gradient(90deg, #eceae5, #f6f5f2, #eceae5); background-size: 200% 100%; }
+body.light #page-insights .ins2-none { background: #f5f3ef; }
+body.light #page-insights .cm-tool { background: #fff; border-color: rgba(0,0,0,.1); }
+body.light #page-insights .coach-icon-btn { background: #fff; border-color: rgba(0,0,0,.12); }
+body.light #page-insights .wr-sec { border-color: rgba(0,0,0,.08); }
+body.light #page-insights .wr-sec-body p { color: #374151; }
+body.light #page-insights .ins2-empty { border-color: rgba(0,0,0,.15); }
+
+/* ── narrower screens ── */
+@media (max-width: 1100px) { #page-insights .ins2-cols { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  #page-insights .coach-header { flex-wrap: wrap; }
+  #page-insights .coach-title-block { flex: 1 1 0; min-width: 0; }
+  #page-insights .coach-header .coach-pro-badge { display: none; }
+  #page-insights .coach-subtitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #page-insights .coach-chat-area { max-height: 62vh; padding: 10px; }
+  #page-insights .coach-msg-bubble { max-width: 100%; }
+  #page-insights .coach-quick-btns { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: -2px; padding-bottom: 2px; }
+  #page-insights .coach-quick-btns::-webkit-scrollbar { display: none; }
+  #page-insights .coach-foot { display: none; }
+  #page-insights .cm-tools { opacity: 1; }
+  #page-insights .ins2-card { min-height: 0; }
+  #page-insights .ins2-val { font-size: 23px; }
+  #page-insights .wr-sec-body { padding-left: 2px; }
+  #page-insights .ins2-cmp-row { grid-template-columns: 76px minmax(0, 1fr) auto; }
+}
+</style>
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   AI INSIGHTS v2 — window.ApexInsights  (01.10.2026)
+   ────────────────────────────────────────────────────────────────────
+   The Insights page: the AI coach, six "at a glance" cards, what the
+   data says, what to do next, and the weekly market briefing.
+
+   What was wrong before, and is the reason this module exists:
+   · The coach never saw buildCoachContext(). sendCoachMsg glued its own
+     thin German summary (win rate per setup + the last FIVE trades) to
+     every question, while the worker's system prompt promised the model
+     breakdowns by weekday, hour, after-a-loss and trend. "Why do I lose
+     on Fridays?" could not be answered from what was sent.
+   · Enter did not send (the handler called sendCoachMsg() without the
+     isManual flag, which drops "automatic" calls).
+   · Coach answers were inserted as raw HTML; error and limit replies were
+     stored in the history and sent back to the model as its own words;
+     every answer was followed by two cooldown bubbles.
+   · The cards ranked by WIN RATE over as few as 2 trades, "Avg Hold Time"
+     showed the most-used timeframe, "Risk Consistency" measured the spread
+     of results, and the net added BTC pips to EURUSD pips.
+   · The pattern alerts rendered into an element that did not exist.
+
+   The rules this module keeps:
+   · One unit for every figure: money when the trades have it (the same
+     $/pips preference as the dashboard), pips otherwise — never mixed.
+   · A slice needs MIN_N trades (the coach's own floor) before it can be
+     called "best" or "worst", and carries an ApexConfidence chip.
+   · Arithmetic here, language in the model. Nothing on this page is
+     produced by the AI except the coach's answers and the weekly report.
+   ════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var I = window.ApexInsights = {};
+  var MIN_N = 6;                 // = COACH_MIN_SAMPLE
+  var D = 86400000;
+  var DOW = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
+  I.MIN_N = MIN_N;
+
+  /* ── small helpers ── */
+  function num(v) { if (v === '' || v == null) return null; var n = parseFloat(v); return isFinite(n) ? n : null; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function nt(s) { return '<span class="notranslate" translate="no">' + esc(s) + '</span>'; }
+  function svg(n) { return '<svg class=ic aria-hidden=true><use href=#i-' + n + ' ></use></svg>'; }
+  function sum(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s; }
+  function mean(a) { return a.length ? sum(a) / a.length : null; }
+  function median(a) {
+    if (!a.length) return null;
+    var s = a.slice().sort(function (x, y) { return x - y; }), m = s.length >> 1;
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function hm(s) { var m = /^(\d{1,2}):(\d{2})/.exec(String(s || '')); return m ? (+m[1]) * 60 + (+m[2]) : null; }
+  function uid() { return window.currentUID || 'local'; }
+  function isPro() { return window.currentPlan === 'pro'; }
+  function $(id) { return document.getElementById(id); }
+  I.esc = esc;
+
+  /* ── values ── */
+  function moneyOf(t) {
+    try { var c = window.calcTradePnl ? calcTradePnl(t) : null; if (c && c.pnlDisplay != null && isFinite(c.pnlDisplay)) return +c.pnlDisplay; } catch (e) {}
+    return null;
+  }
+  function pipsOf(t) { return num(t.pips); }
+  function prefUnit() {
+    try { var p = JSON.parse(localStorage.getItem('apexDash2_' + uid()) || '{}'); return p && p.unit === 'pips' ? 'pips' : 'money'; } catch (e) { return 'money'; }
+  }
+  I.prefUnit = prefUnit;
+  /** The unit every figure on the page uses. The trader's choice, unless it
+      would leave out most trades (manual pip-only journals have no money). */
+  I.unitFor = function (trades, pref) {
+    var m = 0, p = 0;
+    trades.forEach(function (t) { if (moneyOf(t) != null) m++; if (pipsOf(t) != null) p++; });
+    var want = pref === 'pips' ? 'pips' : 'money';
+    var have = want === 'money' ? m : p, other = want === 'money' ? p : m;
+    if (have > 0 && have >= other * 0.6) return want;
+    return other > 0 ? (want === 'money' ? 'pips' : 'money') : want;
+  };
+  function tMs(t) {
+    var o = num(t.openTime); if (o) return o;
+    var tm = hm(t.entryTime || t.time);
+    var ms = Date.parse((t._date || '') + 'T' + (tm != null ? pad2(Math.floor(tm / 60)) + ':' + pad2(tm % 60) : '12:00') + ':00');
+    return isFinite(ms) ? ms : 0;
+  }
+  /** [{t, v, ms}] in time order, only trades with a result in this unit. */
+  I.rows = function (trades, unit) {
+    return trades.map(function (t) { return { t: t, v: unit === 'pips' ? pipsOf(t) : moneyOf(t), ms: tMs(t) }; })
+      .filter(function (r) { return r.v != null; })
+      .sort(function (a, b) { return a.ms - b.ms; });
+  };
+
+  function cur() { try { return window.getPnlSymbol ? getPnlSymbol() : '$'; } catch (e) { return '$'; } }
+  /** "+$1,234" / "−$56.20" / "+12.5 pips". signed=false prints no plus. */
+  I.fmt = function (v, unit, signed) {
+    if (v == null || !isFinite(v)) return '—';
+    var a = Math.abs(v), sg = v < 0 ? '−' : (signed && v > 0 ? '+' : '');
+    if (unit === 'pips') return sg + (a >= 100 ? Math.round(a).toLocaleString('en-US') : a.toFixed(1)) + ' pips';
+    return sg + cur() + (a >= 1000 ? Math.round(a).toLocaleString('en-US') : a.toFixed(a >= 100 ? 0 : 2));
+  };
+  function fv(v, unit) { return '<b class="' + (v > 0 ? 'pos' : v < 0 ? 'neg' : '') + '">' + I.fmt(v, unit, true) + '</b>'; }
+  I.fmtDur = function (min) {
+    if (min == null || !isFinite(min)) return '—';
+    if (min < 1) return '<1m';
+    if (min < 60) return Math.round(min) + 'm';
+    if (min < 1440) { var h = Math.floor(min / 60), m = Math.round(min % 60); if (m === 60) { h++; m = 0; } return h + 'h' + (m ? ' ' + pad2(m) + 'm' : ''); }
+    var d = min / 1440; return (d < 10 ? d.toFixed(1) : Math.round(d)) + 'd';
+  };
+
+  /* ── the analysis (pure: rows in, plain objects out) ── */
+  I.stats = function (vals) {
+    var n = vals.length; if (!n) return null;
+    var w = vals.filter(function (v) { return v > 0; }), l = vals.filter(function (v) { return v < 0; });
+    var gw = sum(w), gl = -sum(l);
+    return { n: n, net: sum(vals), avg: sum(vals) / n, wins: w.length, losses: l.length, wr: w.length / n,
+             avgWin: w.length ? gw / w.length : 0, avgLoss: l.length ? gl / l.length : 0,
+             pf: gl > 0 ? gw / gl : (gw > 0 ? Infinity : null) };
+  };
+  /** Buckets with at least minN trades, best average first. */
+  I.groups = function (rows, keyOf, minN) {
+    var by = {};
+    rows.forEach(function (r) { var k = keyOf(r.t); if (k == null || k === '') return; (by[k] = by[k] || []).push(r.v); });
+    return Object.keys(by).filter(function (k) { return by[k].length >= (minN || MIN_N); })
+      .map(function (k) { return { k: k, vals: by[k], s: I.stats(by[k]) }; })
+      .sort(function (a, b) { return b.s.avg - a.s.avg; });
+  };
+  function holdMin(t) {
+    var o = num(t.openTime), c = num(t.closeTime);
+    if (o && c && c > o) return (c - o) / 60000;
+    var a = hm(t.entryTime), b = hm(t.exitTime);
+    return (a != null && b != null && b > a) ? b - a : null;    // same-day times only
+  }
+  I.hold = function (rows) {
+    var w = [], l = [];
+    rows.forEach(function (r) {
+      var h = holdMin(r.t); if (h == null || h <= 0 || h > 43200) return;
+      if (r.v > 0) w.push(h); else if (r.v < 0) l.push(h);
+    });
+    var out = { n: w.length + l.length, nw: w.length, nl: l.length, medWin: median(w), medLoss: median(l), enough: w.length >= 5 && l.length >= 5 };
+    out.ratio = out.enough && out.medWin > 0 ? out.medLoss / out.medWin : null;
+    return out;
+  };
+  function hasStop(t) { var s = num(t.sl); return s != null && s !== 0; }
+  /** How contained the losses are, plus the two habits behind outsized ones. */
+  I.risk = function (rows) {
+    var losses = rows.filter(function (r) { return r.v < 0; }).map(function (r) { return -r.v; });
+    var out = { n: rows.length, nLoss: losses.length, enough: losses.length >= 5 };
+    out.withStopPct = rows.length ? rows.filter(function (r) { return hasStop(r.t); }).length / rows.length : null;
+    if (!out.enough) return out;
+    var sorted = losses.slice().sort(function (a, b) { return b - a; });
+    out.avgLoss = mean(losses); out.worst = sorted[0];
+    out.worstX = out.avgLoss > 0 ? out.worst / out.avgLoss : null;
+    out.top3Share = sum(sorted.slice(0, 3)) / sum(losses);
+    // size after a loss vs after a win, relative to that symbol's usual size
+    var bySym = {};
+    rows.forEach(function (r) { var l = num(r.t.lots); if (l > 0) { var s = String(r.t.symbol || '?').toUpperCase(); (bySym[s] = bySym[s] || []).push(l); } });
+    var usual = {}; Object.keys(bySym).forEach(function (s) { if (bySym[s].length >= 5) usual[s] = median(bySym[s]); });
+    var aL = [], aW = [];
+    for (var i = 1; i < rows.length; i++) {
+      var p = rows[i - 1], c = rows[i], s = String(c.t.symbol || '?').toUpperCase(), l = num(c.t.lots);
+      if (!(l > 0) || !usual[s] || p.t._date !== c.t._date) continue;
+      (p.v < 0 ? aL : p.v > 0 ? aW : []).push(l / usual[s]);
+    }
+    out.sizeUpPct = (aL.length >= 5 && aW.length >= 5 && mean(aW) > 0) ? Math.round((mean(aL) / mean(aW) - 1) * 100) : null;
+    return out;
+  };
+  /** Mistake tags by what the trades carrying them netted, costliest first. */
+  I.mistakes = function (rows) {
+    var by = {}, total = sum(rows.map(function (r) { return r.v; })), N = rows.length;
+    rows.forEach(function (r) {
+      var seen = {};
+      (r.t.mistakes || []).forEach(function (m) { if (!m || seen[m]) return; seen[m] = 1; (by[m] = by[m] || []).push(r.v); });
+    });
+    return Object.keys(by).map(function (k) {
+      var s = I.stats(by[k]), restN = N - s.n;
+      return { k: k, vals: by[k], s: s, net: s.net, restAvg: restN > 0 ? (total - s.net) / restN : null };
+    }).filter(function (x) { return x.s.n >= 2; }).sort(function (a, b) { return a.net - b.net; });
+  };
+  /** The next trade on the same day after a loss / after a win. */
+  I.afterLoss = function (rows) {
+    var al = [], aw = [], quick = [];
+    for (var i = 1; i < rows.length; i++) {
+      var p = rows[i - 1], c = rows[i];
+      if (p.t._date !== c.t._date) continue;
+      if (p.v < 0) {
+        al.push(c.v);
+        var end = num(p.t.closeTime) || num(p.t.openTime), st = num(c.t.openTime);
+        if (end && st && st >= end && st - end <= 20 * 60000) quick.push(c.v);
+      } else if (p.v > 0) aw.push(c.v);
+    }
+    return { after: I.stats(al), afterWin: I.stats(aw), quick: I.stats(quick), afterVals: al };
+  };
+  I.trend = function (rows, now) {
+    var a = [], b = [];
+    rows.forEach(function (r) { if (r.ms >= now - 30 * D && r.ms <= now + D) a.push(r.v); else if (r.ms >= now - 60 * D && r.ms < now - 30 * D) b.push(r.v); });
+    var out = { last: I.stats(a), prev: I.stats(b), lastVals: a, prevVals: b, verdict: null };
+    if (out.last && out.prev && a.length >= MIN_N && b.length >= MIN_N) {
+      /* "Slipping" for +$185 against +$194 is noise read aloud. Only a
+         difference that would survive Welch's test (p < 0.2, the same
+         "worth watching" bar as Edge & Leaks) gets a direction. */
+      var C = window.ApexConfidence, p = C && C.welch ? C.welch(a, b).p : null;
+      var big = Math.abs(out.last.avg - out.prev.avg) >= 0.25 * Math.max(Math.abs(out.last.avg), Math.abs(out.prev.avg), 1e-9);
+      out.verdict = (p != null ? p < 0.2 : big) ? (out.last.avg >= out.prev.avg ? 'up' : 'down') : 'flat';
+    }
+    return out;
+  };
+  I.streak = function (rows) {
+    var n = 0, sign = 0;
+    for (var i = rows.length - 1; i >= 0; i--) {
+      var v = rows[i].v; if (!v) continue;
+      var s = v > 0 ? 1 : -1; if (!sign) sign = s; if (s !== sign) break; n++;
+    }
+    return { n: n, sign: sign };
+  };
+  I.weekMistakes = function (rows, now) {
+    var c = {};
+    rows.forEach(function (r) { if (r.ms < now - 7 * D) return; (r.t.mistakes || []).forEach(function (m) { if (m) c[m] = (c[m] || 0) + 1; }); });
+    return Object.keys(c).filter(function (k) { return c[k] >= 2; }).sort(function (a, b) { return c[b] - c[a]; }).map(function (k) { return { k: k, n: c[k] }; });
+  };
+  function emotionName(e) { return String(e || '').replace(/[^\p{L}\s-]/gu, '').trim(); }
+
+  /* ── confidence chips (ApexConfidence, when loaded) ── */
+  function chipMean(vals, unit) {
+    var C = window.ApexConfidence; if (!C) return '';
+    return C.chip(C.mean(vals), { range: true, fmt: function (x) { return I.fmt(x, unit, true); } });
+  }
+  function chipRate(k, n) {
+    var C = window.ApexConfidence; if (!C) return '';
+    return C.chip(C.rate(k, n), { range: true, fmt: function (x) { return Math.round(x * 100) + '%'; } });
+  }
+  function chipN(n) { var C = window.ApexConfidence; return C ? C.chip({ n: n, level: C.level(n) }, {}) : ''; }
+
+  /* ── cards ── */
+  function groupCard(rows, unit, all, o) {
+    var g = I.groups(rows, o.key, MIN_N);
+    if (!g.length) {
+      var tagged = rows.filter(function (r) { var k = o.key(r.t); return k != null && k !== ''; }).length;
+      return { eye: o.eye, icon: o.icon, tone: 'muted', val: '—', empty: true,
+               desc: tagged ? 'Needs ' + MIN_N + ' trades in one ' + o.singular + ' before it can be called best — ' + o.thinHint : o.none };
+    }
+    var best = g[0], pos = best.s.avg > 0, worst = g[g.length - 1];
+    return {
+      eye: o.eye, icon: o.icon, tone: pos ? 'profit' : 'loss', val: best.k, isName: true,
+      metric: fv(best.s.avg, unit) + ' per trade · ' + Math.round(best.s.wr * 100) + '% win rate',
+      cmp: { a: best.s.avg, b: all.avg, la: o.mine, lb: 'All trades', unit: unit },
+      desc: (pos ? '' : 'No ' + o.singular + ' is profitable yet over ' + MIN_N + '+ trades — this is the least negative. ') +
+        (g.length > 1 ? 'Weakest of ' + g.length + ': ' + nt(worst.k) + ' (' + I.fmt(worst.s.avg, unit, true) + ' per trade).'
+                      : 'The only ' + o.singular + ' with ' + MIN_N + '+ trades so far.'),
+      chip: chipMean(best.vals, unit), n: best.s.n,
+      ask: o.ask(best.k), filter: o.filterKind ? o.filterKind + ': ' + best.k : null
+    };
+  }
+  I.cards = function (rows, unit) {
+    var all = I.stats(rows.map(function (r) { return r.v; })) || { avg: 0 };
+    var out = [];
+    out.push(groupCard(rows, unit, all, { eye: 'Best setup', icon: 'target', key: function (t) { return t.setup; },
+      singular: 'setup', mine: 'This setup', filterKind: 'Setup', none: 'Name the setup on your trades and this card shows which one pays.',
+      thinHint: 'keep tagging setups.', ask: function (k) { return 'Is "' + k + '" really my best setup, or could it be luck? How should I trade it?'; } }));
+    out.push(groupCard(rows, unit, all, { eye: 'Best session', icon: 'clock', key: function (t) { return t.session; },
+      singular: 'session', mine: 'This session', filterKind: 'Session', none: 'Trades need a session (filled in automatically from the entry time).',
+      thinHint: 'more trades will settle it.', ask: function (k) { return 'Why do I do best in the ' + k + ' session, and should I trade less outside it?'; } }));
+    out.push(groupCard(rows, unit, all, { eye: 'Best market', icon: 'globe', key: function (t) { return t.symbol ? String(t.symbol).toUpperCase() : ''; },
+      singular: 'symbol', mine: 'This market', filterKind: 'Symbol', none: 'Trades need a symbol.',
+      thinHint: 'more trades will settle it.', ask: function (k) { return 'What makes ' + k + ' my best market? Should I focus on it?'; } }));
+
+    var ms = I.mistakes(rows);
+    if (!ms.length) out.push({ eye: 'Costliest mistake', icon: 'alert', tone: 'muted', val: '—', empty: true,
+      desc: 'Tag mistakes on your trades — revenge, FOMO, moved stop — and this card shows which one costs the most.' });
+    else {
+      var m = ms[0];
+      out.push({ eye: 'Costliest mistake', icon: 'alert', tone: m.net < 0 ? 'loss' : 'gold', val: m.k, isName: true,
+        metric: fv(m.net, unit) + ' over ' + m.s.n + ' trade' + (m.s.n === 1 ? '' : 's'),
+        cmp: m.restAvg != null ? { a: m.s.avg, b: m.restAvg, la: 'With it', lb: 'Without it', unit: unit } : null,
+        desc: 'Average ' + I.fmt(m.s.avg, unit, true) + ' when tagged' + (m.restAvg != null ? ', ' + I.fmt(m.restAvg, unit, true) + ' on the rest' : '') + '.' +
+          (ms.length > 1 ? ' Next: ' + nt(ms[1].k) + ' (' + I.fmt(ms[1].net, unit, true) + ').' : ''),
+        chip: chipMean(m.vals, unit), n: m.s.n,
+        ask: 'What does "' + m.k + '" cost me, and what concrete rule would stop it?', filter: 'Mistake: ' + m.k });
+    }
+
+    var h = I.hold(rows);
+    if (!h.enough) out.push({ eye: 'Hold time', icon: 'hourglass', tone: 'muted', val: '—', empty: true,
+      desc: h.n ? 'Needs 5 winners and 5 losers with entry and exit times — ' + h.nw + ' and ' + h.nl + ' so far.'
+                : 'Needs entry and exit times on your trades. Synced and imported trades have them.' });
+    else {
+      var r = h.ratio, tone = r >= 1.3 ? 'loss' : r <= 0.77 ? 'profit' : 'gold';
+      out.push({ eye: 'Hold time', icon: 'hourglass', tone: tone,
+        val: r >= 1.3 ? 'Losers ' + r.toFixed(1) + '× longer' : r <= 0.77 ? 'Winners ' + (1 / r).toFixed(1) + '× longer' : 'Balanced', isText: true,
+        metric: 'Median · winners <b>' + I.fmtDur(h.medWin) + '</b> · losers <b>' + I.fmtDur(h.medLoss) + '</b>',
+        cmp: { a: h.medWin, b: h.medLoss, la: 'Winners', lb: 'Losers', dur: true },
+        desc: r >= 1.3 ? 'You give losing trades more time than winners — cutting winners early and waiting on losers.'
+            : r <= 0.77 ? 'You let winners run longer than losers. That is the shape you want.'
+            : 'Winners and losers are held for similar times.',
+        chip: chipN(h.n), n: h.n,
+        ask: 'Am I holding losers longer than winners? What exit rules would fix that?' });
+    }
+
+    var rk = I.risk(rows);
+    if (!rk.enough) out.push({ eye: 'Loss control', icon: 'shield', tone: 'muted', val: '—', empty: true,
+      desc: 'Needs at least 5 losing trades to judge how contained your losses are.' });
+    else {
+      var x = rk.worstX, rt = x <= 2 ? 'profit' : x <= 3.5 ? 'gold' : 'loss';
+      out.push({ eye: 'Loss control', icon: 'shield', tone: rt, val: x <= 2 ? 'Contained' : x <= 3.5 ? 'Uneven' : 'Outsized', isText: true,
+        metric: 'Worst loss ' + fv(-rk.worst, unit) + ' = <b>' + x.toFixed(1) + '×</b> your average loss',
+        cmp: { a: -rk.avgLoss, b: -rk.worst, la: 'Average loss', lb: 'Worst loss', unit: unit },
+        desc: Math.round(rk.top3Share * 100) + '% of everything you lost came from your 3 biggest losses.' +
+          (rk.withStopPct != null ? ' ' + Math.round(rk.withStopPct * 100) + '% of trades had a stop.' : '') +
+          (rk.sizeUpPct != null && rk.sizeUpPct >= 15 ? ' After a loss you size up ' + rk.sizeUpPct + '%.' : ''),
+        chip: chipN(rk.nLoss), n: rk.nLoss,
+        ask: 'Are my losses contained? Look at my biggest losses, my stop usage and how my size changes after a loss.' });
+    }
+    return out;
+  };
+
+  /* ── what the data says ── */
+  I.feed = function (rows, unit, now, opts) {
+    opts = opts || {};
+    var items = [], n = rows.length;
+    if (!n) return [{ tone: 'gold', icon: 'bulb', title: 'Nothing to read yet', text: 'Log or sync your first trades. Observations start at 5 trades; the cards need ' + MIN_N + ' per setup, session or symbol.' }];
+    var vals = rows.map(function (r) { return r.v; }), s = I.stats(vals);
+    items.push({ tone: 'gold', icon: 'chart', title: n + ' trade' + (n === 1 ? '' : 's') + ' with a result',
+      text: 'Win rate <b>' + Math.round(s.wr * 100) + '%</b> · net ' + fv(s.net, unit) + ' · ' + fv(s.avg, unit) + ' per trade' +
+        (s.pf != null ? ' · profit factor <b>' + (isFinite(s.pf) ? s.pf.toFixed(2) : '∞') + '</b>' : ''),
+      chip: chipMean(vals, unit), src: 'expectancy range' });
+    if (n < 5) return items;
+
+    var tr = I.trend(rows, now);
+    if (tr.verdict) {
+      var vd = tr.verdict;
+      items.push({ tone: vd === 'up' ? 'profit' : vd === 'down' ? 'loss' : 'info', icon: vd === 'up' ? 'trend-up' : vd === 'down' ? 'trend-dn' : 'chart',
+        title: 'Last 30 days: ' + (vd === 'up' ? 'improving' : vd === 'down' ? 'slipping' : 'about the same'),
+        text: fv(tr.last.avg, unit) + ' per trade over ' + tr.last.n + ' trades, against ' + fv(tr.prev.avg, unit) + ' over ' + tr.prev.n + ' in the 30 days before.' +
+          (vd === 'flat' ? ' The difference is within normal variation.' : ''),
+        src: 'trend' });
+    }
+
+    var al = I.afterLoss(rows);
+    if (al.after && al.afterWin && al.after.n >= MIN_N && al.afterWin.n >= MIN_N) {
+      var worse = al.after.avg < al.afterWin.avg;
+      items.push({ tone: worse ? 'loss' : 'profit', icon: 'refresh', title: worse ? 'The trade after a loss is weaker' : 'You recover well after a loss',
+        text: 'Same-day trades right after a loss average ' + fv(al.after.avg, unit) + ' (' + al.after.n + '), after a win ' + fv(al.afterWin.avg, unit) + ' (' + al.afterWin.n + ').' +
+          (al.quick && al.quick.n >= 3 ? ' ' + al.quick.n + ' were opened within 20 minutes of the loss, averaging ' + fv(al.quick.avg, unit) + '.' : ''),
+        chip: chipMean(al.afterVals, unit), src: 'sequence' });
+    }
+
+    var wd = I.groups(rows, function (t) { return t._dow; }, MIN_N);
+    if (wd.length >= 2 && wd[wd.length - 1].s.avg < 0) {
+      var w = wd[wd.length - 1], b = wd[0];
+      items.push({ tone: 'loss', icon: 'calendar', title: (DOW[w.k] || w.k) + 's cost you money',
+        text: fv(w.s.avg, unit) + ' per trade over ' + w.s.n + ' trades. Your best day is ' + (DOW[b.k] || b.k) + ' at ' + fv(b.s.avg, unit) + '.',
+        chip: chipMean(w.vals, unit), src: 'by weekday' });
+    }
+
+    var wm = I.weekMistakes(rows, now);
+    if (wm.length) {
+      items.push({ tone: 'gold', icon: 'alert', title: wm[0].n + '× ' + nt('"' + wm[0].k + '"') + ' this week',
+        text: 'A repeat inside seven days is a pattern, not a slip.' + (wm.length > 1 ? ' Also repeated: ' + wm.slice(1, 3).map(function (x) { return nt(x.k) + ' (' + x.n + '×)'; }).join(', ') + '.' : '') +
+          ' Read your rule for it before the next session.', src: 'last 7 days', htmlTitle: true });
+    }
+
+    var em = I.groups(rows, function (t) { return emotionName(t.exitEmotion); }, MIN_N);
+    if (em.length >= 2 && em[em.length - 1].s.avg < 0) {
+      var e = em[em.length - 1];
+      items.push({ tone: 'loss', icon: 'brain', title: 'Exits logged as ' + nt('"' + e.k + '"') + ' lose money',
+        text: fv(e.s.avg, unit) + ' per trade over ' + e.s.n + ' trades — your best exit state is ' + nt(em[0].k) + ' (' + I.fmt(em[0].s.avg, unit, true) + ').',
+        chip: chipMean(e.vals, unit), src: 'exit emotion', htmlTitle: true });
+    }
+
+    var st = I.streak(rows);
+    if (st.n >= 3) items.push(st.sign < 0
+      ? { tone: 'loss', icon: 'zap', title: st.n + ' losses in a row', text: 'The current run. This is the moment your stop-for-the-day rule exists for.', src: 'streak' }
+      : { tone: 'profit', icon: 'zap', title: st.n + ' wins in a row', text: 'The current run. Keep your size where it is — streaks end, and the trade that ends this one should not be your biggest.', src: 'streak' });
+
+    if (opts.ef) {
+      var ef = opts.ef;
+      if (ef.tooFew) { /* stays quiet below 30 trades — Edge Lab explains why */ }
+      else if (ef.leaks.length || ef.edges.length) {
+        [['leak', ef.leaks[0]], ['edge', ef.edges[0]]].forEach(function (p) {
+          var x = p[1]; if (!x) return;
+          items.push({ tone: p[0] === 'leak' ? 'loss' : 'profit', icon: p[0] === 'leak' ? 'flame' : 'trophy', htmlTitle: true,
+            title: (p[0] === 'leak' ? 'Leak: ' : 'Edge: ') + condText(x.set),
+            text: (p[0] === 'leak' ? 'Cost you ' : 'Made you ') + '<b class="' + (p[0] === 'leak' ? 'neg' : 'pos') + '">' + I.fmt(Math.abs(x.net), unit, false) + '</b> over ' + x.n + ' trades — ' +
+              I.fmt(x.mean, unit, true) + ' per trade against ' + I.fmt(x.restMean, unit, true) + ' on your other trades.',
+            badge: x.verdict === 'confirmed' ? 'Confirmed' : 'Worth watching', src: ef.tested + ' conditions tested', link: { label: 'Open Edge & Leaks', go: 'finder' } });
+        });
+      } else items.push({ tone: 'info', icon: 'search', title: 'No edge or leak stands out yet',
+        text: ef.tested + ' conditions tested against the rest of your trades — none differs from chance after correcting for testing that many. That is a real result, not a missing one.',
+        src: 'Edge & Leaks', link: { label: 'Open Edge & Leaks', go: 'finder' } });
+    } else if (opts.efTeaser && n >= 30) {
+      items.push({ tone: 'info', icon: 'search', title: 'Edge & Leaks', text: 'Tests every condition in your journal — setups, hours, the trade after a loss, oversized positions — and shows only what survives a correction for multiple testing.',
+        badge: 'Pro', link: { label: 'See Pro', pro: true } });
+    }
+    return items.slice(0, 8);
+  };
+  function condText(set) {
+    return set.map(function (c) { var i = c.indexOf(': '); return '<span class="ins2-cond">' + esc(c.slice(0, i)) + ' </span>' + nt(c.slice(i + 2)); }).join(' <span class="ins2-and">and</span> ');
+  }
+
+  /* ── what to do next ── */
+  I.actions = function (rows, unit, opts) {
+    opts = opts || {};
+    var out = [], n = rows.length, key = {};
+    if (n < 5) return out;
+    var ef = opts.ef;
+    if (ef && !ef.tooFew && ef.leaks[0]) {
+      var lk = ef.leaks[0], lkey = lk.set.join(' + ');
+      key[lkey] = 1;
+      out.push({ pri: lk.verdict === 'confirmed' ? 'high' : 'med', icon: 'shield', htmlTitle: true,
+        title: 'Put a guardrail on ' + condText(lk.set),
+        text: 'It cost ' + I.fmt(Math.abs(lk.net), unit, false) + ' over ' + lk.n + ' trades. A guardrail warns you the moment a new trade matches.',
+        btn: { label: 'Warn me when I do this', guard: lkey } });
+    }
+    var ms = I.mistakes(rows);
+    if (ms[0] && ms[0].net < 0 && ms[0].s.n >= 3 && !key['Mistake: ' + ms[0].k]) {
+      out.push({ pri: 'high', icon: 'target', htmlTitle: true, title: 'Fix your #1 leak: ' + nt('"' + ms[0].k + '"'),
+        text: 'Tagged on ' + ms[0].s.n + ' trades that netted ' + I.fmt(ms[0].net, unit, true) + '. Turn it into one if-then rule you check before every entry.',
+        btn: { label: 'Write the rule', nav: 'rules' } });
+    }
+    var al = I.afterLoss(rows);
+    if (al.quick && al.quick.n >= 3 && al.quick.avg < 0) {
+      out.push({ pri: 'high', icon: 'clock', title: 'Wait 20 minutes after a loss',
+        text: al.quick.n + ' trades opened within 20 minutes of a loss averaged ' + I.fmt(al.quick.avg, unit, true) + '. A timer between them is the cheapest fix on this page.' });
+    }
+    var noStop = rows.filter(function (r) { return !hasStop(r.t); }).length;
+    if (n >= 10 && noStop / n >= 0.15) {
+      var nsVals = rows.filter(function (r) { return !hasStop(r.t) && r.v < 0; }).map(function (r) { return r.v; });
+      out.push({ pri: 'high', icon: 'shield', title: 'Set a stop on every trade',
+        text: Math.round(noStop / n * 100) + '% of your trades have no stop recorded' + (nsVals.length >= 3 ? ' — their losses average ' + I.fmt(mean(nsVals), unit, true) : '') + '. Without one there is no R and no defined risk.' });
+    }
+    var wd = I.groups(rows, function (t) { return t._dow; }, MIN_N);
+    if (wd.length >= 2 && wd[wd.length - 1].s.avg < 0) {
+      var w = wd[wd.length - 1], C = window.ApexConfidence, sure = C ? C.mean(w.vals).sign === -1 : false;
+      out.push({ pri: sure ? 'high' : 'med', icon: 'calendar', title: 'Trade ' + (DOW[w.k] || w.k) + 's at half size for two weeks',
+        text: 'Then compare. ' + w.s.n + ' ' + (DOW[w.k] || w.k) + ' trades average ' + I.fmt(w.s.avg, unit, true) + (sure ? ' — clearly below zero, not noise.' : ' — not yet clearly below zero, so test it before you cut the day.') });
+    }
+    // playbook adherence: does ticking the whole checklist pay?
+    var pbs = opts.playbooks || [];
+    if (pbs.length) {
+      pbs.forEach(function (p) {
+        var cl = (p.checklist || []).length; if (!cl) return;
+        var full = [], part = [];
+        rows.forEach(function (r) { if (r.t.playbook !== p.id) return; ((r.t.pbChecks || []).length >= cl ? full : part).push(r.v); });
+        if (full.length >= 3 && part.length >= 3 && mean(full) > mean(part) && full.length / (full.length + part.length) < 0.8) {
+          out.push({ pri: 'high', icon: 'clipboard', htmlTitle: true, title: 'Only take ' + nt('"' + p.name + '"') + ' with every box ticked',
+            text: 'Full checklist: ' + I.fmt(mean(full), unit, true) + ' per trade (' + full.length + '). Steps skipped: ' + I.fmt(mean(part), unit, true) + ' (' + part.length + '). You follow it on ' + Math.round(full.length / (full.length + part.length) * 100) + '% of these trades.',
+            btn: { label: 'Open playbooks', nav: 'playbooks' } });
+        }
+      });
+      var unassigned = rows.filter(function (r) { return !r.t.playbook; }).length;
+      if (n >= 10 && unassigned / n >= 0.4) out.push({ pri: 'med', icon: 'pin', title: Math.round(unassigned / n * 100) + '% of your trades have no playbook',
+        text: 'Assign one to each trade so Evidence can show which strategy carries your edge — and which one to cut.', btn: { label: 'Open playbooks', nav: 'playbooks' } });
+    }
+    var rr = rows.map(function (r) { return num(r.t.rr); }).filter(function (v) { return v != null && v > 0; });
+    if (rr.length >= 10) {
+      var below = rr.filter(function (v) { return v < 1; }).length;
+      if (below / rr.length > 0.4) out.push({ pri: 'med', icon: 'scale', title: 'Plan for at least 1R of reward',
+        text: Math.round(below / rr.length * 100) + '% of your planned trades aim for less reward than they risk (median planned R:R ' + median(rr).toFixed(2) + ').' });
+    }
+    var bare = rows.filter(function (r) { return !(r.t.mistakes || []).length && !(r.t.positives || []).length; }).length;
+    if (n >= 10 && bare / n >= 0.5) out.push({ pri: 'low', icon: 'note', title: 'Review your trades',
+      text: Math.round(bare / n * 100) + '% of your trades carry neither a mistake nor a positive tag. The cards and the coach only see what you tag.',
+      btn: { label: 'Open journal', nav: 'journal' } });
+    if (ef && !ef.tooFew && ef.edges[0] && ef.edges[0].verdict === 'confirmed') {
+      var ed = ef.edges[0], ekey = ed.set.join(' + ');
+      out.push({ pri: 'low', icon: 'trophy', htmlTitle: true, title: 'Do more of ' + condText(ed.set),
+        text: ed.n + ' trades made ' + I.fmt(ed.net, unit, true) + ' — ' + I.fmt(ed.impact, unit, true) + ' more than the same number of your average trades.',
+        btn: /^(Symbol|Setup|Session|Tag|Mistake|Timeframe): /.test(ed.set[0]) ? { label: 'Show these trades', filter: ekey } : null });
+    }
+    var rank = { high: 0, med: 1, low: 2 };
+    return out.sort(function (a, b) { return rank[a.pri] - rank[b.pri]; }).slice(0, 5);
+  };
+
+  /* ── coach: rendering ── */
+  function isHeader(l) {
+    var letters = l.replace(/[^A-Za-zÀ-ÿ]/g, '');
+    if (letters.length < 3 || l.length > 70 || /[.!?]$/.test(l)) return false;
+    var up = letters.replace(/[^A-ZÀ-Þ]/g, '').length;
+    return up / letters.length >= 0.85;
+  }
+  function inline(h) { return h.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>').replace(/__([^_\n]+)__/g, '<strong>$1</strong>'); }
+  /** Safe HTML for a coach answer: escaped first, then the few shapes the
+      system prompt asks for (UPPERCASE headers, → bullets, 1. lists). */
+  I.format = function (raw) {
+    var text = String(raw == null ? '' : raw).replace(/<<SETUP>>[\s\S]*?(?:<<\/SETUP>>|$)/g, '').replace(/\r/g, '').trim();
+    var out = [], para = [];
+    function flush() { if (para.length) { out.push('<p>' + para.join('<br>') + '</p>'); para = []; } }
+    text.split('\n').forEach(function (line) {
+      var l = line.trim();
+      if (!l) { flush(); return; }
+      var mh = /^#{1,6}\s+(.+)$/.exec(l);
+      if (mh) { flush(); out.push('<div class="cm-h">' + inline(esc(mh[1].replace(/\*\*/g, ''))) + '</div>'); return; }
+      if (isHeader(l.replace(/\*\*/g, ''))) { flush(); out.push('<div class="cm-h">' + esc(l.replace(/\*\*/g, '').replace(/:$/, '')) + '</div>'); return; }
+      var mb = /^(?:→|•|–|-|\*)\s+(.+)$/.exec(l);
+      if (mb) { flush(); out.push('<div class="cm-li"><span class="cm-b">→</span><span>' + inline(esc(mb[1])) + '</span></div>'); return; }
+      var mn = /^(\d{1,2})[.)]\s+(.+)$/.exec(l);
+      if (mn) { flush(); out.push('<div class="cm-li"><span class="cm-b">' + mn[1] + '.</span><span>' + inline(esc(mn[2])) + '</span></div>'); return; }
+      para.push(inline(esc(l)));
+    });
+    flush();
+    return out.join('');
+  };
+  /** Replies the worker sends as HTTP 200 that are not answers. They must
+      never be stored as something the coach "said". */
+  I.isError = function (t) {
+    t = String(t || '');
+    return /^\s*⏳/.test(t) || /^\s*(🚨\s*)?Coach System/i.test(t) ||
+      /AI unavailable|API Error|credits are depleted|Quota exceeded|pauses until tomorrow|unusual amount of AI use|GEMINI_API_KEY|Limit erreicht|Spam-Schutz|^\s*No response generated/i.test(t);
+  };
+  function waitOf(t) { var m = /(\d+)\s*s\b/.exec(String(t || '')); return m ? Math.min(90, +m[1]) : 0; }
+  function isFinal(t) { return /pauses until tomorrow|credits are depleted|GEMINI_API_KEY/i.test(String(t || '')); }
+
+  /* ── coach: state ── */
+  var S = { msgs: [], readyFor: null, busyT: null, busyAt: 0 };
+  function chatKey() { return 'apexCoachChat_' + uid(); }
+  function loadChat() {
+    try { var o = JSON.parse(localStorage.getItem(chatKey()) || 'null'); return o && Array.isArray(o.msgs) ? o.msgs.filter(function (m) { return m && (m.role === 'user' || m.role === 'coach') && typeof m.text === 'string'; }) : []; }
+    catch (e) { return []; }
+  }
+  function saveChat() { try { localStorage.setItem(chatKey(), JSON.stringify({ v: 1, msgs: S.msgs.slice(-40) })); } catch (e) {} }
+  /** Complete question → answer pairs only, newest last: what goes to the
+      model as the conversation so far. */
+  I.history = function (msgs, maxPairs) {
+    var pairs = [];
+    for (var i = 0; i < msgs.length - 1; i++) {
+      if (msgs[i].role === 'user' && msgs[i + 1].role === 'coach') { pairs.push([msgs[i], msgs[i + 1]]); i++; }
+    }
+    var out = [];
+    pairs.slice(-(maxPairs || 2)).forEach(function (p) { out.push({ role: 'user', content: p[0].text }, { role: 'assistant', content: p[1].text }); });
+    return out;
+  };
+
+  function chatEl() { return $('coachChat'); }
+  function scrollChat() { var c = chatEl(); if (c) c.scrollTop = c.scrollHeight; }
+  function msgNode(role, text, opt) {
+    opt = opt || {};
+    var div = document.createElement('div');
+    div.className = 'coach-msg' + (role === 'user' ? ' user-msg' : '') + (opt.notice ? ' ins2-notice' : '');
+    var icon = document.createElement('div');
+    icon.className = 'coach-msg-icon';
+    if (role === 'user') icon.textContent = (String(window.currentName || 'You').trim()[0] || 'Y').toUpperCase();
+    else icon.innerHTML = svg(opt.notice ? 'alert' : 'bot');
+    var bubble = document.createElement('div');
+    bubble.className = 'coach-msg-bubble';
+    if (role === 'user' || opt.notice) bubble.textContent = text;
+    else bubble.innerHTML = I.format(text);
+    div.appendChild(icon); div.appendChild(bubble);
+    if (role === 'coach' && !opt.notice && !opt.greeting) {
+      var tools = document.createElement('div'); tools.className = 'cm-tools';
+      var cp = document.createElement('button'); cp.type = 'button'; cp.className = 'cm-tool'; cp.title = 'Copy answer'; cp.setAttribute('aria-label', 'Copy answer');
+      cp.innerHTML = svg('copy');
+      cp.onclick = function () {
+        var plain = bubble.innerText || text;
+        try { navigator.clipboard.writeText(plain).then(function () { cp.innerHTML = svg('check'); setTimeout(function () { cp.innerHTML = svg('copy'); }, 1400); }); } catch (e) {}
+      };
+      tools.appendChild(cp); bubble.appendChild(tools);
+    }
+    return div;
+  }
+  function greetingText() {
+    var name = String(window.currentName || '').trim();
+    return (name ? 'Hi ' + name + '. ' : '') + 'I read the figures the app computes from your journal — by weekday, hour, session, setup and symbol, the trade after a loss, and the last 30 days against the 30 before. Ask me anything about your trading.';
+  }
+  function paintChat() {
+    var c = chatEl(); if (!c) return;
+    removeTyping();
+    c.innerHTML = '';
+    var g = msgNode('coach', greetingText(), { greeting: true }); g.classList.add('ins2-greet');
+    c.appendChild(g);
+    S.msgs.forEach(function (m) { c.appendChild(msgNode(m.role, m.text)); });
+    scrollChat();
+  }
+  function pushMsg(role, text) {
+    S.msgs.push({ role: role, text: text, ts: Date.now() });
+    if (S.msgs.length > 40) S.msgs = S.msgs.slice(-40);
+    saveChat();
+    var c = chatEl(); if (c) { removeTyping(); c.appendChild(msgNode(role, text)); scrollChat(); }
+    window.coachMessages = I.history(S.msgs, 3);
+  }
+  I.appendMsg = function (role, text) {
+    var c = chatEl(); if (!c) return;
+    c.appendChild(msgNode(role === 'user' ? 'user' : 'coach', String(text || ''), { notice: role !== 'user' && I.isError(text) }));
+    scrollChat();
+  };
+  function notice(text, retryText) {
+    var c = chatEl(); if (!c) return;
+    var node = msgNode('coach', text, { notice: true });
+    if (retryText != null && !isFinal(text)) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'apex-btn apex-btn--ghost apex-btn--sm cm-retry';
+      var wait = waitOf(text), until = Date.now() + wait * 1000;
+      var paint = function () {
+        var left = Math.ceil((Math.max(until, window._coachCooldownEnd || 0) - Date.now()) / 1000);
+        b.disabled = left > 0;
+        b.innerHTML = svg('refresh') + (left > 0 ? ' Retry in ' + left + 's' : ' Ask again');
+        if (left > 0) setTimeout(paint, 500);
+      };
+      paint();
+      b.onclick = function () { if (window.coachBusy) return; node.remove(); ask(retryText); };
+      node.querySelector('.coach-msg-bubble').appendChild(b);
+    }
+    c.appendChild(node); scrollChat();
+  }
+
+  /* ── coach: busy state ── */
+  function removeTyping() {
+    var ty = $('coachTyping'), card = $('coachActive'), q = $('coachQuickBtns');
+    if (ty && ty.parentNode === chatEl() && card && q) card.insertBefore(ty, q);
+  }
+  I.setBusy = function (busy) {
+    var ty = $('coachTyping'), c = chatEl(), btn = $('coachSendBtn'), txt = $('coachTypingText');
+    if (S.busyT) { clearInterval(S.busyT); S.busyT = null; }
+    if (ty) ty.classList.toggle('active', !!busy);
+    if (busy) {
+      if (ty && c) { c.appendChild(ty); scrollChat(); }
+      if (btn) btn.disabled = true;
+      S.busyAt = Date.now();
+      var tick = function () {
+        var s = Math.round((Date.now() - S.busyAt) / 1000);
+        if (txt) txt.textContent = s < 6 ? 'Reading your journal…' : s < 20 ? 'Working through your numbers… ' + s + 's' : 'The AI provider is busy — still waiting… ' + s + 's';
+      };
+      tick(); S.busyT = setInterval(tick, 1000);
+    } else {
+      removeTyping();
+      if (btn && !window.coachLocalCooldown) btn.disabled = false;
+    }
+  };
+
+  /* ── coach: what is sent ── */
+  function profileBlock() {
+    var g = function (id) { var el = $(id); return el && el.value ? String(el.value).trim() : ''; };
+    var rows = [['Experience level', g('coachProfileExperience')], ['Preferred instruments', g('coachProfilePairs')], ['Strategy', g('coachProfileStrategy')],
+                ['Prop firm', g('coachProfileFirmName')], ['Account phase', g('coachProfilePhase')]].filter(function (r) { return r[1]; });
+    if (!rows.length) {
+      try { var st = JSON.parse(localStorage.getItem('apexCoachProfile_' + uid()) || '{}');
+        rows = [['Experience level', st.experience], ['Preferred instruments', st.pairs], ['Strategy', st.strategy], ['Prop firm', st.firmName], ['Account phase', st.phase]].filter(function (r) { return r[1]; });
+      } catch (e) {}
+    }
+    return rows.length ? '\nTRADER PROFILE:\n' + rows.map(function (r) { return '- ' + r[0] + ': ' + r[1]; }).join('\n') + '\n' : '';
+  }
+  function propBlock() {
+    try {
+      var pf = window.getPropFirmData ? getPropFirmData() : null;
+      if (!pf || !pf.enabled) return '';
+      var size = parseFloat(pf.accountSize) || 0, dl = parseFloat(pf.dailyLimit) || 0, tl = parseFloat(pf.totalLimit) || 0, pv = parseFloat(pf.pipValue) || 1;
+      var st = window.computePropFirmDDStats ? computePropFirmDDStats() : null;
+      var o = '\nPROP FIRM ACCOUNT:\n';
+      if (size) o += '- Account size: $' + size.toLocaleString('en-US') + '\n';
+      if (dl) o += '- Daily loss limit: ' + dl + '%' + (size ? ' ($' + Math.round(size * dl / 100) + ')' : '') + '\n';
+      if (tl) o += '- Max total drawdown: ' + tl + '%' + (size ? ' ($' + Math.round(size * tl / 100) + ')' : '') + '\n';
+      if (st && size) {
+        var du = st.daily * pv / size * 100, tu = st.total * pv / size * 100;
+        if (dl) o += '- Daily drawdown used: ' + st.daily + ' pips (' + du.toFixed(2) + '%), remaining ' + Math.max(0, dl - du).toFixed(2) + '%\n';
+        if (tl) o += '- Total drawdown used: ' + st.total + ' pips (' + tu.toFixed(2) + '%), remaining ' + Math.max(0, tl - tu).toFixed(2) + '%\n';
+      }
+      return o;
+    } catch (e) { return ''; }
+  }
+  function scopeLabel() {
+    try {
+      if (!window.ApexAccounts) return 'all accounts';
+      var a = ApexAccounts.active(); if (!a || a === 'all') return 'all accounts';
+      var acc = ApexAccounts.get && ApexAccounts.get(a); return 'account "' + (acc && acc.name ? acc.name : a) + '" only';
+    } catch (e) { return 'all accounts'; }
+  }
+  I.context = function () {
+    var ctx = '';
+    try { ctx = window.buildCoachContext ? window.buildCoachContext() : ''; } catch (e) { ctx = 'Journal data could not be read.'; }
+    var d = new Date();
+    return 'JOURNAL CONTEXT — computed by the app just now, scope: ' + scopeLabel() + '. Today is ' +
+      d.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ', local time ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + '.\n' +
+      ctx + profileBlock() + propBlock();
+  };
+
+  /* ── coach: sending ── */
+  var TIMEOUT_MS = 50000;   // the worker gives up after ~30 s; this is the safety net
+  async function ask(text) {
+    if (window.coachBusy) return;
+    if (typeof setCoachBusy === 'function') setCoachBusy(true); else I.setBusy(true);
+    var hist = I.history(S.msgs.slice(0, -1), 2);
+    var payload = hist.concat([{ role: 'user', content: I.context() + '\n\nTRADER\'S QUESTION: ' + text }]);
+    var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    var to = ctl ? setTimeout(function () { ctl.abort(); }, TIMEOUT_MS) : null;
+    try {
+      var res = await fetch(window.COACH_WORKER_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: (window.currentUser && currentUser.uid) || 'guest', system: 'Trading Coach', messages: payload }),
+        signal: ctl ? ctl.signal : undefined
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error(data.error || ('server error ' + res.status));
+      var reply = data.response || (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+      if (!String(reply).trim()) throw new Error('the coach returned an empty answer');
+      if (I.isError(reply)) notice(reply, text);
+      else pushMsg('coach', reply);
+    } catch (e) {
+      notice(e && e.name === 'AbortError'
+        ? 'No answer after ' + Math.round(TIMEOUT_MS / 1000) + ' seconds — the AI provider is overloaded right now.'
+        : 'Could not reach the coach (' + (e && e.message ? e.message : 'network error') + ').', text);
+    } finally {
+      if (to) clearTimeout(to);
+      if (typeof setCoachBusy === 'function') setCoachBusy(false); else I.setBusy(false);
+      if (typeof startCoachCooldown === 'function') startCoachCooldown();
+    }
+  }
+  I.send = function () {
+    if (window.coachBusy || window.coachLocalCooldown) return;
+    var input = $('coachInput'); if (!input) return;
+    var text = String(input.value || '').trim(); if (!text) return;
+    input.value = ''; input.style.height = '';
+    pushMsg('user', text);
+    return ask(text);
+  };
+  /** Suggestion chips: straight to the coach, or — while it is still busy or
+      cooling down — into the input so nothing is lost. */
+  I.ask = function (text) {
+    if (!isPro()) { if (window.openUpgradeModal) openUpgradeModal(); return; }
+    if (window.coachBusy || window.coachLocalCooldown) { var inp = $('coachInput'); if (inp) { inp.value = text; inp.focus(); } return; }
+    pushMsg('user', text);
+    return ask(text);
+  };
+  I.newChat = function () {
+    if (window.coachBusy) return;
+    if (S.msgs.length && window.confirm && !confirm('Start a new conversation? This one will be cleared.')) return;
+    S.msgs = []; saveChat(); window.coachMessages = [];
+    paintChat();
+    var inp = $('coachInput'); if (inp) inp.focus();
+  };
+
+  /* ── coach: suggestions from the data ── */
+  I.suggestions = function (rows, now) {
+    var out = [];
+    var wd = I.groups(rows, function (t) { return t._dow; }, MIN_N);
+    if (wd.length >= 2 && wd[wd.length - 1].s.avg < 0) {
+      var d = DOW[wd[wd.length - 1].k] || wd[wd.length - 1].k;
+      out.push({ icon: 'calendar', label: 'Why ' + d + 's?', q: 'Why do I lose money on ' + d + 's? Use my weekday and entry-hour breakdowns.' });
+    }
+    var al = I.afterLoss(rows);
+    if (al.after && al.after.n >= MIN_N) out.push({ icon: 'refresh', label: 'After a loss', q: 'What happens to my trading right after a losing trade? Compare it with after a win.' });
+    var st = I.groups(rows, function (t) { return t.setup; }, MIN_N);
+    if (st.length && st[0].s.avg > 0) out.push({ icon: 'target', label: 'Is ' + st[0].k + ' my edge?', name: st[0].k, q: 'Is "' + st[0].k + '" really my best setup, or could it be luck? How should I trade it?' });
+    var tr = I.trend(rows, now);
+    if (tr.verdict) out.push({ icon: tr.verdict === 'down' ? 'trend-dn' : 'trend-up', label: 'Last 30 days', q: 'How did my last 30 days compare with the 30 before, and why?' });
+    return out.slice(0, 3);
+  };
+  function paintSuggestions(rows) {
+    var box = $('coachQuickBtns'); if (!box) return;
+    box.querySelectorAll('.ins2-sug').forEach(function (b) { b.remove(); });
+    var first = box.firstChild;
+    I.suggestions(rows, Date.now()).forEach(function (s) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'coach-quick-btn ins2-sug';
+      b.innerHTML = svg(s.icon) + ' ' + (s.name ? 'Is ' + nt(s.name.length > 22 ? s.name.slice(0, 21) + '…' : s.name) + ' my edge?' : esc(s.label));
+      b.onclick = function () { I.ask(s.q); };
+      box.insertBefore(b, first);
+    });
+  }
+  /* The chart-grading module adds its trigger as a separate row under the
+     chips; it reads better as a camera button next to "send". */
+  function adoptGradeButton() {
+    var b = $('cgCoachTrigger'), row = document.querySelector('#coachActive .coach-input-row'), send = $('coachSendBtn');
+    if (!b || !row || !send || b.parentNode === row) return !!(b && b.parentNode === row);
+    var wrap = b.parentNode;
+    b.className = 'coach-icon-btn'; b.type = 'button';
+    b.title = 'Grade a chart screenshot'; b.setAttribute('aria-label', 'Grade a chart screenshot');
+    b.innerHTML = svg('camera');
+    row.insertBefore(b, send);
+    if (wrap && wrap !== row && !wrap.children.length) wrap.remove();
+    return true;
+  }
+  I.coachReady = function () {
+    var id = uid();
+    if (S.readyFor !== id) { S.readyFor = id; S.msgs = loadChat(); window.coachMessages = I.history(S.msgs, 3); paintChat(); }
+    var c = chatEl();
+    if (c && !c.querySelector('.ins2-greet')) paintChat();
+    else if (c) { var gb = c.querySelector('.ins2-greet .coach-msg-bubble'); if (gb) gb.innerHTML = I.format(greetingText()); }   // the name can arrive after the first paint
+    // the grading module adds its button a few seconds after load — catch it the moment it lands
+    if (!adoptGradeButton() && !S.watching && typeof MutationObserver === 'function') {
+      var card = $('coachActive');
+      if (card) { S.watching = true; new MutationObserver(function (_, mo) { if (adoptGradeButton()) mo.disconnect(); }).observe(card, { childList: true }); }
+    }
+  };
+
+  /* ── weekly report ── */
+  function isoWeek(d) {
+    var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), day = t.getUTCDay() || 7;
+    t.setUTCDate(t.getUTCDate() + 4 - day);
+    return Math.ceil(((t - new Date(Date.UTC(t.getUTCFullYear(), 0, 1))) / D + 1) / 7);
+  }
+  I.isoWeek = isoWeek;
+  I.parseReport = function (text) {
+    var secs = [], cur = null;
+    String(text || '').replace(/\r/g, '').split('\n').forEach(function (line) {
+      var l = line.trim();
+      if (!l) { if (cur) cur.body.push(''); return; }
+      var clean = l.replace(/^[#*\s]+|[*\s]+$/g, '').replace(/:$/, '').trim();
+      if (clean.length <= 60 && isHeader(clean)) { cur = { title: clean, body: [] }; secs.push(cur); return; }
+      if (!cur) { cur = { title: '', body: [] }; secs.push(cur); }
+      cur.body.push(l.replace(/\*\*/g, ''));
+    });
+    return secs.map(function (s) {
+      return { title: s.title, paras: s.body.join('\n').split(/\n\s*\n/).map(function (p) { return p.trim(); }).filter(Boolean) };
+    }).filter(function (s) { return s.paras.length; });
+  };
+  var REPORT_ICONS = [[/MARKET|CONTEXT/, 'globe'], [/PAIR|INSTRUMENT|WATCH/, 'chart'], [/PSYCH|TRAP/, 'brain'], [/SUPPLY|DEMAND|ZONE/, 'target'],
+                      [/DISCIPLINE|RULE/, 'shield'], [/MENTAL|DRILL/, 'moon'], [/MISTAKE|AVOID/, 'alert'], [/EVENT|CALENDAR/, 'calendar']];
+  function sentence(s) { s = String(s || '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
+  I.renderReport = function (body, meta, data) {
+    var secs = I.parseReport(data.report);
+    if (!secs.length) { body.textContent = data.report; return; }
+    var html = secs.map(function (s, i) {
+      var ic = 'bulb'; REPORT_ICONS.some(function (p) { if (p[0].test(s.title)) { ic = p[1]; return true; } return false; });
+      return '<details class="wr-sec"' + (i === 0 ? ' open' : '') + '><summary>' + svg(ic) + '<span>' + esc(sentence(s.title) || 'Briefing') + '</span><i class="wr-chev" aria-hidden="true"></i></summary>' +
+        '<div class="wr-sec-body">' + s.paras.map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join('') + '</div></details>';
+    }).join('');
+    body.innerHTML = '<div class="wr-tools"><button type="button" class="wr-toggle" data-open="0">Expand all</button></div>' + html +
+      '<div class="wr-foot">' + svg('globe') + '<span>A general briefing for all Evidence traders, written by the AI — not based on your journal. Check exact release times in the <a href="#" data-nav="econews">Economic Calendar</a>.</span></div>';
+    var tg = body.querySelector('.wr-toggle');
+    if (tg) tg.onclick = function () {
+      var open = tg.getAttribute('data-open') !== '1';
+      body.querySelectorAll('details.wr-sec').forEach(function (d) { d.open = open; });
+      tg.setAttribute('data-open', open ? '1' : '0'); tg.textContent = open ? 'Collapse all' : 'Expand all';
+    };
+    var link = body.querySelector('[data-nav]');
+    if (link) link.onclick = function (e) { e.preventDefault(); if (window.nav) nav(link.getAttribute('data-nav')); };
+    if (meta) {
+      var gen = data.generatedAt ? new Date(data.generatedAt) : null;
+      var stale = (data.week && data.week !== isoWeek(new Date())) || (gen && Date.now() - gen.getTime() > 8 * D);
+      meta.innerHTML = 'Week ' + esc(data.week || '?') + (gen ? ' · ' + esc(gen.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })) : '') +
+        (stale ? ' · <span class="wr-stale" title="This week’s report is published on Monday at 07:00 UTC">previous week</span>' : '');
+    }
+  };
+
+  /* ── page render ── */
+  var _efCache = { key: '', val: null };
+  function edgeFindings(rows, unit) {
+    if (!window.ApexEdgeFinder || !ApexEdgeFinder.analyse || rows.length < 30) return null;
+    var last = rows[rows.length - 1];
+    var k = unit + ':' + rows.length + ':' + last.ms + ':' + last.v + ':' + scopeLabel();
+    if (_efCache.key !== k) {
+      try { _efCache = { key: k, val: ApexEdgeFinder.analyse(rows.map(function (r) { return { t: r.t, v: r.v }; })) }; }
+      catch (e) { _efCache = { key: k, val: null }; }
+    }
+    return _efCache.val;
+  }
+  function cmpHtml(c) {
+    if (!c || c.a == null || c.b == null) return '';
+    var max = Math.max(Math.abs(c.a), Math.abs(c.b)) || 1;
+    var f = c.dur ? I.fmtDur : function (v) { return I.fmt(v, c.unit, true); };
+    var row = function (lab, v, cls) {
+      return '<div class="ins2-cmp-row"><span>' + esc(lab) + '</span><i><b class="' + cls + '" style="width:' + Math.max(3, Math.round(Math.abs(v) / max * 100)) + '%"></b></i><em>' + f(v) + '</em></div>';
+    };
+    var ca = c.dur ? 'pos' : (c.a >= 0 ? 'pos' : 'neg'), cb = c.dur ? 'neg' : (c.b >= 0 ? 'pos dim' : 'neg dim');
+    return '<div class="ins2-cmp">' + row(c.la, c.a, ca) + row(c.lb, c.b, cb) + '</div>';
+  }
+  function cardHtml(c, i) {
+    var val = c.isName ? '<div class="ic-val ins2-val ins2-name notranslate" translate="no" title="' + esc(c.val) + '">' + esc(c.val) + '</div>'
+                       : '<div class="ic-val ins2-val' + (c.isText ? ' ins2-txt' : '') + '">' + esc(c.val) + '</div>';
+    var foot = (c.chip || '') +
+      (c.filter && window.ApexJournalSearch ? '<button type="button" class="ins2-link" data-filter="' + esc(c.filter) + '">Show trades</button>' : '') +
+      (c.ask && isPro() ? '<button type="button" class="ins2-link ins2-askb" data-ask="' + i + '">Ask the coach ' + svg('arrow-down') + '</button>' : '');
+    return '<div class="insight-card ins2-card tone-' + c.tone + (c.empty ? ' is-empty' : '') + '">' +
+      '<div class="ic-eye">' + svg(c.icon) + ' ' + esc(c.eye) + '</div>' + val +
+      (c.metric ? '<div class="ins2-metric">' + c.metric + '</div>' : '') +
+      cmpHtml(c.cmp) +
+      '<div class="ic-desc">' + c.desc + '</div>' +
+      (foot ? '<div class="ins2-foot">' + foot + '</div>' : '') + '</div>';
+  }
+  function feedHtml(it) {
+    var link = it.link ? '<button type="button" class="ins2-link" data-go="' + esc(it.link.pro ? 'pro' : it.link.go) + '">' + esc(it.link.label) + ' →</button>' : '';
+    return '<div class="ai-feed-item ins2-fi tone-' + it.tone + '">' +
+      '<div class="ai-feed-icon ' + it.tone + '">' + svg(it.icon) + '</div>' +
+      '<div class="ai-feed-body"><div class="ai-feed-title">' + (it.htmlTitle ? it.title : esc(it.title)) +
+        (it.badge ? ' <span class="ins2-badge' + (it.badge === 'Confirmed' ? ' ok' : '') + '">' + esc(it.badge) + '</span>' : '') + '</div>' +
+      '<div class="ai-feed-text">' + it.text + '</div>' +
+      ((it.chip || it.src || link) ? '<div class="ins2-fmeta">' + (it.chip || '') + (it.src ? '<span class="ins2-src">' + esc(it.src) + '</span>' : '') + link + '</div>' : '') +
+      '</div></div>';
+  }
+  var _acts = [], _cards = [];
+  function actHtml(a, i) {
+    var lab = { high: 'High priority', med: 'Worth doing', low: 'When you have time' }[a.pri];
+    return '<div class="action-rec-card pri-' + a.pri + '"><div class="action-rec-icon ' + (a.pri === 'high' ? 'loss' : a.pri === 'med' ? 'gold' : 'profit') + '">' + svg(a.icon) + '</div>' +
+      '<div class="action-rec-body"><div class="action-rec-title">' + (a.htmlTitle ? a.title : esc(a.title)) + '</div>' +
+      '<div class="action-rec-text">' + a.text + '</div>' +
+      '<div class="ins2-arow"><span class="action-rec-priority ' + a.pri + '">' + lab + '</span>' +
+      (a.btn ? '<button type="button" class="apex-btn apex-btn--ghost apex-btn--sm" data-act="' + i + '">' + esc(a.btn.label) + '</button>' : '') + '</div></div></div>';
+  }
+  I.render = function () {
+    var grid = $('insightCards'), feed = $('aiFeed'), acts = $('actionRecs');
+    if (!grid && !feed) return;
+    var trades = []; try { trades = (window.getAllTrades ? getAllTrades() : []).filter(function (t) { return t && t._date; }); } catch (e) {}
+    var unit = I.unitFor(trades, prefUnit());
+    var rows = I.rows(trades, unit), now = Date.now();
+    var ef = isPro() ? edgeFindings(rows, unit) : null;
+    var basis = $('ins2Basis');
+    if (basis) basis.innerHTML = rows.length ? rows.length + ' trade' + (rows.length === 1 ? '' : 's') + ' · ' + (unit === 'pips' ? 'in pips' : 'in ' + esc(cur())) + ' · ' + esc(scopeLabel()) : '';
+    if (grid) {
+      _cards = I.cards(rows, unit);
+      grid.innerHTML = rows.length >= 5 ? _cards.map(cardHtml).join('')
+        : '<div class="ins2-empty">' + svg('chart') + '<div><b>' + (rows.length ? (5 - rows.length) + ' more trade' + (5 - rows.length === 1 ? '' : 's') + ' to go' : 'No trades yet') + '</b>' +
+          '<span>The cards start at 5 trades with a result, and call a setup, session or symbol "best" only once it has ' + MIN_N + ' trades.</span></div></div>';
+    }
+    if (feed) feed.innerHTML = I.feed(rows, unit, now, { ef: ef, efTeaser: !isPro() }).map(feedHtml).join('');
+    if (acts) {
+      _acts = I.actions(rows, unit, { ef: ef, playbooks: window.playbooks || [] });
+      acts.innerHTML = _acts.length ? _acts.map(actHtml).join('')
+        : '<div class="ins2-none">' + svg('check') + ' Nothing urgent' + (rows.length < 5 ? ' — recommendations start at 5 trades.' : '. New recommendations appear here as patterns become clear.') + '</div>';
+    }
+    var cb = $('coachBasis');
+    if (cb) cb.textContent = 'Context: ' + rows.length + ' trade' + (rows.length === 1 ? '' : 's') + ' · ' + scopeLabel() + ' · figures computed, not guessed';
+    if (isPro()) { I.coachReady(); paintSuggestions(rows); }
+  };
+
+  /* ── one delegated click handler for the page ── */
+  function onClick(e) {
+    var b = e.target.closest && e.target.closest('#page-insights [data-ask],#page-insights [data-filter],#page-insights [data-go],#page-insights [data-act]');
+    if (!b) return;
+    if (b.hasAttribute('data-ask')) {
+      var c = _cards[+b.getAttribute('data-ask')]; if (!c || !c.ask) return;
+      var card = $('coachActive'); if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      I.ask(c.ask);
+    } else if (b.hasAttribute('data-filter')) {
+      if (window.ApexEdgeFinder) ApexEdgeFinder.filterJournal(b.getAttribute('data-filter'));
+    } else if (b.hasAttribute('data-go')) {
+      var g = b.getAttribute('data-go');
+      if (g === 'pro') { if (window.openUpgradeModal) openUpgradeModal(); return; }
+      if (window.nav) nav('edgelab');
+      setTimeout(function () { try { if (window.EdgeLab && EdgeLab.go) EdgeLab.go(g); } catch (er) {} }, 60);
+    } else if (b.hasAttribute('data-act')) {
+      var a = _acts[+b.getAttribute('data-act')]; if (!a || !a.btn) return;
+      if (a.btn.guard && window.ApexEdgeFinder) ApexEdgeFinder.guard(a.btn.guard);
+      else if (a.btn.filter && window.ApexEdgeFinder) ApexEdgeFinder.filterJournal(a.btn.filter);
+      else if (a.btn.nav && window.nav) nav(a.btn.nav);
+    }
+  }
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('click', onClick);
+    var boot = function () {
+      var p = $('page-insights');
+      if (p && p.classList.contains('active')) I.render();
+      if (isPro() && $('coachActive')) { try { I.coachReady(); } catch (e) {} }
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 800); });
+    else setTimeout(boot, 800);
+  }
+})();
+</script>
 </body>
 </html>
