@@ -5,205 +5,291 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Evidence Trading — System Status</title>
 <link rel="canonical" href="https://evidencetrading.com/status.html">
-<meta name="description" content="Live availability of the Evidence Trading API, sync pipeline and payment services.">
+<meta name="description" content="Live availability and 90-day uptime history of the Evidence Trading app, broker sync, API and payment services.">
 <link rel="icon" href="icons/icon-192.png">
 <style>
   :root{
-    --bg:#0b0d10; --surface:#12151a; --rim:#232830;
-    --ink:#eef1f5; --ink2:#98a1ad; --ink3:#5f6773;
-    --ok:#2fbf71; --warn:#e0a72c; --down:#e0503f; --gold:#c9a227;
+    --bg:#0a0a0b; --surface:#131315; --surface2:#1a1a1d; --rim:#2a2721;
+    --ink:#f2efe8; --ink2:#a39e93; --ink3:#6c675e;
+    --ok:#2fbf71; --warn:#d9a93a; --down:#e0503f; --gold:#c9a84c; --gold-soft:rgba(201,168,76,.14);
+    --none:#26262a;
   }
   @media (prefers-color-scheme: light){
-    :root{ --bg:#f6f7f9; --surface:#fff; --rim:#e3e6ea;
-           --ink:#12151a; --ink2:#5c6570; --ink3:#8d96a1; }
+    :root{ --bg:#f7f5f0; --surface:#fff; --surface2:#faf8f3; --rim:#e6e0d2;
+           --ink:#141414; --ink2:#5d5850; --ink3:#948e82; --none:#e8e4da; }
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
        font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
        -webkit-font-smoothing:antialiased}
-  .wrap{max-width:760px;margin:0 auto;padding:48px 20px 72px}
-  header{display:flex;align-items:center;gap:12px;margin-bottom:34px}
-  .mark{width:30px;height:30px;border-radius:7px;display:block;flex:none}
-  header b{font-size:16px;font-weight:700}
-  header span{color:var(--ink3);font-size:13px}
+  .wrap{max-width:820px;margin:0 auto;padding:44px 16px 72px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:30px}
+  header a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:12px}
+  .mark{width:32px;height:32px;border-radius:8px;display:block;flex:none}
+  header b{font-size:16px;font-weight:700;letter-spacing:.02em}
+  header span{color:var(--gold);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
 
   .overall{background:var(--surface);border:1px solid var(--rim);border-radius:14px;
-           padding:22px 24px;margin-bottom:22px;display:flex;align-items:center;gap:14px}
+           padding:22px 24px;margin-bottom:26px;display:flex;align-items:center;gap:14px;
+           border-left:3px solid var(--gold)}
   .dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 4px rgba(47,191,113,.14)}
-  .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn);box-shadow:0 0 0 4px rgba(224,167,44,.14)}
+  .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn);box-shadow:0 0 0 4px rgba(217,169,58,.16)}
   .dot.down{background:var(--down);box-shadow:0 0 0 4px rgba(224,80,63,.14)}
-  .dot.pend{background:var(--ink3);box-shadow:none}
+  .dot.pend,.dot.unknown{background:var(--ink3);box-shadow:none}
   .overall h1{margin:0;font-size:19px;font-weight:700}
   .overall p{margin:2px 0 0;color:var(--ink2);font-size:13px}
 
-  ul.svc{list-style:none;margin:0;padding:0;background:var(--surface);
-         border:1px solid var(--rim);border-radius:14px;overflow:hidden}
-  ul.svc li{display:flex;align-items:center;gap:12px;padding:15px 20px;border-top:1px solid var(--rim)}
-  ul.svc li:first-child{border-top:0}
+  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+     margin:30px 0 10px;font-weight:600}
+  .svc{background:var(--surface);border:1px solid var(--rim);border-radius:14px;overflow:hidden}
+  .row{padding:15px 20px;border-top:1px solid var(--rim)}
+  .row:first-child{border-top:0}
+  .row-top{display:flex;align-items:center;gap:12px}
   .svc-name{flex:1;min-width:0}
   .svc-name b{display:block;font-size:14px;font-weight:600}
   .svc-name small{color:var(--ink3);font-size:12px}
   .svc-state{font-size:12.5px;font-weight:600;text-align:right;white-space:nowrap}
   .svc-state .ms{display:block;color:var(--ink3);font-weight:400;font-size:11.5px}
-  .s-ok{color:var(--ok)} .s-warn{color:var(--warn)} .s-down{color:var(--down)} .s-pend{color:var(--ink3)}
+  .s-ok{color:var(--ok)} .s-warn{color:var(--warn)} .s-down{color:var(--down)} .s-pend,.s-unknown{color:var(--ink3)}
+  .bars{display:flex;gap:2px;margin-top:10px;height:26px;align-items:stretch}
+  .bar{flex:1;border-radius:2px;background:var(--none);min-width:2px;position:relative}
+  .bar.b-ok{background:var(--ok)} .bar.b-minor{background:var(--warn)} .bar.b-major{background:var(--down)}
+  .bar:hover{outline:1px solid var(--gold);outline-offset:1px}
+  .bars-foot{display:flex;justify-content:space-between;color:var(--ink3);font-size:11px;margin-top:4px}
+  .bars-foot b{color:var(--ink2);font-weight:600}
+  #tip{position:fixed;pointer-events:none;background:var(--surface2);border:1px solid var(--gold);
+       color:var(--ink);font-size:12px;padding:6px 9px;border-radius:7px;display:none;z-index:9;white-space:nowrap}
 
-  .note{margin-top:22px;color:var(--ink3);font-size:12.5px;line-height:1.7}
-  .note a{color:var(--ink2)}
-  footer{margin-top:30px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  .inc{background:var(--surface);border:1px solid var(--rim);border-radius:14px;padding:4px 20px}
+  .inc-item{padding:14px 0;border-top:1px solid var(--rim)}
+  .inc-item:first-child{border-top:0}
+  .inc-title{font-weight:600;font-size:14px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+  .tag.outage{background:rgba(224,80,63,.14);color:var(--down)}
+  .tag.degraded{background:rgba(217,169,58,.14);color:var(--warn)}
+  .tag.maintenance{background:var(--gold-soft);color:var(--gold)}
+  .tag.resolved{background:rgba(47,191,113,.12);color:var(--ok)}
+  .inc-meta{color:var(--ink3);font-size:12px;margin-top:2px}
+  .inc-note{color:var(--ink2);font-size:13px;margin-top:6px}
+  .empty{color:var(--ink3);font-size:13px;padding:14px 0}
+
+  .note{margin-top:26px;color:var(--ink3);font-size:12.5px;line-height:1.7}
+  .note a{color:var(--gold)}
+  footer{margin-top:30px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
          color:var(--ink3);font-size:12px}
   button{background:var(--surface);border:1px solid var(--rim);color:var(--ink2);
          border-radius:8px;padding:7px 14px;font-size:12.5px;cursor:pointer;font-family:inherit}
   button:hover{border-color:var(--gold);color:var(--ink)}
+  @media (max-width:560px){ .bar:nth-child(-n+60){display:none} .overall{padding:18px} }
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header>
+    <a href="https://evidencetrading.com/">
     <svg class="mark" viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg>
-    <div>
-      <b>Evidence Trading</b><br>
-      <span>System Status</span>
-    </div>
+    <div><b>Evidence Trading</b><br><span>System status</span></div>
+    </a>
   </header>
 
   <div class="overall">
     <div class="dot pend" id="overallDot"></div>
     <div>
       <h1 id="overallText">Checking services…</h1>
-      <p id="overallSub">Probing every endpoint directly from your browser.</p>
+      <p id="overallSub">Loading the latest probe results.</p>
     </div>
   </div>
 
-  <ul class="svc" id="services"></ul>
+  <h2>Active &amp; recent incidents</h2>
+  <div class="inc" id="incidents"><div class="empty">Loading…</div></div>
+
+  <h2>Services · <span id="rangeLbl">last 90 days</span></h2>
+  <div class="svc" id="services"></div>
 
   <p class="note">
-    Each row is measured live from <em>your</em> browser when this page loads — this is not a
-    cached dashboard, so what you see is what your own connection sees. Endpoints are probed
-    continuously from outside as well; incidents are posted in-app under
-    <b>Social&nbsp;→&nbsp;News</b>.
+    Every service is probed from our servers every 5 minutes, around the clock, and the result is
+    kept for 90 days. That is what the bars show — one per day, green when every probe that day
+    passed. An incident opens by itself after two failed probes in a row and closes by itself
+    when the service answers again; nobody has to remember to post it.
     <br><br>
-    A service marked <span class="s-warn">Degraded</span> is reachable but reporting that it is
-    missing configuration. <span class="s-down">Down</span> means it did not answer at all.
-    Your journal keeps working offline in either case — trades are stored on your device and
-    sync once the connection is back.
+    <span class="s-warn">Degraded</span> means the service answered but something behind it did
+    not — for example the cTrader background sync running late. <span class="s-down">Down</span>
+    means it did not answer at all. Degraded time counts as half up in the percentages.
+    Your journal keeps working offline either way: trades are stored on your device and sync
+    once the connection is back, and missed broker trades are fetched on the next successful sync.
+    <br><br>
+    Is one of <em>your</em> connections not syncing? In the app, <b>Settings → Auto Tracking</b>
+    shows the status of each of your accounts, including a P&amp;L check against your broker.
   </p>
 
   <footer>
     <span id="stamp">—</span>
-    <button onclick="runChecks()">Re-check now</button>
+    <button onclick="load(true)">Re-check now</button>
   </footer>
 </div>
+<div id="tip"></div>
 
 <script>
-/* ────────────────────────────────────────────────────────────────
-   Every service gets a plain unauthenticated /health endpoint that
-   answers { ok, service, configured, ts }. The probe deliberately
-   carries no credentials: a status page that needs a login is not a
-   status page, and an endpoint that only works when signed in tells
-   you nothing about whether signed-out users can reach it.
-   ──────────────────────────────────────────────────────────────── */
-var SERVICES = [
-  { name: 'Web app',            hint: 'evidencetrading.com',        url: 'https://evidencetrading.com/manifest.webmanifest', mode: 'reachable' },
-  { name: 'Public REST API',    hint: 'v1 — trades, stats, days',    url: 'https://apexapi.4kjyyyftv6.workers.dev/health' },
-  { name: 'Broker ingest',      hint: 'MT4/MT5, ATAS, cTrader sync', url: 'https://apex-ingest.4kjyyyftv6.workers.dev/health' },
-  { name: 'Exchange sync',      hint: 'Binance, Bybit, IBKR Flex',    url: 'https://exchangesync.4kjyyyftv6.workers.dev/health' },
-  { name: 'Market data',        hint: 'candles for chart & replay',  url: 'https://candles-worker.4kjyyyftv6.workers.dev/health' },
-  { name: 'Historical data',    hint: 'Dukascopy tick & M1',         url: 'https://dukascopy-worker.4kjyyyftv6.workers.dev/health' },
-  { name: 'AI coach',           hint: 'trade reviews & auto-tagging',url: 'https://spring-fire-06a2.4kjyyyftv6.workers.dev/health' },
-  { name: 'Economic calendar',  hint: 'news events on the chart',    url: 'https://econal.4kjyyyftv6.workers.dev/health' },
-  { name: 'Payments',           hint: 'checkout & subscriptions',    url: 'https://apex-checkout.4kjyyyftv6.workers.dev/health' },
-  { name: 'Billing webhook',    hint: 'Stripe → account upgrades',   url: 'https://apex-stripe-webhook.4kjyyyftv6.workers.dev/health' },
-  { name: 'Authentication',     hint: 'Firebase sign-in',            url: 'https://identitytoolkit.googleapis.com/v1/projects', mode: 'reachable' }
+/* The history comes from status-worker.js (server-side probes every 5 min,
+   90 days in KV). If that worker is unreachable, the page falls back to
+   probing the /health endpoints from the visitor's browser, so it never
+   shows a blank page during exactly the outage it exists to report. */
+var STATUS_API = 'https://evidence-status.4kjyyyftv6.workers.dev';
+
+var FALLBACK = [
+  { id:'web',      name:'Web app',           hint:'evidencetrading.com',          url:'https://evidencetrading.com/manifest.webmanifest', mode:'reachable' },
+  { id:'api',      name:'Public REST API',   hint:'v1 — trades, stats, days',     url:'https://apexapi.4kjyyyftv6.workers.dev/health' },
+  { id:'ingest',   name:'Broker ingest',     hint:'MT4/MT5, ATAS, Quantower, TradingView', url:'https://apex-ingest.4kjyyyftv6.workers.dev/health' },
+  { id:'ctrader',  name:'cTrader sync',      hint:'background sync while the app is closed', url:'https://ctrader-p67d.onrender.com/health' },
+  { id:'mt5cloud', name:'MT5 cloud sync',    hint:'investor-password sync',       url:'https://evidence-mt5-link.4kjyyyftv6.workers.dev/health' },
+  { id:'exchange', name:'Exchange sync',     hint:'Binance, Bybit, IBKR Flex',    url:'https://exchangesync.4kjyyyftv6.workers.dev/health' },
+  { id:'candles',  name:'Market data',       hint:'candles for chart & replay',   url:'https://candles-worker.4kjyyyftv6.workers.dev/health' },
+  { id:'duka',     name:'Historical data',   hint:'tick & M1 for replay',         url:'https://dukascopy-worker.4kjyyyftv6.workers.dev/health' },
+  { id:'coach',    name:'AI coach',          hint:'trade reviews & auto-tagging', url:'https://spring-fire-06a2.4kjyyyftv6.workers.dev/health' },
+  { id:'econ',     name:'Economic calendar', hint:'news events on the chart',     url:'https://econal.4kjyyyftv6.workers.dev/health' },
+  { id:'checkout', name:'Payments',          hint:'checkout & subscriptions',     url:'https://apex-checkout.4kjyyyftv6.workers.dev/health' },
+  { id:'billing',  name:'Billing webhook',   hint:'Stripe → account upgrades',    url:'https://apex-stripe-webhook.4kjyyyftv6.workers.dev/health' }
 ];
-
 var TIMEOUT_MS = 8000;
+var LABEL = { ok:'Operational', warn:'Degraded', down:'Down', unknown:'No data yet', pend:'Checking…' };
 
-function el(tag, cls, html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
-
-function render(states){
-  var list = document.getElementById('services');
-  list.innerHTML = '';
-  SERVICES.forEach(function(s, i){
-    var st = states[i] || { state:'pend', label:'Checking…' };
-    var li = el('li');
-    li.appendChild(el('div', 'dot ' + st.state));
-    var n = el('div','svc-name','<b></b><small></small>');
-    n.querySelector('b').textContent = s.name;
-    n.querySelector('small').textContent = s.hint;
-    li.appendChild(n);
-    li.appendChild(el('div','svc-state s-'+st.state,
-      st.label + (st.ms != null ? '<span class="ms">' + st.ms + ' ms</span>' : '')));
-    list.appendChild(li);
-  });
-
-  var known = states.filter(function(s){ return s && s.state !== 'pend'; });
-  var down  = known.filter(function(s){ return s.state === 'down'; }).length;
-  var warn  = known.filter(function(s){ return s.state === 'warn'; }).length;
-
-  var dot = document.getElementById('overallDot'),
-      txt = document.getElementById('overallText'),
-      sub = document.getElementById('overallSub');
-
-  if (known.length < SERVICES.length) {
-    dot.className = 'dot pend'; txt.textContent = 'Checking services…';
-    sub.textContent = 'Probing every endpoint directly from your browser.';
-  } else if (down) {
-    dot.className = 'dot down';
-    txt.textContent = down === 1 ? 'One service is down' : down + ' services are down';
-    sub.textContent = 'Your journal still works offline and syncs once the service is back.';
-  } else if (warn) {
-    dot.className = 'dot warn'; txt.textContent = 'Partially degraded';
-    sub.textContent = warn + ' service' + (warn>1?'s are':' is') + ' reachable but not fully configured.';
-  } else {
-    dot.className = 'dot ok'; txt.textContent = 'All systems operational';
-    sub.textContent = 'Every service answered normally.';
-  }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function fmtDate(ms, withTime){
+  var d = new Date(ms);
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) +
+         (withTime ? ', ' + d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }) : '');
+}
+function dur(ms){
+  var m = Math.round(ms/60000);
+  if (m < 60) return m + ' min';
+  var h = Math.floor(m/60); return h + ' h ' + (m%60) + ' min';
 }
 
+function overall(services){
+  var known = services.filter(function(s){ return s.state !== 'unknown' && s.state !== 'pend'; });
+  var down = known.filter(function(s){ return s.state === 'down'; }).length;
+  var warn = known.filter(function(s){ return s.state === 'warn'; }).length;
+  var dot = $('overallDot'), txt = $('overallText'), sub = $('overallSub');
+  if (!known.length){ dot.className='dot pend'; txt.textContent='Checking services…'; return; }
+  if (down){ dot.className='dot down';
+    txt.textContent = down === 1 ? 'One service is down' : down + ' services are down';
+    sub.textContent = 'Your journal still works offline and syncs once the service is back.'; }
+  else if (warn){ dot.className='dot warn'; txt.textContent='Partially degraded';
+    sub.textContent = warn + ' service' + (warn>1?'s are':' is') + ' answering but not fully working.'; }
+  else { dot.className='dot ok'; txt.textContent='All systems operational';
+    sub.textContent = 'Every service passed its last check.'; }
+}
+
+function barClass(b){
+  if (b.pct == null) return '';
+  if (b.down > 0 && b.pct < 99) return 'b-major';
+  if (b.pct < 99.9 || b.warn > 0 || b.down > 0) return 'b-minor';
+  return 'b-ok';
+}
+
+function renderServices(services, hasHistory){
+  $('services').innerHTML = services.map(function(s){
+    var bars = '';
+    if (hasHistory){
+      bars = '<div class="bars">' + s.bars.map(function(b){
+        var t = fmtDate(Date.parse(b.d + 'T12:00:00Z')) + ' · ' +
+          (b.pct == null ? 'no data' : b.pct.toFixed(2) + ' % up' +
+            (b.down ? ' · ' + b.down + ' failed check' + (b.down>1?'s':'') : '') +
+            (b.warn ? ' · ' + b.warn + ' degraded' : ''));
+        return '<div class="bar ' + barClass(b) + '" data-tip="' + esc(t) + '"></div>';
+      }).join('') + '</div>' +
+      '<div class="bars-foot"><span>90 days ago</span><span><b>' +
+        (s.uptime90 == null ? '—' : s.uptime90.toFixed(2) + ' %') + '</b> uptime' +
+        (s.avgMs != null ? ' · avg ' + s.avgMs + ' ms' : '') + '</span><span>Today</span></div>';
+    }
+    return '<div class="row"><div class="row-top">' +
+      '<div class="dot ' + s.state + '"></div>' +
+      '<div class="svc-name"><b>' + esc(s.name) + '</b><small>' + esc(s.hint) + '</small></div>' +
+      '<div class="svc-state s-' + s.state + '">' + LABEL[s.state] +
+        (s.note ? '<span class="ms">' + esc(s.note) + '</span>' : '') +
+        (s.ms != null ? '<span class="ms">' + s.ms + ' ms</span>' : '') + '</div>' +
+      '</div>' + bars + '</div>';
+  }).join('');
+}
+
+function renderIncidents(list, names){
+  if (!list){ $('incidents').innerHTML = '<div class="empty">Incident history is unavailable right now — the live checks below still apply.</div>'; return; }
+  var recent = list.filter(function(i){ return !i.resolvedAt || Date.now() - i.resolvedAt < 14*86400000; });
+  if (!recent.length){ $('incidents').innerHTML = '<div class="empty">No incidents in the last 14 days.</div>'; return; }
+  $('incidents').innerHTML = recent.map(function(i){
+    var open = !i.resolvedAt;
+    var meta = (names[i.svc] ? names[i.svc] + ' · ' : '') + 'started ' + fmtDate(i.startedAt, true) +
+      (open ? ' · ongoing for ' + dur(Date.now() - i.startedAt)
+            : ' · resolved ' + fmtDate(i.resolvedAt, true) + ' after ' + dur(i.resolvedAt - i.startedAt));
+    return '<div class="inc-item"><div class="inc-title">' +
+      '<span class="tag ' + (open ? esc(i.severity) : 'resolved') + '">' + (open ? esc(i.severity) : 'resolved') + '</span>' +
+      esc(i.title) + '</div><div class="inc-meta">' + esc(meta) + (i.auto ? ' · detected automatically' : '') + '</div>' +
+      (i.detail ? '<div class="inc-note">' + esc(i.detail) + '</div>' : '') +
+      (i.notes || []).map(function(n){ return '<div class="inc-note"><b>' + esc(fmtDate(n.at, true)) + '</b> — ' + esc(n.text) + '</div>'; }).join('') +
+    '</div>';
+  }).join('');
+}
+
+/* ── browser fallback ── */
 function probe(svc){
   var t0 = performance.now();
   var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, TIMEOUT_MS);
-
-  /* Origins we do not control cannot send us CORS headers, so those are
-     probed no-cors: we learn "the network reached it", which is exactly
-     what "reachable" claims and nothing more. */
-  var opts = { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined };
+  var opts = { cache:'no-store', signal: ctrl ? ctrl.signal : undefined };
   if (svc.mode === 'reachable') opts.mode = 'no-cors';
-
   return fetch(svc.url, opts).then(function(res){
     clearTimeout(timer);
     var ms = Math.round(performance.now() - t0);
-
-    if (svc.mode === 'reachable') return { state:'ok', label:'Reachable', ms:ms };
-    if (!res.ok) return { state: res.status === 503 ? 'warn' : 'down',
-                          label: res.status === 503 ? 'Degraded' : 'Error ' + res.status, ms:ms };
-
-    return res.json().then(function(j){
-      if (j && j.ok) return { state:'ok', label:'Operational', ms:ms };
-      return { state:'warn', label:'Degraded', ms:ms };
-    }, function(){ return { state:'ok', label:'Operational', ms:ms }; });
-  }).catch(function(e){
-    clearTimeout(timer);
-    return { state:'down',
-             label: (e && e.name === 'AbortError') ? 'Timed out' : 'Unreachable',
-             ms: null };
+    if (svc.mode === 'reachable') return { state:'ok', ms:ms };
+    if (!res.ok) return { state: res.status === 503 ? 'warn' : 'down', ms:ms };
+    return res.json().then(function(j){ return { state: j && j.ok === false ? 'warn' : 'ok', ms:ms }; },
+                           function(){ return { state:'ok', ms:ms }; });
+  }).catch(function(){ clearTimeout(timer); return { state:'down', ms:null }; });
+}
+function browserFallback(){
+  var rows = FALLBACK.map(function(s){ return { id:s.id, name:s.name, hint:s.hint, state:'pend', ms:null }; });
+  renderServices(rows, false); overall(rows);
+  $('rangeLbl').textContent = 'checked from your browser';
+  FALLBACK.forEach(function(svc, i){
+    probe(svc).then(function(r){ rows[i].state = r.state; rows[i].ms = r.ms; renderServices(rows, false); overall(rows); });
   });
+  $('stamp').textContent = 'History unavailable — live check from your browser at ' + new Date().toLocaleTimeString('en-US');
 }
 
-function runChecks(){
-  var states = new Array(SERVICES.length);
-  render(states);
-  SERVICES.forEach(function(svc, i){
-    probe(svc).then(function(st){ states[i] = st; render(states); });
-  });
-  document.getElementById('stamp').textContent =
-    'Last checked ' + new Date().toLocaleString();
+function load(){
+  var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, TIMEOUT_MS);
+  fetch(STATUS_API + '/summary', { cache:'no-store', signal: ctrl ? ctrl.signal : undefined })
+    .then(function(r){ clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(d){
+      if (!d || !d.services || !d.checkedAt) throw new Error('no data yet');
+      var names = {}; d.services.forEach(function(s){ names[s.id] = s.name; });
+      $('rangeLbl').textContent = 'last 90 days';
+      renderServices(d.services, true); overall(d.services);
+      renderIncidents(d.incidents || [], names);
+      $('stamp').textContent = 'Last server check ' + fmtDate(d.checkedAt, true) + ' · every ' + (d.intervalMin || 5) + ' min';
+    })
+    .catch(function(){ renderIncidents(null, {}); browserFallback(); });
 }
 
-runChecks();
-setInterval(runChecks, 60000);
+/* Tooltip for the day bars — hover on desktop, tap on touch. */
+document.addEventListener('mouseover', function(e){
+  var b = e.target.closest && e.target.closest('.bar'); var tip = $('tip');
+  if (!b){ tip.style.display = 'none'; return; }
+  tip.textContent = b.getAttribute('data-tip'); tip.style.display = 'block';
+  var r = b.getBoundingClientRect();
+  tip.style.left = Math.max(8, Math.min(window.innerWidth - tip.offsetWidth - 8, r.left + r.width/2 - tip.offsetWidth/2)) + 'px';
+  tip.style.top = (r.top - tip.offsetHeight - 8) + 'px';
+});
+document.addEventListener('click', function(e){
+  var b = e.target.closest && e.target.closest('.bar');
+  if (b){ var ev = new MouseEvent('mouseover', { bubbles:true }); b.dispatchEvent(ev); }
+});
+
+load();
+setInterval(load, 60000);
 </script>
 </body>
 </html>

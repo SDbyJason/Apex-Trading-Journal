@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Evidence Trading</title>
+<script>
+/* GitHub Pages liefert für jeden unbekannten Pfad diese Datei aus.
+   /p/<slug> ist die Partner-Landingpage (Affiliate-Programm) — die gibt es
+   nicht als Datei, sondern als Ebene in der App unter /?p=<slug>.
+   Alles andere geht auf die Startseite. */
+(function () {
+  var m = location.pathname.match(/^\/p\/([a-z0-9-]{2,32})\/?$/i);
+  location.replace(m ? '/?p=' + encodeURIComponent(m[1].toLowerCase()) : '/');
+})();
+</script>
+<style>body{margin:0;background:#07080b;color:#8b939c;font:14px -apple-system,Segoe UI,Helvetica,Arial,sans-serif;display:grid;place-items:center;height:100vh}</style>
+</head>
+<body><a href="/" style="color:#d4b062">Evidence Trading</a></body>
+</html>

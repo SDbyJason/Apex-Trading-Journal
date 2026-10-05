@@ -140,6 +140,9 @@
 
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
   .grid-5col{display:grid;grid-template-columns:1fr 1fr 1fr 80px 80px;gap:15px;align-items:flex-end}
+  .aff-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:flex-end}
+  @media(max-width:900px){.aff-grid{grid-template-columns:1fr 1fr}}
+  .aff-act{display:flex;gap:6px;flex-wrap:wrap}.aff-act button{font-size:11px;padding:5px 9px;border-radius:7px;border:1px solid var(--rim2,#333);background:transparent;color:var(--ink2);cursor:pointer}
   @media(max-width:700px){.grid-2,.grid-5col,.ann-grid{grid-template-columns:1fr !important}.stats-row{grid-template-columns:1fr 1fr}}
 
   /* appeal / ban cards */
@@ -420,24 +423,50 @@
     </div>
   </div>
 
-  <!-- ════════════ PARTNERS ════════════ -->
+  <!-- ════════════ PARTNERS (Affiliate-Programm, ab 05.10.2026) ════════════ -->
   <div id="tab-partners" class="tab-pane">
     <div class="card glass">
-      <h3>+ Neuen Partner hinzufügen</h3>
-      <div class="grid-5col">
-        <div class="field"><label>Referral Code</label><input type="text" id="new-code" placeholder="z.B. dagnis" /></div>
-        <div class="field"><label>Name</label><input type="text" id="new-name" placeholder="Mike Müller" /></div>
-        <div class="field"><label>Stripe Account ID</label><input type="text" id="new-acct" placeholder="acct_1AbCd..." /></div>
-        <div class="field"><label>Split %</label><input type="number" id="new-split" value="50" min="1" max="99" /></div>
-        <div class="field"><label>Rabatt %</label><input type="number" id="new-discount" value="0" min="0" max="99" /></div>
+      <h3>+ Partner anlegen</h3>
+      <p style="font-size:12px;color:var(--ink3);margin:-4px 0 12px">Beim Speichern automatisch: Stripe-Connect-Konto + Onboarding-Link, Coupon, Promotion Code (ab mid), Gratis-Pro (falls das Konto per E-Mail gefunden wird), Willkommenstext.</p>
+      <div class="aff-grid">
+        <div class="field"><label>Name *</label><input type="text" id="aff-name" placeholder="Vault Trading" /></div>
+        <div class="field"><label>Handle</label><input type="text" id="aff-handle" placeholder="@vaulttrading" /></div>
+        <div class="field"><label>Plattform</label><select id="aff-platform"><option>telegram</option><option>discord</option><option>tiktok</option><option>instagram</option><option>youtube</option><option>x</option><option>other</option></select></div>
+        <div class="field"><label>Stufe *</label><select id="aff-tier" onchange="affTierHint()"><option value="micro">micro (&lt; 5k)</option><option value="mid" selected>mid (5k–50k)</option><option value="big">big (50k+)</option></select></div>
+        <div class="field"><label>Slug * (Link /?ref=…)</label><input type="text" id="aff-slug" placeholder="vault" /></div>
+        <div class="field"><label>E-Mail (App-Konto)</label><input type="email" id="aff-email" placeholder="partner@mail.com" /></div>
+        <div class="field"><label>Kontakt</label><input type="text" id="aff-contact" placeholder="Telegram @… / Tel." /></div>
+        <div class="field"><label>Land (Stripe)</label><input type="text" id="aff-country" value="US" maxlength="2" /></div>
       </div>
-      <br/><button class="btn" style="width:auto;padding:13px 32px" onclick="addPartner()">Partner speichern</button>
+      <details style="margin-top:12px"><summary style="cursor:pointer;color:var(--ink2);font-size:13px">Sonderwerte (leer = Stufe) · Landingpage</summary>
+        <div class="aff-grid" style="margin-top:10px">
+          <div class="field"><label>Rabatt %</label><input type="number" id="aff-o-discount" min="0" max="100" /></div>
+          <div class="field"><label>Rabatt Monate (0 = dauerhaft)</label><input type="number" id="aff-o-months" min="0" max="36" /></div>
+          <div class="field"><label>Provision %</label><input type="number" id="aff-o-comm" min="0" max="100" /></div>
+          <div class="field"><label>Provision % nach 12 M</label><input type="number" id="aff-o-comm12" min="0" max="100" /></div>
+          <div class="field"><label>Wunsch-Code</label><input type="text" id="aff-o-code" placeholder="VAULT25" /></div>
+          <div class="field"><label>Logo-URL</label><input type="text" id="aff-logo" placeholder="https://…" /></div>
+          <div class="field" style="grid-column:span 2"><label>Headline (Landingpage)</label><input type="text" id="aff-headline" placeholder="Exclusive for Vault members" /></div>
+        </div>
+      </details>
+      <div id="aff-tier-hint" style="font-size:12px;color:var(--ink3);margin-top:10px"></div>
+      <br/><button class="btn" id="aff-save" style="width:auto;padding:13px 32px" onclick="addAffiliate()">Partner anlegen</button>
+      <div id="aff-result" style="display:none;margin-top:16px">
+        <label style="font-size:12px;color:var(--ink3)">Willkommenstext (für Telegram kopieren)</label>
+        <textarea id="aff-welcome" readonly style="width:100%;min-height:220px;margin-top:6px;font-family:var(--font-mono);font-size:12px"></textarea>
+        <button class="btn" style="width:auto;padding:9px 20px;margin-top:8px" onclick="navigator.clipboard.writeText(document.getElementById('aff-welcome').value);showToast('Kopiert')">Text kopieren</button>
+      </div>
     </div>
-    <div class="card glass"><h3>Aktive Partner</h3><div id="partner-list-wrap"><div class="empty-state">Laden…</div></div></div>
-    <div class="card glass" style="background:var(--elevated)">
-      <p class="section-title">Referral Link Generator</p>
-      <p style="font-size:13px;color:var(--ink2);margin-bottom:10px">Klicke auf einen Code → Link wird automatisch kopiert.</p>
-      <div class="ref-preview-bar" id="ref-preview">—</div>
+    <div class="card glass">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h3 style="margin:0">Partner</h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn" style="width:auto;padding:8px 16px" onclick="runAffiliates(false)">Reifung jetzt prüfen</button>
+          <button class="btn" style="width:auto;padding:8px 16px" onclick="runAffiliates(true)">Auszahlung jetzt</button>
+        </div>
+      </div>
+      <div id="aff-totals" class="stats-row" style="margin-top:14px"></div>
+      <div id="partner-list-wrap"><div class="empty-state">Laden…</div></div>
     </div>
   </div>
 
@@ -941,19 +970,52 @@ function renderTestimonials(){
       return `<tr>
         <td style="font-size:12px;color:var(--ink3);white-space:nowrap">${date}</td>
         <td style="font-size:12px"><b>${escHtml(t.name||'—')}</b><div style="color:var(--ink3)">${escHtml(t.role||'')}</div>
-          <div style="color:var(--ink3);font-size:10px">${escHtml(t.plan||'')} · ${escHtml((t._id||'').slice(0,8))}…</div></td>
+          <div style="color:var(--ink3);font-size:10px">${escHtml(t.plan||'')} · ${escHtml((t._id||'').slice(0,8))}…</div>
+          ${t.verified?`<div style="color:var(--profit);font-size:10px">✓ ${t.verified.trades} Trades · seit ${escHtml(t.verified.firstDay||'—')}</div>`:'<div style="color:var(--ink3);font-size:10px">nicht verifiziert</div>'}</td>
         <td style="max-width:420px;font-size:12.5px;line-height:1.55;white-space:pre-wrap">${escHtml(t.text||'')}</td>
         <td style="color:var(--gold);white-space:nowrap">${stars}</td>
         <td style="font-size:12px;white-space:nowrap">${t.approved?'<span style="color:var(--profit)">● live</span>':'<span style="color:var(--gold)">● offen</span>'}${t.featured?'<div style="color:var(--gold);font-size:10px">★ featured</div>':''}</td>
         <td style="white-space:nowrap">
           <button class="btn-small" onclick="setTestimonial('${t._id}',{approved:${t.approved?'false':'true'}})">${t.approved?'Zurückziehen':'Freigeben'}</button>
           <button class="btn-small" onclick="setTestimonial('${t._id}',{featured:${t.featured?'false':'true'}})">${t.featured?'Unfeature':'Feature'}</button>
+          <button class="btn-small" onclick="verifyTestimonial('${t._id}')" title="Journal-Zahlen neu lesen">Verifizieren</button>
           <button class="btn-small" style="color:var(--loss)" onclick="delTestimonial('${t._id}')">Löschen</button>
         </td></tr>`;
     }).join('')+'</tbody></table></div>';
 }
+/* Echte Zahlen statt Selbstauskunft: beim Freigeben wird das Journal des
+   Autors gelesen (Index + Shards, siehe ApexJournalStore) und das Ergebnis als
+   `verified` gestempelt. Nur der Admin darf das Feld schreiben (firestore.rules),
+   die Website zeigt es als "Verified · 312 trades journaled since Mar 2026". */
+async function journalFacts(uid){
+  const col=db.collection('apexUsers').doc(uid).collection('private');
+  const idx=await col.doc('journal').get();
+  const d=idx.exists?(idx.data()||{}):{};
+  let data={};
+  if(Array.isArray(d.shards)){
+    const parts=await Promise.all(d.shards.map(id=>col.doc('journal_'+id).get()));
+    parts.forEach(p=>{ const x=p.exists&&p.data()?p.data().data:null; if(x) Object.assign(data,x); });
+  } else if(d.data){ data=typeof d.data==='string'?JSON.parse(d.data):d.data; }
+  let trades=0, first=null, last=null;
+  Object.keys(data).forEach(k=>{
+    const n=((data[k]&&data[k].trades)||[]).filter(t=>t&&(t.exit!==''&&t.exit!=null||t.pips!==''&&t.pips!=null)).length;
+    if(!n) return; trades+=n; if(!first||k<first) first=k; if(!last||k>last) last=k;
+  });
+  return { trades, firstDay:first, lastDay:last };
+}
+async function verifyTestimonial(id){
+  try{
+    const f=await journalFacts(id);
+    const t=allTestimonials.find(x=>x._id===id)||{};
+    const v={ trades:f.trades, firstDay:f.firstDay||'', lastDay:f.lastDay||'', plan:t.plan||'', at:Date.now() };
+    await db.collection('apexTestimonials').doc(id).update({verified:v,reviewedAt:Date.now()});
+    showToast(`✓ Verifiziert: ${f.trades} Trades seit ${f.firstDay||'—'}`); loadTestimonials();
+  }catch(err){ showToast('⚠ Verifizierung: '+err.message,true); }
+}
 async function setTestimonial(id,patch){
   try{ await db.collection('apexTestimonials').doc(id).update({...patch,reviewedAt:Date.now()});
+    // Freigabe stempelt automatisch die echten Journal-Zahlen dazu.
+    if(patch.approved===true) await verifyTestimonial(id);
     showToast('✓ Gespeichert.'); loadTestimonials();
   }catch(err){ showToast('⚠ '+err.message,true); }
 }
@@ -1318,61 +1380,86 @@ function adminLoadChat(sid, uid, name){
 function adminHeaders(extra){
   return Object.assign({ 'Authorization': 'Bearer ' + (adminToken||'') }, extra||{});
 }
+const AFF_TIERS_FALLBACK={micro:"20 % dauerhaft · 30 % Provision · nur Link",mid:"25 % für 3 Monate · 40 % Provision · Code",big:"30 % für 3 Monate · 50 % Provision (12 M), danach 40 % · Code + Landingpage"};
+function affTierHint(){ const t=document.getElementById("aff-tier").value; document.getElementById("aff-tier-hint").textContent="Stufe "+t+": "+AFF_TIERS_FALLBACK[t]; }
+const affMoney=c=>"$"+((Number(c)||0)/100).toFixed(2);
+async function affFetch(path,opts){
+  const res=await fetch(`${WORKER_URL}${path}`,Object.assign({headers:adminHeaders({'Content-Type':'application/json'})},opts||{}));
+  const data=await res.json().catch(()=>({error:"HTTP "+res.status}));
+  if(!res.ok && !data.partial){ const hint=res.status===401?` (gesendeter Token: ${(adminToken||'').length} Zeichen)`:''; throw new Error((data.error||"HTTP "+res.status)+hint); }
+  return data;
+}
 async function loadPartners(){
+  affTierHint();
   const wrap=document.getElementById("partner-list-wrap");
+  try{ renderPartners(await affFetch("/admin/affiliates")); }
+  catch(e){ wrap.innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ ${escHtml(e.message)}</div>`; }
+}
+function renderPartners(list){
+  const wrap=document.getElementById("partner-list-wrap");
+  const T=list.reduce((t,p)=>{["revenue","payingCustomers","pending","payable","paid"].forEach(k=>t[k]=(t[k]||0)+(p.stats[k]||0));return t;},{});
+  document.getElementById("aff-totals").innerHTML=[
+    ["Umsatz über Partner",affMoney(T.revenue),"gold"],["Zahlende Kunden",T.payingCustomers||0,"blue"],
+    ["Offen (Haltefrist)",affMoney(T.pending),"gold"],["Auszahlbar",affMoney(T.payable),"green"],["Ausgezahlt",affMoney(T.paid),"green"]
+  ].map(([l,v,c])=>`<div class="stat-card glass"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join("");
+  if(!list.length){ wrap.innerHTML='<div class="empty-state">Noch keine Partner. Lege oben einen an.</div>'; return; }
+  const badge=s=>({active:'<span class="badge green-badge">aktiv</span>',invited:'<span class="badge gold-badge">eingeladen</span>',paused:'<span class="badge">pausiert</span>'}[s]||escHtml(s));
+  const rows=list.map(p=>{
+    const id=escHtml(p.id);
+    const disc=p.discountPct+"%"+(p.discountDurationMonths?` / ${p.discountDurationMonths} M`:" dauerhaft");
+    const comm=p.commissionPct+"%"+(p.commissionPctAfter12m!=null?` → ${p.commissionPctAfter12m}%`:"");
+    return `<tr>
+    <td><b>${escHtml(p.name)}</b><div style="font-size:11px;color:var(--ink3)">${escHtml(p.handle||"")} · ${escHtml(p.platform||"")} · ${escHtml(p.tier)}</div></td>
+    <td>${badge(p.status)}<div style="font-size:11px;margin-top:4px;color:${p.onboardingComplete?'var(--profit)':'var(--loss)'}">${p.onboardingComplete?'Stripe ✓':'Stripe offen'}</div>${p.uid?'':'<div style="font-size:11px;color:var(--loss)">kein App-Konto</div>'}</td>
+    <td><span class="code-badge" title="Link kopieren" onclick="navigator.clipboard.writeText('${escHtml(p.link)}');showToast('Link kopiert')">?ref=${id}</span>${p.promoCode?`<div style="margin-top:4px"><span class="code-badge" onclick="navigator.clipboard.writeText('${escHtml(p.promoCode)}');showToast('Code kopiert')">${escHtml(p.promoCode)}</span></div>`:""}${p.landing?`<div style="font-size:11px;margin-top:4px"><a href="${escHtml(p.landing)}" target="_blank" rel="noopener" style="color:var(--gold)">Landingpage</a></div>`:""}</td>
+    <td style="font-size:12px">${disc}<br>${comm}</td>
+    <td style="font-size:12px">${p.clicks||0} Klicks<br>${p.stats.payingCustomers} Kunden<br>${affMoney(p.stats.revenue)} Umsatz</td>
+    <td style="font-size:12px">offen ${affMoney(p.stats.pending)}<br>auszahlbar ${affMoney(p.stats.payable)}<br>gezahlt ${affMoney(p.stats.paid)}</td>
+    <td><div class="aff-act">
+      <button onclick="affAction('${id}','onboarding-link')">Onboarding-Link neu</button>
+      <button onclick="affAction('${id}','setup')">Einrichtung fortsetzen</button>
+      ${p.uid?"":`<button onclick="affLinkUser('${id}')">Konto verknüpfen</button>`}
+      ${p.status==="paused"?`<button onclick="affAction('${id}','resume')">Fortsetzen</button>`:`<button onclick="affAction('${id}','pause')" style="color:var(--loss)">Pausieren</button>`}
+    </div></td></tr>`;}).join("");
+  wrap.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Partner</th><th>Status</th><th>Link / Code</th><th>Konditionen</th><th>Reichweite</th><th>Provision</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function affShowWelcome(text){ if(!text) return; document.getElementById("aff-result").style.display=""; document.getElementById("aff-welcome").value=text; document.getElementById("aff-result").scrollIntoView({behavior:"smooth",block:"center"}); }
+async function addAffiliate(){
+  const v=id=>document.getElementById(id).value.trim();
+  const body={name:v("aff-name"),handle:v("aff-handle"),platform:v("aff-platform"),tier:v("aff-tier"),slug:v("aff-slug").toLowerCase(),
+    email:v("aff-email"),contact:v("aff-contact"),country:v("aff-country")||"US",logoUrl:v("aff-logo"),headline:v("aff-headline"),promoCode:v("aff-o-code"),
+    overrides:{discountPct:v("aff-o-discount"),discountDurationMonths:v("aff-o-months"),commissionPct:v("aff-o-comm"),commissionPctAfter12m:v("aff-o-comm12")}};
+  if(!body.name||!body.slug){ showToast("Name und Slug sind Pflichtfelder.",true); return; }
+  const btn=document.getElementById("aff-save"); btn.disabled=true; btn.textContent="Lege an…";
   try{
-    const res=await fetch(`${WORKER_URL}/admin/partners`,{headers:adminHeaders()});
-    const data=await res.json();
-    /* Ein 401 liefert {error:…}. Das hat kein .length und lief vorher in den
-       "Noch keine Partner"-Zweig — ein Auth-Fehler sah also aus wie eine
-       leere Liste. */
-    if(!res.ok || !Array.isArray(data)){
-      /* Bei 401 die Token-LÄNGE mitzeigen (nie den Wert). Weicht sie zwischen
-         zwei Logins ab, hat der Passwort-Manager das Feld anders befüllt. */
-      const hint = res.status===401 ? ` (gesendeter Token: ${(adminToken||'').length} Zeichen)` : '';
-      wrap.innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ ${data&&data.error?data.error:'HTTP '+res.status}${hint}</div>`;
-      return;
-    }
-    renderPartners(data);
-  }
-  catch(e){ wrap.innerHTML=`<div class="empty-state" style="color:var(--loss)">⚠ ${e.message}</div>`; }
+    const d=await affFetch("/admin/affiliates",{method:"POST",body:JSON.stringify(body)});
+    if(d.ok){ showToast(`✓ Partner "${body.slug}" angelegt`); affShowWelcome(d.welcome); }
+    else showToast(d.error||"Teilweise fehlgeschlagen",true);
+    loadPartners();
+  }catch(e){ showToast("Fehler: "+e.message,true); }
+  finally{ btn.disabled=false; btn.textContent="Partner anlegen"; }
 }
-function renderPartners(partners){
-  const wrap=document.getElementById("partner-list-wrap");
-  if(!partners.length){ wrap.innerHTML='<div class="empty-state">Noch keine Partner. Füge oben einen hinzu.</div>'; return; }
-  const rows=partners.map(p=>`<tr>
-    <td><span class="code-badge" onclick="copyRef('${p.code}')" title="Link kopieren">${p.code}</span></td>
-    <td>${p.name||"–"}</td>
-    <td style="font-family:var(--font-mono);font-size:11px;color:var(--ink3)">${p.stripeAccountId}</td>
-    <td><span class="badge gold-badge">${p.splitPercent}%</span></td>
-    <td><span class="badge green-badge">${p.discountPercent?p.discountPercent+'%':'—'}</span></td>
-    <td style="color:var(--ink3);font-size:12px">${p.addedAt?p.addedAt.slice(0,10):'—'}</td>
-    <td><button class="btn-danger" onclick="deletePartner('${p.code}')">Löschen</button></td></tr>`).join("");
-  wrap.innerHTML=`<div class="table-wrap"><table><thead><tr>
-    <th>Code</th><th>Name</th><th>Stripe Account</th><th>Split</th><th>Rabatt</th><th>Hinzugefügt</th><th></th>
-  </tr></thead><tbody>${rows}</tbody></table></div>`;
+async function affAction(id,action){
+  if(action==="pause" && !confirm(`Partner "${id}" pausieren? Code wird deaktiviert, keine neuen Provisionen.`)) return;
+  try{
+    const d=await affFetch(`/admin/affiliates/${encodeURIComponent(id)}/${action}`,{method:"POST",body:"{}"});
+    if(d.welcome) affShowWelcome(d.welcome);
+    showToast(action==="setup"?`✓ Einrichtung: ${(d.done||[]).join(", ")||"nichts offen"}`:"✓ erledigt");
+    loadPartners();
+  }catch(e){ showToast("Fehler: "+e.message,true); }
 }
-async function addPartner(){
-  const code=document.getElementById("new-code").value.trim(), name=document.getElementById("new-name").value.trim();
-  const acct=document.getElementById("new-acct").value.trim(), split=document.getElementById("new-split").value, discount=document.getElementById("new-discount").value;
-  if(!code||!acct){ showToast("Code und Stripe Account ID sind Pflichtfelder.",true); return; }
-  if(!acct.startsWith("acct_")){ showToast("Stripe Account ID muss mit acct_ beginnen.",true); return; }
-  const res=await fetch(`${WORKER_URL}/admin/partners`,{method:"POST",headers:adminHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({code,name,stripeAccountId:acct,splitPercent:Number(split),discountPercent:Number(discount)})});
-  const data=await res.json();
-  if(data.success){ showToast(`✓ Partner "${code}" gespeichert.`); ["new-code","new-name","new-acct"].forEach(i=>document.getElementById(i).value=""); document.getElementById("new-split").value="50"; document.getElementById("new-discount").value="0"; loadPartners(); }
-  else showToast("Fehler: "+(data.error||"Unbekannt"),true);
+async function affLinkUser(id){
+  const email=prompt("E-Mail des App-Kontos des Partners:"); if(!email) return;
+  try{ await affFetch(`/admin/affiliates/${encodeURIComponent(id)}/link-user`,{method:"POST",body:JSON.stringify({email})}); showToast("✓ verknüpft, Pro freigeschaltet"); loadPartners(); }
+  catch(e){ showToast("Fehler: "+e.message,true); }
 }
-async function deletePartner(code){
-  if(!confirm(`Partner "${code}" wirklich löschen?`)) return;
-  const res=await fetch(`${WORKER_URL}/admin/partners/${code}`,{method:"DELETE",headers:adminHeaders()});
-  if((await res.json()).success){ showToast(`✓ Partner "${code}" gelöscht.`); loadPartners(); }
-}
-function copyRef(code){
-  const link=`https://evidencetrading.com/?ref=${code}`;
-  navigator.clipboard.writeText(link);
-  const el=document.getElementById("ref-preview"); el.textContent="✓ Kopiert: "+link; el.style.color="var(--gold)";
-  showToast("Referral Link kopiert!");
+async function runAffiliates(payout){
+  if(payout && !confirm("Auszahlung JETZT ausführen (auch außerhalb des Monatsanfangs)? Überweist echtes Geld an alle Partner über 50 $.")) return;
+  try{ const d=await affFetch("/admin/affiliates-run",{method:"POST",body:JSON.stringify({payout:!!payout})});
+    showToast(`Gereift: ${d.matured||0} · Auszahlungen: ${(d.payouts||[]).length} · Fehler: ${(d.errors||[]).length}`, (d.errors||[]).length>0);
+    if((d.errors||[]).length) console.warn(d.errors);
+    loadPartners();
+  }catch(e){ showToast("Fehler: "+e.message,true); }
 }
 
 // ═══════════════ BUG REPORTS ═══════════════
