@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-05d';
+  window.APEX_BUILD = '2026-10-06a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7738,6 +7738,7 @@ body.light #page-chart .tv-feld select{background:#fff;border-color:rgba(0,0,0,.
 #page-chart .tv-ev-kopf{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:0.5px solid var(--rim);flex-wrap:wrap}
 #page-chart .tv-ev-tfs{display:flex;gap:4px}
 #page-chart .tv-ev-tfs button{font-family:var(--font-mono);font-size:var(--fs-label);padding:3px 9px;border-radius:var(--r-xs);border:0.5px solid var(--rim2);background:transparent;color:var(--ink3);cursor:pointer}
+#page-chart .tv-ev-tfs [data-evalle]{margin-left:8px;font-family:var(--font-body)}
 #page-chart .tv-ev-tfs button.on{color:var(--gold);border-color:var(--gold-line);background:var(--gold-dim)}
 #page-chart .tv-ev-note{font-size:var(--fs-label);color:var(--ink3);margin-left:auto}
 #page-chart .tv-ev-chart{position:relative;flex:1 1 auto;min-height:0}
@@ -48131,8 +48132,11 @@ self.addEventListener('message', async (ev) => {
                        : { n: r.n, t: r.t, ask: r.ask, bid: r.bid };
       })
       .catch(function () {
-        // A missing hour file is a closed market, not a failure.
-        return { n: 0, t: new Float64Array(0), ask: new Float64Array(0), bid: new Float64Array(0) };
+        /* Leer zurück, damit Broker und Sekundenkerzen weiterlaufen — aber
+           MARKIERT: eine gedrosselte Stunde ist kein geschlossener Markt.
+           Der Footprint hat sie früher als „nichts gehandelt" gespeichert
+           und die Kerze blieb für immer leer. */
+        return { n: 0, failed: true, t: new Float64Array(0), ask: new Float64Array(0), bid: new Float64Array(0) };
       });
   }
 
@@ -48628,7 +48632,10 @@ self.addEventListener('message', async (ev) => {
     getTicks: function (sym, hourMs) {
       var m = mapSymbol(sym);
       if (!m) return Promise.reject(new Error('Symbol not available: ' + sym));
-      return tickHour(m, hourMs);
+      return tickHour(m, hourMs).then(function (r) {
+        if (r && r.failed) { var e = new Error('tick feed refused'); e.failed = true; throw e; }
+        return r;
+      });
     },
 
     cacheStats: function () {
@@ -48687,7 +48694,7 @@ self.addEventListener('message', async (ev) => {
   'use strict';
 
   var HOUR = 3600000;
-  var KEEP_HOURS = 72;          // genug für sichtbare Kerzen + Session-Rückblick
+  var KEEP_HOURS = 120;          // genug für sichtbare Kerzen + Session-Rückblick
   var MAX_LV = 80;              // Schutz gegen absurde Zeilengrößen
 
   /* ─────────────── reine Rechnung (testbar ohne Browser) ─────────────── */
@@ -48828,68 +48835,234 @@ self.addEventListener('message', async (ev) => {
     return out.concat(live);
   }
 
+  /* Divergenz mit Signifikanz (gemessen 06.10.2026 auf NAS100): in
+     Dukascopy-Kursticks gibt es systematisch ~1 % mehr Aufwärts- als
+     Abwärtsticks, Abwärtsticks sind dafür etwas größer. Bei ~2000 Ticks je
+     15m-Kerze ist das Rauschen ±45, die Schieflage +20 — ein „+100 in einer
+     roten Kerze" war fast immer nichts. Deshalb: erst die Grundschieflage
+     der umliegenden Kerzen abziehen, dann nur melden, was mehr als zwei
+     Standardabweichungen (2·√Ticks) gegen die Kerze steht. */
+  function biasOf(fps) {
+    var d = 0, v = 0, k = 0;
+    fps.forEach(function (f) { if (f && f.vol) { d += f.delta; v += f.vol; k++; } });
+    return (k >= 5 && v > 0) ? d / v : 0;
+  }
+  function divergence(f, open, close, bias) {
+    if (!f || !f.vol) return '';
+    var adj = f.delta - (bias || 0) * f.vol, thr = 2 * Math.sqrt(f.vol);
+    if (close > open && adj < -thr) return 'bearish';
+    if (close < open && adj > thr) return 'bullish';
+    return '';
+  }
+
   /** Runde Zeilengröße wie f_nice() im Pine: 1/2/5 × 10^k Ticks. */
   function niceTicks(x) {
     var t = Math.max(x, 1), mag = Math.pow(10, Math.floor(Math.log10(t))), r = t / mag;
     return Math.max(1, Math.round((r <= 1 ? 1 : r <= 2 ? 2 : r <= 5 ? 5 : 10) * mag));
   }
 
-  /* ─────────────── Tick-Puffer (Browser) ─────────────── */
-  var _hours = {};          // key sym|hourMs → { loading, data }
+  /* ─────────────── Tick-Puffer (Browser) ───────────────
+     Drei Dinge, die die erste Fassung falsch machte (05.10.2026, live
+     gesehen: Kerzen ohne Footprint, langes Laden):
+       1. Eine gedrosselte Stunde wurde als „leer" gespeichert → die Kerze
+          blieb für immer leer. Jetzt: Wiederholung mit Wartezeit, erst nach
+          vier Fehlversuchen gilt sie als „keine Daten".
+       2. Jede Sitzung lud alle Stunden neu. Jetzt: IndexedDB-Ablage
+          (abgeschlossene Stunden ändern sich nie).
+       3. Der Cum-Delta-Rückblick lud vor den sichtbaren Kerzen. Jetzt
+          gibt es `peek` — schauen ohne zu laden.
+     Die laufende und die letzte Stunde veröffentlicht Dukascopy erst nach
+     ihrem Ende; dort ist „leer" vorläufig und wird später neu gefragt. */
+  var _hours = {};          // key sym|hourMs → { loading, data, tries, retryAt, dead }
   var _order = [];
   var _listeners = [];
+  var RETRY_MS = [4000, 12000, 30000, 90000];
+  var IDB_NAME = 'apexTicks', IDB_STORE = 'h', IDB_MAX = 600;
 
   function hourKey(sym, h) { return sym + '|' + h; }
+  function fire() { _listeners.forEach(function (fn) { try { fn(); } catch (er) {} }); }
 
-  function want(sym, h) {
-    var k = hourKey(sym, h), e = _hours[k];
-    if (e) return e;
-    e = _hours[k] = { loading: true, data: null };
-    _order.push(k);
-    while (_order.length > KEEP_HOURS) delete _hours[_order.shift()];
-    if (!window.ApexMarketData || !window.ApexMarketData.getTicks) { e.loading = false; return e; }
-    window.ApexMarketData.getTicks(sym, h).then(function (tk) {
-      e.loading = false; e.data = (tk && tk.n) ? tk : null; e.empty = !(tk && tk.n);
-      _listeners.forEach(function (fn) { try { fn(); } catch (er) {} });
-    }).catch(function () {
-      e.loading = false; e.failed = true;
-      _listeners.forEach(function (fn) { try { fn(); } catch (er) {} });
+  var _dbp = null;
+  function tdb() {
+    if (_dbp) return _dbp;
+    _dbp = new Promise(function (res, rej) {
+      try {
+        var r = indexedDB.open(IDB_NAME, 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore(IDB_STORE, { keyPath: 'k' }); };
+        r.onsuccess = function () { res(r.result); };
+        r.onerror = function () { rej(r.error); };
+      } catch (e) { rej(e); }
+    }).catch(function () { return null; });
+    return _dbp;
+  }
+  function idbGet(k) {
+    return tdb().then(function (d) {
+      if (!d) return null;
+      return new Promise(function (res) {
+        try {
+          var q = d.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(k);
+          q.onsuccess = function () { res(q.result || null); };
+          q.onerror = function () { res(null); };
+        } catch (e) { res(null); }
+      });
     });
+  }
+  var _puts = 0;
+  function idbPut(k, tk) {
+    tdb().then(function (d) {
+      if (!d) return;
+      try {
+        var st = d.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE);
+        st.put({ k: k, at: Date.now(), n: tk.n, t: tk.t, bid: tk.bid, ask: tk.ask });
+        if (++_puts % 50 === 0) prune(d);
+      } catch (e) {}
+    });
+  }
+  function prune(d) {
+    try {
+      var st = d.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE), all = [];
+      st.openCursor().onsuccess = function (ev) {
+        var c = ev.target.result;
+        if (c) { all.push([c.value.at, c.value.k]); c.continue(); return; }
+        if (all.length <= IDB_MAX) return;
+        all.sort(function (a, b) { return a[0] - b[0]; });
+        all.slice(0, all.length - IDB_MAX).forEach(function (x) { st.delete(x[1]); });
+      };
+    } catch (e) {}
+  }
+
+  function fresh(h) { return h + 2 * HOUR > Date.now(); }   // Datei evtl. noch nicht veröffentlicht
+
+  function fetchHour(sym, h, e) {
+    e.loading = true;
+    var k = hourKey(sym, h);
+    /* Wiederholung selbst planen, nicht aufs nächste Bild warten: im
+       Hintergrund zeichnet der Chart nicht, und dann käme sie nie. */
+    var later = function (ms) {
+      e.retryAt = Date.now() + ms;
+      setTimeout(function () {
+        if (_hours[k] === e && e.retryAt && !e.loading) { e.retryAt = 0; fetchHour(sym, h, e); }
+      }, ms + 50);
+    };
+    var viaNet = function () {
+      if (!window.ApexMarketData || !window.ApexMarketData.getTicks) { e.loading = false; e.dead = true; return; }
+      window.ApexMarketData.getTicks(sym, h).then(function (tk) {
+        e.loading = false;
+        if (tk && tk.n) { e.data = tk; idbPut(k, tk); }
+        else if (fresh(h)) { later(120000); }                     // noch nicht erschienen
+        else e.data = null;                                       // Markt zu: wirklich leer
+        e.ok = !e.retryAt;
+        fire();
+      }).catch(function () {
+        e.loading = false;
+        if (e.tries >= RETRY_MS.length) e.dead = true;
+        else later(RETRY_MS[e.tries]);
+        e.tries++;
+        fire();
+      });
+    };
+    if (fresh(h)) { viaNet(); return; }
+    idbGet(k).then(function (hit) {
+      if (hit && hit.n) { e.loading = false; e.ok = true; e.data = { n: hit.n, t: hit.t, bid: hit.bid, ask: hit.ask }; fire(); }
+      else viaNet();
+    });
+  }
+
+  /** Zustand einer Stunde; mit load=true wird sie (erneut) angefordert. */
+  function want(sym, h, load) {
+    var k = hourKey(sym, h), e = _hours[k];
+    if (!e) {
+      if (!load) return { loading: true, idle: true };
+      e = _hours[k] = { loading: false, data: null, tries: 0, retryAt: 0 };
+      _order.push(k);
+      while (_order.length > KEEP_HOURS) delete _hours[_order.shift()];
+      fetchHour(sym, h, e);
+      return e;
+    }
+    if (load && !e.loading && e.retryAt && Date.now() >= e.retryAt) { e.retryAt = 0; fetchHour(sym, h, e); }
     return e;
   }
 
   /**
-   * Ticks für [t0, t1) — synchron. Gibt null zurück, solange eine
-   * berührte Stunde noch lädt (und stößt das Laden an). Ganz oder gar
-   * nicht, wie beim Tick-Füllen im Broker: eine Lücke in der Mitte
-   * würde das Delta still verfälschen. Die Stunde VOR t0 wird mitgenommen,
-   * wenn vorhanden, damit der erste Tick eine Seite bekommt.
+   * Ticks für [t0, t1) — synchron. null = steht noch aus (lädt, wartet auf
+   * Wiederholung, oder bei peek: nie angefordert). Ganz oder gar nicht: eine
+   * Lücke in der Mitte würde das Delta still verfälschen.
    */
-  function ticksFor(sym, t0, t1) {
-    var first = Math.floor(t0 / HOUR) * HOUR, out = [], pending = false;
+  function ticksFor(sym, t0, t1, peek) {
+    var first = Math.floor(t0 / HOUR) * HOUR, out = [], pending = false, dead = false;
     for (var h = first; h < t1; h += HOUR) {
-      var e = want(sym, h);
-      if (e.loading) pending = true;
-      else if (e.failed) return { failed: true };
+      var e = want(sym, h, !peek);
+      if (e.dead) dead = true;
+      else if (e.loading || e.retryAt) pending = true;
       else if (e.data) out.push(e.data);
     }
     if (pending) return null;
+    if (dead) return { failed: true };
     return { chunks: out };
   }
 
   var _cache = {};          // sym|t0|rs|opts → build()
   var _cacheKeys = [];
-  function forBar(sym, t0, t1, rs, o, noCache) {
+  function forBar(sym, t0, t1, rs, o, noCache, peek) {
     var key = [sym, t0, t1, rs, o.ratio, o.minVol, o.vaPct, o.stackMin].join('|');
     if (_cache[key]) return _cache[key];
-    var tk = ticksFor(sym, t0, t1);
+    var tk = ticksFor(sym, t0, t1, peek);
     if (!tk) return null;                      // lädt noch
-    var res = tk.failed ? { n: 0, failed: true } : build(tk.chunks, t0, t1, rs, o);
-    if (noCache) return res;                   // laufende Kerze: ändert sich jedes Bild
+    if (tk.failed) return { n: 0, failed: true };   // nicht cachen — später neu versuchen
+    var res = build(tk.chunks, t0, t1, rs, o);
+    if (noCache || fresh(t1 - 1)) return res;  // laufende / frische Stunde ändert sich noch
     _cache[key] = res;
     _cacheKeys.push(key);
     while (_cacheKeys.length > 4000) delete _cache[_cacheKeys.shift()];
     return res;
+  }
+
+  /**
+   * Zusammenfassung der letzten `count` Kerzen für die KI. Wartet höchstens
+   * `waitMs` auf die Ticks und nimmt dann, was da ist — Kerzen ohne Ticks
+   * werden als fehlend gemeldet, nicht geschätzt.
+   * bars = { n, t[], o[], c[] } (ms), tfMs = Kerzendauer.
+   */
+  function summary(sym, bars, tfMs, opt) {
+    opt = opt || {};
+    var count = opt.count || 12, waitMs = opt.waitMs || 7000, tick = opt.tick || 0.01;
+    var n = bars.n, from = Math.max(0, n - count);
+    var hi = 0, lo = Infinity;
+    for (var i = Math.max(0, n - 100); i < n; i++) { hi += (bars.h[i] - bars.l[i]); }
+    var atr = hi / Math.max(1, Math.min(100, n));
+    var rs = niceTicks(atr / 8 / tick) * tick;
+    var o = { ratio: 3, minVol: 5, vaPct: 70, stackMin: 3 };
+    function run() {
+      var rows = [];
+      for (var j = from; j < n; j++) rows.push({ j: j, fp: forBar(sym, bars.t[j], bars.t[j] + tfMs, rs, o) });
+      return rows;
+    }
+    return new Promise(function (res) {
+      var t0 = Date.now();
+      (function poll() {
+        var rows = run();
+        var open = rows.some(function (r) { return !r.fp; });
+        if (open && Date.now() - t0 < waitMs) { setTimeout(poll, 400); return; }
+        var fps = {};
+        rows.forEach(function (r) { fps[r.j] = r.fp; });
+        var cum = 0, bias = biasOf(rows.map(function (r) { return r.fp; }));
+        var out = rows.map(function (r) {
+          var f = r.fp, b = { t: bars.t[r.j] };
+          if (!f || !f.n) { b.missing = true; return b; }
+          cum += f.delta;
+          b.delta = f.delta; b.vol = f.vol; b.cum = cum;
+          b.poc = (f.lo + f.poc + 0.5) * rs;
+          b.vah = (f.lo + f.vaHi + 1) * rs; b.val = (f.lo + f.vaLo) * rs;
+          b.imbBuy = f.imbB.filter(Boolean).length; b.imbSell = f.imbS.filter(Boolean).length;
+          b.div = divergence(f, bars.o[r.j], bars.c[r.j], bias);
+          return b;
+        });
+        var zl = zones(fps, bars.c, from, n - 1, 20, true).map(function (z) {
+          return { side: z.isBuy ? 'buy' : 'sell', top: z.top, bot: z.bot, t: bars.t[z.from] };
+        });
+        res({ rowSize: rs, bars: out, stacked: zl, bias: bias });
+      })();
+    });
   }
 
   function onLoad(fn) { _listeners.push(fn); return function () {
@@ -48897,8 +49070,16 @@ self.addEventListener('message', async (ev) => {
 
   window.ApexFootprint = {
     sideOf: sideOf, build: build, zones: zones, niceTicks: niceTicks,
-    forBar: forBar, onLoad: onLoad, ticksFor: ticksFor,
-    _reset: function () { _hours = {}; _order = []; _cache = {}; _cacheKeys = []; }
+    forBar: forBar, onLoad: onLoad, ticksFor: ticksFor, summary: summary,
+    biasOf: biasOf, divergence: divergence,
+    _reset: function () { _hours = {}; _order = []; _cache = {}; _cacheKeys = []; },
+    /** Diagnose: Zustand einer Stunde (für Konsole und Tests). */
+    _state: function (sym, h) {
+      var e = _hours[hourKey(sym, Math.floor(h / HOUR) * HOUR)];
+      if (!e) return 'idle';
+      return e.dead ? 'dead' : e.loading ? 'loading' : e.retryAt ? 'retry' + (e.tries || '') : e.data ? 'data' : 'empty';
+    },
+    _expire: function () { Object.keys(_hours).forEach(function (k) { if (_hours[k].retryAt) _hours[k].retryAt = 1; }); }
   };
 })();
 </script>
@@ -49502,6 +49683,18 @@ self.addEventListener('message', async (ev) => {
   Instance.prototype._paintFootprint = function () {
     var self = this;
     if (!this._fpOpts || !this.series) { this._dropFootprint(); return; }
+    /* Laden nicht erst beim Zeichnen anstossen: die jüngsten Stunden bis
+       zum Cursor sofort anfordern, neueste zuerst — das ist, was man beim
+       Einschalten ansieht. Danach übernimmt das Zeichnen. */
+    try {
+      var all = this._all, sym = this.fpSymbol || this.symbol, FP = window.ApexFootprint;
+      var end = Math.min(this._shown || 0, all ? all.n : 0);
+      if (FP && sym && end > 0 && this._fpPrefetchFor !== sym + '|' + all.t[end - 1]) {
+        this._fpPrefetchFor = sym + '|' + all.t[end - 1];
+        var H = 3600000, top = Math.floor(all.t[end - 1] / H) * H;
+        for (var h = 0; h < 24; h++) FP.ticksFor(sym, top - h * H, top - h * H + 1);
+      }
+    } catch (e) {}
     if (this._fpPrimSeries !== this.series) {
       this._dropFootprint(true);
       this._fpPrim = new FpPrimitive(this);
@@ -49512,11 +49705,14 @@ self.addEventListener('message', async (ev) => {
       // Eine Tick-Stunde ist angekommen → neu zeichnen (gebündelt pro Frame).
       this._fpUnsub = window.ApexFootprint.onLoad(function () {
         if (self._fpRaf) return;
-        self._fpRaf = requestAnimationFrame(function () {
+        /* setTimeout statt requestAnimationFrame: rAF steht still, solange
+           der Tab im Hintergrund ist — dann wurde nie neu gezeichnet und
+           damit auch keine abgelehnte Stunde neu angefordert. */
+        self._fpRaf = setTimeout(function () {
           self._fpRaf = 0;
           var pr = self._fpPrim;
           if (pr && pr._req) { try { pr._req(); } catch (e) {} }
-        });
+        }, 60);
       });
     }
   };
@@ -49548,20 +49744,21 @@ self.addEventListener('message', async (ev) => {
 
   Instance.prototype._drawFootprint = function (x, size) {
     var q = this._fpOpts, all = this._all, FP = window.ApexFootprint;
-    if (!q || !all || !all.n || !this.series || !FP || !this.symbol) return;
+    var fsym = this.fpSymbol || this.symbol;
+    if (!q || !all || !all.n || !this.series || !FP || !fsym) return;
     var MD = window.ApexMarketData;
-    var tick = MD && MD.tickSize ? MD.tickSize(this.symbol) : null;
+    var tick = MD && MD.tickSize ? MD.tickSize(fsym) : null;
     if (!tick) return;                                   // kein Tick-Feed für dieses Symbol
     var shown = Math.min(this._shown || 0, all.n);   // nie über den Cursor hinaus
     if (shown < 1) return;
-    var ts = this.chart.timeScale(), series = this.series, sym = this.symbol;
+    var ts = this.chart.timeScale(), series = this.series, sym = fsym;
     var vr = ts.getVisibleLogicalRange();
     if (!vr) return;
     var forming = (this._forming && this._forming.idx === shown && shown < all.n) ? this._forming : null;
     var last = forming ? shown : shown - 1;
     var a = Math.max(0, Math.floor(vr.from)), b = Math.min(last, Math.ceil(vr.to));
     if (b < a) return;
-    if (b - a > 400) return;                             // so weit rausgezoomt ist nichts lesbar
+    if (b - a > 400) a = b - 400;                        // weiter draussen ist nichts lesbar
 
     // Kerzendauer aus den Daten, nicht aus einem Namen wie '5m'.
     var tfMs = Infinity;
@@ -49569,6 +49766,16 @@ self.addEventListener('message', async (ev) => {
       var d0 = all.t[i] - all.t[i - 1]; if (d0 > 0 && d0 < tfMs) tfMs = d0;
     }
     if (!isFinite(tfMs)) tfMs = 60000;
+    /* Jede Kerze braucht alle Tick-Stunden, die sie berührt. Auf H4 sind
+       das bei 60 sichtbaren Kerzen 240 Dateien — mehr als der Puffer hält,
+       und das Laden würde sich selbst verdrängen. Dann lieber nichts. */
+    var HMAX = 60, H = 3600000;
+    if ((all.t[b] + tfMs - all.t[a]) / H > HMAX) {
+      // Nicht alles weglassen: die jüngsten Kerzen bekommen ihn, bis das
+      // Stundenbudget voll ist — dort schaut man hin.
+      var grenze = all.t[b] + tfMs - HMAX * H;
+      while (a < b && all.t[a] < grenze) a++;
+    }
 
     var rs = this._fpRowSize(q, tick);
     var o = { ratio: q.ratio, minVol: q.minVol, vaPct: q.vaPct, stackMin: q.stackMin };
@@ -49577,9 +49784,23 @@ self.addEventListener('message', async (ev) => {
     function lowOf(j) { return (forming && j === forming.idx) ? forming.row.low : all.l[j]; }
     var closes = all.c;
     if (forming) { closes = Array.prototype.slice.call(all.c, 0, forming.idx + 1); closes[forming.idx] = forming.row.close; }
-    function fpAt(j) {
+    var peekRest = false;
+    function fpAt(j, peek) {
       if (forming && j === forming.idx) return FP.forBar(sym, all.t[j], forming.upto, rs, o, true);
-      return FP.forBar(sym, all.t[j], all.t[j] + tfMs, rs, o);
+      return FP.forBar(sym, all.t[j], all.t[j] + tfMs, rs, o, false, peek);
+    }
+    /* Vorrang: zuerst die sichtbaren Kerzen, von rechts (neueste) nach
+       links. Erst wenn die alle da sind, darf der Rückblick für Cum Delta
+       und Zonen nachladen — sonst wartet das Bild auf Stunden, die man gar
+       nicht sieht. */
+    var vis = {};
+    for (var vj = b; vj >= a; vj--) { vis[vj] = fpAt(vj); if (!vis[vj]) peekRest = true; }
+    var biasVis = FP.biasOf(Object.keys(vis).map(function (j) { return vis[j]; }));
+    var restOffen = false;
+    function fpRest(j) {
+      var r = (j in vis) ? vis[j] : fpAt(j, peekRest);
+      if (!r) restOffen = true;
+      return r;
     }
 
     function xOf(idx) { var v = ts.logicalToCoordinate(idx); return (v == null || !isFinite(v)) ? null : v; }
@@ -49609,7 +49830,7 @@ self.addEventListener('message', async (ev) => {
         for (var j = r; j <= b; j++) {
           var dk = q.cumReset == 1 ? Math.floor((all.t[j] + 4 * 86400000) / resetMs) : Math.floor(all.t[j] / resetMs);
           if (dk !== curDay) { curDay = dk; acc = 0; ok = true; }
-          var f = fpAt(j);
+          var f = fpRest(j);
           if (!f) ok = false; else acc += (f.delta || 0);
           if (j >= a) cum[j] = ok ? acc : null;
         }
@@ -49617,14 +49838,14 @@ self.addEventListener('message', async (ev) => {
     } else {
       // „Nie": über den geladenen Bereich (sichtbar), mehr Daten gibt es nicht.
       var acc2 = 0, ok2 = true;
-      for (var j2 = a; j2 <= b; j2++) { var f2 = fpAt(j2); if (!f2) ok2 = false; else acc2 += (f2.delta || 0); cum[j2] = ok2 ? acc2 : null; }
+      for (var j2 = a; j2 <= b; j2++) { var f2 = fpRest(j2); if (!f2) ok2 = false; else acc2 += (f2.delta || 0); cum[j2] = ok2 ? acc2 : null; }
     }
 
     // Stacked-Zonen: Vorlauf um die Zonenlänge, damit ältere Zonen ins Bild reichen.
     var zFrom = Math.max(0, a - q.zoneLen), fps = {};
-    for (var zj = zFrom; zj <= b; zj++) fps[zj] = fpAt(zj);
+    for (var zj = zFrom; zj <= b; zj++) fps[zj] = fpRest(zj);
     var zl = FP.zones(fps, closes, zFrom, b, q.zoneLen, q.delBroken == 1);
-    var pendingAny = false, self = this;
+    var pendingAny = restOffen, self = this;
     x.save();
     zl.forEach(function (z) {
       var x1 = xOf(z.from), x2 = xOf(z.to), y1 = yOf(z.top), y2 = yOf(z.bot);
@@ -49648,9 +49869,17 @@ self.addEventListener('message', async (ev) => {
         if (drawText) {
           x.globalAlpha = 0.5; x.fillStyle = th.ink3; x.font = '9px system-ui, sans-serif';
           x.textAlign = 'center'; x.textBaseline = 'top';
-          var yl = yOf(lowOf(k)); if (yl != null) x.fillText('loading…', cx, yl + 4);
+          var yl = yOf(lowOf(k));
+          /* Dukascopy veröffentlicht eine Stunde erst nach ihrem Ende. */
+          var neu = all.t[k] + 2 * 3600000 > Date.now();
+          if (yl != null) x.fillText(neu ? 'ticks after the hour' : 'loading…', cx, yl + 4);
         }
         continue;
+      }
+      if (fp.failed && drawText) {                    // Feed hat viermal abgelehnt
+        x.globalAlpha = 0.5; x.fillStyle = th.ink3; x.font = '9px system-ui, sans-serif';
+        x.textAlign = 'center'; x.textBaseline = 'top';
+        var yf = yOf(lowOf(k)); if (yf != null) x.fillText('no ticks', cx, yf + 4);
       }
       if (!fp.n || fp.tooWide) continue;
 
@@ -49666,7 +49895,7 @@ self.addEventListener('message', async (ev) => {
         x.fillStyle = iB ? th.up : iS ? th.down : (dl >= 0 ? th.up : th.down);
         x.fillRect(xl, top, w, h);
         if (h >= 3) {
-          x.globalAlpha = 0.35; x.strokeStyle = '#000'; x.lineWidth = 1;
+          x.globalAlpha = 0.35; x.strokeStyle = document.body.classList.contains('light') ? '#fff' : '#000'; x.lineWidth = 1;
           x.strokeRect(xl + 0.5, top + 0.5, w - 1, h - 1);
         }
         if (L === fp.poc) {
@@ -49717,7 +49946,8 @@ self.addEventListener('message', async (ev) => {
 
       // Delta-Divergenz: Kerze grün mit Verkaufsdelta oder umgekehrt.
       if (q.showDiv == 1 && fp.vol > 0) {
-        var divBear = kc > ko && fp.delta < 0, divBull = kc < ko && fp.delta > 0;
+        var dv = FP.divergence(fp, ko, kc, biasVis);
+        var divBear = dv === 'bearish', divBull = dv === 'bullish';
         if (divBear || divBull) {
           var hy = yOf(Math.max(kh, (fp.lo + fp.nLv) * rs));
           if (hy != null) {
@@ -62876,6 +63106,9 @@ self.addEventListener('message', async (ev) => {
           }
         }
         var l = list().slice();
+        /* Ein Chart hat nur EINE Footprint-Ebene — ein zweiter Eintrag
+           wäre unsichtbar und verwirrend. */
+        if (d && d.footprint && l.some(function (c) { return c.id === id; })) { t.value = ''; return; }
         l.push({ id: id, params: Ind.fillParams(id, null) });
         setList(l);
         redraw();
@@ -73418,6 +73651,55 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* ── Kerzen fuer die KI ───────────────────────────────────────────
      Nur noch die letzten Kerzen des Einstiegszeitrahmens — fuer "was ist
      gerade passiert". Den Verlauf traegt die Swing-Folge. */
+  /* ── Footprint für die KI ─────────────────────────────────────────
+     Dieselbe Rechnung wie auf dem Chart (ApexFootprint), als Zahlen. Nur
+     für M1–M15: auf H1/H4 wären es zu viele Tick-Dateien. Wartet höchstens
+     sieben Sekunden — was dann fehlt, steht als fehlend im Text, damit die
+     KI keine Lücke mit Vermutungen füllt. */
+  function fpFuerKi(L, tf) {
+    var leer = Promise.resolve(null);
+    var FP = window.ApexFootprint, MD = window.ApexMarketData;
+    var sym = fpSym();
+    var name = TF_NAME[tf], ms = { M1: 60000, M5: 300000, M15: 900000 }[name];
+    var e = ebeneVon(L, name);
+    if (!FP || !FP.summary || !sym || !ms || !e || !e.bars || !e.bars.n) return leer;
+    var b = e.bars, n = b.laufend ? b.n - 1 : b.n;          // nur abgeschlossene Kerzen
+    if (n < 3) return leer;
+    var fertig = { n: n, t: b.t, o: b.o, h: b.h, l: b.l, c: b.c };
+    return FP.summary(sym, fertig, ms, { count: 12, waitMs: 7000, tick: MD.tickSize(sym) })
+      .then(function (r) { r.sym = TV._dsym; r.tf = name; return r; })
+      .catch(function () { return null; });
+  }
+
+  function fpBlock(fp, stellen) {
+    var n = function (v) { return isFinite(v) ? Number(v).toFixed(stellen) : 'n/a'; };
+    var sg = function (v) { return (v > 0 ? '+' : '') + Math.round(v); };
+    var z = ['', '=== ORDER FLOW: TICK FOOTPRINT, LAST ' + fp.bars.length + ' CLOSED ' + fp.tf + ' CANDLES (oldest first) ===',
+      'Source: Dukascopy quote ticks. These are QUOTE CHANGES, not exchange trades: "buy"/"sell" = ' +
+      'mid price ticked up/down, volume = number of ticks. Treat it as pressure, not as real contracts. ' +
+      'Dukascopy publishes each hour only after it ends, so the most recent hour is usually missing. ' +
+      'Quote ticks lean slightly upward by construction (here ' + (fp.bias * 100).toFixed(1) + '% of ticks), so a ' +
+      'small positive delta is normal; raw cum delta drifts up for that reason. Divergences below are already ' +
+      'corrected for this and only flagged beyond two standard deviations. ' +
+      'Row size ' + n(fp.rowSize) + '.'];
+    var da = fp.bars.filter(function (b) { return !b.missing; }).length;
+    if (!da) { z.push('No tick data available for these candles - do not infer order flow.'); return z.join('\n'); }
+    fp.bars.forEach(function (b) {
+      var zeit = new Date(b.t).toISOString().slice(11, 16) + 'Z';
+      if (b.missing) { z.push('  ' + zeit + ' no ticks yet'); return; }
+      z.push('  ' + zeit + ' delta ' + sg(b.delta) + ' | cum ' + sg(b.cum) + ' | ticks ' + Math.round(b.vol) +
+             ' | POC ' + n(b.poc) + ' | VA ' + n(b.val) + '-' + n(b.vah) +
+             ' | imbalances buy ' + b.imbBuy + ' / sell ' + b.imbSell + (b.div ? ' | ' + b.div.toUpperCase() + ' DELTA DIVERGENCE' : ''));
+    });
+    if (fp.stacked.length) {
+      z.push('Active stacked imbalance zones (3+ diagonal imbalances in a row, not yet broken):');
+      fp.stacked.forEach(function (s) {
+        z.push('  - ' + s.side.toUpperCase() + ' ' + n(s.bot) + '-' + n(s.top) + ' since ' + new Date(s.t).toISOString().slice(11, 16) + 'Z');
+      });
+    } else z.push('No active stacked imbalance zones.');
+    return z.join('\n');
+  }
+
   function kerzenBlock(bars, anzahl, stellen, tfName) {
     if (!bars || !bars.n) return '';
     var von = Math.max(0, bars.n - anzahl);
@@ -73618,6 +73900,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (o.fein && o.fein.ziel) z.push(feinBlock(o.fein.ziel, o.fein.daten, stellen, o.mStop));
     var einstieg = ebeneVon(L, TF_NAME[tfWahl]);
     if (einstieg && einstieg.bars) z.push(kerzenBlock(einstieg.bars, 12, stellen, einstieg.tf));
+    var fpo = o.fp || ((TV._fpKi && TV._fpKi.sym === TV._dsym) ? TV._fpKi : null);
+    if (fpo) z.push(fpBlock(fpo, stellen));
     z.push(newsBlock(o.kalender, L.sym || o.anzeige));
     /* Mit dem SYMBOL abgleichen, nicht mit dem Anzeigenamen: das Widget
        liefert "Gold", im Journal steht "XAUUSD". */
@@ -75054,7 +75338,15 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Haltequote), dem Setup als Linien und den Schluessel-Leveln. Ein Klick
      auf einen Kasten oeffnet die Zone. Der TradingView-Chart laeuft dabei
      weiter: er liefert den Live-Kurs. */
-  var EV = { inst: null, tf: '', an: false, laden: null, zonen: [], bars: null };
+  var EV = { inst: null, tf: '', an: false, laden: null, zonen: [], bars: null, fp: false };
+  try { EV.fp = localStorage.getItem('apexTV_evfp') === '1'; } catch (e) {}
+  /* Datensymbol der Chart-Seite ('XAU/USD', 'NAS100') → Name im Tick-Feed.
+     null, wenn Dukascopy das Instrument nicht hat. */
+  function fpSym() {
+    var d = String(TV._dsym || '').replace('/', '');
+    if (!d || !window.ApexMarketData || !window.ApexMarketData.tickSize) return null;
+    return window.ApexMarketData.tickSize(d) ? d : null;
+  }
 
   function ansichtSetzen(w) {
     EV.an = w === 'ev';
@@ -75107,8 +75399,15 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (tfs) {
       tfs.innerHTML = mitBars.map(function (e) {
         return '<button type="button" data-evtf="' + e.tf + '" class="' + (e.tf === tf ? 'on' : '') + '">' + e.tf + '</button>';
-      }).join('');
+      }).join('') + '<button type="button" data-evalle="1" class="' + (EV.alle ? 'on' : '') +
+        '" title="Also draw wide areas, contested and rejected zones">All zones</button>' +
+        '<button type="button" data-evfp="1" class="' + (EV.fp ? 'on' : '') +
+        '" title="Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.">Footprint</button>';
       tfs.onclick = function (ev) {
+        var a = ev.target && ev.target.closest && ev.target.closest('[data-evalle]');
+        if (a) { EV.alle = !EV.alle; evChartZeigen(); return; }
+        var f = ev.target && ev.target.closest && ev.target.closest('[data-evfp]');
+        if (f) { EV.fp = !EV.fp; merke('evfp', EV.fp ? '1' : '0'); evChartZeigen(); return; }
         var k = ev.target && ev.target.closest && ev.target.closest('[data-evtf]');
         if (!k) return;
         EV.tf = k.getAttribute('data-evtf');
@@ -75117,7 +75416,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }
     var note = document.getElementById('tvEvNote');
     if (note) note.textContent = (L.quelle === 'Yahoo' ? 'Candles: real-time feed' :
-      'Candles: about 2 min behind the live price') + ' · zones from all timeframes';
+      'Candles: about 2 min behind the live price') + ' · zones from all timeframes' +
+      (EV.fp ? (fpSym() ? ' · footprint: ticks arrive once each hour is over'
+                        : ' · no tick data for this instrument') : '');
     var e = mitBars.filter(function (x) { return x.tf === tf; })[0];
     var los = function (inst) { try { evZeichnen(inst, e, L); } catch (x) { TV._evFehler = (x && x.message) || String(x); } };
     if (EV.inst) { los(EV.inst); return; }
@@ -75210,23 +75511,29 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     /* Nur was man handeln kann und was nah ist: die naechsten drei
        brauchbaren Zonen je Seite. Breite Bereiche, umstrittene und
        verworfene Zonen stehen in der Leiter, nicht auf dem Chart — alle
-       zusammen haben den Chart unlesbar gemacht. */
+       zusammen haben den Chart unlesbar gemacht. "All zones" zeigt sie. */
     var Az = auswahl(L, L.kurs);
-    var zeigen = [].concat(
+    var zeigen = EV.alle ? alleZonen(L) : [].concat(
       Az.drin.filter(function (x) { return nutzbar(x.g); }).slice(0, 2),
       Az.oben.filter(function (x) { return nutzbar(x.g); }).slice(0, 3),
       Az.unten.filter(function (x) { return nutzbar(x.g); }).slice(0, 3));
     var liste = [];
     zeigen.forEach(function (x) {
       var g = x.g;
-      var darst = evDarstellung(g, x.tf, e.tf);
+      var darst = EV.alle ? { art: 'voll', top: (g.kern || g).top, bot: (g.kern || g).bot } : evDarstellung(g, x.tf, e.tf);
       if (!darst) return;
       var von = isFinite(g.zeit) ? inst.indexAt(g.zeit) : Math.max(0, e.bars.n - 60);
       liste.push({ supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: null,
                    broken: false, stil: zonenStil(g, darst), _g: g, _tf: x.tf });
     });
     EV.zonen = liste;
-    inst.setIndicators([{ key: 'evz', kind: 'overlay', plots: [], zones: liste, zoneOpts: { roh: true } }]);
+    var spezi = [{ key: 'evz', kind: 'overlay', plots: [], zones: liste, zoneOpts: { roh: true } }];
+    inst.fpSymbol = fpSym();
+    if (EV.fp && inst.fpSymbol && window.ApexIndicators) {
+      spezi.push({ key: 'evfp', kind: 'overlay', plots: [],
+                   footprint: window.ApexIndicators.fillParams('fp', null) });
+    }
+    inst.setIndicators(spezi);
     /* Nur die sechs naechsten Schluessel-Level und ohne Achsenetikett —
        dreizehn Beschriftungen haben die Preisachse auf dem Handy zugedeckt. */
     var lv = [], kurs = L.kurs;
@@ -76122,8 +76429,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
            ideenNachholenVoll einmal M5. */
         ideenNachholenVoll(datenSym, paar[0]);
 
+        busy(true, 'Reading order flow…');
+        return fpFuerKi(L, tf).then(function (fp) {
+        TV._fpKi = fp;
         var fakten = sachstandText(L, { tfWahl: tf, anzeige: anzeige, kalender: paar[2],
-                                        fein: TV._fein, mStop: medianStop(L.sym) });
+                                        fein: TV._fein, mStop: medianStop(L.sym), fp: fp });
         TV._fakten = fakten;
         busy(true, 'Analysing…');
         var mitPb = /=== THE PLAYBOOK THE USER TRADES/.test(fakten);
@@ -76154,6 +76464,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           TV._analyse = { sym: TV.sym, ts: Date.now(), kurs: Lx && Lx.kurs, atr: eb ? eb.atr : NaN };
           letzteMerken(r.text, r.fremd);
           malen();
+        });
         });
       });
     }).catch(function (e) {
