@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-06a';
+  window.APEX_BUILD = '2026-10-06c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7742,6 +7742,15 @@ body.light #page-chart .tv-feld select{background:#fff;border-color:rgba(0,0,0,.
 #page-chart .tv-ev-tfs button.on{color:var(--gold);border-color:var(--gold-line);background:var(--gold-dim)}
 #page-chart .tv-ev-note{font-size:var(--fs-label);color:var(--ink3);margin-left:auto}
 #page-chart .tv-ev-chart{position:relative;flex:1 1 auto;min-height:0}
+#page-chart .tv-ev-stil{position:absolute;top:44px;right:10px;z-index:6;width:min(460px,calc(100% - 20px));max-height:calc(100% - 56px);overflow:auto;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-md,12px);box-shadow:0 14px 40px rgba(0,0,0,.35);padding:10px 12px}
+#page-chart .tv-ev-stil .acs-panel{margin-top:6px;background:transparent;border:none;padding:4px 2px}
+#page-chart .tv-ev-stil-kopf{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:2px 2px 6px;border-bottom:0.5px solid var(--rim)}
+#page-chart .tv-ev-stil-kopf b{font-size:var(--fs-body,13px);color:var(--ink)}
+#page-chart .tv-ev-stil-kopf span{font-size:var(--fs-label,11px);color:var(--ink3);flex:1}
+#page-chart .tv-ev-stil-zu{background:none;border:none;color:var(--ink3);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
+#page-chart .tv-ev-stil-zu:hover{color:var(--ink)}
+#page-chart .tv-ev-tfs [data-evstil]{font-family:var(--font-body)}
+body.light #page-chart .tv-ev-stil{background:#fff}
 #page-chart .tv-ev-leer{position:absolute;inset:44px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;padding:24px}
 #page-chart .tv-ev-leer[hidden]{display:none}
 #page-chart .tv-ev-leer-t{font-family:var(--font-display);font-size:var(--fs-md);font-weight:700;color:var(--ink)}
@@ -48949,7 +48958,13 @@ self.addEventListener('message', async (ev) => {
       window.ApexMarketData.getTicks(sym, h).then(function (tk) {
         e.loading = false;
         if (tk && tk.n) { e.data = tk; idbPut(k, tk); }
-        else if (fresh(h)) { later(120000); }                     // noch nicht erschienen
+        else if (fresh(h)) {
+          /* Noch nicht erschienen. Läuft die Stunde noch, gezielt kurz nach
+             ihrem Ende fragen statt alle zwei Minuten; ist sie gerade
+             vorbei, im Minutentakt. */
+          var bisEnde = h + HOUR - Date.now();
+          later(bisEnde > 0 ? bisEnde + 90000 : 60000);
+        }
         else e.data = null;                                       // Markt zu: wirklich leer
         e.ok = !e.retryAt;
         fire();
@@ -49807,6 +49822,8 @@ self.addEventListener('message', async (ev) => {
     function yOf(p) { var v = series.priceToCoordinate(p); return (v == null || !isFinite(v)) ? null : v; }
 
     var th = theme();
+    /* Eigene Farben eines Charts (Zones View) schlagen das Theme. */
+    if (this.fpColors) th = Object.assign({}, th, this.fpColors);
     var spacing = (xOf(a + 1) != null && xOf(a) != null) ? Math.abs(xOf(a + 1) - xOf(a)) : 8;
     var w = Math.max(2, spacing * 0.8);
     var visBars = Math.max(1, vr.to - vr.from);
@@ -49845,7 +49862,7 @@ self.addEventListener('message', async (ev) => {
     var zFrom = Math.max(0, a - q.zoneLen), fps = {};
     for (var zj = zFrom; zj <= b; zj++) fps[zj] = fpRest(zj);
     var zl = FP.zones(fps, closes, zFrom, b, q.zoneLen, q.delBroken == 1);
-    var pendingAny = restOffen, self = this;
+    var pendingAny = restOffen, self = this, beschriftet = {};
     x.save();
     zl.forEach(function (z) {
       var x1 = xOf(z.from), x2 = xOf(z.to), y1 = yOf(z.top), y2 = yOf(z.bot);
@@ -49866,13 +49883,21 @@ self.addEventListener('message', async (ev) => {
       var xl = cx - w / 2;
       if (!fp) {                                      // lädt noch
         pendingAny = true;
-        if (drawText) {
-          x.globalAlpha = 0.5; x.fillStyle = th.ink3; x.font = '9px system-ui, sans-serif';
+        if (spacing >= 6) {          // einmal pro Stunde — stört auch rausgezoomt nicht
+          x.globalAlpha = 0.7; x.fillStyle = th.ink3; x.font = '10px system-ui, sans-serif';
           x.textAlign = 'center'; x.textBaseline = 'top';
           var yl = yOf(lowOf(k));
-          /* Dukascopy veröffentlicht eine Stunde erst nach ihrem Ende. */
-          var neu = all.t[k] + 2 * 3600000 > Date.now();
-          if (yl != null) x.fillText(neu ? 'ticks after the hour' : 'loading…', cx, yl + 4);
+          /* Einmal pro Stunde beschriften, nicht unter jede Kerze. Nur die
+             LAUFENDE Stunde gibt es wirklich noch nicht (Dukascopy
+             veröffentlicht nach Stundenende) — alles davor lädt bloss. */
+          var hk = Math.floor(all.t[k] / 3600000) * 3600000;
+          if (yl != null && !beschriftet[hk]) {
+            beschriftet[hk] = true;
+            var ende = new Date(hk + 3600000);
+            var laeuft = hk + 3600000 > Date.now();
+            x.fillText(laeuft ? 'ticks at ' + ('0' + ende.getHours()).slice(-2) + ':' + ('0' + ende.getMinutes()).slice(-2)
+                              : 'loading…', cx, yl + 4);
+          }
         }
         continue;
       }
@@ -50410,6 +50435,10 @@ self.addEventListener('message', async (ev) => {
     this._shown = shown;
     this._markersApi = LWC.createSeriesMarkers(this.series, []);
     if (savedLevels) this.setLevels(savedLevels);
+    /* Zonen und Footprint hängen als Primitive an der alten Serie — mit
+       ihr wären sie weg. Die _paint-Funktionen erkennen die neue Serie. */
+    try { this._paintZones(); } catch (e) {}
+    try { if (this._fpOpts) this._paintFootprint(); } catch (e) {}
     return this;
   };
 
@@ -71599,6 +71628,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                 '<span class="tv-ev-note" id="tvEvNote"></span></div>' +
               '<div class="tv-ev-chart" id="tvEvChart"></div>' +
               '<div class="tv-ev-leer" id="tvEvLeer" hidden></div>' +
+              '<div class="tv-ev-stil" id="tvEvStil" hidden></div>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -75362,6 +75392,58 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (EV.an) evChartZeigen();
   }
 
+  function evStilOffen() { var h = document.getElementById('tvEvStil'); return !!(h && !h.hidden); }
+
+  function evStilHtml() {
+    var F = evFarben();
+    var farbe = function (k, label) {
+      /* Fachbegriffe nicht übersetzen lassen — aus „Supply" machte Google „Liefern". */
+      return '<label class="acs-c"><span class="notranslate" translate="no">' + label + '</span><input type="color" data-evf="' + k + '" value="' + F[k] + '"></label>';
+    };
+    return '<div class="acs-row"><div class="acs-lbl">Zones</div><div class="acs-colors">' +
+        farbe('supply', 'Supply') + farbe('demand', 'Demand') + farbe('levels', 'Key levels') +
+      '</div></div>' +
+      '<div class="acs-row"><div class="acs-lbl">Opacity</div><div style="flex:1;display:flex;align-items:center;gap:10px">' +
+        '<input type="range" min="30" max="250" step="10" data-evf="zoneAlpha" value="' + F.zoneAlpha + '" style="flex:1;accent-color:var(--gold)">' +
+        '<span class="acs-c" data-evf-wert>' + F.zoneAlpha + '%</span></div></div>' +
+      '<div class="acs-row"><div class="acs-lbl">Footprint</div><div class="acs-colors">' +
+        farbe('fpBuy', 'Buyers') + farbe('fpSell', 'Sellers') + farbe('poc', 'POC') +
+      '</div></div>' +
+      '<div class="acs-row"><div class="acs-lbl"></div><div><button class="el-btn" data-evf-reset>Reset zones &amp; footprint</button></div></div>';
+  }
+
+  function evStilUmschalten() {
+    var h = document.getElementById('tvEvStil');
+    if (!h) return;
+    h.hidden = !h.hidden;
+    if (h.hidden) return;
+    h.innerHTML = '<div class="tv-ev-stil-kopf"><b>Chart style</b><span>Saved on this device · candle colours and theme also apply to Market Replay</span>' +
+      '<button type="button" class="tv-ev-stil-zu" aria-label="Close">×</button></div>' +
+      '<div id="tvEvStilA"></div><div class="acs-panel" id="tvEvStilB">' + evStilHtml() + '</div>';
+    var a = document.getElementById('tvEvStilA');
+    if (window.ApexChartStyle && a) window.ApexChartStyle.mount(a, EV.inst, null);
+    h.querySelector('.tv-ev-stil-zu').onclick = function () {
+      h.hidden = true;
+      var b = document.querySelector('#tvEvTfs [data-evstil]'); if (b) b.classList.remove('on');
+    };
+    var B = document.getElementById('tvEvStilB');
+    var setzen = function (t, neuMalen) {
+      var k = t.getAttribute('data-evf'); if (!k) return;
+      var F = evFarben();
+      F[k] = k === 'zoneAlpha' ? Number(t.value) : t.value;
+      merke('evfarben', JSON.stringify(F));
+      var w = B.querySelector('[data-evf-wert]'); if (w) w.textContent = F.zoneAlpha + '%';
+      if (neuMalen) evChartZeigen();
+    };
+    B.addEventListener('input', function (e) { setzen(e.target, true); });
+    B.addEventListener('click', function (e) {
+      if (!e.target.closest('[data-evf-reset]')) return;
+      merke('evfarben', '{}');
+      B.innerHTML = evStilHtml();
+      evChartZeigen();
+    });
+  }
+
   function evLeer(html) {
     var leer = document.getElementById('tvEvLeer'), host = document.getElementById('tvEvChart');
     var tfs = document.getElementById('tvEvTfs'), note = document.getElementById('tvEvNote');
@@ -75402,10 +75484,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }).join('') + '<button type="button" data-evalle="1" class="' + (EV.alle ? 'on' : '') +
         '" title="Also draw wide areas, contested and rejected zones">All zones</button>' +
         '<button type="button" data-evfp="1" class="' + (EV.fp ? 'on' : '') +
-        '" title="Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.">Footprint</button>';
+        '" title="Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.">Footprint</button>' +
+        '<button type="button" data-evstil="1" class="' + (evStilOffen() ? 'on' : '') +
+        '" title="Colours and chart style — saved for next time">Style</button>';
       tfs.onclick = function (ev) {
         var a = ev.target && ev.target.closest && ev.target.closest('[data-evalle]');
         if (a) { EV.alle = !EV.alle; evChartZeigen(); return; }
+        var st = ev.target && ev.target.closest && ev.target.closest('[data-evstil]');
+        if (st) { evStilUmschalten(); st.classList.toggle('on', evStilOffen()); return; }
         var f = ev.target && ev.target.closest && ev.target.closest('[data-evfp]');
         if (f) { EV.fp = !EV.fp; merke('evfp', EV.fp ? '1' : '0'); evChartZeigen(); return; }
         var k = ev.target && ev.target.closest && ev.target.closest('[data-evtf]');
@@ -75426,6 +75512,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     EV.laden = window.ApexChart.create(host, { symbol: L.sym, timeframe: tf.toLowerCase(), volume: false })
       .then(function (inst) {
         EV.inst = inst; EV.laden = null;
+        /* Gespeicherte Optik sofort, nicht erst wenn jemand das Panel öffnet. */
+        if (window.ApexChartStyle) {
+          try { var cs = window.ApexChartStyle.load(); inst.setStyle(cs); inst.setSeriesType(cs.seriesType, cs); } catch (x) {}
+        }
         try {
           inst.chart.subscribeClick(function (param) {
             if (!param || !param.point) return;
@@ -75467,10 +75557,33 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return { art: 'rahmen' };
   }
 
+  /* ── Eigene Farben des Zones View ──────────────────────────────
+     Kerzen, Hintergrund, Raster und Theme kommen aus ApexChartStyle —
+     derselben Einstellung wie im Replay ("deine Farben, überall").
+     Was es nur hier gibt, steht hier: Zonen, Footprint, Schlüssel-Level. */
+  var EV_FARBEN_STD = { supply: '#f0636a', demand: '#3ecf8e', fpBuy: '#3ecf8e', fpSell: '#f0636a',
+                        poc: '#c9a84c', levels: '#8b91a1', zoneAlpha: 100 };
+  function evFarben() {
+    var f = {}, k;
+    for (k in EV_FARBEN_STD) f[k] = EV_FARBEN_STD[k];
+    try {
+      var r = JSON.parse(lies('evfarben', '{}'));
+      for (k in r) if (k in EV_FARBEN_STD && (k === 'zoneAlpha' ? isFinite(r[k]) : /^#[0-9a-f]{6}$/i.test(r[k]))) f[k] = r[k];
+    } catch (e) {}
+    return f;
+  }
+  function rgbVon(hex) {
+    var m = /^#([0-9a-f]{6})$/i.exec(String(hex));
+    if (!m) return '127,127,127';
+    var n = parseInt(m[1], 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(',');
+  }
+
   function zonenStil(g, darst) {
+    var F = evFarben();
     var p = g.staerke ? g.staerke.punkte : 50;
-    var a = Math.max(0.07, Math.min(0.24, 0.07 + (p - 35) / 45 * 0.17));
-    var rgb = g.supply ? '240,99,106' : '62,207,142';
+    var a = Math.max(0.07, Math.min(0.24, 0.07 + (p - 35) / 45 * 0.17)) * (F.zoneAlpha / 100);
+    var rgb = rgbVon(g.supply ? F.supply : F.demand);
     var st = { bisRand: true, fill: 'rgba(' + rgb + ',' + a.toFixed(3) + ')',
                label: (g.id ? g.id + ' ' : '') + (g.tfs ? g.tfs.join('+') : (g.tf || '')) +
                       (g.staerke ? ' ' + p + '%' : ''),
@@ -75529,6 +75642,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     EV.zonen = liste;
     var spezi = [{ key: 'evz', kind: 'overlay', plots: [], zones: liste, zoneOpts: { roh: true } }];
     inst.fpSymbol = fpSym();
+    var F = evFarben();
+    inst.fpColors = { up: F.fpBuy, down: F.fpSell, gold: F.poc };
     if (EV.fp && inst.fpSymbol && window.ApexIndicators) {
       spezi.push({ key: 'evfp', kind: 'overlay', plots: [],
                    footprint: window.ApexIndicators.fillParams('fp', null) });
@@ -75540,7 +75655,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     (L.schluessel || []).slice().sort(function (a, b) {
       return Math.abs(a.p - kurs) - Math.abs(b.p - kurs);
     }).slice(0, 6).forEach(function (s, i) {
-      lv.push({ key: 'kl' + i, kind: 'kl', price: s.p, title: s.k, color: '#8b91a1', style: 2,
+      lv.push({ key: 'kl' + i, kind: 'kl', price: s.p, title: s.k, color: evFarben().levels, style: 2,
                 width: 1, axis: false });
     });
     var S = TV._setup;
