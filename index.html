@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-06c';
+  window.APEX_BUILD = '2026-10-07a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -72144,7 +72144,130 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return o;
   }
 
+  /* ── Indizes ohne Twelve-Data-Tarif ────────────────────────────────
+     Twelve Data liefert NDX/SPX/DJI nur im bezahlten Tarif, und 'NAS100'
+     kennt es gar nicht. Yahoo hat zwei Haelften: den Kassa-Index (richtiger
+     Kurs, Echtzeit, aber nur 15:30-22:00 MEZ) und den Future (fast rund um
+     die Uhr, aber ~10 min alt und um die Basis hoeher — gemessen 07.10.2026
+     NQ 31.324 gegen NDX 31.101). Zusammengesetzt: Future-Kerzen, um die
+     GEMESSENE Basis verschoben, in der Kassa-Sitzung durch die echten
+     Index-Kerzen ersetzt. Die Basis wird bei jedem Abruf neu gemessen (sie
+     driftet und springt beim Kontraktwechsel), nie fest eingetragen. */
+  var INDEX_YAHOO = {
+    NAS100: { fut: 'NQ=F', kasse: '^NDX' },
+    SPX500: { fut: 'ES=F', kasse: '^GSPC' },
+    US30:   { fut: 'YM=F', kasse: '^DJI' }
+  };
+
+  function yJson(ysym, tf) {
+    return fetch(kerzenWorker() + '/ycandles?symbol=' + encodeURIComponent(ysym) + '&interval=' + tf)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || j.status === 'error' || !Array.isArray(j.values) || !j.values.length)
+          throw new Error((j && j.message) || 'yahoo failed for ' + ysym);
+        return j.values.map(function (v) {
+          return { t: Date.parse(String(v.datetime).replace(' ', 'T') + 'Z'),
+                   o: +v.open, h: +v.high, l: +v.low, c: +v.close, v: +(v.volume || 0) };
+        }).filter(function (b) { return isFinite(b.t) && isFinite(b.c); });
+      });
+  }
+
+  function indexHolen(sym, tf, anzahl) {
+    var m = INDEX_YAHOO[sym];
+    var min = { '1min': 1, '5min': 5, '15min': 15, '30min': 30, '1h': 60, '4h': 240 }[tf] || 15;
+    var raster = min * 60000;
+    var merkKey = 'apexIdxBasis_' + sym;
+    var fehler = function () { return null; };
+    return Promise.all([yJson(m.fut, tf).catch(fehler), yJson(m.kasse, tf).catch(fehler)])
+      .then(function (r) {
+        var fut = r[0], kasse = r[1];
+        if (!fut && !kasse) throw new Error('No free data for ' + sym + ' right now (Yahoo unreachable)');
+        /* Nur Kassa: richtiger Kurs, nur mit Loch ueber Nacht. Besser als nichts. */
+        if (!fut) {
+          TV._quelle = 'Yahoo ' + m.kasse + ' (cash session only)';
+          return ausWerten({ values: kasse.map(zuTd) }, sym, anzahl);
+        }
+        /* Die laufende Kerze (jeweils die letzte) traegt die Abrufzeit als
+           Zeitstempel — aufs Raster legen. Alle anderen Kassa-Kerzen zaehlen
+           nur, wenn sie AUF dem Raster beginnen: H1 beim Index startet um
+           13:30 UTC, der Future um 13:00, solche Kerzen sind nicht vergleichbar. */
+        var aufRaster = function (b, letzte) {
+          var t = b.t - (b.t % raster);
+          if (t === b.t) return { t: t, o: b.o, h: b.h, l: b.l, c: b.c, v: b.v };
+          return letzte ? { t: t, o: b.o, h: b.h, l: b.l, c: b.c, v: b.v, teil: true } : null;
+        };
+        var kasseNachT = {};
+        if (kasse) kasse.forEach(function (b, i) {
+          var r2 = aufRaster(b, i === kasse.length - 1);
+          if (r2) einfuegen(kasseNachT, r2);
+        });
+        var futR = {};
+        fut.forEach(function (b, i) {
+          var r2 = aufRaster(b, i === fut.length - 1);
+          if (r2) einfuegen(futR, r2);
+        });
+        fut = Object.keys(futR).map(function (t) { return futR[t]; })
+          .sort(function (a, b) { return a.t - b.t; });
+        /* Basis = Median(Future - Kassa) ueber die juengsten gemeinsamen
+           fertigen Kerzen. Median, weil der Future 10 min nachhaengt und
+           einzelne Kerzen dadurch schief stehen. */
+        var diffs = [];
+        for (var i = fut.length - 2; i >= 0 && diffs.length < 60; i--) {
+          var k = kasseNachT[fut[i].t];
+          if (k && fut[i].t + raster < Date.now()) diffs.push(fut[i].c - k.c);
+        }
+        var basis = null, gemessen = false;
+        if (diffs.length >= 3) {
+          diffs.sort(function (a, b) { return a - b; });
+          basis = diffs[Math.floor(diffs.length / 2)];
+          gemessen = true;
+          try { localStorage.setItem(merkKey, JSON.stringify({ b: basis, ts: Date.now() })); } catch (e) {}
+        } else {
+          try { var alt = JSON.parse(localStorage.getItem(merkKey) || 'null'); if (alt) basis = alt.b; } catch (e) {}
+        }
+        if (basis == null) {
+          /* Ohne Basis ist der Future-Kurs schlicht ein anderer Kurs — das
+             faellt niemandem auf und macht jede Zone falsch. Dann lieber nur
+             die Kassa-Kerzen oder ein ehrlicher Fehler. */
+          if (kasse) {
+            TV._quelle = 'Yahoo ' + m.kasse + ' (cash session only)';
+            return ausWerten({ values: kasse.map(zuTd) }, sym, anzahl);
+          }
+          throw new Error('Cannot align ' + m.fut + ' to the ' + sym + ' price yet — try during the US session');
+        }
+        var nachT = {};
+        fut.forEach(function (b) {
+          nachT[b.t] = { t: b.t, o: b.o - basis, h: b.h - basis, l: b.l - basis, c: b.c - basis, v: b.v };
+        });
+        Object.keys(kasseNachT).forEach(function (t) {
+          var k = kasseNachT[t], f = nachT[t];
+          /* Nur ein laufender Kurs, keine ganze Kerze: Future-Kerze behalten
+             und nur bis zum Echtzeit-Kurs verlaengern. */
+          nachT[t] = (k.teil && f)
+            ? { t: f.t, o: f.o, h: Math.max(f.h, k.c), l: Math.min(f.l, k.c), c: k.c, v: f.v }
+            : { t: k.t, o: k.o, h: k.h, l: k.l, c: k.c, v: f ? f.v : 0 };
+        });
+        var liste = Object.keys(nachT).map(function (t) { return nachT[t]; });
+        TV._quelle = 'Yahoo ' + m.fut + ' adjusted to cash (' + (basis >= 0 ? '−' : '+') +
+                     Math.abs(basis).toFixed(1) + (gemessen ? '' : ', last measured') + ')' +
+                     (kasse ? ' + ' + m.kasse : '');
+        return ausWerten({ values: liste.map(zuTd) }, sym, anzahl);
+      });
+  }
+  /* Laufende Kerze und fertige Kerze mit demselben Rasterplatz zusammenfassen
+     statt die eine durch die andere zu ersetzen. */
+  function einfuegen(ziel, b) {
+    var a = ziel[b.t];
+    ziel[b.t] = a ? { t: b.t, o: a.o, h: Math.max(a.h, b.h), l: Math.min(a.l, b.l), c: b.c, v: a.v + b.v } : b;
+    /* Eine fertige Kerze am selben Platz macht den Eintrag zur ganzen Kerze. */
+    if (a && !(a.teil && b.teil)) delete ziel[b.t].teil;
+  }
+  function zuTd(b) {
+    return { datetime: tdDatum(b.t), open: b.o, high: b.h, low: b.l, close: b.c, volume: b.v };
+  }
+
   function kerzenRoh(sym, tf, anzahl) {
+    if (INDEX_YAHOO[sym]) return indexHolen(sym, tf, anzahl);
     var y = yahooSym(sym);
     if (y) {
       return fetch(kerzenWorker() + '/ycandles?symbol=' + encodeURIComponent(y) +
@@ -75452,8 +75575,62 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (html) { if (tfs) tfs.innerHTML = ''; if (note) note.textContent = ''; }
   }
 
+  /* ── Zones View läuft von selbst weiter ─────────────────────────
+     Vorher stand der Chart still, bis jemand die KI wieder anwarf.
+     Zwei Takte, weil Kerzen Kontingent kosten (800/Tag für ALLE Nutzer),
+     der Kurs aber nicht:
+       • jede Sekunde: die laufende Kerze aus dem TradingView-Kurs
+         (subscribeToQuote, gratis) fortschreiben, neue Kerzen anfangen;
+       • alle 5–15 min: echte Kerzen + Zonen neu (zonenNeu, OHNE KI).
+     Beides nur, solange der Zones View sichtbar ist. Ohne frischen Kurs
+     (Markt zu, > 90 s still) entsteht keine Kerze — nichts Erfundenes. */
+  var EV_TF_MS = { M1: 60000, M5: 300000, M15: 900000, H1: 3600000, H4: 14400000 };
+  var EV_NEU_MS = { M1: 300000, M5: 300000, M15: 300000, H1: 600000, H4: 900000 };
+
+  function evSichtbar() {
+    var seite = document.getElementById('page-chart');
+    return EV.an && !document.hidden && !!seite && seite.classList.contains('active');
+  }
+
+  function evLive() {
+    if (!evSichtbar() || !EV.inst || !EV.inst.series || !EV.bars || !EV.bars.n || !TV._levels) return;
+    var p = liveKurs(TV._levels.sym);
+    var ms = EV_TF_MS[EV.tf];
+    if (p == null || !ms) return;
+    var b = EV.bars, n = b.n, lastT = b.t[n - 1];
+    var start = Math.max(Math.floor(Date.now() / ms) * ms, lastT);
+    var Lv = EV._live;
+    if (!Lv || Lv.basis !== b || Lv.t !== start) {
+      var o, h, l;
+      if (start === lastT) { o = b.o[n - 1]; h = b.h[n - 1]; l = b.l[n - 1]; }   // laufende echte Kerze
+      else { o = (Lv && Lv.basis === b && Lv.t < start) ? Lv.c : b.c[n - 1]; h = o; l = o; }
+      Lv = EV._live = { basis: b, t: start, o: o, h: h, l: l, c: p };
+    }
+    Lv.h = Math.max(Lv.h, p); Lv.l = Math.min(Lv.l, p); Lv.c = p;
+    var typ = EV.inst._seriesType;
+    var zeile = (typ === 'line' || typ === 'area') ? { time: Math.floor(start / 1000), value: p }
+              : { time: Math.floor(start / 1000), open: Lv.o, high: Lv.h, low: Lv.l, close: Lv.c };
+    try { EV.inst.series.update(zeile); } catch (x) {}
+  }
+
+  function evNachladen() {
+    if (!evSichtbar() || EV._neuLaeuft || !TV._levels || !EV.bars) return;
+    var ms = EV_NEU_MS[EV.tf] || 300000;
+    if (Date.now() - (EV._neuAm || 0) < ms) return;
+    EV._neuLaeuft = true; EV._neuAm = Date.now();
+    Promise.resolve(zonenNeu()).catch(function () {}).then(function () { EV._neuLaeuft = false; });
+  }
+
+  function evTakteStarten() {
+    if (EV._takt) return;
+    EV._neuAm = Date.now();           // gerade analysiert/geladen → erst nach dem Intervall
+    EV._takt = setInterval(evLive, 1000);
+    EV._taktNeu = setInterval(evNachladen, 20000);
+  }
+
   function evChartZeigen() {
     if (!EV.an) return;
+    evTakteStarten();
     var host = document.getElementById('tvEvChart');
     if (!host) return;
     var L = TV._levels;
@@ -75502,7 +75679,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }
     var note = document.getElementById('tvEvNote');
     if (note) note.textContent = (L.quelle === 'Yahoo' ? 'Candles: real-time feed' :
-      'Candles: about 2 min behind the live price') + ' · zones from all timeframes' +
+      'Candles: about 2 min behind, last candle follows the live price') + ' · updates itself every ' +
+      Math.round((EV_NEU_MS[tf] || 300000) / 60000) + ' min without the AI · zones from all timeframes' +
       (EV.fp ? (fpSym() ? ' · footprint: ticks arrive once each hour is over'
                         : ' · no tick data for this instrument') : '');
     var e = mitBars.filter(function (x) { return x.tf === tf; })[0];
@@ -75617,9 +75795,23 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   function evZeichnen(inst, e, L) {
     if (!inst || !e) return;
     if (EV.bars !== e.bars) {
+      /* Automatisches Nachladen darf Zoom und Position nicht wegwerfen:
+         gleicher Zeitrahmen → Ausschnitt um die neuen Kerzen verschieben.
+         Nur beim ersten Bild oder Zeitrahmenwechsel ans Ende springen. */
+      var vorher = null;
+      if (EV.bars && EV._barsTf === e.tf) {
+        try { vorher = { vr: inst.chart.timeScale().getVisibleLogicalRange(), n: EV.bars.n, t: EV.bars.t[EV.bars.n - 1] }; } catch (x) {}
+      }
       inst.setBars(e.bars);
-      EV.bars = e.bars;
-      try { inst.followTail(160); } catch (x) { try { inst.fit(); } catch (y) {} }
+      EV.bars = e.bars; EV._barsTf = e.tf; EV._live = null;
+      if (vorher && vorher.vr) {
+        // Verschiebung über die Zeit der alten letzten Kerze, nicht über die Anzahl
+        var alt = inst.indexAt ? inst.indexAt(vorher.t) : -1;
+        var shift = alt >= 0 ? alt - (vorher.n - 1) : e.bars.n - vorher.n;
+        try { inst.chart.timeScale().setVisibleLogicalRange({ from: vorher.vr.from + shift, to: vorher.vr.to + shift }); } catch (x) {}
+      } else {
+        try { inst.followTail(160); } catch (x) { try { inst.fit(); } catch (y) {} }
+      }
     }
     /* Nur was man handeln kann und was nah ist: die naechsten drei
        brauchbaren Zonen je Seite. Breite Bereiche, umstrittene und
