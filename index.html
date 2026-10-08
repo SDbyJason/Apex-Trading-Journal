@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-07l';
+  window.APEX_BUILD = '2026-10-08a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -9549,6 +9549,38 @@ body.light #landingPage * {
   ]
 }
 </script>
+<style id="tv-layout-0810">
+/* 08.10.2026 (Jason: "sieht gequetscht aus", "großer freier Bereich links").
+   1) KI-Spalte: feste Höhe + overflow:hidden liess der Browser alle Kinder
+      schrumpfen — Antwort, Protokoll und Setup-Leiste wurden abgeschnitten.
+      Jetzt schrumpft nichts mehr, die Antwort bekommt echte Mindesthöhe und
+      die Spalte scrollt als Ganzes, wenn es eng wird.
+   2) Datenbereich: Market read und die lange Zonenliste standen in EINER
+      Rasterzeile — links blieb ein Loch, bis rechts die Liste endete. Jetzt
+      steht links Market read + die Zeitrahmen-Spalten, rechts die Zonenliste
+      über beide Zeilen mit eigener Scrollhöhe. */
+#page-chart .tv-ki{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+#page-chart .tv-ki > *{flex-shrink:0}
+#page-chart .tv-ki-out{flex:1 0 auto;min-height:240px;max-height:none;overflow-y:visible;font-size:13px;line-height:1.7;
+  padding:12px 14px;border-radius:var(--r-md);background:var(--elevated);border:0.5px solid var(--rim)}
+#page-chart .tv-lauf{max-height:92px;overflow-y:auto;font-size:11.5px;border-left:2px solid var(--gold-line);padding-left:9px}
+#page-chart .tv-lauf:empty{display:none}
+#page-chart .tv-setup:not(:empty){padding:12px 14px 14px}
+#page-chart .tv-leiter{margin:14px 0 12px}
+#page-chart .tv-lt-bahn{height:46px}
+@media(min-width:981px){
+  /* Links alles untereinander, rechts die Zonenliste über die volle Höhe der
+     linken Spalte. height:0 + min-height:100% heisst: die Liste bestimmt die
+     Zeilenhöhe NICHT mit (sonst bliebe links wieder ein Loch), füllt sie aber
+     aus und scrollt in sich — mindestens 440 px, damit sie nie ein Schlitz wird. */
+  #page-chart .tv-daten{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto auto auto 1fr;align-items:start}
+  #page-chart .tv-lage{grid-column:1;grid-row:1}
+  #page-chart .tv-levels{grid-column:1;grid-row:2}
+  #page-chart .tv-zone{grid-column:1;grid-row:3}
+  #page-chart .tv-ideen{grid-column:1;grid-row:4}
+  #page-chart .tv-zl{grid-column:2;grid-row:1 / span 4;align-self:stretch;height:0;min-height:max(100%,440px);overflow-y:auto;scrollbar-width:thin}
+}
+</style>
 </head>
 <body>
 
