@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-08j';
+  window.APEX_BUILD = '2026-10-08m';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7736,9 +7736,11 @@ body.light #page-chart .tv-feld select{background:#fff;border-color:rgba(0,0,0,.
 #page-chart .tv-ev{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;background:var(--layer)}
 #page-chart .tv-ev[hidden]{display:none}
 #page-chart .tv-ev-kopf{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:0.5px solid var(--rim);flex-wrap:wrap}
-#page-chart .tv-ev-tfs{display:flex;gap:4px}
+#page-chart .tv-ev-tfs{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+#page-chart .tv-ev-tfs button{white-space:nowrap}
+#page-chart .tv-ev-tfs .tv-ev-br{width:4px}
 #page-chart .tv-ev-tfs button{font-family:var(--font-mono);font-size:var(--fs-label);padding:3px 9px;border-radius:var(--r-xs);border:0.5px solid var(--rim2);background:transparent;color:var(--ink3);cursor:pointer}
-#page-chart .tv-ev-tfs [data-evalle]{margin-left:8px;font-family:var(--font-body)}
+#page-chart .tv-ev-tfs .tv-ev-sw{font-family:var(--font-body)}
 #page-chart .tv-ev-tfs button.on{color:var(--gold);border-color:var(--gold-line);background:var(--gold-dim)}
 #page-chart .tv-ev-note{font-size:var(--fs-label);color:var(--ink3);margin-left:auto}
 #page-chart .tv-ev-chart{position:relative;flex:1 1 auto;min-height:0}
@@ -7751,6 +7753,30 @@ body.light #page-chart .tv-feld select{background:#fff;border-color:rgba(0,0,0,.
 #page-chart .tv-ev-stil-zu:hover{color:var(--ink)}
 #page-chart .tv-ev-tfs [data-evstil]{font-family:var(--font-body)}
 body.light #page-chart .tv-ev-stil{background:#fff}
+/* Handy: Zeitrahmen in der ersten Zeile, Schalter als waagrecht wischbare
+   zweite Zeile; Panels ueber die ganze Breite statt 460px rechts oben. */
+@media (max-width:760px){
+  #page-chart .tv-ev-kopf{padding:6px 8px;gap:6px}
+  #page-chart .tv-ev-tfs{width:100%;row-gap:6px}
+  #page-chart .tv-ev-tfs button{padding:6px 11px;min-height:32px}
+  #page-chart .tv-ev-tfs .tv-ev-br{flex-basis:100%;height:0;width:auto}
+  #page-chart .tv-ev-sws{display:flex;gap:4px;overflow-x:auto;flex:1 1 100%;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  #page-chart .tv-ev-sws::-webkit-scrollbar{display:none}
+  #page-chart .tv-ev-stil{left:6px;right:6px;width:auto;top:6px;max-height:calc(100% - 12px);padding:10px}
+  #page-chart .tv-ev-stil-kopf span{flex-basis:100%;order:3}
+  #page-chart .tv-ev-stil-zu{margin-left:auto;font-size:24px;padding:2px 8px}
+  #page-chart .tv-ev-stil .aiu-row{gap:6px 8px;padding:10px 0}
+  #page-chart .tv-ev-stil .aiu-name{min-width:0;flex:1 1 auto;font-size:14px;font-weight:600}
+  #page-chart .tv-ev-stil .aiu-row .u{flex:1 1 calc(100% - 90px);font-size:12px;color:var(--ink3)}
+  #page-chart .tv-ev-stil .aiu-row input:not(.aiu-dot),#page-chart .tv-ev-stil select{font-size:16px}
+  #page-chart .tv-ev-stil .aiu-row input:not(.aiu-dot){width:76px;min-height:34px}
+  #page-chart .tv-ev-stil .aiu-row input.aiu-dot{width:26px;height:26px}
+  #page-chart .tv-ev-stil .aiu-row select{min-height:34px}
+  #page-chart .tv-ev-stil .aiu-x{font-size:20px;padding:4px 10px}
+  #page-chart .tv-ev-stil .aiu-add select{flex:1;min-height:34px}
+}
+#page-chart .tv-ev-sws{display:contents}
+@media (max-width:760px){#page-chart .tv-ev-sws{display:flex}}
 #page-chart .tv-ev-leer{position:absolute;inset:44px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;padding:24px}
 #page-chart .tv-ev-leer[hidden]{display:none}
 #page-chart .tv-ev-leer-t{font-family:var(--font-display);font-size:var(--fs-md);font-weight:700;color:var(--ink)}
@@ -77770,7 +77796,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         '<button type="button" class="tv-ev-stil-zu" aria-label="Close">×</button></div><div id="tvEvIndB"></div>';
       h.querySelector('.tv-ev-stil-zu').onclick = function () {
         h.hidden = true;
-        var b = document.querySelector('#tvEvTfs [data-evind]'); if (b) b.classList.remove('on');
+        evSchalterNeu();
       };
     }
     window.ApexIndicatorUI.mount(document.getElementById('tvEvIndB'), {
@@ -77781,6 +77807,30 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   if (window.ApexIndicatorUI) window.ApexIndicatorUI.onChanged(function () {
     try { if (evSichtbar()) evChartZeigen(); } catch (e) {}
   });
+
+  /* Eingeschaltete Schalter stehen vorne (links), ausgeschaltete in ihrer
+     festen Reihenfolge dahinter — abgewaehlt rutscht einer an seinen Platz
+     zurueck. Stabil sortiert, damit nichts springt, was sich nicht aendert. */
+  function evSchalterHtml() {
+    var n = evIndZahl();
+    var liste = [
+      { an: EV.alle, a: 'data-evalle', t: 'Also draw wide areas, contested and rejected zones', x: 'All zones' },
+      { an: EV.fp, a: 'data-evfp', t: 'Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.', x: 'Footprint' },
+      { an: !EV.zonenAus, a: 'data-evzonen', t: 'Supply and demand zones on the chart — the AI reads them either way', x: 'Zones' },
+      { an: evIndOffen() || n > 0, a: 'data-evind', t: 'Pick any Evidence indicator to draw on this chart', x: 'Indicators' + (n ? ' (' + n + ')' : '') },
+      { an: evStilOffen(), a: 'data-evstil', t: 'Colours and chart style — saved for next time', x: 'Style' }
+    ];
+    liste.forEach(function (k, i) { k.i = i; });
+    liste.sort(function (p, q) { return (q.an ? 1 : 0) - (p.an ? 1 : 0) || p.i - q.i; });
+    return '<span class="tv-ev-br"></span><span class="tv-ev-sws">' + liste.map(function (k) {
+      return '<button type="button" ' + k.a + '="1" class="tv-ev-sw' + (k.an ? ' on' : '') + '" title="' + k.t + '">' + k.x + '</button>';
+    }).join('') + '</span>';
+  }
+  function evSchalterNeu() {
+    var tfs = document.getElementById('tvEvTfs'); if (!tfs) return;
+    [].slice.call(tfs.querySelectorAll('.tv-ev-br,.tv-ev-sws')).forEach(function (b) { b.remove(); });
+    tfs.insertAdjacentHTML('beforeend', evSchalterHtml());
+  }
 
   function evStilOffen() { var h = document.getElementById('tvEvStil'); return !!(h && !h.hidden); }
 
@@ -77814,7 +77864,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (window.ApexChartStyle && a) window.ApexChartStyle.mount(a, EV.inst, null);
     h.querySelector('.tv-ev-stil-zu').onclick = function () {
       h.hidden = true;
-      var b = document.querySelector('#tvEvTfs [data-evstil]'); if (b) b.classList.remove('on');
+      evSchalterNeu();
     };
     var B = document.getElementById('tvEvStilB');
     var setzen = function (t, neuMalen) {
@@ -77949,26 +77999,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (tfs) {
       tfs.innerHTML = mitBars.map(function (e) {
         return '<button type="button" data-evtf="' + e.tf + '" class="' + (e.tf === tf ? 'on' : '') + '">' + e.tf + '</button>';
-      }).join('') + '<button type="button" data-evalle="1" class="' + (EV.alle ? 'on' : '') +
-        '" title="Also draw wide areas, contested and rejected zones">All zones</button>' +
-        '<button type="button" data-evfp="1" class="' + (EV.fp ? 'on' : '') +
-        '" title="Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.">Footprint</button>' +
-        '<button type="button" data-evzonen="1" class="' + (EV.zonenAus ? '' : 'on') +
-        '" title="Supply and demand zones on the chart — the AI reads them either way">Zones</button>' +
-        '<button type="button" data-evind="1" class="' + (evIndOffen() ? 'on' : '') +
-        '" title="Pick any Evidence indicator to draw on this chart">Indicators' +
-        (evIndZahl() ? ' (' + evIndZahl() + ')' : '') + '</button>' +
-        '<button type="button" data-evstil="1" class="' + (evStilOffen() ? 'on' : '') +
-        '" title="Colours and chart style — saved for next time">Style</button>';
+      }).join('') + evSchalterHtml();
       tfs.onclick = function (ev) {
         var a = ev.target && ev.target.closest && ev.target.closest('[data-evalle]');
         if (a) { EV.alle = !EV.alle; evChartZeigen(); return; }
         var zn = ev.target && ev.target.closest && ev.target.closest('[data-evzonen]');
         if (zn) { EV.zonenAus = !EV.zonenAus; merke('evzonen', EV.zonenAus ? '0' : '1'); evChartZeigen(); return; }
         var ib = ev.target && ev.target.closest && ev.target.closest('[data-evind]');
-        if (ib) { evIndUmschalten(); ib.classList.toggle('on', evIndOffen()); return; }
+        if (ib) { evIndUmschalten(); evSchalterNeu(); return; }
         var st = ev.target && ev.target.closest && ev.target.closest('[data-evstil]');
-        if (st) { evStilUmschalten(); st.classList.toggle('on', evStilOffen()); return; }
+        if (st) { evStilUmschalten(); evSchalterNeu(); return; }
         var f = ev.target && ev.target.closest && ev.target.closest('[data-evfp]');
         if (f) { EV.fp = !EV.fp; merke('evfp', EV.fp ? '1' : '0'); evChartZeigen(); return; }
         var k = ev.target && ev.target.closest && ev.target.closest('[data-evtf]');
