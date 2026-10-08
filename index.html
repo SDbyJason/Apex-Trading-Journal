@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-08a';
+  window.APEX_BUILD = '2026-10-08h';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -9565,7 +9565,20 @@ body.light #landingPage * {
   padding:12px 14px;border-radius:var(--r-md);background:var(--elevated);border:0.5px solid var(--rim)}
 #page-chart .tv-lauf{max-height:92px;overflow-y:auto;font-size:11.5px;border-left:2px solid var(--gold-line);padding-left:9px}
 #page-chart .tv-lauf:empty{display:none}
-#page-chart .tv-setup:not(:empty){padding:12px 14px 14px}
+#page-chart .tv-setup:not(:empty){padding:14px 16px 16px}
+/* Setup-Box (08.10.: "zu klein, kann man nicht lesen"): keine 46-%-Kappe mit
+   eigenem Mini-Scroll mehr — die Spalte scrollt als Ganzes. Größere Schrift,
+   Zusätze wie "risk 12.4" oder "2.1R · 50%" werden umbrochen statt abgeschnitten. */
+#page-chart .tv-ki .tv-setup:not(:empty){flex:0 0 auto;min-height:auto;max-height:none;overflow:visible}
+#page-chart .tv-su-kopf b{font-size:15px}
+#page-chart .tv-su-z{font-size:13px;line-height:1.6;color:var(--ink2);margin-bottom:8px}
+#page-chart .tv-su-r{font-size:14px;line-height:1.6;padding:6px 0;align-items:center;flex-wrap:wrap}
+#page-chart .tv-su-r span{flex:0 0 78px;font-size:12px}
+#page-chart .tv-su-r b{font-size:15px}
+#page-chart .tv-su-r i{font-size:12px;white-space:normal;overflow:visible;text-overflow:clip}
+#page-chart .tv-su-zgrund{font-size:12.5px;line-height:1.55;margin:2px 0 6px 85px}
+#page-chart .tv-su-warn,#page-chart .tv-su-hint{font-size:12.5px;line-height:1.55;margin-top:8px}
+#page-chart .tv-lt-m em{font-size:11px}
 #page-chart .tv-leiter{margin:14px 0 12px}
 #page-chart .tv-lt-bahn{height:46px}
 @media(min-width:981px){
@@ -13856,31 +13869,9 @@ function _authAction(type) {
     <div class="settings-panel" id="spanel-funded">
       <div style="max-width:900px">
 
-        <!-- AI Coach phase / firm info -->
-        <div class="glass-card" style="margin-bottom:12px">
-          <div class="gc-title" style="margin-bottom:0.5rem"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg> Account Phase</div>
-          <div style="font-size:12px;color:var(--ink3);margin-bottom:1rem">Set your current account type — used by the AI Coach and prop firm mode.</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div>
-              <div style="font-size:13px;font-weight:500;margin-bottom:6px">Phase</div>
-              <select class="privacy-select" style="width:100%" id="coachProfilePhase2" onchange="syncCoachProfile('phase',this.value)" aria-label="Coaching phase">
-                <option value="">— Select phase —</option>
-                <option value="Challenge Phase 1">Challenge Phase 1</option>
-                <option value="Challenge Phase 2">Challenge Phase 2</option>
-                <option value="Funded">Funded Account</option>
-                <option value="Live">Personal Live Account</option>
-                <option value="Demo">Demo / Practice</option>
-              </select>
-            </div>
-            <div>
-              <div style="font-size:13px;font-weight:500;margin-bottom:4px">Prop Firm Name</div>
-              <input type="text" id="coachProfileFirmName2" placeholder="FTMO, MyForexFunds…"
-                style="width:100%;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-md);padding:9px 12px;color:var(--ink);font-family:var(--font-body);font-size:13px;outline:none"
-                onchange="syncCoachProfile('firmName',this.value)" oninput="syncCoachProfile('firmName',this.value)">
-            </div>
-          </div>
-        </div>
-
+        <!-- Bis 08.10.2026 stand hier eine zweite Karte "Account Phase / Prop
+             Firm Name" (Freitext für den Coach). Firma und Phase kommen jetzt
+             aus dem Prop-Modus — ein Ort statt drei. -->
         <!-- Prop Firm Mode card (same as before, moved here) -->
         <div class="glass-card prop-firm-settings-card" id="propFirmSettingsCard">
           <div class="gc-title" style="margin-bottom:0.25rem;color:var(--gold)"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Prop mode</div>
@@ -19840,12 +19831,33 @@ function applyPropFirmMode() {
   }
   var goalTitle = document.getElementById('goalSectionTitle');
   if (goalTitle) goalTitle.style.color = on ? 'var(--loss)' : '';
+  _propCoachFields(st);
   if (!on) { hidePropFirmOverlay(); return; }
   checkPropFirmLimits();
 }
 
 /* Name bleibt (steht in VIEW_FNS und wird von außen gelesen); die Werte sind
    jetzt Geld aus dem Cockpit, nicht mehr Pips. */
+/* Coach profile: firm and phase are set by the Prop mode while it runs —
+   called here AND at the end of loadCoachProfile, which otherwise refills
+   the fields with the old hand-typed values. */
+function _propCoachFields(st) {
+  if (st === undefined) st = _propStatus();
+  var cf = document.getElementById('coachProfileFirmName'), cp = document.getElementById('coachProfilePhase');
+  var PH = { p1: 'Challenge Phase 1', p2: 'Challenge Phase 2', funded: 'Funded' };
+  [cf, cp].forEach(function (el) {
+    if (!el) return;
+    if (st && st.ready) {
+      el.disabled = true;
+      el.title = 'Set by the Prop mode — change it on the Prop Firm page';
+      el.value = el === cf ? st.firm : (PH[st.cfg.phase || 'p1'] || '');
+    } else if (el.disabled) {
+      el.disabled = false; el.title = '';
+      try { el.value = (JSON.parse(localStorage.getItem('apexCoachProfile_' + (window.currentUID || 'local')) || '{}') || {})[el === cf ? 'firmName' : 'phase'] || ''; } catch (e) {}
+    }
+  });
+}
+
 function computePropFirmDDStats() {
   var st = _propStatus();
   if (!st || !st.ready) return null;
@@ -25884,6 +25896,13 @@ function saveCoachProfile() {
       firmName:   (document.getElementById('coachProfileFirmName')   || {}).value || '',
       phase:      (document.getElementById('coachProfilePhase')      || {}).value || ''
     };
+    /* Locked by the Prop mode: keep what the trader typed before, do not
+       overwrite it with the mode's values. */
+    try {
+      var old = JSON.parse(localStorage.getItem('apexCoachProfile_' + uid) || '{}') || {};
+      if ((document.getElementById('coachProfileFirmName') || {}).disabled) profile.firmName = old.firmName || '';
+      if ((document.getElementById('coachProfilePhase') || {}).disabled) profile.phase = old.phase || '';
+    } catch(e2) {}
     localStorage.setItem('apexCoachProfile_' + uid, JSON.stringify(profile));
   } catch(e) {}
 }
@@ -25907,6 +25926,7 @@ function loadCoachProfile() {
       if (el) el.value = pair[1];
     });
   } catch(e) {}
+  try { if (typeof _propCoachFields === 'function') _propCoachFields(); } catch(e) {}
 }
 
 function coachQuick(text) {
@@ -34591,6 +34611,8 @@ function goToAuthPro(screen) {
         if(t==='SCRIPT'||t==='STYLE'||t==='TEXTAREA'||t==='TITLE') return NodeFilter.FILTER_REJECT;
         // Schon geschützt (z. B. die Rechtstexte) — nicht doppelt verpacken.
         if(p.closest && p.closest('.notranslate,[translate="no"]')) return NodeFilter.FILTER_REJECT;
+        // Hand-translated here (Prop mode, landing): the dictionary wins.
+        try { if(window.ApexI18n && ApexI18n.hasOwn && ApexI18n.hasOwn(v, p)) return NodeFilter.FILTER_REJECT; } catch(_){}
         // GT's own <font> output is already translated — leave its pieces alone.
         if(t==='FONT' && isPunct(v)) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
@@ -43727,7 +43749,7 @@ body.light .pt-sugg{background:var(--layer)}
       '.acx-kpi b{white-space:nowrap}',
       '.acx-kpi b.pos{color:var(--profit)}.acx-kpi b.neg{color:var(--loss)}',
       '.acx-spark{height:44px;width:100%;display:block;margin-bottom:10px}',
-      '.acx-prog{height:6px;border-radius:4px;background:var(--layer);overflow:hidden;margin:8px 0 4px}',
+      '.acx-prop{margin-top:12px;padding:10px 12px;border-radius:12px;border:0.5px solid rgba(var(--gold-rgb),.35);background:rgba(var(--gold-rgb),.06);cursor:pointer}.acx-prop:hover{border-color:var(--gold)}.acx-prop-h{display:flex;align-items:center;gap:8px;font-size:12px}.acx-prop-h b{color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.acx-prop-h em{font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}.acx-prop-m{font-family:var(--font-display);font-weight:800;font-size:9px;color:#07080b;background:linear-gradient(135deg,#c9a84c,#e8c96a);border-radius:5px;padding:2px 5px}.acx-prop-n{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:11px;color:var(--ink3)}.acx-prop-n b{color:var(--ink);font-family:var(--font-mono);margin-left:3px}.acx-prop .acx-prog{margin-top:8px}.acx-pn{font-size:12px;color:var(--ink2);line-height:1.55;padding:8px 10px;border-radius:9px;background:var(--elevated);border:0.5px solid var(--rim)}.acx-pn a{color:var(--gold)}.acx-prog{height:6px;border-radius:4px;background:var(--layer);overflow:hidden;margin:8px 0 4px}',
       '.acx-prog i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--profit))}',
       '.acx-prog-l{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3)}',
       '.acx-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}',
@@ -43819,13 +43841,23 @@ body.light .pt-sugg{background:var(--layer)}
           '<div class="acx-f"><label>Broker / Firm</label><select id="acxBroker"><option value="">— select —</option>'+groups+'<option value="__other"'+(e.broker&&!flatBrokers().includes(e.broker)?' selected':'')+'>Other…</option></select>'+
             '<input id="acxBrokerOther" placeholder="Broker name" value="'+esc(e.broker&&!flatBrokers().includes(e.broker)?e.broker:'')+'" style="margin-top:6px;display:'+(e.broker&&!flatBrokers().includes(e.broker)?'block':'none')+'"></div>'+
           '<div class="acx-f"><label>Platform</label><select id="acxPlatform"><option value="">— select —</option>'+PLATFORMS.map(function(p){ return '<option'+(p===e.platform?' selected':'')+'>'+esc(p)+'</option>'; }).join('')+'</select></div>'+
-          '<div class="acx-f"><label>Type</label><select id="acxType">'+TYPES.map(function(t){ return /* Ohne Zeichen: ein <option> rendert kein SVG, und das Emoji davor war
-             der letzte farbige Rest in dieser Auswahlliste. */
-            '<option value="'+t.id+'"'+(t.id===(e.type||'live')?' selected':'')+'>'+t.label+'</option>'; }).join('')+'</select></div>'+
+          /* Ohne Zeichen: ein <option> rendert kein SVG, und das Emoji davor war
+             der letzte farbige Rest in dieser Auswahlliste.
+             ACHTUNG (08.10.2026): Dieser Kommentar stand zwischen "return" und
+             dem Wert. Ein mehrzeiliger Kommentar zählt als Zeilenumbruch, also
+             setzte JavaScript nach "return" ein Semikolon — die Auswahl war
+             leer, und Speichern machte aus jedem Prop-Konto ein Konto ohne Typ. */
+          '<div class="acx-f"><label>Type</label><select id="acxType">'+TYPES.map(function(t){
+            return '<option value="'+t.id+'"'+(t.id===(e.type||'live')?' selected':'')+'>'+t.label+'</option>'; }).join('')+'</select></div>'+
           '<div class="acx-f"><label>Currency</label><select id="acxCur">'+['USD','EUR','GBP','CHF','AUD','CAD','JPY','SEK','NOK','PLN'].map(function(c){ return '<option'+(c===(e.currency||'USD')?' selected':'')+'>'+c+'</option>'; }).join('')+'</select></div>'+
           '<div class="acx-f"><label>Start balance</label><input id="acxStart" type="number" step="any" placeholder="100000" value="'+esc(e.startBalance!=null?e.startBalance:'')+'"></div>'+
-          '<div class="acx-f"><label>Profit target</label><input id="acxTarget" type="number" step="any" placeholder="10000" value="'+esc(e.target!=null?e.target:'')+'"></div>'+
-          '<div class="acx-f"><label>Max drawdown</label><input id="acxDD" type="number" step="any" placeholder="5000" value="'+esc(e.maxDD!=null?e.maxDD:'')+'"></div>'+
+          /* Prop/Funded: the rules live in the Prop mode (firm, phase, real
+             drawdown model) — two hand-typed numbers here would only drift
+             from them. Other account types keep a simple personal target. */
+          '<div class="acx-f acx-goal"><label>Profit target</label><input id="acxTarget" type="number" step="any" placeholder="10000" value="'+esc(e.target!=null?e.target:'')+'"></div>'+
+          '<div class="acx-f acx-goal"><label>Max drawdown</label><input id="acxDD" type="number" step="any" placeholder="5000" value="'+esc(e.maxDD!=null?e.maxDD:'')+'"></div>'+
+          '<div class="acx-f acx-propnote" style="grid-column:1/-1"><label>Prop firm rules</label><div class="acx-pn">Target, drawdown model, daily limit and phases come from your firm\u2019s rules in the <b class="notranslate" translate="no">Prop mode</b>. '+
+            (e.id ? '<a href="#" onclick="ApexAccounts.setActive(\''+e.id+'\');nav(\'propfirm\');return false;">Open them →</a>' : 'You set them up right after saving.')+'</div></div>'+
         '</div>'+
         '<div class="acx-f" style="margin-bottom:14px"><label>Colour</label><div class="acx-swatches" id="acxSw">'+
           PALETTE.map(function(c){ return '<div class="acx-sw'+(c===(e.color||PALETTE[0])?' on':'')+'" data-c="'+c+'" style="background:'+c+'"></div>'; }).join('')+'</div></div>'+
@@ -43841,13 +43873,20 @@ body.light .pt-sugg{background:var(--layer)}
       s.onclick=function(){ host.querySelectorAll('.acx-sw').forEach(function(x){x.classList.remove('on');}); s.classList.add('on'); };
     });
     host.querySelector('#acxCancel').onclick=function(){ EDIT=null; renderForm(); };
+    var tsel=host.querySelector('#acxType');
+    var syncGoal=function(){
+      var prop = tsel && (tsel.value==='prop' || tsel.value==='funded');
+      host.querySelectorAll('.acx-goal').forEach(function(x){ x.style.display = prop ? 'none' : ''; });
+      host.querySelectorAll('.acx-propnote').forEach(function(x){ x.style.display = prop ? '' : 'none'; });
+    };
+    if(tsel){ tsel.addEventListener('change', syncGoal); syncGoal(); }
     host.querySelector('#acxSave').onclick=function(){
       var bsel=host.querySelector('#acxBroker').value;
       var data={
         name: host.querySelector('#acxName').value.trim(),
         broker: bsel==='__other' ? host.querySelector('#acxBrokerOther').value.trim() : bsel,
         platform: host.querySelector('#acxPlatform').value,
-        type: host.querySelector('#acxType').value,
+        type: host.querySelector('#acxType').value || (e.type || 'live'),
         currency: host.querySelector('#acxCur').value,
         startBalance: host.querySelector('#acxStart').value,
         target: host.querySelector('#acxTarget').value,
@@ -43931,8 +43970,23 @@ body.light .pt-sugg{background:var(--layer)}
           '<div class="acx-kpi"'+(s.expect==null?'':' title="'+fmtMoney(s.expect)+' per trade"')+'><b class="'+(s.expect>=0?'pos':'neg')+'">'+(s.expect==null?'—':fmtMoneyShort(s.expect))+'</b><span>Expectancy</span></div>'+
           '<div class="acx-kpi"><b class="neg">'+(s.maxDD?fmtMoneyShort(-s.maxDD).replace(/\.\d\d$/,''):'—')+'</b><span>Max DD</span></div>'+
         '</div>'+
-        (prog!=null ? '<div class="acx-prog"><i style="width:'+prog.toFixed(1)+'%"></i></div>'+
-          '<div class="acx-prog-l"><span>Target progress</span><span>'+prog.toFixed(0)+'% of '+moneySym()+Number(target).toFixed(0)+'</span></div>' : '')+
+        (function(){
+          /* A prop account shows its challenge — firm, phase, distance to the
+             floor, target — from the Prop mode, not the old hand-typed target. */
+          var ps=null; try{ ps = window.ApexPropPlus && ApexPropPlus.summaryFor ? ApexPropPlus.summaryFor(a.id) : null; }catch(e){}
+          if(ps){
+            var r=ps.r, tp = r.targetAbs>0 ? Math.max(0,Math.min(100,r.targetPct||0)) : null;
+            return '<div class="acx-prop" onclick="ApexAccounts.setActive(\''+a.id+'\');nav(\'propfirm\')" title="Open in the Prop Firm cockpit">'+
+              '<div class="acx-prop-h"><span class="acx-prop-m notranslate" translate="no">'+esc(ps.mono)+'</span><b class="notranslate" translate="no">'+esc(ps.firm)+' · '+esc(ps.phase)+'</b><em>'+esc({running:'running',passed:'passed',funded:'funded',failed:'failed'}[ps.outcome])+'</em></div>'+
+              '<div class="acx-prop-n"><span>To the floor <b class="notranslate" translate="no">'+fmtMoneyShort(r.buffer).replace(/^\+/,'')+'</b></span>'+
+              (tp!=null?'<span>Target <b class="notranslate" translate="no">'+tp.toFixed(0)+'%</b></span>':'')+
+              (r.breaches.length?'<span class="neg">rule broken '+esc(r.breaches[0].date)+'</span>':'')+'</div>'+
+              (tp!=null?'<div class="acx-prog"><i style="width:'+tp.toFixed(1)+'%"></i></div>':'')+'</div>';
+          }
+          if((a.type==='prop'||a.type==='funded')) return '<button class="acx-btn" style="margin-top:10px" onclick="ApexPropWizard.open({account:\''+a.id+'\',firmName:\''+esc(a.broker||'').replace(/'/g,'')+'\'})">Set up the firm\u2019s rules →</button>';
+          return prog!=null ? '<div class="acx-prog"><i style="width:'+prog.toFixed(1)+'%"></i></div>'+
+            '<div class="acx-prog-l"><span>Target progress</span><span>'+prog.toFixed(0)+'% of '+moneySym()+Number(target).toFixed(0)+'</span></div>' : '';
+        })()+
         (a.note?'<div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.5">'+esc(a.note)+'</div>':'')+
       '</div>';
     }).join('')+'</div>'+
@@ -52037,7 +52091,14 @@ self.addEventListener('message', async (ev) => {
     var sizes = [];
     try { sizes = (window.ApexPropPlus && (ApexPropPlus.sizesOf ? ApexPropPlus.sizesOf(S.fundedFirm) : ApexPropPlus.SIZES)) || []; } catch (e) {}
     sizes = sizes.slice();
-    if (S.fundedSize > 0 && sizes.indexOf(S.fundedSize) < 0) sizes.push(S.fundedSize);
+    /* Futures firms publish rules per size — a size they do not sell has no
+       rules, so it snaps to the nearest one. Percentage firms keep any size. */
+    var bySize = !!((fundedPresets()[S.fundedFirm] || {}).bySize);
+    if (S.fundedSize > 0 && sizes.indexOf(S.fundedSize) < 0) {
+      if (bySize && sizes.length) {
+        S.fundedSize = sizes.reduce(function (b, n) { return Math.abs(n - S.fundedSize) < Math.abs(b - S.fundedSize) ? n : b; }, sizes[0]);
+      } else sizes.push(S.fundedSize);
+    }
     sizes.sort(function (a, b) { return a - b; });
     if (!sizes.length) sizes = [25000, 50000, 100000, 150000, 250000];
     return sizes.map(function (n) {
@@ -53572,7 +53633,7 @@ self.addEventListener('message', async (ev) => {
             '</label>' +
             (S.funded
               ? '<div class="arp-funded-row">' +
-                  '<span class="arp-sel"><select id="arpFundedFirm">' + fundedFirmOptions() + '</select></span>' +
+                  '<span class="arp-sel"><select id="arpFundedFirm" class="notranslate" translate="no">' + fundedFirmOptions() + '</select></span>' +
                   '<span class="arp-sel"><select id="arpFundedSize">' + fundedSizeOptions() + '</select></span>' +
                 '</div>' +
                 '<div class="arp-funded-note">' + fundedRuleLine() + '</div>'
@@ -63258,6 +63319,12 @@ self.addEventListener('message', async (ev) => {
     try { ps = window.ApexPropPlus && ApexPropPlus.personalStop ? ApexPropPlus.personalStop() : null; } catch (e) {}
     if (!ps) return false;
     var what = ps.basis === 'daily' ? ps.safety + '% of the firm\u2019s daily limit' : ps.safety + '% of your distance to the floor';
+    if (ps.used < ps.limit && ps.openRisk > 0 && ps.used + ps.openRisk > ps.limit) {
+      res.warnings.push({ rule: 'propStop', msg: 'If your open ' + (ps.openN === 1 ? 'trade hits its stop' : 'trades hit their stops') + ' you are at ' + money(-(ps.used + ps.openRisk)) + ' — past your personal stop of ' + money(-ps.limit) + '.' });
+    }
+    if (ps.openNoStop > 0) {
+      res.warnings.push({ rule: 'propNoStop', msg: ps.openNoStop + ' open position' + (ps.openNoStop === 1 ? '' : 's') + ' without a stop on your prop account — the risk to your daily limit is unknown.' });
+    }
     if (ps.used >= ps.limit) {
       res.breaches.push({ rule: 'propStop', msg: 'Personal stop reached — down ' + money(-ps.used) + ' today, your stop is ' + money(-ps.limit) + ' (' + what + '). Done for today; the firm\u2019s limit is still intact.' });
     } else if (ps.used >= ps.limit * 0.75) {
@@ -64170,20 +64237,48 @@ self.addEventListener('message', async (ev) => {
     });
   }
 
+  /* Where a challenge stands, read from what actually happened — the phase
+     history and the current phase — instead of a field someone has to keep
+     up to date by hand. An old hand-set value is only the last fallback. */
+  function outcomeOf(all, key) {
+    var c = all.byAcc[key] || {}, h = c.history || [], last = h[h.length - 1];
+    if (last && last.result === 'failed') return 'failed';
+    if ((c.phase || 'p1') === 'funded') return 'funded';
+    if (h.some(function (x) { return x.result === 'passed'; })) return 'passed';
+    var l = all.ledger[key] || {};
+    return l.outcome && l.outcome !== 'running' ? l.outcome : 'running';
+  }
+  P.outcomeOf = function (key) { return outcomeOf(loadAll(), key || accKey()); };
+
+  /* Every challenge: accounts typed Prop/Funded plus any account that has
+     challenge rules — someone who set FTMO up on a "live" account still
+     has a challenge. */
+  function challengeKeys(all) {
+    var keys = [];
+    propAccounts().forEach(function (a) { keys.push(a.id); });
+    configuredKeys(all).forEach(function (k) { if (keys.indexOf(k) < 0 && (k === ALL_KEY || validKey(k))) keys.push(k); });
+    return keys;
+  }
+  function firmNameOf(all, key) {
+    var c = all.byAcc[key];
+    if (c && c.preset && c.preset !== 'custom' && PRESETS[c.preset]) return firmOfPreset(c.preset).name;
+    try { var a = ApexAccounts.get(key); if (a && a.broker) return a.broker.trim(); } catch (e) {}
+    return 'Other firm';
+  }
+
   /** Totals across every challenge, plus the per-firm record. */
   function portfolio() {
-    var all = loadAll(), accs = propAccounts();
-    var tot = { spent: 0, earned: 0, net: 0, resets: 0, accounts: accs.length };
-    var byFirm = {};
-    accs.forEach(function (a) {
-      var s = ledgerStats(loadLedger(a.id));
+    var all = loadAll(), keys = challengeKeys(all);
+    var tot = { spent: 0, earned: 0, net: 0, resets: 0, accounts: keys.length };
+    var byFirm = {}, rows = [];
+    keys.forEach(function (k) {
+      var s = ledgerStats(loadLedger(k)), oc = outcomeOf(all, k), firm = firmNameOf(all, k);
       tot.spent += s.spent; tot.earned += s.earned; tot.resets += s.resets;
-      var firm = (a.broker || 'Unnamed firm').trim();
       var f = byFirm[firm] || (byFirm[firm] = { n: 0, spent: 0, earned: 0, passed: 0, failed: 0, decided: 0 });
       f.n++; f.spent += s.spent; f.earned += s.earned;
-      var oc = (all.ledger[a.id] || {}).outcome || 'running';
       if (oc === 'passed' || oc === 'funded') { f.passed++; f.decided++; }
       else if (oc === 'failed') { f.failed++; f.decided++; }
+      rows.push({ key: k, name: accountName(k) || 'This journal', firm: firm, outcome: oc, stats: s, cfg: cfgFor(all, k) });
     });
     tot.net = tot.earned - tot.spent;
     tot.roi = tot.spent > 0 ? tot.net / tot.spent * 100 : null;
@@ -64194,7 +64289,7 @@ self.addEventListener('message', async (ev) => {
       // would make every honest trader look terrible on the day they start.
       f.passRate = f.decided > 0 ? Math.round(f.passed / f.decided * 100) : null;
     });
-    return { totals: tot, byFirm: byFirm, accounts: accs };
+    return { totals: tot, byFirm: byFirm, rows: rows, accounts: rows };
   }
 
   P.get = load;
@@ -64329,6 +64424,7 @@ self.addEventListener('message', async (ev) => {
           if (ms > 0) key = firmDayKey(ms, p.tz, p.reset || 0) || k;
         }
         if (cfg.cycleStart && key < cfg.cycleStart) return;
+        if (cfg.cycleEnd && key > cfg.cycleEnd) return;      // simulator: "as of that day"
         (buckets[key] || (buckets[key] = [])).push(v);
       });
     });
@@ -64435,10 +64531,19 @@ self.addEventListener('message', async (ev) => {
     var todayPnl = todayRow ? todayRow.pnl : 0;
     var dailyLeft = dailyAbs > 0 ? Math.max(0, dailyAbs + todayPnl) : null;
     var bufNow = bal - floor;
+    /* Open positions. Firms measure the daily limit on EQUITY — a running
+       loser already counts. Evidence has no reliable live price for every
+       instrument (spot gold has no free real-time feed), and a delayed one
+       would be worse than none at a prop limit. What it does know is each
+       open trade's stop: the worst case if it is hit. That is what the room
+       is reduced by, and a position without a stop is flagged instead. */
+    var open = openPositions(key || accKey(), cfg);
+    var room = Math.max(0, dailyLeft != null ? Math.min(dailyLeft, bufNow) : bufNow);
     var today = {
       key: todayKey, pnl: todayPnl, trades: todayRow ? todayRow.trades : 0,
       dailyLeft: dailyLeft,
-      room: Math.max(0, dailyLeft != null ? Math.min(dailyLeft, bufNow) : bufNow)
+      room: room,
+      roomWorst: Math.max(0, room - open.risk)
     };
 
     /* The5ers counts only profitable days of at least 0.5 % of the start. */
@@ -64460,10 +64565,43 @@ self.addEventListener('message', async (ev) => {
       daysRemaining: Math.max(0, (num(cfg.minDays) || 0) - daysTraded),
       bestDay: bestDay, worstDay: worstDay,
       consistencyPct: consistencyPct, consistencyOk: consistencyOk, maxAllowedDay: maxAllowedDay,
-      payoutDaysLeft: daysLeft, today: today
+      payoutDaysLeft: daysLeft, today: today, open: open
     };
   }
   P.compute = function () { return compute(load()); };
+  /* Trades still running on the challenge account: no exit yet, but an
+     entry and a size. Risk = distance to the stop × size × the instrument's
+     pip value, in the display currency. */
+  function openPositions(key, cfg) {
+    var jd = journalFor(key), out = { n: 0, risk: 0, noStop: 0, list: [] };
+    Object.keys(jd).forEach(function (k) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+      if (cfg && cfg.cycleStart && k < cfg.cycleStart) return;
+      ((jd[k] && jd[k].trades) || []).forEach(function (t) {
+        var e = num(t.entry), lots = num(t.lots);
+        if (!(t.exit === '' || t.exit == null) || !(e > 0) || !(lots > 0)) return;
+        if (t.pnl !== '' && t.pnl != null && !isNaN(parseFloat(t.pnl))) return;   // already has a result
+        out.n++;
+        var sl = num(t.sl), r = null;
+        if (sl > 0 && sl !== e) {
+          try {
+            var spec = window.getPipSpec ? getPipSpec(t.symbol) : null;
+            if (spec && spec.pipSize && spec.pipValuePerLot) {
+              r = Math.abs(e - sl) / spec.pipSize * lots * spec.pipValuePerLot;
+              if (window.toDisplayCurrency) r = toDisplayCurrency(r);
+              /* A stop already beyond break-even locks in profit, not risk. */
+              var isLong = window.apexIsLong ? apexIsLong(t.dir) : !/sell|short/i.test(t.dir || '');   // takes the direction string, not the trade
+              if ((isLong && sl >= e) || (!isLong && sl <= e)) r = 0;
+            }
+          } catch (x) { r = null; }
+        }
+        if (r == null) out.noStop++; else out.risk += r;
+        out.list.push({ date: k, symbol: t.symbol || '', lots: lots, risk: r });
+      });
+    });
+    return out;
+  }
+
 
   function cfgFor(all, key) {
     var c = all.byAcc[key], out = blankCfg();
@@ -64523,7 +64661,8 @@ self.addEventListener('message', async (ev) => {
     var base = r.dailyAbs > 0 ? r.dailyAbs : Math.max(0, startBuf);
     if (!(base > 0)) return null;
     return { limit: base * sf / 100, safety: sf, basis: r.dailyAbs > 0 ? 'daily' : 'floor', base: base,
-             todayPnl: r.today.pnl, used: Math.max(0, -r.today.pnl), firm: st.firm };
+             todayPnl: r.today.pnl, used: Math.max(0, -r.today.pnl), firm: st.firm,
+             openRisk: r.open.risk, openNoStop: r.open.noStop, openN: r.open.n };
   };
   P.FIRMS = FIRMS;
   P.firmOfPreset = firmOfPreset;
@@ -64566,7 +64705,6 @@ self.addEventListener('message', async (ev) => {
     if (isPro() && num(o.fee) > 0) {
       var l = all.ledger[key] || {};
       l.fee = String(num(o.fee));
-      if (!l.outcome) l.outcome = 'running';
       all.ledger[key] = l;
     }
     all.mode = { on: true, acc: key };
@@ -64576,6 +64714,16 @@ self.addEventListener('message', async (ev) => {
   };
   P.ALL_KEY = ALL_KEY;
   P.keyNow = function () { return accKey(); };
+  /* The challenge on ONE account, for places outside this page (account
+     cards, coach profile) — null when that account has no rules. */
+  P.summaryFor = function (key) {
+    var all = loadAll();
+    if (!(all.byAcc[key] && num(all.byAcc[key].balance) > 0)) return null;
+    var cfg = cfgFor(all, key), fm = firmOfPreset(cfg.preset);
+    var ph = phasesOf(cfg.preset).filter(function (x) { return x.id === (cfg.phase || 'p1'); })[0] || { label: '' };
+    return { cfg: cfg, r: compute(cfg, key), firm: fm.id === 'custom' ? 'Own rules' : fm.name, mono: fm.mono,
+             phase: ph.label, phaseId: cfg.phase || 'p1', outcome: outcomeOf(all, key) };
+  };
   P.configured = function (key) {
     var all = loadAll(); return !!(all.byAcc[key] && num(all.byAcc[key].balance) > 0);
   };
@@ -64620,79 +64768,89 @@ self.addEventListener('message', async (ev) => {
      trades would never have happened. And it says plainly when there is not
      enough history to judge, rather than printing a confident "passed" from
      four days of trading. */
-  P.simulate = function (presetKey, balance, fromDate) {
-    var p = PRESETS[presetKey];
-    if (!p || !(balance > 0)) return null;
-
-    var cfg = blankCfg();
-    cfg.preset = presetKey;
-    cfg.balance = balance;
-    cfg.target = p.target; cfg.daily = p.daily; cfg.max = p.max;
-    cfg.dd = p.dd; cfg.consistency = p.consistency; cfg.minDays = p.minDays;
-    cfg.cycleStart = fromDate || '';
-
-    var r = compute(cfg);
+  /* One phase of a challenge, run over history from `from`: when (if ever)
+     it would have been passed, and when (if ever) a rule would have closed
+     the account. Passing is checked day by day — target, minimum days and
+     consistency all have to hold on the SAME day — because the firm moves
+     you on the first day they all hold, not at the end of the data. */
+  function simPhase(presetKey, size, phaseId, from, key) {
+    var cfg = blankCfg(), r0 = rulesFor(presetKey, size, phaseId);
+    cfg.preset = presetKey; cfg.balance = size; cfg.phase = phaseId; cfg.cycleStart = from || '';
+    for (var f in r0) cfg[f] = r0[f];
+    var r = compute(cfg, key);
     var first = r.breaches.length ? r.breaches[0] : null;
-
-    /* Everything from the breach onward is fiction: the account was gone.
-       So the verdict is measured on the days up to and including it. */
-    var upto = first ? r.series.filter(function (d) { return d.date <= first.date; }) : r.series;
-    var profitAt = upto.reduce(function (a, d) { return a + d.pnl; }, 0);
-
-    var verdict, why;
-    if (!r.series.length) {
-      verdict = 'nodata';
-      why = 'No trades in this period.';
-    } else if (first) {
-      verdict = 'failed';
-      why = first.msg + ' — on day ' + upto.length + ' of trading.';
-    } else if (!r.targetHit) {
-      verdict = 'running';
-      why = 'No rule broken. The profit target was not reached either: ' +
-            moneyTxt(r.profit) + ' of ' + moneyTxt(r.targetAbs) + '.';
-    } else if (r.daysTraded < (num(cfg.minDays) || 0)) {
-      verdict = 'running';
-      why = 'Target reached, but on ' + r.daysTraded + ' trading days — the firm requires ' +
-            cfg.minDays + '.';
-    } else if (!r.consistencyOk) {
-      verdict = 'failed';
-      why = 'Target reached, but the consistency rule fails: your best day is ' +
-            (r.consistencyPct != null ? r.consistencyPct.toFixed(1) : '?') +
-            '% of total profit, the limit is ' + cfg.consistency + '%.';
-    } else {
-      verdict = 'passed';
-      why = 'Target of ' + moneyTxt(r.targetAbs) + ' reached over ' + r.daysTraded +
-            ' trading days, no rule broken.';
+    var passDay = null, passR = null;
+    if (r.targetAbs > 0) {
+      for (var i = 0; i < r.series.length; i++) {
+        var d = r.series[i].date;
+        if (first && d >= first.date) break;          // a breach that day comes first
+        var c2 = {}; for (var k in cfg) c2[k] = cfg[k]; c2.cycleEnd = d;
+        var ri = compute(c2, key);
+        if (ri.targetHit && ri.daysRemaining === 0 && ri.consistencyOk && !ri.breaches.length) { passDay = d; passR = ri; break; }
+      }
     }
+    var verdict = passDay ? 'passed' : first ? 'failed' : r.series.length ? 'running' : 'nodata';
+    var upto = passDay ? passR.series : first ? r.series.filter(function (x) { return x.date <= first.date; }) : r.series;
+    var why;
+    if (verdict === 'passed') why = 'Target of ' + moneyTxt(r.targetAbs, 0) + ' reached on ' + passDay + ', after ' + upto.length + ' trading day' + (upto.length === 1 ? '' : 's') + ', no rule broken.';
+    else if (verdict === 'failed') why = first.msg + ' — on trading day ' + upto.length + '.';
+    else if (verdict === 'nodata') why = 'No trades in this period.';
+    else if (!r.targetHit) why = 'No rule broken, and the target is not reached yet: ' + moneyTxt(r.profit, 0) + ' of ' + moneyTxt(r.targetAbs, 0) + '.';
+    else if (r.daysRemaining > 0) why = 'Target reached, but ' + r.daysRemaining + ' more ' + (r.dayMin != null ? 'profitable ' : '') + 'trading day' + (r.daysRemaining === 1 ? '' : 's') + ' are needed.';
+    else if (!r.consistencyOk) {
+      /* Not a failure at any of the eight firms: the account stays open and
+         simply needs more profit before the best day is small enough. */
+      var need = r.consistencyPct != null && cfg.consistency > 0
+        ? (cfg.consistencyBase === 'target' ? null : r.bestDay.pnl / (cfg.consistency / 100)) : null;
+      why = 'Target reached, but the best day (' + moneyTxt(r.bestDay ? r.bestDay.pnl : 0, 0) + ') is ' + (r.consistencyPct || 0).toFixed(0) +
+        '% of ' + ({ net: 'your net profit', target: 'the target' }[cfg.consistencyBase] || 'your green days') + ' — the limit is ' + cfg.consistency + '%.' +
+        (need ? ' The account stays open; about ' + moneyTxt(need, 0) + ' total profit would satisfy it.' : ' The account stays open; more trading days are needed.');
+    } else why = 'Still running.';
+    return { phase: phaseId, verdict: verdict, why: why, from: from || (r.series[0] && r.series[0].date) || '',
+             end: passDay || (first && first.date) || '', days: upto.length,
+             profit: upto.reduce(function (a, x) { return a + x.pnl; }, 0), cfg: cfg, result: r, firstBreach: first };
+  }
 
-    /* Was the SIZE even allowed on this account? A verdict that ignores the
-       contract cap flatters the trader: on a 50k Topstep account a
-       12-contract position is not a losing trade, it is a trade the platform
-       would have refused. Counted and reported, never used to fail the run —
-       see the note on SIZE_LIMITS for why that restraint is deliberate. */
-    var limit = contractLimit(presetKey, balance);
-    var over = null;
+  /* The whole path: Phase 1, then — from the trading day after it was
+     passed — Phase 2, and so on, until a phase fails, runs out of data, or
+     the funded stage is reached. */
+  P.simulate = function (presetKey, size, from, key) {
+    var p = PRESETS[presetKey];
+    if (!p || !(size > 0)) return null;
+    key = key || accKey();
+    var steps = [], start = from || '';
+    var phases = phasesOf(presetKey).filter(function (x) { return x.id !== 'funded'; });
+    for (var i = 0; i < phases.length; i++) {
+      var st = simPhase(presetKey, size, phases[i].id, start, key);
+      st.label = phases[i].label;
+      steps.push(st);
+      if (st.verdict !== 'passed') break;
+      var nd = new Date(Date.parse(st.end + 'T12:00:00Z') + 86400000);
+      start = nd.toISOString().slice(0, 10);
+    }
+    var last = steps[steps.length - 1];
+    var funded = last && last.verdict === 'passed' && steps.length === phases.length;
+    /* Contract cap: counted and reported, never used to fail the run —
+       `lots` is contracts for futures but not for forex, and a Micro is a
+       tenth of a Mini. A confident "failed" from that would be a guess. */
+    var limit = contractLimit(presetKey, size), over = null;
     if (limit) {
-      var oversized = [], worst = 0;
-      var jd = window.journalData || {};
-      try { if (window.ApexAccounts && ApexAccounts.filteredJournal) jd = ApexAccounts.filteredJournal(); } catch (e) {}
+      var jd = journalFor(key), n = 0, worst = 0;
       Object.keys(jd).forEach(function (k) {
-        if (cfg.cycleStart && k < cfg.cycleStart) return;
+        if (from && k < from) return;
         ((jd[k] && jd[k].trades) || []).forEach(function (t) {
           var q = parseFloat(t.lots);
-          if (!isNaN(q) && q > limit) { oversized.push(k); if (q > worst) worst = q; }
+          if (!isNaN(q) && q > limit) { n++; if (q > worst) worst = q; }
         });
       });
-      if (oversized.length) over = { limit: limit, count: oversized.length, worst: worst };
+      if (n) over = { limit: limit, count: n, worst: worst };
     }
-
-    return {
-      verdict: verdict, why: why, cfg: cfg, label: p.label,
-      firstBreach: first, daysSurvived: upto.length,
-      profit: profitAt, result: r, sizeLimit: limit, oversized: over,
-      thin: r.series.length > 0 && r.series.length < 10
-    };
+    var totalDays = steps.reduce(function (a, x) { return a + x.days; }, 0);
+    return { label: p.label, size: size, steps: steps, funded: funded,
+             verdict: funded ? 'passed' : last ? (last.verdict === 'passed' ? 'running' : last.verdict) : 'nodata',
+             sizeLimit: limit, oversized: over, thin: totalDays > 0 && totalDays < 10, totalDays: totalDays };
   };
+  P.simPhase = simPhase;
 
   /* ── page ── */
   function buildPage() {
@@ -64813,11 +64971,16 @@ self.addEventListener('message', async (ev) => {
   }
 
   function ledgerPro() {
-    return isPro() ? ledgerHtml() + portfolioHtml() + endingsHtml()
-      : lockHtml('Costs, payouts &amp; all your challenges',
-          'What every challenge cost you, what it paid, your net and ROI per firm, every challenge side by side — and what ended the ones that failed.');
+    return isPro() ? historyHtml() + ledgerHtml() + portfolioHtml() + endingsHtml()
+      : lockHtml('History, costs &amp; all your challenges',
+          'Every phase you passed and every reset, what each challenge cost and paid, every challenge side by side — and what ended the ones that failed.');
   }
 
+  /* The hand-written translations (APEX_PROP_I18N) have to land in the same
+     task as the new HTML — otherwise Google Translate reaches the fresh text
+     nodes first ("Room left today" → "Heute ist noch ein Zimmer frei"). */
+  function i18nNow(el) { try { if (el && window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {} }
+  P.i18nNow = i18nNow;
   P.render = function () {
     buildPage();
     var body = document.getElementById('pfBody');
@@ -64830,6 +64993,7 @@ self.addEventListener('message', async (ev) => {
         lockHtml('Another challenge', 'Free tracks one challenge at a time, and yours runs on ' + keepName(fName) +
           '. Switch to that account above, or track several challenges at once with Pro.') +
         retroHtml();
+      i18nNow(body);
       return;
     }
     var setupHtml = renderSetup(cfg);
@@ -64852,8 +65016,9 @@ self.addEventListener('message', async (ev) => {
         '<div style="margin-top:14px"><button class="pf-mode-btn primary" onclick="' + wizardCall(accKey()) + '">Set up my prop account</button></div></div></div>' +
         /* Shown here too, and on purpose: somebody without a challenge running
            is exactly the person deciding whether to buy one. */
-        retroHtml() + ledgerPro() + setupHtml;
+        retroHtml() + ledgerPro();
       body.innerHTML = modeBarHtml() + body.innerHTML;
+      i18nNow(body);
       return;
     }
 
@@ -64865,7 +65030,7 @@ self.addEventListener('message', async (ev) => {
     var bufPctOfDD = r.maxDDAbs > 0 ? Math.max(0, Math.min(100, r.buffer / r.maxDDAbs * 100)) : null;
     var passed = r.targetAbs > 0 && r.targetHit && r.daysRemaining === 0 && r.consistencyOk && !r.breaches.length;
     var breached = r.breaches.length > 0 || r.buffer <= 0;
-    var dayTight = r.dailyAbs > 0 && r.today.room < r.dailyAbs * 0.25;
+    var dayTight = r.dailyAbs > 0 && (r.open.n ? r.today.roomWorst : r.today.room) < r.dailyAbs * 0.25;
     var state = breached ? 'bad' : passed ? 'done' : (bufPctOfDD != null && bufPctOfDD < 25) || dayTight ? 'warn' : 'good';
     var STATE_TXT = { bad: 'Rule breached', done: 'Phase passed', warn: 'Careful — close to a limit', good: 'In good standing' };
     var dayN = r.series.length;
@@ -64898,13 +65063,17 @@ self.addEventListener('message', async (ev) => {
           '<div class="pfx-hero-s">' + (accountName(accKey()) ? keepName(accountName(accKey())) + ' · ' : '') +
           (cfg.cycleStart ? 'since ' + keepName(cfg.cycleStart) + ' · ' : '') + 'trading day ' + dayN +
           ' · ' + esc(DD_LABEL[cfg.dd] || cfg.dd) + ' drawdown</div></div>' +
-        '<span class="pfx-state">' + STATE_TXT[state] + '</span>' +
+        '<div class="pfx-hero-side"><span class="pfx-state">' + STATE_TXT[state] + '</span>' +
+          (function () {
+            var m = modeOf(loadAll()), on = m.on && validKey(m.acc) === accKey();
+            return on ? '<button class="pfx-mode-sw" onclick="ApexPropPlus.setMode(false)" title="Every page measures this account. Click to switch off.">' +
+              '<i></i><span class="notranslate" translate="no">Prop mode</span> on</button>' : '';
+          })() + '</div>' +
       '</div>' + stepper + heroAction +
       (cfg.preset !== 'custom' ? '<div class="pfx-hero-act"><button class="pf-mode-btn" onclick="ApexPropPlus.practise()">Practise these rules in the replay →</button></div>' : '') +
       '<div class="pfx-mini">' +
         '<div><span>Balance</span><b class="' + (r.profit >= 0 ? 'pos' : 'neg') + '">' + money(r.bal, 0) + '</b></div>' +
         '<div><span>Profit</span><b class="' + (r.profit >= 0 ? 'pos' : 'neg') + '">' + keepName((r.profit >= 0 ? '+' : '') + moneyTxt(r.profit, 0)) + '</b></div>' +
-        '<div><span>Floor</span><b>' + money(r.floor, 0) + '</b></div>' +
         '<div><span>Closest all cycle</span><b class="' + (r.lowestBuffer != null && r.lowestBuffer > 0 ? '' : 'neg') + '">' + money(r.lowestBuffer, 0) + '</b></div>' +
       '</div></div>';
 
@@ -64934,11 +65103,15 @@ self.addEventListener('message', async (ev) => {
     }
     var bufRing = r.maxDDAbs > 0
       ? ring(bufPctOfDD, bufPctOfDD < 25 ? 'bad' : bufPctOfDD < 50 ? 'warn' : 'good', money(r.buffer, 0), 'To the floor',
-          keepName(Math.round(bufPctOfDD) + '%') + ' of the max drawdown left')
+          'floor at ' + money(r.floor, 0) + ' · ' + keepName(Math.round(bufPctOfDD) + '%') + ' left')
       : ring(0, 'mute', '—', 'To the floor', 'no max drawdown set');
-    var todayPct = r.dailyAbs > 0 ? r.today.room / r.dailyAbs * 100 : (r.maxDDAbs > 0 ? r.today.room / r.maxDDAbs * 100 : 0);
-    var todayRing = ring(todayPct, dayTight ? 'bad' : todayPct < 50 ? 'warn' : 'good', money(r.today.room, 0), 'Room left today',
-      r.dailyAbs > 0 ? 'daily limit ' + money(r.dailyAbs, 0) + ' · today ' + money(r.today.pnl, 0) : 'no daily limit — floor only');
+    var roomShown = r.open.n ? r.today.roomWorst : r.today.room;
+    var todayPct = r.dailyAbs > 0 ? roomShown / r.dailyAbs * 100 : (r.maxDDAbs > 0 ? roomShown / r.maxDDAbs * 100 : 0);
+    var todayRing = ring(todayPct, dayTight || (r.open.noStop > 0) ? 'bad' : todayPct < 50 ? 'warn' : 'good', money(roomShown, 0), 'Room left today',
+      r.open.n
+        ? (r.open.noStop ? keepName(String(r.open.noStop)) + ' open without a stop — risk unknown'
+                         : 'if ' + (r.open.n === 1 ? 'the open trade hits its stop' : 'the ' + r.open.n + ' open trades hit their stops') + ' (' + money(-r.open.risk, 0) + ')')
+        : r.dailyAbs > 0 ? 'daily limit ' + money(r.dailyAbs, 0) + ' · today ' + money(r.today.pnl, 0) : 'no daily limit — floor only');
     var cons = num(cfg.consistency) > 0
       ? (r.consistencyPct == null
           ? '<div class="pfx-cons-n">—</div><div class="pfx-ring-s">applies once you are in profit</div>'
@@ -64946,9 +65119,17 @@ self.addEventListener('message', async (ev) => {
             '<div class="pfx-cons-bar"><i style="width:' + Math.min(100, r.consistencyPct / cfg.consistency * 100).toFixed(0) + '%" class="' + (r.consistencyOk ? '' : 'bad') + '"></i><em style="left:100%"></em></div>' +
             '<div class="pfx-ring-s">best day of ' + ({ net: 'net profit', target: 'the profit target' }[cfg.consistencyBase] || 'green days\u2019 profit') + ' · limit ' + keepName(cfg.consistency + '%') +
             (r.maxAllowedDay != null && r.consistencyOk ? '<br>max. ' + money(r.maxAllowedDay, 0) + ' on one day' : '') + '</div>')
-      : '<div class="pfx-cons-n">' + keepName(r.daysTraded + (r.daysNeeded ? ' / ' + r.daysNeeded : '')) + '</div>' +
-        '<div class="pfx-ring-s">' + (r.daysNeeded ? (r.daysRemaining ? r.daysRemaining + ' more trading day' + (r.daysRemaining === 1 ? '' : 's') + ' needed' : 'minimum trading days met') : 'trading days · no minimum') + '</div>';
+      /* "15 / 4" read like an error once the minimum was passed: show the
+         requirement filled up (✓ 4 / 4) and the real count underneath. */
+      : (r.daysNeeded
+          ? '<div class="pfx-cons-n' + (r.daysRemaining ? '' : ' pos') + '">' + (r.daysRemaining ? '' : '✓ ') + keepName(Math.min(r.daysTraded, r.daysNeeded) + ' / ' + r.daysNeeded) + '</div>' +
+            '<div class="pfx-cons-bar"><i style="width:' + Math.min(100, r.daysTraded / r.daysNeeded * 100).toFixed(0) + '%"' + (r.daysRemaining ? '' : ' class="ok"') + '></i></div>' +
+            '<div class="pfx-ring-s">' + (r.daysRemaining ? r.daysRemaining + ' more ' + (r.dayMin != null ? 'profitable ' : '') + 'day' + (r.daysRemaining === 1 ? '' : 's') + ' needed'
+              : keepName(String(r.daysTraded)) + ' ' + (r.dayMin != null ? 'profitable ' : 'trading ') + 'days so far') + '</div>'
+          : '<div class="pfx-cons-n">' + keepName(String(r.daysTraded)) + '</div><div class="pfx-ring-s">trading days · no minimum</div>');
     var consLabel = num(cfg.consistency) > 0 ? 'Consistency' : (r.dayMin != null ? 'Profitable days' : 'Trading days');
+    var honest = '<div class="pfx-honest">Counted from closed trades' + (r.open.n ? ' and the stops of open ones' : '') +
+      '. Your firm also counts the floating result of open positions — check its dashboard while a trade runs.</div>';
     var rings = '<div class="pfx-rings">' + tgtRing + bufRing + todayRing +
       '<div class="pfx-ring pfx-cons"><div class="pfx-ring-l" style="margin-top:0">' + consLabel + '</div>' + cons +
       (num(cfg.consistency) > 0 && r.daysNeeded ? '<div class="pfx-ring-s" style="margin-top:8px">Days ' + keepName(r.daysTraded + ' / ' + r.daysNeeded) + '</div>' : '') +
@@ -64956,6 +65137,8 @@ self.addEventListener('message', async (ev) => {
 
     /* ── what to watch ── */
     var alerts = [];
+    if (r.open.noStop > 0)
+      alerts.push('<li class="hard">' + r.open.noStop + ' open position' + (r.open.noStop === 1 ? '' : 's') + ' without a stop. Your firm already counts its floating loss — Evidence cannot see it, so the room above may be too generous.</li>');
     if (!r.consistencyOk && r.consistencyPct != null)
       alerts.push('<li class="hard">Consistency rule failing — keep trading small green days to grow the total, or the payout will be refused.</li>');
     if (bufPctOfDD != null && bufPctOfDD < 25 && r.buffer > 0)
@@ -64972,7 +65155,7 @@ self.addEventListener('message', async (ev) => {
         : '<div class="pf-note">No trades in this cycle yet — the curve starts with your first one.</div>') + '</div>';
 
     /* ── tabs ── */
-    var TABS = [['days', 'Days'], ['sim', 'Would you have passed?'], ['costs', 'Costs & challenges'], ['rules', 'Rules']];
+    var TABS = [['days', 'Days'], ['sim', 'Would you have passed?'], ['costs', 'History & costs'], ['rules', 'Adjust rules']];
     var tab = TABS.some(function (t) { return t[0] === _tab; }) ? _tab : 'days';
     var tabs = '<div class="pfx-tabs" role="tablist">' + TABS.map(function (t) {
       return '<button role="tab" aria-selected="' + (t[0] === tab) + '" class="' + (t[0] === tab ? 'on' : '') + '" onclick="ApexPropPlus.setTab(\'' + t[0] + '\')">' + esc(t[1]) +
@@ -64980,7 +65163,9 @@ self.addEventListener('message', async (ev) => {
     }).join('') + '</div>';
     var panel = tab === 'sim' ? retroHtml() : tab === 'costs' ? ledgerPro() : tab === 'rules' ? setupHtml : daysHtml(r);
 
-    body.innerHTML = modeBarHtml() + legacyNote + hero + rings + payoutCardHtml(cfg, r) + watch + chart + tabs + '<div class="pfx-panel">' + panel + '</div>';
+    var mAll = loadAll(), mOn = modeOf(mAll).on && validKey(modeOf(mAll).acc) === accKey();
+    body.innerHTML = (mOn ? '' : modeBarHtml()) + legacyNote + hero + rings + honest + payoutCardHtml(cfg, r) + watch + chart + tabs + '<div class="pfx-panel">' + panel + '</div>';
+    i18nNow(body);
     drawChart(r);
   };
 
@@ -65202,7 +65387,7 @@ self.addEventListener('message', async (ev) => {
     var nx = ph[i + 1]; if (!nx) return;
     confirmThen('The ' + ph[i].label + ' is recorded as passed, and ' + nx.label + ' starts today with its own rules.', 'Move to ' + nx.label, 'Start ' + nx.label, function () {
       var all = loadAll(), key = accKey(), cur = cfgFor(all, key), stored = all.byAcc[key] || {};
-      var hist = (stored.history || []).concat([{ phase: cur.phase, from: cur.cycleStart, to: todayKeyNow(), result: 'passed' }]);
+      var hist = (stored.history || []).concat([histEntry(cur, 'passed')]);
       cur.phase = nx.id; cur.cycleStart = todayKeyNow();
       if (cur.preset !== 'custom') { var rr = rulesFor(cur.preset, num(cur.balance), nx.id); for (var f in rr) cur[f] = rr[f]; }
       else if (nx.id === 'funded') cur.target = 0;
@@ -65243,183 +65428,207 @@ self.addEventListener('message', async (ev) => {
      Runs the firm's real rules over the trades already in the journal. The
      answer costs nothing to produce and is the one screenshot in this whole
      product that people post unprompted. */
-  var _retro = { preset: 'topstep', size: 50000, from: '' };
-
+  /* Chosen firm / programme / size for the simulator. Starts on the
+     challenge being viewed, so the first answer is about the account the
+     trader actually has; any other firm is two clicks away. */
+  var _retro = null;
+  function retroState() {
+    if (_retro) return _retro;
+    var c = load();
+    var pk = (c.preset && c.preset !== 'custom' && PRESETS[c.preset]) ? c.preset : 'ftmo';
+    var sz = num(c.balance) > 0 && sizesOf(pk).indexOf(num(c.balance)) >= 0 ? num(c.balance) : (sizesOf(pk).indexOf(100000) >= 0 ? 100000 : sizesOf(pk)[0]);
+    _retro = { firm: firmOfPreset(pk).id, preset: pk, size: sz, from: '' };
+    return _retro;
+  }
   P.setRetro = function (k, v) {
-    _retro[k] = (k === 'size') ? (parseFloat(v) || 0) : v;
+    var R = retroState();
+    if (k === 'firm') {
+      var f = FIRMS.filter(function (x) { return x.id === v; })[0];
+      if (!f) return;
+      R.firm = v; R.preset = f.programs[0];
+    } else if (k === 'preset') R.preset = v;
+    else if (k === 'size') R.size = parseFloat(v) || 0;
+    else if (k === 'from') R.from = v;
+    /* A size the programme does not sell is not a question worth answering. */
+    var sz = sizesOf(R.preset);
+    if (k !== 'size' && sz.indexOf(R.size) < 0) R.size = sz.indexOf(100000) >= 0 ? 100000 : sz.indexOf(50000) >= 0 ? 50000 : sz[0];
     P.render();
   };
 
+  function ruleChipsHtml(rr, size) {
+    var amt = function (pc) { return money(size * pc / 100, 0); };
+    var c = [];
+    c.push(['Target', rr.target > 0 ? amt(rr.target) : '—']);
+    c.push(['Daily loss', rr.daily > 0 ? amt(rr.daily) : 'none']);
+    c.push(['Max drawdown', amt(rr.max) + ' <em>' + esc((DD_LABEL[rr.dd] || rr.dd).toLowerCase()) + '</em>']);
+    if (rr.consistency > 0) c.push(['Consistency', keepName(rr.consistency + '%') + ' <em>of ' + ({ net: 'net profit', target: 'target' }[rr.consistencyBase] || 'green days') + '</em>']);
+    if (rr.minDays > 0) c.push(['Min. days', keepName(String(rr.minDays)) + (rr.minDayPct > 0 ? ' <em>≥ ' + rr.minDayPct + '%</em>' : '')]);
+    return '<div class="pfx-sim-rules">' + c.map(function (x) { return '<span><i>' + x[0] + '</i>' + x[1] + '</span>'; }).join('') + '</div>';
+  }
+
   function retroHtml() {
-    var opts = Object.keys(PRESETS).filter(function (k) { return k !== 'custom'; })
-      .map(function (k) {
-        return '<option value="' + k + '"' + (k === _retro.preset ? ' selected' : '') + '>' +
-               esc(PRESETS[k].label) + '</option>';
-      }).join('');
-    var sizes = SIZES.map(function (n) {
-      return '<option value="' + n + '"' + (n === _retro.size ? ' selected' : '') + '>' +
-             moneyTxt(n, 0) + '</option>';
+    var R = retroState();
+    var f = FIRMS.filter(function (x) { return x.id === R.firm; })[0] || FIRMS[0];
+    var firmOpts = FIRMS.filter(function (x) { return x.id !== 'custom'; }).map(function (x) {
+      return '<option value="' + x.id + '"' + (x.id === R.firm ? ' selected' : '') + '>' + esc(x.name) + '</option>';
     }).join('');
+    var progOpts = f.programs.map(function (k) {
+      return '<option value="' + k + '"' + (k === R.preset ? ' selected' : '') + '>' + esc((PRESETS[k].label || k).replace(f.name + ' — ', '')) + '</option>';
+    }).join('');
+    var sizeOpts = sizesOf(R.preset).map(function (n) {
+      return '<option value="' + n + '"' + (n === R.size ? ' selected' : '') + '>' + moneyTxt(n, 0) + '</option>';
+    }).join('');
+    var key = accKey(), accN = accountName(key);
 
     var sim = null;
-    try { sim = P.simulate(_retro.preset, _retro.size, _retro.from); } catch (e) {}
+    try { sim = P.simulate(R.preset, R.size, R.from, key); } catch (e) {}
 
-    var out = '';
-    if (!sim || sim.verdict === 'nodata') {
+    var out;
+    if (!sim || !sim.steps.length || sim.steps[0].verdict === 'nodata') {
       out = '<div class="pf-note">No trades in this period yet.</div>';
     } else {
-      var cls = sim.verdict === 'passed' ? 'good' : sim.verdict === 'failed' ? 'bad' : 'warn';
-      var head = sim.verdict === 'passed' ? '<svg class=ic aria-hidden=true><use href=#i-check ></use></svg> You would have passed'
-               : sim.verdict === 'failed' ? '<svg class=ic aria-hidden=true><use href=#i-ban ></use></svg> You would have failed'
-               : '<svg class=ic aria-hidden=true><use href=#i-hourglass ></use></svg> Still running — no rule broken, no target yet';
-      out = '<div class="pf-status ' + cls + '" style="margin:0 0 10px">' + head +
-            '<span class="pf-status-sub">' + keepName(sim.label) + ' · ' + moneyTxt(_retro.size, 0) + '</span></div>' +
-        '<div class="pf-note">' + esc(sim.why) + '</div>' +
-        '<div class="pf-kpis" style="margin-top:10px">' +
-          kpi('Trading days survived', String(sim.daysSurvived), '',
-              sim.firstBreach ? 'the account would have closed on ' + sim.firstBreach.date : 'no breach') +
-          kpi('Profit at that point', (sim.profit >= 0 ? '+' : '') + money(sim.profit, 0),
-              sim.profit >= 0 ? 'pos' : 'neg') +
-          kpi('Rules applied', esc(DD_LABEL[sim.cfg.dd]), '',
-              sim.cfg.target + '% target · ' + (sim.cfg.daily ? sim.cfg.daily + '% daily · ' : '') +
-              sim.cfg.max + '% max' + (sim.cfg.consistency ? ' · ' + sim.cfg.consistency + '% consistency' : '')) +
-        '</div>' +
+      var v = sim.funded ? 'passed' : sim.verdict;
+      var head = v === 'passed' ? 'You would have been funded'
+        : v === 'failed' ? 'You would have failed ' + esc(sim.steps[sim.steps.length - 1].label)
+        : 'Still on the way — no rule broken';
+      var sub = v === 'passed' ? 'after ' + sim.totalDays + ' trading days across ' + sim.steps.length + ' phase' + (sim.steps.length === 1 ? '' : 's')
+        : v === 'failed' ? 'on ' + esc(sim.steps[sim.steps.length - 1].end) : esc(sim.steps[sim.steps.length - 1].label) + ' is still running';
+      var path = '<div class="pfx-sim-path">' + sim.steps.map(function (st, i) {
+        var cls = st.verdict === 'passed' ? 'ok' : st.verdict === 'failed' ? 'bad' : 'run';
+        var ic = st.verdict === 'passed' ? '✓' : st.verdict === 'failed' ? '✕' : '…';
+        return '<div class="pfx-sim-step ' + cls + '"><div class="pfx-sim-ic">' + ic + '</div><div class="pfx-sim-b">' +
+          '<div class="pfx-sim-t">' + keepName(st.label) + '<span>' + (st.verdict === 'passed' ? 'passed' : st.verdict === 'failed' ? 'failed' : 'running') + '</span></div>' +
+          '<div class="pfx-sim-m">' + (st.from ? keepName(st.from) : '') + (st.end ? ' → ' + keepName(st.end) : '') + ' · ' + st.days + ' day' + (st.days === 1 ? '' : 's') +
+            ' · <b class="' + (st.profit >= 0 ? 'pos' : 'neg') + '">' + keepName((st.profit >= 0 ? '+' : '') + moneyTxt(st.profit, 0)) + '</b></div>' +
+          '<div class="pfx-sim-w">' + esc(st.why) + '</div>' +
+          (i === 0 ? ruleChipsHtml(st.cfg, R.size) : '') + '</div></div>';
+      }).join('') +
+        (sim.funded ? '<div class="pfx-sim-step ok fund"><div class="pfx-sim-ic">★</div><div class="pfx-sim-b"><div class="pfx-sim-t">' +
+          keepName((phasesOf(R.preset).filter(function (x) { return x.id === 'funded'; })[0] || { label: 'Funded' }).label) + '<span>reached</span></div></div></div>' : '') +
+        '</div>';
+      out = '<div class="pfx-sim-verdict ' + v + '"><b>' + head + '</b><span>' + sub + '</span></div>' + path +
         (sim.oversized
-          ? '<div class="pf-hint" style="color:var(--gold)"><svg class=ic aria-hidden=true><use href=#i-alert ></use></svg> ' + sim.oversized.count + ' trade' +
-            (sim.oversized.count === 1 ? '' : 's') + ' used more than the <b>' + sim.oversized.limit +
-            ' contract' + (sim.oversized.limit === 1 ? '' : 's') + '</b> this account size allows ' +
-            '(largest: ' + sim.oversized.worst + '). On a real account those would have been ' +
-            'refused or liquidated, so the verdict above is optimistic. If you trade Micros, ' +
-            'the limit is higher and this warning does not apply.</div>'
-          : '') +
-        (sim.sizeLimit
-          ? '<div class="pf-hint">Size cap for this account: <b>' + sim.sizeLimit +
-            ' contracts</b>' + (sim.oversized ? '' : ' — every trade in this period fits inside it') + '.</div>'
-          : '') +
-        (sim.thin
-          ? '<div class="pf-hint">Only ' + sim.result.series.length + ' trading days in this period — ' +
-            'treat this as an indication, not a verdict.</div>'
-          : '');
+          ? '<div class="pfx-sim-note warn"><svg class=ic aria-hidden=true><use href=#i-alert ></use></svg> ' + sim.oversized.count + ' trade' +
+            (sim.oversized.count === 1 ? '' : 's') + ' used more than the ' + sim.oversized.limit + ' contracts this size allows (largest: ' +
+            sim.oversized.worst + '). A real account would have refused or closed them, so this result is optimistic — unless they were Micros.</div>'
+          : (sim.sizeLimit ? '<div class="pfx-sim-note">Every trade fits the ' + sim.sizeLimit + '-contract limit of this size.</div>' : '')) +
+        (sim.thin ? '<div class="pfx-sim-note">Only ' + sim.totalDays + ' trading days — read this as a hint, not a verdict.</div>' : '');
     }
 
-    return '<div class="pf-card"><h3>Would these trades have passed a challenge?</h3>' +
-      '<div class="pf-note" style="margin-bottom:10px">Your existing trades, run against a firm\'s ' +
-        'published rules. Everything after a breach is ignored — in a real challenge the account ' +
-        'would already have been closed.</div>' +
-      '<div class="pf-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' +
-        '<select aria-label="Prop firm programme" onchange="ApexPropPlus.setRetro(\'preset\',this.value)">' + opts + '</select>' +
-        '<select aria-label="Account size" onchange="ApexPropPlus.setRetro(\'size\',this.value)">' + sizes + '</select>' +
-        '<input type="date" aria-label="Start date" value="' + esc(_retro.from) + '" title="Only trades from this date" ' +
-          'onchange="ApexPropPlus.setRetro(\'from\',this.value)">' +
+    return '<div class="pf-card pfx-sim"><div class="pfx-card-h"><h3>Would you have passed?</h3>' +
+      '<span class="pf-hint" style="margin:0">Trades from ' + (accN ? keepName(accN) : 'all accounts') + '</span></div>' +
+      '<div class="pf-note" style="margin-top:4px">Your trades, run through every phase of a firm’s rules. The next phase starts the day after one is passed. Everything after a broken rule is ignored — the account would already be closed.</div>' +
+      '<div class="pfx-sim-ctl">' +
+        '<label><span>Firm</span><select class="notranslate" translate="no" aria-label="Prop firm" onchange="ApexPropPlus.setRetro(\'firm\',this.value)">' + firmOpts + '</select></label>' +
+        (f.programs.length > 1 ? '<label><span>Programme</span><select class="notranslate" translate="no" aria-label="Programme" onchange="ApexPropPlus.setRetro(\'preset\',this.value)">' + progOpts + '</select></label>' : '') +
+        '<label><span>Size</span><select aria-label="Account size" onchange="ApexPropPlus.setRetro(\'size\',this.value)">' + sizeOpts + '</select></label>' +
+        '<label><span>From</span><input type="date" aria-label="Start date" value="' + esc(R.from) + '" onchange="ApexPropPlus.setRetro(\'from\',this.value)"></label>' +
       '</div>' + out + '</div>';
   }
 
-  function ledgerHtml() {
-    var l = loadLedger(), st = ledgerStats(l);
-    /* ApexAccounts.active() returns the id as a string — reading .name off it
-       left this title empty for everyone. */
-    var accName = accountName(accKey());
+  var OC_LABEL = { running: 'Running', passed: 'Passed', funded: 'Funded', failed: 'Failed' };
 
-    function rows(kind, label) {
+  /* The story of this challenge, oldest first: every finished cycle from
+     the history, then the one running now. */
+  function historyHtml() {
+    var all = loadAll(), key = accKey(), c = cfgFor(all, key), h = c.history || [];
+    var phLabel = function (id, preset) { var x = phasesOf(preset || c.preset).filter(function (p) { return p.id === id; })[0]; return x ? x.label : id; };
+    var CAUSE = { daily: 'daily loss limit', max: 'drawdown floor', consistency: 'consistency rule' };
+    var items = h.map(function (e) {
+      var cls = e.result === 'passed' ? 'ok' : e.result === 'failed' ? 'bad' : 'warn';
+      var what = e.result === 'passed' ? 'passed' : e.result === 'failed' ? 'failed' : 'reset';
+      var detail = [];
+      if (e.days) detail.push(e.days + ' trading day' + (e.days === 1 ? '' : 's'));
+      if (e.profit != null) detail.push(keepName((e.profit >= 0 ? '+' : '') + moneyTxt(e.profit, 0)));
+      if (e.cause) detail.push('ended by the ' + (CAUSE[e.cause] || e.cause) + (e.causeDay ? ' on ' + keepName(e.causeDay) : ''));
+      return '<li class="' + cls + '"><span class="pfx-tl-dot"></span><div><b>' + keepName(phLabel(e.phase, e.preset)) + ' — ' + what + '</b>' +
+        '<span class="pfx-tl-d">' + keepName((e.from || '…') + ' → ' + (e.to || '')) + '</span>' +
+        (detail.length ? '<span class="pfx-tl-x">' + detail.join(' · ') + '</span>' : '') + '</div></li>';
+    });
+    items.push('<li class="now"><span class="pfx-tl-dot"></span><div><b>' + keepName(phLabel(c.phase || 'p1')) + ' — now</b>' +
+      '<span class="pfx-tl-d">since ' + keepName(c.cycleStart || '—') + '</span></div></li>');
+    return '<div class="pf-card"><h3>This challenge, so far</h3>' +
+      (h.length ? '' : '<div class="pf-note" style="margin-top:4px">Passed phases, resets and failed attempts appear here as they happen.</div>') +
+      '<ol class="pfx-tl">' + items.join('') + '</ol></div>';
+  }
+
+  function ledgerHtml() {
+    var l = loadLedger(), st = ledgerStats(l), key = accKey();
+    var accName = accountName(key), oc = outcomeOf(loadAll(), key);
+    function rows(kind, label, hint) {
       var list = l[kind] || [];
       return '<div class="pf-led-list">' +
-        '<div class="pf-led-head">' + esc(label) +
+        '<div class="pf-led-head"><span>' + esc(label) + (hint ? ' <em>' + esc(hint) + '</em>' : '') + '</span>' +
           '<button class="pf-led-add" onclick="ApexPropPlus.addEntry(\'' + kind + '\')">+ Add</button></div>' +
         (list.length
           ? list.map(function (e, i) {
               return '<div class="pf-led-row">' +
                 '<input type="date" aria-label="Date" value="' + esc(e.date || '') + '" ' +
                   'onchange="ApexPropPlus.editEntry(\'' + kind + '\',' + i + ',\'date\',this.value)">' +
-                '<input type="number" step="any" placeholder="0" value="' + esc(e.amount == null ? '' : e.amount) + '" ' +
+                '<input type="number" step="any" placeholder="Amount" aria-label="Amount" value="' + esc(e.amount == null ? '' : e.amount) + '" ' +
                   'onchange="ApexPropPlus.editEntry(\'' + kind + '\',' + i + ',\'amount\',this.value);ApexPropPlus.render()">' +
                 '<button class="pf-led-del" onclick="ApexPropPlus.delEntry(\'' + kind + '\',' + i + ')" aria-label="Remove">✕</button>' +
               '</div>';
             }).join('')
-          : '<div class="pf-note" style="margin:4px 0 0">None recorded.</div>') +
+          : '<div class="pf-note" style="margin:4px 0 0">None yet.</div>') +
       '</div>';
     }
-
-    var ocOpts = OUTCOMES.map(function (o) {
-      /* siehe oben: <option> zeigt kein SVG. */
-      return '<option value="' + o.id + '"' + (l.outcome === o.id ? ' selected' : '') + '>' + esc(o.label) + '</option>';
-    }).join('');
-
-    return '<div class="pf-card"><h3>What this challenge costs' + (accName ? ' — ' + keepName(accName) : '') + '</h3>' +
-      '<div class="pf-note" style="margin-top:0">Entered by hand, once per challenge. Nothing is read from a bank account.</div>' +
-      '<div class="pf-kpis" style="margin-top:12px">' +
-        kpi('Spent', money(st.spent, 0), st.spent > 0 ? 'neg' : '',
-            st.resets ? st.resets + ' reset' + (st.resets === 1 ? '' : 's') + ' included' : 'Fee, activation and resets') +
-        kpi('Received', money(st.earned, 0), st.earned > 0 ? 'pos' : '',
-            st.payouts + ' payout' + (st.payouts === 1 ? '' : 's')) +
-        kpi('Net', money(st.net, 0), st.net >= 0 ? 'pos' : 'neg', 'Received minus spent') +
-        kpi('ROI', st.roi == null ? '—' : (st.roi >= 0 ? '+' : '') + st.roi.toFixed(0) + '%',
-            st.roi == null ? '' : (st.roi >= 0 ? 'pos' : 'neg'),
-            st.roi == null ? 'Nothing spent yet' : 'On what this challenge cost') +
+    return '<div class="pf-card"><div class="pfx-card-h"><h3>Costs and payouts' + (accName ? ' — ' + keepName(accName) : '') + '</h3>' +
+        '<span class="pfx-oc ' + oc + '">' + OC_LABEL[oc] + '</span></div>' +
+      '<div class="pfx-led-kpis">' +
+        '<div><span>Spent</span><b class="' + (st.spent > 0 ? 'neg' : '') + '">' + money(st.spent, 0) + '</b><em>' + (st.resets ? st.resets + ' reset' + (st.resets === 1 ? '' : 's') + ' included' : 'fee, activation, resets') + '</em></div>' +
+        '<div><span>Received</span><b class="' + (st.earned > 0 ? 'pos' : '') + '">' + money(st.earned, 0) + '</b><em>' + st.payouts + ' payout' + (st.payouts === 1 ? '' : 's') + '</em></div>' +
+        '<div><span>Net</span><b class="' + (st.net >= 0 ? 'pos' : 'neg') + '">' + money(st.net, 0) + '</b><em>received minus spent</em></div>' +
+        '<div><span>ROI</span><b class="' + (st.roi == null ? '' : st.roi >= 0 ? 'pos' : 'neg') + '">' + (st.roi == null ? '—' : keepName((st.roi >= 0 ? '+' : '') + st.roi.toFixed(0) + '%')) + '</b><em>on what it cost</em></div>' +
       '</div>' +
-      '<div class="pf-fields" style="margin-top:14px">' +
+      '<div class="pf-fields" style="margin-top:16px">' +
         '<div class="pf-field"><label for="pfFee">Challenge fee</label>' +
-          '<input type="number" step="any" id="pfFee" value="' + esc(l.fee) + '" ' +
-          'onchange="ApexPropPlus.setLedger({fee:this.value})"></div>' +
+          '<input type="number" step="any" id="pfFee" placeholder="0" value="' + esc(l.fee) + '" onchange="ApexPropPlus.setLedger({fee:this.value})"></div>' +
         '<div class="pf-field"><label for="pfAct">Activation fee</label>' +
-          '<input type="number" step="any" id="pfAct" value="' + esc(l.activation) + '" ' +
-          'onchange="ApexPropPlus.setLedger({activation:this.value})">' +
-          '<div class="pf-hint">Some firms charge this once you pass the evaluation.</div></div>' +
-        '<div class="pf-field"><label for="pfOut">Outcome</label>' +
-          '<select id="pfOut" aria-label="Outcome" onchange="ApexPropPlus.setLedger({outcome:this.value})">' + ocOpts + '</select>' +
-          '<div class="pf-hint">Pass rates below count decided attempts only.</div></div>' +
+          '<input type="number" step="any" id="pfAct" placeholder="0" value="' + esc(l.activation) + '" onchange="ApexPropPlus.setLedger({activation:this.value})">' +
+          '<div class="pf-hint">Some firms charge it once you pass.</div></div>' +
       '</div>' +
-      '<div class="pf-fields" style="margin-top:12px">' + rows('resets', 'Resets') + rows('payouts', 'Payouts') + '</div>' +
+      '<div class="pf-fields" style="margin-top:12px">' + rows('resets', 'Resets', '') + rows('payouts', 'Payouts', '') + '</div>' +
+      '<div class="pf-hint" style="margin-top:10px">Entered by hand — nothing is read from a bank account. Resets and payouts you start in the cockpit land here by themselves.</div>' +
       '</div>';
   }
 
-  /* ═══════════════ every challenge at once ═══════════════
-     The cockpit above answers "will I survive this account". This answers
-     "is the whole prop business worth it" — which is a different question
-     and the one nobody was able to ask. */
+  /* Every challenge side by side — only once there is more than one; with a
+     single challenge it would repeat the card above number for number. */
   function portfolioHtml() {
     var pf = portfolio();
-    if (pf.accounts.length < 2 && pf.totals.spent === 0) return '';   // nothing to compare yet
-
+    if (pf.rows.length < 2) return '';
     var t = pf.totals;
     var firms = Object.keys(pf.byFirm).sort(function (a, b) { return pf.byFirm[b].net - pf.byFirm[a].net; });
-
-    var rows = pf.accounts.map(function (a) {
-      var st = ledgerStats(loadLedger(a.id));
-      var oc = (loadAll().ledger[a.id] || {}).outcome || 'running';
-      var o = OUTCOMES.filter(function (x) { return x.id === oc; })[0] || OUTCOMES[0];
-      var isActive = a.id === accKey();
-      return '<tr' + (isActive ? ' style="background:var(--gold-dim)"' : '') + '>' +
-        '<td><b>' + keepName(a.name || '—') + '</b>' + (isActive ? ' <span class="pf-hint" style="display:inline">· showing above</span>' : '') + '</td>' +
-        '<td>' + keepName(a.broker || '—') + '</td>' +
-        '<td>' + o.icon + ' ' + esc(o.label) + '</td>' +
-        '<td class="' + (st.spent > 0 ? 'neg' : '') + '">' + money(st.spent, 0) + '</td>' +
-        '<td class="' + (st.earned > 0 ? 'pos' : '') + '">' + money(st.earned, 0) + '</td>' +
-        '<td class="' + (st.net >= 0 ? 'pos' : 'neg') + '">' + money(st.net, 0) + '</td></tr>';
+    var cur = accKey();
+    var cards = pf.rows.map(function (x) {
+      var fm = x.cfg.preset ? firmOfPreset(x.cfg.preset) : { mono: '+' };
+      var ph = phasesOf(x.cfg.preset).filter(function (p) { return p.id === (x.cfg.phase || 'p1'); })[0];
+      return '<div class="pfx-pc' + (x.key === cur ? ' cur' : '') + '">' +
+        '<div class="pfx-pc-h"><span class="pfx-mono notranslate" translate="no" style="width:30px;height:30px;font-size:11px;border-radius:8px">' + esc(fm.mono) + '</span>' +
+          '<div><b>' + keepName(x.name) + '</b><span>' + keepName(x.firm) + (num(x.cfg.balance) > 0 ? ' · ' + moneyTxt(num(x.cfg.balance), 0) : '') + (ph ? ' · ' + keepName(ph.label) : '') + '</span></div>' +
+          '<span class="pfx-oc ' + x.outcome + '">' + OC_LABEL[x.outcome] + '</span></div>' +
+        '<div class="pfx-pc-n"><span>Spent <b>' + money(x.stats.spent, 0) + '</b></span><span>Received <b>' + money(x.stats.earned, 0) + '</b></span>' +
+          '<span>Net <b class="' + (x.stats.net >= 0 ? 'pos' : 'neg') + '">' + money(x.stats.net, 0) + '</b></span></div>' +
+        (x.key === cur ? '' : '<button class="pfx-pc-go" onclick="ApexAccounts.setActive(\'' + esc(x.key) + '\');ApexPropPlus.render()">Open →</button>') +
+      '</div>';
     }).join('');
-
     return '<div class="pf-card"><h3>All your challenges</h3>' +
-      '<div class="pf-note" style="margin-top:0">Every account typed <b>Prop Challenge</b> or <b>Funded</b> in your account manager.</div>' +
-      '<div class="pf-kpis" style="margin-top:12px">' +
-        kpi('Total spent', money(t.spent, 0), t.spent > 0 ? 'neg' : '', t.accounts + ' challenge' + (t.accounts === 1 ? '' : 's') + ', ' + t.resets + ' reset' + (t.resets === 1 ? '' : 's')) +
-        kpi('Total received', money(t.earned, 0), t.earned > 0 ? 'pos' : '', 'Payouts across all firms') +
-        kpi('Net', money(t.net, 0), t.net >= 0 ? 'pos' : 'neg', t.net >= 0 ? 'Ahead across every firm' : 'Behind across every firm') +
-        kpi('ROI', t.roi == null ? '—' : (t.roi >= 0 ? '+' : '') + t.roi.toFixed(0) + '%', t.roi == null ? '' : (t.roi >= 0 ? 'pos' : 'neg'), 'On everything spent') +
+      '<div class="pfx-led-kpis" style="margin-top:12px">' +
+        '<div><span>Total spent</span><b class="' + (t.spent > 0 ? 'neg' : '') + '">' + money(t.spent, 0) + '</b><em>' + t.accounts + ' challenges, ' + t.resets + ' reset' + (t.resets === 1 ? '' : 's') + '</em></div>' +
+        '<div><span>Total received</span><b class="' + (t.earned > 0 ? 'pos' : '') + '">' + money(t.earned, 0) + '</b><em>payouts across all firms</em></div>' +
+        '<div><span>Net</span><b class="' + (t.net >= 0 ? 'pos' : 'neg') + '">' + money(t.net, 0) + '</b><em>' + (t.net >= 0 ? 'ahead overall' : 'behind overall') + '</em></div>' +
+        '<div><span>ROI</span><b class="' + (t.roi == null ? '' : t.roi >= 0 ? 'pos' : 'neg') + '">' + (t.roi == null ? '—' : keepName((t.roi >= 0 ? '+' : '') + t.roi.toFixed(0) + '%')) + '</b><em>on everything spent</em></div>' +
       '</div>' +
-      '<table class="pf-table" style="margin-top:14px"><thead><tr><th>Account</th><th>Firm</th><th>Outcome</th><th>Spent</th><th>Received</th><th>Net</th></tr></thead><tbody>' +
-        rows + '</tbody></table>' +
+      '<div class="pfx-pcs">' + cards + '</div>' +
       (firms.length > 1
-        ? '<h3 style="margin-top:18px">By firm</h3>' +
-          '<table class="pf-table"><thead><tr><th>Firm</th><th>Attempts</th><th>Pass rate</th><th>Spent</th><th>Received</th><th>Net</th></tr></thead><tbody>' +
-          firms.map(function (k) {
+        ? '<div class="pfx-rules-gt" style="margin-top:18px">By firm<span>pass rate over decided attempts only</span></div>' +
+          '<div class="pfx-firms">' + firms.map(function (k) {
             var f = pf.byFirm[k];
-            return '<tr><td><b>' + keepName(k) + '</b></td><td>' + f.n + '</td>' +
-              '<td>' + (f.passRate == null ? '<span class="pf-hint" style="display:inline">none decided</span>'
-                                           : f.passRate + '% <span class="pf-hint" style="display:inline">of ' + f.decided + '</span>') + '</td>' +
-              '<td class="' + (f.spent > 0 ? 'neg' : '') + '">' + money(f.spent, 0) + '</td>' +
-              '<td class="' + (f.earned > 0 ? 'pos' : '') + '">' + money(f.earned, 0) + '</td>' +
-              '<td class="' + (f.net >= 0 ? 'pos' : 'neg') + '">' + money(f.net, 0) + '</td></tr>';
-          }).join('') + '</tbody></table>' +
-          '<div class="pf-note">A pass rate is shown only over attempts you have marked passed, funded or failed. Counting a challenge you are still running as a failure would make every honest record look terrible.</div>'
+            return '<div><b>' + keepName(k) + '</b><span>' + f.n + ' attempt' + (f.n === 1 ? '' : 's') + ' · ' +
+              (f.passRate == null ? 'none decided' : keepName(f.passRate + '%') + ' passed of ' + f.decided) + '</span>' +
+              '<em class="' + (f.net >= 0 ? 'pos' : 'neg') + '">' + money(f.net, 0) + '</em></div>';
+          }).join('') + '</div>'
         : '') +
       '</div>';
   }
@@ -65435,54 +65644,111 @@ self.addEventListener('message', async (ev) => {
       (p.note ? '<br>' + esc(p.note) : '') + '<br>Terms change — always verify against your own contract.';
   }
 
+  /* Where the stored rules differ from what the firm publishes for this
+     programme, size and phase — shown next to the field, and one click puts
+     the firm's numbers back. */
+  var RULE_FIELDS = ['target', 'daily', 'max', 'dd', 'consistency', 'consistencyBase', 'minDays', 'minDayPct', 'lockAtInitial'];
+  function ruleDiffs(cfg) {
+    if (!cfg.preset || cfg.preset === 'custom' || !PRESETS[cfg.preset]) return {};
+    var r = rulesFor(cfg.preset, num(cfg.balance), cfg.phase || 'p1'), d = {};
+    RULE_FIELDS.forEach(function (f) {
+      var a = cfg[f], b = r[f];
+      if (f === 'consistencyBase') { a = a || 'gross'; b = b || 'gross'; }
+      if (f === 'lockAtInitial') { a = a !== false; b = b !== false; }
+      var same = (typeof b === 'number' || typeof a === 'number') ? Math.abs((num(a) || 0) - (num(b) || 0)) < 1e-6 : a === b;
+      if (!same) d[f] = b;
+    });
+    return d;
+  }
+  P.resetRules = function () {
+    if (lockedForFree(accKey())) { upsell(); return; }
+    var c = load();
+    if (!c.preset || c.preset === 'custom') return;
+    var r = rulesFor(c.preset, num(c.balance), c.phase || 'p1');
+    for (var f in r) c[f] = r[f];
+    persist(c); refreshOutside(); P.render();
+    if (window.showToast) showToast('Back to the firm’s published rules');
+  };
+  P.changeChallenge = function () {
+    var c = load(), k = accKey();
+    if (window.ApexPropWizard) ApexPropWizard.open({ account: k === ALL_KEY ? '' : k, preset: c.preset, size: num(c.balance), phase: c.phase || 'p1' });
+  };
+
   function renderSetup(cfg) {
-    var opts = Object.keys(PRESETS).map(function (k) {
-      return '<option value="' + k + '"' + (cfg.preset === k ? ' selected' : '') + '>' + esc(PRESETS[k].label) + '</option>';
-    }).join('');
-    var ddOpts = ['static', 'eod', 'trailing'].map(function (k) {
-      return '<option value="' + k + '"' + (cfg.dd === k ? ' selected' : '') + '>' + esc(DD_LABEL[k]) + '</option>';
-    }).join('');
-    return '<div class="pf-card pf-setup"><h3>Challenge Setup</h3>' +
-      '<p class="pf-sub">Pick your firm to prefill, then adjust anything your programme does differently.</p>' +
-      '<div class="pf-fields">' +
-        '<div class="pf-field"><label for="pfPreset">Firm / programme</label>' +
-          '<select id="pfPreset" aria-label="Prop firm programme" onchange="ApexPropPlus.applyPreset(this.value)">' + opts + '</select>' +
-          '<div class="pf-hint">' + presetCheck(cfg.preset) + '</div></div>' +
-        fld('Account size (' + sym().trim() + ')', 'pfBalance', cfg.balance, 'balance', 'number', 'Starting balance of this cycle', 'min="0" step="100"') +
-        '<div class="pf-field"><label for="pfPhase">Phase</label>' +
-          '<select id="pfPhase" aria-label="Phase" onchange="ApexPropPlus.setPhase(this.value)">' +
-          phasesOf(cfg.preset).map(function (x) { return '<option value="' + x.id + '"' + ((cfg.phase || 'p1') === x.id ? ' selected' : '') + '>' + esc(x.label) + '</option>'; }).join('') +
-          '</select><div class="pf-hint">Changing it loads that phase\u2019s target.</div></div>' +
-        fld('Profit target (%)', 'pfTarget', cfg.target, 'target', 'number', '', 'min="0" step="0.5"') +
-        fld('Daily loss limit (%)', 'pfDaily', cfg.daily, 'daily', 'number', '0 = none', 'min="0" step="0.5"') +
-        fld('Max drawdown (%)', 'pfMax', cfg.max, 'max', 'number', '', 'min="0" step="0.5"') +
-        '<div class="pf-field"><label for="pfDD">Drawdown model</label>' +
-          '<select id="pfDD" aria-label="Drawdown model" onchange="ApexPropPlus.set({dd:this.value})">' + ddOpts + '</select>' +
-          '<div class="pf-hint">Static never moves. EOD trails your daily closes. Intraday trails every new high.</div></div>' +
-        fld('Consistency limit (%)', 'pfCons', cfg.consistency, 'consistency', 'number', 'Max share of profit from one day. 0 = none', 'min="0" max="100" step="1"') +
-        fld('Personal stop (% of the firm\u2019s daily limit)', 'pfSafety', cfg.safety, 'safety', 'number',
-            'Guardrails warn and stop you here, before the firm does. 25–100. Without a daily limit: share of the floor distance at the start of the day.', 'min="25" max="100" step="5"') +
-        fld('Minimum trading days', 'pfDays', cfg.minDays, 'minDays', 'number', '0 = none', 'min="0" step="1"') +
-        '<div class="pf-field"><label for="pfCBase">Consistency measured against</label>' +
-          '<select id="pfCBase" aria-label="Consistency base" onchange="ApexPropPlus.set({consistencyBase:this.value})">' +
-          [['gross', 'Profit of your green days'], ['net', 'Total net profit'], ['target', 'The profit target']].map(function (o) {
-            return '<option value="' + o[0] + '"' + ((cfg.consistencyBase || 'gross') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
-          }).join('') + '</select><div class="pf-hint">Firms word it differently — Topstep uses the target, TakeProfit the net profit.</div></div>' +
-        fld('A day counts from (% profit)', 'pfDayPct', cfg.minDayPct, 'minDayPct', 'number', 'Only days with at least this profit count toward the minimum. 0 = every traded day', 'min="0" step="0.1"') +
-        ((cfg.phase || 'p1') === 'funded'
-          ? fld('Payout rhythm (days)', 'pfPoEvery', cfg.payoutEvery, 'payoutEvery', 'number', '0 = your firm\u2019s default', 'min="0" step="1"') +
-            fld('Last payout', 'pfPoLast', cfg.lastPayout, 'lastPayout', 'date', 'The payout window restarts here')
-          : '') +
-        fld('Cycle start', 'pfStart', cfg.cycleStart, 'cycleStart', 'date', 'Trades before this date are ignored') +
-        fld('Payout / deadline date', 'pfPayout', cfg.payoutDate, 'payoutDate', 'date', 'Drives the countdown') +
-        '<div class="pf-field" style="grid-column:1/-1">' +
-          '<label style="display:flex;align-items:center;gap:9px;cursor:pointer">' +
-            '<input type="checkbox"' + (cfg.lockAtInitial ? ' checked' : '') +
-            ' onchange="ApexPropPlus.set({lockAtInitial:this.checked})" style="accent-color:var(--gold)">' +
-            '<span style="font-size:13px;color:var(--ink2)">Trailing floor locks at the starting balance</span></label>' +
-          '<div class="pf-hint">How most futures firms run it: once the floor has trailed up to your initial balance it stops rising. Turn off for a floor that trails all the way up.</div>' +
-        '</div>' +
-      '</div></div>';
+    var diffs = ruleDiffs(cfg), nDiff = Object.keys(diffs).length;
+    var fm = firmOfPreset(cfg.preset), pr = PRESETS[cfg.preset] || {};
+    var ph = phasesOf(cfg.preset).filter(function (x) { return x.id === (cfg.phase || 'p1'); })[0] || { label: '' };
+    var pctAmt = function (pc) { return num(cfg.balance) > 0 && num(pc) > 0 ? moneyTxt(num(cfg.balance) * num(pc) / 100, 0) : ''; };
+    /* A field with the firm's value beside it when the two differ. */
+    var firmVal = function (f, fmt) {
+      if (!(f in diffs)) return '';
+      var v = diffs[f];
+      return '<div class="pfx-diff">Firm: ' + esc(fmt ? fmt(v) : String(v)) + '</div>';
+    };
+    var pctFmt = function (v) { return (+v).toFixed(2).replace(/\.?0+$/, '') + '%' + (pctAmt(v) ? ' = ' + pctAmt(v) : ''); };
+    var numFld = function (label, id, key, hint, attrs, fmt) {
+      return '<div class="pf-field' + (key in diffs ? ' changed' : '') + '"><label for="' + id + '">' + label + '</label>' +
+        '<input type="number" id="' + id + '" value="' + esc(cfg[key] == null ? '' : cfg[key]) + '" ' + (attrs || '') +
+        ' onchange="ApexPropPlus.set({' + key + ': parseFloat(this.value)||0})">' +
+        (hint ? '<div class="pf-hint">' + hint + '</div>' : '') + firmVal(key, fmt) + '</div>';
+    };
+    var dateFld = function (label, id, key, hint) {
+      return '<div class="pf-field"><label for="' + id + '">' + label + '</label>' +
+        '<input type="date" id="' + id + '" value="' + esc(cfg[key] || '') + '" onchange="ApexPropPlus.set({' + key + ': this.value})">' +
+        (hint ? '<div class="pf-hint">' + hint + '</div>' : '') + '</div>';
+    };
+    var sel = function (label, id, key, opts, hint) {
+      return '<div class="pf-field' + (key in diffs ? ' changed' : '') + '"><label for="' + id + '">' + label + '</label>' +
+        '<select id="' + id + '" onchange="ApexPropPlus.set({' + key + ': this.value})">' +
+        opts.map(function (o) { return '<option value="' + o[0] + '"' + ((cfg[key] || opts[0][0]) === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') +
+        '</select>' + (hint ? '<div class="pf-hint">' + hint + '</div>' : '') +
+        firmVal(key, function (v) { return (opts.filter(function (o) { return o[0] === v; })[0] || [v, v])[1]; }) + '</div>';
+    };
+    var amtHint = function (key) { var a = pctAmt(cfg[key]); return a ? '= ' + a : ''; };
+
+    var head = '<div class="pfx-rules-head">' +
+        '<span class="pfx-mono notranslate" translate="no" style="width:38px;height:38px;font-size:13px">' + esc(fm.mono) + '</span>' +
+        '<div class="pfx-rules-id"><b>' + keepName(cfg.preset === 'custom' ? 'Your own rules' : (pr.label || fm.name)) + '</b>' +
+          '<span>' + money(num(cfg.balance), 0) + (ph.label ? ' · ' + keepName(ph.label) : '') + '</span></div>' +
+        '<button class="pf-mode-btn" onclick="ApexPropPlus.changeChallenge()">Change firm, size or phase</button>' +
+      '</div>' +
+      (cfg.preset !== 'custom'
+        ? '<div class="pfx-rules-src">' + presetCheck(cfg.preset) + '</div>' +
+          (nDiff ? '<div class="pfx-rules-diff"><span><b>' + nDiff + ' rule' + (nDiff === 1 ? '' : 's') + '</b> ' + (nDiff === 1 ? 'differs' : 'differ') + ' from what ' + keepName(fm.name) + ' publishes — marked below.</span>' +
+            '<button class="pf-mode-btn" onclick="ApexPropPlus.resetRules()">Use the firm’s rules</button></div>' : '')
+        : '<div class="pfx-rules-src">Your own numbers. Check them against your contract.</div>');
+
+    var ddOpts = [['static', 'Static'], ['eod', 'End-of-day trailing'], ['trailing', 'Intraday trailing']];
+    var group = function (title, sub, inner) {
+      return '<div class="pfx-rules-grp"><div class="pfx-rules-gt">' + title + (sub ? '<span>' + sub + '</span>' : '') + '</div><div class="pf-fields">' + inner + '</div></div>';
+    };
+    var firmRules =
+      numFld('Profit target (%)', 'pfTarget', 'target', amtHint('target') || '0 = none in this phase', 'min="0" step="0.5"', pctFmt) +
+      numFld('Daily loss limit (%)', 'pfDaily', 'daily', amtHint('daily') || '0 = none', 'min="0" step="0.5"', pctFmt) +
+      numFld('Max drawdown (%)', 'pfMax', 'max', amtHint('max'), 'min="0" step="0.5"', pctFmt) +
+      sel('Drawdown model', 'pfDD', 'dd', ddOpts, 'Static never moves. End-of-day follows your daily closes, intraday every new high.') +
+      numFld('Consistency limit (%)', 'pfCons', 'consistency', 'Largest share of profit from one day. 0 = none', 'min="0" max="100" step="1"', function (v) { return v + '%'; }) +
+      sel('Measured against', 'pfCBase', 'consistencyBase', [['gross', 'Green days'], ['net', 'Net profit'], ['target', 'Profit target']], 'Green days = the profit of all your winning days.') +
+      numFld('Minimum days', 'pfDays', 'minDays', '0 = none', 'min="0" step="1"', String) +
+      numFld('A day counts from (% profit)', 'pfDayPct', 'minDayPct', '0 = every traded day', 'min="0" step="0.1"', function (v) { return v + '%'; }) +
+      '<div class="pf-field pf-field-wide' + ('lockAtInitial' in diffs ? ' changed' : '') + '">' +
+        '<label class="pfx-check"><input type="checkbox"' + (cfg.lockAtInitial !== false ? ' checked' : '') +
+        ' onchange="ApexPropPlus.set({lockAtInitial:this.checked})"><span>A trailing floor stops at the starting balance</span></label>' +
+        '<div class="pf-hint">How most futures firms run it. Off: the floor keeps trailing upward.</div>' +
+        firmVal('lockAtInitial', function (v) { return v ? 'stops at the start' : 'keeps trailing'; }) + '</div>';
+    var own = numFld('Personal stop (% of the firm’s daily limit)', 'pfSafety', 'safety',
+      'You stop here — before the firm does. 25–100. Without a daily limit: share of the distance to the floor at the start of the day.', 'min="25" max="100" step="5"');
+    var dates = dateFld('This phase started on', 'pfStart', 'cycleStart', 'Trades before this day do not count toward it.') +
+      dateFld('Deadline', 'pfPayout', 'payoutDate', 'Optional — drives the countdown and the pace per day.');
+    var payouts = (cfg.phase || 'p1') === 'funded'
+      ? group('Payouts', 'funded account',
+          numFld('Payout rhythm (days)', 'pfPoEvery', 'payoutEvery', '0 = your firm’s default', 'min="0" step="1"') +
+          dateFld('Last payout', 'pfPoLast', 'lastPayout', 'The next window counts from here.'))
+      : '';
+    return '<div class="pf-card pf-setup"><h3>Adjust rules</h3>' + head +
+      group('The firm’s rules', 'as published for this programme, size and phase', firmRules) +
+      group('Your own line', '', own) +
+      group('Dates', '', dates) + payouts + '</div>';
   }
 
   /* Re-render when the journal changes, so the cockpit is never stale. */
@@ -65713,6 +65979,104 @@ body.light #page-propfirm .pf-led-row input { color-scheme: light; }
 #page-propfirm .pfx-moment.bad { background: rgba(var(--loss-rgb),0.08); border: 0.5px solid rgba(var(--loss-rgb),0.4); }
 #page-propfirm .pfx-moment-btns { display: flex; gap: 8px; flex: none; }
 #page-propfirm .pfx-hero-act { margin-top: 12px; }
+#page-propfirm .pfx-honest { margin: -6px 2px 16px; font-size: 11.5px; color: var(--ink3); line-height: 1.5; }
+#page-propfirm .pfx-sim-ctl { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 16px; }
+#page-propfirm .pfx-sim-ctl label { display: flex; flex-direction: column; gap: 4px; min-width: 130px; flex: 1 1 130px; }
+#page-propfirm .pfx-sim-ctl label > span { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); }
+#page-propfirm .pfx-sim-ctl select, #page-propfirm .pfx-sim-ctl input { width: 100%; }
+#page-propfirm .pfx-sim-verdict { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-radius: 12px; margin-bottom: 14px;
+  border: 0.5px solid rgba(224,169,59,0.4); background: rgba(224,169,59,0.07); }
+#page-propfirm .pfx-sim-verdict b { font-family: var(--font-display); font-size: 17px; color: #e0a93b; }
+#page-propfirm .pfx-sim-verdict span { font-size: 12px; color: var(--ink3); }
+#page-propfirm .pfx-sim-verdict.passed { border-color: rgba(var(--gold-rgb),0.5); background: linear-gradient(135deg, rgba(var(--gold-rgb),0.14), rgba(var(--gold-rgb),0.04)); }
+#page-propfirm .pfx-sim-verdict.passed b { color: var(--gold); }
+#page-propfirm .pfx-sim-verdict.failed { border-color: rgba(var(--loss-rgb),0.45); background: rgba(var(--loss-rgb),0.07); }
+#page-propfirm .pfx-sim-verdict.failed b { color: var(--loss); }
+#page-propfirm .pfx-sim-path { position: relative; display: flex; flex-direction: column; gap: 10px; }
+#page-propfirm .pfx-sim-step { display: grid; grid-template-columns: 30px 1fr; gap: 12px; }
+#page-propfirm .pfx-sim-ic { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px;
+  background: rgba(224,169,59,0.15); color: #e0a93b; }
+#page-propfirm .pfx-sim-step.ok .pfx-sim-ic { background: rgba(var(--profit-rgb),0.15); color: var(--profit); }
+#page-propfirm .pfx-sim-step.bad .pfx-sim-ic { background: rgba(var(--loss-rgb),0.15); color: var(--loss); }
+#page-propfirm .pfx-sim-step.fund .pfx-sim-ic { background: linear-gradient(135deg,#c9a84c,#e8c96a); color: #07080b; }
+#page-propfirm .pfx-sim-b { min-width: 0; padding-bottom: 10px; border-bottom: 0.5px solid var(--rim); }
+#page-propfirm .pfx-sim-step:last-child .pfx-sim-b { border-bottom: 0; }
+#page-propfirm .pfx-sim-t { font-weight: 700; color: var(--ink); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+#page-propfirm .pfx-sim-t span { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); font-weight: 600; }
+#page-propfirm .pfx-sim-m { font-size: 12px; color: var(--ink3); margin: 3px 0 4px; font-family: var(--font-mono); }
+#page-propfirm .pfx-sim-w { font-size: 13px; color: var(--ink2); line-height: 1.55; }
+#page-propfirm .pfx-sim-rules { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+#page-propfirm .pfx-sim-rules span { font-size: 12px; color: var(--ink); background: var(--elevated); border: 0.5px solid var(--rim); border-radius: 8px; padding: 5px 9px; font-family: var(--font-mono); }
+#page-propfirm .pfx-sim-rules i { font-style: normal; font-family: var(--font-body); color: var(--ink3); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; margin-right: 6px; }
+#page-propfirm .pfx-sim-rules em { font-style: normal; color: var(--ink3); font-size: 11px; }
+#page-propfirm .pfx-sim-note { margin-top: 12px; font-size: 12px; color: var(--ink3); line-height: 1.55; }
+#page-propfirm .pfx-sim-note.warn { color: #e0a93b; }
+#page-propfirm .pfx-mini { grid-template-columns: repeat(3, 1fr); }
+#page-propfirm .pfx-hero-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: none; }
+#page-propfirm .pfx-mode-sw { display: inline-flex; align-items: center; gap: 7px; background: none; border: 0.5px solid rgba(var(--gold-rgb),0.4); color: var(--ink2);
+  border-radius: 99px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: var(--font-body); }
+#page-propfirm .pfx-mode-sw i { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px rgba(var(--gold-rgb),0.2); }
+#page-propfirm .pfx-mode-sw:hover { color: var(--ink); border-color: var(--gold); }
+#page-propfirm .pfx-rules-head { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+#page-propfirm .pfx-rules-id { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#page-propfirm .pfx-rules-id b { color: var(--ink); font-size: 15px; }
+#page-propfirm .pfx-rules-id > span { font-size: 12px; color: var(--ink3); }
+#page-propfirm .pfx-rules-src { font-size: 12px; color: var(--ink3); line-height: 1.6; margin: 10px 0 0; }
+#page-propfirm .pfx-rules-src a { color: var(--gold); }
+#page-propfirm .pfx-rules-diff { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding: 10px 12px; border-radius: 10px;
+  background: rgba(224,169,59,0.08); border: 0.5px solid rgba(224,169,59,0.4); font-size: 13px; color: var(--ink2); }
+#page-propfirm .pfx-rules-diff span { flex: 1; min-width: 200px; }
+#page-propfirm .pfx-rules-grp { margin-top: 20px; padding-top: 16px; border-top: 0.5px solid var(--rim); }
+#page-propfirm .pfx-rules-gt { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--ink); }
+#page-propfirm .pfx-rules-gt span { font-family: var(--font-body); font-weight: 400; font-size: 12px; color: var(--ink3); margin-left: 8px; }
+#page-propfirm .pfx-rules-grp .pf-fields { margin-top: 10px; }
+#page-propfirm .pf-field.changed input, #page-propfirm .pf-field.changed select { border-color: rgba(224,169,59,0.6); }
+#page-propfirm .pfx-diff { font-size: 11px; color: #e0a93b; margin-top: 4px; }
+#page-propfirm .pf-field-wide { grid-column: 1 / -1; }
+#page-propfirm .pfx-check { display: flex !important; align-items: center; gap: 9px; cursor: pointer; font-size: 13px !important; color: var(--ink2) !important; }
+#page-propfirm .pfx-check input { accent-color: var(--gold); width: auto !important; }
+@media (max-width: 600px) {
+  #page-propfirm .pfx-hero-side { grid-column: 1 / -1; flex-direction: row; justify-content: flex-start; align-items: center; }
+  #page-propfirm .pfx-rules-head { flex-wrap: wrap; }
+  #page-propfirm .pfx-rules-head .pf-mode-btn { width: 100%; }
+}
+#page-propfirm .pfx-oc { flex: none; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px;
+  color: #e0a93b; background: rgba(224,169,59,0.1); border: 0.5px solid rgba(224,169,59,0.35); }
+#page-propfirm .pfx-oc.passed { color: var(--profit); background: rgba(var(--profit-rgb),0.1); border-color: rgba(var(--profit-rgb),0.35); }
+#page-propfirm .pfx-oc.funded { color: #07080b; background: linear-gradient(135deg,#c9a84c,#e8c96a); border-color: transparent; }
+#page-propfirm .pfx-oc.failed { color: var(--loss); background: rgba(var(--loss-rgb),0.1); border-color: rgba(var(--loss-rgb),0.4); }
+#page-propfirm .pfx-led-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+#page-propfirm .pfx-led-kpis > div { background: var(--elevated); border: 0.5px solid var(--rim); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
+#page-propfirm .pfx-led-kpis > div > span { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); }
+#page-propfirm .pfx-led-kpis b { font-family: var(--font-mono); font-size: 19px; color: var(--ink); }
+#page-propfirm .pfx-led-kpis > div > em { font-style: normal; font-size: 11px; color: var(--ink3); }
+#page-propfirm .pf-led-head em { font-style: normal; color: var(--ink3); }
+#page-propfirm .pfx-tl { list-style: none; margin: 14px 0 0; padding: 0; position: relative; }
+#page-propfirm .pfx-tl:before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1px; background: var(--rim2); }
+#page-propfirm .pfx-tl li { position: relative; display: grid; grid-template-columns: 14px 1fr; gap: 12px; padding: 6px 0 10px; }
+#page-propfirm .pfx-tl-dot { width: 13px; height: 13px; border-radius: 50%; margin-top: 3px; background: #e0a93b; box-shadow: 0 0 0 3px var(--layer); position: relative; z-index: 1; }
+#page-propfirm .pfx-tl li.ok .pfx-tl-dot { background: var(--profit); }
+#page-propfirm .pfx-tl li.bad .pfx-tl-dot { background: var(--loss); }
+#page-propfirm .pfx-tl li.now .pfx-tl-dot { background: linear-gradient(135deg,#c9a84c,#e8c96a); box-shadow: 0 0 0 3px var(--layer), 0 0 0 6px rgba(var(--gold-rgb),0.2); }
+#page-propfirm .pfx-tl b { display: block; color: var(--ink); font-size: 14px; }
+#page-propfirm .pfx-tl-d { display: block; font-size: 12px; color: var(--ink3); font-family: var(--font-mono); margin-top: 2px; }
+#page-propfirm .pfx-tl-x { display: block; font-size: 12px; color: var(--ink2); margin-top: 3px; }
+#page-propfirm .pfx-pcs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-top: 14px; }
+#page-propfirm .pfx-pc { background: var(--elevated); border: 0.5px solid var(--rim); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+#page-propfirm .pfx-pc.cur { border-color: rgba(var(--gold-rgb),0.5); }
+#page-propfirm .pfx-pc-h { display: flex; align-items: center; gap: 10px; }
+#page-propfirm .pfx-pc-h > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#page-propfirm .pfx-pc-h b { color: var(--ink); font-size: 13px; }
+#page-propfirm .pfx-pc-h > div > span { font-size: 11px; color: var(--ink3); }
+#page-propfirm .pfx-pc-n { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--ink3); }
+#page-propfirm .pfx-pc-n > span > b { font-family: var(--font-mono); color: var(--ink); font-size: 13px; margin-left: 3px; }
+#page-propfirm .pfx-pc-go { align-self: flex-start; background: none; border: 0; color: var(--gold); font-size: 12px; cursor: pointer; padding: 0; font-family: var(--font-body); }
+#page-propfirm .pfx-firms { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+#page-propfirm .pfx-firms > div { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; background: var(--elevated); font-size: 13px; }
+#page-propfirm .pfx-firms b { color: var(--ink); min-width: 120px; }
+#page-propfirm .pfx-firms span { flex: 1; color: var(--ink3); font-size: 12px; }
+#page-propfirm .pfx-firms em { font-style: normal; font-family: var(--font-mono); }
+@media (max-width: 760px) { #page-propfirm .pfx-led-kpis { grid-template-columns: repeat(2, 1fr); } }
 #page-propfirm .pfx-po-head { font-size: 15px; color: var(--ink2); margin: 8px 0 4px; }
 #page-propfirm .pfx-po-ok { display: inline-block; font-weight: 800; color: #07080b; background: linear-gradient(135deg,#c9a84c,#e8c96a); border-radius: 8px; padding: 4px 10px; }
 #page-propfirm .pfx-po-list { list-style: none; margin: 8px 0 10px; padding: 0; font-size: 13px; line-height: 1.9; }
@@ -65741,6 +66105,8 @@ body.light #page-propfirm .pf-led-row input { color-scheme: light; }
 #page-propfirm .pfx-cons-bar { position: relative; height: 7px; border-radius: 4px; background: var(--raised, rgba(255,255,255,0.07)); margin-bottom: 6px; }
 #page-propfirm .pfx-cons-bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg,#c9a84c,#e8c96a); }
 #page-propfirm .pfx-cons-bar i.bad { background: var(--loss); }
+#page-propfirm .pfx-cons-bar i.ok { background: var(--profit); }
+#page-propfirm .pfx-cons-n.pos { color: var(--profit); }
 #page-propfirm .pfx-card-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 #page-propfirm .pfx-legend { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ink3); }
 #page-propfirm .pfx-legend i { display: inline-block; width: 14px; height: 0; border-top: 2px solid var(--gold); margin-left: 8px; }
@@ -65765,12 +66131,12 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
 #page-propfirm .pf-kpis { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 @media (max-width: 900px) {
   #page-propfirm .pfx-rings { grid-template-columns: repeat(2, 1fr); }
-  #page-propfirm .pfx-mini { grid-template-columns: repeat(2, 1fr); }
+  #page-propfirm .pfx-mini { grid-template-columns: repeat(3, 1fr); }
+  #page-propfirm .pfx-mini b { font-size: 13px; }
 }
 @media (max-width: 600px) {
   #page-propfirm .pfx-hero { padding: 16px 14px 14px 18px; }
   #page-propfirm .pfx-hero-top { display: grid; grid-template-columns: 46px 1fr; gap: 12px; }
-  #page-propfirm .pfx-state { grid-column: 1 / -1; justify-self: start; }
   #page-propfirm .pfx-hero-t { font-size: 16px; }
   #page-propfirm .pfx-steps { gap: 6px; }
   #page-propfirm .pfx-step-line { flex-basis: 14px; }
@@ -65798,6 +66164,7 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
   var STEPS = ['Firm', 'Programme', 'Phase', 'Account', 'Start'];
 
   function P() { return window.ApexPropPlus; }
+  function tr(el) { try { if (P() && P().i18nNow) P().i18nNow(el); } catch (e) {} }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function keep(t) { return '<span class="notranslate" translate="no">' + esc(t) + '</span>'; }
   function money(v) { return keep(P().fmt(v, 0)); }
@@ -65829,7 +66196,15 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
     S = { step: fid ? 2 : 1, firm: fid, preset: fid ? firm(fid).programs[0] : null, size: num(o.size) || 0,
           phase: 'p1', start: todayStr(), account: o.account || '', newName: '', fee: '', replace: false,
           rules: { target: 10, daily: 5, max: 10, dd: 'static', consistency: 0, minDays: 0 } };
-    if (S.preset) fixSize();
+    /* Opened from "Change firm, size or phase": start on the current one. */
+    if (o.preset && P().PRESETS[o.preset]) {
+      S.preset = o.preset; S.firm = P().firmOfPreset(o.preset).id; S.step = 2;
+      if (o.phase) S.phase = o.phase;
+      if (o.preset === 'custom') {
+        try { var cur = P().get(); ['target', 'daily', 'max', 'dd', 'consistency', 'minDays'].forEach(function (f) { if (cur[f] != null) S.rules[f] = cur[f]; }); } catch (e) {}
+      }
+    }
+    if (S.preset && S.preset !== 'custom') fixSize();
     if (!S.account) {
       var a = accounts().filter(function (x) { return x.type === 'prop' || x.type === 'funded'; })[0];
       S.account = a ? a.id : '__new';
@@ -66065,6 +66440,7 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
         (S.step > 1 ? '<button type="button" class="pw-btn primary" id="pwNext" onclick="ApexPropWizard.next()"' + (valid() ? '' : ' disabled') + '>' +
           (S.step === 5 ? 'Start Prop mode' : 'Continue →') + '</button>' : '') +
       '</div>';
+    tr(card);
   }
 
   /* ───────── the overview card ─────────
@@ -66106,7 +66482,8 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
     if (page.firstElementChild !== card) page.insertBefore(card, page.firstElementChild);
     var r = st.r, c = st.cfg, f = P().firmOfPreset(c.preset), phs = phaseOf(c.preset, c.phase || 'p1');
     var bufPct = r.maxDDAbs > 0 ? Math.max(0, Math.min(100, r.buffer / r.maxDDAbs * 100)) : 0;
-    var dayPct = r.dailyAbs > 0 ? Math.max(0, Math.min(100, r.today.room / r.dailyAbs * 100)) : bufPct;
+    var roomOv = r.open && r.open.n ? r.today.roomWorst : r.today.room;
+    var dayPct = r.dailyAbs > 0 ? Math.max(0, Math.min(100, roomOv / r.dailyAbs * 100)) : bufPct;
     var state = (r.breaches.length || r.buffer <= 0) ? 'bad' : (r.targetHit && r.daysRemaining === 0 && r.consistencyOk) ? 'done'
       : (bufPct < 25 || (r.dailyAbs > 0 && dayPct < 25)) ? 'warn' : 'good';
     var stat = function (label, val, pct, cls) {
@@ -66120,11 +66497,12 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
         '<button type="button" class="pw-btn" onclick="nav(\'propfirm\')">Open cockpit →</button></div>' +
       '<div class="po-stats">' +
         stat('To the floor', money(r.buffer), bufPct, bufPct < 25 ? 'bad' : bufPct < 50 ? 'warn' : 'good') +
-        stat('Room left today', money(r.today.room), dayPct, dayPct < 25 ? 'bad' : dayPct < 50 ? 'warn' : 'good') +
+        stat(r.open && r.open.n ? 'Room if stops hit' : 'Room left today', money(roomOv), dayPct, dayPct < 25 ? 'bad' : dayPct < 50 ? 'warn' : 'good') +
         (r.targetAbs > 0 ? stat('Profit target', keep(Math.round(r.targetPct || 0) + '%'), r.targetPct || 0, 'gold') : '') +
         (r.daysNeeded > 0 ? stat('Trading days', keep(r.daysTraded + ' / ' + r.daysNeeded), r.daysTraded / r.daysNeeded * 100, 'gold') : '') +
       '</div>' +
       '<div class="po-plan">' + planSentence(r, c) + '</div>';
+    tr(card);
   };
 
   /* ───────── hints on the trade cards ─────────
@@ -66228,7 +66606,8 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
     }
     var r = st.r, c = st.cfg;
     var bufPct = r.maxDDAbs > 0 ? r.buffer / r.maxDDAbs * 100 : 100;
-    var dayTight = r.dailyAbs > 0 && r.today.room < r.dailyAbs * 0.25;
+    var roomNow = r.open && r.open.n ? r.today.roomWorst : r.today.room;
+    var dayTight = r.dailyAbs > 0 && roomNow < r.dailyAbs * 0.25;
     var state = (r.breaches.length || r.buffer <= 0 || (r.dailyAbs > 0 && r.today.dailyLeft <= 0)) ? 'bad'
       : (r.targetHit && r.daysRemaining === 0 && r.consistencyOk) ? 'done'
       : (bufPct < 25 || dayTight) ? 'warn' : 'good';
@@ -66236,7 +66615,7 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
     var ph = phaseOf(c.preset, c.phase || 'p1');
     var items = [];
     items.push('<span class="pb-k">Floor</span> <b class="' + (bufPct < 25 ? 'neg' : '') + '">' + money(r.buffer) + '</b>');
-    items.push('<span class="pb-k">Today</span> <b class="' + (dayTight ? 'neg' : '') + '">' + money(r.today.room) + '</b>');
+    items.push('<span class="pb-k">Today</span> <b class="' + (dayTight || (r.open && r.open.noStop) ? 'neg' : '') + '">' + money(roomNow) + '</b>' + (r.open && r.open.n ? '<i class="pb-open" title="Includes the stops of open trades">' + r.open.n + ' open</i>' : ''));
     if (r.targetAbs > 0) items.push('<span class="pb-k">Target</span> <b>' + keep(Math.round(r.targetPct || 0) + '%') + '</b><i class="pb-bar"><i style="width:' + Math.min(100, r.targetPct || 0).toFixed(0) + '%"></i></i>');
     if (r.daysNeeded > 0) items.push('<span class="pb-k">Days</span> <b>' + keep(r.daysTraded + '/' + r.daysNeeded) + '</b>');
     var label = state === 'bad' ? 'Rule breached' : state === 'done' ? 'All conditions met' : state === 'warn' ? 'Careful' : 'In good standing';
@@ -66247,6 +66626,7 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
       '<span class="pb-state">' + label + '</span>' +
       items.map(function (x, i) { return '<span class="pb-it pb-it' + i + '">' + x + '</span>'; }).join('') +
       '<span class="pb-go">→</span></button>';
+    tr(bar);
   };
 })();
 </script>
@@ -66394,6 +66774,7 @@ body.light .pw-fld input, body.light .pw-fld select { color-scheme: light; }
 .prop-bar .pb-bar { display: inline-block; width: 46px; height: 4px; border-radius: 2px; background: var(--raised, rgba(255,255,255,0.08)); overflow: hidden; }
 .prop-bar .pb-bar > i { display: block; height: 100%; background: linear-gradient(90deg,#c9a84c,#e8c96a); }
 .prop-bar .pb-go { margin-left: auto; color: var(--ink3); }
+.prop-bar .pb-open { font-style: normal; font-size: 10px; color: var(--ink3); border: 0.5px solid var(--rim2); border-radius: 99px; padding: 1px 6px; }
 .prop-bar.setup > button { color: var(--gold); font-weight: 600; }
 @media (max-width: 900px) {
   .prop-bar > button { padding: 7px 14px; gap: 10px; }
@@ -66404,6 +66785,216 @@ body.light .pw-fld input, body.light .pw-fld select { color-scheme: light; }
 }
 </style>
 <!-- ==== /Evidence Prop mode ==== -->
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   Prop-Modus — handgeschriebene Übersetzungen (de, es, pt, fr), 08.10.2026
+   Gilt NUR im Cockpit, in der Challenge-Leiste, der Übersichtskarte und im
+   Assistenten. Google Translate hat dort "Floor" zum Boden, "Balance" zum
+   Gleichgewicht, "allowance" zum Taschengeld und "challenge" zum Konflikt
+   gemacht; halb übersetzte Seiten wirkten unfertig. Schlüssel = exakter
+   englischer Textknoten. Anrede wie in der App: du / tú / você / vous.
+   Fachwörter, die Trader überall englisch sagen (Drawdown, Floor im Sinne
+   der Linie, Challenge, Funded, Payout), bleiben in allen Sprachen stehen.
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var PR = {
+    // Status
+    'In good standing': ['Alles im Rahmen', 'Todo en regla', 'Tudo dentro das regras', 'Tout est en règle'],
+    'Careful — close to a limit': ['Vorsicht — nah an einer Grenze', 'Cuidado — cerca de un límite', 'Atenção — perto de um limite', 'Attention — proche d’une limite'],
+    'Rule breached': ['Regel verletzt', 'Regla incumplida', 'Regra violada', 'Règle enfreinte'],
+    'Phase passed': ['Phase bestanden', 'Fase superada', 'Fase aprovada', 'Phase réussie'],
+    'Careful': ['Vorsicht', 'Cuidado', 'Atenção', 'Attention'],
+    'All conditions met': ['Alle Bedingungen erfüllt', 'Todas las condiciones cumplidas', 'Todas as condições cumpridas', 'Toutes les conditions remplies'],
+    'All conditions met.': ['Alle Bedingungen erfüllt.', 'Todas las condiciones cumplidas.', 'Todas as condições cumpridas.', 'Toutes les conditions sont remplies.'],
+    // Kopfkarte + Ringe
+    'Practise these rules in the replay →': ['Diese Regeln im Replay üben →', 'Practica estas reglas en el replay →', 'Pratique estas regras no replay →', 'S’entraîner à ces règles dans le replay →'],
+    'Balance': ['Kontostand', 'Saldo', 'Saldo', 'Solde'],
+    'Profit': ['Gewinn', 'Beneficio', 'Lucro', 'Profit'],
+    'Closest all cycle': ['Knappster Abstand', 'Lo más cerca', 'Mais perto', 'Au plus près'],
+    'Profit target': ['Gewinnziel', 'Objetivo de beneficio', 'Meta de lucro', 'Objectif de profit'],
+    'To the floor': ['Bis zur Grenze', 'Hasta el límite', 'Até o limite', 'Jusqu’à la limite'],
+    'Room left today': ['Heute noch möglich', 'Margen de hoy', 'Margem de hoje', 'Marge du jour'],
+    'Room if stops hit': ['Spielraum, wenn Stops greifen', 'Margen si saltan los stops', 'Margem se os stops forem atingidos', 'Marge si les stops sont touchés'],
+    'Consistency': ['Konsistenz', 'Consistencia', 'Consistência', 'Régularité'],
+    'Trading days': ['Handelstage', 'Días de trading', 'Dias de trading', 'Jours de trading'],
+    'Profitable days': ['Profitable Tage', 'Días con beneficio', 'Dias com lucro', 'Jours gagnants'],
+    'Next payout': ['Nächste Auszahlung', 'Próximo pago', 'Próximo saque', 'Prochain paiement'],
+    'Payout available': ['Auszahlung möglich', 'Pago disponible', 'Saque disponível', 'Paiement disponible'],
+    'I received a payout': ['Auszahlung erhalten', 'He recibido un pago', 'Recebi um saque', 'J’ai reçu un paiement'],
+    'Counted from closed trades. Your firm also counts the floating result of open positions — check its dashboard while a trade runs.':
+      ['Gerechnet aus geschlossenen Trades. Deine Firma zählt auch das laufende Ergebnis offener Positionen — schau während eines Trades in ihr Dashboard.',
+       'Calculado con operaciones cerradas. Tu firma también cuenta el resultado flotante de las posiciones abiertas: mira su panel mientras haya una operación abierta.',
+       'Calculado a partir de operações fechadas. Sua firma também conta o resultado flutuante das posições abertas — confira o painel dela enquanto uma operação estiver aberta.',
+       'Calculé à partir des trades clôturés. Votre firme compte aussi le résultat latent des positions ouvertes — consultez son tableau de bord tant qu’un trade est en cours.'],
+    'Counted from closed trades and the stops of open ones. Your firm also counts the floating result of open positions — check its dashboard while a trade runs.':
+      ['Gerechnet aus geschlossenen Trades und den Stops der offenen. Deine Firma zählt auch das laufende Ergebnis offener Positionen — schau während eines Trades in ihr Dashboard.',
+       'Calculado con operaciones cerradas y los stops de las abiertas. Tu firma también cuenta el resultado flotante: mira su panel mientras haya una operación abierta.',
+       'Calculado a partir das operações fechadas e dos stops das abertas. Sua firma também conta o resultado flutuante — confira o painel dela enquanto uma operação estiver aberta.',
+       'Calculé à partir des trades clôturés et des stops des positions ouvertes. Votre firme compte aussi le résultat latent — consultez son tableau de bord tant qu’un trade est en cours.'],
+    'Balance against the floor': ['Kontostand gegen die Grenze', 'Saldo frente al límite', 'Saldo contra o limite', 'Solde face à la limite'],
+    'Floor': ['Grenze', 'Límite', 'Limite', 'Limite'],
+    'Target': ['Ziel', 'Objetivo', 'Meta', 'Objectif'],
+    'What to watch': ['Worauf du achten solltest', 'A qué prestar atención', 'No que prestar atenção', 'Points de vigilance'],
+    'Start a reset': ['Reset starten', 'Iniciar un reset', 'Iniciar um reset', 'Lancer un reset'],
+    'Mark as failed': ['Als gescheitert markieren', 'Marcar como fallido', 'Marcar como reprovado', 'Marquer comme échoué'],
+    // feste Zusätze unter den Ringen
+    'none in this phase': ['in dieser Phase keins', 'ninguno en esta fase', 'nenhuma nesta fase', 'aucun dans cette phase'],
+    'no max drawdown set': ['kein max. Drawdown gesetzt', 'sin drawdown máximo', 'sem drawdown máximo', 'aucun drawdown max. défini'],
+    'no daily limit — floor only': ['kein Tageslimit — nur die Grenze', 'sin límite diario: solo el límite total', 'sem limite diário — só o limite total', 'pas de limite journalière — seulement la limite'],
+    'applies once you are in profit': ['gilt, sobald du im Gewinn bist', 'se aplica cuando estás en beneficio', 'vale quando você está no lucro', 's’applique dès que vous êtes en profit'],
+    'minimum trading days met': ['Mindesttage erfüllt', 'días mínimos cumplidos', 'dias mínimos cumpridos', 'jours minimum atteints'],
+    'trading days · no minimum': ['Handelstage · kein Minimum', 'días de trading · sin mínimo', 'dias de trading · sem mínimo', 'jours de trading · pas de minimum'],
+    'available now': ['jetzt möglich', 'disponible ya', 'disponível agora', 'disponible maintenant'],
+    'until the window opens': ['bis das Fenster öffnet', 'hasta que se abra la ventana', 'até a janela abrir', 'avant l’ouverture de la fenêtre'],
+    'conditions met': ['Bedingungen erfüllt', 'condiciones cumplidas', 'condições cumpridas', 'conditions remplies'],
+    'trading days so far': ['Handelstage bisher', 'días de trading hasta ahora', 'dias de trading até agora', 'jours de trading jusqu’ici'],
+    'profitable days so far': ['profitable Tage bisher', 'días con beneficio hasta ahora', 'dias com lucro até agora', 'jours gagnants jusqu’ici'],
+    'Turn off': ['Ausschalten', 'Desactivar', 'Desligar', 'Désactiver'],
+    'Turn on': ['Einschalten', 'Activar', 'Ligar', 'Activer'],
+    'Switch to this account': ['Auf dieses Konto wechseln', 'Cambiar a esta cuenta', 'Mudar para esta conta', 'Passer sur ce compte'],
+    'Trading a prop account?': ['Tradest du ein Prop-Konto?', '¿Operas una cuenta de prop firm?', 'Você opera uma conta de prop firm?', 'Vous tradez un compte de prop firm ?'],
+    'Set up my prop account': ['Mein Prop-Konto einrichten', 'Configurar mi cuenta prop', 'Configurar minha conta prop', 'Configurer mon compte prop'],
+    'Every page of Evidence measures this account with these rules.': ['Jede Seite von Evidence misst dieses Konto mit diesen Regeln.', 'Cada página de Evidence mide esta cuenta con estas reglas.', 'Cada página do Evidence mede esta conta com estas regras.', 'Chaque page d’Evidence mesure ce compte avec ces règles.'],
+    // Tabs
+    'Days': ['Tage', 'Días', 'Dias', 'Jours'],
+    'Would you have passed?': ['Hättest du bestanden?', '¿Habrías aprobado?', 'Você teria passado?', 'Auriez-vous réussi ?'],
+    'History & costs': ['Verlauf & Kosten', 'Historial y costes', 'Histórico e custos', 'Historique et coûts'],
+    'Adjust rules': ['Regeln anpassen', 'Ajustar reglas', 'Ajustar regras', 'Ajuster les règles'],
+    'Trading days this cycle': ['Handelstage in diesem Zyklus', 'Días de trading de este ciclo', 'Dias de trading deste ciclo', 'Jours de trading de ce cycle'],
+    'Show as table': ['Als Tabelle zeigen', 'Ver como tabla', 'Mostrar como tabela', 'Afficher en tableau'],
+    'Hide table': ['Tabelle ausblenden', 'Ocultar tabla', 'Ocultar tabela', 'Masquer le tableau'],
+    'Date': ['Datum', 'Fecha', 'Data', 'Date'],
+    'No trades in this cycle yet — the curve starts with your first one.': ['Noch keine Trades in diesem Zyklus — die Kurve beginnt mit deinem ersten.', 'Aún no hay operaciones en este ciclo: la curva empieza con la primera.', 'Ainda não há operações neste ciclo — a curva começa com a primeira.', 'Pas encore de trade dans ce cycle — la courbe commence avec le premier.'],
+    // Simulator
+    'Firm': ['Firma', 'Firma', 'Firma', 'Firme'],
+    'Programme': ['Programm', 'Programa', 'Programa', 'Programme'],
+    'Size': ['Größe', 'Tamaño', 'Tamanho', 'Taille'],
+    'From': ['Ab', 'Desde', 'A partir de', 'À partir du'],
+    'Your trades, run through every phase of a firm’s rules. The next phase starts the day after one is passed. Everything after a broken rule is ignored — the account would already be closed.':
+      ['Deine Trades, durch jede Phase der Firmenregeln gerechnet. Die nächste Phase beginnt am Tag nach dem Bestehen. Alles nach einer verletzten Regel zählt nicht — das Konto wäre dann schon geschlossen.',
+       'Tus operaciones, pasadas por cada fase de las reglas de una firma. La siguiente fase empieza el día después de superar la anterior. Todo lo posterior a una regla incumplida se ignora: la cuenta ya estaría cerrada.',
+       'Suas operações, passadas por cada fase das regras de uma firma. A fase seguinte começa no dia depois de uma ser aprovada. Tudo depois de uma regra violada é ignorado — a conta já estaria encerrada.',
+       'Vos trades, passés à travers chaque phase des règles d’une firme. La phase suivante commence le lendemain de la réussite. Tout ce qui suit une règle enfreinte est ignoré — le compte serait déjà clôturé.'],
+    'You would have been funded': ['Du wärst funded gewesen', 'Habrías conseguido la cuenta funded', 'Você teria conseguido a conta funded', 'Vous auriez obtenu le compte funded'],
+    'Still on the way — no rule broken': ['Noch unterwegs — keine Regel verletzt', 'Aún en camino: ninguna regla incumplida', 'Ainda a caminho — nenhuma regra violada', 'Toujours en route — aucune règle enfreinte'],
+    'passed': ['bestanden', 'superada', 'aprovada', 'réussie'],
+    'failed': ['gescheitert', 'fallida', 'reprovada', 'échouée'],
+    'running': ['läuft', 'en curso', 'em andamento', 'en cours'],
+    'reached': ['erreicht', 'alcanzada', 'alcançada', 'atteinte'],
+    'No trades in this period yet.': ['In diesem Zeitraum gibt es noch keine Trades.', 'Aún no hay operaciones en este periodo.', 'Ainda não há operações neste período.', 'Pas encore de trade sur cette période.'],
+    'Daily loss': ['Tagesverlust', 'Pérdida diaria', 'Perda diária', 'Perte journalière'],
+    'Max drawdown': ['Max. Drawdown', 'Drawdown máximo', 'Drawdown máximo', 'Drawdown max.'],
+    'Min. days': ['Mindesttage', 'Días mín.', 'Dias mín.', 'Jours min.'],
+    // Regeln anpassen
+    'Change firm, size or phase': ['Firma, Größe oder Phase ändern', 'Cambiar firma, tamaño o fase', 'Mudar firma, tamanho ou fase', 'Changer de firme, de taille ou de phase'],
+    'Use the firm’s rules': ['Regeln der Firma übernehmen', 'Usar las reglas de la firma', 'Usar as regras da firma', 'Reprendre les règles de la firme'],
+    'The firm’s rules': ['Regeln der Firma', 'Reglas de la firma', 'Regras da firma', 'Règles de la firme'],
+    'as published for this programme, size and phase': ['wie für dieses Programm, diese Größe und Phase veröffentlicht', 'tal y como se publican para este programa, tamaño y fase', 'como publicadas para este programa, tamanho e fase', 'telles que publiées pour ce programme, cette taille et cette phase'],
+    'Your own line': ['Deine eigene Linie', 'Tu propia línea', 'Sua própria linha', 'Votre propre limite'],
+    'Dates': ['Daten', 'Fechas', 'Datas', 'Dates'],
+    'Payouts': ['Auszahlungen', 'Pagos', 'Saques', 'Paiements'],
+    'funded account': ['Funded-Konto', 'cuenta funded', 'conta funded', 'compte funded'],
+    'Profit target (%)': ['Gewinnziel (%)', 'Objetivo de beneficio (%)', 'Meta de lucro (%)', 'Objectif de profit (%)'],
+    'Daily loss limit (%)': ['Tageslimit (%)', 'Límite de pérdida diaria (%)', 'Limite de perda diária (%)', 'Limite de perte journalière (%)'],
+    'Max drawdown (%)': ['Max. Drawdown (%)', 'Drawdown máximo (%)', 'Drawdown máximo (%)', 'Drawdown max. (%)'],
+    'Drawdown model': ['Drawdown-Modell', 'Modelo de drawdown', 'Modelo de drawdown', 'Modèle de drawdown'],
+    'Consistency limit (%)': ['Konsistenzgrenze (%)', 'Límite de consistencia (%)', 'Limite de consistência (%)', 'Limite de régularité (%)'],
+    'Measured against': ['Gemessen an', 'Medido sobre', 'Medido em relação a', 'Mesuré par rapport à'],
+    'Minimum days': ['Mindesttage', 'Días mínimos', 'Dias mínimos', 'Jours minimum'],
+    'A day counts from (% profit)': ['Ein Tag zählt ab (% Gewinn)', 'Un día cuenta desde (% de beneficio)', 'Um dia conta a partir de (% de lucro)', 'Un jour compte à partir de (% de profit)'],
+    'Personal stop (% of the firm’s daily limit)': ['Persönlicher Stopp (% des Tageslimits der Firma)', 'Stop personal (% del límite diario de la firma)', 'Stop pessoal (% do limite diário da firma)', 'Stop personnel (% de la limite journalière de la firme)'],
+    'This phase started on': ['Diese Phase begann am', 'Esta fase empezó el', 'Esta fase começou em', 'Cette phase a commencé le'],
+    'Deadline': ['Frist', 'Fecha límite', 'Prazo', 'Échéance'],
+    'Payout rhythm (days)': ['Auszahlungsrhythmus (Tage)', 'Ritmo de pagos (días)', 'Ritmo de saques (dias)', 'Rythme des paiements (jours)'],
+    'Last payout': ['Letzte Auszahlung', 'Último pago', 'Último saque', 'Dernier paiement'],
+    'A trailing floor stops at the starting balance': ['Eine nachziehende Grenze stoppt beim Startguthaben', 'Un límite móvil se detiene en el saldo inicial', 'Um limite móvel para no saldo inicial', 'Une limite suiveuse s’arrête au solde de départ'],
+    'How most futures firms run it. Off: the floor keeps trailing upward.': ['So handhaben es die meisten Futures-Firmen. Aus: Die Grenze zieht immer weiter nach oben.', 'Así lo hacen la mayoría de las firmas de futuros. Desactivado: el límite sigue subiendo.', 'É assim na maioria das firmas de futuros. Desligado: o limite continua subindo.', 'C’est le cas de la plupart des firmes de futures. Désactivé : la limite continue de monter.'],
+    'Static never moves. End-of-day follows your daily closes, intraday every new high.': ['Statisch bewegt sich nie. Tagesende folgt deinen Tagesschlüssen, Intraday jedem neuen Hoch.', 'El estático nunca se mueve. El de cierre diario sigue tus cierres; el intradía, cada nuevo máximo.', 'O estático nunca se move. O de fim do dia segue seus fechamentos; o intradiário, cada nova máxima.', 'Le statique ne bouge jamais. Celui de fin de journée suit vos clôtures, l’intraday chaque nouveau plus haut.'],
+    'Green days = the profit of all your winning days.': ['Grüne Tage = der Gewinn all deiner Gewinntage.', 'Días verdes = el beneficio de todos tus días ganadores.', 'Dias verdes = o lucro de todos os seus dias positivos.', 'Jours verts = le profit de tous vos jours gagnants.'],
+    'Green days': ['Grüne Tage', 'Días verdes', 'Dias verdes', 'Jours verts'],
+    'Net profit': ['Nettogewinn', 'Beneficio neto', 'Lucro líquido', 'Profit net'],
+    'Static': ['Statisch', 'Estático', 'Estático', 'Statique'],
+    'End-of-day trailing': ['Tagesende-Trailing', 'Trailing al cierre del día', 'Trailing no fim do dia', 'Trailing en fin de journée'],
+    'Intraday trailing': ['Intraday-Trailing', 'Trailing intradía', 'Trailing intradiário', 'Trailing intraday'],
+    '0 = every traded day': ['0 = jeder gehandelte Tag', '0 = cada día operado', '0 = cada dia operado', '0 = chaque jour tradé'],
+    '0 = none': ['0 = keins', '0 = ninguno', '0 = nenhum', '0 = aucun'],
+    '0 = none in this phase': ['0 = keins in dieser Phase', '0 = ninguno en esta fase', '0 = nenhuma nesta fase', '0 = aucun dans cette phase'],
+    'Largest share of profit from one day. 0 = none': ['Größter Anteil des Gewinns aus einem Tag. 0 = keine Regel', 'Mayor parte del beneficio en un solo día. 0 = ninguna', 'Maior parte do lucro em um único dia. 0 = nenhuma', 'Plus grande part du profit sur une journée. 0 = aucune'],
+    'You stop here — before the firm does. 25–100. Without a daily limit: share of the distance to the floor at the start of the day.':
+      ['Hier hörst du auf — bevor die Firma es tut. 25–100. Ohne Tageslimit: Anteil am Abstand zur Grenze zu Tagesbeginn.', 'Aquí paras tú, antes que la firma. 25–100. Sin límite diario: parte de la distancia al límite al empezar el día.', 'Você para aqui — antes da firma. 25–100. Sem limite diário: parte da distância até o limite no início do dia.', 'Vous vous arrêtez ici — avant la firme. 25–100. Sans limite journalière : part de la distance à la limite en début de journée.'],
+    'Trades before this day do not count toward it.': ['Trades vor diesem Tag zählen nicht dazu.', 'Las operaciones anteriores a este día no cuentan.', 'Operações antes deste dia não contam.', 'Les trades avant ce jour ne comptent pas.'],
+    'Optional — drives the countdown and the pace per day.': ['Optional — für den Countdown und das nötige Tempo pro Tag.', 'Opcional: para la cuenta atrás y el ritmo por día.', 'Opcional — para a contagem regressiva e o ritmo por dia.', 'Facultatif — pour le compte à rebours et le rythme par jour.'],
+    'The next window counts from here.': ['Das nächste Fenster zählt ab hier.', 'La siguiente ventana cuenta desde aquí.', 'A próxima janela conta a partir daqui.', 'La prochaine fenêtre compte à partir d’ici.'],
+    '0 = your firm’s default': ['0 = Standard deiner Firma', '0 = el de tu firma', '0 = o padrão da sua firma', '0 = celui de votre firme'],
+    'Your own numbers. Check them against your contract.': ['Deine eigenen Zahlen. Prüfe sie an deinem Vertrag.', 'Tus propios números. Compruébalos con tu contrato.', 'Seus próprios números. Confira-os no seu contrato.', 'Vos propres chiffres. Vérifiez-les dans votre contrat.'],
+    'Your own rules': ['Eigene Regeln', 'Reglas propias', 'Regras próprias', 'Vos propres règles'],
+    // Verlauf & Kosten
+    'This challenge, so far': ['Diese Challenge bisher', 'Este challenge hasta ahora', 'Este challenge até agora', 'Ce challenge jusqu’ici'],
+    'Passed phases, resets and failed attempts appear here as they happen.': ['Bestandene Phasen, Resets und gescheiterte Versuche erscheinen hier, sobald sie passieren.', 'Las fases superadas, los resets y los intentos fallidos aparecen aquí cuando ocurren.', 'Fases aprovadas, resets e tentativas reprovadas aparecem aqui quando acontecem.', 'Les phases réussies, les resets et les échecs apparaissent ici au fil de l’eau.'],
+    'Costs and payouts': ['Kosten und Auszahlungen', 'Costes y pagos', 'Custos e saques', 'Coûts et paiements'],
+    'Spent': ['Ausgegeben', 'Gastado', 'Gasto', 'Dépensé'],
+    'Received': ['Erhalten', 'Recibido', 'Recebido', 'Reçu'],
+    'Net': ['Netto', 'Neto', 'Líquido', 'Net'],
+    'fee, activation, resets': ['Gebühr, Aktivierung, Resets', 'cuota, activación, resets', 'taxa, ativação, resets', 'frais, activation, resets'],
+    'received minus spent': ['erhalten minus ausgegeben', 'recibido menos gastado', 'recebido menos gasto', 'reçu moins dépensé'],
+    'on what it cost': ['auf die Kosten', 'sobre lo que costó', 'sobre o que custou', 'sur ce qu’il a coûté'],
+    'Challenge fee': ['Challenge-Gebühr', 'Cuota del challenge', 'Taxa do challenge', 'Frais du challenge'],
+    'Activation fee': ['Aktivierungsgebühr', 'Cuota de activación', 'Taxa de ativação', 'Frais d’activation'],
+    'Some firms charge it once you pass.': ['Manche Firmen verlangen sie nach dem Bestehen.', 'Algunas firmas la cobran al aprobar.', 'Algumas firmas cobram ao aprovar.', 'Certaines firmes la facturent une fois la phase réussie.'],
+    'Resets': ['Resets', 'Resets', 'Resets', 'Resets'],
+    '+ Add': ['+ Hinzufügen', '+ Añadir', '+ Adicionar', '+ Ajouter'],
+    'None yet.': ['Noch keine.', 'Aún ninguno.', 'Nenhum ainda.', 'Aucun pour l’instant.'],
+    'Entered by hand — nothing is read from a bank account. Resets and payouts you start in the cockpit land here by themselves.':
+      ['Von Hand eingetragen — es wird kein Bankkonto ausgelesen. Resets und Auszahlungen aus dem Cockpit landen hier von selbst.', 'Introducido a mano: no se lee ninguna cuenta bancaria. Los resets y pagos que inicias en el cockpit aparecen aquí solos.', 'Inserido à mão — nenhuma conta bancária é lida. Resets e saques iniciados no cockpit aparecem aqui sozinhos.', 'Saisi à la main — aucun compte bancaire n’est lu. Les resets et paiements lancés dans le cockpit arrivent ici tout seuls.'],
+    'All your challenges': ['Alle deine Challenges', 'Todos tus challenges', 'Todos os seus challenges', 'Tous vos challenges'],
+    'Total spent': ['Insgesamt ausgegeben', 'Total gastado', 'Total gasto', 'Total dépensé'],
+    'Total received': ['Insgesamt erhalten', 'Total recibido', 'Total recebido', 'Total reçu'],
+    'payouts across all firms': ['Auszahlungen aller Firmen', 'pagos de todas las firmas', 'saques de todas as firmas', 'paiements de toutes les firmes'],
+    'on everything spent': ['auf alles Ausgegebene', 'sobre todo lo gastado', 'sobre tudo o que foi gasto', 'sur tout ce qui a été dépensé'],
+    'What ended your challenges': ['Was deine Challenges beendet hat', 'Qué acabó con tus challenges', 'O que encerrou seus challenges', 'Ce qui a mis fin à vos challenges'],
+    'Running': ['Läuft', 'En curso', 'Em andamento', 'En cours'],
+    'Passed': ['Bestanden', 'Superado', 'Aprovado', 'Réussi'],
+    'Funded': ['Funded', 'Funded', 'Funded', 'Funded'],
+    'Failed': ['Gescheitert', 'Fallido', 'Reprovado', 'Échoué'],
+    'Open →': ['Öffnen →', 'Abrir →', 'Abrir →', 'Ouvrir →'],
+    // Leiste + Übersicht
+    'Today': ['Heute', 'Hoy', 'Hoje', 'Aujourd’hui'],
+    'Open cockpit →': ['Cockpit öffnen →', 'Abrir cockpit →', 'Abrir cockpit →', 'Ouvrir le cockpit →'],
+    // Assistent
+    'Account': ['Konto', 'Cuenta', 'Conta', 'Compte'],
+    'Start': ['Start', 'Inicio', 'Início', 'Départ'],
+    'Phase': ['Phase', 'Fase', 'Fase', 'Phase'],
+    'Which prop firm are you trading with?': ['Mit welcher Prop-Firma tradest du?', '¿Con qué prop firm operas?', 'Com qual prop firm você opera?', 'Avec quelle prop firm tradez-vous ?'],
+    'Pick the firm and Evidence fills in its rules — drawdown model, trading day, consistency, size limits.':
+      ['Wähle die Firma, und Evidence trägt ihre Regeln ein — Drawdown-Modell, Handelstag, Konsistenz, Größenlimits.', 'Elige la firma y Evidence rellena sus reglas: modelo de drawdown, día de trading, consistencia y límites de tamaño.', 'Escolha a firma e o Evidence preenche as regras — modelo de drawdown, dia de trading, consistência e limites de tamanho.', 'Choisissez la firme et Evidence reprend ses règles — modèle de drawdown, journée de trading, régularité, limites de taille.'],
+    'Account size': ['Kontogröße', 'Tamaño de la cuenta', 'Tamanho da conta', 'Taille du compte'],
+    'Where are you right now?': ['Wo stehst du gerade?', '¿Dónde estás ahora?', 'Onde você está agora?', 'Où en êtes-vous ?'],
+    'Each phase has its own target. When you pass, Evidence moves you to the next one.': ['Jede Phase hat ihr eigenes Ziel. Wenn du bestehst, bringt dich Evidence zur nächsten.', 'Cada fase tiene su propio objetivo. Al aprobar, Evidence te pasa a la siguiente.', 'Cada fase tem a sua meta. Quando você passa, o Evidence leva você à próxima.', 'Chaque phase a son objectif. Quand vous réussissez, Evidence vous fait passer à la suivante.'],
+    'Which journal account holds these trades?': ['In welchem Journal-Konto liegen diese Trades?', '¿En qué cuenta del diario están estas operaciones?', 'Em qual conta do diário estão essas operações?', 'Dans quel compte du journal se trouvent ces trades ?'],
+    'New account': ['Neues Konto', 'Cuenta nueva', 'Conta nova', 'Nouveau compte'],
+    'a fresh journal account': ['ein neues Journal-Konto', 'una cuenta nueva del diario', 'uma conta nova no diário', 'un nouveau compte de journal'],
+    'Name of the new account': ['Name des neuen Kontos', 'Nombre de la cuenta nueva', 'Nome da conta nova', 'Nom du nouveau compte'],
+    'Ready to start': ['Bereit zum Start', 'Listo para empezar', 'Pronto para começar', 'Prêt à démarrer'],
+    'From now on every page of Evidence measures this account against these rules.': ['Ab jetzt misst jede Seite von Evidence dieses Konto an diesen Regeln.', 'A partir de ahora, cada página de Evidence mide esta cuenta con estas reglas.', 'A partir de agora, cada página do Evidence mede esta conta com estas regras.', 'Désormais, chaque page d’Evidence mesure ce compte selon ces règles.'],
+    'What did it cost? (optional)': ['Was hat sie gekostet? (optional)', '¿Cuánto costó? (opcional)', 'Quanto custou? (opcional)', 'Combien a-t-il coûté ? (facultatif)'],
+    'Trades before this date do not count toward it.': ['Trades vor diesem Datum zählen nicht dazu.', 'Las operaciones anteriores a esta fecha no cuentan.', 'Operações antes desta data não contam.', 'Les trades avant cette date ne comptent pas.'],
+    'Continue →': ['Weiter →', 'Continuar →', 'Continuar →', 'Continuer →'],
+    '← Back': ['← Zurück', '← Atrás', '← Voltar', '← Retour'],
+    'Your firm’s rules': ['Die Regeln deiner Firma', 'Las reglas de tu firma', 'As regras da sua firma', 'Les règles de votre firme'],
+    'Type them in from your contract or the firm’s rules page. Every field stays editable later.': ['Trag sie aus deinem Vertrag oder der Regelseite der Firma ein. Jedes Feld lässt sich später ändern.', 'Introdúcelas desde tu contrato o la página de reglas de la firma. Todo se puede cambiar después.', 'Digite-as a partir do seu contrato ou da página de regras da firma. Tudo pode ser alterado depois.', 'Saisissez-les depuis votre contrat ou la page des règles de la firme. Tout reste modifiable ensuite.'],
+    'Only the trades of this account count toward the firm’s limits — your other accounts never do.': ['Nur die Trades dieses Kontos zählen für die Grenzen der Firma — deine anderen Konten nie.', 'Solo las operaciones de esta cuenta cuentan para los límites de la firma; tus otras cuentas, nunca.', 'Só as operações desta conta contam para os limites da firma — suas outras contas nunca.', 'Seuls les trades de ce compte comptent pour les limites de la firme — jamais vos autres comptes.']
+  };
+  window.APEX_PROP_I18N = PR;
+  function go() {
+    if (!window.ApexI18n || !ApexI18n.addScoped) { setTimeout(go, 300); return; }
+    if (go.done) return; go.done = true;
+    ApexI18n.addScoped('#page-propfirm, #propBar, #propOvCard, #pwOv', PR);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+})();
+</script>
+
 
 
 <!-- ==== Evidence Developer — API keys & outbound webhooks ==== -->
@@ -83359,6 +83950,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      in der App etwas anderes heissen können. Ein Eintrag hier wirkt nur
      unterhalb von `sel` und hat dort Vorrang vor T. */
   var SCOPED = [];
+  /* True when a hand-written scoped translation exists for this text at
+     this place — the jargon/brand wrapper then leaves the node alone, so the
+     authored sentence wins instead of a half-English, half-machine mix. */
+  I.hasOwn = function(text, el){ try { return !!scopedRow(text, el); } catch (e) { return false; } };
   I.addScoped = function(sel, table){
     var idx = {}; Object.keys(table).forEach(function(k){ idx[norm(k)] = table[k]; });
     SCOPED.push({ sel: sel, idx: idx });
@@ -83648,7 +84243,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* UTC day of a replay timestamp. The firms measure days on their own
      server clock, not the trader's — using the replay's own clock is the
      closest honest approximation and keeps the daily reset deterministic. */
-  function dayOf(ms){ return Math.floor(Number(ms) / 86400000); }
+  /* The firm's trading day — Topstep rolls at 17:00 Chicago, FTMO at midnight
+     Prague — from the same function the cockpit uses. UTC days put a late
+     New York trade under the wrong daily limit. */
+  function dayOf(ms){
+    try {
+      var p = S && presets()[S.key];
+      if (p && window.ApexPropPlus && ApexPropPlus.firmDayKey) return ApexPropPlus.firmDayKey(ms, p.tz || 'UTC', p.reset || 0);
+    } catch(e){}
+    return Math.floor(Number(ms) / 86400000);
+  }
 
   C.start = function(presetKey, balance, phase){
     var p = presets()[presetKey];
@@ -83695,6 +84299,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       daysTraded: 0,
       dayHadTrade: false,
       dayProfits: [],         // realised P&L per completed trading day
+      qualDays: 0,            // days that count toward minDays (≥ minDayPct where set)
       status: 'running',      // running | failed | passed
       reason: '',
       failedAt: null
@@ -83712,11 +84317,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (S.dayHadTrade){
       S.daysTraded++;
       S.dayProfits.push(balance - S.dayOpen);
+      if (qualifies(balance - S.dayOpen)) S.qualDays++;
     }
     if (S.rules.dd === 'eod'){
       if (balance > S.peakEod) S.peakEod = balance;
       var f = S.peakEod - S.maxDD;
-      if (f > S.start) f = S.start;     // floor locks at the starting balance
+      if (S.rules.lockAtInitial !== false && f > S.start) f = S.start;   // floor locks at the starting balance
       if (f > S.floor) S.floor = f;
     }
     S.dayOpen = balance;
@@ -83748,7 +84354,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (S.rules.dd === 'trailing'){
       if (eq > S.peak) S.peak = eq;
       var f = S.peak - S.maxDD;
-      if (f > S.start) f = S.start;
+      if (S.rules.lockAtInitial !== false && f > S.start) f = S.start;
       if (f > S.floor) S.floor = f;
     }
 
@@ -83766,7 +84372,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     /* Passing needs the target AND the minimum days AND consistency — the
        same three the real payout review checks, in the same order. */
     if (S.target > 0 && (bal - S.start) >= S.target){
-      var days = S.daysTraded + (S.dayHadTrade ? 1 : 0);
+      var days = S.qualDays + (S.dayHadTrade && qualifies(bal - S.dayOpen) ? 1 : 0);
       if (days >= (S.rules.minDays || 0) && consistencyOk(bal)){
         S.status = 'passed';
         S.reason = 'Target of ' + money(S.target) + ' reached over ' + days + ' trading days.';
@@ -83776,15 +84382,26 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     paint();
   };
 
+  /* The5ers: only days of at least minDayPct of the start count. */
+  function qualifies(dayPnl){
+    var pct = S.rules.minDayPct || 0;
+    return !pct || dayPnl >= S.start * pct / 100;
+  }
+  /* Same three bases as the cockpit: green days (default), net profit, or
+     the profit target (Topstep: best day below 55 % of the target). */
   function consistencyOk(bal){
     var lim = S.rules.consistency || 0;
     if (!lim) return true;
-    var profits = S.dayProfits.concat(S.dayHadTrade ? [bal - S.dayOpen] : [])
-                              .filter(function(v){ return v > 0; });
-    var total = profits.reduce(function(a,b){ return a+b; }, 0);
-    if (total <= 0) return true;
+    var all = S.dayProfits.concat(S.dayHadTrade ? [bal - S.dayOpen] : []);
+    var profits = all.filter(function(v){ return v > 0; });
+    if (!profits.length) return true;
     var best = Math.max.apply(null, profits);
-    return (best / total * 100) <= lim;
+    var base = S.rules.consistencyBase === 'net' ? (bal - S.start)
+             : S.rules.consistencyBase === 'target' ? S.target
+             : profits.reduce(function(a,b){ return a+b; }, 0);
+    if (base <= 0) return true;
+    var pct = best / base * 100;
+    return (S.rules.consistencyBase || 'gross') === 'gross' ? pct <= lim : pct < lim;
   }
 
   function fail(msg, st){
@@ -92371,6 +92988,9 @@ body.light #page-insights .ins2-empty { border-color: rgba(0,0,0,.15); }
     var g = function (id) { var el = $(id); return el && el.value ? String(el.value).trim() : ''; };
     var rows = [['Experience level', g('coachProfileExperience')], ['Preferred instruments', g('coachProfilePairs')], ['Strategy', g('coachProfileStrategy')],
                 ['Prop firm', g('coachProfileFirmName')], ['Account phase', g('coachProfilePhase')]].filter(function (r) { return r[1]; });
+    /* Prop mode on: firm and phase come with the PROP FIRM CHALLENGE block —
+       a hand-typed name next to it could only disagree. */
+    try { if (window.ApexPropPlus && ApexPropPlus.status()) rows = rows.filter(function (r) { return r[0] !== 'Prop firm' && r[0] !== 'Account phase'; }); } catch (e) {}
     if (!rows.length) {
       try { var st = JSON.parse(localStorage.getItem('apexCoachProfile_' + uid()) || '{}');
         rows = [['Experience level', st.experience], ['Preferred instruments', st.pairs], ['Strategy', st.strategy], ['Prop firm', st.firmName], ['Account phase', st.phase]].filter(function (r) { return r[1]; });
