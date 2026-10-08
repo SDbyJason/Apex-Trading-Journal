@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-08h';
+  window.APEX_BUILD = '2026-10-08j';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -73833,6 +73833,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
               '<div class="tv-ev-chart" id="tvEvChart"></div>' +
               '<div class="tv-ev-leer" id="tvEvLeer" hidden></div>' +
               '<div class="tv-ev-stil" id="tvEvStil" hidden></div>' +
+              '<div class="tv-ev-stil" id="tvEvInd" hidden></div>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -73859,7 +73860,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           '<span class="tv-ki-pbhint">Your rules from <b>Analysis &rsaquo; Playbooks</b> ' +
             '&mdash; edit or add them there.</span>' +
           '<details class="tv-ind" id="tvInd">' +
-            '<summary id="tvIndKopf">Indicators the AI sees</summary>' +
+            '<summary id="tvIndKopf">Indicators the AI reads</summary>' +
             '<div class="tv-ind-liste" id="tvIndListe"></div>' +
           '</details>' +
           '<button class="tv-ki-go" id="tvKiGo">' +
@@ -74133,6 +74134,23 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      ist. Ein stehengebliebener Kurs eines vorher gewaehlten Instruments waere
      schlimmer als gar keiner — die KI wuerde jeden Zonenabstand falsch
      rechnen und es nicht merken. */
+  /* Kurs-Band: jeder Live-Kurs landet in seiner Minute (o/h/l/c). Die
+     Zones View baut daraus die Kerzen, die die verzoegerten Daten noch nicht
+     haben — Neuladen wirft sie nicht mehr weg, und eine Kerze ueberspannt nie
+     mehrere Zeitfenster. indexHolen misst daran ausserdem den Abstand. */
+  function bandKey(s) { return String(s || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase(); }
+  function kursBand(sym, p) {
+    var k = bandKey(sym); if (!k || !isFinite(p)) return;
+    var B = TV._band || (TV._band = {}), b = B[k] || (B[k] = {});
+    var m = Math.floor(Date.now() / 60000) * 60000, x = b[m];
+    if (!x) {
+      b[m] = { o: p, h: p, l: p, c: p };
+      var alt = m - 6 * 3600000;
+      Object.keys(b).forEach(function (t) { if (+t < alt) delete b[t]; });
+    } else { x.h = Math.max(x.h, p); x.l = Math.min(x.l, p); x.c = p; }
+  }
+  function bandVon(sym) { return (TV._band && TV._band[bandKey(sym)]) || null; }
+
   function liveKurs(symName) {
     var k = TV.kurs;
     if (!k || !isFinite(k.preis)) return null;
@@ -74215,6 +74233,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             if (!q || !isFinite(q.last_price)) return;
             TV.kurs = { preis: Number(q.last_price), ts: Date.now(),
                         sym: q.short_name || '', aend: q.change_percent };
+            kursBand(TV.kurs.sym, TV.kurs.preis);
             kursAnzeigen();
             /* Jedes Preisereignis traegt sein Symbol. Vorher lief eine
                Gold-Idee nach einem Symbolwechsel gegen den EURUSD-Kurs, galt
@@ -74438,6 +74457,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             return ausWerten({ values: kasse.map(zuTd) }, sym, anzahl);
           }
           throw new Error('Cannot align ' + m.fut + ' to the ' + sym + ' price yet — try during the US session');
+        }
+        /* Am Live-Kurs (TradingView-Quelle) nachjustieren: Schlusskurs jeder
+           fertigen Future-Kerze gegen den Live-Kurs ihrer letzten Minute.
+           Sonst stehen Kerzen und Zonen um die Basisdrift neben dem Preis,
+           den der Nutzer im Live-Chart sieht. */
+        var band = bandVon(sym), korr = [];
+        if (band) fut.forEach(function (b) {
+          var m = band[b.t + raster - 60000];
+          if (m && b.t + raster < Date.now() && !b.teil) korr.push((b.c - basis) - m.c);
+        });
+        if (korr.length >= 3) {
+          korr.sort(function (a, b) { return a - b; });
+          basis += korr[Math.floor(korr.length / 2)];
         }
         var nachT = {};
         fut.forEach(function (b) {
@@ -75606,8 +75638,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var k = document.getElementById('tvIndKopf');
     if (!k) return;
     var n = indAuswahl().length;
-    k.textContent = n ? 'Indicators the AI sees (' + n + ')'
-                      : 'Indicators the AI sees — none picked yet';
+    k.textContent = n ? 'Indicators the AI reads (' + n + ')'
+                      : 'Indicators the AI reads — none picked yet';
   }
 
   /* Werte der gewaehlten Indikatoren. Bewusst generisch: was in DEF steht,
@@ -77697,6 +77729,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      weiter: er liefert den Live-Kurs. */
   var EV = { inst: null, tf: '', an: false, laden: null, zonen: [], bars: null, fp: false };
   try { EV.fp = localStorage.getItem('apexTV_evfp') === '1'; } catch (e) {}
+  /* Zonen sind Standard, aber keine Pflicht: wer nur mit eigenen Indikatoren
+     arbeitet, blendet sie aus. Die KI liest sie trotzdem weiter. */
+  try { EV.zonenAus = localStorage.getItem('apexTV_evzonen') === '0'; } catch (e) {}
   /* Datensymbol der Chart-Seite ('XAU/USD', 'NAS100') → Name im Tick-Feed.
      null, wenn Dukascopy das Instrument nicht hat. */
   function fpSym() {
@@ -77718,6 +77753,34 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }
     if (EV.an) evChartZeigen();
   }
+
+  /* Indikatoren auf dem Zones-Chart: dieselbe Auswahl wie im Market Replay
+     (ApexIndicatorUI, geraetuebergreifend gespeichert). Die Liste kommt aus
+     ApexIndicators.DEF — jeder neue Indikator erscheint hier von selbst. */
+  function evIndOffen() { var h = document.getElementById('tvEvInd'); return !!(h && !h.hidden); }
+  function evIndZahl() { return window.ApexIndicatorUI ? window.ApexIndicatorUI.count() : 0; }
+  function evIndUmschalten() {
+    var h = document.getElementById('tvEvInd');
+    if (!h || !window.ApexIndicatorUI) return;
+    h.hidden = !h.hidden;
+    if (h.hidden) return;
+    if (!h._evKopf) {
+      h._evKopf = true;
+      h.innerHTML = '<div class="tv-ev-stil-kopf"><b>Indicators on this chart</b><span>Only what you see — what the AI reads is picked in the AI panel. Shared with Market Replay.</span>' +
+        '<button type="button" class="tv-ev-stil-zu" aria-label="Close">×</button></div><div id="tvEvIndB"></div>';
+      h.querySelector('.tv-ev-stil-zu').onclick = function () {
+        h.hidden = true;
+        var b = document.querySelector('#tvEvTfs [data-evind]'); if (b) b.classList.remove('on');
+      };
+    }
+    window.ApexIndicatorUI.mount(document.getElementById('tvEvIndB'), {
+      chart: null, bars: null,               // gezeichnet wird in evZeichnen, zusammen mit den Zonen
+      onChange: function () { evChartZeigen(); }
+    });
+  }
+  if (window.ApexIndicatorUI) window.ApexIndicatorUI.onChanged(function () {
+    try { if (evSichtbar()) evChartZeigen(); } catch (e) {}
+  });
 
   function evStilOffen() { var h = document.getElementById('tvEvStil'); return !!(h && !h.hidden); }
 
@@ -77798,23 +77861,35 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
   function evLive() {
     if (!evSichtbar() || !EV.inst || !EV.inst.series || !EV.bars || !EV.bars.n || !TV._levels) return;
-    var p = liveKurs(TV._levels.sym);
-    var ms = EV_TF_MS[EV.tf];
-    if (p == null || !ms) return;
+    var ms = EV_TF_MS[EV.tf], band = bandVon(TV._levels.sym);
+    if (!ms || !band || liveKurs(TV._levels.sym) == null) return;
     var b = EV.bars, n = b.n, lastT = b.t[n - 1];
-    var start = Math.max(Math.floor(Date.now() / ms) * ms, lastT);
-    var Lv = EV._live;
-    if (!Lv || Lv.basis !== b || Lv.t !== start) {
-      var o, h, l;
-      if (start === lastT) { o = b.o[n - 1]; h = b.h[n - 1]; l = b.l[n - 1]; }   // laufende echte Kerze
-      else { o = (Lv && Lv.basis === b && Lv.t < start) ? Lv.c : b.c[n - 1]; h = o; l = o; }
-      Lv = EV._live = { basis: b, t: start, o: o, h: h, l: l, c: p };
-    }
-    Lv.h = Math.max(Lv.h, p); Lv.l = Math.min(Lv.l, p); Lv.c = p;
+    /* Kerzen nur aus echten Minuten des Kurs-Bands, jede in ihrem eigenen
+       Zeitfenster. Frueher haengte sich der Live-Kurs an die aktuelle Uhrzeit,
+       waehrend die Daten 10 min nachhinken: die Kerze dazwischen fehlte und
+       die Live-Kerze schluckte zwei Zeitfenster. */
+    var slots = {};
+    Object.keys(band).forEach(function (t) {
+      t = +t; if (t + 60000 <= lastT) return;
+      var s0 = Math.max(Math.floor(t / ms) * ms, lastT), m = band[t], x = slots[s0];
+      if (!x) { slots[s0] = { o: m.o, h: m.h, l: m.l, c: m.c, t0: t, t1: t }; return; }
+      if (t < x.t0) { x.o = m.o; x.t0 = t; }
+      if (t > x.t1) { x.c = m.c; x.t1 = t; }
+      x.h = Math.max(x.h, m.h); x.l = Math.min(x.l, m.l);
+    });
+    var zeiten = Object.keys(slots).map(Number).sort(function (a, c) { return a - c; });
+    if (!zeiten.length) return;
+    var ab = EV._live && EV._live.basis === b ? EV._live.t : lastT;
     var typ = EV.inst._seriesType;
-    var zeile = (typ === 'line' || typ === 'area') ? { time: Math.floor(start / 1000), value: p }
-              : { time: Math.floor(start / 1000), open: Lv.o, high: Lv.h, low: Lv.l, close: Lv.c };
-    try { EV.inst.series.update(zeile); } catch (x) {}
+    zeiten.forEach(function (t) {
+      if (t < ab) return;
+      var x = slots[t], o = x.o, h = x.h, l = x.l;
+      if (t === lastT) { o = b.o[n - 1]; h = Math.max(h, b.h[n - 1]); l = Math.min(l, b.l[n - 1]); }   // laufende echte Kerze
+      var zeile = (typ === 'line' || typ === 'area') ? { time: Math.floor(t / 1000), value: x.c }
+                : { time: Math.floor(t / 1000), open: o, high: h, low: l, close: x.c };
+      try { EV.inst.series.update(zeile); } catch (e) {}
+    });
+    EV._live = { basis: b, t: zeiten[zeiten.length - 1] };
   }
 
   function evNachladen() {
@@ -77878,11 +77953,20 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         '" title="Also draw wide areas, contested and rejected zones">All zones</button>' +
         '<button type="button" data-evfp="1" class="' + (EV.fp ? 'on' : '') +
         '" title="Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.">Footprint</button>' +
+        '<button type="button" data-evzonen="1" class="' + (EV.zonenAus ? '' : 'on') +
+        '" title="Supply and demand zones on the chart — the AI reads them either way">Zones</button>' +
+        '<button type="button" data-evind="1" class="' + (evIndOffen() ? 'on' : '') +
+        '" title="Pick any Evidence indicator to draw on this chart">Indicators' +
+        (evIndZahl() ? ' (' + evIndZahl() + ')' : '') + '</button>' +
         '<button type="button" data-evstil="1" class="' + (evStilOffen() ? 'on' : '') +
         '" title="Colours and chart style — saved for next time">Style</button>';
       tfs.onclick = function (ev) {
         var a = ev.target && ev.target.closest && ev.target.closest('[data-evalle]');
         if (a) { EV.alle = !EV.alle; evChartZeigen(); return; }
+        var zn = ev.target && ev.target.closest && ev.target.closest('[data-evzonen]');
+        if (zn) { EV.zonenAus = !EV.zonenAus; merke('evzonen', EV.zonenAus ? '0' : '1'); evChartZeigen(); return; }
+        var ib = ev.target && ev.target.closest && ev.target.closest('[data-evind]');
+        if (ib) { evIndUmschalten(); ib.classList.toggle('on', evIndOffen()); return; }
         var st = ev.target && ev.target.closest && ev.target.closest('[data-evstil]');
         if (st) { evStilUmschalten(); st.classList.toggle('on', evStilOffen()); return; }
         var f = ev.target && ev.target.closest && ev.target.closest('[data-evfp]');
@@ -78057,8 +78141,15 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       liste.push({ supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: null,
                    broken: false, stil: zonenStil(g, darst), _g: g, _tf: x.tf });
     });
+    if (EV.zonenAus) liste = [];
     EV.zonen = liste;
     var spezi = [{ key: 'evz', kind: 'overlay', plots: [], zones: liste, zoneOpts: { roh: true } }];
+    if (window.ApexIndicatorUI && window.ApexIndicators && e.bars && e.bars.n) {
+      try {
+        if (!e.bars.__sym) e.bars.__sym = L.sym;
+        spezi = spezi.concat(window.ApexIndicators.chartSpecs(e.bars, window.ApexIndicatorUI.list()) || []);
+      } catch (x) { /* ein kaputter Indikator darf Zonen und Chart nicht mitnehmen */ }
+    }
     inst.fpSymbol = fpSym();
     var F = evFarben();
     inst.fpColors = { up: F.fpBuy, down: F.fpSell, gold: F.poc };
