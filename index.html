@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-09m';
+  window.APEX_BUILD = '2026-10-09o';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -78569,7 +78569,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var note = document.getElementById('tvEvNote');
     if (note) note.textContent = (L.quelle === 'Yahoo' ? 'Candles: real-time feed' :
       'Candles: about 2 min behind, last candle follows the live price') + ' · updates itself every ' +
-      Math.round((EV_NEU_MS[tf] || 300000) / 60000) + ' min without the AI · zones from all timeframes' +
+      Math.round((EV_NEU_MS[tf] || 300000) / 60000) + ' min without the AI · zones of this timeframe' +
       (EV.fp ? (fpSym() ? ' · footprint: ticks arrive once each hour is over'
                         : ' · no tick data for this instrument') : '');
     var e = mitBars.filter(function (x) { return x.tf === tf; })[0];
@@ -78609,27 +78609,18 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      auf kleinen Charts aber nur als Rahmen: dort sucht man den Einstieg,
      und "ich stehe in einer H4-Zone" ist Kontext, kein Kasten, der den
      halben Chart fuellt. */
-  var EV_FUELLEN = { M1: ['M1', 'M5'], M5: ['M1', 'M5', 'M15'], M15: ['M15', 'H1'],
-                     H1: ['H1', 'H4'], H4: ['H1', 'H4'] };
-  /* Welcher Zeitrahmen im Chart steht, aendert nur die DARSTELLUNG einer
-     Zone, nie ob es sie gibt. Vorher gab es hier ein `null`: ein Level, das
-     feiner war als der Chart und zu keiner MTF-Zone mit passendem Glied
-     gehoerte, wurde gar nicht gezeichnet. Auf M15 verschwanden damit alle
-     M1-/M5-Zonen — auch die weiter entfernten, nach denen man dort gerade
-     sucht. Eine Zone ist ein Preisniveau; das gilt auf jedem Chart. */
+  /* Jede Zone nur auf IHREM Zeitrahmen: M1-Zonen auf dem M1-Chart,
+     M15-Zonen auf dem M15-Chart. Eine Zone, die auf mehreren Zeitrahmen
+     gefunden wurde, erscheint auf jedem davon — `tfs` ist die Liste.
+
+     Vorher galt eine Zuordnung (M5-Chart zeigte M1+M5+M15), und ein Level,
+     das zu keinem passenden Glied gehoerte, fiel ganz heraus. Beides weg:
+     entweder gehoert die Zone zu diesem Zeitrahmen oder sie wird hier nicht
+     gezeichnet. Die Leiter unter dem Chart zeigt weiterhin alle. */
   function evDarstellung(g, tf, chartTf) {
-    var fuell = EV_FUELLEN[chartTf] || [chartTf];
-    var unten = TF_RANG[fuell[0]];
-    var kernTf = g.kernTf || tf;
-    if (fuell.indexOf(kernTf) >= 0) return { art: 'voll', top: (g.kern || g).top, bot: (g.kern || g).bot };
-    if (TF_RANG[kernTf] < unten) {
-      /* Level feiner als der Chart: moeglichst das Glied dieses Zeitrahmens,
-         sonst das enge Level selbst. */
-      var passt = (g.glieder || []).filter(function (m) { return fuell.indexOf(m.tf) >= 0; })[0];
-      return passt ? { art: 'voll', top: passt.top, bot: passt.bot }
-                   : { art: 'voll', top: (g.kern || g).top, bot: (g.kern || g).bot };
-    }
-    return { art: 'rahmen' };
+    var meine = g.tfs && g.tfs.length ? g.tfs : [g.tf || tf];
+    if (meine.indexOf(chartTf) < 0) return null;
+    return { art: 'voll', top: (g.kern || g).top, bot: (g.kern || g).bot };
   }
 
   /* ── Eigene Farben des Zones View ──────────────────────────────
@@ -78733,7 +78724,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var liste = [];
     zeigen.forEach(function (x) {
       var g = x.g;
-      var darst = EV.alle ? { art: 'voll', top: (g.kern || g).top, bot: (g.kern || g).bot } : evDarstellung(g, x.tf, e.tf);
+      var darst = evDarstellung(g, x.tf, e.tf);
       if (!darst) return;
       var von = isFinite(g.zeit) ? inst.indexAt(g.zeit) : Math.max(0, e.bars.n - 60);
       liste.push({ supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: null,
