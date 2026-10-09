@@ -7742,6 +7742,14 @@ body.light #page-chart .tv-feld select{background:#fff;border-color:rgba(0,0,0,.
 #page-chart .tv-ev-tfs button{font-family:var(--font-mono);font-size:var(--fs-label);padding:3px 9px;border-radius:var(--r-xs);border:0.5px solid var(--rim2);background:transparent;color:var(--ink3);cursor:pointer}
 #page-chart .tv-ev-tfs .tv-ev-sw{font-family:var(--font-body)}
 #page-chart .tv-ev-tfs button.on{color:var(--gold);border-color:var(--gold-line);background:var(--gold-dim)}
+/* Zonen: ein Dreifach-Schalter (Off · Nearby · All) statt zweier Knoepfe,
+   die sich gegenseitig aushebelten. */
+#page-chart .tv-ev-seg{display:inline-flex;align-items:stretch;flex:0 0 auto;border:0.5px solid var(--rim2);border-radius:var(--r-xs);overflow:hidden}
+#page-chart .tv-ev-seg-t{display:flex;align-items:center;padding:0 7px 0 8px;font-size:var(--fs-label);color:var(--ink2);font-family:var(--font-body)}
+#page-chart .tv-ev-tfs .tv-ev-seg button{border:none;border-left:0.5px solid var(--rim2);border-radius:0;font-family:var(--font-body)}
+#page-chart .tv-ev-tfs .tv-ev-seg button.on{box-shadow:inset 0 0 0 0.5px var(--gold-line)}
+#page-chart .tv-ev-tfs button:focus-visible{outline:1.5px solid var(--gold);outline-offset:1px}
+#page-chart .tv-ev-leer-k{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 #page-chart .tv-ev-note{font-size:var(--fs-label);color:var(--ink3);margin-left:auto}
 #page-chart .tv-ev-chart{position:relative;flex:1 1 auto;min-height:0}
 #page-chart .tv-ev-stil{position:absolute;top:44px;right:10px;z-index:6;width:min(460px,calc(100% - 20px));max-height:calc(100% - 56px);overflow:auto;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-md,12px);box-shadow:0 14px 40px rgba(0,0,0,.35);padding:10px 12px}
@@ -49422,6 +49430,7 @@ self.addEventListener('message', async (ev) => {
     this._ovlSpecs = specs || [];
     this._dropOverlays();
     this._zones = [];
+    this._marken = [];
     if (!this.chart || !this.LWC || !this._all || !this._all.n) return this;
 
     var LWC = this.LWC, self = this, th = theme();
@@ -49488,14 +49497,7 @@ self.addEventListener('message', async (ev) => {
 
     /* Zonen-Rechtecke einsammeln. Sie hängen nicht an einer Serie, sondern
        werden über den Chart gelegt — deshalb getrennt von den Plots oben. */
-    this._zones = [];
-    this._zoneOpts = null;
-    this._ovlSpecs.forEach(function (sp) {
-      if (sp && sp.visible !== false && sp.zones && sp.zones.length) {
-        self._zones = self._zones.concat(sp.zones);
-        if (sp.zoneOpts) self._zoneOpts = sp.zoneOpts;
-      }
-    });
+    this._zonenSammeln();
     this._paintZones();
 
     // Tick-Footprint: höchstens einer pro Chart, eigene Zeichenebene.
@@ -49525,29 +49527,68 @@ self.addEventListener('message', async (ev) => {
 
      Als Primitive gibt es das Problem nicht mehr: gezeichnet wird mit den
      Koordinaten desselben Frames. `zOrder: 'bottom'` legt die Zonen hinter
-     die Kerzen, wo sie hingehören. */
-  function ZoneRenderer(inst) { this._i = inst; }
+     die Kerzen, wo sie hingehören.
+
+     Zweite Ebene `top`: nur die Etiketten der Zones View. Unter den Kerzen
+     waren sie halb verdeckt und auf der juengsten Kerze kaum lesbar. */
+  function ZoneRenderer(inst, ebene) { this._i = inst; this._e = ebene; }
   ZoneRenderer.prototype.draw = function (target) {
-    var inst = this._i;
+    var inst = this._i, ebene = this._e;
     try {
       target.useMediaCoordinateSpace(function (scope) {
-        inst._drawZones(scope.context, scope.mediaSize);
+        inst._drawZones(scope.context, scope.mediaSize, ebene);
       });
     } catch (e) { /* ein Zeichenfehler darf den Chart nie mitnehmen */ }
   };
 
-  function ZonePaneView(inst) { this._r = new ZoneRenderer(inst); }
+  function ZonePaneView(inst, ebene) { this._r = new ZoneRenderer(inst, ebene); this._e = ebene; }
   ZonePaneView.prototype.update = function () {};
   ZonePaneView.prototype.renderer = function () { return this._r; };
-  ZonePaneView.prototype.zOrder = function () { return 'bottom'; };
+  ZonePaneView.prototype.zOrder = function () { return this._e; };
 
-  function ZonePrimitive(inst) { this._views = [new ZonePaneView(inst)]; }
+  function ZonePrimitive(inst) {
+    this._i = inst; this._req = null;
+    this._views = [new ZonePaneView(inst, 'bottom'), new ZonePaneView(inst, 'top')];
+  }
+  ZonePrimitive.prototype.attached = function (p) {
+    // Wie beim Footprint: als Methode aufrufen, ungebunden zeichnet die Bibliothek nicht neu.
+    this._req = (p && p.requestUpdate) ? function () { p.requestUpdate(); } : null;
+  };
+  ZonePrimitive.prototype.detached = function () { this._req = null; };
   ZonePrimitive.prototype.updateAllViews = function () {};
   ZonePrimitive.prototype.paneViews = function () { return this._views; };
+  ZonePrimitive.prototype.autoscaleInfo = function (von, bis) {
+    try { return this._i._zonenSkala(von, bis); } catch (e) { return null; }
+  };
+  /* Zeiger als Hand ueber Etiketten und Randmarken — man sieht, dass sie
+     anklickbar sind. Ueber der Flaeche bleibt der Zeiger, wie er ist: dort
+     wird gezogen und gezoomt. */
+  ZonePrimitive.prototype.hitTest = function (x, y) {
+    var t = this._i.zoneTreffer ? this._i.zoneTreffer(x, y, true) : null;
+    return t ? { externalId: 'apexZone', zOrder: 'top', cursorStyle: 'pointer' } : null;
+  };
+
+  Instance.prototype._zonenSammeln = function () {
+    var self = this;
+    this._zones = [];
+    this._zoneOpts = null;
+    this._marken = [];
+    (this._ovlSpecs || []).forEach(function (sp) {
+      if (!sp || sp.visible === false) return;
+      if (sp.zones && sp.zones.length) {
+        self._zones = self._zones.concat(sp.zones);
+        if (sp.zoneOpts) self._zoneOpts = sp.zoneOpts;
+      }
+      // Waagrechte Marken (Schluessel-Level der Zones View) — gleiche Ebene.
+      if (sp.marken && sp.marken.length) self._marken = self._marken.concat(sp.marken);
+    });
+  };
+
   /** Primitive anhängen, sobald es Zonen gibt — und nach jedem Seriewechsel. */
   Instance.prototype._paintZones = function () {
-    if (!this.series || !this._zones || !this._zones.length) return;
-    if (this._zonePrimSeries !== this.series) {
+    if (!this.series) return;
+    var da = (this._zones && this._zones.length) || (this._marken && this._marken.length);
+    if (da && this._zonePrimSeries !== this.series) {
       if (this._zonePrim && this._zonePrimSeries) {
         try { this._zonePrimSeries.detachPrimitive(this._zonePrim); } catch (e) {}
       }
@@ -49555,12 +49596,307 @@ self.addEventListener('message', async (ev) => {
       this._zonePrimSeries = this.series;
       try { this.series.attachPrimitive(this._zonePrim); } catch (e) { this._zonePrim = null; }
     }
+    /* Ohne Anstoss zeichnet die Bibliothek erst bei der naechsten Bewegung neu:
+       ausgeschaltete Zonen blieben stehen, bis jemand die Maus bewegt. */
+    if (this._zonePrim && this._zonePrim._req) { try { this._zonePrim._req(); } catch (e) {} }
   };
 
-  /** Der eigentliche Strich — läuft im Render-Durchgang des Charts. */
-  Instance.prototype._drawZones = function (x, size) {
-    if (!this._zones || !this._zones.length || !this.series || !this._all) return;
-    var belegt = [];      // Etiketten dieses Bildes — ueberlappende weichen aus
+  /** Nur die Zonen (und Marken) EINER Overlay-Angabe tauschen — ohne
+      setIndicators, das jeden Indikator neu aufbaut. Fuer Zonen, die dem
+      Live-Kurs folgen. */
+  Instance.prototype.setOverlayZones = function (key, zones, marken, zoneOpts) {
+    var sp = null;
+    (this._ovlSpecs || []).forEach(function (s) { if (s && s.key === key) sp = s; });
+    if (!sp || this._tot()) return false;
+    sp.zones = zones || [];
+    if (marken !== undefined) sp.marken = marken || [];
+    if (zoneOpts) sp.zoneOpts = zoneOpts;
+    this._zonenSammeln();
+    this._paintZones();
+    return true;
+  };
+
+  /** Zones View: die naechste Zone ueber und unter den Kerzen gehoert mit
+      ins Bild, wenn sie knapp ausserhalb liegt (bis 35 % der Kerzenspanne).
+      Vorher lag die naechste Supply oft ein paar Dollar ueber dem Bildrand —
+      genau die Zone, um die es ging, war unsichtbar. Weiter weg Liegendes
+      bleibt draussen und steht als Randmarke da. */
+  Instance.prototype._zonenSkala = function (von, bis) {
+    var o = this._zoneOpts, all = this._all;
+    if (!o || !o.ansicht || !all || !all.n || !this._zones || !this._zones.length) return null;
+    var a = Math.max(0, Math.floor(von)), b = Math.min(this._shown - 1, Math.ceil(bis));
+    if (!(b >= a)) return null;
+    var lo = Infinity, hi = -Infinity;
+    for (var i = a; i <= b; i++) { if (all.l[i] < lo) lo = all.l[i]; if (all.h[i] > hi) hi = all.h[i]; }
+    var spanne = hi - lo;
+    if (!(spanne > 0)) return null;
+    var minV = lo, maxV = hi, darueber = null, darunter = null;
+    this._zones.forEach(function (z) {
+      if (!z || !z.stil || z.stil.rahmen) return;
+      if (z.bot > hi && (!darueber || z.bot < darueber.bot)) darueber = z;
+      if (z.top < lo && (!darunter || z.top > darunter.top)) darunter = z;
+    });
+    if (darueber && darueber.top - hi <= spanne * 0.35) maxV = darueber.top;
+    if (darunter && lo - darunter.bot <= spanne * 0.35) minV = darunter.bot;
+    if (minV === lo && maxV === hi) return null;
+    return { priceRange: { minValue: minV, maxValue: maxV } };
+  };
+
+  /** Zone unter dem Zeiger hervorheben (Zones View). */
+  Instance.prototype.zoneHover = function (z) {
+    if (this._zoneHover === z) return;
+    this._zoneHover = z || null;
+    if (this._zonePrim && this._zonePrim._req) { try { this._zonePrim._req(); } catch (e) {} }
+  };
+
+  /** Was liegt an (x, y)? Zuerst Etiketten und Randmarken, dann die Flaeche
+      (die schmalste gewinnt). `nurMarken`: nur Etiketten und Randmarken.
+      Gerechnet auf dem zuletzt gezeichneten Bild. */
+  Instance.prototype.zoneTreffer = function (x, y, nurMarken) {
+    var L = this._zLage;
+    if (!L || !isFinite(x) || !isFinite(y)) return null;
+    for (var i = L.etiketten.length - 1; i >= 0; i--) {
+      var e = L.etiketten[i];
+      if (x >= e.x - 2 && x <= e.x + e.w + 2 && y >= e.y - 2 && y <= e.y + e.h + 2)
+        return { z: e.z, rand: !!e.rand };
+    }
+    if (nurMarken) return null;
+    var best = null;
+    L.boxen.forEach(function (b) {
+      if (x < b.x0 || x > b.x1 || y < b.y0 - 1 || y > b.y1 + 1) return;
+      var h = b.y1 - b.y0;
+      if (!best || h < best.h) best = { z: b.z, h: h };
+    });
+    return best ? { z: best.z, rand: false } : null;
+  };
+
+  /* ─────────── Zones View: Lage, Flaechen, Etiketten ───────────
+     Nur fuer Zonen mit eigenem Stil (`stil`, Chart-Seite). Der Replay
+     zeichnet weiter wie bisher.
+
+     Was vorher schief lief: die Etiketten standen unter den Kerzen, am
+     rechten Rand ueber der juengsten Kerze, und wer sich ueberlappte,
+     wurde bis zu 48 px nach unten geschoben — neben eine ANDERE Zone.
+     Jetzt: Etikett mit eigenem Grund ueber den Kerzen, ein Ausgleich in
+     beide Richtungen, und wer verrutscht, bekommt einen Strich zu seiner
+     Zone. Zonen ausserhalb des Bildes verschwinden nicht mehr spurlos —
+     sie stehen als Marke am oberen oder unteren Rand. */
+  Instance.prototype._zonenLage = function (size) {
+    var ts = this.chart.timeScale(), series = this.series;
+    var W = size.width, H = size.height, letzte = Math.max(0, this._shown - 1);
+    var L = { boxen: [], oben: [], unten: [], W: W, H: H };
+    (this._zones || []).forEach(function (z) {
+      if (!z || !z.stil) return;
+      var a = series.priceToCoordinate(z.top), b = series.priceToCoordinate(z.bot);
+      if (a == null || b == null || !isFinite(a) || !isFinite(b)) return;
+      var y0 = Math.min(a, b), y1 = Math.max(a, b);
+      if (y1 < 0) { L.oben.push(z); return; }
+      if (y0 > H) { L.unten.push(z); return; }
+      var x0 = ts.logicalToCoordinate(Math.max(0, Math.min(z.from | 0, letzte)));
+      if (x0 == null || !isFinite(x0)) x0 = 0;
+      if (x0 > W) return;                       // beginnt rechts vom Ausschnitt
+      L.boxen.push({ z: z, x0: x0, x1: W, y0: y0, y1: y1 });
+    });
+    return L;
+  };
+
+  function zAlpha(rgba, a) {
+    return String(rgba || '').replace(/rgba\(([^)]*),\s*[\d.]+\)/, 'rgba($1,' + a + ')');
+  }
+
+  Instance.prototype._zonenFlaechen = function (x, size) {
+    var L = this._zonenLage(size), self = this, W = size.width, H = size.height;
+    var series = this.series;
+    /* Schluessel-Level: gestrichelt, UNTER den Kerzen — die Beschriftung
+       steht in der oberen Ebene. */
+    (this._marken || []).forEach(function (m) {
+      var y = series.priceToCoordinate(m.price);
+      if (y == null || !isFinite(y) || y < 0 || y > H) return;
+      x.save();
+      x.strokeStyle = m.farbe || 'rgba(139,145,161,0.8)';
+      x.globalAlpha = 0.75;
+      x.lineWidth = 1;
+      if (x.setLineDash) x.setLineDash([3, 4]);
+      x.beginPath(); x.moveTo(0, Math.round(y) + 0.5); x.lineTo(W, Math.round(y) + 0.5); x.stroke();
+      x.restore();
+    });
+    L.boxen.forEach(function (b) {
+      var st = b.z.stil, hoch = Math.max(1, b.y1 - b.y0), breit = b.x1 - b.x0;
+      var hell = b.z === self._zoneHover || st.offen;
+      if (st.fill) { x.fillStyle = st.fill; x.fillRect(b.x0, b.y0, breit, hoch); }
+      if (st.inner && st.inner.top != null && st.inner.bot != null) {
+        var k1 = series.priceToCoordinate(st.inner.top), k2 = series.priceToCoordinate(st.inner.bot);
+        if (k1 != null && k2 != null) {
+          x.fillStyle = st.inner.fill || st.fill || 'rgba(127,127,127,0.2)';
+          x.fillRect(b.x0, Math.min(k1, k2), breit, Math.max(1, Math.abs(k2 - k1)));
+        }
+      }
+      if (hell && st.akzent) {
+        // Hervorgehoben (Zeiger darueber oder Zone geoeffnet): ein Hauch mehr Flaeche.
+        x.fillStyle = zAlpha(st.akzent, 0.08);
+        x.fillRect(b.x0, b.y0, breit, hoch);
+      }
+      var rand = hell ? st.akzent : (st.stroke || (st.drin ? zAlpha(st.akzent, 0.6) : null));
+      if (rand) {
+        x.save();
+        x.strokeStyle = rand; x.lineWidth = hell ? 1.5 : 1;
+        if (!hell && st.dash && x.setLineDash) x.setLineDash(st.dash);
+        x.strokeRect(b.x0 + 0.5, b.y0 + 0.5, Math.max(1, breit - 1), Math.max(1, hoch - 1));
+        x.restore();
+      }
+    });
+  };
+
+  Instance.prototype._zonenEtiketten = function (x, size) {
+    var L = this._zonenLage(size), self = this, W = size.width, H = size.height;
+    var series = this.series, opts = this._zoneOpts || {};
+    var PH = 16, LUFT = 2, RAND = 6;
+    var hellesThema = document.body && document.body.classList.contains('light');
+    var grund = hellesThema ? 'rgba(255,255,255,0.9)' : 'rgba(13,15,19,0.84)';
+    var fmt = function (p) {
+      try { return series.priceFormatter().format(p); } catch (e) { return String(p); }
+    };
+    x.save();
+    x.font = '600 10px system-ui, -apple-system, Segoe UI, sans-serif';
+    x.textBaseline = 'middle';
+    var breite = function (t) { return Math.ceil(x.measureText(t).width) + 12; };
+
+    /* 1D-Ausgleich: nach Wunschhoehe sortieren, Ueberlappungen nach unten
+       schieben, was unten hinausragt wieder hoch. Kein Etikett springt
+       dabei an eine fremde Zone vorbei. */
+    function verteilen(liste) {
+      liste.sort(function (a, b) { return a.want - b.want; });
+      var y = -Infinity;
+      liste.forEach(function (it) { it.y = Math.max(it.want, y + PH + LUFT); y = it.y; });
+      var grenze = H - 2;
+      for (var i = liste.length - 1; i >= 0; i--) {
+        if (liste[i].y + PH > grenze) liste[i].y = grenze - PH;
+        grenze = liste[i].y - LUFT;
+      }
+      liste.forEach(function (it) { it.y = Math.max(2, it.y); });
+    }
+    function pille(it) {
+      x.fillStyle = grund;
+      x.strokeStyle = it.linie;
+      x.lineWidth = it.hell ? 1.5 : 1;
+      var r = 4, X = it.x + 0.5, Y = it.y + 0.5, w = it.w - 1, h = it.h - 1;
+      x.beginPath();
+      x.moveTo(X + r, Y); x.lineTo(X + w - r, Y); x.quadraticCurveTo(X + w, Y, X + w, Y + r);
+      x.lineTo(X + w, Y + h - r); x.quadraticCurveTo(X + w, Y + h, X + w - r, Y + h);
+      x.lineTo(X + r, Y + h); x.quadraticCurveTo(X, Y + h, X, Y + h - r);
+      x.lineTo(X, Y + r); x.quadraticCurveTo(X, Y, X + r, Y);
+      x.closePath(); x.fill(); x.stroke();
+      x.fillStyle = it.farbe;
+      x.fillText(it.text, it.x + 6, it.y + PH / 2 + 0.5);
+    }
+
+    // Rechte Spalte: Zonen-Etiketten und Randmarken.
+    var rechts = [];
+    L.boxen.forEach(function (b) {
+      var st = b.z.stil;
+      if (!st.label) return;
+      var oben = Math.max(b.y0, 0), unten = Math.min(b.y1, H);
+      var want = (unten - oben >= PH + 2) ? oben + 1 : (oben + unten) / 2 - PH / 2;
+      rechts.push({ z: b.z, b: b, text: st.label, want: want, farbe: st.labelColor || '#e6e9ef',
+                    linie: zAlpha(st.akzent || st.labelColor, b.z === self._zoneHover || st.offen ? 0.95 : 0.45),
+                    hell: b.z === self._zoneHover || st.offen });
+    });
+    var maxRand = 2;
+    var kurs = isFinite(opts.kurs) ? opts.kurs : null;
+    function randMarke(z, auf, k) {
+      var st = z.stil, d = kurs == null ? '' : (auf ? z.bot - kurs : kurs - z.top);
+      var text = (auf ? '▲ ' : '▼ ') + (st.kurz || '') + '  ' + fmt(z.bot) + '–' + fmt(z.top) +
+                 (kurs == null ? '' : '  ' + (auf ? '+' : '−') + fmt(Math.abs(d)));
+      return { z: z, rand: true, text: text, want: auf ? 2 + k * (PH + LUFT) : H - PH - 2 - k * (PH + LUFT),
+               farbe: st.labelColor || '#e6e9ef', linie: zAlpha(st.akzent || st.labelColor, 0.6),
+               hell: z === self._zoneHover || st.offen };
+    }
+    L.oben.sort(function (a, b) { return a.bot - b.bot; }).slice(0, maxRand)
+      .forEach(function (z, k) { rechts.push(randMarke(z, true, k)); });
+    L.unten.sort(function (a, b) { return b.top - a.top; }).slice(0, maxRand)
+      .forEach(function (z, k) { rechts.push(randMarke(z, false, k)); });
+
+    rechts.forEach(function (it) { it.w = Math.min(breite(it.text), W - 2 * RAND); it.h = PH; it.x = W - RAND - it.w; });
+    verteilen(rechts);
+    rechts.forEach(function (it) {
+      /* Verrutscht? Ein feiner Strich am rechten Rand fuehrt zur Zone. */
+      if (it.b) {
+        var mitte = it.y + PH / 2;
+        if (mitte < it.b.y0 - 1 || mitte > it.b.y1 + 1) {
+          var ziel = mitte < it.b.y0 ? it.b.y0 : it.b.y1;
+          x.save();
+          x.strokeStyle = it.linie; x.lineWidth = 1;
+          x.beginPath(); x.moveTo(W - 2.5, mitte); x.lineTo(W - 2.5, ziel); x.stroke();
+          x.restore();
+        }
+      }
+      pille(it);
+    });
+
+    /* Linke Spalte: Schluessel-Level, klein und zurueckgenommen. Liegen
+       mehrere dichter als ein Etikett hoch ist (auf H4 sind PWL, London H
+       und Asia H oft ein paar Pixel), werden sie EIN Etikett — sonst wanderten
+       sie als Stapel weit weg von ihren Linien. */
+    var links = [], punkte = [];
+    (this._marken || []).forEach(function (m) {
+      var y = series.priceToCoordinate(m.price);
+      if (y == null || !isFinite(y) || y < 0 || y > H) return;
+      punkte.push({ y: y, m: m });
+    });
+    punkte.sort(function (a, b) { return a.y - b.y; });
+    var gruppe = null;
+    punkte.forEach(function (p) {
+      if (gruppe && p.y - gruppe.letzte < PH + LUFT) { gruppe.liste.push(p); gruppe.letzte = p.y; return; }
+      gruppe = { liste: [p], letzte: p.y };
+      links.push(gruppe);
+    });
+    links = links.map(function (g) {
+      var namen = g.liste.map(function (p) { return p.m.text || ''; });
+      var preise = g.liste.map(function (p) { return fmt(p.m.price); });
+      var gleich = preise.every(function (t) { return t === preise[0]; });
+      var mitte = (g.liste[0].y + g.liste[g.liste.length - 1].y) / 2;
+      return { text: namen.join(' · ') + (g.liste.length === 1 || gleich ? '  ' + preise[0] : ''),
+               want: mitte - PH / 2, farbe: g.liste[0].m.farbe || '#8b91a1',
+               linie: 'rgba(139,145,161,0.35)', hell: false };
+    });
+    links.forEach(function (it) { it.w = breite(it.text); it.h = PH; it.x = RAND; });
+    verteilen(links);
+    links.forEach(pille);
+    x.restore();
+
+    this._zLage = { boxen: L.boxen, etiketten: rechts };
+  };
+
+  /** Ein Schritt zu einem Rand-Etikett: Preisachse so aufziehen, dass die
+      Zone im Bild liegt. Doppelklick auf die Achse stellt wieder automatisch. */
+  Instance.prototype.zoneInsBild = function (z) {
+    if (this._tot() || !z) return;
+    try {
+      var ps = this.series.priceScale(), r = ps.getVisibleRange();
+      if (!r) return;
+      var lo = Math.min(r.from, r.to), hi = Math.max(r.from, r.to);
+      var pad = (z.top - z.bot) * 0.5 + (hi - lo) * 0.05;
+      ps.setAutoScale(false);
+      ps.setVisibleRange({ from: Math.min(lo, z.bot - pad), to: Math.max(hi, z.top + pad) });
+    } catch (e) {}
+  };
+
+  /** Der eigentliche Strich — läuft im Render-Durchgang des Charts.
+      `ebene`: 'bottom' (Flaechen, unter den Kerzen) oder 'top' (Etiketten). */
+  Instance.prototype._drawZones = function (x, size, ebene) {
+    if (!this.series || !this._all || !this.chart) return;
+    /* Zones View (Zonen mit eigenem Stil oder Marken): eigener Weg. */
+    var ansicht = (this._zoneOpts && this._zoneOpts.ansicht) ||
+                  (this._zones && this._zones.some(function (z) { return z && z.stil; })) ||
+                  (this._marken && this._marken.length);
+    if (ansicht) {
+      if (!size || !size.width || !size.height) return;
+      if (ebene === 'top') this._zonenEtiketten(x, size);
+      else this._zonenFlaechen(x, size);
+      return;
+    }
+    if (ebene === 'top') { this._zLage = null; return; }
+    if (!this._zones || !this._zones.length) return;
 
     var ts = this.chart.timeScale();
     var series = this.series;
@@ -49603,57 +49939,6 @@ self.addEventListener('message', async (ev) => {
       if (x1 == null || x2 == null || y1 == null || y2 == null) return;
       if (x2 < x1) { var t = x1; x1 = x2; x2 = t; }
       if (x2 - x1 < 1) x2 = x1 + 1;
-
-      /* Eigener Stil (Chart-Seite): Flaeche, innerer Kern, Rahmen, Etikett.
-         Ohne `stil` bleibt alles wie im Replay. */
-      if (z.stil) {
-        var st = z.stil;
-        if (st.bisRand && size && size.width) x2 = Math.max(x2, size.width);
-        var oben = Math.min(y1, y2), hoch = Math.max(1, Math.abs(y2 - y1));
-        if (st.fill) { x.fillStyle = st.fill; x.fillRect(x1, oben, x2 - x1, hoch); }
-        if (st.inner && st.inner.top != null && st.inner.bot != null) {
-          var k1 = yOf(st.inner.top), k2 = yOf(st.inner.bot);
-          if (k1 != null && k2 != null) {
-            x.fillStyle = st.inner.fill || st.fill || 'rgba(127,127,127,0.2)';
-            x.fillRect(x1, Math.min(k1, k2), x2 - x1, Math.max(1, Math.abs(k2 - k1)));
-          }
-        }
-        if (st.stroke) {
-          x.save();
-          x.strokeStyle = st.stroke; x.lineWidth = st.lineWidth || 1;
-          if (st.dash && x.setLineDash) x.setLineDash(st.dash);
-          x.strokeRect(x1 + 0.5, oben + 0.5, Math.max(1, x2 - x1 - 1), Math.max(1, hoch - 1));
-          x.restore();
-        }
-        /* Etikett nur fuer Zonen, die im Bild liegen — sonst stuenden oben
-           rechts Namen von Zonen weit ausserhalb des Ausschnitts. */
-        var imBild = !(size && size.height) || (oben < size.height && oben + hoch > 0);
-        if (st.label && imBild) {
-          x.save();
-          x.font = '600 10px system-ui, -apple-system, Segoe UI, sans-serif';
-          x.fillStyle = st.labelColor || 'rgba(230,233,239,0.9)';
-          x.textBaseline = 'top';
-          var lw = x.measureText(st.label).width;
-          var lx = Math.max(x1 + 4, 4), ly = hoch < 13 ? oben - 12 : oben + 2;
-          /* Am rechten Rand nicht abschneiden: lieber nach links ruecken. */
-          if (size && size.width) lx = Math.max(4, Math.min(lx, size.width - lw - 6));
-          if (st.labelRechts && size && size.width) lx = Math.max(4, size.width - lw - 8);
-          /* Steht der Kurs in einer grossen Zone, liegen ihre Raender oft
-             ausserhalb des Bildes — das Etikett bleibt trotzdem sichtbar. */
-          if (size && size.height) ly = Math.max(2, Math.min(ly, size.height - 14));
-          for (var v = 0; v < 4; v++) {
-            var frei = belegt.every(function (b) {
-              return lx + lw < b.x || lx > b.x + b.w || ly + 11 < b.y || ly > b.y + 11;
-            });
-            if (frei) break;
-            ly += 12;
-          }
-          belegt.push({ x: lx, y: ly, w: lw });
-          x.fillText(st.label, lx, ly);
-          x.restore();
-        }
-        return;
-      }
 
       var broken = !!z.broken;
       var htf = z.htfLevel || 0;
@@ -50009,6 +50294,8 @@ self.addEventListener('message', async (ev) => {
 
   Instance.prototype._dropZones = function () {
     this._zones = [];
+    this._marken = [];
+    this._zLage = null;
     if (this._zonePrim && this._zonePrimSeries) {
       try { this._zonePrimSeries.detachPrimitive(this._zonePrim); } catch (e) {}
     }
@@ -77753,11 +78040,20 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Haltequote), dem Setup als Linien und den Schluessel-Leveln. Ein Klick
      auf einen Kasten oeffnet die Zone. Der TradingView-Chart laeuft dabei
      weiter: er liefert den Live-Kurs. */
-  var EV = { inst: null, tf: '', an: false, laden: null, zonen: [], bars: null, fp: false };
+  var EV = { inst: null, tf: '', an: false, laden: null, zonen: [], bars: null, fp: false,
+             zmodus: 'nah', levelsAus: false };
   try { EV.fp = localStorage.getItem('apexTV_evfp') === '1'; } catch (e) {}
   /* Zonen sind Standard, aber keine Pflicht: wer nur mit eigenen Indikatoren
-     arbeitet, blendet sie aus. Die KI liest sie trotzdem weiter. */
-  try { EV.zonenAus = localStorage.getItem('apexTV_evzonen') === '0'; } catch (e) {}
+     arbeitet, blendet sie aus. Die KI liest sie trotzdem weiter.
+     Drei Stufen statt zweier Schalter ("Zones" und "All zones"), die sich
+     gegenseitig aushebelten — "All zones" liess sich bei ausgeschalteten
+     Zonen einschalten und tat nichts. Gespeichert wird weiter unter
+     'evzonen' ('0' aus, '1' nah — so stand es schon da — und 'alle'). */
+  try {
+    var zmGemerkt = localStorage.getItem('apexTV_evzonen');
+    EV.zmodus = zmGemerkt === '0' ? 'aus' : (zmGemerkt === 'alle' ? 'alle' : 'nah');
+    EV.levelsAus = localStorage.getItem('apexTV_evlevels') === '0';
+  } catch (e) {}
   /* Datensymbol der Chart-Seite ('XAU/USD', 'NAS100') → Name im Tick-Feed.
      null, wenn Dukascopy das Instrument nicht hat. */
   function fpSym() {
@@ -77808,28 +78104,55 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     try { if (evSichtbar()) evChartZeigen(); } catch (e) {}
   });
 
-  /* Eingeschaltete Schalter stehen vorne (links), ausgeschaltete in ihrer
-     festen Reihenfolge dahinter — abgewaehlt rutscht einer an seinen Platz
-     zurueck. Stabil sortiert, damit nichts springt, was sich nicht aendert. */
+  /* Feste Reihenfolge. Vorher standen eingeschaltete Schalter vorne: wer
+     "Zones" ausschaltete, sah den Knopf an die dritte Stelle springen, und
+     der zweite Klick an derselben Stelle traf "All zones". */
+  var EV_ZMODI = [
+    ['aus',  'Off',    'No zones on the chart — the AI still reads them'],
+    ['nah',  'Nearby', 'The nearest tradeable zones above and below price that this timeframe can show'],
+    ['alle', 'All',    'Every zone this timeframe can show — including wide areas, contested and rejected zones']
+  ];
   function evSchalterHtml() {
     var n = evIndZahl();
-    var liste = [
-      { an: EV.alle, a: 'data-evalle', t: 'Also draw wide areas, contested and rejected zones', x: 'All zones' },
-      { an: EV.fp, a: 'data-evfp', t: 'Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.', x: 'Footprint' },
-      { an: !EV.zonenAus, a: 'data-evzonen', t: 'Supply and demand zones on the chart — the AI reads them either way', x: 'Zones' },
-      { an: evIndOffen() || n > 0, a: 'data-evind', t: 'Pick any Evidence indicator to draw on this chart', x: 'Indicators' + (n ? ' (' + n + ')' : '') },
-      { an: evStilOffen(), a: 'data-evstil', t: 'Colours and chart style — saved for next time', x: 'Style' }
-    ];
-    liste.forEach(function (k, i) { k.i = i; });
-    liste.sort(function (p, q) { return (q.an ? 1 : 0) - (p.an ? 1 : 0) || p.i - q.i; });
-    return '<span class="tv-ev-br"></span><span class="tv-ev-sws">' + liste.map(function (k) {
-      return '<button type="button" ' + k.a + '="1" class="tv-ev-sw' + (k.an ? ' on' : '') + '" title="' + k.t + '">' + k.x + '</button>';
-    }).join('') + '</span>';
+    var knopf = function (an, attr, titel, text) {
+      return '<button type="button" ' + attr + '="1" class="tv-ev-sw' + (an ? ' on' : '') +
+        '" aria-pressed="' + (an ? 'true' : 'false') + '" title="' + titel + '">' + text + '</button>';
+    };
+    var seg = '<span class="tv-ev-seg" role="radiogroup" aria-label="Zones on the chart">' +
+      '<span class="tv-ev-seg-t" aria-hidden="true">Zones</span>' +
+      EV_ZMODI.map(function (m) {
+        var on = EV.zmodus === m[0];
+        return '<button type="button" role="radio" data-evzmodus="' + m[0] + '" aria-checked="' + on +
+          '" class="' + (on ? 'on' : '') + '" title="' + m[2] + '">' + m[1] + '</button>';
+      }).join('') + '</span>';
+    return '<span class="tv-ev-br"></span><span class="tv-ev-sws">' + seg +
+      knopf(!EV.levelsAus, 'data-evlevels', 'Key levels: previous day and week high/low, day and week open, session highs and lows, equal highs and lows', 'Levels') +
+      knopf(EV.fp, 'data-evfp', 'Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.', 'Footprint') +
+      knopf(evIndOffen() || n > 0, 'data-evind', 'Pick any Evidence indicator to draw on this chart', 'Indicators' + (n ? ' (' + n + ')' : '')) +
+      knopf(evStilOffen(), 'data-evstil', 'Colours and chart style — saved for next time', 'Style') +
+      '</span>';
   }
   function evSchalterNeu() {
     var tfs = document.getElementById('tvEvTfs'); if (!tfs) return;
+    var fokus = evFokusMerken(tfs);
     [].slice.call(tfs.querySelectorAll('.tv-ev-br,.tv-ev-sws')).forEach(function (b) { b.remove(); });
     tfs.insertAdjacentHTML('beforeend', evSchalterHtml());
+    evFokusZurueck(tfs, fokus);
+  }
+  /* Die Leiste wird bei jedem Umschalten neu geschrieben. Wer mit der
+     Tastatur bedient, verlor dabei jedes Mal den Fokus. */
+  function evFokusMerken(tfs) {
+    var a = document.activeElement;
+    if (!a || !tfs.contains(a)) return null;
+    var attr = ['data-evzmodus', 'data-evtf'].filter(function (k) { return a.hasAttribute(k); })[0];
+    if (attr) return '[' + attr + '="' + a.getAttribute(attr) + '"]';
+    attr = ['data-evlevels', 'data-evfp', 'data-evind', 'data-evstil'].filter(function (k) { return a.hasAttribute(k); })[0];
+    return attr ? '[' + attr + ']' : null;
+  }
+  function evFokusZurueck(tfs, sel) {
+    if (!sel) return;
+    var b = tfs.querySelector(sel);
+    if (b) try { b.focus({ preventScroll: true }); } catch (e) { b.focus(); }
   }
 
   function evStilOffen() { var h = document.getElementById('tvEvStil'); return !!(h && !h.hidden); }
@@ -77940,6 +78263,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       try { EV.inst.series.update(zeile); } catch (e) {}
     });
     EV._live = { basis: b, t: zeiten[zeiten.length - 1] };
+    /* Alle paar Sekunden pruefen, ob der Kurs die Auswahl veraendert hat. */
+    if (Date.now() - (EV._zLiveAm || 0) > 3000) {
+      EV._zLiveAm = Date.now();
+      try { evZonenLive(); } catch (e) {}
+    }
   }
 
   function evNachladen() {
@@ -77971,21 +78299,35 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }
     var mitBars = L && L.ebenen ? L.ebenen.filter(function (e) { return echteEbene(e) && e.bars; }) : [];
     if (!mitBars.length) {
-      /* Wer die Zones View oeffnet, will Zonen sehen — die Analyse startet
-         von selbst. Einmal je Instrument: schlaegt sie fehl, steht der Knopf
-         da, statt dass sie sich endlos neu anstoesst. */
+      /* Wer die Zones View oeffnet, will Zonen sehen. Vorher startete dafuer
+         die VOLLE KI-Analyse — bei jedem Seitenaufruf, denn gespeicherte
+         Level haben keine Kerzen. Das kostete eine KI-Anfrage und dauerte,
+         obwohl die Zonen gerechnet werden, nicht von der KI kommen. Jetzt:
+         nur Kerzen und Zonen (zonenNeu). Einmal je Instrument — schlaegt es
+         fehl, steht der Knopf da, statt dass es sich endlos neu anstoesst. */
       var go = document.getElementById('tvKiGo');
-      var laeuft = !!(go && go.disabled);
+      var kiLaeuft = !!(go && go.disabled);
       var symJetzt = TV.sym || STD_SYM;
-      if (laeuft || EV._autoSym !== symJetzt) {
-        if (!laeuft) { EV._autoSym = symJetzt; setTimeout(analysieren, 0); }
-        evLeer('<div class="tv-ev-leer-t">Analysing this chart…</div>' +
-          '<p>Every zone it finds is drawn here, on the same candles it read.</p>');
+      if (EV._laedt || kiLaeuft) {
+        evLeer('<div class="tv-ev-leer-t">' + (kiLaeuft ? 'Analysing this chart…' : 'Calculating zones…') + '</div>' +
+          '<p>Loading the candles of five timeframes &mdash; every zone found is drawn on the same candles.</p>');
         return;
       }
-      evLeer('<div class="tv-ev-leer-t">Nothing analysed on this instrument yet.</div>' +
-        '<p>Run the analysis &mdash; every zone it finds is drawn here, on the same candles it read.</p>' +
-        '<button type="button" class="tv-zn-b primar" id="tvEvGo">Analyse chart</button>');
+      if (EV._autoSym !== symJetzt) {
+        EV._autoSym = symJetzt;
+        evZonenLaden();
+        return;
+      }
+      var keineDaten = !DATEN_SYM[symJetzt];
+      evLeer('<div class="tv-ev-leer-t">' + (EV._ladeFehler ? 'The zones could not be calculated.'
+          : (keineDaten ? 'No candle data for this instrument.' : 'No zones calculated for this instrument yet.')) + '</div>' +
+        '<p>' + (EV._ladeFehler ? escHtml(EV._ladeFehler)
+          : (keineDaten ? 'Zones are calculated for gold, silver, the major FX pairs, the main indices and BTC/ETH.'
+                        : 'The zones are calculated from the candles &mdash; no AI request needed.')) + '</p>' +
+        (keineDaten ? '' : '<div class="tv-ev-leer-k"><button type="button" class="tv-zn-b primar" id="tvEvLaden">Calculate zones</button>' +
+          '<button type="button" class="tv-zn-b" id="tvEvGo">Analyse with AI</button></div>'));
+      var bl = document.getElementById('tvEvLaden');
+      if (bl) bl.onclick = function () { evZonenLaden(); };
       var b = document.getElementById('tvEvGo');
       if (b) b.onclick = analysieren;
       return;
@@ -77997,14 +78339,24 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     EV.tf = tf;
     var tfs = document.getElementById('tvEvTfs');
     if (tfs) {
+      var fokus = evFokusMerken(tfs);
       tfs.innerHTML = mitBars.map(function (e) {
-        return '<button type="button" data-evtf="' + e.tf + '" class="' + (e.tf === tf ? 'on' : '') + '">' + e.tf + '</button>';
+        return '<button type="button" data-evtf="' + e.tf + '" class="' + (e.tf === tf ? 'on' : '') +
+          '" aria-pressed="' + (e.tf === tf ? 'true' : 'false') + '">' + e.tf + '</button>';
       }).join('') + evSchalterHtml();
+      evFokusZurueck(tfs, fokus);
       tfs.onclick = function (ev) {
-        var a = ev.target && ev.target.closest && ev.target.closest('[data-evalle]');
-        if (a) { EV.alle = !EV.alle; evChartZeigen(); return; }
-        var zn = ev.target && ev.target.closest && ev.target.closest('[data-evzonen]');
-        if (zn) { EV.zonenAus = !EV.zonenAus; merke('evzonen', EV.zonenAus ? '0' : '1'); evChartZeigen(); return; }
+        var zm = ev.target && ev.target.closest && ev.target.closest('[data-evzmodus]');
+        if (zm) {
+          var m = zm.getAttribute('data-evzmodus');
+          if (m === EV.zmodus) return;
+          EV.zmodus = m;
+          merke('evzonen', m === 'aus' ? '0' : (m === 'alle' ? 'alle' : '1'));
+          evChartZeigen();
+          return;
+        }
+        var lv = ev.target && ev.target.closest && ev.target.closest('[data-evlevels]');
+        if (lv) { EV.levelsAus = !EV.levelsAus; merke('evlevels', EV.levelsAus ? '0' : '1'); evChartZeigen(); return; }
         var ib = ev.target && ev.target.closest && ev.target.closest('[data-evind]');
         if (ib) { evIndUmschalten(); evSchalterNeu(); return; }
         var st = ev.target && ev.target.closest && ev.target.closest('[data-evstil]');
@@ -78017,14 +78369,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         evChartZeigen();
       };
     }
-    var note = document.getElementById('tvEvNote');
-    if (note) note.textContent = (L.quelle === 'Yahoo' ? 'Candles: real-time feed' :
-      'Candles: about 2 min behind, last candle follows the live price') + ' · updates itself every ' +
-      Math.round((EV_NEU_MS[tf] || 300000) / 60000) + ' min without the AI · zones from all timeframes' +
-      (EV.fp ? (fpSym() ? ' · footprint: ticks arrive once each hour is over'
-                        : ' · no tick data for this instrument') : '');
     var e = mitBars.filter(function (x) { return x.tf === tf; })[0];
-    var los = function (inst) { try { evZeichnen(inst, e, L); } catch (x) { TV._evFehler = (x && x.message) || String(x); } };
+    var los = function (inst) {
+      var info = null;
+      try { info = evZeichnen(inst, e, L); } catch (x) { TV._evFehler = (x && x.message) || String(x); }
+      evNotiz(L, tf, info);
+    };
     if (EV.inst) { los(EV.inst); return; }
     if (EV.laden || !window.ApexChart) return;
     EV.laden = window.ApexChart.create(host, { symbol: L.sym, timeframe: tf.toLowerCase(), volume: false })
@@ -78035,16 +78385,27 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           try { var cs = window.ApexChartStyle.load(); inst.setStyle(cs); inst.setSeriesType(cs.seriesType, cs); } catch (x) {}
         }
         try {
+          /* Getroffen wird, was gezeichnet ist: Etikett, Randmarke oder die
+             Flaeche AB ihrer Entstehung. Vorher zaehlte nur der Preis — ein
+             Klick links neben einer Zone, vor ihrer Entstehung, oeffnete sie
+             trotzdem. */
           inst.chart.subscribeClick(function (param) {
-            if (!param || !param.point) return;
-            var p = inst.series.coordinateToPrice(param.point.y);
-            if (!isFinite(p)) return;
-            var best = null;
-            EV.zonen.forEach(function (z) {
-              var w = z.top - z.bot;
-              if (p >= z.bot && p <= z.top && (!best || w < best.w)) best = { z: z, w: w };
-            });
-            if (best) zoneOeffnen(regZone(best.z._g, best.z._tf));
+            if (!param || !param.point || !inst.zoneTreffer) return;
+            var t = inst.zoneTreffer(param.point.x, param.point.y);
+            if (!t || !t.z || !t.z._g) return;
+            var id = regZone(t.z._g, t.z._tf);
+            if (t.rand) {
+              /* Randmarke: die Zone ins Bild holen und oeffnen — nicht
+                 schliessen, falls sie schon offen war. */
+              inst.zoneInsBild(t.z);
+              if (ZOFF !== id) zoneOeffnen(id);
+              return;
+            }
+            zoneOeffnen(id);
+          });
+          inst.chart.subscribeCrosshairMove(function (param) {
+            var t = param && param.point && inst.zoneTreffer ? inst.zoneTreffer(param.point.x, param.point.y) : null;
+            inst.zoneHover(t ? t.z : null);
           });
         } catch (x) { /* ohne Klick bleibt der Chart nutzbar */ }
         evChartZeigen();
@@ -78103,9 +78464,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var a = Math.max(0.07, Math.min(0.24, 0.07 + (p - 35) / 45 * 0.17)) * (F.zoneAlpha / 100);
     var rgb = rgbVon(g.supply ? F.supply : F.demand);
     var st = { bisRand: true, fill: 'rgba(' + rgb + ',' + a.toFixed(3) + ')',
-               label: (g.id ? g.id + ' ' : '') + (g.tfs ? g.tfs.join('+') : (g.tf || '')) +
-                      (g.staerke ? ' ' + p + '%' : ''),
-               labelColor: 'rgba(' + rgb + ',0.95)' };
+               label: [g.id || '', g.tfs ? g.tfs.join('+') : (g.tf || ''), g.staerke ? p + '%' : '']
+                        .filter(Boolean).join(' · '),
+               kurz: (g.id ? g.id + ' ' : '') + (g.supply ? 'Supply' : 'Demand'),
+               labelColor: 'rgba(' + rgb + ',0.95)', akzent: 'rgba(' + rgb + ',0.95)' };
     var k = g.kern;
     if (k && (k.top - k.bot) < (g.top - g.bot) - 1e-9)
       st.inner = { top: k.top, bot: k.bot, fill: 'rgba(' + rgb + ',' + Math.min(0.36, a + 0.14).toFixed(3) + ')' };
@@ -78115,13 +78477,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (g._ki === 'weg') {
       st.fill = 'rgba(140,140,140,0.06)'; st.inner = null; st.stroke = 'rgba(140,140,140,0.5)';
       st.dash = [2, 3]; st.label += ' · rejected'; st.labelColor = 'rgba(160,160,160,0.9)';
+      st.akzent = 'rgba(160,160,160,0.95)';
     }
     if (g._kiNeu) { st.stroke = 'rgba(201,168,76,0.9)'; st.label += ' · AI'; }
-    st.labelRechts = true;
     if (darst && darst.art === 'rahmen') {
       /* Hoeherer Zeitrahmen: Umriss und nur ein Hauch Flaeche — genug, um
          zu sehen, dass man drin steht, ohne den Chart zuzudecken. */
-      st.fill = 'rgba(' + rgb + ',0.035)'; st.inner = null;
+      st.fill = 'rgba(' + rgb + ',0.035)'; st.inner = null; st.rahmen = true;
       st.stroke = st.stroke || 'rgba(' + rgb + ',0.55)'; st.dash = st.dash || [5, 4];
     } else if (darst && darst.art === 'voll' && (darst.top < g.top - 1e-9 || darst.bot > g.bot + 1e-9)) {
       /* Das Level gefuellt, die groessere Huelle nur umrandet. */
@@ -78148,8 +78510,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }
       if (!gleich) {
         try { inst.setSymbol(L.sym); } catch (x) {}
-        /* Wer die Achse einmal gezogen hat, hat autoScale abgeschaltet —
-           ohne Zuruecksetzen haengt sie am alten Preisbereich. */
+      }
+      /* Wer die Achse einmal gezogen hat (oder eine Randmarke angeklickt),
+         hat autoScale abgeschaltet — ohne Zuruecksetzen haengt sie am alten
+         Preisbereich. Auch beim Zeitrahmenwechsel: H4 spannt einen anderen
+         Bereich als M1. */
+      if (!gleich || EV._barsTf !== e.tf) {
         try { inst.resetPriceScale(); } catch (x) {}
       }
       inst.setBars(e.bars);
@@ -78160,30 +78526,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         var shift = alt >= 0 ? alt - (vorher.n - 1) : e.bars.n - vorher.n;
         try { inst.chart.timeScale().setVisibleLogicalRange({ from: vorher.vr.from + shift, to: vorher.vr.to + shift }); } catch (x) {}
       } else {
-        try { inst.followTail(160); } catch (x) { try { inst.fit(); } catch (y) {} }
+        evAnsEnde(inst, e.bars.n);
       }
     }
-    /* Nur was man handeln kann und was nah ist: die naechsten drei
-       brauchbaren Zonen je Seite. Breite Bereiche, umstrittene und
-       verworfene Zonen stehen in der Leiter, nicht auf dem Chart — alle
-       zusammen haben den Chart unlesbar gemacht. "All zones" zeigt sie. */
-    var Az = auswahl(L, L.kurs);
-    var zeigen = EV.alle ? alleZonen(L) : [].concat(
-      Az.drin.filter(function (x) { return nutzbar(x.g); }).slice(0, 2),
-      Az.oben.filter(function (x) { return nutzbar(x.g); }).slice(0, 3),
-      Az.unten.filter(function (x) { return nutzbar(x.g); }).slice(0, 3));
-    var liste = [];
-    zeigen.forEach(function (x) {
-      var g = x.g;
-      var darst = EV.alle ? { art: 'voll', top: (g.kern || g).top, bot: (g.kern || g).bot } : evDarstellung(g, x.tf, e.tf);
-      if (!darst) return;
-      var von = isFinite(g.zeit) ? inst.indexAt(g.zeit) : Math.max(0, e.bars.n - 60);
-      liste.push({ supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: null,
-                   broken: false, stil: zonenStil(g, darst), _g: g, _tf: x.tf });
-    });
-    if (EV.zonenAus) liste = [];
-    EV.zonen = liste;
-    var spezi = [{ key: 'evz', kind: 'overlay', plots: [], zones: liste, zoneOpts: { roh: true } }];
+    var Z = evZonenBauen(inst, e, L);
+    EV.zonen = Z.zonen;
+    EV._zSig = Z.sig;
+    var spezi = [{ key: 'evz', kind: 'overlay', plots: [], zones: Z.zonen, marken: Z.marken, zoneOpts: Z.opts }];
     if (window.ApexIndicatorUI && window.ApexIndicators && e.bars && e.bars.n) {
       try {
         if (!e.bars.__sym) e.bars.__sym = L.sym;
@@ -78198,15 +78547,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                    footprint: window.ApexIndicators.fillParams('fp', null) });
     }
     inst.setIndicators(spezi);
-    /* Nur die sechs naechsten Schluessel-Level und ohne Achsenetikett —
-       dreizehn Beschriftungen haben die Preisachse auf dem Handy zugedeckt. */
-    var lv = [], kurs = L.kurs;
-    (L.schluessel || []).slice().sort(function (a, b) {
-      return Math.abs(a.p - kurs) - Math.abs(b.p - kurs);
-    }).slice(0, 6).forEach(function (s, i) {
-      lv.push({ key: 'kl' + i, kind: 'kl', price: s.p, title: s.k, color: evFarben().levels, style: 2,
-                width: 1, axis: false });
-    });
+    /* Schluessel-Level zeichnet die Zonen-Ebene (Z.marken), mit Namen am
+       linken Rand. Als Preislinien ohne Achsenetikett standen sie als
+       namenlose gestrichelte Linien da und sahen aus wie Zonenraender. */
+    var lv = [];
     var S = TV._setup;
     if (S && S.richtung !== 'none') {
       if (isFinite(S.einstieg)) lv.push({ key: 'e', kind: 'entry', price: S.einstieg, title: 'Entry' });
@@ -78216,6 +78560,167 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       });
     }
     inst.setLevels(lv);
+    return { gezeigt: Z.zonen.length, gesamt: Z.gesamt, feiner: Z.feiner };
+  }
+
+  /* Rechts vom juengsten Kerzenpaar bleibt eine Spur frei: dort stehen die
+     Etiketten der Zonen, statt die juengsten Kerzen zu verdecken. */
+  function evAnsEnde(inst, n) {
+    try {
+      var w = (inst.el && inst.el.clientWidth) || 800;
+      var kerzen = w < 520 ? 90 : 160;
+      var frei = Math.round(kerzen * (w < 520 ? 0.12 : 0.17));
+      inst.chart.timeScale().setVisibleLogicalRange({ from: n - kerzen, to: n - 1 + frei });
+    } catch (x) { try { inst.followTail(160); } catch (y) { try { inst.fit(); } catch (z) {} } }
+  }
+
+  /* Kurs fuer die Auswahl: live, wenn frisch — sonst der der Rechnung.
+     Vorher immer der Kurs der letzten Rechnung: lief der Markt seitdem
+     durch eine Zone, stand die Auswahl daneben. */
+  function evKurs(L) {
+    var live = L ? liveKurs(L.sym) : null;
+    return live != null ? live : (L ? L.kurs : NaN);
+  }
+
+  /* ── Welche Zonen auf DIESEN Chart gehoeren ───────────────────────
+     Zuerst, was dieser Zeitrahmen ueberhaupt zeigen kann (evDarstellung),
+     DANN die naechsten je Seite. Vorher umgekehrt: die drei naechsten
+     Zonen aller Zeitrahmen, und erst danach fiel weg, was hier nicht
+     darstellbar ist — auf H1/H4 blieb so oft eine einzige Zone uebrig,
+     weil M1-Zonen die Plaetze belegt hatten, und eine H4-Demand, an der
+     der Kurs sichtbar abgeprallt war, fehlte ganz.
+       nah   brauchbar (nicht umstritten, nicht verworfen, kein breiter
+             Bereich): bis zu zwei, in denen der Kurs steht, und die
+             naechsten drei darueber und darunter
+       alle  alles, was dieser Zeitrahmen zeigen kann — auch Bereiche,
+             umstrittene und verworfene Zonen */
+  var EV_JE_SEITE = 3, EV_DRIN = 2;
+  function evZonenWahl(L, chartTf, kurs, modus) {
+    if (modus === 'aus' || !L) return [];
+    /* Zwei MTF-Zonen koennen auf DIESEM Zeitrahmen derselbe Kasten sein:
+       zwei M1-Level in derselben M15-Zone sehen auf M15 beide wie die
+       M15-Zone aus. Vorher lagen dann zwei gleiche Kaesten uebereinander und
+       belegten zwei der drei Plaetze. Jetzt einer — die brauchbarere, bei
+       Gleichstand die staerkere — und das Etikett nennt beide Kennungen. */
+    var kand = [], gleich = {};
+    var punkte = function (g) { return g.staerke ? g.staerke.punkte : 0; };
+    alleZonen(L).forEach(function (x) {
+      var d = evDarstellung(x.g, x.tf, chartTf);
+      if (!d) return;
+      var g = x.g, k = d.art === 'voll' ? d : { top: g.top, bot: g.bot };
+      var sch = (g.supply ? 's' : 'd') + '|' + g.bot + '|' + g.top + '|' + d.art + '|' + k.bot + '|' + k.top;
+      var neu = { x: x, d: d, mit: [], mitZid: [] };
+      var alt = gleich[sch];
+      if (!alt) { gleich[sch] = neu; kand.push(neu); return; }
+      var besser = (nutzbar(g) - nutzbar(alt.x.g)) || (punkte(g) - punkte(alt.x.g));
+      var raus = besser > 0 ? alt : neu, bleibt = besser > 0 ? neu : alt;
+      if (besser > 0) { kand[kand.indexOf(alt)] = neu; gleich[sch] = neu; }
+      bleibt.mit = bleibt.mit.concat(raus.mit, raus.x.g.id ? [raus.x.g.id] : []);
+      bleibt.mitZid = bleibt.mitZid.concat(raus.mitZid, [zonenKennung(raus.x.g) + '@' + raus.x.tf]);
+    });
+    if (modus === 'alle' || !isFinite(kurs)) return kand;
+    var ok = kand.filter(function (k) { return nutzbar(k.x.g); });
+    var weg = function (k) { return abstand(kurs, k.x.g.bot, k.x.g.top); };
+    var naeher = function (a, b) { return weg(a) - weg(b); };
+    var drin = ok.filter(function (k) { return kurs >= k.x.g.bot && kurs <= k.x.g.top; })
+      .sort(function (a, b) {
+        /* Zuerst, was hier ein Level ist, dann der Rahmen; je enger, desto vorne. */
+        return ((a.d.art === 'voll' ? 0 : 1) - (b.d.art === 'voll' ? 0 : 1)) ||
+               ((a.x.g.top - a.x.g.bot) - (b.x.g.top - b.x.g.bot));
+      }).slice(0, EV_DRIN);
+    var oben = ok.filter(function (k) { return k.x.g.bot > kurs; }).sort(naeher).slice(0, EV_JE_SEITE);
+    var unten = ok.filter(function (k) { return k.x.g.top < kurs; }).sort(naeher).slice(0, EV_JE_SEITE);
+    return drin.concat(oben, unten);
+  }
+
+  function evZonenBauen(inst, e, L) {
+    var kurs = evKurs(L), F = evFarben();
+    var wahl = evZonenWahl(L, e.tf, kurs, EV.zmodus);
+    var zonen = wahl.map(function (k) {
+      var g = k.x.g;
+      var von = isFinite(g.zeit) ? inst.indexAt(g.zeit) : Math.max(0, e.bars.n - 60);
+      var st = zonenStil(g, k.d);
+      if (k.mit && k.mit.length && g.id) {
+        var ids = [g.id].concat(k.mit).sort(function (a, b) { return parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10); }).join('/');
+        st.label = st.label.replace(g.id, ids);
+        st.kurz = st.kurz.replace(g.id, ids);
+      }
+      var zid = zonenKennung(g) + '@' + k.x.tf;
+      st.offen = zid === ZOFF || (k.mitZid || []).indexOf(ZOFF) >= 0;
+      st.drin = isFinite(kurs) && kurs >= g.bot && kurs <= g.top;
+      return { supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: null,
+               broken: false, stil: st, _g: g, _tf: k.x.tf, _id: zid };
+    });
+    /* Die sechs naechsten Schluessel-Level, mit Namen. */
+    var marken = [];
+    if (!EV.levelsAus && isFinite(kurs)) {
+      (L.schluessel || []).slice().sort(function (a, b) {
+        return Math.abs(a.p - kurs) - Math.abs(b.p - kurs);
+      }).slice(0, 6).forEach(function (s) {
+        marken.push({ price: s.p, text: s.k, farbe: F.levels });
+      });
+    }
+    /* Wie viele Zonen dieser Zeitrahmen gar nicht zeigen kann (zu fein). */
+    var gesamt = alleZonen(L).length, darstellbar = 0;
+    alleZonen(L).forEach(function (x) { if (evDarstellung(x.g, x.tf, e.tf)) darstellbar++; });
+    return { zonen: zonen, marken: marken, gesamt: gesamt, feiner: gesamt - darstellbar,
+             opts: { roh: true, ansicht: true, kurs: kurs },
+             sig: zonen.map(function (z) { return z._id + (z.stil.drin ? '*' : ''); }).join('|') + '#' +
+                  marken.map(function (m) { return m.price; }).join('|') };
+  }
+
+  /* Folgt der Live-Kurs, aendert sich die Auswahl: neue naechste Zone,
+     Kurs in eine Zone hinein. Nur die Zonen-Ebene tauschen — die
+     Indikatoren bleiben, wie sie sind. */
+  function evZonenLive() {
+    if (!EV.inst || !EV.bars || !TV._levels || (EV.zmodus === 'aus' && EV.levelsAus)) return;
+    var L = TV._levels;
+    var e = (L.ebenen || []).filter(function (x) { return x.tf === EV.tf && x.bars === EV.bars; })[0];
+    if (!e) return;
+    var Z = evZonenBauen(EV.inst, e, L);
+    if (Z.sig === EV._zSig) return;
+    if (EV.inst.setOverlayZones && EV.inst.setOverlayZones('evz', Z.zonen, Z.marken, Z.opts)) {
+      EV.zonen = Z.zonen; EV._zSig = Z.sig;
+      evNotiz(L, EV.tf, { gezeigt: Z.zonen.length, gesamt: Z.gesamt, feiner: Z.feiner });
+    }
+  }
+
+  function evNotiz(L, tf, info) {
+    var note = document.getElementById('tvEvNote');
+    if (!note || !L) return;
+    var z;
+    if (EV.zmodus === 'aus') z = 'zones hidden (the AI still reads them)';
+    else if (!info) z = '';
+    else {
+      z = info.gezeigt + (info.gezeigt === 1 ? ' zone' : ' zones') + ' on ' + tf + ' of ' + info.gesamt + ' found';
+      if (info.feiner > 0) z += ' · ' + info.feiner + ' too fine for ' + tf;
+    }
+    note.textContent = (L.quelle === 'Yahoo' ? 'Candles: real-time feed' :
+      'Candles: about 2 min behind, last candle follows the live price') + ' · refreshes every ' +
+      Math.round((EV_NEU_MS[tf] || 300000) / 60000) + ' min without the AI' + (z ? ' · ' + z : '') +
+      (EV.fp ? (fpSym() ? ' · footprint: ticks arrive once each hour is over'
+                        : ' · no tick data for this instrument') : '');
+  }
+
+  /* Zonen ohne KI laden (zwei Kerzenabrufe). Fuer den ersten Blick in die
+     Zones View und den Knopf im leeren Zustand. */
+  function evZonenLaden() {
+    if (EV._laedt) return EV._laedt;
+    EV._ladeFehler = '';
+    TV._neuFehler = '';
+    var fertig = function () {
+      EV._laedt = null;
+      var L = TV._levels;
+      var da = L && L.ebenen && L.ebenen.some(function (x) { return echteEbene(x) && x.bars; });
+      if (!da) EV._ladeFehler = TV._neuFehler || '';
+      evChartZeigen();
+    };
+    EV._laedt = Promise.resolve().then(zonenNeu).then(fertig, function (x) {
+      TV._neuFehler = (x && x.message) || String(x);
+      fertig();
+    });
+    evChartZeigen();
+    return EV._laedt;
   }
 
   /* ── Benachrichtigung, wenn die Seite im Hintergrund ist ─────────── */
