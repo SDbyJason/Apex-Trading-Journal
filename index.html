@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-09c';
+  window.APEX_BUILD = '2026-10-09g';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -75236,10 +75236,103 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Retests: EIN Bereich, EINE Zaehlung. Vorher wurde die Summe der
      Mitglieder genommen — eine Beruehrung zaehlte so oft, wie Zonen im
      Bereich lagen, und der Frische-Wert fiel fuer jedes Buendel. */
-  var BUENDEL_SPANNE = 2.0;   // in ATR
+
+  /* ── Qualitaetspruefung der Zonen ────────────────────────────────
+     Die Engine (ApexIndicators 'sd') bildet bewusst Jasons TradingView-V3
+     nach: jeder bestaetigte Swing wird zur Zone, ohne Impulspruefung, und
+     die Kaesten werden an drei Stellen aufgezogen — beim Verschmelzen, beim
+     Erzwingen einer Mindesthoehe und beim Buendeln. Fuer Replay und Backtest
+     bleibt das so (Gleichstand mit dem Indikator, eigene Testsuite).
+
+     Fuer die Chart-Seite wird hier nachgeprueft, was eine Zone ueberhaupt
+     zu einer Zone macht. Die Regeln sind die, die im Pine-Indikator (V8) an
+     von Jason markierten Zonen kalibriert wurden:
+
+     1. BASIS statt Pivotkerze. Die Zone ist die letzte Kerze GEGEN die
+        Abrissrichtung, distale Kante am Docht, proximale am Koerper. Die
+        ganze Pivotkerze ist auf volatilen Kerzen ein halber Dollar-Bereich.
+     2. Die Basisschwelle wird gegen den IMPULS gemessen, nicht gegen die
+        ATR allein. Um 14:25 ist auf Gold keine M1-Kerze "ruhig"; ruhig
+        heisst ruhig VERGLICHEN mit dem, was danach kam.
+     3. IMPULS: der Abriss muss mindestens IMP_ATR betragen UND mindestens
+        das IMP_REL-fache der Zonenhoehe. Das Verhaeltnis ist der wirksamere
+        Filter — eine 1-ATR-Zone mit 4 ATR Abriss taugt, dieselbe mit 2 ATR
+        Abriss ist nur fett.
+     4. VERBRAUCH: ist der Preis seit der Geburt zu FILL_TOT durch die Zone
+        gelaufen, ist sie verbraucht — auch ohne formalen Bruch. Das killt
+        die Zombie-Zonen, die nur deshalb nie brachen, weil das Verschmelzen
+        sie so breit gemacht hat, dass kein Schluss mehr draussen lag. */
+  var TF_DAUER = { M1: 6e4, M5: 3e5, M15: 9e5, H1: 36e5, H4: 144e5 };
+  var IMP_FENSTER = 8, IMP_ATR = 1.6, IMP_REL = 1.6;
+  var BASIS_ATR = 0.6, BASIS_REL = 0.4, BASIS_TIEFE = 10;
+  var MAX_ZONE_ATR = 2.2, FILL_TOT = 0.85;
+
+  /* Die Geometrie EINER Zone aus den Kerzen, mit allen Pruefungen.
+     Wird zweimal gebraucht: fuer die Zonen des eigenen Zeitrahmens und beim
+     Nachschaerfen auf einem feineren. */
+  function basisZone(bars, p, sup) {
+    var n = bars && bars.n;
+    if (!n || !(p >= 1 && p < n)) return null;
+    var atrArr = atrReihe(bars, 20);
+    var a = atrArr[Math.max(0, Math.min(n - 1, p | 0))];
+    if (!(isFinite(a) && a > 0)) return null;
+
+    /* Abriss: wie weit lief der Preis vom Pivot WEG, und wie gross war die
+       groesste Kerze dabei (Massstab fuer "ruhig"). */
+    var ende = Math.min(n - 1, p + IMP_FENSTER), weg = 0, impMax = 0;
+    for (var j = p + 1; j <= ende; j++) {
+      var d = sup ? (bars.h[p] - bars.l[j]) : (bars.h[j] - bars.l[p]);
+      if (d > weg) weg = d;
+      var k = bars.h[j] - bars.l[j];
+      if (k > impMax) impMax = k;
+    }
+    if (weg <= 0) return null;
+
+    /* Basis: letzte Kerze gegen die Abrissrichtung, ruhig gemessen am
+       Impuls. Findet sich keine, bleibt die Pivotkerze selbst. */
+    var grenze = Math.max(a * BASIS_ATR, impMax * BASIS_REL), b = p;
+    for (var k2 = 0; k2 <= BASIS_TIEFE; k2++) {
+      var idx = p - k2;
+      if (idx < 0) break;
+      var o = bars.o[idx], c = bars.c[idx];
+      if ((sup ? (c > o) : (c < o)) && Math.abs(c - o) <= grenze) { b = idx; break; }
+    }
+
+    /* Distale Kante am Docht, proximale am Koerper der Basis. Dreht der
+       Preis im Docht, laege die Zone sonst scheinbar daneben. */
+    var distal = sup ? -Infinity : Infinity;
+    for (var m = Math.min(b, p); m <= Math.max(b, p); m++)
+      distal = sup ? Math.max(distal, bars.h[m]) : Math.min(distal, bars.l[m]);
+    var prox = sup ? Math.min(bars.o[b], bars.c[b]) : Math.max(bars.o[b], bars.c[b]);
+    var top = sup ? distal : prox, bot = sup ? prox : distal;
+    var hoehe = top - bot;
+    if (!(hoehe > 0) || hoehe > a * MAX_ZONE_ATR) return null;
+    if (weg < a * IMP_ATR || weg < hoehe * IMP_REL) return null;
+
+    /* Bruch und Verbrauch gegen die ENGEN Kanten. */
+    var tief = sup ? -Infinity : Infinity;
+    for (var q = p + 1; q < n; q++) {
+      if (sup ? (bars.c[q] > top) : (bars.c[q] < bot)) return null;     // gebrochen
+      tief = sup ? Math.max(tief, bars.h[q]) : Math.min(tief, bars.l[q]);
+    }
+    var fill = isFinite(tief) ? (sup ? (tief - bot) : (top - tief)) / hoehe : 0;
+    if (fill >= FILL_TOT) return null;                                   // verbraucht
+
+    return { bot: bot, top: top, abriss: weg / a, fill: Math.max(0, fill), basis: b };
+  }
+
+  function zonenPruefen(roh, bars, kurs) {
+    if (!bars || !bars.n) return roh;
+    return roh.map(function (z) {
+      var r = basisZone(bars, isFinite(z.pivot) ? (z.pivot | 0) : -1, !!z.supply);
+      if (!r) return null;
+      z.bot = r.bot; z.top = r.top; z.ab = abstand(kurs, r.bot, r.top);
+      z.abriss = r.abriss; z.fill = r.fill;
+      return z;
+    }).filter(Boolean);
+  }
 
   function zonenBuendeln(zonen, atrW, bars, kurs) {
-    var maxSpanne = (isFinite(atrW) && atrW > 0) ? atrW * BUENDEL_SPANNE : Infinity;
     var sortiert = zonen.slice().sort(function (a, b) { return a.bot - b.bot; });
     var gruppen = [];
     sortiert.forEach(function (z) {
@@ -75247,9 +75340,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       for (var i = 0; i < gruppen.length; i++) {
         var g = gruppen[i];
         if (g.supply !== z.supply) continue;
-        var neuBot = Math.min(g.bot, z.bot), neuTop = Math.max(g.top, z.top);
-        var ueberlappt = z.bot <= g.top && z.top >= g.bot;
-        if (ueberlappt || (neuTop - neuBot) <= maxSpanne) { passt = g; break; }
+        /* NUR bei echter Ueberlappung. Vorher wurden auch getrennte Zonen
+           zusammengezogen, solange die Spanne unter 2 ATR blieb — das war
+           die dritte Stelle, an der Kaesten aufgeblaeht wurden. */
+        if (z.bot <= g.top && z.top >= g.bot) { passt = g; break; }
       }
       if (passt) {
         passt.bot = Math.min(passt.bot, z.bot);
@@ -75315,8 +75409,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                  retests: z.retests || 0, ab: abstand(kurs, z.bot, z.top),
                  von: isFinite(z.bornAt) ? z.bornAt : z.from,
                  alter: isFinite(z.from) ? (n - 1 - z.from) : NaN,
+                 pivot: z.from,
                  zeit: zeitVon(z.from), geburt: zeitVon(isFinite(z.bornAt) ? z.bornAt : z.from) };
       });
+      roh = zonenPruefen(roh, bars, kurs);
       var auswahl = [];
       [true, false].forEach(function (seite) {
         roh.filter(function (z) { return z.supply === seite; })
@@ -75398,8 +75494,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var m = [blatt].concat(eltern);
     var naechste = eltern.slice().sort(function (a, b) {
       return (a.g.top - a.g.bot) - (b.g.top - b.g.bot); })[0];
-    var u = { supply: !!blatt.g.supply, bot: Math.min(blatt.g.bot, naechste.g.bot),
-              top: Math.max(blatt.g.top, naechste.g.top), broken: false,
+    /* Die Zone IST das engste Level. Die groesseren Zeitrahmen, auf denen
+       dieselbe Stelle auch gefunden wurde, stehen als Bestaetigung in `tfs`
+       und als Bereich in `huelleBot/Top` — gezeichnet wird das enge Level.
+       Vorher war es die Vereinigung mit der naechstgroesseren Zone, und eine
+       geprueft enge Zone wurde dadurch wieder 40 $ breit. */
+    var u = { supply: !!blatt.g.supply, bot: blatt.g.bot, top: blatt.g.top,
+              huelleBot: Math.min(blatt.g.bot, naechste.g.bot),
+              huelleTop: Math.max(blatt.g.top, naechste.g.top), broken: false,
               teile: [], glieder: [], tfs: [], mtf: true, offen: true,
               zeit: Infinity, geburt: Infinity, bereich: false };
     var kv = null;
@@ -75473,79 +75575,56 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     neue.forEach(function (n) { n.ziel.zonen.push(n.u); });
   }
 
-  /* ── Verfeinern: zu breite Zonen auf kleinerem Zeitrahmen schaerfen ──
-     Eine 40-$-H4-Zone sagt, WO der Markt reagieren duerfte, aber nicht, wo
-     man einsteigt. Die grosse Zone bleibt als Kontext stehen; dazu kommt an
-     derselben Stelle eine enge Einstiegszone vom kleineren Zeitrahmen —
-     hoechstens VERFEINERN_ANTEIL des Kurses breit (Gold um 4200: ~10 $).
-     1) Liegt dort schon eine enge Zone eines kleineren Zeitrahmens, ist das
-        die Verfeinerung — nichts Neues erfinden.
-     2) Sonst die Ursprungskerze auf dem feinsten Zeitrahmen, dessen Kerzen
-        bis zur Entstehung der Zone zurueckreichen: bei Demand die Kerze mit
-        dem tiefsten Tief in der Zone (Docht bis Koerper), bei Supply die mit
-        dem hoechsten Hoch — auf die Hoechstbreite gekappt. */
-  var VERFEINERN_ANTEIL = 0.0024;
-  var TF_DAUER = { M1: 6e4, M5: 3e5, M15: 9e5, H1: 36e5, H4: 144e5 };
-  function zonenSchaerfen(ebenen, kurs) {
+  /* ── Nachschaerfen: breite Zonen auf dem feineren Zeitrahmen ──────
+     Eine H4-Zone darf nach der ATR-Regel 2,2 x ATR hoch sein — auf H4 sind
+     das schnell 40 $. Fuer einen Einstieg ist das keine Zone, sondern eine
+     Gegend. Der Impuls, der sie erzeugt hat, wurde aber auf M1 gezogen: die
+     eigentliche Basis steckt im Docht der H4-Kerze.
+
+     Deshalb wird dieselbe Basis- und Impulspruefung an derselben STELLE auf
+     dem feinsten Zeitrahmen wiederholt, dessen Kerzen so weit zurueckreichen.
+     Besteht sie dort, ist das die Zone — sonst bleibt die grobe stehen,
+     statt eine engere zu erfinden. Genau das hat der Pine-Indikator (V7)
+     auch getan; dort war es der entscheidende Schritt. */
+  var ZIEL_ANTEIL = 0.0024;          // ~10 $ bei Gold um 4200
+  function zonenNachschaerfen(ebenen, kurs) {
     if (!isFinite(kurs) || kurs <= 0) return;
-    var maxB = kurs * VERFEINERN_ANTEIL;
-    ebenen.forEach(function (e, ei) {
-      (e.zonen || []).slice().forEach(function (g) {
-        if (g.verfeinertAus || g.top - g.bot <= maxB) return;
-        if (g.mtf && g.kern && g.kern.top - g.kern.bot <= maxB) return;
-        var r = TF_RANG[e.tf];
-        var kleiner = ebenen.filter(function (h) { return TF_RANG[h.tf] < r; });
-        if (!kleiner.length) return;
-        /* 1) schon vorhandene enge Zone darin */
-        var da = null;
-        kleiner.forEach(function (h) {
-          (h.zonen || []).forEach(function (o) {
-            if (!!o.supply !== !!g.supply || o.top - o.bot > maxB || anteilIn(o, g) < 0.6) return;
-            var besser = !da || (g.supply ? o.bot < da.o.bot : o.top > da.o.top);
-            if (besser) da = { o: o, h: h };
-          });
-        });
-        if (da) { g._ersetzt = true; return; }
-        /* 2) Ursprungskerze */
-        var geb = isFinite(g.geburt) ? g.geburt : (isFinite(g.zeit) ? g.zeit : NaN);
-        var h = null;
-        for (var i = 0; i < kleiner.length; i++) {
-          var b = kleiner[i].bars;
-          if (b && b.n > 5 && (!isFinite(geb) || b.t[0] <= geb)) { h = kleiner[i]; break; }
+    var ziel = kurs * ZIEL_ANTEIL;
+    ebenen.forEach(function (e) {
+      (e.zonen || []).forEach(function (g) {
+        if (g.top - g.bot <= ziel) return;
+        var sup = !!g.supply, r = TF_RANG[e.tf];
+        var fein = ebenen.filter(function (h) { return TF_RANG[h.tf] < r && h.bars && h.bars.n > 5; });
+        for (var i = 0; i < fein.length; i++) {
+          var B = fein[i].bars;
+          /* Die PIVOT-Zeit, nicht die Bestaetigung: das Extrem liegt am
+             Pivot, und auf H4 liegen zwischen beiden 12 Kerzen (= 2 Tage). */
+          var zeit = isFinite(g.zeit) ? g.zeit : g.geburt;
+          if (!isFinite(zeit) || B.t[0] > zeit) continue;        // reicht nicht zurueck
+          /* Das Extrem der Zone auf dem feinen Zeitrahmen suchen — das ist
+             dieselbe Stelle, nur genauer aufgeloest. */
+          var dauer = TF_DAUER[e.tf] || 36e5;
+          var von = indexBei(B, zeit - dauer);
+          var bis = Math.min(B.n - 1, indexBei(B, zeit + 2 * dauer));
+          var best = -1;
+          for (var j = von; j <= bis; j++) {
+            var x = sup ? B.h[j] : B.l[j];
+            if (!(x >= g.bot && x <= g.top)) continue;
+            if (best < 0 || (sup ? x > B.h[best] : x < B.l[best])) best = j;
+          }
+          if (best < 0) continue;
+          var z = basisZone(B, best, sup);
+          if (!z || z.top - z.bot >= g.top - g.bot) continue;
+          if (z.bot < g.bot - 1e-9 || z.top > g.top + 1e-9) continue;   // muss drin liegen
+          g.huelleBot = isFinite(g.huelleBot) ? Math.min(g.huelleBot, g.bot) : g.bot;
+          g.huelleTop = isFinite(g.huelleTop) ? Math.max(g.huelleTop, g.top) : g.top;
+          g.bot = z.bot; g.top = z.top; g.abriss = z.abriss; g.fill = z.fill;
+          g.feinTf = fein[i].tf;
+          if (g.kern === g || !g.kern) g.kern = g;
+          g.ab = abstand(kurs, g.bot, g.top);
+          break;
         }
-        if (!h) return;
-        var B = h.bars, von = 0, bis = B.n - 1;
-        if (isFinite(geb)) {
-          var tf = TF_DAUER[e.tf] || 36e5;
-          von = indexBei(B, geb - tf); bis = Math.min(B.n - 1, indexBei(B, geb + 3 * tf));
-        }
-        var best = -1;
-        for (var j = von; j <= bis; j++) {
-          var x = g.supply ? B.h[j] : B.l[j];
-          if (!(x >= g.bot && x <= g.top)) continue;
-          if (best < 0 || (g.supply ? x > B.h[best] : x < B.l[best])) best = j;
-        }
-        if (best < 0) return;
-        var o = B.o ? B.o[best] : B.c[best], c = B.c[best], bot, top;
-        if (g.supply) { top = B.h[best]; bot = Math.max(o, c); if (top - bot < maxB * 0.15) bot = Math.min(o, c); bot = Math.max(bot, top - maxB); }
-        else { bot = B.l[best]; top = Math.min(o, c); if (top - bot < maxB * 0.15) top = Math.max(o, c); top = Math.min(top, bot + maxB); }
-        bot = Math.max(bot, g.bot); top = Math.min(top, g.top);
-        if (!(top > bot)) return;
-        var aD = atrBei(h, best);
-        var z = { supply: !!g.supply, bot: bot, top: top, broken: false, retests: 0,
-                  von: best, tf: h.tf, ab: abstand(kurs, bot, top),
-                  zeit: B.t[best], geburt: B.t[best], juengste: B.n - 1 - best,
-                  _streit: false, _in: null, _imBereich: e.tf, _ki: null, _kiGrund: '',
-                  tfs: null, mtf: false, glieder: null, kernTf: null, id: null,
-                  verfeinertAus: e.tf, bereich: false,
-                  breiteAtr: (isFinite(aD) && aD > 0) ? (top - bot) / aD : NaN };
-        z.teile = [z]; z.kern = z;
-        h.zonen.push(z);
-        g._ersetzt = true;
       });
-      /* Die grosse Zone wird nicht gezeigt, nur ihre Einstiegszone. Laesst
-         sie sich nicht schaerfen, bleibt sie als 'wide area' stehen. */
-      e.zonen = e.zonen.filter(function (g) { return !g._ersetzt; });
     });
   }
 
@@ -75556,10 +75635,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         ebenen.forEach(function (h) {
           if (!(TF_RANG[h.tf] > r)) return;
           (h.zonen || []).forEach(function (o) {
-            if (o === g || anteilIn(g, o) < MTF_ANTEIL) return;
+            /* Gegen die HUELLE der groesseren Zone, nicht gegen ihr enges
+               Level: "der hoehere Zeitrahmen drueckt dagegen" ist eine
+               Aussage ueber den Bereich, in dem die Stelle liegt. */
+            var ob = { bot: isFinite(o.huelleBot) ? o.huelleBot : o.bot,
+                       top: isFinite(o.huelleTop) ? o.huelleTop : o.top,
+                       supply: o.supply, bereich: o.bereich };
+            if (o === g || anteilIn(g, ob) < MTF_ANTEIL) return;
             if (!!o.supply !== !!g.supply) {
               if (!g._in || TF_RANG[h.tf] > TF_RANG[g._in.tf])
-                g._in = { tf: h.tf, supply: !!o.supply, bot: o.bot, top: o.top, bereich: !!o.bereich };
+                g._in = { tf: h.tf, supply: !!o.supply, bot: ob.bot, top: ob.top, bereich: !!o.bereich };
             } else if (o.bereich) {
               if (!g._imBereich || TF_RANG[h.tf] > TF_RANG[g._imBereich]) g._imBereich = h.tf;
             }
@@ -75807,7 +75892,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       });
     });
     mtfVerbinden(echte, kurs);
-    zonenSchaerfen(echte, kurs);
+    zonenNachschaerfen(echte, kurs);
     hinweiseSetzen(echte);
     streitMarkieren(echte);
     kiZonenEinsetzen(L);
@@ -78480,7 +78565,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       st.inner = { top: k.top, bot: k.bot, fill: 'rgba(' + rgb + ',' + Math.min(0.36, a + 0.14).toFixed(3) + ')' };
     if (g.bereich) { st.fill = 'rgba(' + rgb + ',0.05)'; st.stroke = 'rgba(' + rgb + ',0.45)'; st.dash = [4, 3]; st.label += ' · wide area'; }
     if (g._streit) { st.stroke = 'rgba(232,180,60,0.85)'; st.dash = [3, 3]; st.label += ' · contested'; }
-    if (g.verfeinertAus) { st.label += ' · entry in ' + g.verfeinertAus; st.stroke = 'rgba(' + rgb + ',0.95)'; }
+    if (g.feinTf) st.label += ' · entry ' + g.feinTf;
     if (g._ki === 'ok') st.label += ' · AI ✓';
     if (g._ki === 'weg') {
       st.fill = 'rgba(140,140,140,0.06)'; st.inner = null; st.stroke = 'rgba(140,140,140,0.5)';
