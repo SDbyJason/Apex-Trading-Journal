@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-09a';
+  window.APEX_BUILD = '2026-10-09c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -75473,6 +75473,82 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     neue.forEach(function (n) { n.ziel.zonen.push(n.u); });
   }
 
+  /* ── Verfeinern: zu breite Zonen auf kleinerem Zeitrahmen schaerfen ──
+     Eine 40-$-H4-Zone sagt, WO der Markt reagieren duerfte, aber nicht, wo
+     man einsteigt. Die grosse Zone bleibt als Kontext stehen; dazu kommt an
+     derselben Stelle eine enge Einstiegszone vom kleineren Zeitrahmen —
+     hoechstens VERFEINERN_ANTEIL des Kurses breit (Gold um 4200: ~10 $).
+     1) Liegt dort schon eine enge Zone eines kleineren Zeitrahmens, ist das
+        die Verfeinerung — nichts Neues erfinden.
+     2) Sonst die Ursprungskerze auf dem feinsten Zeitrahmen, dessen Kerzen
+        bis zur Entstehung der Zone zurueckreichen: bei Demand die Kerze mit
+        dem tiefsten Tief in der Zone (Docht bis Koerper), bei Supply die mit
+        dem hoechsten Hoch — auf die Hoechstbreite gekappt. */
+  var VERFEINERN_ANTEIL = 0.0024;
+  var TF_DAUER = { M1: 6e4, M5: 3e5, M15: 9e5, H1: 36e5, H4: 144e5 };
+  function zonenSchaerfen(ebenen, kurs) {
+    if (!isFinite(kurs) || kurs <= 0) return;
+    var maxB = kurs * VERFEINERN_ANTEIL;
+    ebenen.forEach(function (e, ei) {
+      (e.zonen || []).slice().forEach(function (g) {
+        if (g.verfeinertAus || g.top - g.bot <= maxB) return;
+        if (g.mtf && g.kern && g.kern.top - g.kern.bot <= maxB) return;
+        var r = TF_RANG[e.tf];
+        var kleiner = ebenen.filter(function (h) { return TF_RANG[h.tf] < r; });
+        if (!kleiner.length) return;
+        /* 1) schon vorhandene enge Zone darin */
+        var da = null;
+        kleiner.forEach(function (h) {
+          (h.zonen || []).forEach(function (o) {
+            if (!!o.supply !== !!g.supply || o.top - o.bot > maxB || anteilIn(o, g) < 0.6) return;
+            var besser = !da || (g.supply ? o.bot < da.o.bot : o.top > da.o.top);
+            if (besser) da = { o: o, h: h };
+          });
+        });
+        if (da) { g._ersetzt = true; return; }
+        /* 2) Ursprungskerze */
+        var geb = isFinite(g.geburt) ? g.geburt : (isFinite(g.zeit) ? g.zeit : NaN);
+        var h = null;
+        for (var i = 0; i < kleiner.length; i++) {
+          var b = kleiner[i].bars;
+          if (b && b.n > 5 && (!isFinite(geb) || b.t[0] <= geb)) { h = kleiner[i]; break; }
+        }
+        if (!h) return;
+        var B = h.bars, von = 0, bis = B.n - 1;
+        if (isFinite(geb)) {
+          var tf = TF_DAUER[e.tf] || 36e5;
+          von = indexBei(B, geb - tf); bis = Math.min(B.n - 1, indexBei(B, geb + 3 * tf));
+        }
+        var best = -1;
+        for (var j = von; j <= bis; j++) {
+          var x = g.supply ? B.h[j] : B.l[j];
+          if (!(x >= g.bot && x <= g.top)) continue;
+          if (best < 0 || (g.supply ? x > B.h[best] : x < B.l[best])) best = j;
+        }
+        if (best < 0) return;
+        var o = B.o ? B.o[best] : B.c[best], c = B.c[best], bot, top;
+        if (g.supply) { top = B.h[best]; bot = Math.max(o, c); if (top - bot < maxB * 0.15) bot = Math.min(o, c); bot = Math.max(bot, top - maxB); }
+        else { bot = B.l[best]; top = Math.min(o, c); if (top - bot < maxB * 0.15) top = Math.max(o, c); top = Math.min(top, bot + maxB); }
+        bot = Math.max(bot, g.bot); top = Math.min(top, g.top);
+        if (!(top > bot)) return;
+        var aD = atrBei(h, best);
+        var z = { supply: !!g.supply, bot: bot, top: top, broken: false, retests: 0,
+                  von: best, tf: h.tf, ab: abstand(kurs, bot, top),
+                  zeit: B.t[best], geburt: B.t[best], juengste: B.n - 1 - best,
+                  _streit: false, _in: null, _imBereich: e.tf, _ki: null, _kiGrund: '',
+                  tfs: null, mtf: false, glieder: null, kernTf: null, id: null,
+                  verfeinertAus: e.tf, bereich: false,
+                  breiteAtr: (isFinite(aD) && aD > 0) ? (top - bot) / aD : NaN };
+        z.teile = [z]; z.kern = z;
+        h.zonen.push(z);
+        g._ersetzt = true;
+      });
+      /* Die grosse Zone wird nicht gezeigt, nur ihre Einstiegszone. Laesst
+         sie sich nicht schaerfen, bleibt sie als 'wide area' stehen. */
+      e.zonen = e.zonen.filter(function (g) { return !g._ersetzt; });
+    });
+  }
+
   function hinweiseSetzen(ebenen) {
     ebenen.forEach(function (e) {
       (e.zonen || []).forEach(function (g) {
@@ -75731,6 +75807,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       });
     });
     mtfVerbinden(echte, kurs);
+    zonenSchaerfen(echte, kurs);
     hinweiseSetzen(echte);
     streitMarkieren(echte);
     kiZonenEinsetzen(L);
@@ -78403,6 +78480,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       st.inner = { top: k.top, bot: k.bot, fill: 'rgba(' + rgb + ',' + Math.min(0.36, a + 0.14).toFixed(3) + ')' };
     if (g.bereich) { st.fill = 'rgba(' + rgb + ',0.05)'; st.stroke = 'rgba(' + rgb + ',0.45)'; st.dash = [4, 3]; st.label += ' · wide area'; }
     if (g._streit) { st.stroke = 'rgba(232,180,60,0.85)'; st.dash = [3, 3]; st.label += ' · contested'; }
+    if (g.verfeinertAus) { st.label += ' · entry in ' + g.verfeinertAus; st.stroke = 'rgba(' + rgb + ',0.95)'; }
     if (g._ki === 'ok') st.label += ' · AI ✓';
     if (g._ki === 'weg') {
       st.fill = 'rgba(140,140,140,0.06)'; st.inner = null; st.stroke = 'rgba(140,140,140,0.5)';
