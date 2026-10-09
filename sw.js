@@ -13,7 +13,7 @@
    byteweise ändert — bleibt sie liegen, behalten installierte Apps die
    alten Icons/Manifest-Einträge (cache-first) und das alte SW-Verhalten.
    Die index.html selbst kommt dank network-first trotzdem frisch an. */
-const CACHE = 'evidence-v138';
+const CACHE = 'evidence-v140';
 
 /* Alle Pfade relativ zum Ablageort dieser Datei — NICHT ab "/".
    Auf GitHub Pages liegt die App unter /<repo>/, dort zeigt "/" auf
