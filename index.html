@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-08m';
+  window.APEX_BUILD = '2026-10-09a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7147,6 +7147,31 @@ body.light #page-chart .tv-kitoggle{background:#fff;border-color:rgba(0,0,0,.12)
 #page-chart .tv-chip{flex:0 0 auto;white-space:nowrap}
 #page-chart .tv-chip{background:var(--layer);border:0.5px solid var(--rim);color:var(--ink3);border-radius:8px;padding:7px 14px;font-family:var(--font-body);font-size:12.5px;cursor:pointer;transition:.15s}
 #page-chart .tv-chip:hover{border-color:var(--gold-line);color:var(--ink)}
+#page-chart .tv-chip-st{color:var(--gold);margin-right:4px;font-size:.9em}
+#page-chart .tv-chip-edit{display:inline-flex;align-items:center;padding:7px 10px}
+/* Der Bearbeiten-Knopf bleibt rechts sichtbar, auch wenn die Leiste scrollt. */
+#page-chart .tv-schnell .tv-chip-edit{position:sticky;right:0;z-index:1;background:var(--elevated);margin-left:auto}
+#page-chart .tv-schnell:has(.tv-chip-edit){-webkit-mask-image:none;mask-image:none}
+#page-chart .tv-kopf:has(.tv-sl:not([hidden])){flex-wrap:wrap}
+#page-chart .tv-chip-edit .ic{width:14px;height:14px}
+#page-chart .tv-sl{order:99;flex:1 1 100%;margin-top:10px;background:var(--elevated);border:0.5px solid var(--rim2);border-radius:var(--r-md,12px);padding:12px 14px}
+#page-chart .tv-sl-kopf{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+#page-chart .tv-sl-kopf b{font-size:var(--fs-body,13px);color:var(--ink)}
+#page-chart .tv-sl-kopf span{font-size:var(--fs-label,11px);color:var(--ink3);flex:1}
+#page-chart .tv-sl-zu{margin-left:auto;background:none;border:none;color:var(--ink3);font-size:20px;line-height:1;cursor:pointer;padding:0 6px}
+#page-chart .tv-sl-liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+#page-chart .tv-sl-z{display:flex;align-items:center;gap:4px;background:var(--layer);border:0.5px solid var(--rim);border-radius:8px;padding:4px 6px}
+#page-chart .tv-sl-n{flex:1;font-size:13px;color:var(--ink)}
+#page-chart .tv-sl-fav,#page-chart .tv-sl-b{background:none;border:none;color:var(--ink3);cursor:pointer;font-size:15px;min-width:30px;min-height:30px;border-radius:6px}
+#page-chart .tv-sl-b:hover{background:var(--surface);color:var(--ink)}
+#page-chart .tv-sl-fav.on{color:var(--gold)}
+#page-chart .tv-sl-x:hover{color:var(--loss)}
+#page-chart .tv-sl-kopf2,#page-chart .tv-sl-g{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin:12px 0 6px}
+#page-chart .tv-sl-kopf2{font-size:11px;color:var(--ink2,var(--ink));border-top:0.5px solid var(--rim);padding-top:10px}
+#page-chart .tv-sl-add{display:flex;flex-wrap:wrap;gap:6px}
+#page-chart .tv-sl-fuss{margin-top:12px;text-align:right}
+#page-chart .tv-sl-reset{background:none;border:0.5px solid var(--rim2);color:var(--ink3);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px}
+@media (max-width:760px){#page-chart .tv-sl{padding:10px}#page-chart .tv-sl-liste{grid-template-columns:1fr}#page-chart .tv-sl-fav,#page-chart .tv-sl-b{min-width:38px;min-height:38px;font-size:17px}}
 #page-chart .tv-chip.on{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}
 /* Die Buehne traegt die Hoehe. Das Widget stellt sich auf autosize und
    braucht dafuer einen Elternteil mit einer echten, nicht geerbten Hoehe —
@@ -22295,6 +22320,12 @@ function csvDateKey(dt){
 
 function csvSession(dt){
   if (!dt || isNaN(dt)) return '';
+  /* Sommer-/Winterzeit-richtig aus ApexSessions; Overlap zaehlt hier wie
+     bisher zu New York, die Zeit nach Handelsschluss zu Asien. */
+  if (window.ApexSessions && ApexSessions.kind) {
+    var k = ApexSessions.kind(dt.getTime());
+    return k === 'london' ? 'London' : (k === 'ny' || k === 'overlap') ? 'New York' : 'Asian';
+  }
   var h = dt.getUTCHours();
   if (h >= 0  && h < 7)  return 'Asian';
   if (h >= 7  && h < 12) return 'London';
@@ -24640,7 +24671,7 @@ function joinChallenge(id) {
     return 'local time';
   }
 
-  var _lastHoursPaint = 0;
+  var _lastHoursPaint = 0, _lastTz = '';
   function tickSession() {
     var now = Date.now();
     var pill   = document.getElementById('sessionTimerPill');
@@ -24654,7 +24685,10 @@ function joinChallenge(id) {
 
     // Hours in the display timezone — recomputed once a minute, they move
     // only when a clock changes.
-    var paintHours = now - _lastHoursPaint > 60000;
+    /* Neu malen auch sofort, wenn in Settings → Region die Zeitzone wechselt. */
+    var tzJetzt = tzName();
+    var paintHours = now - _lastHoursPaint > 60000 || tzJetzt !== _lastTz;
+    _lastTz = tzJetzt;
     if (paintHours) {
       _lastHoursPaint = now;
       var ttl = document.querySelector('#sessionDropdown .session-drop-title');
@@ -24735,8 +24769,56 @@ function joinChallenge(id) {
   });
 
   // Exposed for tests: the state of each session at an arbitrary instant.
+  /* Die EINE Antwort auf "welche Session war das?" fuer die ganze App.
+     Frueher hatte fast jedes Modul eigene feste UTC-Stunden (London 7–12,
+     NY 12–20 …) — im Winter eine Stunde daneben, und jedes etwas anders.
+     Ergebnis je UTC-Stunde zwischengespeichert: Grenzen liegen immer auf
+     vollen Stunden, und ein Import mit tausenden Trades fragt oft. */
+  var _kind = {}, _kindN = 0, _loc = {}, _locN = 0;
+  function kindAt(ms) {
+    if (!isFinite(ms)) return '';
+    var hk = Math.floor(ms / 3600000);
+    if (_kind[hk]) return _kind[hk];
+    var a = getSessionState(SESSIONS[0], ms).isActive,
+        l = getSessionState(SESSIONS[1], ms).isActive,
+        n = getSessionState(SESSIONS[2], ms).isActive;
+    var r = l && n ? 'overlap' : n ? 'ny' : l ? 'london' : a ? 'asia' : 'off';
+    if (++_kindN > 20000) { _kind = {}; _kindN = 0; }
+    return (_kind[hk] = r);
+  }
+  function byId(id) {
+    id = id === 'asia' ? 'asian' : id;
+    return SESSIONS.filter(function (s) { return s.id === id; })[0];
+  }
   window.ApexSessions = {
-    at: function (ms) { var o = {}; SESSIONS.forEach(function (s) { o[s.id] = getSessionState(s, ms); }); return o; }
+    at: function (ms) { var o = {}; SESSIONS.forEach(function (s) { o[s.id] = getSessionState(s, ms); }); return o; },
+    /** 'asia' | 'london' | 'overlap' | 'ny' | 'off' — London/NY gemeinsam = overlap. */
+    kind: kindAt,
+    /** Naechste Eroeffnung von 'asia'|'london'|'ny' nach ms (UTC-ms) oder null. */
+    nextOpen: function (id, ms) {
+      var s = byId(id), best = null;
+      if (!s) return null;
+      [ms, ms + 3 * 86400000].forEach(function (m) {
+        windows(s, m).forEach(function (x) { if (x[0] > ms && (best == null || x[0] < best)) best = x[0]; });
+      });
+      return best;
+    },
+    /** Oeffnungszeiten in der App-Zeitzone (Settings → Region), z. B. "09:00 – 18:00". */
+    hours: function (id, ms) {
+      var s = byId(id); if (!s) return '';
+      var st = getSessionState(s, ms || Date.now());
+      return st.win ? clock(st.win[0]) + ' – ' + clock(st.win[1]) : '';
+    },
+    /** Ortszeit in tz: { d: 'YYYY-MM-DD', h: Stunde } — je UTC-Stunde gemerkt. */
+    local: function (ms, tz) {
+      var key = tz + Math.floor(ms / 3600000), c = _loc[key];
+      if (c) return c;
+      var p = parts(ms, tz);
+      if (++_locN > 20000) { _loc = {}; _locN = 0; }
+      return (_loc[key] = { d: p.year + '-' + p.month + '-' + p.day, h: +p.hour % 24 });
+    },
+    clock: clock,
+    tzName: tzName
   };
 
   document.addEventListener('DOMContentLoaded', function() { tickSession(); });
@@ -28949,7 +29031,12 @@ window.startFreeTrial = startFreeTrial;
     return '';
   }
   function detectSession(tsMs) {
-    if (!tsMs) return ''; const h = new Date(tsMs).getUTCHours();
+    if (!tsMs) return '';
+    if (window.ApexSessions && ApexSessions.kind) {
+      const k = ApexSessions.kind(+tsMs);
+      return k === 'asia' ? 'Asia' : k === 'london' ? 'London' : (k === 'ny' || k === 'overlap') ? 'NY' : 'Late';
+    }
+    const h = new Date(tsMs).getUTCHours();
     if (h<7) return 'Asia'; if (h<12) return 'London'; if (h<17) return 'NY'; return 'Late';
   }
 
@@ -29443,6 +29530,10 @@ window.startFreeTrial = startFreeTrial;
 
   function detectQtSession(ts) {
     if (!ts) return '';
+    if (window.ApexSessions && ApexSessions.kind) {
+      const k = ApexSessions.kind(new Date(ts).getTime());
+      return k === 'asia' ? 'Asia' : k === 'london' ? 'London' : (k === 'ny' || k === 'overlap') ? 'NY' : 'Late';
+    }
     const h = new Date(ts).getUTCHours();
     if (h < 7)  return 'Asia';
     if (h < 12) return 'London';
@@ -39136,9 +39227,58 @@ body.light .pt-sugg{background:var(--layer)}
   /* ── service worker ── */
   function registerSW(){
     if(!canSW()) return;
-    navigator.serviceWorker.register('sw.js').then(function(reg){
+    var hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function(reg){
       swReg = reg;
     }).catch(function(e){ console.warn('[pwa] sw register', e); });
+    /* A new sw.js took over = a new deploy. The very first install also
+       fires this, hence hadController. */
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(hadController) showUpdate();
+      hadController = true;
+    });
+  }
+
+  /* ── update check ──
+     An installed app is rarely closed: iOS and Android resume it from the
+     background without reloading, so it can show an old build for days.
+     On every return (at most every 5 min) and every 30 min while open we
+     ask the server whether the page changed — HEAD + ETag, so this works
+     even when only index.html was uploaded and sw.js was not — and then
+     offer a reload. Never reload on our own: a half-typed trade would be
+     lost. HEAD is not intercepted by the service worker (GET only). */
+  var lastCheck = 0, baseTag = null, updateShown = false;
+  function pageTag(){
+    return fetch(location.pathname, { method: 'HEAD', cache: 'no-store' }).then(function(r){
+      return r.ok ? (r.headers.get('etag') || r.headers.get('last-modified')) : null;
+    }).catch(function(){ return null; });
+  }
+  function checkForUpdate(force){
+    if(updateShown || !/^https?:$/.test(location.protocol)) return;
+    if(!force && Date.now() - lastCheck < 5*60*1000) return;
+    lastCheck = Date.now();
+    if(swReg) swReg.update().catch(function(){});
+    pageTag().then(function(tag){
+      if(!tag) return;
+      if(baseTag === null){ baseTag = tag; return; }
+      if(tag !== baseTag) showUpdate();
+    });
+  }
+  function showUpdate(){
+    if(updateShown || document.getElementById('pwaUpdateBar')) return;
+    updateShown = true;
+    injectCSS();
+    var pill = document.getElementById('pwaInstallPill'); if(pill) pill.style.display = 'none';
+    var bar = document.createElement('div'); bar.id = 'pwaUpdateBar'; bar.setAttribute('role', 'status');
+    bar.innerHTML = '<span>New version available</span>' +
+      '<button type=button class="apex-btn apex-btn--solid apex-btn--sm" data-act=reload>Reload</button>' +
+      '<button type=button class=x data-act=close aria-label="Dismiss">✕</button>';
+    bar.onclick = function(ev){
+      var b = ev.target.closest && ev.target.closest('button'); if(!b) return;
+      if(b.getAttribute('data-act') === 'reload') location.reload();
+      else bar.remove();
+    };
+    document.body.appendChild(bar);
   }
 
   /* ── install prompt ── */
@@ -39152,7 +39292,9 @@ body.light .pt-sugg{background:var(--layer)}
       '.pwa-btn:hover{border-color:var(--gold-line,#e0b84c);color:var(--gold,#e0b84c)}'+
       '.pwa-btn.gold{background:var(--gold-dim,rgba(224,184,76,.14));border-color:var(--gold-line,#e0b84c);color:var(--gold,#e0b84c)}'+
       '.pwa-btn.done{color:var(--profit,#3ecf8e);border-color:rgba(var(--profit-rgb),.3)}'+
-      '.pwa-btn:disabled{opacity:.5;cursor:default}';
+      '.pwa-btn:disabled{opacity:.5;cursor:default}'+
+      '#pwaUpdateBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:9001;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;border-radius:var(--r-md);border:0.5px solid var(--gold-line);background:var(--elevated);color:var(--ink);font-family:var(--font-body,sans-serif);font-size:var(--fs-sm);font-weight:600;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.4)}'+
+      '#pwaUpdateBar .x{background:none;border:0;color:var(--ink2);font-size:var(--fs-sm);cursor:pointer;padding:4px 6px}';
     document.head.appendChild(s);
   }
   function ensurePill(){
@@ -39302,6 +39444,14 @@ body.light .pt-sugg{background:var(--layer)}
   /* ── boot ── */
   registerSW();
   injectCSS();
+  /* Not inside the landing-page tour iframe — that is no running app. */
+  var topLevel = true; try{ topLevel = window.top === window; }catch(e){ topLevel = false; }
+  if(topLevel){
+    setTimeout(function(){ checkForUpdate(true); }, 3000);   // baseline ETag of this build
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkForUpdate(); });
+    window.addEventListener('online', function(){ checkForUpdate(true); });
+    setInterval(function(){ if(!document.hidden) checkForUpdate(); }, 30*60*1000);
+  }
   if(isStandalone()){ /* already installed — no pill */ }
   var tries=0;
   var poll=setInterval(function(){
@@ -42552,7 +42702,10 @@ body.light .pt-sugg{background:var(--layer)}
   function pro(){ return window.currentPlan==='pro'; }
   function num(v){ if(v===''||v==null) return null; var n=parseFloat(v); return isNaN(n)?null:n; }
   function dayKey(ms){ return new Date(ms).toISOString().slice(0,10); }
-  function sessionFor(ms){ var h=new Date(ms).getUTCHours(); if(h>=0&&h<7)return 'Asian'; if(h>=7&&h<12)return 'London'; if(h>=12&&h<17)return 'NY/LN Overlap'; if(h>=17&&h<20)return 'New York'; return 'Asian'; }
+  function sessionFor(ms){
+    if(window.ApexSessions&&ApexSessions.kind){ var k=ApexSessions.kind(ms);
+      return k==='london'?'London':k==='overlap'?'NY/LN Overlap':k==='ny'?'New York':'Asian'; }
+    var h=new Date(ms).getUTCHours(); if(h>=0&&h<7)return 'Asian'; if(h>=7&&h<12)return 'London'; if(h>=12&&h<17)return 'NY/LN Overlap'; if(h>=17&&h<20)return 'New York'; return 'Asian'; }
 
   function injectCSS(){
     if(document.getElementById('alcCSS')) return;
@@ -52214,9 +52367,9 @@ self.addEventListener('message', async (ev) => {
      Tokyo open is the Tokyo open wherever you are sitting. Same reasoning as
      ApexStrategy.SESSIONS, and the same hours. */
   var JUMPS = [
-    ['asia',   'Asia',     0,  'Tokyo open · 00:00 UTC'],
-    ['london', 'London',   7,  'London open · 07:00 UTC'],
-    ['ny',     'New York', 12, 'New York FX session · 12:00 UTC'],
+    ['asia',   'Asia',     0,  'Tokyo open · 09:00 Tokyo'],
+    ['london', 'London',   7,  'London open · 08:00 London'],
+    ['ny',     'New York', 12, 'New York FX session · 08:00 New York'],
     /* Labelled with the clock time rather than a word. "US cash" came back
        from Google Translate as "US-Bargeld" — cash as in banknotes — which
        is the same class of mistake as "pips" turning into "Kerne". A time is
@@ -53092,6 +53245,10 @@ self.addEventListener('message', async (ev) => {
     return Math.round(h / 24) + ' days';
   }
   function sessionOf(ms) {
+    if (window.ApexSessions && ApexSessions.kind) {
+      var k = ApexSessions.kind(ms);
+      return k === 'asia' ? 'Asia' : k === 'london' ? 'London' : (k === 'ny' || k === 'overlap') ? 'New York' : 'Late';
+    }
     var h = new Date(ms).getUTCHours();
     return h < 7 ? 'Asia' : h < 12 ? 'London' : h < 21 ? 'New York' : 'Late';
   }
@@ -53950,7 +54107,8 @@ self.addEventListener('message', async (ev) => {
           JUMPS.map(function (j) {
             // The clock-time label must survive machine translation intact.
             var keep = j[0] === 'cash' ? ' translate="no" class="el-pill notranslate"' : ' class="el-pill"';
-            return '<button' + keep + ' data-arp-jump="' + j[0] + '" title="' + esc(j[3]) + '">' + esc(j[1]) + '</button>';
+            var hh = (j[0] !== 'cash' && window.ApexSessions && ApexSessions.hours) ? ApexSessions.hours(j[0]) : '';
+            return '<button' + keep + ' data-arp-jump="' + j[0] + '" title="' + esc(j[3] + (hh ? ' — ' + hh + ' your time' : '')) + '">' + esc(j[1]) + '</button>';
           }).join('') +
           '<button class="el-pill" data-arp-jump="nextday" title="The next trading day, at the same time of day">Next day ▸</button>' +
           /* Hidden in blind mode: its min/max would give the dates away. */
@@ -54914,7 +55072,11 @@ self.addEventListener('message', async (ev) => {
       } else {
         var j = JUMPS.filter(function (x) { return x[0] === id; })[0];
         if (!j) return;
-        t = S.session.nextUtcHour(j[2]);
+        /* Echte Eroeffnung des jeweiligen Tages (Sommer-/Winterzeit), nicht
+           eine feste UTC-Stunde — London oeffnet im Winter um 08:00 UTC. */
+        var cur0 = S.session.data.bid.t[Math.min(S.session.cursor, S.session.data.n - 1)];
+        t = (window.ApexSessions && ApexSessions.nextOpen) ? ApexSessions.nextOpen(id, cur0) : null;
+        if (t == null) t = S.session.nextUtcHour(j[2]);
       }
       if (t == null) return;
 
@@ -60206,11 +60368,28 @@ self.addEventListener('message', async (ev) => {
   /* Sessions are UTC windows. Market hours are the same worldwide, so this is
      deliberately NOT the user's display timezone — the same reasoning as the
      rest of the app's session logic. */
+  /* Feste UTC-Stunden nur noch als Rueckfall. Normal entscheidet
+     ApexSessions in der Ortszeit der Boerse (Sommer-/Winterzeit), und die
+     Beschriftung zeigt die Stunden in der App-Zeitzone. Die Sessions duerfen
+     sich ueberschneiden: ein Balken im Overlap zaehlt fuer London UND NY. */
   var SESSIONS = [
-    ['asia',   'Asia (00–08 UTC)',   0,  8],
-    ['london', 'London (07–16 UTC)', 7, 16],
-    ['ny',     'New York (12–21 UTC)', 12, 21]
+    ['asia',   'Asia',     0,  9],
+    ['london', 'London',   7, 16],
+    ['ny',     'New York', 12, 21]
   ];
+  function sessLabel(x) {
+    var h = window.ApexSessions && ApexSessions.hours ? ApexSessions.hours(x[0]) : '';
+    return x[1] + (h ? ' (' + h + ')' : '');
+  }
+  function inSess(x, ms) {
+    if (window.ApexSessions && ApexSessions.kind) {
+      var k = ApexSessions.kind(ms);
+      return x[0] === 'asia' ? k === 'asia' : x[0] === 'london' ? (k === 'london' || k === 'overlap')
+           : (k === 'ny' || k === 'overlap');
+    }
+    var h = new Date(ms).getUTCHours();
+    return h >= x[2] && h < x[3];
+  }
   var DAYS = [['1', 'Mon'], ['2', 'Tue'], ['3', 'Wed'], ['4', 'Thu'], ['5', 'Fri'], ['0', 'Sun'], ['6', 'Sat']];
 
   /* +null is 0 and +'' is 0, so a plain isFinite() check turns a MISSING value
@@ -60443,7 +60622,7 @@ self.addEventListener('message', async (ev) => {
       var d = new Date(bars.t[i]);
       var h = d.getUTCHours(), wd = String(d.getUTCDay());
       var okDay = !days.length || days.indexOf(wd) >= 0;
-      var okSess = !sess.length || sess.some(function (x) { return h >= x[2] && h < x[3]; });
+      var okSess = !sess.length || sess.some(function (x) { return inSess(x, bars.t[i]); });
       okBar[i] = (okDay && okSess) ? 1 : 0;
     }
     ev.allowed = function (i) { return okBar[i] === 1; };
@@ -60632,7 +60811,7 @@ self.addEventListener('message', async (ev) => {
     PRESETS: PRESETS,
     OPS: OPS,
     OPERANDS: OPERANDS,
-    SESSIONS: SESSIONS,
+    SESSIONS: SESSIONS, sessLabel: sessLabel, inSession: inSess,
     DAYS: DAYS,
     condLabel: condLabel,
     operandLabel: operandLabel
@@ -61887,8 +62066,8 @@ self.addEventListener('message', async (ev) => {
     '<div class="el-controls">' +
       fld('Sessions', '<div>' + window.ApexStrategy.SESSIONS.map(function (x) {
             var on = (s.filters.sessions || []).indexOf(x[0]) >= 0;
-            return '<label class="sxl-chk"><input type="checkbox" data-sxl-sess="' + x[0] + '"' + (on ? ' checked' : '') + '>' + esc(x[1]) + '</label>';
-          }).join('') + '</div>', 'no box ticked = all hours') +
+            return '<label class="sxl-chk"><input type="checkbox" data-sxl-sess="' + x[0] + '"' + (on ? ' checked' : '') + '>' + esc(window.ApexStrategy.sessLabel ? window.ApexStrategy.sessLabel(x) : x[1]) + '</label>';
+          }).join('') + '</div>', 'no box ticked = all hours · times in your timezone (Settings → Region)') +
     '</div>' +
     '<div class="el-controls">' +
       fld('Weekdays', '<div>' + window.ApexStrategy.DAYS.map(function (x) {
@@ -73836,6 +74015,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           '<div class="tv-jetzt notranslate" translate="no" id="tvJetzt" hidden></div>' +
         '</div>' +
         '<div class="tv-schnell" id="tvSchnell" role="toolbar" aria-label="Instruments the AI can analyse"></div>' +
+        '<div class="tv-sl" id="tvSchnellEdit" hidden></div>' +
         '<button class="tv-kitoggle" id="tvKiToggle" aria-expanded="true" ' +
           'title="Show or hide the AI panel">' +
           '<svg class=ic aria-hidden=true><use href=#i-brain ></use></svg>' +
@@ -73956,9 +74136,17 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     /* Schnellwahl und Schnellfragen: ein Zuhoerer am Behaelter, weil beide
        Leisten neu gebaut werden. */
     d.querySelector('#tvSchnell').addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-schnelledit]')) {
+        var ed = document.getElementById('tvSchnellEdit');
+        ed.hidden = !ed.hidden;
+        if (!ed.hidden) schnellEditor();
+        schnellFuellen();
+        return;
+      }
       var b = e.target.closest && e.target.closest('[data-sym]');
       if (b) symbolWechseln(b.getAttribute('data-sym'));
     });
+    d.querySelector('#tvSchnellEdit').addEventListener('click', schnellAktion);
     d.querySelector('#tvKiChips').addEventListener('click', function (e) {
       var b = e.target.closest && e.target.closest('[data-frage]');
       if (!b) return;
@@ -74010,15 +74198,106 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     ['BINANCE:BTCUSDT', 'BTC'], ['BINANCE:ETHUSDT', 'ETH'],
   ];
 
+  /* Alles, was Kerzen hat (DATEN_SYM) — nur daraus darf man waehlen, sonst
+     koennte die KI ein Instrument in der Leiste gar nicht lesen. */
+  var KATALOG = [
+    ['Metals', [['OANDA:XAUUSD', 'Gold'], ['OANDA:XAGUSD', 'Silver']]],
+    ['Indices', [['OANDA:NAS100USD', 'NAS100'], ['OANDA:SPX500USD', 'SPX500'],
+                 ['OANDA:US30USD', 'US30'], ['OANDA:DE30EUR', 'GER40']]],
+    ['Forex', ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'USDCHF',
+               'EURGBP', 'EURJPY', 'GBPJPY', 'EURCHF', 'AUDJPY', 'EURAUD', 'GBPAUD',
+               'CADJPY', 'NZDJPY', 'GBPCAD', 'EURCAD'].map(function (x) { return ['OANDA:' + x, x]; })],
+    ['Crypto', [['BINANCE:BTCUSDT', 'BTC'], ['BINANCE:ETHUSDT', 'ETH'],
+                ['BINANCE:SOLUSDT', 'SOL'], ['BINANCE:XRPUSDT', 'XRP']]]
+  ];
+  function katName(sym) {
+    for (var g = 0; g < KATALOG.length; g++)
+      for (var k = 0; k < KATALOG[g][1].length; k++)
+        if (KATALOG[g][1][k][0] === sym) return KATALOG[g][1][k][1];
+    return sym.split(':').pop();
+  }
+  /* Eigene Leiste: [{s, fav}] auf diesem Geraet. Favoriten stehen vorne,
+     sonst gilt die Reihenfolge, die der Nutzer gezogen hat. */
+  function meineLeiste() {
+    try {
+      var roh = JSON.parse(lies('chips', '') || 'null');
+      if (Array.isArray(roh) && roh.length)
+        return roh.filter(function (x) { return x && DATEN_SYM[x.s]; });
+    } catch (e) {}
+    return SCHNELL.map(function (x) { return { s: x[0], fav: false }; });
+  }
+  function leisteMerken(l) { merke('chips', JSON.stringify(l)); }
+  function geordnet(l) {
+    return l.map(function (x, i) { return { x: x, i: i }; })
+      .sort(function (a, b) { return (b.x.fav ? 1 : 0) - (a.x.fav ? 1 : 0) || a.i - b.i; })
+      .map(function (o) { return o.x; });
+  }
+
   function schnellFuellen() {
     var el = document.getElementById('tvSchnell');
     if (!el) return;
     var jetzt = TV.sym || lies('sym', STD_SYM);
-    el.innerHTML = SCHNELL.map(function (x) {
-      return '<button class="tv-chip notranslate' + (x[0] === jetzt ? ' on' : '') +
-        '" translate="no" data-sym="' + x[0] + '" aria-pressed="' +
-        (x[0] === jetzt ? 'true' : 'false') + '">' + x[1] + '</button>';
+    var l = geordnet(meineLeiste());
+    var ed = document.getElementById('tvSchnellEdit'), offen = !!(ed && !ed.hidden);
+    el.innerHTML = l.map(function (x) {
+      var an = x.s === jetzt;
+      return '<button class="tv-chip notranslate' + (an ? ' on' : '') + (x.fav ? ' fav' : '') +
+        '" translate="no" data-sym="' + x.s + '" aria-pressed="' + (an ? 'true' : 'false') + '">' +
+        (x.fav ? '<span class="tv-chip-st" aria-hidden="true">★</span>' : '') + katName(x.s) + '</button>';
+    }).join('') +
+      '<button class="tv-chip tv-chip-edit' + (offen ? ' on' : '') + '" data-schnelledit="1" title="Edit, reorder and favourite instruments" aria-label="Edit instruments">' +
+      '<svg class=ic aria-hidden=true><use href=#i-settings ></use></svg></button>';
+  }
+
+  function schnellEditor() {
+    var h = document.getElementById('tvSchnellEdit');
+    if (!h) return;
+    var l = meineLeiste(), drin = {};
+    l.forEach(function (x) { drin[x.s] = 1; });
+    var g = geordnet(l);
+    var zeile = function (x) {
+      var i = l.indexOf(x), name = katName(x.s);
+      return '<div class="tv-sl-z notranslate" translate="no">' +
+        '<button class="tv-sl-fav' + (x.fav ? ' on' : '') + '" data-slfav="' + i + '" aria-label="Favourite ' + name + '" aria-pressed="' + !!x.fav + '">' + (x.fav ? '★' : '☆') + '</button>' +
+        '<span class="tv-sl-n">' + name + '</span>' +
+        '<button class="tv-sl-b" data-slauf="' + i + '" aria-label="Move ' + name + ' left">↑</button>' +
+        '<button class="tv-sl-b" data-slab="' + i + '" aria-label="Move ' + name + ' right">↓</button>' +
+        '<button class="tv-sl-b tv-sl-x" data-slweg="' + i + '" aria-label="Remove ' + name + '">×</button></div>';
+    };
+    var neu = KATALOG.map(function (gr) {
+      var frei = gr[1].filter(function (x) { return !drin[x[0]]; });
+      if (!frei.length) return '';
+      return '<div class="tv-sl-g">' + gr[0] + '</div><div class="tv-sl-add notranslate" translate="no">' +
+        frei.map(function (x) { return '<button class="tv-chip" data-sladd="' + x[0] + '">+ ' + x[1] + '</button>'; }).join('') + '</div>';
     }).join('');
+    h.innerHTML = '<div class="tv-sl-kopf"><b>Your instruments</b><span>★ favourites stay in front · saved on this device</span>' +
+      '<button class="tv-sl-zu" data-slzu="1" aria-label="Close">×</button></div>' +
+      '<div class="tv-sl-liste">' + g.map(zeile).join('') + '</div>' +
+      (neu ? '<div class="tv-sl-kopf2">Add</div>' + neu : '') +
+      '<div class="tv-sl-fuss"><button class="tv-sl-reset" data-slreset="1">Reset to default</button></div>';
+  }
+
+  function schnellAktion(e) {
+    var t = e.target.closest && e.target.closest('button');
+    if (!t) return;
+    var l = meineLeiste(), a;
+    if (t.hasAttribute('data-slzu')) { document.getElementById('tvSchnellEdit').hidden = true; schnellFuellen(); return; }
+    if (t.hasAttribute('data-slreset')) { merke('chips', ''); }
+    else if ((a = t.getAttribute('data-slfav')) != null) { l[+a].fav = !l[+a].fav; leisteMerken(l); }
+    else if ((a = t.getAttribute('data-slweg')) != null) {
+      if (l.length <= 1) return;                       // eine muss bleiben
+      l.splice(+a, 1); leisteMerken(l);
+    }
+    else if ((a = t.getAttribute('data-sladd')) != null) { l.push({ s: a, fav: false }); leisteMerken(l); }
+    else if ((a = t.getAttribute('data-slauf') || t.getAttribute('data-slab')) != null) {
+      /* Verschoben wird in der SICHTBAREN Reihenfolge und nur innerhalb der
+         eigenen Gruppe (Favoriten / Rest) — sonst haette der Pfeil scheinbar
+         nichts getan. */
+      var g = geordnet(l), x = l[+a], p = g.indexOf(x), q = p + (t.hasAttribute('data-slauf') ? -1 : 1);
+      if (q < 0 || q >= g.length || !!g[q].fav !== !!x.fav) return;
+      g[p] = g[q]; g[q] = x; leisteMerken(g);
+    } else return;
+    schnellEditor(); schnellFuellen();
   }
 
   /* Wechsel per Chip. Das Widget kann das Instrument nur beim Aufbau setzen,
@@ -74297,7 +74576,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'OANDA:EURUSD': 'EUR/USD', 'OANDA:GBPUSD': 'GBP/USD',
     'OANDA:USDJPY': 'USD/JPY', 'OANDA:AUDUSD': 'AUD/USD',
     'OANDA:USDCAD': 'USD/CAD', 'OANDA:NZDUSD': 'NZD/USD',
+    'OANDA:USDCHF': 'USD/CHF', 'OANDA:EURGBP': 'EUR/GBP', 'OANDA:EURJPY': 'EUR/JPY',
+    'OANDA:GBPJPY': 'GBP/JPY', 'OANDA:EURCHF': 'EUR/CHF', 'OANDA:AUDJPY': 'AUD/JPY',
+    'OANDA:EURAUD': 'EUR/AUD', 'OANDA:GBPAUD': 'GBP/AUD', 'OANDA:CADJPY': 'CAD/JPY',
+    'OANDA:NZDJPY': 'NZD/JPY', 'OANDA:GBPCAD': 'GBP/CAD', 'OANDA:EURCAD': 'EUR/CAD',
     'BINANCE:BTCUSDT': 'BTC/USD', 'BINANCE:ETHUSDT': 'ETH/USD',
+    'BINANCE:SOLUSDT': 'SOL/USD', 'BINANCE:XRPUSDT': 'XRP/USD',
     'OANDA:NAS100USD': 'NAS100', 'OANDA:SPX500USD': 'SPX500',
     'OANDA:US30USD': 'US30', 'OANDA:DE30EUR': 'GER40',
   };
@@ -74709,7 +74993,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      liefert: Vortageshoch und -tief, Tages- und Wochen-Open, die letzten
      Sessions und gleiche Hochs/Tiefs (dort liegen Stops). Gerechnet aus den
      Kerzen, die ohnehin geladen sind — kein Abruf. */
-  var SESSIONS = [['Asia', 0, 7], ['London', 7, 13], ['New York', 13, 21]];
+  /* In der Ortszeit der jeweiligen Boerse, damit Sommer-/Winterzeit stimmt
+     (frueher feste UTC-Stunden: im Sommer eine Stunde daneben). Im Winter
+     entspricht das genau den alten Werten 00–07 / 08–13 / 13–21 UTC. */
+  var SESSIONS = [['Asia', 9, 16, 'Asia/Tokyo'], ['London', 8, 13, 'Europe/London'],
+                  ['New York', 8, 16, 'America/New_York']];
 
   function schluesselLevel(bars, kurs, atrW, jetzt) {
     var out = [];
@@ -74752,14 +75040,18 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         out.push({ k: 'PWL', name: 'Previous week low', p: vl });
       }
     }
-    /* Die letzte ABGESCHLOSSENE Session je Art (UTC-Stunden). */
+    /* Die letzte ABGESCHLOSSENE Session je Art (Ortszeit der Boerse). */
+    var AS = window.ApexSessions && ApexSessions.local;
     SESSIONS.forEach(function (s) {
       var best = null;
+      var heute = AS ? ApexSessions.local(jetzt, s[3]) : null;
       for (var i = n - 1; i >= 0; i--) {
-        var t = bars.t[i], dU = Math.floor(t / TAG), hU = new Date(t).getUTCHours();
+        var t = bars.t[i], dU, hU;
+        if (AS) { var lo = ApexSessions.local(t, s[3]); dU = lo.d; hU = lo.h; }
+        else { dU = Math.floor(t / TAG); hU = new Date(t).getUTCHours(); }
         if (best && dU < best.d) break;
         if (hU < s[1] || hU >= s[2]) continue;
-        if (dU * TAG + s[2] * 3600000 > jetzt) continue;       // laeuft noch
+        if (AS ? (dU === heute.d && heute.h < s[2]) : (dU * TAG + s[2] * 3600000 > jetzt)) continue;   // laeuft noch
         if (!best) best = { d: dU, h: bars.h[i], l: bars.l[i] };
         else { if (bars.h[i] > best.h) best.h = bars.h[i]; if (bars.l[i] < best.l) best.l = bars.l[i]; }
       }

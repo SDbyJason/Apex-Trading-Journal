@@ -8,11 +8,12 @@
      arrive even when the app is closed (needs a server to send them).
    Bump CACHE when you change the cached shell so old copies get purged.
    ════════════════════════════════════════════════════════════════ */
-/* Bumped to v3 for the Market Replay modules (apex-marketdata / apex-chart /
-   apex-replay / apex-replay-ui). Static assets are served cache-first, so
-   without this bump existing installs would keep serving the old files
-   forever and the new tab would look broken. */
-const CACHE = 'evidence-v131';
+/* Bei JEDEM Deploy hochzählen und sw.js mit hochladen. Der Browser
+   installiert einen neuen Service Worker nur, wenn sich diese Datei
+   byteweise ändert — bleibt sie liegen, behalten installierte Apps die
+   alten Icons/Manifest-Einträge (cache-first) und das alte SW-Verhalten.
+   Die index.html selbst kommt dank network-first trotzdem frisch an. */
+const CACHE = 'evidence-v134';
 
 /* Alle Pfade relativ zum Ablageort dieser Datei — NICHT ab "/".
    Auf GitHub Pages liegt die App unter /<repo>/, dort zeigt "/" auf
@@ -24,6 +25,9 @@ const BASE = new URL('./', self.location).href;
    Repository heißt (index.html oder indexdatenschutz.html), entscheidet der
    Hoster — das Verzeichnis liefert immer das Richtige aus. */
 const APP = BASE;
+const BASE_PATH = new URL(BASE).pathname;
+const isAppPath = (p) => p === BASE_PATH ||
+  p === BASE_PATH + 'index.html' || p === BASE_PATH + 'indexdatenschutz.html';
 const SHELL = [BASE, BASE + 'manifest.webmanifest',
   BASE + 'icons/icon-192.png', BASE + 'icons/icon-512.png', BASE + 'icons/icon-512-maskable.png'];
 
@@ -53,11 +57,23 @@ self.addEventListener('fetch', (e) => {
   const isNav = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');
   if (isNav) {
+    /* no-cache: beim Server nachfragen statt bis zu 10 Minuten (max-age=600
+       bei GitHub Pages) eine alte Kopie aus dem HTTP-Cache zu zeigen. Ist die
+       Seite unverändert, antwortet der Server nur mit 304 — kostet nichts.
+       Ältere Safari-Versionen werfen beim Kopieren einer Navigation; dann
+       eben die Anfrage wie bisher. */
+    let netReq = req;
+    try { netReq = new Request(req, { cache: 'no-cache' }); } catch (_) {}
     e.respondWith(
-      fetch(req)
+      fetch(netReq)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(APP, copy)).catch(() => {});
+          /* Nur die App selbst als Offline-Kopie ablegen — nicht die
+             Academy- oder Vergleichsseiten und keine Fehlerseiten, sonst
+             öffnet die App offline plötzlich eine ganz andere Seite. */
+          if (res.ok && res.type === 'basic' && isAppPath(url.pathname)) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(APP, copy)).catch(() => {});
+          }
           return res;
         })
         .catch(() => caches.match(APP).then((r) => r || caches.match(BASE)))
