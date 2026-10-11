@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-09o';
+  window.APEX_BUILD = '2026-10-10a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -79835,6 +79835,45 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return '<span class="tv-zq"><i style="width:' + p + '%"></i></span>';
   }
 
+  /* Zeitpunkt einer Zone fuer die Tafel: Datum und Uhrzeit in der Zeitzone
+     aus den Einstellungen (ApexChart.fmtDateTime, dieselbe wie im Chart und
+     im Replay) plus "wie lange her". Ohne das Datum ist eine Uhrzeit bei
+     einer drei Tage alten H4-Zone wertlos. */
+  function seitWann(ms) {
+    if (!isFinite(ms) || ms <= 0) return '';
+    var txt = '';
+    try { if (window.ApexChart && ApexChart.fmtDateTime) txt = ApexChart.fmtDateTime(ms); } catch (e) {}
+    if (!txt) txt = new Date(ms).toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+    var min = Math.round((Date.now() - ms) / 60000);
+    if (min < 1) return txt + ' &middot; just now';
+    var her = min < 60 ? min + ' min'
+            : (min < 1440 ? Math.round(min / 60) + ' h' : Math.round(min / 1440) + ' d');
+    return txt + ' &middot; ' + her + ' ago';
+  }
+
+  /* Eine Zone entsteht an ihrer Ursprungskerze, ist aber erst
+     swingLen (12) Kerzen spaeter BESTAETIGT — vorher steht der Swing noch
+     nicht fest. Gezeichnet wird der Kasten rueckwirkend bis zum Ursprung,
+     dadurch sieht er aus, als haette er die ganze Zeit dort gelegen.
+
+     Diese Funktion beantwortet, was daran fuer den Handel zaehlt: war der
+     erste echte Retest schon vorbei, bevor die Zone ueberhaupt auf dem
+     Chart stand? Gemessen wie ueberall: erst muss der Kurs die Zone
+     verlassen haben, dann zaehlt die Rueckkehr. */
+  function retestVorSicht(g, bars) {
+    if (!bars || !bars.n || !isFinite(g.zeit) || !isFinite(g.geburt)) return null;
+    if (g.geburt <= g.zeit) return null;
+    var p = indexBei(bars, g.zeit), b = indexBei(bars, g.geburt);
+    if (!(b > p)) return null;
+    var weg = false;
+    for (var q = p + 1; q < bars.n; q++) {
+      var drin = bars.h[q] >= g.bot && bars.l[q] <= g.top;
+      if (!weg) { if (!drin) weg = true; continue; }
+      if (drin) return q < b;             // Rueckkehr vor der Bestaetigung?
+    }
+    return false;                          // noch gar kein Retest
+  }
+
   function zoneZeigen() {
     var host = document.getElementById('tvZone');
     if (!host) return;
@@ -79891,6 +79930,15 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       f.push([m.tf + ' zone', n(m.bot) + '&ndash;' + n(m.top)]);
     });
     else if (g.teile && g.teile.length > 1) f.push(['Merged from', g.teile.length + ' zones']);
+    /* Seit wann die Zone da ist. `zeit` ist die Ursprungskerze — dort
+       beginnt der Kasten im Chart. `geburt` ist die Kerze, auf der der Swing
+       bestaetigt war und die Zone ueberhaupt entstand; auf H4 liegen dazwischen
+       zwei Tage. Beides steht da, wenn es sich unterscheidet. */
+    var tSeit = seitWann(g.zeit);
+    if (tSeit) f.push(['Since', tSeit]);
+    var tGeb = seitWann(g.geburt);
+    if (tGeb && isFinite(g.zeit) && isFinite(g.geburt) && g.geburt - g.zeit > 60000)
+      f.push(['Visible from', tGeb]);
     f.push(['Retests', String(g.retests || 0)]);
     if (isFinite(g.juengste)) f.push(['Last touched', g.juengste + ' bars ago']);
     h += '<div class="tv-zn-git">';
@@ -79929,6 +79977,17 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     h += '<div class="tv-zn-ki ' + (g._ki === 'weg' ? 'weg' : (g._ki === 'ok' ? 'ok' : '')) +
          '"><b>' + urteil + '</b>' +
          (g.grund ? '<span>' + escHtml(g.grund) + '</span>' : '') + '</div>';
+    /* Der Unterschied zwischen "der Kasten liegt dort" und "der Kasten lag
+       dort, als der Kurs ankam". Ohne diesen Satz liest sich jede Zone wie
+       eine Stelle, an der man haette handeln koennen. */
+    var zBars = null;
+    (L && L.ebenen || []).forEach(function (x) { if (x.tf === (g.kernTf || e.tf)) zBars = x.bars; });
+    var zuSpaet = retestVorSicht(g, zBars);
+    if (zuSpaet === true)
+      h += '<div class="tv-su-warn">The first return into this zone happened <b>before the zone ' +
+           'was on the chart</b>. A zone is only confirmed 12 candles after its origin candle, and ' +
+           'the box is then drawn back over them &mdash; so this touch was not tradeable live.</div>';
+
     if (g._streit)
       h += '<div class="tv-su-warn">An opposing zone on the same timeframe overlaps this one &mdash; ' +
            'support and resistance on the same price. Treat it as unresolved.</div>';
