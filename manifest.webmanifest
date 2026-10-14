@@ -40,6 +40,32 @@
   ],
   "shortcuts": [
     {
+      "name": "Plan a trade",
+      "short_name": "Plan",
+      "description": "Write the plan before you place the order",
+      "url": "./?source=pwa&quick=plan",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Quick log",
+      "short_name": "Quick log",
+      "description": "Five answers for the trades you just closed",
+      "url": "./?source=pwa&quick=log",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
       "name": "Log a trade",
       "short_name": "Log trade",
       "description": "Record a trade in a few taps",
@@ -56,18 +82,6 @@
       "name": "Journal",
       "short_name": "Journal",
       "url": "./?source=pwa&go=journal",
-      "icons": [
-        {
-          "src": "icons/icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Books",
-      "short_name": "Books",
-      "url": "./?source=pwa&go=books",
       "icons": [
         {
           "src": "icons/icon-192.png",
