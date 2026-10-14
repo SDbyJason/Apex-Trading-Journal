@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-14b';
+  window.APEX_BUILD = '2026-10-14c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -1187,18 +1187,31 @@ window.APEX_PRICES = (function () {
       // An <img alt=""> with an empty src fires this too, and the app is full of
       // placeholder slots waiting for a screenshot. Reporting those would
       // spend the per-session cap on nothing before a real error appears.
-      if (!url) return;
+      /* `.src` of an <img src=""> is NOT empty: the browser resolves it to the
+         page's own address (…/?source=pwa). That was 338 reports from 13 users
+         of nothing. The attribute tells the truth. Third-party scripts that a
+         blocker or a network hiccup stops (Google Translate) are not ours. */
+      var attr = e.target.getAttribute && (e.target.getAttribute('src') || e.target.getAttribute('href'));
+      if (!url || !attr || !String(attr).trim()) return;
+      if (/translate\.google|googleTranslateElementInit|gstatic\.com\/_\/translate/i.test(url)) return;
       record('resource', 'Failed to load ' + e.target.tagName, url, 0, 0, '');
       return;
     }
+    /* Browser noise, not an app error: ResizeObserver's loop notice is a
+       warning the spec says to ignore; wallet extensions inject their own
+       failures into every page. */
+    if (/ResizeObserver loop|MetaMask|ethereum/i.test(String(e.message || ''))) return;
     record('error', e.message, e.filename, e.lineno, e.colno, e.error && e.error.stack);
   }, true);
 
   window.addEventListener('unhandledrejection', function(e){
     var r = e && e.reason;
-    record('promise',
-           (r && (r.message || r)) || 'Unhandled rejection',
-           '', 0, 0, r && r.stack);
+    /* Firebase-Fehler kommen als Objekt mit verkuerztem Klassennamen ("La")
+       und ohne message — dann zaehlen code und Name, sonst steht im Log nur
+       "La". Wallet-Erweiterungen (MetaMask) sind nicht unsere Fehler. */
+    var msg = r && (r.message || (r.code ? 'code ' + r.code + (r.name ? ' (' + r.name + ')' : '') : '') || String(r));
+    if (/MetaMask|ethereum/i.test(String(msg || ''))) return;
+    record('promise', msg || 'Unhandled rejection', '', 0, 0, r && r.stack);
   });
 
   // Small manual hook for code that already catches its own errors.
@@ -15621,9 +15634,26 @@ async function loadUserProfile() {
     var out = {};
     Object.keys(years).forEach(function (y) {
       if (bytes(JSON.stringify(years[y])) <= MAX_SHARD_BYTES) { out[y] = years[y]; return; }
+      var months = {};
       Object.keys(years[y]).forEach(function (k) {
         var m = String(k).slice(0, 7);     // YYYY-MM
-        (out[m] || (out[m] = {}))[k] = years[y][k];
+        (months[m] || (months[m] = {}))[k] = years[y][k];
+      });
+      /* 14.10.2026: a month can be too big as well (one user had 2 MB in
+         August — lots of chart images). Then the save threw and NOTHING was
+         saved. Such a month is cut into runs of days, YYYY-MM~1, ~2 …, each
+         under the limit; a single day bigger than that gets its own shard.
+         The reader merges whatever the index lists, so old journals load
+         unchanged and nothing else has to know. */
+      Object.keys(months).forEach(function (m) {
+        if (bytes(JSON.stringify(months[m])) <= MAX_SHARD_BYTES) { out[m] = months[m]; return; }
+        var part = 1, cur = {}, size = 2;
+        Object.keys(months[m]).sort().forEach(function (k) {
+          var one = bytes(JSON.stringify(months[m][k])) + k.length + 4;
+          if (size + one > MAX_SHARD_BYTES && Object.keys(cur).length) { out[m + '~' + part++] = cur; cur = {}; size = 2; }
+          cur[k] = months[m][k]; size += one;
+        });
+        if (Object.keys(cur).length) out[m + '~' + part] = cur;
       });
     });
     return out;
@@ -15671,8 +15701,9 @@ async function loadUserProfile() {
         var json = JSON.stringify(buckets[id]);
         if (written[id] === json) continue;
         if (bytes(json) > 1048000) {
-          throw new Error('Shard ' + id + ' is ' + Math.round(bytes(json) / 1024) +
-                          ' KB — above the 1 MiB document limit');
+          // Nur noch moeglich, wenn EIN einzelner Tag ueber 1 MB liegt (Bilder).
+          throw new Error('Day ' + Object.keys(buckets[id])[0] + ' alone is ' + Math.round(bytes(json) / 1024) +
+                          ' KB — above the 1 MiB document limit; remove a few chart images from that day');
         }
         await privCol(uid).doc(PREFIX + id).set({ data: buckets[id], updatedAt: stamp });
         written[id] = json;
@@ -27517,6 +27548,17 @@ async function sendCoachMsg(isManual) {
   return ApexInsights.send();
 }
 
+/* Die zweite Kopie der Felder (Settings → Trading) schrieb in eine Funktion,
+   die es nie gab — jede Auswahl dort warf einen Fehler und ging verloren.
+   Sie spiegelt jetzt in die Hauptfelder und speichert ueber denselben Weg. */
+function syncCoachProfile(field, value) {
+  var id = { experience: 'coachProfileExperience', pairs: 'coachProfilePairs', strategy: 'coachProfileStrategy' }[field];
+  var el = id && document.getElementById(id);
+  if (el) el.value = value;
+  clearTimeout(window._cpSyncT);
+  window._cpSyncT = setTimeout(function () { try { saveCoachProfile(); } catch (e) {} }, field === 'pairs' ? 600 : 0);
+}
+window.syncCoachProfile = syncCoachProfile;
 function saveCoachProfile() {
   try {
     var uid = window.currentUID || 'local';
@@ -27555,6 +27597,8 @@ function loadCoachProfile() {
     Object.entries(fields).forEach(function(pair) {
       var el = document.getElementById(pair[0]);
       if (el) el.value = pair[1];
+      var el2 = document.getElementById(pair[0] + '2');   // zweite Kopie unter Settings → Trading
+      if (el2) el2.value = pair[1];
     });
   } catch(e) {}
   try { if (typeof _propCoachFields === 'function') _propCoachFields(); } catch(e) {}
@@ -43075,7 +43119,7 @@ body.light .pt-sugg{background:var(--layer)}
     return Notification.requestPermission().then(function(p){
       if(p==='granted'){
         toast('🔔 Trade alerts enabled');
-        try{ new Notification('Evidence', { body:'Alerts are on. You’ll get trade & risk notifications here.', icon:'/icon-192.png' }); }catch(e){}
+        try{ new Notification('Evidence', { body:'Alerts are on. You’ll get trade & risk notifications here.', icon:'/icons/icon-192.png' }); }catch(e){}
         subscribePush();
       } else {
         toast('🔕 Notifications not enabled');
@@ -43088,8 +43132,8 @@ body.light .pt-sugg{background:var(--layer)}
   function notify(title, opts){
     try{
       if(('Notification' in window) && Notification.permission==='granted'){
-        if(swReg && swReg.showNotification) return swReg.showNotification(title, Object.assign({ icon:'/icon-192.png', badge:'/icon-192.png' }, opts||{}));
-        return new Notification(title, Object.assign({ icon:'/icon-192.png' }, opts||{}));
+        if(swReg && swReg.showNotification) return swReg.showNotification(title, Object.assign({ icon:'/icons/icon-192.png', badge:'/icons/icon-192.png' }, opts||{}));
+        return new Notification(title, Object.assign({ icon:'/icons/icon-192.png' }, opts||{}));
       }
     }catch(e){}
   }
@@ -58507,7 +58551,7 @@ self.addEventListener('message', async (ev) => {
         rvKpi('Buffer to floor', money(eq - c.floor), (eq - c.floor) < c.maxDD * 0.25 ? 'neg' : '') +
         rvKpi('Trading days', days + (need ? ' / ' + need : '')) +
       '</div>' +
-      (c.status === 'running' && S.session.cursor >= S.session.data.n
+      (c.status === 'running' && S.session && S.session.data && S.session.cursor >= S.session.data.n
         ? '<div class="arp-rv-note">The data ended before the challenge did. Start a longer session (1 month) to play it to the end.</div>' : '') +
     '</div>';
   }
@@ -59981,11 +60025,11 @@ self.addEventListener('message', async (ev) => {
       return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
     }
     function barIndexAt(f) {
-      var total = S.session ? S.session.data.n : 0;
+      var total = S.session && S.session.data ? S.session.data.n : 0;
       return Math.max(0, Math.min(total, Math.round(f * total)));
     }
     function showTip(f) {
-      if (!S.session) return;
+      if (!S.session || !S.session.data) return;
       var i = barIndexAt(f);
       var t = S.session.data.bid.t[Math.max(0, Math.min(S.session.data.n - 1, i - 1))];
       var r = bar.getBoundingClientRect();
@@ -60023,7 +60067,7 @@ self.addEventListener('message', async (ev) => {
       dragging = false;
       bar.classList.remove('dragging');
       try { bar.releasePointerCapture(e.pointerId); } catch (err) {}
-      if (resume && S.session && S.session.cursor < S.session.data.n) S.session.play();
+      if (resume && S.session && S.session.data && S.session.cursor < S.session.data.n) S.session.play();
       resume = false;
       paint(true);
     }
@@ -60515,6 +60559,8 @@ self.addEventListener('message', async (ev) => {
       var t = e.target && e.target.tagName;
       if (t === 'INPUT' || t === 'SELECT' || t === 'TEXTAREA') return;   // don't hijack typing
       if (!document.getElementById('arpChart')) return;
+      // Noch keine Sitzung geladen (oder gerade beendet): Tasten tun nichts.
+      if (!S.session || !S.session.data) return;
       var k = e.key;
       if (k === 'Escape' && S.draw) {
         // Back to plain chart navigation — the way out of a drawing tool.
