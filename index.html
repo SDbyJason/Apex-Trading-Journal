@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-15l';
+  window.APEX_BUILD = '2026-10-15m';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -81913,6 +81913,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     return bars;
   }
 
+  /* Fuer andere Charts (Live-Chart / Chart-Session): dieselben Kerzen samt
+     Index-Weg ueber Yahoo, statt dass jeder Chart seine eigene, schwaechere
+     Quelle hat. */
+  TV.kerzen = function (sym, tf, anzahl) { return kerzenHolen(sym, tf, anzahl); };
+  TV.hatIndexWeg = function (sym) { return !!INDEX_YAHOO[sym]; };
+
   function kerzenHolen(sym, tf, anzahl) {
     var min = { '1min': 1, '5min': 5, '15min': 15, '1h': 60, '4h': 240 }[tf] || 15;
     return kerzenRoh(sym, tf, anzahl).then(function (b) {
@@ -90230,6 +90236,19 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
 
   function holeKerzenExtern(sym, interval, vonMs, bisMs) {
+    /* Indizes (NAS100, SPX500, US30): Twelve Data hat sie im Gratis-Tarif
+       nicht — die Zonen-Ansicht holt sie seit 07.10. ueber Yahoo (Future +
+       gemessene Basis + Kassa). Derselbe Weg hier (15.10.2026); vorher ging
+       NAS100 im Live-Chart und damit in jeder Chart-Session nicht. */
+    if (window.ApexTV && ApexTV.kerzen && ApexTV.hatIndexWeg && ApexTV.hatIndexWeg(sym)) {
+      return ApexTV.kerzen(sym, interval, 600).then(function (b) {
+        if (!b || !b.n) throw new Error('No data for ' + sym);
+        var out = [];
+        for (var i = 0; i < b.n; i++) out.push({ t: b.t[i], o: b.o[i], h: b.h[i], l: b.l[i], c: b.c[i], v: b.v[i] || 0 });
+        LC.quelle = 'Yahoo';
+        return out;
+      });
+    }
     var u = workerUrl() + '/candles?symbol=' + encodeURIComponent(tdSym(sym)) +
             '&interval=' + interval +
             '&start_date=' + encodeURIComponent(tdDate(vonMs)) +
