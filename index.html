@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-15h';
+  window.APEX_BUILD = '2026-10-15k';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -8079,6 +8079,24 @@ table.tv-li td.tv-li-a button:hover{background:var(--surface);color:var(--ink)}
 .tv-ev-mini-k{display:flex;align-items:center;gap:8px;padding:3px 6px;font-size:11px;color:var(--ink3);flex:none}
 .tv-ev-mini-k select{background:var(--elevated);border:0.5px solid var(--rim2);color:var(--ink);border-radius:6px;padding:2px 6px;font:inherit;font-size:12px}
 .tv-ev-mini-c{position:relative;flex:1 1 auto;min-height:0}
+.tv-ev-mini-fx{flex:none;background:var(--elevated);border:0.5px solid var(--rim2);color:var(--gold);border-radius:6px;padding:2px 7px;font-family:var(--font-mono);font-style:italic;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.tv-ev-mini-fx.on{border-color:var(--gold-line);background:rgba(var(--gold-rgb),.14)}
+.tv-ev-mini-fx i{font-style:normal;font-size:10.5px;min-width:16px;height:16px;border-radius:8px;background:rgba(var(--gold-rgb),.2);display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
+.tv-ev-mini-pop{position:absolute;left:6px;top:32px;z-index:12;width:min(300px,calc(100% - 12px));max-height:calc(100% - 40px);overflow:auto;padding:10px;border-radius:12px;background:var(--elevated);border:0.5px solid var(--rim2);box-shadow:0 16px 40px rgba(0,0,0,.45);display:grid;gap:8px;font-size:12.5px;color:var(--ink2)}
+.tv-ev-mini-pop .h{display:flex;align-items:center;justify-content:space-between}
+.tv-ev-mini-pop .h b{color:var(--ink);font-size:13px}
+.tv-ev-mini-pop .h button{background:none;border:0;color:var(--ink3);font-size:18px;cursor:pointer}
+.tv-ev-mini-pop .lyr{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tv-ev-mini-pop .lyr .tv-ev-lt{padding:6px 8px}
+.tv-ev-mini-pop .lst{display:flex;flex-wrap:wrap;gap:5px}
+.tv-ev-mini-pop .lst em{font-style:normal;color:var(--ink3)}
+.tv-ev-mini-pop .it{display:inline-flex;align-items:center;gap:4px;padding:3px 4px 3px 8px;border-radius:7px;background:var(--surface);border:0.5px solid var(--rim2);color:var(--ink)}
+.tv-ev-mini-pop .it input{width:48px;background:var(--layer);border:0.5px solid var(--rim2);border-radius:5px;color:var(--ink);font:inherit;font-size:12px;padding:1px 4px}
+.tv-ev-mini-pop .it button{background:none;border:0;color:var(--ink3);cursor:pointer;font-size:14px}
+.tv-ev-mini-pop select{width:100%;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink);padding:7px 8px;font:inherit}
+.tv-ev-mini-pop .act{display:flex;gap:6px}
+.tv-ev-mini-pop .act button{flex:1;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink2);padding:6px;font:inherit;font-size:12px;cursor:pointer}
+.tv-ev-mini-pop .act button:hover{border-color:var(--gold-line);color:var(--ink)}
 .tv-ev-lay{display:inline-flex;border:0.5px solid var(--rim2);border-radius:7px;overflow:hidden;margin-right:4px}
 .tv-ev-lay button{background:transparent;border:0;color:var(--ink3);font:inherit;font-size:11.5px;padding:3px 9px;cursor:pointer}
 .tv-ev-lay button.on{background:rgba(var(--gold-rgb),.15);color:var(--gold)}
@@ -38547,6 +38565,7 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
   }
   function listenVoice(sid){
     if(CS.voice.presUnsub){ CS.voice.presUnsub(); CS.voice.presUnsub=null; }
+    CS.voice._lsid=sid;
     // Each participant writes ONLY their own doc (id = uid) → no overwrites / kicking.
     CS.voice.presUnsub=db.collection('apexServers').doc(sid).collection('voice').onSnapshot(function(snap){
       var rooms={}, now=Date.now();
@@ -38585,15 +38604,23 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
     {urls:'turns:global.relay.metered.ca:443?transport=tcp', username:'3491686cc546a4b829f4d18d', credential:'76+/Rd0y9iX+Ydoa'}
   ] };
   CS.toggleVoice=function(rid){ if(CS.voice.room===rid) CS.leaveVoice(); else joinVoice(rid); };
-  async function joinVoice(rid){
-    if(!ready()||!CS.cur) return;
+  /* Fuer die Chart-Session: Raum in einem bestimmten Server betreten. */
+  CS.joinVoiceAt=function(sid, rid){ if(CS.voice.room===rid&&CS.voice.sid===sid) return Promise.resolve(); return joinVoice(rid, sid); };
+  CS.voiceRooms=function(srv){ return voiceRoomsFor(srv||CS.cur); };
+  async function joinVoice(rid, sidArg){
+    var vsid=sidArg||(CS.cur&&CS.cur.id);
+    if(!ready()||!vsid) return;
     if(CS.voice.room) await leaveVoiceInternal();
-    CS.voice.sid=CS.cur.id; CS.voice.room=rid; CS.voice.micOn=true; CS.voice.pcs={}; CS.voice.audios={}; CS.voice.sigUnsubs={};
+    /* Presence-Zuhoerer fuer genau diesen Server — von der Chart-Session aus
+       ist der Server-Bildschirm evtl. zu, dann liefe sonst kein Abgleich der
+       Gegenstellen und man hoerte niemanden. */
+    if(CS.voice._lsid!==vsid) listenVoice(vsid);
+    CS.voice.sid=vsid; CS.voice.room=rid; CS.voice.micOn=true; CS.voice.pcs={}; CS.voice.audios={}; CS.voice.sigUnsubs={};
     if(window.APEX_DEMO){ CS.voice.localStream=null; toast('Voice is simulated in the demo — no microphone is used'); }
     else try{ CS.voice.localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false}); }
     catch(e){ CS.voice.localStream=null; toast('🎤 No mic access — joined as listener'); }
     CS.voice._joinId=Math.random().toString(36).slice(2,10); CS.voice._peerJid={};
-    db.collection('apexServers').doc(CS.cur.id).collection('voice').doc(window.currentUID)
+    db.collection('apexServers').doc(vsid).collection('voice').doc(window.currentUID)
       .set({ room:rid, name:(window.currentName||'Trader'), mic:true, jid:CS.voice._joinId, ts:FV().serverTimestamp() })
       .catch(function(e){ toast('⚠ '+(e.message||'voice unavailable — deploy rules')); });
     CS.voice._peerSet=null; CS.voice._sig=null; startHeartbeat(); vSound('join'); toast('🔊 Joined '+rid.replace('r','Voice ')); paintVoice(); setTimeout(syncPeers,400);
@@ -86700,7 +86727,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     while (EV.mehr.length < soll) {
       var i = EV.mehr.length, el = document.createElement('div');
       el.className = 'tv-ev-mini';
-      el.innerHTML = '<div class="tv-ev-mini-k"><select class="notranslate" translate="no" aria-label="Timeframe of this chart">' +
+      el.innerHTML = '<div class="tv-ev-mini-k"><button type="button" class="tv-ev-mini-fx" data-mfx="' + i + '" title="Indicators and layers of this chart" aria-label="Indicators of this chart">ƒx</button><select class="notranslate" translate="no" aria-label="Timeframe of this chart">' +
         EV_ALLE_TF.map(function (x) { return '<option value="' + x[0] + '">' + x[0] + '</option>'; }).join('') +
         '</select><span></span></div><div class="tv-ev-mini-c"></div>';
       grid.appendChild(el);
@@ -86741,9 +86768,18 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
           inst.setBars(r.e.bars); m._bars = r.e.bars; m.bars = r.e.bars;
           try { inst.followTail(120); } catch (x) { try { inst.fit(); } catch (y) {} }
         }
-        var liste = [];
-        try { liste = evZonenListe(inst, r.e, r.L); } catch (x) {}
-        try { inst.setIndicators([{ key: 'evz', kind: 'overlay', plots: [], zones: liste, zoneOpts: { roh: true } }]); } catch (x) {}
+        /* Eigene Auswahl je Fenster (15.10.2026): Zonen, Heatmap, Indikatoren. */
+        var cfg = paneCfg(m.i), specs = [], liste = [];
+        if (cfg.zones) { try { liste = evZonenListe(inst, r.e, r.L); } catch (x) {} }
+        specs.push({ key: 'evz', kind: 'overlay', plots: [], zones: liste, zoneOpts: { roh: true } });
+        var A = window.ApexIndicators, b = r.e.bars;
+        if (A && b && b.n) {
+          if (!b.__sym) b.__sym = r.L.sym;
+          if ((cfg.ind || []).length) { try { specs = specs.concat(A.chartSpecs(b, cfg.ind) || []); } catch (x) {} }
+          if (cfg.hm) { try { var hq = A.fillParams('lhm', null), hr = A.compute(b, 'lhm', hq); if (hr && hr.heatmap) specs.push({ key: 'evhm', kind: 'overlay', plots: [], heatmap: { q: hq, model: hr.heatmap } }); } catch (x) {} }
+        }
+        try { inst.setIndicators(specs); } catch (x) {}
+        var fx = m.el.querySelector('.tv-ev-mini-fx'); if (fx) { var n = (cfg.ind || []).length + (cfg.hm ? 1 : 0); fx.innerHTML = 'ƒx' + (n ? '<i>' + n + '</i>' : ''); fx.classList.toggle('on', !!m.popAuf); }
       };
       if (m.inst) { los(m.inst); return; }
       if (m.laden || !window.ApexChart) return;
@@ -86759,6 +86795,69 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       }).catch(function () { m.laden = null; info.textContent = 'chart could not load'; });
     }).catch(function (x) { info.textContent = (x && x.message) || 'no candles'; });
   }
+  /* ── Indikatoren je Chart-Fenster ──
+     Fenster 1 ist der Haupt-Chart (gemeinsame Liste mit dem Market Replay).
+     Die Neben-Charts 2–4 haben je eine eigene Auswahl, gemerkt pro Platz. */
+  function paneCfg(i) {
+    var c = null; try { c = JSON.parse(lies('evPane' + i, 'null')); } catch (e) {}
+    if (!c || typeof c !== 'object') c = { zones: true, hm: false, ind: [] };
+    if (!Array.isArray(c.ind)) c.ind = [];
+    return c;
+  }
+  function paneSichern(i, c) { merke('evPane' + i, JSON.stringify({ zones: !!c.zones, hm: !!c.hm, ind: (c.ind || []).slice(0, 8) })); }
+  function panePopHtml(m) {
+    var c = paneCfg(m.i), A = window.ApexIndicators; if (!A) return '';
+    var gruppen = { overlay: [], pane: [] };
+    Object.keys(A.DEF).forEach(function (id) { var d = A.DEF[id]; if (!d || d.footprint || d.heatmap) return; (gruppen[d.group === 'pane' ? 'pane' : 'overlay']).push([id, d.label]); });
+    var opt = function (a) { return a.sort(function (x, y) { return x[1].localeCompare(y[1]); }).map(function (x) { return '<option value="' + x[0] + '">' + escHtml(x[1]) + '</option>'; }).join(''); };
+    var name = function (it) { var d = A.DEF[it.id] || {}; var p = it.params || {}; return escHtml(d.label || it.id) + (isFinite(p.p) ? ' ' + p.p : ''); };
+    return '<div class="tv-ev-mini-pop" data-mpop="' + m.i + '">' +
+      '<div class="h"><b>Chart ' + (m.i + 2) + ' · ' + escHtml(m.tf) + '</b><button type="button" data-mpa="zu" aria-label="Close">×</button></div>' +
+      '<div class="lyr"><button type="button" data-mpa="zones" class="tv-ev-lt' + (c.zones ? ' on' : '') + '"><i></i><span><b>Zones</b></span></button>' +
+        '<button type="button" data-mpa="hm" class="tv-ev-lt' + (c.hm ? ' on' : '') + '"><i></i><span><b>Heatmap</b></span></button></div>' +
+      '<div class="lst">' + (c.ind.length ? c.ind.map(function (it, k) {
+        return '<span class="it">' + name(it) + (isFinite((it.params || {}).p) ? '<input type="number" min="1" max="500" value="' + it.params.p + '" data-mpp="' + k + '" aria-label="Period">' : '') +
+          '<button type="button" data-mpa="del" data-k="' + k + '" aria-label="Remove">×</button></span>'; }).join('') : '<em>No indicators on this chart</em>') + '</div>' +
+      '<select data-mpadd aria-label="Add an indicator"><option value="">＋ Add indicator…</option><optgroup label="On the candles">' + opt(gruppen.overlay) + '</optgroup><optgroup label="Below the chart (RSI, MACD …)">' + opt(gruppen.pane) + '</optgroup></select>' +
+      '<div class="act"><button type="button" data-mpa="copy">Copy from chart 1</button><button type="button" data-mpa="clear">Clear</button></div>' +
+    '</div>';
+  }
+  function paneNeu(m) {
+    var alt = m.el.querySelector('.tv-ev-mini-pop'); if (alt) alt.remove();
+    if (m.popAuf) m.el.insertAdjacentHTML('beforeend', panePopHtml(m));
+    evMiniZeichnen(m);
+  }
+  document.addEventListener('click', function (ev) {
+    var t = ev.target; if (!t || !t.closest) return;
+    var fx = t.closest('[data-mfx]');
+    if (fx) { var m = EV.mehr[+fx.getAttribute('data-mfx')]; if (!m) return; EV.mehr.forEach(function (q) { if (q !== m && q.popAuf) { q.popAuf = false; paneNeu(q); } }); m.popAuf = !m.popAuf; paneNeu(m); return; }
+    var a = t.closest('[data-mpa]'); if (!a) return;
+    var pop = a.closest('[data-mpop]'), mm = pop && EV.mehr[+pop.getAttribute('data-mpop')]; if (!mm) return;
+    var c = paneCfg(mm.i), w = a.getAttribute('data-mpa');
+    if (w === 'zu') { mm.popAuf = false; paneNeu(mm); return; }
+    if (w === 'zones') c.zones = !c.zones;
+    if (w === 'hm') c.hm = !c.hm;
+    if (w === 'del') c.ind.splice(+a.getAttribute('data-k'), 1);
+    if (w === 'clear') { c.ind = []; c.hm = false; }
+    if (w === 'copy' && window.ApexIndicatorUI) { c.ind = JSON.parse(JSON.stringify(window.ApexIndicatorUI.list() || [])).filter(function (x) { return x.id !== 'lhm'; }).slice(0, 8); c.hm = evHmAn(); }
+    paneSichern(mm.i, c); paneNeu(mm);
+  });
+  document.addEventListener('change', function (ev) {
+    var t = ev.target; if (!t || !t.closest) return;
+    var pop = t.closest('[data-mpop]'); if (!pop) return;
+    var mm = EV.mehr[+pop.getAttribute('data-mpop')]; if (!mm || !window.ApexIndicators) return;
+    var c = paneCfg(mm.i);
+    if (t.hasAttribute('data-mpadd') && t.value) {
+      if (c.ind.length >= 8) { if (window.showToast) showToast('Up to 8 indicators per chart'); t.value = ''; return; }
+      c.ind.push({ id: t.value, params: window.ApexIndicators.fillParams(t.value, null) });
+    } else if (t.hasAttribute('data-mpp')) {
+      var k = +t.getAttribute('data-mpp'), v = Math.max(1, Math.min(500, parseInt(t.value, 10) || 1));
+      if (c.ind[k]) c.ind[k].params = Object.assign({}, c.ind[k].params, { p: v });
+    } else return;
+    paneSichern(mm.i, c); paneNeu(mm);
+  });
+  TV._paneCfg = paneCfg;
+
   /* Fadenkreuz: dieselbe ZEIT auf allen Charts (jeweils die Kerze, die sie enthaelt). */
   function evKreuzSync(von, bar, drin) {
     if (EV._syncLaeuft) return;
@@ -90187,7 +90286,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Instrument oder Zeiteinheit im laufenden Chart wechseln — ohne die
      Buehne abzubauen. Zeichnungen haengen am Symbol, deshalb bekommt auch
      die Zeichenebene das neue Symbol mitgeteilt. */
-  LC.wechseln = function (sym, tf) {
+  LC.wechseln = function (sym, tf, fremd) {
     if (!LC.on || !LC.chart) return;
     var p = document.getElementById('lcPicker');
     if (p) p.style.display = 'none';
@@ -90198,7 +90297,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var von = bis - LC.cnt * minuten(neuTf) * 60000 * 1.6;
     var btn = document.getElementById('lcSymNow');
     if (btn) btn.textContent = 'lädt…';
-    holeKerzen(neuSym, neuTf, von, bis).then(function (bars) {
+    var holen = function () { return holeKerzen(neuSym, neuTf, von, bis).then(function (b) { if (!b.length) throw new Error('keine Kerzen'); return b; }); };
+    (fremd && fremd.length ? holen().catch(function () { return fremd; }) : holen()).then(function (bars) {
       if (!bars.length) throw new Error('keine Kerzen');
       LC.bars = bars.slice(-LC.cnt);
       LC.sym = neuSym; LC.tf = neuTf;
@@ -90245,6 +90345,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     });
   }
 
+  LC.setzeKerzen = function (liste) {
+    if (!LC.on || !LC.chart || !liste || !liste.length) return;
+    LC.bars = liste.slice(-LC.cnt);
+    try { LC.chart.setBars(spalten(LC.bars)); } catch (e) {}
+  };
+
   LC.render = function () {
     seiteBauen();
     var b = document.getElementById('lcBody');
@@ -90253,8 +90359,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   };
 
   // ── Start ──────────────────────────────────────────────────────────
-  LC.start = function (symWahl) {
+  LC.start = function (symWahl, opt) {
     if (LC.on) return;
+    opt = opt || {};
     var w = letzteWahl();
     var sym = symWahl || w.sym || 'XAUUSD';
     var tf  = LC.tfWahl || w.tf || '1min';
@@ -90263,11 +90370,15 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     LC.cnt = cnt;
     var note = document.getElementById('lcNote');
     if (note) note.textContent = 'Lade ' + sym + ' …';
+    LC.fehler = '';
 
     var bis = Date.now();
     var von = bis - cnt * minuten(tf) * 60000 * 1.6;   // Puffer fuer Marktpausen
 
-    holeKerzen(sym, tf, von, bis).then(function (bars) {
+    /* opt.bars: Kerzen, die jemand anders mitgibt (Chart-Session, 15.10.2026)
+       — wer das Instrument im eigenen Datentarif nicht hat, sieht trotzdem
+       den Chart des Vortragenden. */
+    (opt.bars && opt.bars.length ? Promise.resolve(opt.bars) : holeKerzen(sym, tf, von, bis)).then(function (bars) {
       if (!bars.length) throw new Error('Keine Kerzen erhalten — Symbol oder Zeiteinheit prüfen.');
       LC.bars = bars.slice(-cnt);
       LC.sym = sym; LC.tf = tf; LC.pollS = pollS;
@@ -90302,6 +90413,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       stromStarten();
       takt();
     }).catch(function (e) {
+      LC.fehler = (e && e.message) || 'Fehler';
       if (note) note.innerHTML = '<b style="color:var(--loss)">' + (e && e.message ? e.message : 'Fehler') + '</b>';
     });
   };
@@ -90342,7 +90454,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       top: [document.getElementById('lcSwitch')].filter(Boolean),
       topRight: [quote],
       exit: exit,
-      rail: gruppen,
+      /* Die ganze Leiste umziehen, nicht nur ihre Gruppen (15.10.2026):
+         mountToolbar haengt seinen einzigen Klick-Empfaenger an #lcTools.
+         Wanderten nur die .apd-g-Gruppen in die Spalte, kam kein Klick mehr
+         an — man konnte im Live-Chart (und damit in der Chart-Session)
+         weder ein Werkzeug waehlen noch zeichnen. Das Replay macht es
+         genauso (rail: [#rpTools]). */
+      rail: tools ? [tools] : gruppen,
       panels: [document.getElementById('lcInd'), document.getElementById('lcStyle')].filter(Boolean),
       onExit: function () { LC.stop(); }
     });
@@ -103732,7 +103850,7 @@ function trackCalc(jd, opt) {
    ════════════════════════════════════════════════════════════════════ */
 (function(){
   'use strict';
-  var LS = { mode:null, sid:null, unsub:null, loop:null, last:'', state:null, userMoved:false, applying:false, beat:null };
+  var LS = { mode:null, sid:null, unsub:null, loop:null, last:'', state:null, userMoved:false, applying:false, beat:null, lastPush:0, barsAt:0, barsKey:'', barsUnsub:null, fremd:null, hooked:null, chat:[], chatUnsub:null, chatOpen:false, unread:0, seen:0 };
   window.ApexLiveSession = LS;
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function toast(m){ try{ if(window.showToast) showToast(m); }catch(e){} }
@@ -103742,6 +103860,16 @@ function trackCalc(jd, opt) {
   function LC(){ return window.ApexLive; }
   function FV(){ return firebase.firestore.FieldValue; }
   function docRef(sid){ return window.db.collection('apexServers').doc(sid).collection('live').doc('session'); }
+  function barsRef(sid){ return window.db.collection('apexServers').doc(sid).collection('live').doc('bars'); }
+  /* Gilt eine Session als laufend? Der Vortragende meldet sich alle 20 s
+     (updatedAt). Schliesst er den Tab oder stuerzt die App ab, bliebe on:true
+     sonst fuer immer stehen und Mitglieder folgten einem toten Chart. */
+  var STALE_MS = 75000;
+  function alive(st){ return !!(st && st.on && (Date.now() - (+st.updatedAt || 0)) < STALE_MS); }
+  /* Zeichnungen als JSON-Text: Firestore lehnt undefined und verschachtelte
+     Listen ab — ein einziges Fib-Objekt mit so einem Feld hat sonst den
+     ganzen Start mit einer stummen Fehlermeldung abgebrochen. */
+  function shapesOf(st){ if(!st) return []; if(typeof st.shapesJ==='string'){ try{ return JSON.parse(st.shapesJ)||[]; }catch(e){ return []; } } return st.shapes||[]; }
   function css(){
     if(document.getElementById('apex-ls-css')) return;
     var st=document.createElement('style'); st.id='apex-ls-css';
@@ -103755,10 +103883,109 @@ function trackCalc(jd, opt) {
 '.ls-btn.bad{color:#ff8a8f;border-color:rgba(229,72,77,.45)}'+
 '.cs-livebar{display:flex;align-items:center;gap:10px;margin:8px 12px 0;padding:9px 12px;border-radius:10px;border:0.5px solid rgba(229,72,77,.45);background:rgba(229,72,77,.07);font-size:12.5px;color:var(--ink2)}'+
 '.cs-livebar span.t{flex:1;min-width:0}.cs-livebar b{color:var(--ink)}'+
-'@media(max-width:600px){.ls-bar .s{display:none}}';
+'.ls-btn{flex:none}.ls-bar>span:nth-child(2){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+'.ls-btn.lsi{padding:6px 9px;display:inline-flex;align-items:center;gap:5px}.ls-btn svg{width:14px;height:14px;flex:none}'+
+'@media(max-width:600px){.ls-bar{gap:6px;padding:6px 8px 6px 10px}.ls-btn{padding:6px 8px}.ls-btn .t{display:none}}'+
+'.ls-btn.on{border-color:var(--gold-line,rgba(212,175,55,.45));color:var(--gold,#d4af37)}.ls-btn.off{color:#ff8a8f}'+
+'.ls-btn i{font-style:normal;min-width:16px;height:16px;border-radius:8px;background:#e5484d;color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}'+
+'.ls-chat{position:fixed;right:16px;bottom:74px;z-index:99989;width:min(340px,calc(100vw - 24px));height:min(420px,calc(100vh - 160px));display:flex;flex-direction:column;border-radius:14px;background:rgba(14,16,21,.96);border:0.5px solid rgba(255,255,255,.14);box-shadow:0 16px 48px rgba(0,0,0,.5);color:#eef0f4;font-size:13px;backdrop-filter:blur(8px)}'+
+'.ls-chat .h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:0.5px solid rgba(255,255,255,.1)}.ls-chat .h b{flex:1}.ls-chat .h button{background:none;border:0;color:#9aa0ad;font-size:18px;cursor:pointer}'+
+'.ls-chat .pin{margin:8px 10px 0;padding:8px 10px;border-radius:9px;background:rgba(212,175,55,.12);border:0.5px solid rgba(212,175,55,.4);font-size:12.5px;display:flex;gap:8px;align-items:flex-start}.ls-chat .pin span{flex:1;white-space:pre-wrap;word-break:break-word}.ls-chat .pin button{background:none;border:0;color:#9aa0ad;cursor:pointer}'+
+'.ls-chat .ms{flex:1;overflow:auto;padding:8px 12px;display:flex;flex-direction:column;gap:7px}'+
+'.ls-chat .m{line-height:1.35;word-break:break-word}.ls-chat .m b{color:#d4af37;margin-right:5px}.ls-chat .m.p b{color:#ff8a8f}.ls-chat .m .x{opacity:0;background:none;border:0;color:#9aa0ad;cursor:pointer;font-size:11px;margin-left:4px}.ls-chat .m:hover .x{opacity:1}'+
+'.ls-chat .e{color:#9aa0ad;text-align:center;margin:auto;font-size:12.5px}'+
+'.ls-chat form{display:flex;gap:6px;padding:10px;border-top:0.5px solid rgba(255,255,255,.1)}.ls-chat input{flex:1;min-width:0;background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.16);border-radius:9px;color:#eef0f4;padding:8px 10px;font:inherit}'+
+'.ls-chat form button{background:var(--gold,#d4af37);border:0;border-radius:9px;color:#0b0c0f;font-weight:700;padding:0 12px;cursor:pointer}'+
+'@media(max-width:600px){.ls-bar .s{display:none}.ls-chat{right:8px;left:8px;width:auto;bottom:70px;height:min(360px,calc(100vh - 150px))}}';
     document.head.appendChild(st);
   }
   function bar(html){ css(); var b=document.getElementById('lsBar'); if(!html){ if(b) b.remove(); return; } if(!b){ b=document.createElement('div'); b.id='lsBar'; b.className='ls-bar'; b.setAttribute('role','status'); document.body.appendChild(b); } b.innerHTML=html; }
+  function chatRef(sid){ return docRef(sid).collection('chat'); }
+  /* ── Sprache: der Voice-Raum des Servers ──
+     Vorher nur, wenn der Vortragende zufaellig schon in einem Raum sass, und
+     „Join voice" ging nur bei offenem Server. Jetzt hat jede Session einen
+     Raum, und Beitreten klappt direkt vom Chart aus. */
+  function inRoom(){ var C=CS(), st=LS.state||{}; return !!(C&&C.voice&&st.room&&C.voice.room===st.room&&C.voice.sid===LS.sid); }
+  function voiceBtns(){
+    var C=CS(), st=LS.state||{}; if(!C||!st.room) return '';
+    if(!inRoom()) return '<button class="ls-btn lsi" onclick="ApexLiveSession.voice()">'+svg('volume')+'<span class="t"> Join voice</span></button>';
+    var on=C.voice.micOn!==false&&!!C.voice.localStream;
+    return '<button class="ls-btn lsi '+(on?'on':'off')+'" onclick="ApexLiveSession.mic()" aria-label="'+(on?'Mute':'Unmute')+'" title="'+(on?'Mute your mic':'Unmute')+'">'+svg(on?'mic':'mute')+'</button>'+
+      '<button class="ls-btn lsi" onclick="ApexLiveSession.voiceLeave()" title="Leave voice" aria-label="Leave voice">'+svg('volume')+'<span class="t"> Leave</span></button>';
+  }
+  function chatBtn(){ return '<button class="ls-btn lsi'+(LS.chatOpen?' on':'')+'" onclick="ApexLiveSession.chatToggle()">'+svg('chat')+'<span class="t"> Chat</span>'+(LS.unread&&!LS.chatOpen?'<i>'+Math.min(LS.unread,99)+'</i>':'')+'</button>'; }
+  function repaint(){ if(LS.mode==='present') paintPresent(); else if(LS.mode==='follow') paintFollow(); }
+  LS.voice=function(){
+    var C=CS(), st=LS.state; if(!C||!st||!LS.sid) return;
+    var room=st.room; if(!room){ toast('The presenter has no voice room'); return; }
+    Promise.resolve(C.joinVoiceAt(LS.sid, room)).then(function(){ setTimeout(repaint, 300); });
+  };
+  LS.mic=function(){ var C=CS(); if(C&&C.toggleMic) C.toggleMic(); setTimeout(repaint, 200); };
+  LS.voiceLeave=function(){ var C=CS(); if(C&&C.leaveVoice) C.leaveVoice(); setTimeout(repaint, 300); };
+
+  /* ── Chat am Chart ──
+     Fragen stellen, ohne den Chart zu verlassen. Nachrichten gehoeren zu
+     genau einer Session (Feld s = startedAt) — eine neue Session beginnt
+     leer. Der Vortragende kann eine Nachricht oben anheften. */
+  function chatStart(){
+    chatStop(); if(!LS.sid) return;
+    var sid=LS.sid;
+    LS.chatUnsub=chatRef(sid).orderBy('ts','desc').limit(80).onSnapshot(function(q){
+      var st=LS.state||{}, list=[];
+      q.forEach(function(d){ var m=d.data(); if(m&&m.s===st.startedAt){ m.id=d.id; list.push(m); } });
+      list.sort(function(x,y){ return (x.ts||0)-(y.ts||0); });
+      var neu=list.filter(function(m){ return m.ts>LS.seen&&m.from!==me(); }).length;
+      LS.chat=list;
+      if(LS.chatOpen){ LS.seen=Date.now(); LS.unread=0; } else if(neu){ LS.unread=neu; }
+      chatPaint(); repaint();
+    }, function(){});
+  }
+  function chatStop(){ if(LS.chatUnsub){ try{ LS.chatUnsub(); }catch(e){} LS.chatUnsub=null; } LS.chat=[]; LS.unread=0; LS.seen=0; var p=document.getElementById('lsChat'); if(p) p.remove(); }
+  function chatPaint(){
+    var p=document.getElementById('lsChat');
+    if(!LS.chatOpen||!LS.mode){ if(p) p.remove(); return; }
+    css();
+    var st=LS.state||{}, host=LS.mode==='present', unten=true;
+    if(!p){ p=document.createElement('div'); p.id='lsChat'; p.className='ls-chat'; p.setAttribute('role','dialog'); p.setAttribute('aria-label','Session chat'); document.body.appendChild(p);
+      p.innerHTML='<div class="h"><b>Session chat</b><button type="button" onclick="ApexLiveSession.chatToggle()" aria-label="Close">×</button></div><div class="pinbox"></div><div class="ms" role="log" aria-live="polite"></div>'+
+        '<form onsubmit="event.preventDefault();ApexLiveSession.send(this)"><input maxlength="500" placeholder="Ask or comment…" aria-label="Message"><button type="submit">Send</button></form>';
+    } else { var ms0=p.querySelector('.ms'); unten=ms0.scrollHeight-ms0.scrollTop-ms0.clientHeight<40; }
+    p.querySelector('.pinbox').innerHTML=st.pin&&st.pin.text?'<div class="pin">'+svg('pin')+'<span>'+esc(st.pin.text)+'</span>'+(host?'<button type="button" onclick="ApexLiveSession.pin(null)" aria-label="Unpin">×</button>':'')+'</div>':'';
+    var ms=p.querySelector('.ms');
+    ms.innerHTML=LS.chat.length?LS.chat.map(function(m){
+      var vom=m.from===st.by;
+      return '<div class="m'+(vom?' p':'')+'"><b class="notranslate" translate="no">'+esc(m.fromName||'Trader')+'</b>'+esc(m.text)+
+        (host?'<button type="button" class="x" onclick="ApexLiveSession.pin(\''+esc(m.id)+'\')">Pin</button>':'')+
+        ((host||m.from===me())?'<button type="button" class="x" onclick="ApexLiveSession.del(\''+esc(m.id)+'\')">Delete</button>':'')+'</div>';
+    }).join(''):'<div class="e">No messages yet — ask about the setup here.</div>';
+    if(unten) ms.scrollTop=ms.scrollHeight;
+  }
+  LS.chatToggle=function(){ LS.chatOpen=!LS.chatOpen; if(LS.chatOpen){ LS.unread=0; LS.seen=Date.now(); } chatPaint(); repaint(); if(LS.chatOpen){ var i=document.querySelector('#lsChat input'); if(i) i.focus(); } };
+  LS.send=function(f){
+    var i=f&&f.querySelector('input'), t=i&&String(i.value||'').trim(); if(!t||!LS.sid||!LS.state) return;
+    i.value='';
+    var m={ from:me(), fromName:String(window.currentName||'Trader').slice(0,40), text:t.slice(0,500), ts:Date.now(), s:LS.state.startedAt||0 };
+    chatRef(LS.sid).add(m).then(function(){
+      /* Demo-Speicher meldet keine Aenderungen — Nachricht sofort zeigen. */
+      if(window.APEX_DEMO && !LS.chat.some(function(x){ return x.ts===m.ts&&x.from===m.from; })){ LS.chat.push(Object.assign({ id:'d'+m.ts }, m)); chatPaint(); }
+    }).catch(function(e){ toast(/permission/i.test((e&&e.message)||'')?'You cannot write here (muted, or the rules are not published)':'Message not sent'); i.value=t; });
+  };
+  LS.del=function(id){ if(!LS.sid) return; chatRef(LS.sid).doc(id).delete().catch(function(){}); LS.chat=LS.chat.filter(function(m){ return m.id!==id; }); chatPaint(); };
+  LS.pin=function(id){
+    if(LS.mode!=='present'||!LS.sid) return;
+    var m=id?LS.chat.filter(function(x){ return x.id===id; })[0]:null;
+    var pin=m?{ text:String(m.text).slice(0,500), by:m.fromName||'' }:null;
+    docRef(LS.sid).update({ pin:pin, updatedAt:Date.now() }).catch(function(){});
+    if(LS.state) LS.state.pin=pin; chatPaint();
+  };
+  LS.pinText=function(){
+    if(LS.mode!=='present') return;
+    window.ApexDialog.prompt('Pin a note for everyone (e.g. entry, stop, target)', (LS.state&&LS.state.pin&&LS.state.pin.text)||'').then(function(t){
+      if(t===null||!LS.sid) return; var pin=String(t||'').trim()?{ text:String(t).trim().slice(0,500), by:window.currentName||'' }:null;
+      docRef(LS.sid).update({ pin:pin, updatedAt:Date.now() }).catch(function(){}); if(LS.state) LS.state.pin=pin; chatPaint();
+    });
+  };
+
   function viewers(st){ var v=(st&&st.viewers)||{}, now=Date.now(); return Object.keys(v).filter(function(u){ return now-v[u]<45000; }).length; }
 
   /* Der Live-Chart muss stehen, bevor gesendet oder gefolgt wird. */
@@ -103768,44 +103995,89 @@ function trackCalc(jd, opt) {
     if(L.on && L.chart && L.draw) return Promise.resolve(L);
     try{ L.render(); }catch(e){}
     if(tf) L.tfWahl=tf;
-    L.start(sym);
-    return new Promise(function(res, rej){ var n=0; (function w(){ if(L.on&&L.chart&&L.draw) return res(L); if(++n>60) return rej(new Error('The live chart did not load')); setTimeout(w, 250); })(); });
+    L.fehler=''; L.start(sym);
+    /* Scheitert das Laden (z. B. Instrument nicht im Datentarif), sofort
+       melden — vorher wartete man 15 s auf eine nichtssagende Meldung. */
+    return new Promise(function(res, rej){ var n=0; (function w(){ if(L.on&&L.chart&&L.draw) return res(L); if(L.fehler) return rej(new Error(L.fehler)); if(++n>60) return rej(new Error('The live chart did not load')); setTimeout(w, 250); })(); });
   }
   function ts(L){ try{ return L.chart.chart.timeScale(); }catch(e){ return null; } }
   function snapshot(L){
     var r=null, t=ts(L); try{ r=t&&t.getVisibleRange(); }catch(e){}
-    var shapes=((L.draw&&L.draw.shapes)||[]).slice(0,200);
-    return { sym:L.sym, tf:L.tf, shapes:shapes, range:r&&r.from!=null?{ from:+r.from, to:+r.to }:null };
+    var shapes=((L.draw&&L.draw.shapes)||[]).slice(0,200), j='[]';
+    try{ j=JSON.stringify(shapes); }catch(e){}
+    if(j.length>600000) j='[]';
+    return { sym:L.sym, tf:L.tf, shapesJ:j, range:r&&r.from!=null?{ from:+r.from, to:+r.to }:null };
   }
 
   /* ── Vorführen ── */
   LS.present=function(){
     var C=CS(), s=C&&C.cur; if(!s||!me()) return;
     if(!(C.can('announce')||C.can('manageLibrary'))){ toast('You need “Post in announcements” to present'); return; }
-    var room=(C.voice&&C.voice.room)||'';
+    if(LS.mode) LS.stop();
+    /* Sitzt man schon in einem Raum dieses Servers, bleibt es der; sonst
+       der erste Raum des Servers. */
+    var room=(C.voice&&C.voice.room&&C.voice.sid===s.id)?C.voice.room:(((C.voiceRooms&&C.voiceRooms(s))||[])[0]||{}).id||'';
     window.ApexDialog.prompt('What are you showing? (shown to the members)', 'Live: '+((LC()&&LC().sym)||'XAUUSD')).then(function(title){
       if(title===null) return;
       var sid=s.id;
-      ensureChart().then(function(L){
+      ensureChart().catch(function(){
+        /* Zuletzt gewaehltes Instrument hat keine Daten: mit Gold starten,
+           der Vortragende kann danach frei wechseln. */
+        toast('Your last instrument has no data — starting with Gold');
+        return ensureChart('XAUUSD');
+      }).then(function(L){
         var st=snapshot(L);
+        st.startedAt=Date.now();
         return docRef(sid).set(Object.assign({ on:true, by:me(), byName:window.currentName||'Coach', title:String(title||'').slice(0,80), room:room,
-          startedAt:Date.now(), updatedAt:Date.now(), viewers:{}, serverName:s.name||'' }, st)).then(function(){
-          LS.mode='present'; LS.sid=sid; LS.last=JSON.stringify(st);
+          updatedAt:Date.now(), viewers:{}, pin:null, serverName:s.name||'' }, st)).then(function(){
+          LS.mode='present'; LS.sid=sid; LS.last=JSON.stringify(st); LS.lastPush=Date.now(); LS.barsAt=0; LS.barsKey='';
           if(LS.loop) clearInterval(LS.loop);
-          LS.loop=setInterval(function(){ pushState(L); }, 900);
-          LS.unsub=docRef(sid).onSnapshot(function(d){ LS.state=d.exists?d.data():null; paintPresent(); }, function(){});
+          LS.loop=setInterval(function(){ pushState(LC()); }, 900);
+          pushBars(L, true);
+          LS.state={ on:true, by:me(), startedAt:st.startedAt, room:room, title:title };
+          chatStart();
+          if(room && C.joinVoiceAt) Promise.resolve(C.joinVoiceAt(sid, room)).then(function(){ setTimeout(paintPresent, 400); });
+          LS.unsub=docRef(sid).onSnapshot(function(d){ if(d.exists) LS.state=d.data(); paintPresent(); chatPaint(); }, function(){});
           announce(sid, title);
           paintPresent(); toast('You are presenting — members see your chart');
         });
-      }).catch(function(e){ toast('Could not start: '+((e&&e.message)||'')); });
+      }).catch(function(e){ toast('Could not start: '+(/permission/i.test((e&&e.message)||'')?'no permission (are the latest server rules published?)':((e&&e.message)||''))); });
     });
   };
   function pushState(L){
-    if(LS.mode!=='present'||!L.on) return;
-    var st=snapshot(L), j=JSON.stringify(st); if(j===LS.last) return;
-    LS.last=j; st.updatedAt=Date.now();
+    if(LS.mode!=='present') return;
+    /* Live-Chart geschlossen = Session vorbei. Vorher lief die Schleife
+       ins Leere und die Mitglieder starrten auf einen eingefrorenen Chart. */
+    if(!L||!L.on||!L.chart){ toast('Chart closed — the session has ended'); LS.stop(); return; }
+    var st=snapshot(L), j=JSON.stringify(st), now=Date.now();
+    pushBars(L, false);
+    if(j===LS.last){
+      if(now-LS.lastPush>20000){ LS.lastPush=now; docRef(LS.sid).update({ updatedAt:now }).catch(function(){}); }
+      return;
+    }
+    LS.last=j; LS.lastPush=now; st.updatedAt=now;
+    var C=CS(); if(C&&C.voice&&C.voice.room&&C.voice.sid===LS.sid&&LS.state&&C.voice.room!==LS.state.room) st.room=C.voice.room;
     docRef(LS.sid).update(st).catch(function(){});
   }
+  /* Kerzen fuer Mitglieder, deren eigener Datentarif das Instrument nicht
+     hat (Indizes im Gratis-Feed, Broker-Kurse des Coaches). Klein gehalten:
+     die letzten 300 Kerzen als Zahlenlisten, hoechstens alle 15 s. */
+  function pushBars(L, sofort){
+    if(LS.mode!=='present'||!L||!L.bars||!L.bars.length) return;
+    var key=L.sym+'|'+L.tf, now=Date.now();
+    if(!sofort && key===LS.barsKey && now-LS.barsAt<15000) return;
+    LS.barsKey=key; LS.barsAt=now;
+    var b=L.bars.slice(-300), r=function(x){ return Math.round(x*1e6)/1e6; };
+    barsRef(LS.sid).set({ by:me(), sym:L.sym, tf:L.tf, at:now,
+      t:b.map(function(x){ return x.t; }), o:b.map(function(x){ return r(x.o); }), h:b.map(function(x){ return r(x.h); }),
+      l:b.map(function(x){ return r(x.l); }), c:b.map(function(x){ return r(x.c); }) }).catch(function(){});
+  }
+  function barsAus(d){
+    if(!d||!Array.isArray(d.t)) return null;
+    var out=[]; for(var i=0;i<d.t.length;i++) out.push({ t:+d.t[i], o:+d.o[i], h:+d.h[i], l:+d.l[i], c:+d.c[i], v:0 });
+    return out.length?out:null;
+  }
+  window.addEventListener('pagehide', function(){ if(LS.mode==='present'&&LS.sid){ try{ docRef(LS.sid).set({ on:false, endedAt:Date.now() }, { merge:true }); }catch(e){} } });
   function announce(sid, title){
     try{
       var C=CS(), chans=(C.chans||[]), c=chans.filter(function(x){ return x.kind==='announce'; })[0]; if(!c) return;
@@ -103819,64 +104091,111 @@ function trackCalc(jd, opt) {
     if(LS.mode!=='present') return;
     var st=LS.state||{};
     bar('<span class="ls-dot"></span><span><b>Presenting</b> <span class="s">· '+esc(st.title||'')+'</span></span><span class="s">'+viewers(st)+' following</span>'+
+      voiceBtns()+chatBtn()+'<button class="ls-btn lsi" onclick="ApexLiveSession.pinText()" title="Pin a note for everyone" aria-label="Pin a note">'+svg('pin')+'</button>'+
       '<button class="ls-btn bad" onclick="ApexLiveSession.stop()">End session</button>');
   }
 
   /* ── Folgen ── */
   LS.follow=function(sid){
     sid=sid||(CS()&&CS().cur&&CS().cur.id); if(!sid) return;
-    docRef(sid).get().then(function(d){
-      var st=d.exists?d.data():null; if(!st||!st.on){ toast('The session has ended'); return; }
-      ensureChart(st.sym, st.tf).then(function(L){
+    if(LS.mode==='present'){ toast('You are presenting — end your session first'); return; }
+    if(LS.mode) LS.stop();
+    toast('Opening the presenter’s chart…');
+    Promise.all([docRef(sid).get(), barsRef(sid).get().catch(function(){ return null; })]).then(function(res){
+      var d=res[0], st=d.exists?d.data():null; if(!alive(st)){ toast('The session has ended'); return; }
+      var bd=res[1]&&res[1].exists?res[1].data():null;
+      LS.fremd=(bd&&bd.sym===st.sym&&bd.tf===st.tf)?barsAus(bd):null;
+      LS._mitFremd=false;
+      ensureChart(st.sym, st.tf).catch(function(e){
+        /* Eigener Feed hat das Instrument nicht: mit den Kerzen des
+           Vortragenden starten statt mit einer Fehlermeldung aufzugeben. */
+        var L=LC(); if(!LS.fremd||!L) throw e;
+        LS._mitFremd=true;
+        try{ if(L.on) L.stop(); }catch(x){}
+        L.tfWahl=st.tf; L.start(st.sym, { bars:LS.fremd });
+        return new Promise(function(res2, rej){ var n=0; (function w(){ if(L.on&&L.chart&&L.draw) return res2(L); if(++n>40) return rej(e); setTimeout(w, 250); })(); });
+      }).then(function(L){
         LS.mode='follow'; LS.sid=sid; LS.userMoved=false;
         L.draw.scope='live-session';
-        var t=ts(L);
-        if(t && !LS._rangeHooked){ LS._rangeHooked=true; t.subscribeVisibleTimeRangeChange(function(){ if(LS.mode==='follow' && !LS.applying){ LS.userMoved=true; paintFollow(); } }); }
+        try{ L.draw.setTool('cursor'); }catch(e){}
+        hookRange(L);
         if(LS.unsub) LS.unsub();
         LS.unsub=docRef(sid).onSnapshot(function(x){
           var s2=x.exists?x.data():null; LS.state=s2;
           if(!s2||!s2.on){ toast('The presenter ended the session'); LS.stop(true); return; }
-          apply(L, s2); paintFollow();
+          var L2=LC(); if(!L2||!L2.on){ LS.stop(true); return; }
+          hookRange(L2); apply(L2, s2); paintFollow(); chatPaint();
+        }, function(e){ toast('Lost the session: '+((e&&e.message)||'')); LS.stop(true); });
+        if(LS.barsUnsub) LS.barsUnsub();
+        LS.barsUnsub=barsRef(sid).onSnapshot(function(x){
+          var bd2=x.exists?x.data():null, L3=LC(); if(!bd2||!L3||!L3.on) return;
+          LS.fremd=barsAus(bd2);
+          /* Nur nachziehen, wenn dieser Chart mit fremden Kerzen laeuft
+             (eigener Feed fehlt) — sonst hat jeder seine eigenen Kurse. */
+          if(L3.quelle==='Vortragender'&&bd2.sym===L3.sym&&bd2.tf===L3.tf&&LS.fremd) L3.setzeKerzen(LS.fremd);
         }, function(){});
+        if(LS._mitFremd){ L.quelle='Vortragender'; toast('Your data feed does not have '+st.sym+' — showing the presenter’s candles'); }
+        LS.state=st; chatStart();
         beat(); if(LS.beat) clearInterval(LS.beat); LS.beat=setInterval(beat, 20000);
         if(st.room && CS() && CS().voice && CS().voice.room!==st.room && CS().cur && CS().cur.id===sid){ /* Voice nur auf Wunsch — der Knopf steht in der Leiste. */ }
       }).catch(function(e){ toast('Could not open the chart: '+((e&&e.message)||'')); });
-    }).catch(function(){ toast('Could not load the session'); });
+    }).catch(function(e){ toast(/permission/i.test((e&&e.message)||'')?'No access to this session — join the server first':'Could not load the session'); });
   };
+  /* Eigenes Scrollen erkennen — je Chart-Instanz neu einhaengen. Vorher hing
+     der Haken nur am ersten Chart; nach einem Neustart des Live-Charts
+     sprang die Ansicht ungebremst zurueck, obwohl man selbst scrollte. */
+  function hookRange(L){
+    /* Echte Eingaben statt Bereichs-Ereignisse: setBars, Einpassen und neue
+       Kerzen verschieben den Bereich ebenfalls — damit stand „Back to
+       presenter" schon da, bevor man irgendetwas angefasst hatte. */
+    var el=L.draw&&L.draw.el; if(!el||LS.hooked===el) return; LS.hooked=el;
+    var weg=function(){ if(LS.mode==='follow' && LS.hooked===el && !LS.userMoved){ LS.userMoved=true; paintFollow(); } };
+    el.addEventListener('wheel', weg, { passive:true });
+    el.addEventListener('pointerdown', weg);
+  }
   function beat(){ if(LS.mode!=='follow'||!LS.sid) return; var u={}; u['viewers.'+me()]=Date.now(); docRef(LS.sid).update(u).catch(function(){}); }
   function apply(L, st){
     var go=function(){
       LS.applying=true;
       try{
-        L.draw.shapes=JSON.parse(JSON.stringify(st.shapes||[])); L.draw.sync();
+        L.draw.shapes=shapesOf(st); L.draw.sync();
         if(st.range && !LS.userMoved){ var t=ts(L); if(t) t.setVisibleRange({ from:st.range.from, to:st.range.to }); }
       }catch(e){}
       setTimeout(function(){ LS.applying=false; }, 120);
     };
-    if(st.sym!==L.sym || st.tf!==L.tf){ L.wechseln(st.sym, st.tf); var n=0; (function w(){ if((L.sym===st.sym&&L.tf===st.tf)||++n>40){ L.draw.scope='live-session'; return go(); } setTimeout(w, 200); })(); }
+    if(st.sym!==L.sym || st.tf!==L.tf){
+      if(LS._wechselt===st.sym+'|'+st.tf) return;            // laeuft schon
+      LS._wechselt=st.sym+'|'+st.tf;
+      /* Fremde Kerzen nur, wenn sie zu Symbol+TF passen; sonst eigener Feed. */
+      var f=(LS.fremd&&LS.state&&LS.state.sym===st.sym)?LS.fremd:null;
+      L.wechseln(st.sym, st.tf, f); var n=0;
+      (function w(){ if((L.sym===st.sym&&L.tf===st.tf)||++n>60){ LS._wechselt=''; if(L.sym!==st.sym) toast('Your data feed does not have '+st.sym+' — following the drawings only'); if(L.draw) L.draw.scope='live-session'; return go(); } setTimeout(w, 200); })();
+    }
     else go();
   }
   function paintFollow(){
     if(LS.mode!=='follow') return; var st=LS.state||{};
-    var inRoom=CS()&&CS().voice&&st.room&&CS().voice.room===st.room;
     bar('<span class="ls-dot"></span><span><b>Following <span class="notranslate" translate="no">'+esc(st.byName||'')+'</span></b> <span class="s">· '+esc(st.title||'')+'</span></span>'+
       (LS.userMoved?'<button class="ls-btn pri" onclick="ApexLiveSession.resync()">Back to presenter</button>':'')+
-      (st.room&&!inRoom?'<button class="ls-btn" onclick="ApexLiveSession.voice()">'+svg('volume')+' Join voice</button>':'')+
+      voiceBtns()+chatBtn()+
       '<button class="ls-btn" onclick="ApexLiveSession.stop()">Stop following</button>');
   }
+  LS.endStale=function(sid){ if(!sid) return; docRef(sid).set({ on:false, endedAt:Date.now() }, { merge:true }).then(function(){ toast('Session ended'); }).catch(function(){ toast('Could not end the session'); }); };
   LS.resync=function(){ LS.userMoved=false; var L=LC(); if(L&&LS.state) apply(L, LS.state); paintFollow(); };
-  LS.voice=function(){ var st=LS.state, C=CS(); if(!st||!C) return; if(C.cur&&C.cur.id===LS.sid) C.toggleVoice(st.room); else toast('Open the server to join the voice room'); setTimeout(paintFollow, 800); };
 
   /* ── Ende ── */
   LS.stop=function(remote){
     var L=LC();
     if(LS.mode==='present' && LS.sid && !remote) docRef(LS.sid).set({ on:false, endedAt:Date.now() }, { merge:true }).catch(function(){});
-    if(LS.mode==='follow' && L && L.draw){
+    if(LS.mode==='follow' && L && L.quelle==='Vortragender'){ try{ L.stop(); }catch(e){} }
+    else if(LS.mode==='follow' && L && L.draw){
       // Eigene Zeichnungen zurueck: Scope weg, Symbol neu laden.
       L.draw.scope=null; var sym=L.sym; L.draw.symbol=''; try{ L.draw.setSymbol(sym); }catch(e){}
       var u={}; u['viewers.'+me()]=FV().delete(); if(LS.sid) docRef(LS.sid).update(u).catch(function(){});
     }
     if(LS.unsub){ try{ LS.unsub(); }catch(e){} LS.unsub=null; }
+    if(LS.barsUnsub){ try{ LS.barsUnsub(); }catch(e){} LS.barsUnsub=null; }
+    LS.fremd=null; LS.hooked=null; LS._wechselt=''; chatStop(); LS.chatOpen=false;
     if(LS.loop){ clearInterval(LS.loop); LS.loop=null; }
     if(LS.beat){ clearInterval(LS.beat); LS.beat=null; }
     LS.mode=null; LS.sid=null; LS.state=null; bar(null);
@@ -103889,11 +104208,13 @@ function trackCalc(jd, opt) {
     if(!sid||!window.db) return;
     watchUnsub=docRef(sid).onSnapshot(function(d){
       var st=d.exists?d.data():null, el=document.getElementById('csLiveBan'); if(!el) return;
-      if(!st||!st.on){ el.innerHTML=''; return; }
-      var mine=st.by===me(), here=LS.mode&&LS.sid===sid;
+      var mine=st&&st.by===me(), here=LS.mode&&LS.sid===sid;
+      /* Haengengebliebene Session (Tab zu, Absturz): fuer andere ausblenden,
+         dem Vortragenden selbst einen Knopf zum Beenden zeigen. */
+      if(!st||!st.on||(!alive(st)&&!(mine&&LS.mode!=='present'))){ el.innerHTML=''; return; }
       el.innerHTML='<div class="cs-livebar">'+svg('chart')+'<span class="t"><b class="notranslate" translate="no">'+esc(st.byName||'')+'</b> is presenting '+
         '<b class="notranslate" translate="no">'+esc(st.sym||'')+' '+esc(st.tf||'')+'</b>'+(st.title?' — '+esc(st.title):'')+' · '+viewers(st)+' following</span>'+
-        (mine?(LS.mode==='present'?'':'<button class="cs-mini" onclick="ApexLiveSession.stop()">End</button>')
+        (mine?(LS.mode==='present'?'':'<button class="cs-mini" onclick="ApexLiveSession.endStale(\''+esc(sid)+'\')">End</button>')
           :(here?'':'<button class="cs-mini" onclick="ApexLiveSession.follow(\''+esc(sid)+'\')">Follow chart</button>'))+'</div>';
     }, function(){});
   };
