@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-14v';
+  window.APEX_BUILD = '2026-10-15h';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -7250,7 +7250,7 @@ body.light .aw-type { color-scheme: light; }
    Spalte stapeln sich ihre Gruppen senkrecht. */
 .aw-rail .apd-tb { display: flex; flex-direction: column; gap: 6px; align-items: center; width: 100%; }
 .aw-rail .apd-g { display: flex; flex-direction: column; gap: 3px; align-items: center; flex-wrap: nowrap; }
-.aw-rail .apd-g:nth-child(2) { display: grid; grid-template-columns: repeat(2, auto); gap: 4px; }
+.aw-rail .apd-g:nth-child(2) { display: flex; }
 .aw-rail .apd-t { width: 32px; height: 30px; font-size: var(--fs-md); }
 .aw-rail .apd-sw { width: 15px; height: 15px; }
 /* siehe oben: Menue-Lage kommt aus JavaScript, nicht aus CSS. */
@@ -7961,11 +7961,108 @@ body.light #page-chart .tv-feld select{background:#fff;border-color:rgba(0,0,0,.
 .tv-ev-sets button:hover{border-color:var(--gold-line);color:var(--ink)}
 .tv-ev-sets .plus{color:var(--gold)}
 .tv-ev-set-mine{display:inline-flex}.tv-ev-set-mine button:first-child{border-radius:7px 0 0 7px}.tv-ev-set-mine .x{border-radius:0 7px 7px 0;border-left:0;padding:5px 7px}
-.tv-ev-leg{position:absolute;left:8px;top:6px;z-index:5;display:flex;flex-wrap:wrap;gap:4px 10px;max-width:calc(100% - 90px);font-family:var(--font-mono);font-size:11px;color:var(--ink3);pointer-events:none;text-shadow:0 0 4px var(--bg,#000)}
+.tv-ev-leg{position:absolute;left:8px;top:6px;z-index:5;display:flex;flex-wrap:wrap;gap:4px 10px;max-width:calc(100% - 90px);font-family:var(--font-mono);font-size:11px;color:var(--ink3);pointer-events:none;padding:3px 8px;border-radius:6px;background:color-mix(in srgb,var(--layer) 82%,transparent)}
 .tv-ev-leg b{color:var(--ink2);font-weight:600}.tv-ev-leg b.up{color:var(--profit)}.tv-ev-leg b.dn{color:var(--loss)}
 .tv-ev-leg .k{color:var(--gold)}.tv-ev-leg .ind i{font-style:normal;color:var(--ink3)}
 @media (max-width:600px){.tv-ev-leg .ind{display:none}}
 .tv-ev-sess{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+/* Aufgeraeumter Zones View (15.10.2026): eine Kopfzeile, Werkzeuge links, Ebenen im Indikatoren-Fenster */
+.tv-ev-kopf{flex-wrap:nowrap!important;padding:5px 8px!important;gap:6px!important}
+.tv-ev-tfs{flex-wrap:nowrap!important;width:100%;overflow-x:auto;scrollbar-width:none;row-gap:0!important}
+.tv-ev-tfs::-webkit-scrollbar{display:none}
+.tv-ev-tfs>*{flex:none}
+.tv-ev-note{display:none!important}
+#tvEvTfs .tv-ev-br{display:none}
+#tvEvTfs .tv-ev-sws{display:flex!important;align-items:center;gap:6px;margin-left:auto;flex:none}
+.tv-ev-indb .fx{font-family:var(--font-mono);font-style:italic;color:var(--gold);margin-right:2px}
+.tv-ev-indb i{font-style:normal;margin-left:6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgba(var(--gold-rgb),.18);color:var(--gold);font-size:11px;display:inline-flex;align-items:center;justify-content:center}
+.tv-ev-more{position:relative}
+.tv-ev-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:220px;padding:6px;border-radius:12px;background:var(--elevated);border:0.5px solid var(--rim2);box-shadow:0 16px 40px rgba(0,0,0,.45);display:grid;gap:2px}
+.tv-ev-pop button{display:flex;align-items:center;justify-content:space-between;gap:12px;background:none;border:0;border-radius:8px;padding:9px 10px;color:var(--ink2);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.tv-ev-pop button:hover{background:var(--surface);color:var(--ink)}
+.tv-ev-pop kbd{font-family:var(--font-mono);font-size:11px;color:var(--ink3);border:0.5px solid var(--rim2);border-radius:4px;padding:0 5px}
+.tv-ev-info{font-size:14px;padding:0 8px!important;color:var(--ink3)}
+.tv-ev-main{position:relative;display:flex;flex:1 1 auto;min-height:0}
+.tv-ev-main>.tv-ev-grid{flex:1 1 auto;min-width:0;overflow:hidden}
+.tv-ev-main{overflow:hidden}
+.tv-ev-grid{grid-template-columns:minmax(0,1fr)!important}
+.tv-ev-grid[data-n="2"]{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+.tv-ev-grid[data-n="4"]{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+@media (max-width:760px){.tv-ev-grid[data-n="2"]{grid-template-columns:minmax(0,1fr)!important}}
+.tv-ev-rail{flex:none;width:42px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 3px;border-right:0.5px solid var(--rim);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:var(--layer)}
+.tv-ev-rail::-webkit-scrollbar{display:none}
+.tv-ev-rail .tv-ev-tools{padding:0!important;border:0!important;width:100%}
+.tv-ev-rail .apd-tb{display:flex;flex-direction:column;gap:6px;align-items:center;width:100%;flex-wrap:nowrap!important}
+.tv-ev-rail .apd-g{display:flex;flex-direction:column;gap:3px;align-items:center;flex-wrap:nowrap}
+.tv-ev-rail .apd-g:nth-child(2){display:flex}
+.tv-ev-rail .apd-t{width:32px;height:30px}
+.tv-ev-rail .apd-sw{width:14px;height:14px}
+.tv-ev-rail .tv-ev-zt{display:flex!important;flex-direction:column;gap:4px;align-items:center;padding:6px 0 0!important;border:0!important;border-top:0.5px solid var(--rim)!important;width:100%;overflow:visible!important}
+.tv-ev-rail .tv-ev-zt[hidden]{display:none!important}
+.tv-ev-rail .tv-ez-b{width:32px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;gap:1px;font-size:12px}
+.tv-ev-rail .tv-ez-b i{font-style:normal;font-size:10px;opacity:.8}
+.tv-ev-railx{margin-top:auto;background:none;border:0;color:var(--ink3);font-size:16px;width:32px;height:28px;cursor:pointer;border-radius:6px}
+.tv-ev-railx:hover{background:var(--surface);color:var(--ink)}
+.tv-ev-railo{display:none;position:absolute;left:6px;top:6px;z-index:6;width:30px;height:30px;border-radius:8px;border:0.5px solid var(--rim2);background:var(--elevated);color:var(--ink2);cursor:pointer}
+.tv-ev-main.rail-zu .tv-ev-rail{display:none}
+.tv-ev-main.rail-zu .tv-ev-railo{display:block}
+.tv-ev-main.rail-zu .tv-ev-leg{left:44px}
+.tv-ev-hint{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:8;padding:6px 12px;border-radius:999px;background:rgba(var(--gold-rgb),.92);color:#0b0c0f;font-size:12.5px;font-weight:600;pointer-events:none;white-space:nowrap}
+.tv-ev-hint[hidden]{display:none}
+/* Zonen-Leiste am Chart + Griffe (15.10.2026) */
+.tv-ev-zbar{position:absolute;z-index:9;display:flex;flex-wrap:nowrap;align-items:center;gap:3px;max-width:calc(100% - 80px);padding:4px;border-radius:10px;background:var(--elevated);border:0.5px solid var(--gold-line);box-shadow:0 10px 28px rgba(0,0,0,.35);font-size:12px}
+.tv-ev-zbar .lbl{padding:0 8px 0 6px;color:var(--ink2);white-space:nowrap;max-width:240px;min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
+.tv-ev-zbar>button{flex:none}
+.tv-ev-zbar:has(.zb-al){flex-wrap:wrap}
+.tv-ev-zbar .lbl b{font-weight:700}.tv-ev-zbar .lbl.s b{color:var(--loss)}.tv-ev-zbar .lbl.d b{color:var(--profit)}.tv-ev-zbar .lbl i{font-style:normal;color:var(--gold)}
+.tv-ev-zbar>button{min-width:30px;height:30px;padding:0 8px;border-radius:7px;border:0;background:none;color:var(--ink2);font:inherit;font-size:13px;cursor:pointer;position:relative}
+.tv-ev-zbar>button:hover{background:var(--surface);color:var(--ink)}
+.tv-ev-zbar>button.on{background:rgba(var(--gold-rgb),.16);color:var(--gold)}
+.tv-ev-zbar>button.txt{font-size:12px;font-weight:600}
+.tv-ev-zbar>button.del{color:var(--loss)}
+.tv-ev-zbar sup{font-size:9px;color:var(--gold);margin-left:1px}
+.tv-ev-zbar .zb-al{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px;padding:4px 2px 0;border-top:0.5px solid var(--rim);margin-top:2px}
+.tv-ev-zbar .zb-al button{border:0.5px solid var(--rim2);background:var(--surface);color:var(--ink2);border-radius:7px;padding:5px 9px;font:inherit;font-size:12px;cursor:pointer}
+.tv-ev-zbar .zb-al button.on{border-color:var(--gold-line);color:var(--gold)}
+.tv-ev-griffe{position:absolute;left:0;right:60px;top:0;bottom:26px;pointer-events:none;z-index:8}
+.tv-ev-griffe .gr{position:absolute;left:0;right:0;height:14px;margin-top:-7px;pointer-events:auto;cursor:ns-resize;touch-action:none}
+.tv-ev-griffe .gr i{position:absolute;left:0;right:0;top:6px;height:2px;background:var(--gold);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.tv-ev-griffe .gr span{position:absolute;right:4px;top:-12px;font-family:var(--font-mono);font-size:11px;padding:1px 6px;border-radius:5px;background:var(--gold);color:#0b0c0f}
+.tv-ev-griffe .gr.mid{left:50%;right:auto;width:34px;height:26px;margin:-13px 0 0 -17px;border-radius:13px;background:var(--gold);color:#0b0c0f;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:move;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.tv-ev-griffe .gr:hover i{height:3px;top:5px}
+body.tv-ev-ziehen{cursor:ns-resize;user-select:none}
+.tv-ev-undo{position:absolute;left:50%;bottom:36px;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:12px;padding:8px 10px 8px 14px;border-radius:10px;background:var(--elevated);border:0.5px solid var(--rim2);box-shadow:0 10px 28px rgba(0,0,0,.35);font-size:13px;color:var(--ink)}
+.tv-ev-undo button{background:none;border:0;color:var(--gold);font:inherit;font-weight:700;cursor:pointer;padding:4px 6px}
+table.tv-li td.tv-li-a{white-space:nowrap;text-align:right}
+table.tv-li td.tv-li-a button{background:none;border:0;color:var(--ink3);cursor:pointer;min-width:28px;min-height:28px;border-radius:6px;font-size:13px}
+table.tv-li td.tv-li-a button:hover{background:var(--surface);color:var(--ink)}
+.tv-li-hid{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--ink3)}
+.tv-li-hid b{flex-basis:100%;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.tv-li-hid span{padding:3px 4px 3px 8px;border-radius:7px;border:0.5px solid var(--rim2)}
+.tv-li-hid button{background:none;border:0;color:var(--gold);font:inherit;cursor:pointer}
+.tv-li-hid button.all{border:0.5px solid var(--gold-line);border-radius:7px;padding:3px 8px}
+@media (max-width:760px){.tv-ev-zbar{max-width:calc(100% - 12px);flex-wrap:wrap}.tv-ev-zbar>button{min-width:34px;height:34px}.tv-ev-zbar .lbl{flex-basis:100%;padding:2px 6px}.tv-ev-griffe .gr{height:24px;margin-top:-12px}.tv-ev-griffe .gr i{top:11px}.tv-ev-griffe .gr.mid{width:40px;height:32px;margin:-16px 0 0 -20px}}
+.tv-ev-lyr-h{display:flex;align-items:baseline;gap:8px;margin:2px 0 8px}
+.tv-ev-lyr-h b{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.tv-ev-lyr-h span{font-size:11.5px;color:var(--ink3)}
+.tv-ev-lyr{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px}
+.tv-ev-lt{display:flex;align-items:center;gap:10px;text-align:left;background:var(--surface);border:0.5px solid var(--rim2);border-radius:10px;padding:8px 10px;color:var(--ink2);font:inherit;cursor:pointer}
+.tv-ev-lt i{flex:none;width:28px;height:16px;border-radius:8px;background:var(--rim2);position:relative;transition:.15s}
+.tv-ev-lt i::after{content:"";position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s}
+.tv-ev-lt.on{border-color:var(--gold-line);color:var(--ink)}
+.tv-ev-lt.on i{background:var(--gold)}.tv-ev-lt.on i::after{left:14px}
+.tv-ev-lt b{display:block;font-size:13px;font-weight:600}.tv-ev-lt em{display:block;font-style:normal;font-size:11.5px;color:var(--ink3)}
+.tv-ev-lyr-n{margin-top:8px;font-size:12px;color:var(--ink3)}
+.tv-ev-lyr-n button{background:none;border:0;color:var(--gold);font:inherit;cursor:pointer;padding:0}
+@media (max-width:760px){
+  #tvBuehne.ev-an .tv-ev-main{flex:none;height:380px}
+  #tvBuehne.ev-an .tv-ev-main .tv-ev-grid{height:auto!important;flex:1 1 auto!important;min-width:0}
+  #tvBuehne.ev-an .tv-ev-grid[data-n="2"]~*,#tvBuehne.ev-an .tv-ev-main:has(.tv-ev-grid[data-n="2"]){height:560px}
+  #tvBuehne.ev-an .tv-ev-main:has(.tv-ev-grid[data-n="4"]){height:520px}
+  #tvBuehne.ev-an .tv-ev-rail .tv-ev-tools{display:block!important;overflow:visible!important}
+  .tv-ev-rail{width:38px}
+  .tv-ev-rail .apd-t,.tv-ev-rail .tv-ez-b{width:30px;height:30px}
+}
 .tv-ev-sess .bd{position:absolute;top:0;bottom:26px;display:block}
 .tv-ev-sess .tg{position:absolute;top:0;bottom:26px;width:0;border-left:1px dashed rgba(139,145,161,.28);display:block}
 .tv-ev-sess .nw{position:absolute;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#e8b43c;border:1px solid rgba(0,0,0,.4);pointer-events:auto;cursor:help}
@@ -8014,6 +8111,23 @@ table.tv-li i{font-style:normal;font-size:10px;color:var(--gold);margin-left:4px
 .tv-ev-hilfe>b{display:block;color:var(--ink);margin-bottom:8px}
 .tv-ev-hilfe div{display:flex;gap:10px;align-items:center;padding:3px 0}
 .tv-ev-hilfe kbd{min-width:66px;font-family:var(--font-mono);font-size:11px;color:var(--gold);background:var(--surface);border:0.5px solid var(--rim2);border-radius:5px;padding:2px 6px;text-align:center}
+/* Market Replay aufgeraeumt (15.10.2026): eine Farbe sichtbar, Seltenes hinter ⋯ */
+.arp-swatches:not(.auf) .arp-sw:not(.on){display:none}
+.arp-swatches{position:relative}
+.arp-swatches.auf{position:relative}
+.arp-swatches.auf .arp-sw:not(.on){display:inline-block}
+.aw-rail .arp-swatches.auf{display:grid!important;grid-template-columns:repeat(2,auto);gap:4px}
+body:not(.arp-mehr-auf) [data-arp-redo],body:not(.arp-mehr-auf) [data-arp-clearall],body:not(.arp-mehr-auf) [data-arp-list],
+body:not(.arp-mehr-auf) [data-arp-zoomout],body:not(.arp-mehr-auf) [data-arp-zoomin],body:not(.arp-mehr-auf) [data-arp-fit]{display:none!important}
+body.arp-mehr-auf .arp-mehr{color:var(--gold)}
+.tv-rpv-k{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}
+.tv-rpv-k div{background:var(--surface);border:0.5px solid var(--rim);border-radius:9px;padding:8px}
+.tv-rpv-k b{display:block;font-family:var(--font-mono);font-size:15px;color:var(--ink)}.tv-rpv-k span{font-size:11px;color:var(--ink3)}
+.tv-rpv-k .up,.tv-rpv-ls .up,table.tv-li td.up{color:var(--profit)}.tv-rpv-k .dn,.tv-rpv-ls .dn,table.tv-li td.dn{color:var(--loss)}
+.tv-rpv-sp{width:100%;height:54px;display:block;margin:4px 0}.tv-rpv-sp polyline{fill:none;stroke-width:2}.tv-rpv-sp .up{stroke:var(--profit)}.tv-rpv-sp .dn{stroke:var(--loss)}.tv-rpv-sp .z{stroke:var(--rim2);stroke-dasharray:3 3}
+.tv-rpv-ls{font-size:12.5px;color:var(--ink2);margin:4px 0 8px}
+.tv-rpv-x{background:none;border:0;color:var(--ink3);font-size:16px;cursor:pointer;min-width:28px;min-height:28px}
+@media (max-width:600px){.tv-rpv-k{grid-template-columns:repeat(3,1fr)}}
 .tv-ev-hilfe>button{position:absolute;top:6px;right:8px;background:none;border:0;color:var(--ink3);font-size:18px;cursor:pointer}
 table.tv-li tr[data-li]:focus-visible td{outline:none;background:rgba(var(--gold-rgb),.12)}
 @media (max-width:760px){
@@ -49523,6 +49637,10 @@ body.light .pt-sugg{background:var(--layer)}
       '.mt-trow2 .ic{width:13px;height:13px;vertical-align:-2px;color:var(--ink3)}',
       '.mt-pager{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 4px 2px;font-size:12px;color:var(--ink3)}',
       '.mt-pager button[disabled]{opacity:.4;cursor:default}',
+      '.mt-grp-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}',
+      '.mt-grp-i{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:0.5px solid var(--rim2);background:var(--surface);cursor:pointer;font-size:13px;color:var(--ink)}',
+      '.mt-grp-i.on{border-color:var(--gold-line);background:rgba(var(--gold-rgb),.08)}.mt-grp-i i{font-style:normal;font-size:11px;color:var(--ink3)}',
+      '.mt-grp-i input{accent-color:var(--gold)}',
       '.mt-biz-k{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:6px}',
       '.mt-biz-k div{background:var(--surface);border:0.5px solid var(--rim);border-radius:10px;padding:10px 12px}',
       '.mt-biz-k b{display:block;font-family:var(--font-display);font-size:20px;color:var(--ink)}.mt-biz-k b small{font-size:12px;color:var(--ink3)}.mt-biz-k b.warn{color:#e8b43c}',
@@ -50311,11 +50429,16 @@ body.light .pt-sugg{background:var(--layer)}
           [['attention','Needs attention first'],['active','Last active'],['pips','Net pips'],['win','Win rate'],['name','Name']].map(function(o){
             return '<option value="'+o[0]+'"'+(ST.sortBy===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+
         '</select>'+
+        (window.ApexCall?'<button class="mt-btn sm" onclick="ApexMentor._grp()">'+svgI('users')+' Group call</button>':'')+
         '<div class="mt-seg" role="group" aria-label="Layout">'+
           '<button class="'+(ST.rview!=='table'?'on':'')+'" onclick="ApexMentor._view(\'grid\')" title="Cards" aria-label="Cards">'+svgI('grid')+'</button>'+
           '<button class="'+(ST.rview==='table'?'on':'')+'" onclick="ApexMentor._view(\'table\')" title="Table" aria-label="Table">'+svgI('list')+'</button>'+
         '</div>'+
       '</div>'+
+      (ST.grpOpen?'<div class="mt-card mt-grp"><h3>'+svgI('users')+' Group call</h3><p class="mt-sub">Up to 4 students. They hear and see each other through you — good for a group review.</p>'+
+        '<div class="mt-grp-l">'+live.map(function(m){ var on=(ST.grpSel||[]).indexOf(m.id)>=0;
+          return '<label class="mt-grp-i'+(on?' on':'')+'"><input type="checkbox"'+(on?' checked':'')+' onchange="ApexMentor._grpSel(\''+m.id+'\',this.checked)">'+avatar(m.studentName, m.studentUid, '')+'<span>'+esc(m.studentName||'Student')+(m.team?' <i>'+esc(m.team)+'</i>':'')+'</span></label>'; }).join('')+'</div>'+
+        '<div class="mt-row" style="margin-top:10px"><button class="mt-btn gold" onclick="ApexMentor._grpStart(true)">'+svgI('video')+' Start video call</button><button class="mt-btn" onclick="ApexMentor._grpStart(false)">'+svgI('phone')+' Voice only</button><span class="mt-sub" style="margin:0">'+(ST.grpSel||[]).length+' of 4 picked</span></div></div>':'')+
       '<div id="mtRoster"></div>';
     paintRoster();
   }
@@ -50337,6 +50460,9 @@ body.light .pt-sugg{background:var(--layer)}
     }).catch(function(){});
   };
   M._dtab = function(t){ ST.dtab=t; render(); };
+  M._grp = function(){ ST.grpOpen=!ST.grpOpen; if(!ST.grpOpen) ST.grpSel=[]; render(); };
+  M._grpSel = function(id, on){ var a=ST.grpSel||(ST.grpSel=[]); var i=a.indexOf(id); if(on&&i<0){ if(a.length>=4){ toast('Up to 4 students'); render(); return; } a.push(id); } if(!on&&i>=0) a.splice(i,1); render(); };
+  M._grpStart = function(video){ var a=(ST.grpSel||[]).slice(); if(!a.length){ toast('Pick at least one student'); return; } ST.grpOpen=false; ST.grpSel=[]; render(); ApexCall.gruppe(a, video); };
   M._topen = function(k){ ST.topen=k||null; render(); };
   M._tpage = function(d){ ST.tpage=(ST.tpage||0)+d; ST.topen=null; render(); };
   M.open = function(id){ if(ST.openStudent!==id){ ST.dtab='overview'; ST.tpage=0; ST.topen=null; } ST.openStudent=id; ST.tab='students';
@@ -50656,10 +50782,26 @@ body.light .pt-sugg{background:var(--layer)}
     if(status==='cancelled' || status==='declined'){ var g=prompt(status==='declined'?'Reason (optional) — your student sees it':'Reason for cancelling (optional)'); if(g===null) return; upd.reason=String(g).slice(0,300); }
     d.collection('apexMentorships').doc(mid).collection('bookings').doc(bid).update(upd).then(function(){
       Object.assign(b, upd); if(m.mentorUid===me()) busySync(); render();
+      if(status==='confirmed') erinnerungSetzen(m, bid, b); else erinnerungLoeschen(bid);
       toast(status==='confirmed'?'Session confirmed':status==='declined'?'Request declined':'Session cancelled');
       notifyBooking(mid, status==='confirmed'?'confirmed the 1:1 on '+whenLbl(b.start):status==='declined'?'declined the 1:1 request':'cancelled the 1:1 on '+whenLbl(b.start));
     }).catch(function(e){ toast('Error: '+(e&&e.message||e)); });
   };
+  /* Erinnerungen auch bei geschlossener App: apexReminders/{bid}_24 und _15,
+     der Push-Worker schickt sie (ueber den Cron-Worker alle 5 min). */
+  function erinnerungSetzen(m, bid, b){
+    var d=DB(); if(!d||window.APEX_DEMO||!m||!bid||!b) return;
+    var wann=whenLbl(b.start), wer=(m.studentName||'Student')+' & '+(m.mentorName||'Coach');
+    [[86400000,'24','1:1 coaching tomorrow'],[15*60000,'15','1:1 coaching in 15 minutes']].forEach(function(r){
+      var due=b.start-r[0]; if(due<=Date.now()) return;
+      d.collection('apexReminders').doc(bid+'_'+r[1]).set({ mid:m.id, bid:bid, uids:[m.mentorUid, m.studentUid], dueAt:due, start:b.start,
+        title:r[2], body:wer+' · '+wann+' — open Evidence to join' }).catch(function(){});
+    });
+  }
+  function erinnerungLoeschen(bid){
+    var d=DB(); if(!d||window.APEX_DEMO||!bid) return;
+    ['24','15'].forEach(function(x){ d.collection('apexReminders').doc(bid+'_'+x).delete().catch(function(){}); });
+  }
   /* Bescheid ueber den bestehenden Push-Weg (Feedback-Eintrag kind 'booking'). */
   function notifyBooking(mid, text){
     var d=DB(); if(!d) return;
@@ -50677,7 +50819,7 @@ body.light .pt-sugg{background:var(--layer)}
       var r=d.collection('apexMentorships').doc(mid).collection('bookings').doc(); refs.push(r);
       var wd=new Date(start); wd.setDate(wd.getDate()+7*i);   // gleiche Uhrzeit auch ueber die Zeitumstellung
       var doc={ start:wd.getTime(), dur:dur, status:'confirmed', by:me(), byName:myName(), note:'', agenda:agenda, series:series, at:Date.now() };
-      b.set(r, doc); lokalBuchen(mid, r.id, doc);
+      b.set(r, doc); lokalBuchen(mid, r.id, doc); erinnerungSetzen(m, r.id, doc);
     }
     b.commit().then(function(){ return loadBookings(mid,true); }).then(function(){ busySync(); render();
       toast(n>1?n+' weekly sessions booked':'Session booked'); notifyBooking(mid, (n>1?'booked '+n+' weekly 1:1s, first ':'booked a 1:1 on ')+whenLbl(start)); })
@@ -51559,7 +51701,8 @@ body.light .pt-sugg{background:var(--layer)}
       (l.length?l.map(function(e){
         var ic=LIVE_IC[e.type]||['dot',''];
         return '<div class="mt-lv-e '+(LIVE_ALARM[e.type]?'alarm':e.type)+'">'+svgI(ic[0])+(nur?'':'<span class="n" role="button" tabindex="0" onclick="ApexMentor.open(\''+e.mid+'\')">'+esc(e.name)+'</span>')+
-          '<span class="x">'+esc(e.text)+'</span>'+(e.type==='close'&&e.pips!=null?'<b class="'+(e.pips>=0?'pos':'neg')+'">'+(e.pips>0?'+':'')+e.pips+'</b>':'')+'<span class="t">'+ago(e.at)+'</span></div>';
+          '<span class="x">'+esc(e.text)+'</span>'+(e.type==='close'&&e.pips!=null?'<b class="'+(e.pips>=0?'pos':'neg')+'">'+(e.pips>0?'+':'')+e.pips+'</b>':'')+
+          (e.type==='close'&&e.pips==null&&e.pnl!=null?'<b class="notranslate '+(e.pnl>=0?'pos':'neg')+'" translate="no" title="Broker P&amp;L">'+(e.pnl>0?'+':'')+e.pnl+'</b>':'')+'<span class="t">'+ago(e.at)+'</span></div>';
       }).join(''):'<div class="mt-sub" style="margin:4px 0 0">Nothing yet today. Trades your students open and close show up here as they happen.</div>');
   }
   function liveCard(){
@@ -60684,6 +60827,7 @@ self.addEventListener('message', async (ev) => {
       '</div>' +
       '<div class="arp-tgroup">' +
         '<button class="arp-tool" data-arp-undo title="Undo (Ctrl+Z)" aria-label="Undo">↺</button>' +
+        '<button class="arp-tool arp-mehr" data-arp-mehr title="More: redo, drawing list, delete all, zoom" aria-label="More tools" aria-expanded="false">⋯</button>' +
         '<button class="arp-tool" data-arp-redo title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↻</button>' +
         '<button class="arp-tool" data-arp-clearall title="Delete all drawings" aria-label="Delete all drawings"><svg class=ic aria-hidden=true><use href=#i-trash ></use></svg></button>' +
       '</div>' +
@@ -60711,6 +60855,21 @@ self.addEventListener('message', async (ev) => {
      braucht: Chart gross, Werkzeuge links, Handelspanel angedockt,
      Wiedergabe unten, nichts scrollt. Siehe .aw-* im CSS fuer die Messung,
      die dazu gefuehrt hat. Verschiebt nur Knoten — kein Neuaufbau. */
+  if (!window._arpAufgeraeumt) {
+    window._arpAufgeraeumt = true;
+    document.addEventListener('click', function (e) {
+      var t = e.target && e.target.closest ? e.target : null; if (!t) return;
+      var mehr = t.closest('[data-arp-mehr]');
+      if (mehr) { var auf = document.body.classList.toggle('arp-mehr-auf'); mehr.setAttribute('aria-expanded', String(auf)); return; }
+      var sw = t.closest('.arp-swatches .arp-sw'), grp = sw && sw.closest('.arp-swatches');
+      if (grp) {
+        if (!grp.classList.contains('auf') && sw.classList.contains('on')) { grp.classList.add('auf'); e.stopPropagation(); return; }
+        setTimeout(function () { grp.classList.remove('auf'); }, 0);
+        return;
+      }
+      [].forEach.call(document.querySelectorAll('.arp-swatches.auf'), function (g) { g.classList.remove('auf'); });
+    }, true);
+  }
   function enterWorkspace(body) {
     if (!window.ApexWorkspace) return;
     var chart = document.getElementById('arpChart');
@@ -65231,6 +65390,11 @@ self.addEventListener('message', async (ev) => {
       '.apd-t.on{background:var(--gold-dim);color:var(--gold)}',
       '.apd-sw{width:17px;height:17px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}',
       '.apd-sw.on{border-color:var(--ink)}',
+      '.apd-cpop{position:absolute;z-index:31;display:grid;grid-template-columns:repeat(4,auto);gap:6px;padding:8px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.45)}',
+      '.apd-cur{width:20px;height:20px;border:2px solid var(--rim3,rgba(255,255,255,.3))}',
+      '.apd-menu-acts{border-top:0.5px solid var(--rim);margin-top:6px;padding-top:6px;display:grid}',
+      '.apd-act{display:flex;align-items:center;gap:9px;background:none;border:0;color:var(--ink2);padding:7px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--font-body);text-align:left}',
+      '.apd-act:hover{background:var(--raised);color:var(--ink)}.apd-act .g{width:18px;text-align:center}.apd-act .ic{width:13px;height:13px}.apd-act.danger{color:var(--loss)}',
       '.apd-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:30;min-width:250px;max-height:340px;overflow:auto;' +
         'background:var(--elevated);border:0.5px solid var(--rim);border-radius:12px;padding:6px;box-shadow:0 18px 44px rgba(0,0,0,.45)}',
       '.apd-menu-h{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding:6px 8px 8px;display:flex;justify-content:space-between;gap:8px}',
@@ -65345,21 +65509,25 @@ self.addEventListener('message', async (ev) => {
               '<button class="apd-star' + (on ? ' on' : '') + '" data-apd-fav="' + t[0] + '"><svg class=ic aria-hidden=true><use href=#i-star ></use></svg></button>' +
             '</div>';
           }).join('') +
+          /* Seltenes (15.10.2026) aus der Leiste ins Menue: Liste, Wiederholen, Alles loeschen. */
+          '<div class="apd-menu-acts">' +
+            '<button class="apd-act" data-apd-list><span class="g">☰</span>Drawings on this chart</button>' +
+            '<button class="apd-act" data-apd-redo><span class="g">↻</span>Redo</button>' +
+            '<button class="apd-act danger" data-apd-clear><span class="g"><svg class=ic aria-hidden=true><use href=#i-trash ></use></svg></span>Delete all drawings</button>' +
+          '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="apd-g">' + COLORS.map(function (c, i) {
-        return '<button class="apd-sw' + (draw.color === c ? ' on' : (i === 0 && !draw.color ? ' on' : '')) +
-               '" data-apd-color="' + c + '" style="background:' + c + '"></button>';
-      }).join('') + '</div>' +
+      '<div class="apd-g apd-gc">' +
+        '<button class="apd-sw apd-cur" data-apd-cpick title="Colour" aria-label="Drawing colour" style="background:' + (draw.color || COLORS[0]) + '"></button>' +
+        '<div class="apd-cpop" data-apd-cpop style="display:none">' + COLORS.map(function (c, i) {
+          return '<button class="apd-sw' + (draw.color === c ? ' on' : (i === 0 && !draw.color ? ' on' : '')) +
+                 '" data-apd-color="' + c + '" style="background:' + c + '" aria-label="Colour ' + c + '"></button>';
+        }).join('') + '</div>' +
+      '</div>' +
       '<div class="apd-g">' +
         '<button class="apd-t' + (draw.magnet ? ' on' : '') + '" data-apd-magnet ' +
           'title="Magnet — snap points to the candle\'s open, high, low or close" aria-label="Magnet mode">🧲</button>' +
-        '<button class="apd-t" data-apd-list title="Drawings on this chart" aria-label="Drawing list">☰</button>' +
-      '</div>' +
-      '<div class="apd-g">' +
         '<button class="apd-t" data-apd-undo title="Undo (Ctrl+Z)" aria-label="Undo">↺</button>' +
-        '<button class="apd-t" data-apd-redo title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↻</button>' +
-        '<button class="apd-t" data-apd-clear title="Delete all drawings" aria-label="Delete all drawings"><svg class=ic aria-hidden=true><use href=#i-trash ></use></svg></button>' +
       '</div>' +
       /* Die Liste haengt an der Leiste, nicht am Chart: sie soll mitwandern,
          wenn die Leiste in die linke Spalte der Werkstatt zieht. */
@@ -65482,7 +65650,7 @@ self.addEventListener('message', async (ev) => {
     if (host._apdBound) return;            // one delegated listener per host
     host._apdBound = true;
     host.addEventListener('click', async function (e) {
-      var el = e.target.closest ? e.target.closest('[data-apd-tool],[data-apd-fav],[data-apd-color],[data-apd-more],[data-apd-undo],[data-apd-redo],[data-apd-clear],[data-apd-magnet],[data-apd-list],[data-apd-go],[data-apd-eye],[data-apd-lock],[data-apd-del]') : null;
+      var el = e.target.closest ? e.target.closest('[data-apd-tool],[data-apd-fav],[data-apd-color],[data-apd-cpick],[data-apd-more],[data-apd-undo],[data-apd-redo],[data-apd-clear],[data-apd-magnet],[data-apd-list],[data-apd-go],[data-apd-eye],[data-apd-lock],[data-apd-del]') : null;
       if (!el) return;
       var d = host._apdDraw || draw;
       var menu = host.querySelector('[data-apd-menu]');
@@ -65519,12 +65687,20 @@ self.addEventListener('message', async (ev) => {
         }
         return;
       }
+      if (el.hasAttribute('data-apd-cpick')) {
+        var cp = host.querySelector('[data-apd-cpop]'); if (!cp) return;
+        var cauf = cp.style.display === 'none'; cp.style.display = cauf ? '' : 'none';
+        if (cauf) placeList(cp, el);
+        return;
+      }
       var col = el.getAttribute('data-apd-color');
       if (col) {
         d.setColor(col);
         host.querySelectorAll('[data-apd-color]').forEach(function (b) {
           b.classList.toggle('on', b.getAttribute('data-apd-color') === col);
         });
+        var cur = host.querySelector('[data-apd-cpick]'); if (cur) cur.style.background = col;
+        var cp2 = host.querySelector('[data-apd-cpop]'); if (cp2) cp2.style.display = 'none';
         return;
       }
       if (el.hasAttribute('data-apd-undo')) { d.undo(); renderList(host, d); return; }
@@ -80970,13 +81146,20 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             '<div class="tv-ev" id="tvEv" hidden>' +
               '<div class="tv-ev-kopf"><div class="tv-ev-tfs notranslate" translate="no" id="tvEvTfs"></div>' +
                 '<span class="tv-ev-note" id="tvEvNote"></span></div>' +
-              '<div class="tv-ev-tools" id="tvEvTools" hidden></div>' +
-              '<div class="tv-ev-zt" id="tvEvZt" hidden></div>' +
-              '<div class="tv-ev-grid" id="tvEvGrid" data-n="1"><div class="tv-ev-chart" id="tvEvChart"></div></div>' +
+              '<div class="tv-ev-main" id="tvEvMain">' +
+                '<div class="tv-ev-rail" id="tvEvRail">' +
+                  '<div class="tv-ev-tools" id="tvEvTools" hidden></div>' +
+                  '<div class="tv-ev-zt" id="tvEvZt" hidden></div>' +
+                  '<button type="button" class="tv-ev-railx" onclick="ApexTV.evRail()" aria-label="Hide drawing tools" title="Hide the tools">‹</button>' +
+                '</div>' +
+                '<button type="button" class="tv-ev-railo" onclick="ApexTV.evRail()" aria-label="Show drawing tools" title="Drawing tools">✎</button>' +
+                '<div class="tv-ev-grid" id="tvEvGrid" data-n="1"><div class="tv-ev-chart" id="tvEvChart"></div></div>' +
+              '</div>' +
               '<div class="tv-ev-leer" id="tvEvLeer" hidden></div>' +
               '<div class="tv-ev-stil" id="tvEvStil" hidden></div>' +
               '<div class="tv-ev-stil" id="tvEvInd" hidden></div>' +
               '<div class="tv-ev-stil tv-ev-liste" id="tvEvListe" hidden></div>' +
+              '<div class="tv-ev-stil tv-ev-liste" id="tvEvRpV" hidden></div>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -85350,7 +85533,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   function eigeneMessen(m, e) {
     var bars = e.bars, von = isFinite(m.zeit) && EV.inst && EV.inst.indexAt ? EV.inst.indexAt(m.zeit) : -1;
     if (!(von >= 0)) von = Math.max(0, bars.n - 60);
-    var g = { supply: !!m.supply, top: m.top, bot: m.bot, zeit: m.zeit, von: von, tfs: [m.tf || e.tf], id: 'Mine', mine: true, mineId: m.id };
+    var g = { supply: !!m.supply, top: m.top, bot: m.bot, zeit: m.zeit, von: von, tfs: [m.tf || e.tf], id: m.name ? m.name : 'Mine', mine: true, mineId: m.id };
     g.retests = beruehrungen(bars, m.bot, m.top, von + 2);
     var last = -1; for (var i = bars.n - 1; i > von; i--) { if (bars.l[i] <= m.top && bars.h[i] >= m.bot) { last = i; break; } }
     if (last >= 0) g.juengste = bars.n - 1 - last;
@@ -85366,13 +85549,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var el = document.getElementById('tvEvZt'); if (!el) return;
     var L = evL(), d = L ? zsLaden(L.sym) : zsLeer();
     el.hidden = !EV.inst;
-    el.innerHTML = '<span class="tv-ez-l">Zones</span>' +
-      '<button type="button" data-ez="supply" class="tv-ez-b s' + (EV.mk === 'supply' ? ' on' : '') + '" title="Draw your own supply zone: click one edge, then the other">＋ Supply</button>' +
-      '<button type="button" data-ez="demand" class="tv-ez-b d' + (EV.mk === 'demand' ? ' on' : '') + '" title="Draw your own demand zone: click one edge, then the other">＋ Demand</button>' +
-      (d.mine.length ? '<span class="tv-ez-n">' + d.mine.length + ' mine</span>' : '') +
-      (d.hidden.length ? '<button type="button" data-ez="unhide" class="tv-ez-b" title="Show the zones you hid again">' + d.hidden.length + ' hidden · show</button>' : '') +
-      (d.alarms.length ? '<span class="tv-ez-n" title="Zone alerts on this instrument">' + d.alarms.length + ' alert' + (d.alarms.length === 1 ? '' : 's') + '</span>' : '') +
-      (EV.mk ? '<span class="tv-ez-hint">' + (EV.mkP ? 'Now click the other edge' : 'Click one edge of the zone') + ' · Esc cancels</span>' : '');
+    el.innerHTML =
+      '<button type="button" data-ez="supply" class="tv-ez-b s' + (EV.mk === 'supply' ? ' on' : '') + '" title="Draw your own supply zone (Z): click one edge, then the other" aria-label="Draw a supply zone"><b>S</b><i>＋</i></button>' +
+      '<button type="button" data-ez="demand" class="tv-ez-b d' + (EV.mk === 'demand' ? ' on' : '') + '" title="Draw your own demand zone (Shift Z): click one edge, then the other" aria-label="Draw a demand zone"><b>D</b><i>＋</i></button>';
+    var gh = document.getElementById('tvEvChart'), hint = document.getElementById('tvEvHint');
+    if (gh && !hint) { hint = document.createElement('div'); hint.id = 'tvEvHint'; hint.className = 'tv-ev-hint'; gh.appendChild(hint); }
+    if (hint) { hint.hidden = !EV.mk; hint.textContent = EV.mk ? (EV.mk === 'supply' ? 'Supply zone: ' : 'Demand zone: ') + (EV.mkP ? 'now click the other edge' : 'click one edge') + ' · Esc cancels' : ''; }
+    try { evSchichtenNeu(); } catch (x) {}
     if (!el._ez) {
       el._ez = true;
       el.addEventListener('click', function (ev) {
@@ -85496,6 +85679,178 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     });
   }
   TV._ezAlarmPruefen = ezAlarmPruefen;
+
+  /* ═══ Zonen bearbeiten direkt am Chart (15.10.2026) ═══
+     Vorher lag alles in der Zonenkarte rechts im KI-Bereich — war der
+     ausgeblendet oder weit unten, ging ein Klick ins Leere. Jetzt: eine
+     Leiste direkt an der Zone, Kanten mit der Maus/dem Finger ziehen,
+     Entf loescht, E bearbeitet, Esc hebt die Auswahl auf, Rueckgaengig. */
+  EV.edit = null;
+  function zbEintrag() { return ZOFF && zReg[ZOFF] ? zReg[ZOFF] : null; }
+  function zbSek(ms) { return Math.floor(ms / 1000); }
+  function zbMine(g) { if (!g || !g.mine) return null; var L = evL(); if (!L) return null; return (zsLaden(L.sym).mine || []).filter(function (m) { return m.id === g.mineId; })[0] || null; }
+  function zbNeuZeichnen() {
+    if (EV._zbRaf) return;
+    EV._zbRaf = requestAnimationFrame(function () {
+      EV._zbRaf = null;
+      try { if (EV.inst && EV._e && EV._L) evZeichnen(EV.inst, EV._e, EV._L); } catch (x) {}
+      evZoneBarPos(); evGriffePos();
+    });
+  }
+  function evZoneBar() {
+    var host = document.getElementById('tvEvChart');
+    var bar = document.getElementById('tvEvZBar');
+    var e = zbEintrag();
+    if (!host || !e || !EV.inst || !EV.an) { if (bar) bar.remove(); evEditEnde(); return; }
+    if (!bar) {
+      bar = document.createElement('div'); bar.id = 'tvEvZBar'; bar.className = 'tv-ev-zbar'; bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', 'Zone');
+      ['pointerdown', 'mousedown', 'touchstart'].forEach(function (t) { bar.addEventListener(t, function (ev) { ev.stopPropagation(); }, { passive: true }); });
+      bar.addEventListener('click', evZoneBarKlick);
+      host.appendChild(bar);
+    }
+    var g = e.g, st = (evL() && evL().stellen) || 2, L = evL(), d = L ? zsLaden(L.sym) : zsLeer();
+    var stern = d.star.indexOf(zoneSchl(g)) >= 0, m = zbMine(g);
+    var ak = (d.alarms || []).filter(function (a) { return a.k === (g.mine ? 'm:' + g.mineId : zoneSchl(g)); }).map(function (a) { return a.art || 'enter'; });
+    var b = function (a, txt, tit, an, cls) { return '<button type="button" data-zb="' + a + '" class="' + (an ? 'on ' : '') + (cls || '') + '" title="' + tit + '" aria-label="' + tit + '">' + txt + '</button>'; };
+    bar.innerHTML =
+      '<span class="lbl ' + (g.supply ? 's' : 'd') + '"><b>' + (g.supply ? 'Supply' : 'Demand') + '</b> <span class="notranslate" translate="no">' + escHtml((g.tfs ? g.tfs.join('+') : e.tf) || '') + ' ' + nf(g.bot, st) + '–' + nf(g.top, st) + '</span>' +
+        (m && m.name ? ' · <i class="notranslate" translate="no">' + escHtml(m.name) + '</i>' : (g.mine ? ' · mine' : '')) + '</span>' +
+      b('edit', '✎', 'Move the edges (E)', EV.edit === ZOFF) +
+      (g.mine ? b('flip', '⇅', 'Switch supply / demand') + b('name', 'Aa', 'Label this zone') : '') +
+      b('star', stern ? '★' : '☆', stern ? 'Unstar' : 'Star', stern) +
+      (proAn() ? b('alarm', '🔔' + (ak.length ? '<sup>' + ak.length + '</sup>' : ''), 'Alerts for this zone', EV.zbAlarm || ak.length) : '') +
+      b('pos', g.supply ? 'Short' : 'Long', (g.supply ? 'Short' : 'Long') + ' position from this zone', false, 'txt') +
+      b('info', 'ⓘ', 'All details of this zone') +
+      b('del', g.mine ? '🗑' : 'Hide', g.mine ? 'Delete this zone (Del)' : 'Hide this zone (Del)', false, g.mine ? 'del' : 'txt') +
+      b('x', '✕', 'Close (Esc)') +
+      (EV.zbAlarm && proAn() ? '<div class="zb-al">' + [['near', 'Gets close'], ['enter', 'Enters'], ['brk', 'Closes beyond']].map(function (x) {
+        return '<button type="button" data-zbal="' + x[0] + '" class="' + (ak.indexOf(x[0]) >= 0 ? 'on' : '') + '">' + (ak.indexOf(x[0]) >= 0 ? '✓ ' : '') + x[1] + '</button>'; }).join('') + '</div>' : '');
+    evZoneBarPos();
+    evGriffe();
+  }
+  function evZoneBarPos() {
+    var bar = document.getElementById('tvEvZBar'), e = zbEintrag(), host = document.getElementById('tvEvChart');
+    if (!bar || !e || !EV.inst || !host) return;
+    var g = e.g, ts = EV.inst.chart.timeScale(), w = host.clientWidth, h = host.clientHeight;
+    var y = EV.inst.series.priceToCoordinate(g.top), y2 = EV.inst.series.priceToCoordinate(g.bot);
+    var x = isFinite(g.zeit) ? ts.timeToCoordinate(zbSek(g.zeit)) : null;
+    if (x == null || !isFinite(x)) x = 12;
+    var bw = bar.offsetWidth || 360, bh = bar.offsetHeight || 34;
+    var top = (y != null && isFinite(y)) ? y - bh - 8 : 12;
+    if (top < 6) top = (y2 != null && isFinite(y2)) ? Math.min(h - bh - 34, y2 + 8) : 6;
+    bar.style.left = Math.max(6, Math.min(w - bw - (w < 520 ? 6 : 70), x)) + 'px';
+    bar.style.top = Math.max(6, Math.min(h - bh - 30, top)) + 'px';
+  }
+  function zbUndo(text, fn) {
+    var host = document.getElementById('tvEvChart'); if (!host) return;
+    var u = document.getElementById('tvEvUndo'); if (u) u.remove();
+    u = document.createElement('div'); u.id = 'tvEvUndo'; u.className = 'tv-ev-undo';
+    u.innerHTML = '<span>' + escHtml(text) + '</span><button type="button">Undo</button>';
+    u.querySelector('button').onclick = function () { u.remove(); fn(); };
+    host.appendChild(u);
+    clearTimeout(EV._undoT); EV._undoT = setTimeout(function () { if (u.parentNode) u.remove(); }, 6000);
+  }
+  function zbLoeschen() {
+    var e = zbEintrag(); if (!e) return;
+    var g = e.g, L = evL(); if (!L) return; var d = zsLaden(L.sym);
+    if (g.mine) {
+      var m = zbMine(g); if (!m) return;
+      var al = (d.alarms || []).filter(function (a) { return a.k === 'm:' + m.id; });
+      d.mine = d.mine.filter(function (x) { return x.id !== m.id; }); d.alarms = d.alarms.filter(function (a) { return a.k !== 'm:' + m.id; });
+      zsSichern(L.sym); zoneSchliessen(); evChartZeigen();
+      zbUndo('Zone deleted', function () { var dd = zsLaden(L.sym); dd.mine.push(m); al.forEach(function (a) { dd.alarms.push(a); }); zsSichern(L.sym); evChartZeigen(); });
+    } else {
+      var k = zoneSchl(g); if (d.hidden.indexOf(k) < 0) d.hidden.push(k);
+      zsSichern(L.sym); zoneSchliessen(); evChartZeigen();
+      zbUndo('Zone hidden', function () { var dd = zsLaden(L.sym); dd.hidden = dd.hidden.filter(function (x) { return x !== k; }); zsSichern(L.sym); evChartZeigen(); });
+    }
+  }
+  function evZoneBarKlick(ev) {
+    ev.stopPropagation();
+    var al = ev.target.closest && ev.target.closest('[data-zbal]');
+    if (al) { TV.ezAlarm(al.getAttribute('data-zbal')); evZoneBar(); return; }
+    var t = ev.target.closest && ev.target.closest('[data-zb]'); if (!t) return;
+    var a = t.getAttribute('data-zb'), e = zbEintrag(); if (!e) return;
+    var g = e.g, L = evL();
+    if (a === 'x') { zoneSchliessen(); return; }
+    if (a === 'edit') { EV.edit = EV.edit === ZOFF ? null : ZOFF; evZoneBar(); return; }
+    if (a === 'del') { zbLoeschen(); return; }
+    if (a === 'star') { TV.ezStar(); evZoneBar(); return; }
+    if (a === 'alarm') { EV.zbAlarm = !EV.zbAlarm; evZoneBar(); return; }
+    if (a === 'pos') { TV.ezPosition(); return; }
+    if (a === 'info') {
+      var c = document.getElementById('tvZone');
+      if (c && c.offsetParent) { c.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      else if (window.showToast) showToast('Details sit in the AI panel — show it with “AI” at the top of the chart');
+      return;
+    }
+    var m = zbMine(g); if (!m || !L) return;
+    if (a === 'flip') { m.supply = !m.supply; zsSichern(L.sym); zoneSchliessen(); evChartZeigen(); if (window.showToast) showToast('Now a ' + (m.supply ? 'supply' : 'demand') + ' zone'); return; }
+    if (a === 'name') {
+      window.ApexDialog.prompt('Label for this zone (shown on the chart)', m.name || '').then(function (v) {
+        if (v == null) return; m.name = String(v).trim().slice(0, 30); zsSichern(L.sym); evChartZeigen(); evZoneBar();
+      });
+    }
+  }
+  /* Griffe: obere Kante, untere Kante, ganze Zone verschieben. */
+  function evGriffe() {
+    var host = document.getElementById('tvEvChart'), box = document.getElementById('tvEvGriffe');
+    if (!host || !EV.edit || EV.edit !== ZOFF || !zbEintrag()) { if (box) box.remove(); return; }
+    if (!box) {
+      box = document.createElement('div'); box.id = 'tvEvGriffe'; box.className = 'tv-ev-griffe';
+      box.innerHTML = '<div class="gr top" data-gr="top" title="Drag the upper edge"><i></i><span></span></div>' +
+                      '<div class="gr bot" data-gr="bot" title="Drag the lower edge"><i></i><span></span></div>' +
+                      '<div class="gr mid" data-gr="mid" title="Drag to move the whole zone">⇕</div>';
+      host.appendChild(box);
+      box.addEventListener('pointerdown', griffStart);
+    }
+    evGriffePos();
+    if (!EV._grLoop) {
+      var loop = function () { if (!document.getElementById('tvEvGriffe')) { EV._grLoop = null; return; } evGriffePos(); EV._grLoop = requestAnimationFrame(loop); };
+      EV._grLoop = requestAnimationFrame(loop);
+    }
+  }
+  function evGriffePos() {
+    var box = document.getElementById('tvEvGriffe'), e = zbEintrag(); if (!box || !e || !EV.inst) return;
+    var g = e.g, st = (evL() && evL().stellen) || 2;
+    var yt = EV.inst.series.priceToCoordinate(g.top), yb = EV.inst.series.priceToCoordinate(g.bot);
+    if (yt == null || yb == null) { box.style.display = 'none'; return; }
+    box.style.display = '';
+    var t = box.querySelector('.top'), b = box.querySelector('.bot'), m = box.querySelector('.mid');
+    t.style.top = yt + 'px'; b.style.top = yb + 'px'; m.style.top = ((yt + yb) / 2) + 'px';
+    t.querySelector('span').textContent = nf(g.top, st); b.querySelector('span').textContent = nf(g.bot, st);
+  }
+  function griffStart(ev) {
+    var gr = ev.target.closest && ev.target.closest('[data-gr]'); if (!gr) return;
+    ev.preventDefault(); ev.stopPropagation();
+    var e = zbEintrag(); if (!e || !EV.inst) return;
+    var art = gr.getAttribute('data-gr'), host = document.getElementById('tvEvChart'), r = host.getBoundingClientRect();
+    var g = e.g, L = evL(); if (!L) return;
+    var d = zsLaden(L.sym), m = zbMine(g), k = zoneSchl(g);
+    var p0 = EV.inst.series.coordinateToPrice(ev.clientY - r.top), t0 = g.top, b0 = g.bot;
+    try { gr.setPointerCapture(ev.pointerId); } catch (x) {}
+    document.body.classList.add('tv-ev-ziehen');
+    var setze = function (top, bot) {
+      if (!(top > bot)) return;
+      g.top = top; g.bot = bot;
+      if (m) { m.top = top; m.bot = bot; } else { d.over[k] = { top: top, bot: bot }; }
+      zbNeuZeichnen();
+    };
+    var bewegen = function (e2) {
+      var p = EV.inst.series.coordinateToPrice(e2.clientY - r.top); if (!isFinite(p)) return;
+      if (art === 'top') setze(Math.max(p, b0 + 1e-9), b0);
+      else if (art === 'bot') setze(t0, Math.min(p, t0 - 1e-9));
+      else { var dp = p - p0; setze(t0 + dp, b0 + dp); }
+    };
+    var ende = function () {
+      gr.removeEventListener('pointermove', bewegen); gr.removeEventListener('pointerup', ende); gr.removeEventListener('pointercancel', ende);
+      document.body.classList.remove('tv-ev-ziehen');
+      zsSichern(L.sym); evZoneBar();
+    };
+    gr.addEventListener('pointermove', bewegen); gr.addEventListener('pointerup', ende); gr.addEventListener('pointercancel', ende);
+  }
+  function evEditEnde() { EV.edit = null; EV.zbAlarm = false; var b = document.getElementById('tvEvGriffe'); if (b) b.remove(); }
+  TV._zb = { bar: evZoneBar, del: zbLoeschen };
 
   /* >>> KONF CALC — Zones-View-Plan Etappe 3.1; .claude/tests/konfluenz.test.js liest genau diesen Block.
      Konfluenz einer Zone, 0–100. Jeder Baustein ist eine Ja/Nein-Frage an die
@@ -85705,7 +86060,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       if (U && A) {
         U.list().forEach(function (c) {
           if (c.visible === false) return;
-          var d = A.DEF[c.id]; if (!d || d.heatmap || d.footprint) return;
+          var d = A.DEF[c.id]; if (!d || d.heatmap || d.footprint || d.zones) return;
           try {
             var r = A.compute(b, c.id, c.params), werte = [];
             (d.outputs || []).forEach(function (o) {
@@ -85768,14 +86123,18 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (h.hidden) return;
     if (!h._evKopf) {
       h._evKopf = true;
-      h.innerHTML = '<div class="tv-ev-stil-kopf"><b>Indicators on this chart</b><span>Only what you see — what the AI reads is picked in the AI panel. Shared with Market Replay.</span>' +
-        '<button type="button" class="tv-ev-stil-zu" aria-label="Close">×</button></div><div id="tvEvSets"></div><div id="tvEvIndB"></div>';
+      h.innerHTML = '<div class="tv-ev-stil-kopf"><b>Indicators &amp; layers</b><span>Only what you see — what the AI reads is picked in the AI panel.</span>' +
+        '<button type="button" class="tv-ev-stil-zu" aria-label="Close">×</button></div><div id="tvEvLayers"></div><div id="tvEvSets"></div><div id="tvEvIndB"></div>';
+      h.addEventListener('click', function (ev) {
+        if (ev.target && ev.target.closest && ev.target.closest('.tv-ev-lt,[data-ezunhide]')) evSchalterKlick(ev);
+      });
       h.querySelector('.tv-ev-stil-zu').onclick = function () {
         h.hidden = true;
         evSchalterNeu();
       };
     }
     indPanelNeu();
+    evSchichtenNeu();
     window.ApexIndicatorUI.mount(document.getElementById('tvEvIndB'), {
       chart: null, bars: null,               // gezeichnet wird in evZeichnen, zusammen mit den Zonen
       onChange: function () { evChartZeigen(); }
@@ -85795,10 +86154,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (k === 'Escape') {
       if (EV.mk) { EV.mk = null; EV.mkP = null; ezLeiste(); hat(); return; }
       if (EV.draw && EV.draw.tool !== 'cursor') { evWerkzeug('cursor'); hat(); return; }
+      if (EV.edit) { EV.edit = null; evZoneBar(); hat(); return; }
       if (ZOFF) { zoneSchliessen(); hat(); }
       return;
     }
     if (k === 'f' || k === 'F') { var vb = document.querySelector('#page-chart .tv-voll'); if (vb) { hat(); vb.click(); } return; }
+    if ((k === 'Delete' || k === 'Backspace') && ZOFF && zReg[ZOFF]) { hat(); zbLoeschen(); return; }
+    if ((k === 'e' || k === 'E') && ZOFF && zReg[ZOFF]) { hat(); EV.edit = EV.edit === ZOFF ? null : ZOFF; evZoneBar(); return; }
     if (k === 'z') { hat(); EV.mk = EV.mk === 'supply' ? null : 'supply'; EV.mkP = null; if (EV.draw && EV.draw.tool !== 'cursor') evWerkzeug('cursor'); ezLeiste(); return; }
     if (k === 'Z') { hat(); EV.mk = EV.mk === 'demand' ? null : 'demand'; EV.mkP = null; if (EV.draw && EV.draw.tool !== 'cursor') evWerkzeug('cursor'); ezLeiste(); return; }
     if (k === 'h' || k === 'H') { hat(); evWerkzeug('hline'); return; }
@@ -85852,37 +86214,119 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Eingeschaltete Schalter stehen vorne (links), ausgeschaltete in ihrer
      festen Reihenfolge dahinter — abgewaehlt rutscht einer an seinen Platz
      zurueck. Stabil sortiert, damit nichts springt, was sich nicht aendert. */
+  /* Ebenen (Zonen, Heatmap, Footprint, Sessions, News, Konfluenz …) stehen
+     seit 15.10.2026 nicht mehr in der Kopfleiste, sondern als eigener
+     Abschnitt im Indikatoren-Fenster — die Leiste war zu voll und nahm dem
+     Chart den Platz. Oben bleiben Zeitrahmen, Layout, Indicators, ⋯ und ⓘ. */
+  function evSchichten() {
+    return [
+      { an: !EV.zonenAus, a: 'data-evzonen', t: 'Supply and demand zones on the chart — the AI reads them either way', x: 'Zones', d: 'Supply & demand boxes' },
+      { an: EV.alle, a: 'data-evalle', t: 'Also draw wide areas, contested and rejected zones', x: 'All zones', d: 'Incl. wide, contested, rejected' },
+      { an: evHmAn(), a: 'data-evhm', t: 'Liquidity heatmap: likely stop pools beyond swing highs and lows, traded volume as texture, volume bubbles. A model built from candles, not an order book.', x: 'Heatmap', d: 'Stop pools & volume' },
+      { an: EV.fp, a: 'data-evfp', t: 'Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over.', x: 'Footprint', d: 'Ticks per price level' },
+      { an: EV.sess, a: 'data-evsess', t: 'Asia, London and New York sessions as background bands, plus a line where each trading day starts', x: 'Sessions', d: 'Asia · London · New York' },
+      { an: EV.news, a: 'data-evnews', t: 'Medium and high impact news for this instrument as dots at the bottom', x: 'News', d: 'Economic calendar dots' },
+      proAn() && { an: EV.minKonf > 0, a: 'data-evkonf', t: 'Only zones with at least this confluence score. Click to step 0 → 40 → 60 → 80.', x: 'Confluence ≥ ' + EV.minKonf, d: 'Hide weaker zones' },
+      proAn() && { an: EV.konfShade, a: 'data-evkshade', t: 'Fill strength follows the confluence score', x: 'Shade by confluence', d: 'Stronger zones darker' }
+    ].filter(Boolean);
+  }
+  function evSchichtenHtml() {
+    var L = evL(), d = L ? zsLaden(L.sym) : zsLeer();
+    return '<div class="tv-ev-lyr-h"><b>Layers</b><span>On this chart</span></div><div class="tv-ev-lyr">' +
+      evSchichten().map(function (k) {
+        return '<button type="button" ' + k.a + '="1" class="tv-ev-lt' + (k.an ? ' on' : '') + '" title="' + k.t + '" aria-pressed="' + !!k.an + '"><i></i><span><b>' + k.x + '</b><em>' + k.d + '</em></span></button>';
+      }).join('') + '</div>' +
+      ((d.mine.length || d.hidden.length || d.alarms.length) ? '<div class="tv-ev-lyr-n">' +
+        (d.mine.length ? d.mine.length + ' own zone' + (d.mine.length === 1 ? '' : 's') : '') +
+        (d.alarms.length ? (d.mine.length ? ' · ' : '') + d.alarms.length + ' alert' + (d.alarms.length === 1 ? '' : 's') : '') +
+        (d.hidden.length ? ' · <button type="button" data-ezunhide="1">' + d.hidden.length + ' hidden — show again</button>' : '') + '</div>' : '') +
+      '<div class="tv-ev-lyr-h" style="margin-top:12px"><b>Indicators</b><span>Shared with Market Replay</span></div>';
+  }
+  function evSchichtenNeu() { var b = document.getElementById('tvEvLayers'); if (b) b.innerHTML = evSchichtenHtml(); }
   function evSchalterHtml() {
-    var n = evIndZahl();
-    var liste = [
-      { an: EV.alle, a: 'data-evalle', t: 'Also draw wide areas, contested and rejected zones', x: 'All zones' },
-      { an: EV.fp, a: 'data-evfp', t: 'Tick footprint from Dukascopy ticks (M1–M15). Ticks are published once an hour is over, so the latest hour fills in later.', x: 'Footprint' },
-      { an: evHmAn(), a: 'data-evhm', t: 'Liquidity heatmap: likely stop pools beyond swing highs and lows (yellow to red, gone once swept), traded volume as blue texture, volume bubbles. A model built from candles, not an order book.', x: 'Heatmap' },
-      { an: !EV.zonenAus, a: 'data-evzonen', t: 'Supply and demand zones on the chart — the AI reads them either way', x: 'Zones' },
-      { an: evIndOffen() || n > 0, a: 'data-evind', t: 'Pick any Evidence indicator to draw on this chart', x: 'Indicators' + (n ? ' (' + n + ')' : '') },
-      { an: evStilOffen(), a: 'data-evstil', t: 'Colours and chart style — saved for next time', x: 'Style' },
-      proAn() && { an: EV.minKonf > 0, a: 'data-evkonf', t: 'Only zones with at least this confluence score (your own zones always show). Click to step 0 → 40 → 60 → 80.', x: 'Confluence ≥ ' + EV.minKonf },
-      { an: !!(document.getElementById('tvEvListe') && !document.getElementById('tvEvListe').hidden), a: 'data-evliste', t: 'Every zone on this symbol with distance, hold rate, confluence, tests and age — click to jump', x: 'Zone list' },
-      { an: !!EV.rp, a: 'data-evrp', t: 'Go back to the candle under your last crosshair position and replay from there — zones only from what was known then, trade from them with a simulated order', x: EV.rp ? 'End replay' : 'Replay from here' },
-      { an: false, a: 'data-evhilfe', t: 'Keyboard shortcuts (?)', x: '⌨' },
-      { an: false, a: 'data-evbild', t: 'Save the chart as an image (and copy it) — paste into a chat, a Book or a trade', x: 'Image' },
-      { an: EV.sess, a: 'data-evsess', t: 'Asia, London and New York sessions as background bands, plus a line where each trading day starts (17:00 New York)', x: 'Sessions' },
-      { an: EV.news, a: 'data-evnews', t: 'Medium and high impact news for this instrument as dots at the bottom — hover for the event', x: 'News' },
-      proAn() && { an: EV.konfShade, a: 'data-evkshade', t: 'Fill strength follows the confluence score instead of the zone strength', x: 'Shade by confluence' }
+    var n = evIndZahl() + evSchichten().filter(function (k) { return k.an; }).length;
+    var nRp = 0; try { nRp = JSON.parse(localStorage.getItem('apexZoneReplays_' + (window.currentUID || 'guest')) || '[]').length; } catch (e) {}
+    var note = (document.getElementById('tvEvNote') || {}).textContent || '';
+    var menu = [
+      ['data-evliste', 'Zone list', 'L'],
+      ['data-evrp', EV.rp ? 'End replay' : 'Replay from here', ''],
+      ['data-evrpv', 'Replay history' + (nRp ? ' (' + nRp + ')' : ''), ''],
+      ['data-evstil', 'Chart style & colours', ''],
+      ['data-evbild', 'Save chart image', ''],
+      ['data-evhilfe', 'Keyboard shortcuts', '?']
     ];
-    liste = liste.filter(Boolean);
-    liste.forEach(function (k, i) { k.i = i; });
-    liste.sort(function (p, q) { return (q.an ? 1 : 0) - (p.an ? 1 : 0) || p.i - q.i; });
-    return '<span class="tv-ev-br"></span><span class="tv-ev-sws"><span class="tv-ev-lay" title="Charts side by side, each with its own timeframe">' +
-      [1, 2, 4].map(function (n) { return '<button type="button" data-evlay="' + n + '" class="' + (EV.anzahl === n ? 'on' : '') + '" aria-label="' + n + ' chart' + (n > 1 ? 's' : '') + '">' + n + '</button>'; }).join('') + '</span>' +
-      liste.map(function (k) {
-      return '<button type="button" ' + k.a + '="1" class="tv-ev-sw' + (k.an ? ' on' : '') + '" title="' + k.t + '">' + k.x + '</button>';
-    }).join('') + '</span>';
+    return '<span class="tv-ev-br"></span><span class="tv-ev-sws">' +
+      '<span class="tv-ev-lay" title="Charts side by side, each with its own timeframe">' +
+      [1, 2, 4].map(function (k) { return '<button type="button" data-evlay="' + k + '" class="' + (EV.anzahl === k ? 'on' : '') + '" aria-label="' + k + ' chart' + (k > 1 ? 's' : '') + '">' + k + '</button>'; }).join('') + '</span>' +
+      '<button type="button" data-evind="1" class="tv-ev-sw tv-ev-indb' + (evIndOffen() ? ' on' : '') + '" title="Indicators and layers — zones, heatmap, footprint, sessions, news">' +
+        '<b class="fx">ƒx</b> Indicators' + (n ? '<i>' + n + '</i>' : '') + '</button>' +
+      '<span class="tv-ev-more"><button type="button" data-evmore="1" class="tv-ev-sw' + (EV.moreOpen ? ' on' : '') + '" aria-label="More" aria-expanded="' + !!EV.moreOpen + '">⋯</button>' +
+        (EV.moreOpen ? '<div class="tv-ev-pop" role="menu">' + menu.map(function (x) { return '<button type="button" role="menuitem" ' + x[0] + '="1">' + x[1] + (x[2] ? '<kbd>' + x[2] + '</kbd>' : '') + '</button>'; }).join('') + '</div>' : '') +
+      '</span>' +
+      (note ? '<button type="button" class="tv-ev-sw tv-ev-info" title="' + escHtml(note) + '" aria-label="About this chart">ⓘ</button>' : '') +
+    '</span>';
   }
   function evHmAn() {
     return !!EV.hm || !!(window.ApexIndicatorUI && window.ApexIndicatorUI.list().some(function (c) {
       return c.id === 'lhm' && c.visible !== false; }));
   }
+  function evSchalterKlick(ev) {
+        var zu = ev.target && ev.target.closest && ev.target.closest('[data-evliste],[data-evrp],[data-evrpv],[data-evstil],[data-evbild],[data-evhilfe]');
+        if (zu && EV.moreOpen) { EV.moreOpen = false; setTimeout(evSchalterNeu, 0); }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evmore]')) { EV.moreOpen = !EV.moreOpen; evSchalterNeu(); return; }
+        var uh = ev.target && ev.target.closest && ev.target.closest('[data-ezunhide]');
+        if (uh) { var Lx = evL(), dd = Lx && zsLaden(Lx.sym); if (dd) { dd.hidden = []; zsSichern(Lx.sym); evChartZeigen(); evSchichtenNeu(); } return; }
+        var lyr = ev.target && ev.target.closest && ev.target.closest('.tv-ev-lt');
+        if (lyr) setTimeout(function () { evSchichtenNeu(); evSchalterNeu(); }, 0);
+
+        var a = ev.target && ev.target.closest && ev.target.closest('[data-evalle]');
+        if (a) { EV.alle = !EV.alle; evChartZeigen(); return; }
+        var zn = ev.target && ev.target.closest && ev.target.closest('[data-evzonen]');
+        if (zn) { EV.zonenAus = !EV.zonenAus; merke('evzonen', EV.zonenAus ? '0' : '1'); evChartZeigen(); return; }
+        var ib = ev.target && ev.target.closest && ev.target.closest('[data-evind]');
+        if (ib) { evIndUmschalten(); evSchalterNeu(); return; }
+        var kf = ev.target && ev.target.closest && ev.target.closest('[data-evkonf]');
+        if (kf) { EV.minKonf = KONF_STUFEN[(KONF_STUFEN.indexOf(EV.minKonf) + 1) % KONF_STUFEN.length]; merke('evMinKonf', String(EV.minKonf)); evChartZeigen(); return; }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evliste]')) { TV.evListe(); return; }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evbild]')) { TV.evBild(); return; }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evhilfe]')) { evKuerzelHilfe(); return; }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evrpv]')) { TV.rpVerlauf(); return; }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evrp]')) { TV.evReplay(); evSchalterNeu(); return; }
+        var ly = ev.target && ev.target.closest && ev.target.closest('[data-evlay]');
+        if (ly) { TV.evAnzahl(+ly.getAttribute('data-evlay')); return; }
+        var ss = ev.target && ev.target.closest && ev.target.closest('[data-evsess]');
+        if (ss) { EV.sess = !EV.sess; merke('evSess', EV.sess ? '1' : '0'); evSchalterNeu(); evUeberlagerung(); return; }
+        var nw = ev.target && ev.target.closest && ev.target.closest('[data-evnews]');
+        if (nw) { EV.news = !EV.news; merke('evNews', EV.news ? '1' : '0'); evSchalterNeu(); evNewsLaden(); evUeberlagerung(); return; }
+        var ks = ev.target && ev.target.closest && ev.target.closest('[data-evkshade]');
+        if (ks) { EV.konfShade = !EV.konfShade; merke('evKonfShade', EV.konfShade ? '1' : '0'); evChartZeigen(); return; }
+        var st = ev.target && ev.target.closest && ev.target.closest('[data-evstil]');
+        if (st) { evStilUmschalten(); evSchalterNeu(); return; }
+        var f = ev.target && ev.target.closest && ev.target.closest('[data-evfp]');
+        if (f) { EV.fp = !EV.fp; merke('evfp', EV.fp ? '1' : '0'); evChartZeigen(); return; }
+        var hmb = ev.target && ev.target.closest && ev.target.closest('[data-evhm]');
+        if (hmb) {
+          /* Aus heisst aus: liegt die Heatmap zusaetzlich ueber „Indicators"
+             auf dem Chart, wird sie dort mit entfernt — sonst blieb sie stehen. */
+          var hmAn = evHmAn();
+          EV.hm = !hmAn; merke('evhm', EV.hm ? '1' : '0');
+          if (!EV.hm && window.ApexIndicatorUI) {
+            var hl = window.ApexIndicatorUI.list();
+            if (hl.some(function (c) { return c.id === 'lhm'; }))
+              window.ApexIndicatorUI.setList(hl.filter(function (c) { return c.id !== 'lhm'; }));
+          }
+          evChartZeigen(); return;
+        }
+        var k = ev.target && ev.target.closest && ev.target.closest('[data-evtf]');
+        if (!k) return;
+        EV.tf = k.getAttribute('data-evtf');
+        evChartZeigen();
+  }
+  document.addEventListener('click', function (e) {
+    if (!EV.moreOpen) return;
+    if (e.target && e.target.closest && e.target.closest('.tv-ev-more')) return;
+    EV.moreOpen = false; evSchalterNeu();
+  });
   function evSchalterNeu() {
     var tfs = document.getElementById('tvEvTfs'); if (!tfs) return;
     [].slice.call(tfs.querySelectorAll('.tv-ev-br,.tv-ev-sws')).forEach(function (b) { b.remove(); });
@@ -85987,6 +86431,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       x.h = Math.max(x.h, m.h); x.l = Math.min(x.l, m.l);
     });
     var zeiten = Object.keys(slots).map(Number).sort(function (a, c) { return a - c; });
+    /* Luecke zwischen der letzten geladenen Kerze und dem ersten Live-Minutenwert
+       (Tab im Hintergrund, Kurs pausiert): dann sofort nachladen statt alle 5 min. */
+    EV._luecke = !zeiten.length ? (Date.now() - lastT > 2 * ms + 120000) : zeiten[0] > lastT + ms;
     if (!zeiten.length) return;
     var ab = EV._live && EV._live.basis === b ? EV._live.t : lastT;
     var typ = EV.inst._seriesType;
@@ -86003,6 +86450,15 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
   function evNachladen() {
     if (EV.rp) return;
+    if (EV._luecke && evSichtbar() && EV.bars) {
+      var takt = TV._quelle === 'Yahoo' ? 60000 : 120000;   // Twelve Data hat ein Tageskontingent
+      if (Date.now() - (EV._lueckeAm || 0) > takt) {
+        EV._lueckeAm = Date.now(); EV._luecke = false;
+        if (EV.lokal) { EV.cache = {}; evChartZeigen(); return; }
+        if (!EV._neuLaeuft && TV._levels) { EV._neuLaeuft = true; EV._neuAm = Date.now(); Promise.resolve(zonenNeu()).catch(function () {}).then(function () { EV._neuLaeuft = false; }); }
+        return;
+      }
+    }
     if (EV.lokal) {
       if (!evSichtbar() || !EV.bars || Date.now() - (EV._neuAm || 0) < 300000) return;
       EV._neuAm = Date.now(); EV.cache = {};
@@ -86015,6 +86471,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     Promise.resolve(zonenNeu()).catch(function () {}).then(function () { EV._neuLaeuft = false; });
   }
 
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return;
+    setTimeout(function () { try { evLive(); evNachladen(); } catch (e) {} }, 1500);
+  });
   function evTakteStarten() {
     if (EV._takt) return;
     EV._neuAm = Date.now();           // gerade analysiert/geladen → erst nach dem Intervall
@@ -86065,49 +86525,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         return '<button type="button" data-evtf="' + t + '" class="' + (t === tf ? 'on' : '') + (ana(t) ? ' ana' : '') + '" title="' +
           (ana(t) ? 'Zones from the analysis, reviewed by the AI' : pro ? 'Zones calculated on these candles, not reviewed by the AI' : 'Chart, drawings, indicators and your own zones') + '">' + t + '</button>';
       }).join('') + evSchalterHtml();
-      tfs.onclick = function (ev) {
-        var a = ev.target && ev.target.closest && ev.target.closest('[data-evalle]');
-        if (a) { EV.alle = !EV.alle; evChartZeigen(); return; }
-        var zn = ev.target && ev.target.closest && ev.target.closest('[data-evzonen]');
-        if (zn) { EV.zonenAus = !EV.zonenAus; merke('evzonen', EV.zonenAus ? '0' : '1'); evChartZeigen(); return; }
-        var ib = ev.target && ev.target.closest && ev.target.closest('[data-evind]');
-        if (ib) { evIndUmschalten(); evSchalterNeu(); return; }
-        var kf = ev.target && ev.target.closest && ev.target.closest('[data-evkonf]');
-        if (kf) { EV.minKonf = KONF_STUFEN[(KONF_STUFEN.indexOf(EV.minKonf) + 1) % KONF_STUFEN.length]; merke('evMinKonf', String(EV.minKonf)); evChartZeigen(); return; }
-        if (ev.target && ev.target.closest && ev.target.closest('[data-evliste]')) { TV.evListe(); return; }
-        if (ev.target && ev.target.closest && ev.target.closest('[data-evbild]')) { TV.evBild(); return; }
-        if (ev.target && ev.target.closest && ev.target.closest('[data-evhilfe]')) { evKuerzelHilfe(); return; }
-        if (ev.target && ev.target.closest && ev.target.closest('[data-evrp]')) { TV.evReplay(); evSchalterNeu(); return; }
-        var ly = ev.target && ev.target.closest && ev.target.closest('[data-evlay]');
-        if (ly) { TV.evAnzahl(+ly.getAttribute('data-evlay')); return; }
-        var ss = ev.target && ev.target.closest && ev.target.closest('[data-evsess]');
-        if (ss) { EV.sess = !EV.sess; merke('evSess', EV.sess ? '1' : '0'); evSchalterNeu(); evUeberlagerung(); return; }
-        var nw = ev.target && ev.target.closest && ev.target.closest('[data-evnews]');
-        if (nw) { EV.news = !EV.news; merke('evNews', EV.news ? '1' : '0'); evSchalterNeu(); evNewsLaden(); evUeberlagerung(); return; }
-        var ks = ev.target && ev.target.closest && ev.target.closest('[data-evkshade]');
-        if (ks) { EV.konfShade = !EV.konfShade; merke('evKonfShade', EV.konfShade ? '1' : '0'); evChartZeigen(); return; }
-        var st = ev.target && ev.target.closest && ev.target.closest('[data-evstil]');
-        if (st) { evStilUmschalten(); evSchalterNeu(); return; }
-        var f = ev.target && ev.target.closest && ev.target.closest('[data-evfp]');
-        if (f) { EV.fp = !EV.fp; merke('evfp', EV.fp ? '1' : '0'); evChartZeigen(); return; }
-        var hmb = ev.target && ev.target.closest && ev.target.closest('[data-evhm]');
-        if (hmb) {
-          /* Aus heisst aus: liegt die Heatmap zusaetzlich ueber „Indicators"
-             auf dem Chart, wird sie dort mit entfernt — sonst blieb sie stehen. */
-          var hmAn = evHmAn();
-          EV.hm = !hmAn; merke('evhm', EV.hm ? '1' : '0');
-          if (!EV.hm && window.ApexIndicatorUI) {
-            var hl = window.ApexIndicatorUI.list();
-            if (hl.some(function (c) { return c.id === 'lhm'; }))
-              window.ApexIndicatorUI.setList(hl.filter(function (c) { return c.id !== 'lhm'; }));
-          }
-          evChartZeigen(); return;
-        }
-        var k = ev.target && ev.target.closest && ev.target.closest('[data-evtf]');
-        if (!k) return;
-        EV.tf = k.getAttribute('data-evtf');
-        evChartZeigen();
-      };
+      tfs.onclick = evSchalterKlick;
     }
     var eb = mitBars.filter(function (x) { return x.tf === tf; })[0];
     if (!eb) { evLokal(tf, pro, host); return; }
@@ -86158,6 +86576,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     });
   }
   TV._evBarsFuer = evBarsFuer;
+  /* Werkzeugspalte ein-/ausklappen (gemerkt). */
+  TV.evRail = function () {
+    var m = document.getElementById('tvEvMain'); if (!m) return;
+    var zu = !m.classList.contains('rail-zu'); m.classList.toggle('rail-zu', zu); merke('evRailZu', zu ? '1' : '0');
+    setTimeout(function () { try { var h = document.getElementById('tvEvChart'); if (EV.inst && h) EV.inst.chart.resize(h.clientWidth, h.clientHeight); } catch (e) {} }, 30);
+  };
+  try { if (lies('evRailZu', '0') === '1') setTimeout(function () { var m = document.getElementById('tvEvMain'); if (m) m.classList.add('rail-zu'); }, 0); } catch (e) {}
 
   /* ── Sessions, Tagestrennung, News auf dem Chart (Etappe 4.3) ──────
      Als eigene Ebene ueber dem Chart statt als Serie: die Baender folgen
@@ -86524,18 +86949,39 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       knopf('data-lif', 'mine', EV.liFilter, 'Mine') + knopf('data-lif', 'star', EV.liFilter, '★') +
       '<span class="sp"></span>Sort ' + knopf('data-lis', 'dist', EV.liSort, 'Distance') + knopf('data-lis', 'score', EV.liSort, 'Score') + knopf('data-lis', 'age', EV.liSort, 'Age') + '</div>';
     if (!EV_LI.length) h += '<div class="tv-li-leer">No zones match.' + (proAn() ? '' : ' Your own zones show here — automatic zones come with Pro.') + '</div>';
-    else h += '<table class="tv-li"><thead><tr><th></th><th>TF</th><th>Zone</th><th>Away</th><th>Hold</th><th>Conf.</th><th>Tests</th><th>Age</th></tr></thead><tbody>' +
+    else h += '<table class="tv-li"><thead><tr><th></th><th>TF</th><th>Zone</th><th>Away</th><th>Hold</th><th>Conf.</th><th>Tests</th><th>Age</th><th></th></tr></thead><tbody>' +
       EV_LI.map(function (x, i) {
         return '<tr data-li="' + i + '" tabindex="0" role="button" aria-label="' + (x.g.supply ? 'Supply' : 'Demand') + ' ' + escHtml(x.tf) + ' ' + nf(x.g.bot, st) + ' to ' + nf(x.g.top, st) + '"><td><span class="tv-li-s ' + (x.g.supply ? 's' : 'd') + '">' + (x.g.supply ? 'S' : 'D') + '</span>' + (x.star ? '★' : '') + (x.mine ? '<i>mine</i>' : '') + '</td>' +
           '<td class="notranslate" translate="no">' + escHtml(x.g.tfs ? x.g.tfs.join('+') : x.tf) + '</td>' +
           '<td class="notranslate num" translate="no">' + nf(x.g.bot, st) + '–' + nf(x.g.top, st) + '</td>' +
           '<td class="num">' + (x.abAtr === 0 ? 'inside' : isFinite(x.abAtr) ? x.abAtr.toFixed(1) + ' ATR · ' + x.abPct.toFixed(2) + '%' : '—') + '</td>' +
           '<td class="num">' + (x.halt != null ? x.halt + '%' : '—') + '</td><td class="num">' + (x.konf != null ? x.konf : '—') + '</td>' +
-          '<td class="num">' + (x.tests != null ? x.tests : '—') + '</td><td class="num">' + evAlter(x.alter) + '</td></tr>';
+          '<td class="num">' + (x.tests != null ? x.tests : '—') + '</td><td class="num">' + evAlter(x.alter) + '</td>' +
+          '<td class="tv-li-a"><button type="button" data-lia="edit" data-i="' + i + '" title="Show and move the edges" aria-label="Edit">✎</button>' +
+          '<button type="button" data-lia="del" data-i="' + i + '" title="' + (x.mine ? 'Delete' : 'Hide') + '" aria-label="' + (x.mine ? 'Delete' : 'Hide') + '">' + (x.mine ? '🗑' : '⊘') + '</button></td></tr>';
       }).join('') + '</tbody></table>';
+    var ZDh = L ? zsLaden(L.sym) : null;
+    if (ZDh && ZDh.hidden.length) h += '<div class="tv-li-hid"><b>Hidden zones</b>' + ZDh.hidden.map(function (k) {
+      var p = String(k).split('|'), t = +p[1] * 60000;
+      return '<span>' + (p[0] === 's' ? 'Supply' : 'Demand') + (isFinite(t) && t > 0 ? ' · from ' + escHtml(new Date(t).toLocaleDateString([], { day: 'numeric', month: 'short' })) : '') +
+        ' <button type="button" data-lih="' + escHtml(k) + '">Show</button></span>'; }).join('') +
+      '<button type="button" data-lih="*" class="all">Show all</button></div>';
     box.innerHTML = h;
     box.querySelector('.tv-ev-stil-zu').onclick = function () { box.hidden = true; evSchalterNeu(); };
     box.onclick = function (ev) {
+      var la = ev.target.closest('[data-lia]'), lh = ev.target.closest('[data-lih]');
+      if (la) {
+        ev.stopPropagation();
+        var xi = EV_LI[+la.getAttribute('data-i')]; if (!xi) return;
+        if (la.getAttribute('data-lia') === 'edit') { evListeGehe(xi); setTimeout(function () { if (ZOFF) { EV.edit = ZOFF; evZoneBar(); } }, 1300); return; }
+        TV._vonChart = true; zoneOeffnen(regZone(xi.g, xi.tf)); if (!ZOFF) { TV._vonChart = true; zoneOeffnen(regZone(xi.g, xi.tf)); }
+        zbLoeschen(); setTimeout(evListeZeichnen, 50); return;
+      }
+      if (lh) {
+        var Lh = evL(); if (!Lh) return; var dh = zsLaden(Lh.sym), kh = lh.getAttribute('data-lih');
+        dh.hidden = kh === '*' ? [] : dh.hidden.filter(function (x) { return x !== kh; });
+        zsSichern(Lh.sym); evChartZeigen(); setTimeout(evListeZeichnen, 50); return;
+      }
       var f = ev.target.closest('[data-lif]'), s = ev.target.closest('[data-lis]'), r = ev.target.closest('[data-li]');
       if (f) { EV.liFilter = f.getAttribute('data-lif'); merke('evLiFilter', EV.liFilter); evListeZeichnen(); return; }
       if (s) { EV.liSort = s.getAttribute('data-lis'); merke('evLiSort', EV.liSort); evListeZeichnen(); return; }
@@ -86719,6 +87165,54 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (window.showToast) showToast(P.dir + ' limit at ' + nf(P.entry, st) + ', stop ' + nf(P.stop, st) + ', target ' + nf(P.target, st) + ' (' + P.rr.toFixed(2) + 'R)');
     rpLeisteNeu();
   };
+
+  /* ── Verlauf der Zonen-Replays (15.10.2026) ──
+     Die Sitzungen liegen lokal (apexZoneReplays_<uid>); hier werden sie
+     gezeigt und zusammengefasst: Trefferquote, R je Sitzung, Long/Short. */
+  function rpListe(){ try { var a = JSON.parse(localStorage.getItem(rpSchluessel()) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  TV.rpVerlauf = function () {
+    var box = document.getElementById('tvEvRpV'); if (!box) return;
+    box.hidden = !box.hidden; evSchalterNeu(); rpVerlaufZeichnen();
+  };
+  TV.rpLoeschen = function (i) {
+    var a = rpListe(); a.splice(i, 1);
+    try { localStorage.setItem(rpSchluessel(), JSON.stringify(a)); } catch (e) {}
+    rpVerlaufZeichnen(); evSchalterNeu();
+  };
+  function rpVerlaufZeichnen() {
+    var box = document.getElementById('tvEvRpV'); if (!box || box.hidden) return;
+    var a = rpListe(), alle = [];
+    a.forEach(function (x) { (x.trades || []).forEach(function (t) { alle.push(t); }); });
+    var gew = alle.filter(function (t) { return t.r > 0; }).length, sum = alle.reduce(function (s, t) { return s + (+t.r || 0); }, 0);
+    var seite = function (d) { var l = alle.filter(function (t) { return t.dir === d; }); return { n: l.length, r: Math.round(l.reduce(function (s, t) { return s + (+t.r || 0); }, 0) * 100) / 100 }; };
+    var L = seite('long'), S = seite('short');
+    var kum = 0, pts = a.slice().reverse().map(function (x) { kum += +x.r || 0; return kum; });
+    var mn = Math.min.apply(null, [0].concat(pts)), mx = Math.max.apply(null, [0].concat(pts)), W = 260, H = 54;
+    var y = function (v) { return mx === mn ? H / 2 : H - 4 - (v - mn) / (mx - mn) * (H - 8); };
+    var linie = pts.length > 1 ? '<svg class="tv-rpv-sp" viewBox="0 0 ' + W + ' ' + H + '" aria-label="R over sessions"><line x1="0" x2="' + W + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '" class="z"/><polyline points="' +
+      pts.map(function (v, i) { return (i / (pts.length - 1) * W).toFixed(1) + ',' + y(v).toFixed(1); }).join(' ') + '" class="' + (kum >= 0 ? 'up' : 'dn') + '"/></svg>' : '';
+    var st = (TV._levels && TV._levels.stellen) || 2;
+    box.innerHTML = '<div class="tv-ev-stil-kopf"><b>Your zone replays</b><span>Practice sessions from “Replay from here”, saved on this device.</span>' +
+      '<button type="button" class="tv-ev-stil-zu" aria-label="Close" onclick="ApexTV.rpVerlauf()">×</button></div>' +
+      (!a.length ? '<div class="tv-li-leer">No replay saved yet. Start one with “Replay from here”, place trades from the zones, then end it.</div>' :
+      '<div class="tv-rpv-k"><div><b>' + a.length + '</b><span>Sessions</span></div><div><b>' + alle.length + '</b><span>Trades</span></div>' +
+        '<div><b>' + (alle.length ? Math.round(gew / alle.length * 100) + '%' : '—') + '</b><span>Hit rate</span></div>' +
+        '<div><b class="' + (sum >= 0 ? 'up' : 'dn') + '">' + (sum >= 0 ? '+' : '') + sum.toFixed(2) + 'R</b><span>Total</span></div>' +
+        '<div><b>' + (alle.length ? (sum / alle.length >= 0 ? '+' : '') + (sum / alle.length).toFixed(2) + 'R' : '—') + '</b><span>Per trade</span></div></div>' +
+      linie +
+      '<div class="tv-rpv-ls">Long: ' + L.n + ' trades · <b class="' + (L.r >= 0 ? 'up' : 'dn') + '">' + (L.r >= 0 ? '+' : '') + L.r + 'R</b> &nbsp; Short: ' + S.n + ' trades · <b class="' + (S.r >= 0 ? 'up' : 'dn') + '">' + (S.r >= 0 ? '+' : '') + S.r + 'R</b></div>' +
+      '<table class="tv-li"><thead><tr><th>Played</th><th>Market</th><th>Period</th><th>Trades</th><th>Result</th><th></th></tr></thead><tbody>' +
+      a.map(function (x, i) {
+        var t = x.trades || [], g = t.filter(function (q) { return q.r > 0; }).length;
+        return '<tr><td>' + escHtml(new Date(x.at).toLocaleDateString([], { day: 'numeric', month: 'short' })) + '</td>' +
+          '<td class="notranslate" translate="no">' + escHtml((x.sym || '') + ' ' + (x.tf || '')) + '</td>' +
+          '<td class="num">' + escHtml(new Date(x.von).toLocaleDateString([], { day: 'numeric', month: 'short' })) + '–' + escHtml(new Date(x.bis).toLocaleDateString([], { day: 'numeric', month: 'short' })) + '</td>' +
+          '<td class="num notranslate" translate="no">' + t.length + ' · ' + g + ' ✓</td>' +
+          '<td class="num ' + ((+x.r || 0) >= 0 ? 'up' : 'dn') + '">' + ((+x.r || 0) >= 0 ? '+' : '') + (+x.r || 0).toFixed(2) + 'R</td>' +
+          '<td><button type="button" class="tv-rpv-x" aria-label="Delete session" onclick="ApexTV.rpLoeschen(' + i + ')">×</button></td></tr>';
+      }).join('') + '</tbody></table>');
+  }
+
   function rpLeiste() {
     var host = document.getElementById('tvEvChart'); if (!host) return;
     var l = document.getElementById('tvEvRp');
@@ -86822,7 +87316,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         try { evLegendeAn(inst, host); } catch (x) {}
         try { inst.onCrosshair(function (bar, drin) { if (drin && bar && isFinite(bar.i)) EV._xhI = bar.i; evKreuzSync(null, bar, drin); }); } catch (x) {}
         try {
-          inst.chart.timeScale().subscribeVisibleLogicalRangeChange(function () { evUeberlagerung(); });
+          inst.chart.timeScale().subscribeVisibleLogicalRangeChange(function () { evUeberlagerung(); try { evZoneBarPos(); } catch (x) {} });
           if (window.ResizeObserver) new ResizeObserver(function () { evUeberlagerung(); }).observe(host);
         } catch (x) {}
         /* Gespeicherte Optik sofort, nicht erst wenn jemand das Panel öffnet. */
@@ -86838,14 +87332,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
             var p = inst.series.coordinateToPrice(param.point.y);
             if (!isFinite(p)) return;
             var best = null;
+            /* Eigene Zonen haben Vorrang vor automatischen (lagen sie
+               uebereinander, war die eigene nicht mehr anklickbar). */
             EV.zonen.forEach(function (z) {
-              var w = z.top - z.bot;
-              if (p >= z.bot && p <= z.top && (!best || w < best.w)) best = { z: z, w: w };
+              var w = z.top - z.bot, mine = !!(z._g && z._g.mine);
+              if (p >= z.bot && p <= z.top && (!best || (mine && !best.mine) || (mine === best.mine && w < best.w))) best = { z: z, w: w, mine: mine };
             });
-            if (best) {
-              zoneOeffnen(regZone(best.z._g, best.z._tf));
-              if (window.innerWidth <= 760) { var c = document.getElementById('tvZone'); if (c && ZOFF) setTimeout(function () { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
-            }
+            if (best) { TV._vonChart = true; zoneOeffnen(regZone(best.z._g, best.z._tf)); }
+            else if (ZOFF && !EV.edit) zoneSchliessen();
           });
         } catch (x) { /* ohne Klick bleibt der Chart nutzbar */ }
         evChartZeigen();
@@ -86983,6 +87477,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   function evZeichnen(inst, e, L) {
     if (!inst || !e) return;
     if (EV.rp && !EV._rpZeichnen) { rpZeigen(); return; }   // im Replay zaehlt nur der Cursor
+    EV._e = e; EV._L = L;
     if (EV.bars !== e.bars) {
       /* Automatisches Nachladen darf Zoom und Position nicht wegwerfen:
          gleicher Zeitrahmen → Ausschnitt um die neuen Kerzen verschieben.
@@ -87019,6 +87514,12 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
        zusammen haben den Chart unlesbar gemacht. "All zones" zeigt sie. */
     try { evDemoSaat(e, L); } catch (x) {}
     var liste = evZonenListe(inst, e, L);
+    if (ZOFF) liste.forEach(function (z) {
+      try {
+        if (zonenKennung(z._g) + '@' + z._tf !== ZOFF && !(z._g.mine && zReg[ZOFF] && zReg[ZOFF].g.mine && zReg[ZOFF].g.mineId === z._g.mineId)) return;
+        z.stil = Object.assign({}, z.stil, { stroke: 'rgba(201,168,76,1)', dash: [], label: '◆ ' + (z.stil.label || '') });
+      } catch (x) {}
+    });
     EV.zonen = liste;
     try { ezLeiste(); } catch (x) {}
     var spezi = [{ key: 'evz', kind: 'overlay', plots: [], zones: liste, zoneOpts: { roh: true } }];
@@ -88096,12 +88597,14 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   function zoneOeffnen(id) {
     if (!id) return;
     ZOFF = (ZOFF === id) ? null : id;   // nochmal draufklicken schliesst
-    TV._ezMenu = false;
+    TV._ezMenu = false; EV.zbAlarm = false; if (EV.edit && EV.edit !== ZOFF) EV.edit = null;
+    var vomChart = TV._vonChart; TV._vonChart = false;
+    try { evZeichnenErneut(); evZoneBar(); } catch (x) {}
     TV._stats = false;
     zoneZeigen();
     levelZeigen();                      // die angeklickte Zeile markieren
     var host = document.getElementById('tvZone');
-    if (!ZOFF || !host) return;
+    if (!ZOFF || !host || vomChart) return;   // vom Chart aus: die Leiste an der Zone reicht, kein Sprung
     /* Die Tafel steht unter dem ganzen Raster und kann weit unterhalb des
        Bildschirms liegen. Ohne diesen Sprung sieht ein Klick aus wie
        nichts — genau so wurde er auch gemeldet. */
@@ -88112,7 +88615,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     } catch (e) {}
   }
 
-  function zoneSchliessen() { ZOFF = null; TV._formZone = null; zoneZeigen(); }
+  function zoneSchliessen() { ZOFF = null; TV._formZone = null; zoneZeigen(); try { evEditEnde(); evZoneBar(); evZeichnenErneut(); } catch (x) {} }
+  /* Auswahl-Rahmen sofort zeigen/entfernen, ohne die Kerzen neu zu laden. */
+  function evZeichnenErneut() { if (EV.inst && EV._e && EV._L && EV.an) try { evZeichnen(EV.inst, EV._e, EV._L); } catch (x) {} }
 
   /* Saetze aus der letzten Antwort, die von genau dieser Stelle handeln.
      Die KI schreibt Fliesstext ueber mehrere Zonen; hier soll nur stehen,
@@ -103664,11 +104169,11 @@ function trackCalc(jd, opt) {
   };
 
   function eingehend(m, cid, d) {
-    if (C) {                                                // besetzt
+    if (C || G) {                                           // besetzt
       ref(m.id, cid).update({ status: 'busy', endedAt: Date.now() }).catch(function () {});
       return;
     }
-    C = { mid: m.id, cid: cid, m: m, rolle: 'callee', video: !!d.video, peer: { uid: d.from, name: d.fromName || other(m).name },
+    C = { mid: m.id, cid: cid, m: m, rolle: 'callee', video: !!d.video, group: !!d.group, groupNames: d.groupNames || [], peer: { uid: d.from, name: d.fromName || other(m).name },
           status: 'ringing', notiz: '', transkript: [], secs: 0 };
     zeichnen();
     ringStart(false);
@@ -103682,7 +104187,7 @@ function trackCalc(jd, opt) {
 
   /* ── Anrufen ── */
   X.start = function (mid, video) {
-    if (C) { toast('You are already in a call'); return; }
+    if (C || G) { toast('You are already in a call'); return; }
     var m = mOf(mid); if (!m) { toast('This mentorship is not active'); return; }
     var p = other(m);
     C = { mid: mid, m: m, rolle: 'caller', video: !!video, peer: p, status: 'calling', notiz: '', transkript: [], secs: 0 };
@@ -103758,6 +104263,12 @@ function trackCalc(jd, opt) {
     if (!C.lokal.getVideoTracks().length) { try { pc.addTransceiver('video', { direction: 'recvonly' }); } catch (e) {} }
     pc.ontrack = function (e) {
       var st = (e.streams && e.streams[0]) || new MediaStream([e.track]);
+      /* Gruppen-Call: der erste Stream ist der Coach, weitere sind die anderen Teilnehmer. */
+      if (C.fern && C.fern.id !== st.id) {
+        C.extra = C.extra || {}; C.extra[st.id] = st;
+        st.onremovetrack = function () { if (!st.getTracks().length && C && C.extra) { delete C.extra[st.id]; zeichnen(); } };
+        zeichnen(); return;
+      }
       C.fern = st; var v = document.getElementById('acRemote'); if (v && v.srcObject !== st) v.srcObject = st;
       zeichnen();
     };
@@ -103788,6 +104299,7 @@ function trackCalc(jd, opt) {
     dc.onmessage = function (e) {
       var x; try { x = JSON.parse(e.data); } catch (er) { return; }
       if (!C) return;
+      if (schuelerGruppe(x)) return;
       if (x.t === 'tr' && x.text) { C.transkript.push({ who: C.peer.name, text: String(x.text).slice(0, 600), at: Date.now() }); malTranskript(); }
       if (x.t === 'trade' && x.trade) { C.geteilt = x.trade; malGeteilt(); toast(C.peer.name + ' shared a trade'); }
     };
@@ -103913,7 +104425,7 @@ function trackCalc(jd, opt) {
     var p = C.peer, init = (p.name || '?').trim().charAt(0).toUpperCase();
     if (C.status === 'ringing' && C.rolle === 'callee') {
       box.className = 'pcall-ov ring';
-      box.innerHTML = '<div class="pcall-ring"><div class="pcall-av big">' + esc(init) + '</div><b>' + esc(p.name) + '</b><span>' + (C.video ? 'Video call' : 'Voice call') + ' · Evidence coaching</span>' +
+      box.innerHTML = '<div class="pcall-ring"><div class="pcall-av big">' + esc(init) + '</div><b>' + esc(p.name) + '</b><span>' + (C.group ? 'Group call with ' + esc((C.groupNames || []).filter(function (n) { return n !== myName(); }).join(', ')) : (C.video ? 'Video call' : 'Voice call') + ' · Evidence coaching') + '</span>' +
         '<div class="pcall-ring-b"><button class="pcall-b no" onclick="ApexCall.ablehnen()" aria-label="Decline">' + ic('phone-off') + '</button>' +
         '<button class="pcall-b ok" onclick="ApexCall.annehmen()" aria-label="Accept">' + ic(C.video ? 'video' : 'phone') + '</button></div></div>';
       return;
@@ -103928,6 +104440,10 @@ function trackCalc(jd, opt) {
         '<div class="pcall-fallback"' + (C.fern && C.fern.getVideoTracks().some(function (t) { return t.enabled && t.readyState === 'live'; }) ? ' hidden' : '') + '><div class="pcall-av big">' + esc(init) + '</div><b>' + esc(p.name) + '</b>' +
           '<span>' + (C.status === 'calling' ? 'Calling…' : C.status === 'connecting' ? 'Connecting…' : 'Voice') + '</span></div>' +
         '<video id="acLocal" autoplay playsinline muted' + (C.cam || C.teilen ? '' : ' hidden') + '></video>' +
+        (C.extra && Object.keys(C.extra).length ? '<div class="pcall-extra">' + Object.keys(C.extra).map(function (k) {
+          var nm = (C.namen || {})[k] || 'Participant';
+          return '<div class="pcall-tile sm"><video id="acX_' + esc(k).replace(/[^A-Za-z0-9_-]/g, '') + '" autoplay playsinline></video><div class="pcall-fallback"><div class="pcall-av">' + esc(nm.charAt(0).toUpperCase()) + '</div></div><span class="pcall-name notranslate" translate="no">' + esc(nm) + '</span></div>';
+        }).join('') + '</div>' : '') +
         '<div class="pcall-top"><b class="notranslate" translate="no">' + esc(p.name) + '</b><span id="acUhr">' + (C.status === 'live' ? mmss(C.secs) : '') + '</span><i id="acNetz">' + (C.status === 'live' ? 'Connected' : '') + '</i>' +
           '<button class="pcall-mini" onclick="ApexCall.klein()" aria-label="' + (C.klein ? 'Expand' : 'Minimise') + '">' + (C.klein ? '⤢' : '—') + '</button></div>' +
         '<div class="pcall-bar">' +
@@ -103946,6 +104462,7 @@ function trackCalc(jd, opt) {
         '<div class="pcall-sec"><h4>Live transcript</h4><p>Not recorded — each side writes down its own speech; saved with the notes when the call ends.</p><div class="pcall-tr-box" id="acTr"></div></div>' +
       '</aside>';
     var r = document.getElementById('acRemote'); if (r && C.fern) r.srcObject = C.fern;
+    if (C.extra) Object.keys(C.extra).forEach(function (k) { var v = document.getElementById('acX_' + k.replace(/[^A-Za-z0-9_-]/g, '')); if (v) { v.srcObject = C.extra[k]; var fb = v.nextElementSibling; if (fb && C.extra[k].getVideoTracks().some(function (t) { return t.enabled; })) fb.hidden = true; } });
     var l = document.getElementById('acLocal'); if (l && C.lokal) l.srcObject = C.teilen ? C.teilen.s : C.lokal;
     malTranskript(); malGeteilt();
   }
@@ -103980,6 +104497,227 @@ function trackCalc(jd, opt) {
   /* Anmelden: sobald die Kopplungen geladen sind, regelmaessig nachziehen. */
   setInterval(function () { try { X.listen(); } catch (e) {} }, 15000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) try { X.listen(); } catch (e) {} });
+  /* ═══ Gruppen-Call (15.10.2026): Coach + bis zu 4 Schueler ═══
+     Stern statt Netz: jeder Schueler ist nur mit dem Coach verbunden (seine
+     eigene Kopplung, dieselben Regeln wie beim 1:1). Der Browser des Coaches
+     leitet Ton und Bild der anderen weiter (addTrack mit der empfangenen Spur)
+     und verhandelt neu ueber den Datenkanal — kein Server, keine neue Sammlung.
+     Fuer 2–5 Personen reicht das; mehr braeuchte einen SFU-Dienst (E1). */
+  var G = null, GMAX = 4;
+  function gWerte() { return G ? Object.keys(G.peers).map(function (k) { return G.peers[k]; }) : []; }
+  X.gruppe = function (mids, video) {
+    if (C || G) { toast('You are already in a call'); return; }
+    var ms = (mids || []).map(mOf).filter(Boolean).slice(0, GMAX);
+    if (!ms.length) { toast('Pick at least one student'); return; }
+    G = { video: !!video, peers: {}, start: 0, secs: 0, notiz: '', transkript: [], mic: true, cam: !!video };
+    ms.forEach(function (m) { var p = other(m); G.peers[m.id] = { m: m, uid: p.uid, name: p.name, status: 'calling', pend: [], fwd: {} }; });
+    gZeichnen();
+    if (window.APEX_DEMO) { gDemo(); return; }
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: video ? { width: { ideal: 960 }, height: { ideal: 540 } } : false })
+      .catch(function () { return navigator.mediaDevices.getUserMedia({ audio: true }); })
+      .then(function (s) {
+        if (!G) { s.getTracks().forEach(function (t) { t.stop(); }); return; }
+        G.lokal = s; G.cam = s.getVideoTracks().length > 0;
+        gWerte().forEach(gAnrufen);
+        G._timeout = setTimeout(function () { gWerte().forEach(function (p) { if (p.status === 'calling') gWeg(p.m.id, 'missed'); }); }, RING_MS);
+        gZeichnen();
+      }).catch(function (e) { gEnde('Could not start: ' + ((e && e.message) || e)); });
+  };
+  function gSenden(p, o) { try { if (p.dc && p.dc.readyState === 'open') p.dc.send(JSON.stringify(o)); } catch (e) {} }
+  function gAnrufen(p) {
+    var pc = new RTCPeerConnection(ICE); p.pc = pc;
+    G.lokal.getTracks().forEach(function (t) { pc.addTrack(t, G.lokal); });
+    if (!G.lokal.getVideoTracks().length) { try { pc.addTransceiver('video', { direction: 'recvonly' }); } catch (e) {} }
+    pc.ontrack = function (e) {
+      var st = (e.streams && e.streams[0]) || new MediaStream([e.track]);
+      p.stream = st; gZeichnen(); weiterleiten();
+    };
+    pc.onconnectionstatechange = function () { if (pc.connectionState === 'failed') gWeg(p.m.id, 'lost'); };
+    var dc = pc.createDataChannel('apx'); p.dc = dc;
+    dc.onopen = function () { p.offen = true; weiterleiten(); };
+    dc.onmessage = function (e) {
+      var x; try { x = JSON.parse(e.data); } catch (er) { return; }
+      if (x.t === 'answer' && x.sdp) pc.setRemoteDescription(new RTCSessionDescription(x.sdp)).then(function () { p.neg = false; if (p.nochmal) { p.nochmal = false; neuVerhandeln(p); } }).catch(function () { p.neg = false; });
+      if (x.t === 'tr' && x.text) { G.transkript.push({ who: p.name, text: String(x.text).slice(0, 600), at: Date.now() }); gMalTr(); gWerte().forEach(function (q) { if (q !== p) gSenden(q, { t: 'tr2', who: p.name, text: x.text }); }); }
+    };
+    var namen = gWerte().map(function (q) { return q.name; });
+    var r = db.collection('apexMentorships').doc(p.m.id).collection('calls').doc(); p.ref = r; p.cid = r.id;
+    pc.createOffer().then(function (o) { return pc.setLocalDescription(o).then(function () { return o; }); }).then(function (o) {
+      return r.set({ from: me(), fromName: myName(), to: p.uid, toName: p.name, video: !!G.video, status: 'ringing', at: Date.now(),
+                     offer: { type: o.type, sdp: o.sdp }, group: true, groupNames: namen.slice(0, 5), ts: FV().serverTimestamp() });
+    }).then(function () {
+      try { if (window.ApexPush) ApexPush.notify('call', 'apexMentorships/' + p.m.id + '/calls/' + r.id); } catch (e) {}
+      pc.onicecandidate = function (e) { if (e.candidate) r.collection('fromCand').add(e.candidate.toJSON()).catch(function () {}); };
+      p._cand = r.collection('toCand').onSnapshot(function (s) { s.docChanges().forEach(function (ch) { if (ch.type === 'added') gAddC(p, ch.doc.data()); }); }, function () {});
+      p._watch = r.onSnapshot(function (doc) {
+        var x = doc.data(); if (!x || !G) return;
+        if (x.answer && !pc.currentRemoteDescription) {
+          pc.setRemoteDescription(new RTCSessionDescription(x.answer)).then(function () {
+            var pd = p.pend; p.pend = []; pd.forEach(function (c) { gAddC(p, c); });
+            p.status = 'live'; if (!G.start) gLive();
+            pc.onnegotiationneeded = function () { neuVerhandeln(p); };
+            gZeichnen();
+          }).catch(function () {});
+        }
+        if (x.status === 'declined' || x.status === 'busy' || x.status === 'missed') gWeg(p.m.id, x.status);
+        else if (x.status === 'ended' && p.status === 'live') gWeg(p.m.id, 'left');
+      });
+    }).catch(function () { gWeg(p.m.id, 'error'); });
+  }
+  function gAddC(p, c) {
+    if (!p.pc) return;
+    if (!p.pc.remoteDescription || !p.pc.remoteDescription.type) { p.pend.push(c); return; }
+    try { var q = p.pc.addIceCandidate(new RTCIceCandidate(c)); if (q && q.catch) q.catch(function () {}); } catch (e) {}
+  }
+  function neuVerhandeln(p) {
+    if (!p.pc || !p.offen) return;
+    if (p.neg) { p.nochmal = true; return; }
+    p.neg = true;
+    p.pc.createOffer().then(function (o) { return p.pc.setLocalDescription(o).then(function () { return o; }); })
+      .then(function (o) { gSenden(p, { t: 'offer', sdp: { type: o.type, sdp: o.sdp } }); })
+      .catch(function () { p.neg = false; });
+  }
+  /* Jeder bekommt die Spuren der anderen; dazu eine Namensliste je Stream. */
+  function weiterleiten() {
+    if (!G) return;
+    var live = gWerte().filter(function (p) { return p.offen && p.stream && p.status === 'live'; });
+    live.forEach(function (a) {
+      live.forEach(function (b) {
+        if (a === b || a.fwd[b.m.id]) return;
+        try { a.fwd[b.m.id] = b.stream.getTracks().map(function (t) { return a.pc.addTrack(t, b.stream); }); } catch (e) {}
+      });
+    });
+    var map = {}; if (G.lokal) map[G.lokal.id] = myName();
+    live.forEach(function (p) { map[p.stream.id] = p.name; });
+    live.forEach(function (a) { gSenden(a, { t: 'names', map: map }); });
+  }
+  function gWeg(mid, warum) {
+    if (!G) return; var p = G.peers[mid]; if (!p || p.status === 'gone') return;
+    var war = p.status; p.status = 'gone'; p.warum = warum;
+    try { if (p._watch) p._watch(); if (p._cand) p._cand(); } catch (e) {}
+    try { if (p.ref && war === 'calling' && warum === 'missed') p.ref.update({ status: 'missed', endedAt: Date.now() }).catch(function () {}); } catch (e) {}
+    try { if (p.pc) p.pc.close(); } catch (e) {}
+    gWerte().forEach(function (a) { var s = a.fwd[mid]; if (s && a.pc) { s.forEach(function (x) { try { a.pc.removeTrack(x); } catch (e) {} }); delete a.fwd[mid]; } });
+    if (war === 'live') toast(p.name + ' left the call');
+    if (!gWerte().some(function (q) { return q.status === 'live' || q.status === 'calling'; })) { gEnde(G.start ? 'Everyone has left' : 'Nobody answered'); return; }
+    gZeichnen();
+  }
+  function gLive() {
+    G.start = Date.now();
+    G._uhr = setInterval(function () { if (!G) return; G.secs = Math.round((Date.now() - G.start) / 1000); var u = document.getElementById('acUhr'); if (u) u.textContent = mmss(G.secs); }, 1000);
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR) try {
+      var sr = new SR(); sr.continuous = true; sr.interimResults = false; sr.lang = document.documentElement.lang || navigator.language || 'en-US';
+      sr.onresult = function (e) { for (var i = e.resultIndex; i < e.results.length; i++) { if (!e.results[i].isFinal || !G || !G.mic) continue; var t = e.results[i][0].transcript.trim(); if (!t) continue;
+        G.transkript.push({ who: myName(), text: t, at: Date.now() }); gWerte().forEach(function (p) { gSenden(p, { t: 'tr2', who: myName(), text: t }); }); gMalTr(); } };
+      sr.onend = function () { if (G && !G.trAus) try { sr.start(); } catch (e) {} };
+      sr.start(); G.sr = sr;
+    } catch (e) {}
+  }
+  X.gMic = function () { if (!G || !G.lokal) { if (G) { G.mic = !G.mic; gZeichnen(); } return; } G.mic = !G.mic; G.lokal.getAudioTracks().forEach(function (t) { t.enabled = G.mic; }); gZeichnen(); };
+  X.gCam = function () { if (!G || !G.lokal) return; var v = G.lokal.getVideoTracks(); if (!v.length) { toast('Start a video group call to use the camera'); return; } G.cam = !G.cam; v.forEach(function (t) { t.enabled = G.cam; }); gZeichnen(); };
+  X.gBildschirm = function () {
+    if (!G) return;
+    if (G.teilen) { gStopTeilen(); return; }
+    if (!navigator.mediaDevices.getDisplayMedia) { toast('Screen sharing is not available in this browser'); return; }
+    navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 15 } }).then(function (s) {
+      var t = s.getVideoTracks()[0]; G.teilen = { s: s, alt: [] };
+      gWerte().forEach(function (p) {
+        if (!p.pc) return;
+        var sender = p.pc.getSenders().filter(function (x) { return x.track && x.track.kind === 'video' && G.lokal.getVideoTracks().indexOf(x.track) >= 0; })[0];
+        if (sender) { G.teilen.alt.push([sender, sender.track]); sender.replaceTrack(t); }
+      });
+      if (!G.teilen.alt.length) toast('Start a video group call to share your screen');
+      t.onended = gStopTeilen; gZeichnen();
+    }).catch(function () {});
+  };
+  function gStopTeilen() { if (!G || !G.teilen) return; G.teilen.alt.forEach(function (x) { try { x[0].replaceTrack(x[1]); } catch (e) {} }); try { G.teilen.s.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} G.teilen = null; gZeichnen(); }
+  X.gNotiz = function (v) { if (G) G.notiz = String(v || '').slice(0, 5000); };
+  X.gAuflegen = function () { gEnde(''); };
+  function gEnde(text) {
+    if (!G) return;
+    var g = G; G = null;
+    clearTimeout(g._timeout); clearInterval(g._uhr);
+    try { if (g.sr) { g.trAus = true; g.sr.stop(); } } catch (e) {}
+    try { if (g.teilen) g.teilen.s.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+    try { if (g.lokal) g.lokal.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+    var dabei = [];
+    Object.keys(g.peers).forEach(function (k) {
+      var p = g.peers[k];
+      if (p.status === 'live' || p.warum === 'left') dabei.push(p);
+      try { if (p._watch) p._watch(); if (p._cand) p._cand(); } catch (e) {}
+      try { if (p.ref && !window.APEX_DEMO) p.ref.update({ status: p.status === 'calling' ? 'missed' : 'ended', endedAt: Date.now(), secs: g.secs || 0 }).catch(function () {}); } catch (e) {}
+      try { if (p.pc) p.pc.close(); } catch (e) {}
+    });
+    var box = document.getElementById('acOv'); if (box) box.remove();
+    if (text) toast(text);
+    if (g.secs > 20 && dabei.length && window.ApexMentor && ApexMentor.saveCallSession) {
+      var namen = dabei.map(function (p) { return p.name; }).join(', ');
+      var akt = (g.notiz || '').split('\n').map(function (x) { return x.trim(); }).filter(function (x) { return /^[-•*]/.test(x); }).map(function (x) { return x.replace(/^[-•*]\s*/, ''); });
+      var tr = g.transkript.slice(-80).map(function (x) { return x.who + ': ' + x.text; }).join('\n');
+      var text2 = 'Group call (' + namen + ') · ' + mmss(g.secs) + (g.notiz ? '\n\nNotes\n' + g.notiz : '') + (tr ? '\n\nTranscript (excerpt)\n' + tr : '');
+      dabei.forEach(function (p) { ApexMentor.saveCallSession(p.m.id, { text: text2, secs: g.secs, video: g.video, when: g.start, actions: akt }); });
+      toast('Session notes saved for ' + dabei.length + ' student' + (dabei.length === 1 ? '' : 's'));
+    }
+  }
+  function gMalTr() {
+    var b = document.getElementById('acTr'); if (!b || !G) return;
+    b.innerHTML = G.transkript.slice(-40).map(function (x) { return '<div><b>' + esc(x.who) + '</b> ' + esc(x.text) + '</div>'; }).join('') || '<span class="leer">Waiting for speech…</span>';
+    b.scrollTop = b.scrollHeight;
+  }
+  function gZeichnen() {
+    if (!G) return;
+    var box = document.getElementById('acOv');
+    if (!box) { box = document.createElement('div'); box.id = 'acOv'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', 'Group call'); document.body.appendChild(box); }
+    box.className = 'pcall-ov live';
+    var ps = gWerte();
+    box.innerHTML =
+      '<div class="pcall-stage pcall-grid n' + Math.min(4, ps.length) + '">' +
+        ps.map(function (p) {
+          var stand = p.status === 'live' ? '' : p.status === 'calling' ? 'Ringing…' : p.warum === 'declined' ? 'Declined' : p.warum === 'busy' ? 'In another call' : p.warum === 'missed' ? 'No answer' : 'Left';
+          return '<div class="pcall-tile' + (p.status === 'live' ? '' : ' wait') + '"><video id="acG_' + p.m.id + '" autoplay playsinline></video>' +
+            '<div class="pcall-fallback"><div class="pcall-av">' + esc((p.name || '?').charAt(0).toUpperCase()) + '</div></div>' +
+            '<span class="pcall-name notranslate" translate="no">' + esc(p.name) + (stand ? ' · ' + stand : '') + '</span></div>';
+        }).join('') +
+        '<video id="acLocal" autoplay playsinline muted' + ((G.cam && G.lokal) || G.teilen ? '' : ' hidden') + '></video>' +
+        '<div class="pcall-top"><b>Group call</b><span id="acUhr">' + (G.start ? mmss(G.secs) : '') + '</span><i>' + ps.filter(function (p) { return p.status === 'live'; }).length + ' of ' + ps.length + ' connected</i></div>' +
+        '<div class="pcall-bar">' +
+          '<button class="pcall-b' + (G.mic ? '' : ' aus') + '" onclick="ApexCall.gMic()" aria-label="' + (G.mic ? 'Mute' : 'Unmute') + '">' + ic(G.mic ? 'mic' : 'mic-off') + '</button>' +
+          '<button class="pcall-b' + (G.cam ? '' : ' aus') + '" onclick="ApexCall.gCam()" aria-label="Camera">' + ic(G.cam ? 'video' : 'video-off') + '</button>' +
+          '<button class="pcall-b' + (G.teilen ? ' an' : '') + '" onclick="ApexCall.gBildschirm()" aria-label="Share screen">' + ic('screen') + '</button>' +
+          '<button class="pcall-b no" onclick="ApexCall.gAuflegen()" aria-label="End the call for everyone">' + ic('phone-off') + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<aside class="pcall-side">' +
+        '<div class="pcall-sec"><h4>Notes</h4><p>Saved to every student’s sessions. Lines starting with “-” become action items.</p><textarea rows="6" oninput="ApexCall.gNotiz(this.value)">' + esc(G.notiz) + '</textarea></div>' +
+        '<div class="pcall-sec"><h4>Live transcript</h4><p>Not recorded — each person writes down their own speech.</p><div class="pcall-tr-box" id="acTr"></div></div>' +
+      '</aside>';
+    ps.forEach(function (p) { var v = document.getElementById('acG_' + p.m.id); if (v && p.stream) { v.srcObject = p.stream; var fb = v.nextElementSibling; if (fb && p.stream.getVideoTracks().some(function (t) { return t.enabled; })) fb.hidden = true; } });
+    var l = document.getElementById('acLocal'); if (l && G.lokal) l.srcObject = G.teilen ? G.teilen.s : G.lokal;
+    gMalTr();
+  }
+  function gDemo() {
+    toast('Group calls are simulated in the demo — no camera or microphone is used');
+    gWerte().forEach(function (p, i) {
+      setTimeout(function () { if (!G) return; p.status = i === 2 ? 'gone' : 'live'; if (i === 2) p.warum = 'busy'; if (!G.start) { G.start = Date.now(); G._uhr = setInterval(function () { if (!G) return; G.secs = Math.round((Date.now() - G.start) / 1000); var u = document.getElementById('acUhr'); if (u) u.textContent = mmss(G.secs); }, 1000); } gZeichnen(); }, 900 + i * 700);
+    });
+    setTimeout(function () { if (!G) return; var a = gWerte()[0]; G.transkript.push({ who: a.name, text: 'Can we go through my Tuesday trades first?', at: Date.now() }); gMalTr(); }, 3200);
+  }
+  X._gState = function () { return G; };
+
+  /* ── Schueler-Seite im Gruppen-Call: weitere Streams + Neuverhandlung ── */
+  function schuelerGruppe(x) {
+    if (!C || !C.pc) return false;
+    if (x.t === 'offer' && x.sdp) {
+      C.pc.setRemoteDescription(new RTCSessionDescription(x.sdp)).then(function () { return C.pc.createAnswer(); })
+        .then(function (a) { return C.pc.setLocalDescription(a).then(function () { senden({ t: 'answer', sdp: { type: a.type, sdp: a.sdp } }); }); }).catch(function () {});
+      return true;
+    }
+    if (x.t === 'names' && x.map) { C.namen = x.map; zeichnen(); return true; }
+    if (x.t === 'tr2' && x.text) { C.transkript.push({ who: String(x.who || '').slice(0, 40), text: String(x.text).slice(0, 600), at: Date.now() }); malTranskript(); return true; }
+    return false;
+  }
+
   X._state = function () { return C; };
 })();
 </script>
@@ -104031,6 +104769,18 @@ function trackCalc(jd, opt) {
 .pcall-ov.live.klein .pcall-stage{position:absolute;inset:0}
 .pcall-ov.live.klein .pcall-bar{bottom:10px;gap:8px;padding:6px 8px}.pcall-ov.live.klein .pcall-b{width:38px;height:38px}.pcall-ov.live.klein .pcall-b .ic{width:18px;height:18px}
 .pcall-ov.live.klein #acLocal{display:none}
+.pcall-grid{display:grid;gap:6px;padding:60px 10px 96px;background:#000}
+.pcall-grid.n1{grid-template-columns:1fr}.pcall-grid.n2{grid-template-columns:1fr 1fr}.pcall-grid.n3,.pcall-grid.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.pcall-tile{position:relative;background:radial-gradient(60% 60% at 50% 40%,#1a1c22,#050608);border-radius:14px;overflow:hidden;min-height:120px}
+.pcall-tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pcall-tile .pcall-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:transparent}
+.pcall-tile .pcall-fallback[hidden]{display:none}
+.pcall-tile.wait{opacity:.6}
+.pcall-name{position:absolute;left:10px;bottom:8px;font-size:12.5px;color:#fff;background:rgba(0,0,0,.5);padding:2px 8px;border-radius:6px}
+.pcall-extra{position:absolute;left:12px;top:60px;display:flex;flex-direction:column;gap:8px;z-index:2}
+.pcall-tile.sm{width:160px;height:96px;min-height:0;border:1px solid rgba(255,255,255,.15)}
+.pcall-tile.sm .pcall-av{width:38px;height:38px;font-size:16px}
+@media (max-width:820px){.pcall-grid{padding:56px 6px 90px}.pcall-tile.sm{width:110px;height:70px}}
 @media (max-width:820px){
   .pcall-ov.live{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
   .pcall-side{max-height:38vh;border-left:0;border-top:0.5px solid var(--rim2)}
@@ -104038,6 +104788,124 @@ function trackCalc(jd, opt) {
   .pcall-bar{bottom:14px}
 }
 </style>
+<script id="apex-mentor-i18n">
+/* Feste Uebersetzungen fuer Mentor v2, Calls, Coach-Seite und Zones View
+   (15.10.2026). Google Translate machte aus „checks“ „Schecks“, aus
+   „No overtrading“ „NEIN overtrading“, aus „Live“ „Aktiv“. Reihenfolge: de, es, pt, fr. */
+(function(){
+  if (!window.ApexI18n || !ApexI18n.addScoped) return;
+  var MT = {
+    'Overview': ['Übersicht','Resumen','Visão geral','Aperçu'],
+    'Trades': ['Trades','Operaciones','Operações','Trades'],
+    'Feedback': ['Feedback','Comentarios','Feedback','Retours'],
+    'Goals': ['Ziele','Objetivos','Metas','Objectifs'],
+    'Chat': ['Chat','Chat','Chat','Chat'],
+    'Sessions': ['Sitzungen','Sesiones','Sessões','Séances'],
+    'Team & tools': ['Team & Werkzeuge','Equipo y herramientas','Equipe e ferramentas','Équipe et outils'],
+    'Students': ['Schüler','Alumnos','Alunos','Élèves'],
+    'Call': ['Anrufen','Llamar','Ligar','Appeler'],
+    'Video': ['Video','Vídeo','Vídeo','Vidéo'],
+    'Call coach': ['Coach anrufen','Llamar al coach','Ligar para o coach','Appeler le coach'],
+    'Message': ['Nachricht','Mensaje','Mensagem','Message'],
+    'Monthly report': ['Monatsbericht','Informe mensual','Relatório mensal','Rapport mensuel'],
+    '← Back to roster': ['← Zurück zur Liste','← Volver a la lista','← Voltar à lista','← Retour à la liste'],
+    'Live': ['Live','En vivo','Ao vivo','En direct'],
+    'Open now': ['Gerade offen','Abiertas ahora','Abertas agora','Ouvertes maintenant'],
+    'no stop': ['kein Stop','sin stop','sem stop','sans stop'],
+    'Next 7 days': ['Nächste 7 Tage','Próximos 7 días','Próximos 7 dias','7 prochains jours'],
+    'Availability': ['Verfügbarkeit','Disponibilidad','Disponibilidade','Disponibilités'],
+    'Close availability': ['Verfügbarkeit schließen','Cerrar disponibilidad','Fechar disponibilidade','Fermer les disponibilités'],
+    'Your availability': ['Deine Verfügbarkeit','Tu disponibilidad','Sua disponibilidade','Vos disponibilités'],
+    'Save availability': ['Verfügbarkeit speichern','Guardar disponibilidad','Salvar disponibilidade','Enregistrer'],
+    'Booked sessions': ['Gebuchte Termine','Sesiones reservadas','Sessões agendadas','Séances réservées'],
+    'Book a session': ['Termin festlegen','Reservar una sesión','Agendar uma sessão','Réserver une séance'],
+    'Book': ['Buchen','Reservar','Agendar','Réserver'],
+    'Requested': ['Angefragt','Solicitada','Solicitada','Demandée'],
+    'Confirmed': ['Bestätigt','Confirmada','Confirmada','Confirmée'],
+    'Declined': ['Abgelehnt','Rechazada','Recusada','Refusée'],
+    'Cancelled': ['Abgesagt','Cancelada','Cancelada','Annulée'],
+    'Confirm': ['Bestätigen','Confirmar','Confirmar','Confirmer'],
+    'Decline': ['Ablehnen','Rechazar','Recusar','Refuser'],
+    'Cancel': ['Abbrechen','Cancelar','Cancelar','Annuler'],
+    'Add to calendar': ['In den Kalender','Añadir al calendario','Adicionar ao calendário','Ajouter au calendrier'],
+    'Join now': ['Jetzt beitreten','Unirse ahora','Entrar agora','Rejoindre'],
+    'Weekly plan': ['Wochenplan','Plan semanal','Plano semanal','Plan de la semaine'],
+    'Plan this week': ['Plan dieser Woche','Plan de esta semana','Plano desta semana','Plan de la semaine'],
+    'Pre-trade check': ['Check vor dem Trade','Consulta antes del trade','Consulta antes do trade','Vérification avant le trade'],
+    'Check': ['Vorab fragen','Consultar','Consultar','Demander'],
+    'Ask before you take it': ['Frag, bevor du ihn nimmst','Pregunta antes de entrar','Pergunte antes de entrar','Demandez avant d’entrer'],
+    'Waiting for your coach': ['Wartet auf deinen Coach','Esperando a tu coach','Aguardando seu coach','En attente de votre coach'],
+    'Go': ['Go','Adelante','Pode','Go'],
+    'Wait': ['Warten','Espera','Espere','Attendre'],
+    'No': ['Nein','No','Não','Non'],
+    'Asked before a trade:': ['Vor dem Trade gefragt:','Consultas antes del trade:','Consultas antes do trade:','Demandes avant un trade :'],
+    'Seen': ['Gelesen','Visto','Visto','Vu'],
+    '· approved:': ['· freigegeben:','· aprobadas:','· aprovadas:','· validées :'],
+    '· waiting for you:': ['· warten auf dich:','· esperando tu respuesta:','· aguardando você:','· en attente de vous :'],
+    '· approved and taken:': ['· freigegeben und genommen:','· aprobadas y tomadas:','· aprovadas e feitas:','· validées et prises :'],
+    '· taken against your advice:': ['· gegen deinen Rat genommen:','· tomadas contra tu consejo:','· feitas contra seu conselho:','· prises contre votre avis :'],
+    'Reply': ['Antworten','Responder','Responder','Répondre'],
+    'Delete': ['Löschen','Eliminar','Excluir','Supprimer'],
+    'Send': ['Senden','Enviar','Enviar','Envoyer'],
+    'Process': ['Prozess','Proceso','Processo','Processus'],
+    'Your process': ['Dein Prozess','Tu proceso','Seu processo','Votre processus'],
+    'Stop on every trade': ['Stop bei jedem Trade','Stop en cada trade','Stop em cada trade','Stop sur chaque trade'],
+    'Rules followed': ['Regeln eingehalten','Reglas cumplidas','Regras seguidas','Règles respectées'],
+    'Same risk each trade': ['Gleiches Risiko je Trade','Mismo riesgo por trade','Mesmo risco por trade','Même risque par trade'],
+    'Planned before entry': ['Vor dem Einstieg geplant','Planificado antes de entrar','Planejado antes da entrada','Planifié avant l’entrée'],
+    'Trade limit per day kept': ['Tageslimit eingehalten','Límite diario respetado','Limite diário respeitado','Limite quotidienne respectée'],
+    'Journal kept': ['Journal geführt','Diario al día','Diário em dia','Journal tenu'],
+    'Stops': ['Stops','Stops','Stops','Stops'], 'Rules': ['Regeln','Reglas','Regras','Règles'], 'Risk': ['Risiko','Riesgo','Risco','Risque'],
+    'Plan': ['Plan','Plan','Plano','Plan'], 'Pace': ['Tempo','Ritmo','Ritmo','Rythme'], 'Journal': ['Journal','Diario','Diário','Journal'],
+    'Programme': ['Programm','Programa','Programa','Programme'],
+    'Mark done': ['Erledigt','Marcar como hecho','Marcar como feito','Marquer comme fait'],
+    'Save programme': ['Programm speichern','Guardar programa','Salvar programa','Enregistrer le programme'],
+    'Assign': ['Zuweisen','Asignar','Atribuir','Attribuer'],
+    'Client record': ['Kundendatensatz','Ficha del cliente','Ficha do cliente','Fiche client'],
+    'only you see this': ['nur du siehst das','solo tú lo ves','só você vê isto','vous seul le voyez'],
+    'Save record': ['Speichern','Guardar','Salvar','Enregistrer'],
+    'Your coaching business': ['Dein Coaching-Geschäft','Tu negocio de coaching','Seu negócio de coaching','Votre activité de coaching'],
+    'View my public page': ['Meine öffentliche Seite','Ver mi página pública','Ver minha página pública','Voir ma page publique'],
+    'Renewals coming up': ['Anstehende Verlängerungen','Renovaciones próximas','Renovações próximas','Renouvellements à venir'],
+    'Applications': ['Bewerbungen','Solicitudes','Candidaturas','Candidatures'],
+    'Accept': ['Annehmen','Aceptar','Aceitar','Accepter'],
+    'Waitlist': ['Warteliste','Lista de espera','Lista de espera','Liste d’attente'],
+    'Find a coach': ['Coach finden','Buscar un coach','Encontrar um coach','Trouver un coach'],
+    'Apply for coaching': ['Für Coaching bewerben','Solicitar coaching','Candidatar-se ao coaching','Postuler au coaching'],
+    'Join the waitlist': ['Auf die Warteliste','Unirse a la lista de espera','Entrar na lista de espera','Rejoindre la liste d’attente'],
+    'Send application': ['Bewerbung senden','Enviar solicitud','Enviar candidatura','Envoyer la candidature'],
+    'Packages': ['Pakete','Paquetes','Pacotes','Formules'],
+    'What students say': ['Was Schüler sagen','Lo que dicen los alumnos','O que dizem os alunos','Ce que disent les élèves'],
+    'Payment is arranged with the coach directly.': ['Die Bezahlung klärst du direkt mit dem Coach.','El pago se acuerda directamente con el coach.','O pagamento é combinado diretamente com o coach.','Le paiement se règle directement avec le coach.'],
+    'Your applications': ['Deine Bewerbungen','Tus solicitudes','Suas candidaturas','Vos candidatures'],
+    'Post review': ['Bewertung abgeben','Publicar reseña','Publicar avaliação','Publier l’avis'],
+    'Notes': ['Notizen','Notas','Notas','Notes'],
+    'Live transcript': ['Live-Mitschrift','Transcripción en vivo','Transcrição ao vivo','Transcription en direct'],
+    'On screen together': ['Gemeinsam auf dem Schirm','En pantalla juntos','Na tela juntos','À l’écran ensemble'],
+    'Calling…': ['Wählt…','Llamando…','Chamando…','Appel…'],
+    'Connecting…': ['Verbinde…','Conectando…','Conectando…','Connexion…'],
+    'Connected': ['Verbunden','Conectado','Conectado','Connecté'],
+    'Voice': ['Sprache','Voz','Voz','Voix'],
+    'Voice call · Evidence coaching': ['Sprachanruf · Evidence Coaching','Llamada de voz · Evidence coaching','Chamada de voz · Evidence coaching','Appel vocal · Evidence coaching'],
+    'Video call · Evidence coaching': ['Videoanruf · Evidence Coaching','Videollamada · Evidence coaching','Chamada de vídeo · Evidence coaching','Appel vidéo · Evidence coaching'],
+    'Zone list': ['Zonenliste','Lista de zonas','Lista de zonas','Liste des zones'],
+    'Replay from here': ['Replay ab hier','Replay desde aquí','Replay daqui','Replay à partir d’ici'],
+    'End replay': ['Replay beenden','Terminar replay','Encerrar replay','Arrêter le replay'],
+    'Long from demand': ['Long aus Demand','Long desde demanda','Long da demanda','Long depuis la demande'],
+    'Short from supply': ['Short aus Supply','Short desde oferta','Short da oferta','Short depuis l’offre'],
+    'Why this zone · Confluence': ['Warum diese Zone · Konfluenz','Por qué esta zona · Confluencia','Por que esta zona · Confluência','Pourquoi cette zone · Confluence'],
+    'Save as planned trade': ['Als geplanten Trade speichern','Guardar como trade planificado','Salvar como trade planejado','Enregistrer comme trade prévu'],
+    'Show tests on chart': ['Tests im Chart zeigen','Mostrar tests en el gráfico','Mostrar testes no gráfico','Afficher les tests sur le graphique'],
+    'Alert me': ['Alarm','Avisarme','Me avise','M’alerter'],
+    'Alert me when…': ['Melde mich, wenn…','Avísame cuando…','Me avise quando…','M’alerter quand…'],
+    'Price gets close': ['Kurs nähert sich','El precio se acerca','O preço se aproxima','Le prix s’approche'],
+    'Price enters': ['Kurs ist in der Zone','El precio entra','O preço entra','Le prix entre'],
+    'Candle closes beyond (zone broken)': ['Kerze schließt jenseits (Zone gebrochen)','La vela cierra más allá (zona rota)','O candle fecha além (zona rompida)','La bougie clôture au-delà (zone cassée)'],
+    'Keyboard shortcuts': ['Tastenkürzel','Atajos de teclado','Atalhos de teclado','Raccourcis clavier']
+  };
+  ApexI18n.addScoped('#page-mentor, #acOv, #mtCoachHost, #tvEv, #tvZone', MT);
+})();
+</script>
 <style id="apex-srv-polish-1410">
 /* Server-Ansichten (14.10.2026): zu kleine Schrift, abgeschnittene Knoepfe,
    Karten, die aus dem Fenster ragen. Steht am Ende des Body, damit es die zur
@@ -104067,6 +104935,14 @@ function trackCalc(jd, opt) {
 #csSetModal .ss-sub{font-size:13px}
 #csSetModal .ss-b{font-size:12.5px}
 .qs-row{font-size:13px}
+/* Durchlauf 15.10.: Mentor + Zones View — Mini-Knoepfe und 10-px-Beschriftungen */
+#page-mentor .mt-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:13px;border-radius:8px;border:0.5px solid var(--rim2);background:var(--elevated);color:var(--ink2);margin-bottom:10px}
+#page-mentor .mt-kpi .l,#page-mentor .mt-ck .l,#page-mentor .mt-tchip,#page-mentor .mt-pill,#page-mentor .mt-tbl th,#page-mentor .mt-mist,#page-mentor .mt-pos{font-size:11px}
+#page-mentor .mt-flag{font-size:11.5px}
+#tvEvTfs [data-evtf],#tvEvTfs .tv-ev-sw,#tvEvTfs .tv-ev-lay button{font-size:12px;min-height:28px;padding-left:10px;padding-right:10px}
+#tvEvTfs [data-evtf]{min-width:38px}
+.tv-ev-stil-zu{min-width:32px;min-height:32px;font-size:18px}
+@media (max-width:760px){#tvEvTfs [data-evtf],#tvEvTfs .tv-ev-sw,#tvEvTfs .tv-ev-lay button{min-height:34px;font-size:12.5px}}
 .cs-pop .cs-mini,#csSetModal .cs-mini,#page-channels .cs-mini{background:var(--elevated);border:0.5px solid var(--rim2);color:var(--ink2);border-radius:8px;padding:6px 11px;font:inherit;font-size:12px;cursor:pointer}
 .cs-pop .cs-mini:hover,#page-channels .cs-mini:hover{border-color:var(--gold-line);color:var(--ink)}
 body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{background:#fff;border-color:rgba(0,0,0,0.12)}
