@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-16b';
+  window.APEX_BUILD = '2026-10-16c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -64295,6 +64295,12 @@ self.addEventListener('message', async (ev) => {
       var rw = Math.abs(x1 - x0), rh = Math.abs(y1 - y0);
       ctx.globalAlpha = 0.13; ctx.fillRect(rx, ry, rw, rh);
       ctx.globalAlpha = 1; ctx.strokeRect(rx, ry, rw, rh);
+      /* Griffe wie in TradingView (16.10.2026): Ecken + Mitte jeder Seite.
+         Links/rechts aendern nur die Breite, oben/unten nur die Hoehe. */
+      this._handle(ctx, x0, y0); this._handle(ctx, x1, y1);
+      this._handle(ctx, x0, y1); this._handle(ctx, x1, y0);
+      this._kante(ctx, rx, ry + rh / 2); this._kante(ctx, rx + rw, ry + rh / 2);
+      this._kante(ctx, rx + rw / 2, ry); this._kante(ctx, rx + rw / 2, ry + rh);
 
     } else if (s.type === 'fib') {
       if (y0 == null || y1 == null) { ctx.restore(); return; }
@@ -64499,6 +64505,14 @@ self.addEventListener('message', async (ev) => {
     ctx.restore();
   };
 
+  /* Seitengriff: weisser Punkt mit Rand — deutlich als „hier ziehen". */
+  Draw.prototype._kante = function (ctx, x, y) {
+    ctx.save();
+    ctx.globalAlpha = 1; ctx.fillStyle = '#fff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  };
+
   Draw.prototype._fmtPrice = function (p) {
     var d = p > 1000 ? 2 : (p > 20 ? 3 : 5);
     return (+p).toFixed(d);
@@ -64531,6 +64545,17 @@ self.addEventListener('message', async (ev) => {
       // A position tool paints all three handles on its left edge, so the hit
       // test has to look for them there too — otherwise grabbing the target
       // silently moved the whole box instead of changing the R:R.
+      /* Rechteck: Seitenmitten zuerst (Breite bzw. Hoehe allein), dann die
+         beiden gegenueberliegenden Ecken, die keine Punkte sind. */
+      if (s.type === 'rect' && s.points.length >= 2) {
+        var ax0 = this._x(s.points[0].t), ax1 = this._x(s.points[1].t), ay0 = this._y(s.points[0].p), ay1 = this._y(s.points[1].p);
+        if (ax0 != null && ax1 != null && ay0 != null && ay1 != null) {
+          var lx = Math.min(ax0, ax1), rx2 = Math.max(ax0, ax1), ty = Math.min(ay0, ay1), by = Math.max(ay0, ay1);
+          var my = (ty + by) / 2, mx = (lx + rx2) / 2;
+          var kanten = [['el', lx, my], ['er', rx2, my], ['et', mx, ty], ['eb', mx, by], ['c01', ax0, ay1], ['c10', ax1, ay0]];
+          for (var q = 0; q < kanten.length; q++) if (Math.hypot(kanten[q][1] - px, kanten[q][2] - py) <= grab) return { shape: s, idx: i, part: kanten[q][0] };
+        }
+      }
       var edgeX = null;
       if (s.type === 'long' || s.type === 'short') {
         var ax = this._x(s.points[0].t);
@@ -64965,6 +64990,21 @@ self.addEventListener('message', async (ev) => {
       return { t: t, p: p };
     }
     if (part === 'body') s.points = base.map(moved);
+    else if (s.type === 'rect' && /^(el|er|et|eb|c01|c10)$/.test(part) && base.length >= 2) {
+      /* Seite ziehen: nur die Zeit (links/rechts) bzw. nur der Preis
+         (oben/unten) des Punkts auf dieser Seite aendert sich. */
+      var np2 = base.map(function (q) { return { t: q.t, p: q.p }; });
+      var xa = self._x(base[0].t), xb = self._x(base[1].t), ya = self._y(base[0].p), yb = self._y(base[1].p);
+      var setT = function (k) { var x = (k === 0 ? xa : xb); if (x == null) return; var t = self._toTime(x + dx); if (t != null) np2[k].t = t; };
+      var setP = function (k) { var y = (k === 0 ? ya : yb); if (y == null) return; var pp = self._toPrice(y + dy); if (pp != null) np2[k].p = self._magnet(np2[k].t, pp).p; };
+      if (part === 'el') setT(xa <= xb ? 0 : 1);
+      else if (part === 'er') setT(xa <= xb ? 1 : 0);
+      else if (part === 'et') setP(ya <= yb ? 0 : 1);
+      else if (part === 'eb') setP(ya <= yb ? 1 : 0);
+      else if (part === 'c01') { setT(0); setP(1); }      // Ecke (x von Punkt 0, y von Punkt 1)
+      else if (part === 'c10') { setT(1); setP(0); }
+      s.points = np2;
+    }
     else {
       var k = +part.slice(1);
       if (base[k]) {
@@ -65037,7 +65077,7 @@ self.addEventListener('message', async (ev) => {
         // Hover feedback so it is discoverable that shapes can be grabbed.
         if (usable(e) && self.shapes.length) {
           var h = self._hit(local(e).x, local(e).y, false);
-          el.style.cursor = h ? (h.part === 'body' ? 'move' : 'pointer') : '';
+          el.style.cursor = h ? (h.part === 'body' ? 'move' : (h.part === 'el' || h.part === 'er') ? 'ew-resize' : (h.part === 'et' || h.part === 'eb') ? 'ns-resize' : 'pointer') : '';
         }
         return;
       }
@@ -74084,6 +74124,7 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
      Four numbers, on every page: distance to the floor, room left today,
      target progress, trading days. Lives inside <nav>, which is sticky, so it
      scrolls with the navigation and never covers content. */
+  W.barZu = function () { W._barZu = true; var b = document.getElementById('propBar'); if (b) b.hidden = true; };
   W.renderBar = function () {
     var nav = document.querySelector('#shell > nav');
     if (!nav || !P()) return;
@@ -74098,7 +74139,7 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
     var st = null;
     try { st = P().status(); } catch (e) {}
     var landing = document.getElementById('landingPage');
-    if (!st || !window.currentUID || (landing && landing.offsetParent !== null)) { bar.hidden = true; return; }
+    if (!st || !window.currentUID || W._barZu || (landing && landing.offsetParent !== null)) { bar.hidden = true; return; }
     bar.hidden = false;
     if (!st.ready) {
       bar.className = 'prop-bar setup';
@@ -74128,7 +74169,9 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
       (c.practice ? '<span class="pb-practice" title="Practice account — same rules, nothing at stake">Practice</span>' : '') +
       '<span class="pb-state">' + label + '</span>' +
       items.map(function (x, i) { return '<span class="pb-it pb-it' + i + '">' + x + '</span>'; }).join('') +
-      '<span class="pb-go">→</span></button>';
+      '<span class="pb-go">→</span></button>' +
+      /* Ausblenden bis zum Neuladen (16.10.2026) — nur im Speicher. */
+      '<button type="button" class="pb-x" onclick="event.stopPropagation();ApexPropWizard.barZu()" aria-label="Hide until the page is reloaded" title="Hide until you reload">✕</button>';
     tr(bar);
   };
 })();
@@ -74261,7 +74304,10 @@ body.light .pw-fld input, body.light .pw-fld select { color-scheme: light; }
 .prop-risk.warn { background: rgba(224,169,59,0.07); border-color: rgba(224,169,59,0.35); }
 .prop-risk.bad { background: rgba(var(--loss-rgb),0.07); border-color: rgba(var(--loss-rgb),0.4); }
 /* ── challenge bar under the navigation ── */
-.prop-bar { border-top: 0.5px solid rgba(var(--gold-rgb),0.12); }
+.prop-bar { border-top: 0.5px solid rgba(var(--gold-rgb),0.12); display: flex; align-items: center; }
+.prop-bar > button:first-child { flex: 1; min-width: 0; }
+.prop-bar > .pb-x { flex: none; width: auto; background: none; border: 0; color: var(--ink3); font-size: 14px; padding: 6px 12px; cursor: pointer; }
+.prop-bar > .pb-x:hover { color: var(--ink); }
 .prop-bar[hidden] { display: none; }
 .prop-bar > button { width: 100%; display: flex; align-items: center; gap: 14px; padding: 7px 1.75rem; background: none; border: 0;
   cursor: pointer; color: var(--ink2); font-family: var(--font-body); font-size: 12px; text-align: left; overflow: hidden; white-space: nowrap; }
@@ -81977,7 +82023,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Index-Weg ueber Yahoo, statt dass jeder Chart seine eigene, schwaechere
      Quelle hat. */
   TV.kerzen = function (sym, tf, anzahl) { return kerzenHolen(sym, tf, anzahl); };
-  TV.hatIndexWeg = function (sym) { return !!INDEX_YAHOO[sym]; };
+  TV.hatIndexWeg = function (sym) { return !!INDEX_YAHOO[sym] || !!yahooSym(sym); };
 
   function kerzenHolen(sym, tf, anzahl) {
     var min = { '1min': 1, '5min': 5, '15min': 15, '1h': 60, '4h': 240 }[tf] || 15;
@@ -90372,7 +90418,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
 
   function holeKerzenExtern(sym, interval, vonMs, bisMs) {
-    /* Indizes (NAS100, SPX500, US30): Twelve Data hat sie im Gratis-Tarif
+    /* Seit 16.10.2026 auch Forex + Krypto ueber Yahoo (kostenlos, ohne
+       Tageslimit) — das geteilte 800er-Kontingent von Twelve Data war sonst
+       mittags leer und der Live-Chart lud gar nichts mehr. Gold bleibt dort.
+       Indizes (NAS100, SPX500, US30): Twelve Data hat sie im Gratis-Tarif
        nicht — die Zonen-Ansicht holt sie seit 07.10. ueber Yahoo (Future +
        gemessene Basis + Kassa). Derselbe Weg hier (15.10.2026); vorher ging
        NAS100 im Live-Chart und damit in jeder Chart-Session nicht. */
@@ -90703,7 +90752,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     }).then(function (inst) {
       LC.chart = inst;
       inst.setBars(spalten(LC.bars));
-      inst.reveal ? inst.reveal() : null;
+      /* reveal() ohne Zahl heisst „0 Kerzen zeigen" — der Chart war bis zur
+         ersten Aktualisierung leer und nicht bezeichenbar (16.10.2026). */
+      if (inst.reveal) inst.reveal(LC.bars.length);
       if (inst.fit) inst.fit();
       // Aussehen und Indikatoren, die der Nutzer ueberall gewaehlt hat
       if (window.ApexChartStyle && ApexChartStyle.load) {
