@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-16f';
+  window.APEX_BUILD = '2026-10-16g';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -10446,7 +10446,7 @@ body.light #landingPage * {
       <a href="#" class="lp-btn primary" id="lpDemoOpen">Open the full demo ↗</a>
       <a href="#" class="lp-btn ghost" onclick="goToAuth('register');return false;">Create free account →</a>
     </div>
-    <div class="lp-hint">Demo data only · nothing is stored · the tour pauses as soon as you touch it</div>
+    <div class="lp-hint">Demo data only · nothing is stored · the tour stops as soon as you use the app</div>
   </div>
 
   <div class="lp-proof">
@@ -53777,6 +53777,15 @@ body.light .pt-sugg{background:var(--layer)}
     frame.addEventListener('load', function(){
       frame._ok = true; clearTimeout(failed);
       fitFrame();
+      /* Wer IN der Demo etwas tut (klicken, tippen, scrollen, Tasten), will
+         dort bleiben — die Tour hoert dann ganz auf (16.10.2026). Vorher
+         pausierte sie nur unter der Maus und sprang nach dem Rausfahren bzw.
+         6 s nach dem letzten Tippen weiter, mitten aus dem Gezeigten heraus. */
+      try {
+        var d = frame.contentWindow.document;
+        var genommen = function(){ if(userTook) return; userTook = true; stopTour(); };
+        ['pointerdown','keydown','wheel','touchstart'].forEach(function(t){ d.addEventListener(t, genommen, { capture:true, passive:true }); });
+      } catch(e){}
       setTimeout(function(){
         poster.classList.add('gone');
         if(!userTook) startTour();
@@ -53850,6 +53859,7 @@ body.light .pt-sugg{background:var(--layer)}
     box.addEventListener('touchstart', function(){ paused = true; clearTimeout(touchTimer); }, { passive:true });
     box.addEventListener('touchend', function(){
       clearTimeout(touchTimer);
+      if(userTook) return;
       touchTimer = setTimeout(function(){ paused = false; }, 6000);
     }, { passive:true });
 
