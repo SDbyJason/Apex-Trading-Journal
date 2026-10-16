@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-16a';
+  window.APEX_BUILD = '2026-10-16b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -86133,7 +86133,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     gr.addEventListener('pointermove', bewegen); gr.addEventListener('pointerup', ende); gr.addEventListener('pointercancel', ende);
   }
   function evEditEnde() { EV.edit = null; EV.zbAlarm = false; var b = document.getElementById('tvEvGriffe'); if (b) b.remove(); }
-  TV._zb = { inst: function () { return EV.inst; }, bar: evZoneBar, del: zbLoeschen, edit: function () { if (ZOFF) { EV.edit = ZOFF; evZoneBar(); } return !!ZOFF; } };
+  TV._zb = { bar: evZoneBar, del: zbLoeschen, edit: function () { if (ZOFF) { EV.edit = ZOFF; evZoneBar(); } return !!ZOFF; } };
 
   /* >>> KONF CALC — Zones-View-Plan Etappe 3.1; .claude/tests/konfluenz.test.js liest genau diesen Block.
      Konfluenz einer Zone, 0–100. Jeder Baustein ist eine Ja/Nein-Frage an die
@@ -88958,6 +88958,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     ZOFF = (ZOFF === id) ? null : id;   // nochmal draufklicken schliesst
     TV._ezMenu = false; EV.zbAlarm = false; if (EV.edit && EV.edit !== ZOFF) EV.edit = null;
     var vomChart = TV._vonChart; TV._vonChart = false;
+    /* Wie in TradingView (16.10.2026): Zone auf dem Chart anklicken = sofort
+       Griffe (Hoehe oben/unten, Breite links/rechts). Vorher erst nach „E". */
+    if (vomChart && ZOFF) EV.edit = ZOFF;
     try { evZeichnenErneut(); evZoneBar(); } catch (x) {}
     TV._stats = false;
     zoneZeigen();
