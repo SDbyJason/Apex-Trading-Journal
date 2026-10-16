@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-16c';
+  window.APEX_BUILD = '2026-10-16f';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -81818,9 +81818,25 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      haben — Neuladen wirft sie nicht mehr weg, und eine Kerze ueberspannt nie
      mehrere Zeitfenster. indexHolen misst daran ausserdem den Abstand. */
   function bandKey(s) { return String(s || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase(); }
+  /* Band im Browser behalten (16.10.2026): vorher nur im Speicher — jedes
+     Neuladen warf die mitgeschriebenen Minuten weg und die Luecke zwischen
+     den verzoegerten Kerzen und dem Live-Kurs ging von vorn los. */
+  function bandLaden() {
+    if (TV._band) return TV._band;
+    var B = {};
+    try { var r = JSON.parse(localStorage.getItem('apexTVBand') || 'null'); if (r && typeof r === 'object') B = r; } catch (e) {}
+    var alt = Date.now() - 6 * 3600000;
+    Object.keys(B).forEach(function (k) { Object.keys(B[k] || {}).forEach(function (t) { if (+t < alt) delete B[k][t]; }); });
+    return (TV._band = B);
+  }
+  function bandSichern() {
+    if (TV._bandT) return;
+    TV._bandT = setTimeout(function () { TV._bandT = null; try { localStorage.setItem('apexTVBand', JSON.stringify(TV._band || {})); } catch (e) {} }, 10000);
+  }
   function kursBand(sym, p) {
     var k = bandKey(sym); if (!k || !isFinite(p)) return;
-    var B = TV._band || (TV._band = {}), b = B[k] || (B[k] = {});
+    var B = bandLaden(), b = B[k] || (B[k] = {});
+    bandSichern();
     var m = Math.floor(Date.now() / 60000) * 60000, x = b[m];
     if (!x) {
       b[m] = { o: p, h: p, l: p, c: p };
@@ -81828,7 +81844,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       Object.keys(b).forEach(function (t) { if (+t < alt) delete b[t]; });
     } else { x.h = Math.max(x.h, p); x.l = Math.min(x.l, p); x.c = p; }
   }
-  function bandVon(sym) { return (TV._band && TV._band[bandKey(sym)]) || null; }
+  function bandVon(sym) { return bandLaden()[bandKey(sym)] || null; }
 
   function liveKurs(symName) {
     var k = TV.kurs;
@@ -82023,7 +82039,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Index-Weg ueber Yahoo, statt dass jeder Chart seine eigene, schwaechere
      Quelle hat. */
   TV.kerzen = function (sym, tf, anzahl) { return kerzenHolen(sym, tf, anzahl); };
-  TV.hatIndexWeg = function (sym) { return !!INDEX_YAHOO[sym] || !!yahooSym(sym); };
+  TV.hatIndexWeg = function (sym) { return !!INDEX_YAHOO[sym] || !!yahooSym(sym) || /^XAUUSD$/.test(String(sym).replace(/[^A-Z]/g, '')); };
 
   function kerzenHolen(sym, tf, anzahl) {
     var min = { '1min': 1, '5min': 5, '15min': 15, '1h': 60, '4h': 240 }[tf] || 15;
@@ -82217,7 +82233,76 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         });
     }
     TV._quelle = 'Twelve Data';
+    if (/^XAU/.test(String(sym).replace(/[^A-Z]/g, ''))) return goldMitLuecke(sym, tf, anzahl);
     return twelveHolen(sym, tf, anzahl);
+  }
+
+  /* Gold ohne Loch (16.10.2026). Twelve Data teilt 800 Abrufe am Tag auf ALLE
+     Nutzer; ist das leer, liefert der Worker nur noch die zwischengespeicherte
+     Antwort — gemessen: juengste Kerze 21 min alt, die Kerzen fehlten einfach.
+     Dann werden die fehlenden Kerzen mit dem Gold-Future von Yahoo (GC=F)
+     aufgefuellt, um den GEMESSENEN Abstand Future−Spot verschoben (Median
+     ueber die gemeinsamen Kerzen, nie fest eingetragen). Ohne Messung lieber
+     die Luecke lassen als einen falschen Kurs zeigen. */
+  function goldMitLuecke(sym, tf, anzahl) {
+    var min = { '1min': 1, '5min': 5, '15min': 15, '30min': 30, '1h': 60, '4h': 240 }[tf] || 15, raster = min * 60000;
+    /* Quellen fuer die Luecke, beste zuerst:
+       1. PAXG (Binance) — goldgedeckter Token, folgt dem Spot fast exakt,
+          ECHTZEIT, kostenlos, ohne Schluessel und praktisch ohne Limit.
+       2. Gold-Future GC=F (Yahoo) — rund 10 min verzoegert, Reserve.
+       Beide um den GEMESSENEN Abstand zum Spot verschoben. */
+    var binIv = { '1min': '1m', '5min': '5m', '15min': '15m', '30min': '30m', '1h': '1h', '4h': '4h' }[tf] || '15m';
+    var paxg = function () {
+      return fetch('https://data-api.binance.vision/api/v3/klines?symbol=PAXGUSDT&interval=' + binIv + '&limit=1000')
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!Array.isArray(j) || !j.length) throw new Error('paxg');
+          return j.map(function (k) { return { t: +k[0], o: +k[1], h: +k[2], l: +k[3], c: +k[4], v: 0 }; });
+        });
+    };
+    var quellen = [['PAXG (Binance)', paxg, 'apexGoldBasisPaxg'], ['Yahoo GC=F', function () { return yJson('GC=F', tf); }, 'apexGoldBasis']];
+    var mitQuelle = function (td, qi) {
+      var q = quellen[qi]; if (!q) return Promise.resolve(td);
+      var last = td && td.n ? td.t[td.n - 1] : 0;
+      return q[1]().then(function (fut) {
+        var futT = {};
+        fut.forEach(function (b) { var t = b.t - (b.t % raster); futT[t] = { t: t, o: b.o, h: b.h, l: b.l, c: b.c, v: b.v }; });
+        var diffs = [];
+        if (td && td.n) for (var i = td.n - 1; i >= 0 && diffs.length < 60; i--) { var f = futT[td.t[i]]; if (f) diffs.push(f.c - td.c[i]); }
+        /* Abstand nur an den JUENGSTEN gemeinsamen Kerzen messen — er wandert.
+           Groessere Zeitrahmen nehmen die frische M1-Messung (genauer, weil
+           viele Kerzen in kurzer Zeit), sonst ihre eigene. */
+        var basis = null, frisch = null;
+        try { frisch = JSON.parse(localStorage.getItem(q[2] + '_1m') || 'null'); } catch (e) {}
+        diffs = diffs.slice(0, min === 1 ? 20 : 8);
+        if (min !== 1 && frisch && Date.now() - frisch.ts < 2 * 3600000) basis = frisch.b;
+        else if (diffs.length >= 3) {
+          diffs.sort(function (a, b) { return a - b; }); basis = diffs[Math.floor(diffs.length / 2)];
+          try { localStorage.setItem(q[2] + (min === 1 ? '_1m' : ''), JSON.stringify({ b: basis, ts: Date.now() })); } catch (e) {}
+        }
+        else { try { var alt = JSON.parse(localStorage.getItem(q[2]) || 'null') || frisch; if (alt && Date.now() - alt.ts < 3 * 86400000) basis = alt.b; } catch (e) {} }
+        if (basis == null) throw new Error('no basis');
+        var neuT = Object.keys(futT).map(Number).filter(function (t) { return t > last; }).sort(function (a, b) { return a - b; });
+        if (!neuT.length) return td;
+        var o = td && td.n ? { n: td.n, t: td.t.slice(), o: td.o.slice(), h: td.h.slice(), l: td.l.slice(), c: td.c.slice(), v: td.v.slice() } : { n: 0, t: [], o: [], h: [], l: [], c: [], v: [] };
+        neuT.forEach(function (t) { var f = futT[t]; o.t.push(t); o.o.push(f.o - basis); o.h.push(f.h - basis); o.l.push(f.l - basis); o.c.push(f.c - basis); o.v.push(f.v || 0); });
+        o.n = o.t.length; o.__sym = sym;
+        /* PAXG handelt auch am Wochenende — Gold nicht. */
+        o = ohneWochenende(o); o.__sym = sym;
+        if (anzahl && o.n > anzahl) { var ab = o.n - anzahl; ['t', 'o', 'h', 'l', 'c', 'v'].forEach(function (k) { o[k] = o[k].slice(ab); }); o.n = anzahl; }
+        TV._quelle = 'Twelve Data + ' + q[0] + ' adjusted to spot (' + (basis >= 0 ? '−' : '+') + Math.abs(basis).toFixed(2) + ') for the last ' + neuT.length + ' candles';
+        /* Noch Rest uebrig (Reserve-Quelle hinkt)? Dann die naechste dranhaengen. */
+        if (Date.now() - o.t[o.n - 1] > raster * 2.5 && quellen[qi + 1]) return mitQuelle(o, qi + 1);
+        return o;
+      }).catch(function () { return mitQuelle(td, qi + 1); });
+    };
+    var auffuellen = function (td) {
+      if (td && td.n && Date.now() - td.t[td.n - 1] < raster * 2.5) return td;
+      return mitQuelle(td, 0);
+    };
+    return twelveHolen('XAU/USD', tf, anzahl).then(auffuellen, function (e) {
+      return auffuellen(null).then(function (r) { if (!r) throw e; return r; });
+    });
   }
 
   function twelveHolen(sym, tf, anzahl) {
