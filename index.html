@@ -1117,7 +1117,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-15m';
+  window.APEX_BUILD = '2026-10-16a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -8028,6 +8028,7 @@ body.light #page-chart .tv-feld select{background:#fff;border-color:rgba(0,0,0,.
 .tv-ev-griffe .gr{position:absolute;left:0;right:0;height:14px;margin-top:-7px;pointer-events:auto;cursor:ns-resize;touch-action:none}
 .tv-ev-griffe .gr i{position:absolute;left:0;right:0;top:6px;height:2px;background:var(--gold);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .tv-ev-griffe .gr span{position:absolute;right:4px;top:-12px;font-family:var(--font-mono);font-size:11px;padding:1px 6px;border-radius:5px;background:var(--gold);color:#0b0c0f}
+.tv-ev-griffe .gr.lr{right:auto;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;border:2px solid var(--gold);cursor:ew-resize;box-shadow:0 2px 8px rgba(0,0,0,.4)}.tv-ev-griffe .gr.lr.offen{border-style:dashed}.tv-ev-griffe .gr.lr i,.tv-ev-griffe .gr.lr span{display:none}
 .tv-ev-griffe .gr.mid{left:50%;right:auto;width:34px;height:26px;margin:-13px 0 0 -17px;border-radius:13px;background:var(--gold);color:#0b0c0f;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:move;box-shadow:0 4px 12px rgba(0,0,0,.35)}
 .tv-ev-griffe .gr:hover i{height:3px;top:5px}
 body.tv-ev-ziehen{cursor:ns-resize;user-select:none}
@@ -8041,7 +8042,7 @@ table.tv-li td.tv-li-a button:hover{background:var(--surface);color:var(--ink)}
 .tv-li-hid span{padding:3px 4px 3px 8px;border-radius:7px;border:0.5px solid var(--rim2)}
 .tv-li-hid button{background:none;border:0;color:var(--gold);font:inherit;cursor:pointer}
 .tv-li-hid button.all{border:0.5px solid var(--gold-line);border-radius:7px;padding:3px 8px}
-@media (max-width:760px){.tv-ev-zbar{max-width:calc(100% - 12px);flex-wrap:wrap}.tv-ev-zbar>button{min-width:34px;height:34px}.tv-ev-zbar .lbl{flex-basis:100%;padding:2px 6px}.tv-ev-griffe .gr{height:24px;margin-top:-12px}.tv-ev-griffe .gr i{top:11px}.tv-ev-griffe .gr.mid{width:40px;height:32px;margin:-16px 0 0 -20px}}
+@media (max-width:760px){.tv-ev-zbar{max-width:calc(100% - 12px);flex-wrap:wrap}.tv-ev-zbar>button{min-width:34px;height:34px}.tv-ev-zbar .lbl{flex-basis:100%;padding:2px 6px}.tv-ev-griffe .gr{height:24px;margin-top:-12px}.tv-ev-griffe .gr i{top:11px}.tv-ev-griffe .gr.mid{width:40px;height:32px;margin:-16px 0 0 -20px}.tv-ev-griffe .gr.lr{width:20px;height:20px;margin:-10px 0 0 -10px}}
 .tv-ev-lyr-h{display:flex;align-items:baseline;gap:8px;margin:2px 0 8px}
 .tv-ev-lyr-h b{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
 .tv-ev-lyr-h span{font-size:11.5px;color:var(--ink3)}
@@ -8320,7 +8321,7 @@ body.light #page-chart .tv-zl-z,body.light #page-chart .tv-kl{background:var(--v
 #page-live .lc-t-name{font-size:11.5px;color:var(--ink3)}
 /* Wechsler in der Kopfleiste der Buehne */
 #lcSwitch{display:flex;align-items:center;gap:8px}
-#lcSwitch .lc-symbtn{display:flex;align-items:center;gap:6px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:5px 11px;font-family:var(--font-body);font-size:13px;cursor:pointer;white-space:nowrap}
+#lcSwitch .lc-xbtn{color:var(--gold);font-family:var(--font-mono);font-style:italic}#lcSwitch .lc-xbtn sub{font-style:normal;font-size:10px;margin-left:1px}#lcSwitch .lc-xbtn .ic{width:15px;height:15px}#lcSwitch .lc-symbtn{display:flex;align-items:center;gap:6px;background:var(--elevated);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:5px 11px;font-family:var(--font-body);font-size:13px;cursor:pointer;white-space:nowrap}
 #lcSwitch .lc-symbtn:hover{border-color:var(--gold-line)}
 #lcSwitch .lc-symbtn b{font-family:var(--font-display);font-weight:700}
 #lcSwitch .lc-symbtn i{font-style:normal;color:var(--ink3);font-size:10px}
@@ -17766,6 +17767,37 @@ function getPipSpec(symbol) {
      spec, not to the spot metal that happens to share part of its name. */
   return FUTURES_SPECS[n] || PIP_SPECS[n] || null;
 }
+
+/* Pip-Groesse fuer ANZEIGEN (Zeichenwerkzeuge, Replay-Beschriftung),
+   15.10.2026. getPipSpec kennt nur die Journal-Schreibweisen — Charts
+   reichen aber 'OANDA:XAUUSD', 'NAS100USD', 'BTCUSDT', 'NQ_PROXY' oder
+   Dukascopy-Namen durch, und dann stand gar keine Pip-Zahl da. Fuer Geld-
+   rechnung bleibt getPipSpec massgeblich (dort heisst null "unbekannt"). */
+var APEX_PIP_ALIAS = {
+  NAS100USD:'NAS100', SPX500USD:'US500', US30USD:'US30', DE30EUR:'GER40', DE40EUR:'GER40',
+  USATECHIDXUSD:'NAS100', USA500IDXUSD:'US500', USA30IDXUSD:'US30', DEUIDXEUR:'GER40',
+  GBRIDXGBP:'UK100', JPNIDXJPY:'JPN225', LIGHTCMDUSD:'WTI', BRENTCMDUSD:'BRENT',
+  XAUUSDT:'XAUUSD'
+};
+function apexPipSize(symbol) {
+  var raw = String(symbol || '').toUpperCase();
+  var s = raw.split(':').pop().replace(/[^A-Z0-9_]/g, '');
+  var tries = [s, APEX_PIP_ALIAS[s], s.replace(/USDT$/, 'USD'), s.replace(/^M?([A-Z]{2})_PROXY$/, '$1').replace(/^([A-Z]{2,3})_PROXY$/, '$1')];
+  /* Futures-Stellvertreter: Pips wie das zugrunde liegende CFD-Instrument. */
+  var proxy = { ES:'US500', MES:'US500', NQ:'NAS100', MNQ:'NAS100', YM:'US30', MYM:'US30', GC:'XAUUSD', MGC:'XAUUSD', CL:'WTI', MCL:'WTI' };
+  var pm = s.match(/^([A-Z]{2,3})_?PROXY$/); if (pm && proxy[pm[1]]) tries.unshift(proxy[pm[1]]);
+  for (var i = 0; i < tries.length; i++) {
+    if (!tries[i]) continue;
+    try { var sp = getPipSpec(tries[i]); if (sp && sp.pipSize > 0) return sp.pipSize; } catch (e) {}
+  }
+  if (/(NAS|US30|US500|SPX|DAX|GER|UK100|FTSE|JPN|NIK|FRA|CAC|AUS200|HK50|ESP|IBEX|STOXX|IDX)/.test(s)) return 1;
+  if (/^(BTC|ETH)/.test(s)) return /^BTC/.test(s) ? 1 : 0.1;
+  if (/^(LTC|SOL|BNB)/.test(s)) return 0.01;
+  if (/^(XRP|ADA|DOGE)/.test(s)) return 0.0001;
+  if (/^[A-Z]{6}$/.test(s)) return /(JPY|HUF)$/.test(s) ? 0.01 : 0.0001;
+  return null;
+}
+window.apexPipSize = apexPipSize;
 
 function priceToPips(symbol, priceDiff) {
   var spec = getPipSpec(symbol);
@@ -44460,7 +44492,7 @@ body.light .pt-sugg{background:var(--layer)}
   function pipsFor(sym, entry, exit, dir){
     try {
       var ps=0.0001;
-      if(window.getPipSpec && window.normalizeSymbol){ var sp=getPipSpec(normalizeSymbol(sym)); if(sp&&sp.pipSize) ps=sp.pipSize; }
+      if(window.getPipSpec && window.normalizeSymbol){ var sp=getPipSpec(normalizeSymbol(sym)); if(sp&&sp.pipSize) ps=sp.pipSize; else if(window.apexPipSize&&apexPipSize(sym)) ps=apexPipSize(sym); }
       var diff=(parseFloat(exit)-parseFloat(entry))*(dir==='short'?-1:1);
       return (diff/ps).toFixed(1);
     } catch(e){ return ''; }
@@ -45637,8 +45669,11 @@ body.light .pt-sugg{background:var(--layer)}
   function num(v){ if(v===''||v==null)return null; var n=parseFloat(v); return isNaN(n)?null:n; }
   function key(d){ return d.toISOString().slice(0,10); }
   function seenKey(){ return 'apexRecap_'+(window.currentUID||'local'); }
-  function alreadyToday(){ try{ return localStorage.getItem(seenKey())===key(new Date()); }catch(e){ return false; } }
-  function markSeen(){ try{ localStorage.setItem(seenKey(), key(new Date())); }catch(e){} }
+  /* Geschlossen = bis morgen weg (16.10.2026). Vorher hing der Merker an der
+     uid, gelesen wurde aber oft schon vor der Anmeldung ('local') — die
+     Karte kam bei jedem Neuladen wieder. Jetzt zaehlt beides. */
+  function alreadyToday(){ try{ var k=key(new Date()); return localStorage.getItem(seenKey())===k || localStorage.getItem('apexRecap_any')===k; }catch(e){ return false; } }
+  function markSeen(){ try{ var k=key(new Date()); localStorage.setItem(seenKey(), k); localStorage.setItem('apexRecap_any', k); }catch(e){} }
 
   // last day that actually has a CLOSED trade (pips recorded)
   function lastTradingDay(){ var data=jd(); var keys=Object.keys(data).filter(function(k){ var d=data[k]; return d&&d.trades&&d.trades.some(function(t){return t.pips!==''&&t.pips!=null;}); }).sort(); return keys.length?keys[keys.length-1]:null; }
@@ -64419,9 +64454,15 @@ self.addEventListener('message', async (ev) => {
 
       var risk = Math.abs(p0.p - p1.p), rew = Math.abs(p2p.p - p0.p);
       var rr = risk > 0 ? (rew / risk).toFixed(2) : '—';
+      /* Stop UND Ziel getrennt (15.10.2026): vorher stand nur der Abstand
+         zum Ziel da — bei 30 Pips Stop und R:R 10 also „300p", was wie die
+         Stop-Groesse aussah. Jetzt steht jede Zahl an ihrer Zone. */
+      var slP = this._pips(risk), tpP = this._pips(rew);
       this._badge(ctx, xa + 4, Math.min(y0, y1, yT) - 8,
-                  (s.type === 'long' ? 'LONG' : 'SHORT') + '   R:R ' + rr +
-                  '   ' + (this._pips(rew) || '') , s.color);
+                  (s.type === 'long' ? 'LONG' : 'SHORT') + '   R:R ' + rr, s.color);
+      var yTpMid = (y0 + yT) / 2, ySlMid = (y0 + y1) / 2;
+      this._badge(ctx, xa + 4, yTpMid + 4, 'Target ' + (tpP || this._fmtPrice(rew)), '#3ecf8e');
+      this._badge(ctx, xa + 4, ySlMid + 4, 'Stop ' + (slP || this._fmtPrice(risk)), '#f0636a');
       this._handle(ctx, xa, y0); this._handle(ctx, xa, y1); this._handle(ctx, xa, yT);
     }
     ctx.restore();
@@ -64430,9 +64471,10 @@ self.addEventListener('message', async (ev) => {
   /** Pip distance for a price delta, using the app's own pip table. */
   Draw.prototype._pips = function (delta) {
     try {
-      var spec = window.getPipSpec ? window.getPipSpec(this.symbol) : null;
-      if (!spec || !spec.pipSize) return '';
-      return (Math.abs(delta) / spec.pipSize).toFixed(1) + 'p';
+      var ps = window.apexPipSize ? window.apexPipSize(this.symbol) : null;
+      if (!ps) return '';
+      var v = Math.abs(delta) / ps;
+      return (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + 'p';
     } catch (e) { return ''; }
   };
 
@@ -65795,6 +65837,18 @@ self.addEventListener('message', async (ev) => {
     host.className = 'apd-tb';
     host.innerHTML = barHtml(draw);
 
+    /* Die Leiste kann einen NEUEN Chart bekommen (Live-Chart geschlossen und
+       wieder geoeffnet, Chart-Session gestartet). Der Klick-Empfaenger haengt
+       nur einmal am Host — aber welche Zeichenebene er steuert, muss bei
+       JEDEM Aufruf neu gesetzt werden. Vorher stand das hinter dem fruehen
+       return: die Leiste steuerte die alte, zerstoerte Ebene, und Zeichnen
+       ging ab dem zweiten Oeffnen nicht mehr (15.10.2026). */
+    host._apdDraw = draw;
+    draw._onTool = function (tool) {
+      host.querySelectorAll('.apd-t[data-apd-tool]').forEach(function (b) {
+        b.classList.toggle('on', b.getAttribute('data-apd-tool') === tool);
+      });
+    };
     if (host._apdBound) return;            // one delegated listener per host
     host._apdBound = true;
     host.addEventListener('click', async function (e) {
@@ -73908,13 +73962,14 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
     if (r.daysRemaining > 0) parts.push(r.daysRemaining + ' more trading day' + (r.daysRemaining === 1 ? '' : 's') + ' needed.');
     return parts.join(' ');
   }
+  W.ovZu = function () { W._ovZu = true; var c = document.getElementById('propOvCard'); if (c) c.remove(); };
   W.renderOverview = function () {
     var page = document.getElementById('page-overview');
     if (!page || !P()) return;
     var card = document.getElementById('propOvCard');
     var st = null;
     try { st = P().status(); } catch (e) {}
-    if (!st || !st.ready) { if (card) card.remove(); return; }
+    if (!st || !st.ready || W._ovZu) { if (card) card.remove(); return; }
     if (!card) {
       card = document.createElement('div');
       card.id = 'propOvCard';
@@ -73939,7 +73994,9 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
         '<div class="po-id"><b>' + keep((f.id === 'custom' ? 'Prop account' : f.name) + ' ' + sizeLabel(num(c.balance))) + '</b>' +
           (c.practice ? '<span class="pb-practice">Practice</span>' : '') +
         '<span>' + keep(phs.label) + (st.account ? ' · ' + keep(st.account) : '') + '</span></div>' +
-        '<button type="button" class="pw-btn" onclick="nav(\'propfirm\')">Open cockpit →</button></div>' +
+        '<button type="button" class="pw-btn" onclick="nav(\'propfirm\')">Open cockpit →</button>' +
+        /* Schliessen bis zum naechsten Oeffnen der App (nur im Speicher). */
+        '<button type="button" class="po-x" onclick="ApexPropWizard.ovZu()" aria-label="Hide until the app is reopened" title="Hide until you reopen the app">✕</button></div>' +
       '<div class="po-stats">' +
         stat('To the floor', money(r.buffer), bufPct, bufPct < 25 ? 'bad' : bufPct < 50 ? 'warn' : 'good') +
         stat(r.open && r.open.n ? 'Room if stops hit' : 'Room left today', money(roomOv), dayPct, dayPct < 25 ? 'bad' : dayPct < 50 ? 'warn' : 'good') +
@@ -74182,6 +74239,7 @@ body.light .pw-fld input, body.light .pw-fld select { color-scheme: light; }
 .prop-ov { position: relative; margin: 0 0 18px; padding: 16px 18px 14px 22px; border-radius: 16px; overflow: hidden;
   background: linear-gradient(135deg, rgba(var(--gold-rgb),0.07), transparent 60%), var(--glass); border: 0.5px solid var(--rim); }
 .prop-ov::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--profit); }
+.prop-ov .po-x { background: none; border: 0; color: var(--ink3); font-size: 15px; cursor: pointer; padding: 4px 6px; margin-left: 4px; border-radius: 6px; flex: none; } .prop-ov .po-x:hover { color: var(--ink); background: rgba(255,255,255,.06); }
 .prop-ov.warn::before { background: #e0a93b; } .prop-ov.bad::before { background: var(--loss); }
 .prop-ov.done::before { background: linear-gradient(180deg,#e8c96a,#c9a84c); }
 .prop-ov .po-head { display: flex; align-items: center; gap: 12px; }
@@ -81458,7 +81516,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Die Instrumente, fuer die es Kerzen gibt — nur die kann die KI lesen.
      Alles andere bleibt ueber TradingViews eigene Suche erreichbar. */
   var SCHNELL = [
-    ['OANDA:XAUUSD', 'Gold'], ['OANDA:XAGUSD', 'Silver'],
+    /* Silber raus (15.10.2026): Twelve Data nur im bezahlten Tarif, Yahoo nur
+       den Future zu einem anderen Kurs — keine kostenlose, richtige Quelle. */
+    ['OANDA:XAUUSD', 'Gold'],
     ['OANDA:EURUSD', 'EURUSD'], ['OANDA:GBPUSD', 'GBPUSD'], ['OANDA:USDJPY', 'USDJPY'],
     ['OANDA:AUDUSD', 'AUDUSD'], ['OANDA:USDCAD', 'USDCAD'],
     ['OANDA:NAS100USD', 'NAS100'], ['OANDA:SPX500USD', 'SPX500'],
@@ -81469,7 +81529,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Alles, was Kerzen hat (DATEN_SYM) — nur daraus darf man waehlen, sonst
      koennte die KI ein Instrument in der Leiste gar nicht lesen. */
   var KATALOG = [
-    ['Metals', [['OANDA:XAUUSD', 'Gold'], ['OANDA:XAGUSD', 'Silver']]],
+    ['Metals', [['OANDA:XAUUSD', 'Gold']]],
     ['Indices', [['OANDA:NAS100USD', 'NAS100'], ['OANDA:SPX500USD', 'SPX500'],
                  ['OANDA:US30USD', 'US30'], ['OANDA:DE30EUR', 'GER40']]],
     ['Forex', ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'USDCHF',
@@ -81841,7 +81901,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      Symbol liefert Kerzen eines ANDEREN Instruments, und das faellt
      niemandem auf. */
   var DATEN_SYM = {
-    'OANDA:XAUUSD': 'XAU/USD', 'OANDA:XAGUSD': 'XAG/USD',
+    'OANDA:XAUUSD': 'XAU/USD',
     'OANDA:EURUSD': 'EUR/USD', 'OANDA:GBPUSD': 'GBP/USD',
     'OANDA:USDJPY': 'USD/JPY', 'OANDA:AUDUSD': 'AUD/USD',
     'OANDA:USDCAD': 'USD/CAD', 'OANDA:NZDUSD': 'NZD/USD',
@@ -81964,7 +82024,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   var INDEX_YAHOO = {
     NAS100: { fut: 'NQ=F', kasse: '^NDX' },
     SPX500: { fut: 'ES=F', kasse: '^GSPC' },
-    US30:   { fut: 'YM=F', kasse: '^DJI' }
+    US30:   { fut: 'YM=F', kasse: '^DJI' },
+    /* DAX: Twelve Data kennt ihn gar nicht, einen DAX-Future hat Yahoo nicht.
+       Der Xetra-Index (^GDAXI) ist kostenlos und der richtige Kurs, aber nur
+       09:00–17:30 Uhr — nachts bleibt der Chart stehen (15.10.2026). */
+    GER40:  { fut: null, kasse: '^GDAXI' }
   };
 
   function yJson(ysym, tf) {
@@ -81986,7 +82050,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var raster = min * 60000;
     var merkKey = 'apexIdxBasis_' + sym;
     var fehler = function () { return null; };
-    return Promise.all([yJson(m.fut, tf).catch(fehler), yJson(m.kasse, tf).catch(fehler)])
+    return Promise.all([m.fut ? yJson(m.fut, tf).catch(fehler) : Promise.resolve(null), yJson(m.kasse, tf).catch(fehler)])
       .then(function (r) {
         var fut = r[0], kasse = r[1];
         if (!fut && !kasse) throw new Error('No free data for ' + sym + ' right now (Yahoo unreachable)');
@@ -85579,7 +85643,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     alleZonen(L).filter(function (x) { return x.g._ki !== 'weg' && !(ZDp && ZDp.hidden.indexOf(zoneSchl(x.g)) >= 0); })
       .sort(function (a, b) { return a.g.ab - b.g.ab; }).slice(0, 24).forEach(function (x) {
         var g = x.g, o = ZDp && ZDp.over[zoneSchl(g)];
-        if (o) { g = Object.assign({}, g, { top: o.top, bot: o.bot, kern: null }); }
+        if (o && isFinite(o.top)) { g = Object.assign({}, g, { top: o.top, bot: o.bot, kern: null }); }
         var k = g.kern || g;
         var farbe = g.supply ? 'color.red' : 'color.green';
         var links = isFinite(g.zeit) ? String(Math.round(g.zeit)) : 'time - 86400000';
@@ -85688,6 +85752,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var bars = e.bars, von = isFinite(m.zeit) && EV.inst && EV.inst.indexAt ? EV.inst.indexAt(m.zeit) : -1;
     if (!(von >= 0)) von = Math.max(0, bars.n - 60);
     var g = { supply: !!m.supply, top: m.top, bot: m.bot, zeit: m.zeit, von: von, tfs: [m.tf || e.tf], id: m.name ? m.name : 'Mine', mine: true, mineId: m.id };
+    if (Number.isFinite(m.links)) g._links = m.links;
+    if (Number.isFinite(m.rechts)) g._rechts = m.rechts;
     g.retests = beruehrungen(bars, m.bot, m.top, von + 2);
     var last = -1; for (var i = bars.n - 1; i > von; i--) { if (bars.l[i] <= m.top && bars.h[i] >= m.bot) { last = i; break; } }
     if (last >= 0) g.juengste = bars.n - 1 - last;
@@ -85761,7 +85827,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var lo = Math.min(z[0], z[1]), hi = Math.max(z[0], z[1]); if (!(hi > lo)) return;
       var x = ezZone(g);
       if (g.mine) x.d.mine.forEach(function (m) { if (m.id === g.mineId) { m.top = hi; m.bot = lo; } });
-      else x.d.over[x.k] = { top: hi, bot: lo };
+      else x.d.over[x.k] = Object.assign({}, x.d.over[x.k], { top: hi, bot: lo });
       zsSichern(x.L.sym); evChartZeigen(); zoneZeigen();
     });
   };
@@ -85954,7 +86020,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       box = document.createElement('div'); box.id = 'tvEvGriffe'; box.className = 'tv-ev-griffe';
       box.innerHTML = '<div class="gr top" data-gr="top" title="Drag the upper edge"><i></i><span></span></div>' +
                       '<div class="gr bot" data-gr="bot" title="Drag the lower edge"><i></i><span></span></div>' +
-                      '<div class="gr mid" data-gr="mid" title="Drag to move the whole zone">⇕</div>';
+                      '<div class="gr mid" data-gr="mid" title="Drag to move the whole zone">⇕</div>' +
+                      /* Breite (16.10.2026): Punkte links/rechts in der Mitte wie in
+                         TradingView — ziehen aendert nur Anfang bzw. Ende, nie die Hoehe. */
+                      '<div class="gr lr l" data-gr="l" title="Drag to change where the zone starts"></div>' +
+                      '<div class="gr lr r" data-gr="r" title="Drag to change where the zone ends (all the way right = runs to now)"></div>';
       host.appendChild(box);
       box.addEventListener('pointerdown', griffStart);
     }
@@ -85973,6 +86043,31 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var t = box.querySelector('.top'), b = box.querySelector('.bot'), m = box.querySelector('.mid');
     t.style.top = yt + 'px'; b.style.top = yb + 'px'; m.style.top = ((yt + yb) / 2) + 'px';
     t.querySelector('span').textContent = nf(g.top, st); b.querySelector('span').textContent = nf(g.bot, st);
+    var xs = evZoneX(g), lh = box.querySelector('.l'), rh = box.querySelector('.r'), ym = ((yt + yb) / 2) + 'px';
+    if (lh && rh && xs) {
+      lh.style.display = ''; lh.style.left = xs.l + 'px'; lh.style.top = ym; lh.classList.toggle('offen', !!xs.lAus);
+      rh.style.left = xs.r + 'px'; rh.style.top = ym;
+      rh.classList.toggle('offen', !Number.isFinite(g._rechts));
+    }
+  }
+  /* Linke/rechte Kante einer Zone in Pixeln. Rechts ohne Ende: rechter Rand
+     der Kerzenflaeche. */
+  function evZoneX(g) {
+    try {
+      var ts = EV.inst.chart.timeScale(), all = EV.inst._all; if (!all || !all.n) return null;
+      /* Die Registry baut ihre Zonen beim Neuzeichnen frisch — Breite aus dem
+         Speicher (Korrektur bzw. eigene Zone) nachtragen. */
+      try { var Lw = evL(), dw = Lw ? zsLaden(Lw.sym) : null, mw = zbMine(g), ow = dw && dw.over[zoneSchl(g)];
+        var src = mw || ow; if (src) { g = Object.assign({}, g); if (Number.isFinite(src.links)) g._links = src.links; if (Number.isFinite(src.rechts)) g._rechts = src.rechts; } } catch (x) {}
+      var lz = Number.isFinite(g._links) ? g._links : g.zeit;
+      var il = Number.isFinite(lz) ? EV.inst.indexAt(lz) : Math.max(0, all.n - 60);
+      var xl = ts.logicalToCoordinate(il);
+      var w = ts.width();
+      var xr = Number.isFinite(g._rechts) ? ts.logicalToCoordinate(EV.inst.indexAt(g._rechts)) : w - 4;
+      if (xr == null || xr > w - 4) xr = w - 4;
+      var drau = (xl == null || xl < 6);
+      return { l: drau ? 6 : xl, r: xr, lAus: drau };
+    } catch (x) { return null; }
   }
   function griffStart(ev) {
     var gr = ev.target.closest && ev.target.closest('[data-gr]'); if (!gr) return;
@@ -85982,12 +86077,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var g = e.g, L = evL(); if (!L) return;
     var d = zsLaden(L.sym), m = zbMine(g), k = zoneSchl(g);
     var p0 = EV.inst.series.coordinateToPrice(ev.clientY - r.top), t0 = g.top, b0 = g.bot;
+    if (art === 'l' || art === 'r') return griffBreite(ev, gr, art, e, g, L, d, m, k, r);
     try { gr.setPointerCapture(ev.pointerId); } catch (x) {}
     document.body.classList.add('tv-ev-ziehen');
     var setze = function (top, bot) {
       if (!(top > bot)) return;
       g.top = top; g.bot = bot;
-      if (m) { m.top = top; m.bot = bot; } else { d.over[k] = { top: top, bot: bot }; }
+      if (m) { m.top = top; m.bot = bot; } else { d.over[k] = Object.assign({}, d.over[k], { top: top, bot: bot }); }
       zbNeuZeichnen();
     };
     var bewegen = function (e2) {
@@ -86003,8 +86099,41 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     };
     gr.addEventListener('pointermove', bewegen); gr.addEventListener('pointerup', ende); gr.addEventListener('pointercancel', ende);
   }
+  function griffBreite(ev, gr, art, e, g, L, d, m, k, r) {
+    var ts = EV.inst.chart.timeScale(), all = EV.inst._all; if (!all || !all.n) return;
+    try { gr.setPointerCapture(ev.pointerId); } catch (x) {}
+    document.body.classList.add('tv-ev-ziehen');
+    var zuZeit = function (x) {
+      var lg = ts.coordinateToLogical(x); if (lg == null || !isFinite(lg)) return null;
+      var i = Math.round(lg); if (i < 0) i = 0;
+      if (i >= all.n - 1) return Infinity;          // ganz rechts = offen bis jetzt
+      return all.t[i];
+    };
+    var setze = function (links, rechts) {
+      var src0 = m || d.over[k] || {};
+      var lz = Number.isFinite(links) ? links : (Number.isFinite(src0.links) ? src0.links : (Number.isFinite(g._links) ? g._links : g.zeit));
+      if (Number.isFinite(rechts) && Number.isFinite(lz) && rechts <= lz) return;   // nie umgedreht
+      if (art === 'l' && Number.isFinite(src0.rechts) && links >= src0.rechts) return;
+      if (art === 'l') g._links = links; else { if (Number.isFinite(rechts)) g._rechts = rechts; else delete g._rechts; }
+      var neu = art === 'l' ? { links: links } : { rechts: Number.isFinite(rechts) ? rechts : null };
+      if (m) { if (art === 'l') m.links = links; else { if (Number.isFinite(rechts)) m.rechts = rechts; else delete m.rechts; } }
+      else { var o = Object.assign({}, d.over[k]); if (art === 'l') o.links = links; else { if (neu.rechts != null) o.rechts = neu.rechts; else delete o.rechts; } d.over[k] = o; }
+      zbNeuZeichnen();
+    };
+    var bewegen = function (e2) {
+      var t = zuZeit(e2.clientX - r.left); if (t == null) return;
+      if (art === 'l') { if (t === Infinity) return; setze(t, null); }
+      else setze(null, t);
+    };
+    var ende = function () {
+      gr.removeEventListener('pointermove', bewegen); gr.removeEventListener('pointerup', ende); gr.removeEventListener('pointercancel', ende);
+      document.body.classList.remove('tv-ev-ziehen');
+      zsSichern(L.sym); evZoneBar();
+    };
+    gr.addEventListener('pointermove', bewegen); gr.addEventListener('pointerup', ende); gr.addEventListener('pointercancel', ende);
+  }
   function evEditEnde() { EV.edit = null; EV.zbAlarm = false; var b = document.getElementById('tvEvGriffe'); if (b) b.remove(); }
-  TV._zb = { bar: evZoneBar, del: zbLoeschen };
+  TV._zb = { inst: function () { return EV.inst; }, bar: evZoneBar, del: zbLoeschen, edit: function () { if (ZOFF) { EV.edit = ZOFF; evZoneBar(); } return !!ZOFF; } };
 
   /* >>> KONF CALC — Zones-View-Plan Etappe 3.1; .claude/tests/konfluenz.test.js liest genau diesen Block.
      Konfluenz einer Zone, 0–100. Jeder Baustein ist eine Ja/Nein-Frage an die
@@ -87673,7 +87802,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     /* Korrigierte Auto-Zonen: eigene Kanten, Rest (Messung, Kennung) bleibt. */
     zeigen = zeigen.map(function (x) {
       var k = zoneSchl(x.g), o = ZD.over[k], g2 = x.g;
-      if (o || ZD.star.indexOf(k) >= 0) { g2 = Object.assign({}, x.g); if (o) { g2.top = o.top; g2.bot = o.bot; g2.kern = null; g2._adj = true; } if (ZD.star.indexOf(k) >= 0) g2._star = true; }
+      if (o || ZD.star.indexOf(k) >= 0) { g2 = Object.assign({}, x.g); if (o) { if (isFinite(o.top)) { g2.top = o.top; g2.bot = o.bot; g2.kern = null; } g2._adj = true; if (Number.isFinite(o.links)) g2._links = o.links; if (Number.isFinite(o.rechts)) g2._rechts = o.rechts; } if (ZD.star.indexOf(k) >= 0) g2._star = true; }
       return { g: g2, tf: x.tf };
     });
     zeigen.forEach(function (x) {
@@ -87683,8 +87812,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var kf = null; if (proAn()) try { kf = konfluenz(g, x.tf, L); } catch (q) {}
       g._konf = kf ? kf.score : null;
       if (EV.minKonf && proAn() && !g._star && (g._konf == null || g._konf < EV.minKonf)) return;
-      var von = isFinite(g.zeit) ? inst.indexAt(g.zeit) : Math.max(0, e.bars.n - 60);
-      liste.push({ supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: null,
+      var lz = Number.isFinite(g._links) ? g._links : g.zeit;
+      var von = Number.isFinite(lz) ? inst.indexAt(lz) : Math.max(0, e.bars.n - 60);
+      var bis = Number.isFinite(g._rechts) ? inst.indexAt(g._rechts) : null;
+      liste.push({ supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: bis,
                    broken: false, stil: zonenStil(g, darst), _g: g, _tf: x.tf });
     });
     /* Eigene Zonen: auf jedem Zeitrahmen, gemessen auf diesen Kerzen. */
@@ -87692,8 +87823,10 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var g = eigeneMessen(m, e);
       if (ZD.star.indexOf(zoneSchl(g)) >= 0) g._star = true;
       if (proAn()) try { var kfm = konfluenz(g, e.tf, L); g._konf = kfm ? kfm.score : null; } catch (q) {}
-      var von = isFinite(m.zeit) ? inst.indexAt(m.zeit) : Math.max(0, e.bars.n - 60);
-      liste.push({ supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: null,
+      var lzm = Number.isFinite(m.links) ? m.links : m.zeit;
+      var von = Number.isFinite(lzm) ? inst.indexAt(lzm) : Math.max(0, e.bars.n - 60);
+      var bism = Number.isFinite(m.rechts) ? inst.indexAt(m.rechts) : null;
+      liste.push({ supply: !!g.supply, top: g.top, bot: g.bot, from: Math.max(0, von), to: bism,
                    broken: false, stil: zonenStil(g, { art: 'voll' }), _g: g, _tf: e.tf });
     });
     if (EV.zonenAus) liste = [];
@@ -90159,9 +90292,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      erklaert. Der Klartextname steht dabei — "NAS100" sagt nicht jedem etwas,
      "Nasdaq 100" schon. */
   var GRUPPEN = [
-    ['Metalle',  [['XAUUSD','Gold'], ['XAGUSD','Silber · Tarif']]],
-    ['Indizes',  [['GER40','DAX 40'], ['NAS100','Nasdaq 100 · Tarif'],
-                  ['SPX500','S&P 500 · Tarif'], ['US30','Dow Jones · Tarif']]],
+    ['Metalle',  [['XAUUSD','Gold']]],
+    ['Indizes',  [['NAS100','Nasdaq 100'], ['SPX500','S&P 500'], ['US30','Dow Jones'],
+                  ['GER40','DAX 40 · Xetra-Zeiten']]],
     ['Forex',    [['EURUSD','Euro / US-Dollar'], ['GBPUSD','Pfund / US-Dollar'],
                   ['USDJPY','US-Dollar / Yen'], ['AUDUSD','Aussie / US-Dollar'],
                   ['USDCAD','US-Dollar / Kanada'], ['EURGBP','Euro / Pfund']]],
@@ -90351,9 +90484,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                    '<span class="lc-t-name">' + s[1] + '</span></button>';
           }).join('') + '</div>';
       }).join('') +
-      '<div class="lc-note" id="lcNote">Ein Klick öffnet den Chart. Mit <b>· Tarif</b> markierte ' +
-      'Instrumente sind im kostenlosen Datentarif nicht enthalten — sie melden sich beim Anklicken. ' +
-      'Der Anbieter erlaubt 8 Abfragen je Minute, deshalb wird alle 15 Sekunden nachgeladen.</div>' +
+      '<div class="lc-note" id="lcNote">Ein Klick öffnet den Chart. Alle Instrumente hier haben eine kostenlose Datenquelle; ' +
+      'Indizes außerhalb der US-Börsenzeit etwa 10 Minuten verzögert, der DAX nur zu Xetra-Zeiten. Nachgeladen wird alle 15 Sekunden.</div>' +
       '</div>' +
       '<div class="el-card" id="lcCard" style="display:none">' +
         '<div id="lcSwitch">' +
@@ -90364,6 +90496,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
               return '<button data-tf="' + t[0] + '" onclick="ApexLive.wechseln(null,\'' + t[0] + '\')">' + t[1] + '</button>';
             }).join('') +
           '</div>' +
+          '<button class="lc-symbtn lc-xbtn" id="lcIndBtn" onclick="ApexLive.indPanel()" title="Indicators" aria-label="Indicators">ƒx</button>' +
+          '<button class="lc-symbtn lc-xbtn" onclick="ApexLive.stilPanel()" title="Chart appearance (colours, candles, grid)" aria-label="Chart appearance">' +
+            '<svg class=ic aria-hidden=true><use href=#i-settings ></use></svg></button>' +
         '</div>' +
         '<div id="lcTools"></div>' +
         '<div id="lcChart" style="height:520px"></div>' +
@@ -90448,7 +90583,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       LC.chart.setBars(spalten(LC.bars));
       if (LC.draw && LC.draw.setSymbol) LC.draw.setSymbol(neuSym);
       if (window.ApexIndicatorUI && ApexIndicatorUI.list) {
-        try { LC.chart.setIndicators(ApexIndicatorUI.list()); } catch (e) {}
+        indAnwenden();
       }
       try { LC.chart.fit(); } catch (e) {}
       kopfNachziehen();
@@ -90489,6 +90624,39 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (!LC.on || !LC.chart || !liste || !liste.length) return;
     LC.bars = liste.slice(-LC.cnt);
     try { LC.chart.setBars(spalten(LC.bars)); } catch (e) {}
+    indAnwenden();
+  };
+
+  /* Indikatoren wirklich BERECHNEN (15.10.2026). Vorher bekam der Chart nur
+     die Auswahlliste (setIndicators(list())) statt fertiger Linien — im
+     Live-Chart erschien deshalb nie ein Indikator, und es gab auch keinen
+     Knopf dafuer. LC.indFremd: Auswahl des Vortragenden in einer
+     Chart-Session (die eigene Liste bleibt unangetastet). */
+  function indAnwenden() {
+    if (!LC.chart || !LC.bars || !LC.bars.length) return;
+    var b = spalten(LC.bars); b.__sym = LC.sym;
+    try {
+      if (LC.indFremd && window.ApexIndicators && ApexIndicators.chartSpecs) LC.chart.setIndicators(ApexIndicators.chartSpecs(b, LC.indFremd) || []);
+      else if (window.ApexIndicatorUI && ApexIndicatorUI.apply) ApexIndicatorUI.apply(LC.chart, b);
+    } catch (e) {}
+    var k = document.getElementById('lcIndBtn');
+    if (k) { var n = LC.indFremd ? LC.indFremd.length : (window.ApexIndicatorUI ? ApexIndicatorUI.count() : 0); k.innerHTML = 'ƒx' + (n ? '<sub>' + n + '</sub>' : ''); }
+  }
+  LC.indAnwenden = indAnwenden;
+  LC.indPanel = function () {
+    var h = document.getElementById('lcInd'); if (!h || !window.ApexIndicatorUI) return;
+    var auf = h.style.display === 'none'; h.style.display = auf ? '' : 'none';
+    var st = document.getElementById('lcStyle'); if (auf && st) st.style.display = 'none';
+    if (!auf) return;
+    if (LC.indFremd && window.showToast) showToast('Showing the presenter’s indicators — switch to “Mine” in the session bar to use your own');
+    if (!LC._indBound) { LC._indBound = true; ApexIndicatorUI.onChanged(function () { indAnwenden(); }); }
+    ApexIndicatorUI.mount(h, { chart: function () { return LC.chart; }, bars: function () { var b = spalten(LC.bars || []); b.__sym = LC.sym; return b; }, onChange: indAnwenden });
+  };
+  LC.stilPanel = function () {
+    var h = document.getElementById('lcStyle'); if (!h || !window.ApexChartStyle) return;
+    var auf = h.style.display === 'none'; h.style.display = auf ? '' : 'none';
+    var ih = document.getElementById('lcInd'); if (auf && ih) ih.style.display = 'none';
+    if (auf && !h.dataset.mounted) { ApexChartStyle.mount(h, LC.chart, function () { if (LC.draw) LC.draw.sync(); }); h.dataset.mounted = '1'; }
   };
 
   LC.render = function () {
@@ -90539,7 +90707,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         try { inst.setStyle(ApexChartStyle.load()); } catch (e) {}
       }
       if (window.ApexIndicatorUI && ApexIndicatorUI.list) {
-        try { inst.setIndicators(ApexIndicatorUI.list()); } catch (e) {}
+        indAnwenden();
       }
       if (window.ApexDraw) {
         LC.draw = ApexDraw.attach(inst, { symbol: sym });
@@ -90625,6 +90793,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     if (!LC.pollS) return;
     LC.timer = setInterval(function () {
       if (!LC.on || !LC.chart) return;
+      /* Chart-Session: Kerzen kommen vom Vortragenden (identischer Chart). */
+      if (LC.nurFremd) return;
       /* Der Broker-Strom liefert die laufende Kerze bereits. Die Kerzen-API
          korrigiert dann nur noch abgeschlossene Kerzen — dafuer reicht jeder
          vierte Takt, und das Kontingent von 8 Abfragen je Minute bleibt frei
@@ -90641,6 +90811,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         if (!neu.length || !LC.on) return;
         LC.bars = einsortieren(LC.bars, neu);
         LC.chart.setBars(spalten(LC.bars));
+        indAnwenden();
         if (LC.draw) LC.draw.sync();
         var q = document.getElementById('lcQuote');
         var letzte = LC.bars[LC.bars.length - 1];
@@ -104146,7 +104317,10 @@ function trackCalc(jd, opt) {
     var shapes=((L.draw&&L.draw.shapes)||[]).slice(0,200), j='[]';
     try{ j=JSON.stringify(shapes); }catch(e){}
     if(j.length>600000) j='[]';
-    return { sym:L.sym, tf:L.tf, shapesJ:j, range:r&&r.from!=null?{ from:+r.from, to:+r.to }:null };
+    /* Indikatoren des Vortragenden mitschicken, als JSON (Parameter koennen
+       Listen enthalten). */
+    var ind='[]'; try{ ind=JSON.stringify((window.ApexIndicatorUI&&ApexIndicatorUI.list())||[]); }catch(e){}
+    return { sym:L.sym, tf:L.tf, shapesJ:j, indJ:ind, range:r&&r.from!=null?{ from:+r.from, to:+r.to }:null };
   }
 
   /* ── Vorführen ── */
@@ -104206,8 +104380,9 @@ function trackCalc(jd, opt) {
   function pushBars(L, sofort){
     if(LS.mode!=='present'||!L||!L.bars||!L.bars.length) return;
     var key=L.sym+'|'+L.tf, now=Date.now();
-    if(!sofort && key===LS.barsKey && now-LS.barsAt<15000) return;
-    LS.barsKey=key; LS.barsAt=now;
+    var lb=L.bars[L.bars.length-1], sig=key+'|'+lb.t+'|'+lb.c;
+    if(!sofort && (sig===LS.barsSig || now-LS.barsAt<5000)) return;
+    LS.barsKey=key; LS.barsAt=now; LS.barsSig=sig;
     var b=L.bars.slice(-300), r=function(x){ return Math.round(x*1e6)/1e6; };
     barsRef(LS.sid).set({ by:me(), sym:L.sym, tf:L.tf, at:now,
       t:b.map(function(x){ return x.t; }), o:b.map(function(x){ return r(x.o); }), h:b.map(function(x){ return r(x.h); }),
@@ -104245,14 +104420,22 @@ function trackCalc(jd, opt) {
     Promise.all([docRef(sid).get(), barsRef(sid).get().catch(function(){ return null; })]).then(function(res){
       var d=res[0], st=d.exists?d.data():null; if(!alive(st)){ toast('The session has ended'); return; }
       var bd=res[1]&&res[1].exists?res[1].data():null;
-      LS.fremd=(bd&&bd.sym===st.sym&&bd.tf===st.tf)?barsAus(bd):null;
+      LS.fremd=(bd&&bd.sym===st.sym&&bd.tf===st.tf)?barsAus(bd):null; LS.fremdKey=LS.fremd?bd.sym+'|'+bd.tf:'';
       LS._mitFremd=false;
-      ensureChart(st.sym, st.tf).catch(function(e){
+      /* Schnell beitreten (15.10.2026): liegen die Kerzen des Vortragenden
+         schon vor, sofort damit starten — vorher lud jedes Mitglied erst
+         selbst (Broker, dann Yahoo, bei NAS100 M1 allein 3–4 s) und sah am
+         Ende trotzdem leicht andere Kerzen als der Vortragende. */
+      var Lx=LC();
+      var schnell=LS.fremd&&Lx&&!(Lx.on&&Lx.sym===st.sym&&Lx.tf===st.tf);
+      (schnell?Promise.reject(new Error('fremd')):ensureChart(st.sym, st.tf)).catch(function(e){
         /* Eigener Feed hat das Instrument nicht: mit den Kerzen des
            Vortragenden starten statt mit einer Fehlermeldung aufzugeben. */
         var L=LC(); if(!LS.fremd||!L) throw e;
         LS._mitFremd=true;
         try{ if(L.on) L.stop(); }catch(x){}
+        if(typeof window.nav==='function') nav('live');
+        try{ L.render(); }catch(x){}
         L.tfWahl=st.tf; L.start(st.sym, { bars:LS.fremd });
         return new Promise(function(res2, rej){ var n=0; (function w(){ if(L.on&&L.chart&&L.draw) return res2(L); if(++n>40) return rej(e); setTimeout(w, 250); })(); });
       }).then(function(L){
@@ -104270,12 +104453,15 @@ function trackCalc(jd, opt) {
         if(LS.barsUnsub) LS.barsUnsub();
         LS.barsUnsub=barsRef(sid).onSnapshot(function(x){
           var bd2=x.exists?x.data():null, L3=LC(); if(!bd2||!L3||!L3.on) return;
-          LS.fremd=barsAus(bd2);
+          LS.fremd=barsAus(bd2); LS.fremdKey=bd2.sym+'|'+bd2.tf;
+          /* Vortragender hat gewechselt und die neuen Kerzen sind da, der
+             eigene Chart steht noch auf dem alten Instrument: nachziehen. */
+          if(LS.state&&bd2.sym===LS.state.sym&&bd2.tf===LS.state.tf&&(L3.sym!==bd2.sym||L3.tf!==bd2.tf)&&!LS._wechselt){ LS._wechselt=bd2.sym+'|'+bd2.tf; L3.wechseln(bd2.sym, bd2.tf, LS.fremd); setTimeout(function(){ LS._wechselt=''; }, 6000); }
           /* Nur nachziehen, wenn dieser Chart mit fremden Kerzen laeuft
              (eigener Feed fehlt) — sonst hat jeder seine eigenen Kurse. */
-          if(L3.quelle==='Vortragender'&&bd2.sym===L3.sym&&bd2.tf===L3.tf&&LS.fremd) L3.setzeKerzen(LS.fremd);
+          if(L3.nurFremd&&bd2.sym===L3.sym&&bd2.tf===L3.tf&&LS.fremd) L3.setzeKerzen(LS.fremd);
         }, function(){});
-        if(LS._mitFremd){ L.quelle='Vortragender'; toast('Your data feed does not have '+st.sym+' — showing the presenter’s candles'); }
+        if(LS._mitFremd){ L.quelle='Vortragender'; L.nurFremd=true; }
         LS.state=st; chatStart();
         if(LS._autoVoice&&st.room){ LS._autoVoice=false; var Cv=CS(); if(Cv&&Cv.joinVoiceAt) Promise.resolve(Cv.joinVoiceAt(sid, st.room)).then(function(){ setTimeout(paintFollow, 400); }); }
         beat(); if(LS.beat) clearInterval(LS.beat); LS.beat=setInterval(beat, 20000);
@@ -104300,7 +104486,13 @@ function trackCalc(jd, opt) {
     var go=function(){
       LS.applying=true;
       try{
-        L.draw.shapes=shapesOf(st); L.draw.sync();
+        if(!LS.eigeneInd){ var il=null; try{ il=JSON.parse(st.indJ||'null'); }catch(e){}
+          var neuJ=JSON.stringify(il||[]); if(neuJ!==LS._indJ){ LS._indJ=neuJ; L.indFremd=il||[]; if(L.indAnwenden) L.indAnwenden(); } }
+        /* Eigene Zeichnungen der Zuschauer bleiben stehen (nur die des
+           Vortragenden werden ersetzt) — vorher loeschte jedes Update alles,
+           was man selbst gezeichnet hatte. */
+        var eigene=(L.draw.shapes||[]).filter(function(x){ return x && !x._ls; });
+        L.draw.shapes=shapesOf(st).map(function(x){ x._ls=1; return x; }).concat(eigene); L.draw.sync();
         if(st.range && !LS.userMoved){ var t=ts(L); if(t) t.setVisibleRange({ from:st.range.from, to:st.range.to }); }
       }catch(e){}
       setTimeout(function(){ LS.applying=false; }, 120);
@@ -104309,7 +104501,8 @@ function trackCalc(jd, opt) {
       if(LS._wechselt===st.sym+'|'+st.tf) return;            // laeuft schon
       LS._wechselt=st.sym+'|'+st.tf;
       /* Fremde Kerzen nur, wenn sie zu Symbol+TF passen; sonst eigener Feed. */
-      var f=(LS.fremd&&LS.state&&LS.state.sym===st.sym)?LS.fremd:null;
+      var f=(LS.fremd&&LS.fremdKey===st.sym+'|'+st.tf)?LS.fremd:null;
+      L.nurFremd=false;
       L.wechseln(st.sym, st.tf, f); var n=0;
       (function w(){ if((L.sym===st.sym&&L.tf===st.tf)||++n>60){ LS._wechselt=''; if(L.sym!==st.sym) toast('Your data feed does not have '+st.sym+' — following the drawings only'); if(L.draw) L.draw.scope='live-session'; return go(); } setTimeout(w, 200); })();
     }
@@ -104320,6 +104513,7 @@ function trackCalc(jd, opt) {
     bar('<span class="ls-dot"></span><span><b>Following <span class="notranslate" translate="no">'+esc(st.byName||'')+'</span></b> <span class="s">· '+esc(st.title||'')+'</span></span>'+
       (LS.userMoved?'<button class="ls-btn pri" onclick="ApexLiveSession.resync()">Back to presenter</button>':'')+
       voiceBtns()+chatBtn()+
+      '<button class="ls-btn" onclick="ApexLiveSession.indToggle()" title="Whose indicators you see">'+(LS.eigeneInd?'My indicators':'Their indicators')+'</button>'+
       '<button class="ls-btn" onclick="ApexLiveSession.stop()">Stop following</button>');
   }
   /* Laufende Session dieses Servers (fuer den Raum in der Kanalliste). */
@@ -104335,12 +104529,19 @@ function trackCalc(jd, opt) {
     toast('Nobody is presenting right now — you get a notice when it starts');
   };
   LS.endStale=function(sid){ if(!sid) return; docRef(sid).set({ on:false, endedAt:Date.now() }, { merge:true }).then(function(){ toast('Session ended'); }).catch(function(){ toast('Could not end the session'); }); };
+  LS.indToggle=function(){
+    LS.eigeneInd=!LS.eigeneInd; LS._indJ=''; var L=LC();
+    if(L){ L.indFremd=null; if(LS.eigeneInd){ if(L.indAnwenden) L.indAnwenden(); } else if(LS.state) apply(L, LS.state); }
+    toast(LS.eigeneInd?'Showing your own indicators':'Showing the presenter’s indicators'); paintFollow();
+  };
   LS.resync=function(){ LS.userMoved=false; var L=LC(); if(L&&LS.state) apply(L, LS.state); paintFollow(); };
 
   /* ── Ende ── */
   LS.stop=function(remote){
     var L=LC();
     if(LS.mode==='present' && LS.sid && !remote) docRef(LS.sid).set({ on:false, endedAt:Date.now() }, { merge:true }).catch(function(){});
+    if(LS.mode==='follow' && L){ L.indFremd=null; LS._indJ=''; LS.eigeneInd=false; if(L.indAnwenden) L.indAnwenden(); }
+    if(L) L.nurFremd=false;
     if(LS.mode==='follow' && L && L.quelle==='Vortragender'){ try{ L.stop(); }catch(e){} }
     else if(LS.mode==='follow' && L && L.draw){
       // Eigene Zeichnungen zurueck: Scope weg, Symbol neu laden.
