@@ -387,6 +387,13 @@ window.APEX_PRICES = (function () {
         'sowie Fehlerberichte der App (Fehlermeldung, Stacktrace, Datei und Zeile, Browserkennung, ' +
         'aufgerufene Seite, App-Version, Nutzerkennung). Fehlerberichte enthalten <b>keine</b> ' +
         'Journalinhalte.</p>' +
+        '<p><b>Fragen-Assistent auf der Startseite (optional):</b> Stellst du dem Assistenten eine ' +
+        'Frage, speichern wir die Frage, die Antwort, die Seitensprache, eine zufällige Gesprächskennung ' +
+        'aus deinem Browser und ob du ein Angebot (Demo oder kostenloses Konto) angenommen hast. ' +
+        '<b>Deine IP-Adresse speichern wir dabei nicht</b>; sie wird nur in gehashter Form für ein ' +
+        'Tageslimit gegen Missbrauch verwendet und nach 48 Stunden verworfen. Zweck: Fragen beantworten ' +
+        'und erkennen, was auf der Website fehlt. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO. Bitte gib ' +
+        'dort keine personenbezogenen Daten ein.</p>' +
         '<p><b>Community (optional):</b> Beiträge, Kommentare, Direktnachrichten, öffentliches Profil. Das öffentliche Profil ist standardmäßig ausgeschaltet und wird nur sichtbar, wenn du es in den Einstellungen einschaltest.</p>' +
 
         '<h3>3. Zwecke und Rechtsgrundlagen</h3>' +
@@ -435,7 +442,8 @@ window.APEX_PRICES = (function () {
            Funktion, damit erkennbar ist, WANN etwas übertragen wird. */
         '<p><b>Google Ireland Ltd. / Google LLC — KI-Funktionen (Gemini API):</b> ' +
         'für den KI-Coach, die Tag-Vorschläge, die Chart-Bewertung, das Kurswerk der Academy, ' +
-        'den Strategie-Trainer und die Glossar-Nachschlage-Funktion werden die dafür jeweils ' +
+        'den Strategie-Trainer, die Glossar-Nachschlage-Funktion und den Fragen-Assistenten der ' +
+        'Startseite (dort nur deine Frage und der bisherige Gesprächsverlauf) werden die dafür jeweils ' +
         'nötigen Journaldaten übermittelt — beim Coach eine Zusammenfassung deiner Handelsstatistik ' +
         'und deiner letzten Trades, bei der Chart-Bewertung das jeweilige Bild. ' +
         'Jede dieser Funktionen wird nur auf deine ausdrückliche Handlung hin ausgeführt; ' +
@@ -454,7 +462,8 @@ window.APEX_PRICES = (function () {
         '<p>Journal- und Kontodaten speichern wir, solange dein Konto besteht. Nach Löschung des ' +
         'Kontos werden sie unverzüglich entfernt; ausgenommen sind Daten mit gesetzlicher ' +
         'Aufbewahrungspflicht (Rechnungen: 10 Jahre, § 147 AO). Fehlerberichte löschen wir nach ' +
-        '90 Tagen. Kündigungen bewahren wir zum Nachweis 3 Jahre auf.</p>' +
+        '90 Tagen, ebenso Fragen an den Assistenten der Startseite. Kündigungen bewahren wir zum ' +
+        'Nachweis 3 Jahre auf.</p>' +
         '<p><b>MT5-Cloud-Sync:</b> Investor-Passwort und Zugangsdaten werden gelöscht, sobald du die ' +
         'Verbindung trennst, dein Evidence-Konto löschst oder MetaTrader die Anmeldung beim ersten ' +
         'Verbinden ablehnt — und automatisch 7 Tage nach Ende deines Pro-Zugangs. Bereits ins Journal ' +
@@ -100865,6 +100874,722 @@ body.light::before{ opacity:.45; }
     try { if (lp && ApexI18n.apply) ApexI18n.apply(lp); } catch (e) { }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+})();
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LANDING-ASSISTENT  —  ApexAsk   (20.10.2026)
+
+   Besucher ohne Konto fragen, was Evidence kann, was es kostet und wie es
+   sich zu anderen Journalen verhält. Die Antwort kommt vom Coach-Worker
+   (POST /ask), der NUR aus landing-facts.json antwortet — der Datei, die
+   .claude/build-landing-facts.js aus genau dieser Landing erzeugt.
+
+   Angebot statt Umleitung: passt es, FRAGT die KI am Ende, ob sie zur Demo
+   oder zum kostenlosen Konto bringen soll. Weitergeleitet wird nur auf
+   „Ja". Nach einem „Nein" fragt sie in diesem Gespräch nicht mehr
+   (mayOffer:false an den Worker, der das zusätzlich erzwingt), nach einem
+   Angebot ohne Antwort erst wieder zwei Fragen später.
+
+   Gestaltung (20.10. abends): kein Chatfenster, sondern eine Bühne — ein
+   schwebender 3D-Goldkristall als Knopf, beim Öffnen Vollbild mit dem
+   großen Kristall links (reagiert auf Denken/Antwort/Maus), rechts die
+   Frage als Überschrift und die Antwort Wort für Wort. three.js r128 wie die
+   Landing (gleiche URL → aus dem Cache); ohne WebGL ein CSS-Kristall.
+
+   Liegt in #landingPage, verschwindet also mit der Landing. Die Antworten
+   tragen translate="no": sie kommen schon in der Sprache des Besuchers,
+   Google Translate würde sie nur ein zweites Mal übersetzen.
+   ═══════════════════════════════════════════════════════════════════ */
+(function apexAsk() {
+  'use strict';
+  var URL_ = 'https://spring-fire-06a2.4kjyyyftv6.workers.dev/ask';
+  /* Eigene Übersetzungen statt Google Translate: GT macht aus „Evidence"
+     im Fließtext „Beweis", und die Antworten kommen ohnehin schon in der
+     richtigen Sprache. Das ganze Fenster trägt deshalb translate="no". */
+  var TX = {
+    en: { btn: 'Ask about Evidence', sub: 'Answers from our own product pages', ph: 'Ask anything about Evidence…', send: 'Send', close: 'Close',
+          hi: 'Hi! Ask me anything about Evidence — features, prices, brokers, or how it compares to other journals.',
+          sg: ['What does Evidence do?', 'How much does Pro cost?', 'How is it different from TradeZella?', 'Which brokers sync automatically?'],
+          note: 'AI answers can be wrong — the pricing and feature sections are binding. Questions are stored anonymously (no IP) for 90 days to improve the site; please don’t enter personal data.',
+          wait: 'Thinking', yDemo: 'Yes, show me the demo', yTrial: 'Yes, create my free account', no: 'No thanks', np: 'No problem — ask me anything else.',
+          slow: 'One moment — too many questions at once. Try again in a minute.', lim: 'That’s the question limit for today. Our Discord is always open: https://discord.gg/Qb353QustV',
+          down: 'The assistant is not available right now. The FAQ further down answers the most common questions.', net: 'No connection to the assistant. Please try again.' },
+    de: { btn: 'Frag zu Evidence', sub: 'Antworten aus unseren eigenen Produktseiten', ph: 'Frag alles zu Evidence…', send: 'Senden', close: 'Schließen',
+          hi: 'Hi! Frag mich alles zu Evidence — Funktionen, Preise, Broker oder wie es sich von anderen Journalen unterscheidet.',
+          sg: ['Was macht Evidence?', 'Was kostet Pro?', 'Was ist anders als bei TradeZella?', 'Welche Broker synchronisieren automatisch?'],
+          note: 'KI-Antworten können falsch sein — verbindlich sind die Preis- und Funktionsangaben der Seite. Fragen werden anonym (ohne IP) 90 Tage gespeichert, um die Seite zu verbessern; bitte keine persönlichen Daten eingeben.',
+          wait: 'Denke nach', yDemo: 'Ja, zeig mir die Demo', yTrial: 'Ja, kostenloses Konto erstellen', no: 'Nein danke', np: 'Kein Problem — frag gern weiter.',
+          slow: 'Moment — zu viele Fragen auf einmal. Versuch es in einer Minute noch einmal.', lim: 'Das Fragenlimit für heute ist erreicht. Unser Discord ist immer offen: https://discord.gg/Qb353QustV',
+          down: 'Der Assistent ist gerade nicht erreichbar. Die FAQ weiter unten beantworten die häufigsten Fragen.', net: 'Keine Verbindung zum Assistenten. Bitte versuch es noch einmal.' },
+    es: { btn: 'Pregunta sobre Evidence', sub: 'Respuestas de nuestras propias páginas', ph: 'Pregunta lo que quieras sobre Evidence…', send: 'Enviar', close: 'Cerrar',
+          hi: '¡Hola! Pregúntame lo que quieras sobre Evidence: funciones, precios, brokers o en qué se diferencia de otros diarios.',
+          sg: ['¿Qué hace Evidence?', '¿Cuánto cuesta Pro?', '¿En qué se diferencia de TradeZella?', '¿Qué brokers se sincronizan solos?'],
+          note: 'Las respuestas de la IA pueden fallar: lo vinculante son las secciones de precios y funciones. Las preguntas se guardan de forma anónima (sin IP) 90 días para mejorar la web; no introduzcas datos personales.',
+          wait: 'Pensando', yDemo: 'Sí, enséñame la demo', yTrial: 'Sí, crear mi cuenta gratis', no: 'No, gracias', np: 'Sin problema, pregúntame otra cosa.',
+          slow: 'Un momento: demasiadas preguntas a la vez. Prueba en un minuto.', lim: 'Has llegado al límite de preguntas de hoy. Nuestro Discord está siempre abierto: https://discord.gg/Qb353QustV',
+          down: 'El asistente no está disponible ahora. Las FAQ más abajo responden a lo más habitual.', net: 'Sin conexión con el asistente. Inténtalo de nuevo.' },
+    pt: { btn: 'Pergunte sobre o Evidence', sub: 'Respostas das nossas próprias páginas', ph: 'Pergunte qualquer coisa sobre o Evidence…', send: 'Enviar', close: 'Fechar',
+          hi: 'Olá! Pergunte-me qualquer coisa sobre o Evidence — funções, preços, corretoras ou como se compara a outros diários.',
+          sg: ['O que o Evidence faz?', 'Quanto custa o Pro?', 'Qual a diferença para o TradeZella?', 'Que corretoras sincronizam sozinhas?'],
+          note: 'As respostas da IA podem errar — valem as secções de preços e funções. As perguntas são guardadas de forma anónima (sem IP) durante 90 dias para melhorar o site; não introduza dados pessoais.',
+          wait: 'A pensar', yDemo: 'Sim, mostre-me a demo', yTrial: 'Sim, criar conta grátis', no: 'Não, obrigado', np: 'Sem problema — pergunte outra coisa.',
+          slow: 'Um momento — demasiadas perguntas de uma vez. Tente daqui a um minuto.', lim: 'Atingiu o limite de perguntas de hoje. O nosso Discord está sempre aberto: https://discord.gg/Qb353QustV',
+          down: 'O assistente não está disponível agora. As FAQ mais abaixo respondem ao mais comum.', net: 'Sem ligação ao assistente. Tente novamente.' },
+    fr: { btn: 'Une question sur Evidence ?', sub: 'Réponses tirées de nos propres pages', ph: 'Posez votre question sur Evidence…', send: 'Envoyer', close: 'Fermer',
+          hi: 'Bonjour ! Posez-moi vos questions sur Evidence — fonctions, prix, brokers, ou ce qui le distingue des autres journaux.',
+          sg: ['Que fait Evidence ?', 'Combien coûte Pro ?', 'Quelle différence avec TradeZella ?', 'Quels brokers se synchronisent seuls ?'],
+          note: 'Les réponses de l’IA peuvent être fausses — seules les sections prix et fonctions font foi. Les questions sont conservées anonymement (sans IP) 90 jours pour améliorer le site ; n’indiquez pas de données personnelles.',
+          wait: 'Réflexion', yDemo: 'Oui, montrez-moi la démo', yTrial: 'Oui, créer mon compte gratuit', no: 'Non merci', np: 'Pas de souci — posez une autre question.',
+          slow: 'Un instant — trop de questions à la fois. Réessayez dans une minute.', lim: 'Limite de questions atteinte pour aujourd’hui. Notre Discord est toujours ouvert : https://discord.gg/Qb353QustV',
+          down: 'L’assistant est indisponible pour le moment. La FAQ plus bas répond aux questions courantes.', net: 'Pas de connexion à l’assistant. Réessayez.' }
+  };
+  var hist = [], busy = false, declined = false, lastOfferTurn = -9, turn = 0, built = false;
+  var sid = (function () {
+    try { var s = sessionStorage.getItem('evAskSid'); if (s) return s; } catch (e) { }
+    var n = ''; for (var i = 0; i < 16; i++) n += 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)];
+    try { sessionStorage.setItem('evAskSid', n); } catch (e) { }
+    return n;
+  })();
+
+  function lang() {
+    // Die Seitensprache steht im googtrans-Cookie (/en/de); ohne ihn ist die
+    // Seite englisch. Schreibt der Besucher anders, antwortet die KI in seiner.
+    var m = /googtrans=\/[a-zA-Z-]+\/([a-zA-Z]+)/.exec(document.cookie || '');
+    var l = (m ? m[1] : 'en').slice(0, 2).toLowerCase();
+    return /^(en|de|es|pt|fr|it)$/.test(l) ? l : 'en';
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  /* Nur **fett** und nackte https-Links — der Rest bleibt Text. Erst
+     escapen, dann formatieren: die Antwort ist fremder Text. */
+  function fmt(s) {
+    return esc(s)
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      .replace(/(https:\/\/[^\s<)]+[^\s<).,;:!?])/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+      .replace(/\n/g, '<br>');
+  }
+
+  /* Zusätzliche Texte der Bühnen-Fassung (gleiche Regel: von Hand, nicht GT). */
+  var TX2 = {
+    en: { kicker: 'Ask Evidence', title: 'What do you want to know?', earlier: 'Asked before', you: 'You asked', open: 'Ask Evidence anything' },
+    de: { kicker: 'Frag Evidence', title: 'Was willst du wissen?', earlier: 'Schon gefragt', you: 'Deine Frage', open: 'Frag Evidence alles' },
+    es: { kicker: 'Pregunta a Evidence', title: '¿Qué quieres saber?', earlier: 'Ya preguntado', you: 'Tu pregunta', open: 'Pregunta lo que quieras a Evidence' },
+    pt: { kicker: 'Pergunte ao Evidence', title: 'O que quer saber?', earlier: 'Já perguntado', you: 'A sua pergunta', open: 'Pergunte qualquer coisa ao Evidence' },
+    fr: { kicker: 'Demandez à Evidence', title: 'Que voulez-vous savoir ?', earlier: 'Déjà demandé', you: 'Votre question', open: 'Posez vos questions à Evidence' }
+  };
+  function T(k) {
+    var l = lang(), t = TX[l] || TX.en, t2 = TX2[l] || TX2.en;
+    return t[k] != null ? t[k] : t2[k] != null ? t2[k] : (TX.en[k] != null ? TX.en[k] : TX2.en[k]);
+  }
+
+  var REDUCE = false;
+  try { REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { }
+
+  /* ═══════════ Der Kristall ═══════════
+     Ein facettierter Goldkörper mit innerem Glühen, einem Gitter-Mantel,
+     zwei Ringen und einem Partikelschwarm. Drei Zustände, alle weich
+     ineinander übergeblendet statt umgeschaltet:
+       idle      langsames Drehen, Atmen
+       think     Schwarm zieht sich zusammen, Drehung zieht an, Facetten pulsen
+       answer    ein Lichtstoß nach außen, dann zurück zu idle
+     Eigener Renderer pro Leinwand (Knopf und Bühne), jeder rendert nur,
+     solange er sichtbar ist. */
+  function loadThree() {
+    if (window.THREE) return Promise.resolve(window.THREE);
+    if (loadThree.p) return loadThree.p;
+    loadThree.p = new Promise(function (res, rej) {
+      var sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'; sc.async = true;
+      sc.onload = function () { window.THREE ? res(window.THREE) : rej(); };
+      sc.onerror = rej;
+      document.head.appendChild(sc);
+    });
+    return loadThree.p;
+  }
+  function webgl() {
+    try { var c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; }
+  }
+
+  function crystal(canvas, opt) {
+    var THREE = window.THREE;
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(Math.max(devicePixelRatio || 1, opt.mini ? 1 : 1.5), opt.mini ? 2 : 2.5));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.4;
+    var scene = new THREE.Scene();
+    var cam = new THREE.PerspectiveCamera(opt.mini ? 34 : 38, 1, 0.1, 50);
+    cam.position.set(0, 0, opt.mini ? 8.6 : 7.2);
+
+    var GOLD = 0xd9b45a, GOLD_HI = 0xffe3a0, COOL = 0x6f8cff;
+    scene.add(new THREE.AmbientLight(0x30261a, 1.2));
+    var k1 = new THREE.PointLight(GOLD_HI, 2.4, 30); k1.position.set(4, 5, 6); scene.add(k1);
+    var k2 = new THREE.PointLight(COOL, 1.6, 30); k2.position.set(-5, -3, 3); scene.add(k2);
+    var k3 = new THREE.PointLight(0xffffff, 0.9, 20); k3.position.set(0, -6, -4); scene.add(k3);
+
+    var rig = new THREE.Group(); scene.add(rig);
+
+    /* Spiegelungen: ohne Umgebung sieht Metall in three.js stumpf aus. Eine
+       kleine, gemalte Studio-Umgebung (warmer Verlauf, zwei Softboxen, ein
+       kühler Rand) wird per PMREM vorgefiltert — keine Bilddatei nötig. */
+    var env = (function () {
+      var c = document.createElement('canvas'); c.width = 512; c.height = 256;
+      var x = c.getContext('2d');
+      var gr = x.createLinearGradient(0, 0, 0, 256);
+      gr.addColorStop(0, '#1c160d'); gr.addColorStop(0.45, '#050404'); gr.addColorStop(0.55, '#020203'); gr.addColorStop(1, '#100c08');
+      x.fillStyle = gr; x.fillRect(0, 0, 512, 256);
+      function box(cx, cy, w, h, col) { var g = x.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h)); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(cx - w * 2, cy - h * 2, w * 4, h * 4); }
+      box(140, 70, 60, 26, 'rgba(255,236,190,1)');
+      box(380, 90, 40, 18, 'rgba(255,214,140,.85)');
+      box(260, 200, 90, 20, 'rgba(120,150,255,.45)');
+      box(40, 128, 20, 60, 'rgba(255,255,255,.6)');
+      var t = new THREE.CanvasTexture(c); t.mapping = THREE.EquirectangularReflectionMapping;
+      var pm = new THREE.PMREMGenerator(renderer);
+      var rt = pm.fromEquirectangular(t); t.dispose(); pm.dispose();
+      return rt.texture;
+    })();
+
+    /* Der Kern ist ein geschliffener Edelstein (Brillantschliff): Tafel,
+       Krone mit Stern- und Hauptfacetten, Rundiste, Pavillon bis zur Kalette.
+       Jede Facette ein eigenes Dreieck — flache Schattierung, damit jede
+       einzeln aufblitzt. */
+    function gem(n) {
+      var P = [], TAU = Math.PI * 2;
+      function ring(r, y, off) { var a = []; for (var i = 0; i < n; i++) { var t = (i + (off || 0)) / n * TAU; a.push([Math.cos(t) * r, y, Math.sin(t) * r]); } return a; }
+      var top = [0, 0.62, 0], table = ring(0.52, 0.62, 0), star = ring(0.78, 0.46, 0.5),
+          gU = ring(1.0, 0.16, 0), gU2 = ring(1.0, 0.16, 0.5), gL = ring(1.0, 0.04, 0), gL2 = ring(1.0, 0.04, 0.5),
+          pav = ring(0.42, -0.62, 0.5), culet = [0, -1.28, 0];
+      function tri(a, b, c) { P.push(a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]); }
+      for (var i = 0; i < n; i++) {
+        var j = (i + 1) % n;
+        tri(top, table[j], table[i]);                 // Tafel
+        tri(table[i], table[j], star[i]);             // Sternfacetten
+        tri(table[i], star[i], gU2[(i + n - 1) % n]); // Hauptfacetten der Krone
+        tri(star[i], table[j], gU2[i]);
+        tri(star[i], gU2[i], gU[j]);
+        tri(star[i], gU[j], gU2[(i + n - 1) % n]);
+        tri(gU2[(i + n - 1) % n], gU[j], gU[i]);
+        tri(gU[i], gU[j], gL[i]); tri(gU[j], gL[j], gL[i]);   // Rundiste
+        tri(gL[i], gL[j], pav[i]);                    // Pavillon oben
+        tri(pav[i], gL[j], pav[j]);
+        tri(pav[i], pav[j], culet);                   // zur Kalette
+      }
+      var g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+      g.computeVertexNormals();
+      return g;
+    }
+    var SEG = opt.mini ? 8 : 16;
+    var coreMat = new THREE.MeshStandardMaterial({ color: 0xd2a446, metalness: 1, roughness: 0.07, flatShading: true, side: THREE.DoubleSide,
+      envMap: env, envMapIntensity: 2.2, emissive: 0x2a1a05, emissiveIntensity: 0.35 });
+    var core = new THREE.Mesh(gem(SEG), coreMat);
+    core.scale.setScalar(1.25);
+    rig.add(core);
+    // Facettenkanten als feine Lichtlinien
+    var edges = new THREE.LineSegments(new THREE.EdgesGeometry(core.geometry, 1),
+      new THREE.LineBasicMaterial({ color: GOLD_HI, transparent: true, opacity: opt.mini ? 0.45 : 0.32, blending: THREE.AdditiveBlending, depthWrite: false }));
+    core.add(edges);
+    // Innerer Kristall: ein zweiter, kleinerer Stein, gegenläufig, durchscheinend —
+    // sichtbar durch die Kanten, er gibt dem Kern Tiefe
+    var innerMat = new THREE.MeshBasicMaterial({ color: 0xffd98a, wireframe: true, transparent: true, opacity: 0.0, blending: THREE.AdditiveBlending, depthWrite: false });
+    var inner = new THREE.Mesh(gem(opt.mini ? 6 : 10), innerMat);
+    inner.scale.setScalar(0.62); inner.rotation.x = Math.PI;
+    if (!opt.mini) rig.add(inner);
+    // Glanzpunkte: kleine Sterne auf ausgewählten Ecken, die nacheinander aufblitzen
+    var glints = [];
+    if (!opt.mini) {
+      var gc = document.createElement('canvas'); gc.width = gc.height = 128;
+      var gx = gc.getContext('2d'); gx.translate(64, 64);
+      var rg = gx.createRadialGradient(0, 0, 0, 0, 0, 64); rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(0.12, 'rgba(255,240,200,.8)'); rg.addColorStop(1, 'rgba(255,220,150,0)');
+      gx.fillStyle = rg; gx.fillRect(-64, -64, 128, 128);
+      gx.fillStyle = 'rgba(255,250,235,.9)';
+      for (var q = 0; q < 2; q++) { gx.rotate(Math.PI / 2 * q); gx.beginPath(); gx.moveTo(-64, 0); gx.quadraticCurveTo(0, -2.2, 64, 0); gx.quadraticCurveTo(0, 2.2, -64, 0); gx.fill(); }
+      var gtex = new THREE.CanvasTexture(gc);
+      var src = core.geometry.attributes.position.array, picks = [];
+      for (var v = 0; v < src.length; v += 9 * 3) picks.push([src[v], src[v + 1], src[v + 2]]);
+      for (var k = 0; k < 9; k++) {
+        var pp = picks[(k * 7) % picks.length];
+        var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: gtex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+        sp.position.set(pp[0], pp[1], pp[2]); sp.scale.setScalar(0.5);
+        core.add(sp); glints.push({ s: sp, ph: k * 0.77, sp: 0.5 + (k % 3) * 0.17 });
+      }
+    }
+    // inneres Glühen
+    var glowMat = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending, depthWrite: false });
+    var glow = new THREE.Mesh(new THREE.IcosahedronGeometry(1.55, 2), glowMat);
+    rig.add(glow);
+    // Gitter-Mantel, gegenläufig
+    var shell = new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.9, 1)),
+      new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false }));
+    rig.add(shell);
+    // Ringe
+    function ring(r, tube, op, tiltX, tiltZ) {
+      var m = new THREE.Mesh(new THREE.TorusGeometry(r, tube, 8, 160),
+        new THREE.MeshBasicMaterial({ color: GOLD_HI, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false }));
+      m.rotation.x = tiltX; m.rotation.z = tiltZ; rig.add(m); return m;
+    }
+    var r1 = ring(2.35, 0.008, 0.55, 1.25, 0.25);
+    var r2 = ring(2.7, 0.005, 0.3, 1.75, -0.5);
+    // Skalenstriche wie auf einem Messinstrument — auf dem inneren Ring
+    if (!opt.mini) {
+      var tk = [], TK = 120;
+      for (var ti = 0; ti < TK; ti++) {
+        var ta = ti / TK * Math.PI * 2, L = ti % 10 === 0 ? 0.16 : 0.06;
+        tk.push(Math.cos(ta) * 2.35, Math.sin(ta) * 2.35, 0, Math.cos(ta) * (2.35 + L), Math.sin(ta) * (2.35 + L), 0);
+      }
+      var tg = new THREE.BufferGeometry(); tg.setAttribute('position', new THREE.Float32BufferAttribute(tk, 3));
+      r1.add(new THREE.LineSegments(tg, new THREE.LineBasicMaterial({ color: GOLD_HI, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false })));
+      var r3 = ring(1.62, 0.004, 0.22, 0.2, 0.9);   // enger Ring nahe am Stein
+      r3.userData.spin = -0.6;
+    }
+    // Satelliten auf den Ringen
+    var satGeo = new THREE.SphereGeometry(0.045, 10, 10);
+    var satMat = new THREE.MeshBasicMaterial({ color: 0xfff1c8 });
+    var s1 = new THREE.Mesh(satGeo, satMat); r1.add(s1);
+    var s2 = new THREE.Mesh(satGeo, satMat); r2.add(s2);
+
+    // Partikelschwarm
+    var N = opt.mini ? 90 : 950, pos = new Float32Array(N * 3), seed = [];
+    for (var i = 0; i < N; i++) {
+      var u = Math.random() * 2 - 1, th = Math.random() * Math.PI * 2, rr = 2.2 + Math.random() * 1.6;
+      seed.push({ u: u, th: th, r: rr, sp: 0.15 + Math.random() * 0.35, ph: Math.random() * 6.28 });
+    }
+    var pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var dot = document.createElement('canvas'); dot.width = dot.height = 64;
+    var g = dot.getContext('2d'), grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grd.addColorStop(0, 'rgba(255,240,200,1)'); grd.addColorStop(0.35, 'rgba(255,205,110,.55)'); grd.addColorStop(1, 'rgba(255,190,90,0)');
+    g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
+    var pts = new THREE.Points(pg, new THREE.PointsMaterial({ size: opt.mini ? 0.12 : 0.085, map: new THREE.CanvasTexture(dot), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    scene.add(pts);
+
+    // Lichtstoß (Antwort)
+    var waveMat = new THREE.MeshBasicMaterial({ color: GOLD_HI, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    var wave = new THREE.Mesh(new THREE.RingGeometry(0.98, 1, 96), waveMat);
+    scene.add(wave);
+
+    var st = { mode: 'idle', think: 0, burst: 0, mx: 0, my: 0, tx: 0, ty: 0, hover: 0, hoverT: 0 };
+    var running = false, raf = 0, t0 = performance.now(), last = t0, spin = 0;
+
+    function size() {
+      var w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
+      renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
+    }
+    function frame(now) {
+      raf = 0; if (!running) return;
+      var dt = Math.min(0.05, (now - last) / 1000); last = now;
+      var t = (now - t0) / 1000;
+      st.think += ((st.mode === 'think' ? 1 : 0) - st.think) * Math.min(1, dt * 3);
+      st.burst = Math.max(0, st.burst - dt * 0.9);
+      st.hover += (st.hoverT - st.hover) * Math.min(1, dt * 6);
+      st.mx += (st.tx - st.mx) * Math.min(1, dt * 3); st.my += (st.ty - st.my) * Math.min(1, dt * 3);
+
+      spin += dt * (0.35 + st.think * 2.6 + st.hover * 0.8);
+      rig.rotation.y = spin + st.mx * 0.5;
+      rig.rotation.x = Math.sin(t * 0.4) * 0.12 + st.my * 0.35;
+      core.rotation.y = -spin * 0.4;
+      var breath = 1 + Math.sin(t * 1.6) * 0.025 + st.think * Math.sin(t * 9) * 0.04 + st.burst * 0.25;
+      core.scale.setScalar(1.25 * breath);
+      inner.rotation.y = spin * 1.3; inner.rotation.z = t * 0.2;
+      innerMat.opacity = 0.1 + st.think * 0.25 + st.burst * 0.5;
+      edges.material.opacity = (opt.mini ? 0.45 : 0.3) + st.think * 0.3 + st.burst * 0.5;
+      for (var gi = 0; gi < glints.length; gi++) {
+        var G = glints[gi], w = Math.max(0, Math.sin(t * G.sp * 2.1 + G.ph * 4));
+        w = Math.pow(w, 14) + st.burst * 0.8;
+        G.s.material.opacity = Math.min(1, w); G.s.scale.setScalar(0.25 + w * 0.55);
+        G.s.material.rotation = t * 0.6 + G.ph;
+      }
+      coreMat.emissiveIntensity = 0.3 + st.think * (0.6 + Math.sin(t * 10) * 0.4) + st.burst * 2.2 + st.hover * 0.4;
+      glowMat.opacity = 0.05 + st.think * 0.1 + st.burst * 0.3 + st.hover * 0.06;
+      glow.scale.setScalar(1 + Math.sin(t * 1.2) * 0.04 + st.burst * 0.5);
+      shell.rotation.y = -spin * 0.6; shell.rotation.z = t * 0.07;
+      shell.material.opacity = 0.1 + st.think * 0.18 + st.burst * 0.3;
+      r1.rotation.z += dt * (0.25 + st.think * 1.8); r2.rotation.z -= dt * (0.18 + st.think * 1.4);
+      s1.position.set(Math.cos(t * 1.3) * 2.35, Math.sin(t * 1.3) * 2.35, 0);
+      s2.position.set(Math.cos(-t * 0.9 + 2) * 2.7, Math.sin(-t * 0.9 + 2) * 2.7, 0);
+      k1.intensity = 2.4 + st.burst * 6;
+
+      // Schwarm: beim Denken nach innen gesogen, beim Antworten hinausgestoßen
+      for (var i = 0; i < N; i++) {
+        var p = seed[i], a = p.th + t * p.sp * (1 + st.think * 4);
+        var rad = p.r * (1 - st.think * 0.45) + st.burst * 2.4 + Math.sin(t * 1.1 + p.ph) * 0.08;
+        var s = Math.sqrt(1 - p.u * p.u);
+        pos[i * 3] = Math.cos(a) * s * rad;
+        pos[i * 3 + 1] = p.u * rad * 0.9;
+        pos[i * 3 + 2] = Math.sin(a) * s * rad;
+      }
+      pg.attributes.position.needsUpdate = true;
+      pts.rotation.y = st.mx * 0.3; pts.rotation.x = st.my * 0.2;
+
+      var b = 1 - st.burst;
+      wave.scale.setScalar(1.4 + b * 4.2);
+      waveMat.opacity = st.burst > 0 ? st.burst * 0.7 : 0;
+      wave.lookAt(cam.position);
+
+      renderer.render(scene, cam);
+      if (!REDUCE) raf = requestAnimationFrame(frame);
+    }
+    var api = {
+      set: function (m) { st.mode = m; },
+      burst: function () { st.burst = 1; st.mode = 'idle'; },
+      look: function (x, y) { st.tx = x; st.ty = y; },
+      hover: function (on) { st.hoverT = on ? 1 : 0; },
+      start: function () { if (running) return; running = true; size(); last = performance.now(); raf = requestAnimationFrame(frame); },
+      stop: function () { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; },
+      size: size
+    };
+    addEventListener('resize', function () { if (running) size(); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) { if (running) { api.stop(); api._wake = true; } } else if (api._wake) { api._wake = false; api.start(); } });
+    return api;
+  }
+
+  /* ═══════════ Bühne ═══════════ */
+  function css() {
+    var st = document.createElement('style');
+    st.textContent = [
+      '#lpAsk,#lpAskFab{--g:var(--lp-gold,#c9a84c);--gh:var(--lp-gold-hi,#eccb74);--tx:var(--lp-text,#f3efe7);--mu:var(--lp-mute,#9a8c74)}',
+      /* Startknopf: der Kristall schwebt, darunter ein Schatten, daneben ein Etikett, das beim Hover ausfährt */
+      '#lpAskFab{position:fixed;right:18px;bottom:18px;z-index:900;width:92px;height:92px;border:0;padding:0;background:none;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent}',
+      '#lpAskFab canvas{position:absolute;inset:-14px;width:120px;height:120px;pointer-events:none;animation:lpaFloat 5.5s ease-in-out infinite}',
+      '#lpAskFab::before{content:"";position:absolute;inset:8px;border-radius:50%;background:radial-gradient(circle,rgba(var(--gold-rgb,201,168,76),.30),rgba(var(--gold-rgb,201,168,76),0) 70%);filter:blur(4px);animation:lpaPulse 3.2s ease-in-out infinite}',
+      '#lpAskFab::after{content:"";position:absolute;left:22px;right:22px;bottom:-6px;height:10px;border-radius:50%;background:rgba(0,0,0,.55);filter:blur(6px);animation:lpaShadow 5.5s ease-in-out infinite}',
+      '#lpAskFab .lbl{position:absolute;right:96px;top:50%;transform:translate(10px,-50%);opacity:0;white-space:nowrap;pointer-events:none;padding:10px 16px;border-radius:999px;font:600 13px/1 var(--font-display,inherit);letter-spacing:.02em;color:var(--tx);background:rgba(16,14,12,.78);border:1px solid rgba(var(--gold-rgb,201,168,76),.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:.35s cubic-bezier(.2,.8,.2,1);box-shadow:0 10px 30px rgba(0,0,0,.4)}',
+      '#lpAskFab .lbl b{color:var(--gh)}',
+      '#lpAskFab:hover .lbl,#lpAskFab:focus-visible .lbl,#lpAskFab.hint .lbl{opacity:1;transform:translate(0,-50%)}',
+      '#lpAskFab .css{position:absolute;inset:18px;border-radius:30%;transform:rotate(45deg);background:conic-gradient(from 30deg,#f6dc93,#a7802c,#ffe9b0,#8a6418,#f6dc93);box-shadow:0 0 30px rgba(var(--gold-rgb,201,168,76),.6);animation:lpaFloat 5.5s ease-in-out infinite}',
+      '@keyframes lpaFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}',
+      '@keyframes lpaShadow{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.78);opacity:.45}}',
+      '@keyframes lpaPulse{0%,100%{transform:scale(.92);opacity:.7}50%{transform:scale(1.08);opacity:1}}',
+
+      /* Vollbild-Bühne */
+      '#lpAsk{position:fixed;inset:0;z-index:1000;display:none;color:var(--tx);font-size:15px}',
+      '#lpAsk.on{display:block}',
+      '#lpAsk .bg{position:absolute;inset:0;background:radial-gradient(1200px 800px at 28% 50%,rgba(var(--gold-rgb,201,168,76),.16),transparent 60%),radial-gradient(900px 700px at 90% 10%,rgba(90,110,255,.10),transparent 60%),rgba(6,6,8,.86);backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);opacity:0;transition:opacity .5s}',
+      '#lpAsk.in .bg{opacity:1}',
+      '#lpAsk .grid{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1s .2s;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse at 30% 50%,#000 10%,transparent 70%);mask-image:radial-gradient(ellipse at 30% 50%,#000 10%,transparent 70%)}',
+      '#lpAsk.in .grid{opacity:1}',
+      '#lpAsk .stage{position:absolute;left:0;top:0;bottom:0;width:46%;display:flex;align-items:center;justify-content:center}',
+      '#lpAsk .stage canvas{width:min(46vw,640px);height:min(46vw,640px);max-height:92vh;transform:scale(.6);opacity:0;transition:transform 1s cubic-bezier(.16,1,.3,1),opacity .6s}',
+      '#lpAsk.in .stage canvas{transform:scale(1);opacity:1}',
+      '#lpAsk .stage .css{width:180px;height:180px;border-radius:30%;transform:rotate(45deg);background:conic-gradient(from 30deg,#f6dc93,#a7802c,#ffe9b0,#8a6418,#f6dc93);box-shadow:0 0 90px rgba(var(--gold-rgb,201,168,76),.5)}',
+      '#lpAsk .status{position:absolute;bottom:9vh;left:0;right:0;text-align:center;font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.32em;text-transform:uppercase;color:var(--mu)}',
+      '#lpAsk .status i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gh);margin-right:10px;vertical-align:1px;box-shadow:0 0 10px var(--gh)}',
+      '#lpAsk.think .status i{animation:lpaBlink .7s infinite}',
+      '@keyframes lpaBlink{50%{opacity:.2}}',
+
+      '#lpAsk .pane{position:absolute;right:0;top:0;bottom:0;width:54%;display:flex;flex-direction:column;padding:8vh 6vw 5vh 2vw;box-sizing:border-box}',
+      '#lpAsk .x{position:absolute;top:22px;right:24px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--tx);cursor:pointer;display:grid;place-items:center;transition:.3s;z-index:2}',
+      '#lpAsk .x:hover{transform:rotate(90deg);border-color:var(--g)}',
+      '#lpAsk .x .ic{width:18px;height:18px}',
+      '#lpAsk .kick{font:600 11.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.34em;text-transform:uppercase;color:var(--gh);display:flex;align-items:center;gap:12px}',
+      '#lpAsk .kick::before{content:"";width:34px;height:1px;background:linear-gradient(90deg,var(--g),transparent)}',
+      '#lpAsk .scroll{flex:1;overflow-y:auto;margin:22px -12px 0;padding:0 12px 20px;scrollbar-width:thin;-webkit-mask-image:linear-gradient(transparent,#000 24px,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(transparent,#000 24px,#000 calc(100% - 30px),transparent)}',
+      '#lpAsk h2.q{margin:18px 0 0;font:700 clamp(28px,3.6vw,54px)/1.04 var(--font-display,inherit);letter-spacing:-.02em;background:linear-gradient(180deg,#fff 20%,#d8c79c);-webkit-background-clip:text;background-clip:text;color:transparent;word-wrap:break-word}',
+      '#lpAsk h2.q.user{font-size:clamp(22px,2.6vw,38px)}',
+      '#lpAsk .you{margin-top:22px;font:500 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.26em;text-transform:uppercase;color:var(--mu)}',
+      '#lpAsk .ans{margin-top:22px;font-size:clamp(16px,1.25vw,19px);line-height:1.65;color:#e9e3d6;max-width:62ch}',
+      '#lpAsk .ans b{color:#fff;font-weight:700}',
+      '#lpAsk .ans a{color:var(--gh);text-decoration:none;border-bottom:1px solid rgba(var(--gold-rgb,201,168,76),.45)}',
+      '#lpAsk .ans .w{display:inline-block;opacity:0;filter:blur(8px);transform:translateY(.4em);animation:lpaWord .55s cubic-bezier(.2,.8,.2,1) forwards;white-space:pre}',
+      '@keyframes lpaWord{to{opacity:1;filter:blur(0);transform:none}}',
+      '#lpAsk .ans.err{color:#f2b2a8}',
+      '#lpAsk .scan{height:2px;margin-top:30px;max-width:420px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--gh),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:lpaScan 1.1s linear infinite;opacity:.9}',
+      '@keyframes lpaScan{from{background-position:-40% 0}to{background-position:140% 0}}',
+
+      /* Vorschlagskarten: Glas, neigen sich zur Maus, Lichtkante wandert mit */
+      '#lpAsk .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:34px;perspective:900px}',
+      '#lpAsk .card{position:relative;text-align:left;padding:20px 20px 18px;min-height:96px;border-radius:18px;cursor:pointer;color:var(--tx);font:600 15.5px/1.35 inherit;border:1px solid rgba(255,255,255,.1);background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.015));transform-style:preserve-3d;transition:transform .25s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;opacity:0;animation:lpaRise .7s cubic-bezier(.16,1,.3,1) forwards;overflow:hidden}',
+      '#lpAsk .card::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(260px circle at var(--px,50%) var(--py,50%),rgba(var(--gold-rgb,201,168,76),.22),transparent 60%);opacity:0;transition:opacity .3s}',
+      '#lpAsk .card:hover{border-color:rgba(var(--gold-rgb,201,168,76),.55);box-shadow:0 24px 50px -20px rgba(0,0,0,.8),0 0 0 1px rgba(var(--gold-rgb,201,168,76),.12) inset}',
+      '#lpAsk .card:hover::before{opacity:1}',
+      '#lpAsk .card .n{display:block;margin-bottom:12px;font:500 10.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.2em;color:var(--gh);transform:translateZ(20px)}',
+      '#lpAsk .card .t{display:block;transform:translateZ(30px)}',
+      '#lpAsk .card .ar{position:absolute;right:16px;bottom:14px;color:var(--gh);opacity:.0;transform:translateX(-6px);transition:.3s}',
+      '#lpAsk .card:hover .ar{opacity:1;transform:none}',
+      '@keyframes lpaRise{from{opacity:0;transform:translateY(24px) rotateX(-14deg)}to{opacity:1;transform:none}}',
+
+      /* Angebot: zwei große Karten, die Ja-Karte mit umlaufendem Goldrand */
+      '#lpAsk .offer{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}',
+      '#lpAsk .offer button{position:relative;border:0;cursor:pointer;border-radius:16px;padding:18px 26px;font:700 15px/1 var(--font-display,inherit);letter-spacing:.01em;opacity:0;animation:lpaRise .6s cubic-bezier(.16,1,.3,1) forwards}',
+      '#lpAsk .offer .y{color:#140f05;background:linear-gradient(135deg,var(--gh),var(--g));box-shadow:0 18px 50px -12px rgba(var(--gold-rgb,201,168,76),.7);isolation:isolate}',
+      '#lpAsk .offer .y::before{content:"";position:absolute;inset:-2px;border-radius:18px;z-index:-1;background:conic-gradient(from var(--a,0deg),transparent 0 70%,#fff8e0 80%,transparent 90%);animation:lpaSpin 2.4s linear infinite;filter:blur(1px)}',
+      '#lpAsk .offer .y:hover{transform:translateY(-2px)}',
+      '#lpAsk .offer .n{color:var(--tx);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);animation-delay:.08s}',
+      '@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}',
+      '@keyframes lpaSpin{to{--a:360deg}}',
+
+      /* Eingabe: eine Linie, kein Kasten */
+      '#lpAsk form{position:relative;margin-top:18px;display:flex;align-items:center;gap:14px;padding:6px 6px 6px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:border-color .3s,box-shadow .3s}',
+      '#lpAsk form:focus-within{border-color:rgba(var(--gold-rgb,201,168,76),.7);box-shadow:0 0 0 6px rgba(var(--gold-rgb,201,168,76),.08),0 20px 60px -20px rgba(var(--gold-rgb,201,168,76),.45)}',
+      '#lpAsk input{flex:1;min-width:0;border:0;outline:0;background:none;color:var(--tx);font:500 17px/1.2 inherit;padding:14px 0}',
+      '#lpAsk input::placeholder{color:rgba(243,239,231,.38)}',
+      '#lpAsk form button{flex:0 0 auto;width:54px;height:54px;border-radius:50%;border:0;cursor:pointer;color:#140f05;background:linear-gradient(135deg,var(--gh),var(--g));display:grid;place-items:center;font-size:22px;transition:transform .25s}',
+      '#lpAsk form button:hover{transform:scale(1.07) rotate(-8deg)}',
+      '#lpAsk form button:disabled{opacity:.45;transform:none;cursor:default}',
+      '#lpAsk .trail{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}',
+      '#lpAsk .trail span{font:500 10.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--mu);margin-right:4px}',
+      '#lpAsk .trail button{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:none;color:#cfc6b4;font:500 12.5px/1.2 inherit;cursor:pointer}',
+      '#lpAsk .trail button:hover,#lpAsk .trail button.cur{border-color:rgba(var(--gold-rgb,201,168,76),.6);color:#fff}',
+      '#lpAsk .note{margin-top:12px;font-size:11.5px;line-height:1.5;color:rgba(154,140,116,.85);max-width:70ch}',
+
+      '@media (max-width:860px){',
+      '#lpAsk .stage{width:100%;height:34vh;bottom:auto}',
+      '#lpAsk .stage canvas{width:34vh;height:34vh}',
+      '#lpAsk .status{display:none}',
+      '#lpAsk .pane{width:100%;top:30vh;padding:0 18px 16px}',
+      '#lpAsk h2.q{font-size:28px}',
+      '#lpAsk .cards{grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}',
+      '#lpAsk .card{min-height:0;padding:14px;font-size:14px;border-radius:14px}',
+      '#lpAsk .card .n{margin-bottom:8px}',
+      '#lpAsk .x{position:fixed;top:12px;right:12px}',
+      '#lpAsk .note{font-size:10.5px;margin-top:8px}',
+      '#lpAsk .offer button{flex:1;padding:16px 14px}',
+      '#lpAsk input{font-size:16px}',
+      '#lpAskFab{right:12px;bottom:12px;width:78px;height:78px}',
+      '#lpAskFab canvas{inset:-12px;width:102px;height:102px}',
+      '}',
+      '@media (prefers-reduced-motion:reduce){#lpAsk *,#lpAskFab *,#lpAskFab::before,#lpAskFab::after{animation:none!important;transition:none!important}#lpAsk .ans .w,#lpAsk .card,#lpAsk .offer button{opacity:1;filter:none;transform:none}}'
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+
+  var fabC = null, bigC = null, $ = function (id) { return document.getElementById(id); };
+  var shown = -1;   // Index in qa, der gerade auf der Bühne steht
+  var qa = [];      // { q, a, err }
+
+  function build() {
+    var lp = document.getElementById('landingPage');
+    if (!lp || built) return;
+    built = true;
+    css();
+    var fab = document.createElement('button');
+    fab.id = 'lpAskFab'; fab.type = 'button'; fab.className = 'notranslate'; fab.setAttribute('translate', 'no');
+    fab.setAttribute('aria-label', T('open'));
+    fab.innerHTML = '<canvas aria-hidden="true"></canvas><span class="lbl">✦ <b>' + esc(T('btn')) + '</b></span>';
+    var box = document.createElement('div');
+    box.id = 'lpAsk'; box.className = 'notranslate'; box.setAttribute('translate', 'no');
+    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', T('btn'));
+    box.innerHTML =
+      '<div class="bg"></div><div class="grid"></div>' +
+      '<div class="stage"><canvas aria-hidden="true"></canvas><div class="status"><i></i><span id="lpAskSt">Evidence · online</span></div></div>' +
+      '<div class="pane">' +
+        '<button type="button" class="x" id="lpAskX" aria-label="' + esc(T('close')) + '"><svg class=ic aria-hidden=true><use href=#i-x></use></svg></button>' +
+        '<div class="kick">' + esc(T('kicker')) + '</div>' +
+        '<div class="scroll" id="lpAskScroll"><div id="lpAskView"></div></div>' +
+        '<form id="lpAskForm"><input id="lpAskIn" maxlength="500" autocomplete="off" aria-label="' + esc(T('ph')) + '" placeholder="' + esc(T('ph')) + '">' +
+          '<button type="submit" id="lpAskGo" aria-label="' + esc(T('send')) + '">↗</button></form>' +
+        '<div class="trail" id="lpAskTrail"></div>' +
+        '<div class="note">' + esc(T('note')) + '</div>' +
+      '</div>';
+    lp.appendChild(fab); lp.appendChild(box);
+
+    var gl = webgl();
+    if (gl) {
+      loadThree().then(function () {
+        fabC = crystal(fab.querySelector('canvas'), { mini: true }); fabC.start();
+        bigC = crystal(box.querySelector('.stage canvas'), {});
+        if (box.classList.contains('on')) bigC.start();
+      }).catch(function () { cssCrystals(fab, box); });
+    } else cssCrystals(fab, box);
+
+    fab.addEventListener('click', open);
+    fab.addEventListener('mouseenter', function () { fabC && fabC.hover(true); });
+    fab.addEventListener('mouseleave', function () { fabC && fabC.hover(false); });
+    $('lpAskX').addEventListener('click', close);
+    box.querySelector('.bg').addEventListener('click', close);
+    $('lpAskForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var q = $('lpAskIn').value.trim(); if (!q) return;
+      $('lpAskIn').value = ''; ask(q);
+    });
+    box.addEventListener('mousemove', function (e) {
+      if (bigC) bigC.look((e.clientX / innerWidth - 0.3) * 1.4, (e.clientY / innerHeight - 0.5) * 1.2);
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('on')) close(); });
+    // Einmal kurz zeigen, was der Kristall ist — nach 6 s, nur ein Mal pro Sitzung.
+    try {
+      if (!sessionStorage.getItem('evAskHint')) setTimeout(function () {
+        if (box.classList.contains('on')) return;
+        fab.classList.add('hint'); setTimeout(function () { fab.classList.remove('hint'); }, 3800);
+        try { sessionStorage.setItem('evAskHint', '1'); } catch (e) { }
+      }, 6000);
+    } catch (e) { }
+    // Knopf rendert nur, solange die Landing sichtbar ist
+    new MutationObserver(function () {
+      if (!fabC) return;
+      if (lp.style.display === 'none') fabC.stop(); else if (!box.classList.contains('on')) fabC.start();
+    }).observe(lp, { attributes: true, attributeFilter: ['style'] });
+  }
+  function cssCrystals(fab, box) {
+    fab.querySelector('canvas').outerHTML = '<span class="css" aria-hidden="true"></span>';
+    box.querySelector('.stage canvas').outerHTML = '<div class="css" aria-hidden="true"></div>';
+  }
+
+  var typer = 0;
+  function typePlaceholder() {
+    clearTimeout(typer);
+    var inp = $('lpAskIn'), list = T('sg'), k = 0, i = 0, del = false;
+    if (REDUCE) return;
+    (function step() {
+      if (!$('lpAsk').classList.contains('on')) return;
+      if (document.activeElement === inp && inp.value) { typer = setTimeout(step, 800); return; }
+      var s = list[k % list.length];
+      if (!del) { i++; if (i > s.length) { del = true; typer = setTimeout(step, 1700); return; } }
+      else { i -= 2; if (i <= 0) { i = 0; del = false; k++; } }
+      inp.placeholder = s.slice(0, i) + (i < s.length ? '▍' : '');
+      typer = setTimeout(step, del ? 22 : 55);
+    })();
+  }
+
+  function open() {
+    var box = $('lpAsk');
+    box.classList.add('on');
+    requestAnimationFrame(function () { requestAnimationFrame(function () { box.classList.add('in'); }); });
+    $('lpAskFab').style.visibility = 'hidden';
+    if (fabC) fabC.stop();
+    if (bigC) bigC.start();
+    document.documentElement.style.overflow = 'hidden';
+    if (shown < 0) renderWelcome();
+    typePlaceholder();
+    setTimeout(function () { if (matchMedia('(pointer:fine)').matches) $('lpAskIn').focus(); }, 350);
+  }
+  function close() {
+    var box = $('lpAsk');
+    box.classList.remove('in');
+    clearTimeout(typer);
+    setTimeout(function () {
+      box.classList.remove('on');
+      if (bigC) bigC.stop();
+      $('lpAskFab').style.visibility = '';
+      if (fabC) fabC.start();
+    }, 380);
+    document.documentElement.style.overflow = '';
+  }
+
+  function status(t) { $('lpAskSt').textContent = t; }
+  function renderWelcome() {
+    var v = $('lpAskView');
+    v.innerHTML = '<h2 class="q">' + esc(T('title')) + '</h2><div class="ans">' + esc(T('hi')) + '</div><div class="cards" id="lpAskCards"></div>';
+    var cards = $('lpAskCards');
+    T('sg').forEach(function (s, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'card'; b.style.animationDelay = (0.15 + i * 0.08) + 's';
+      b.innerHTML = '<span class="n">0' + (i + 1) + '</span><span class="t">' + esc(s) + '</span><span class="ar">→</span>';
+      b.addEventListener('click', function () { ask(s); });
+      b.addEventListener('mousemove', function (e) {
+        var r = b.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        b.style.setProperty('--px', (x * 100) + '%'); b.style.setProperty('--py', (y * 100) + '%');
+        b.style.transform = 'rotateY(' + ((x - 0.5) * 14) + 'deg) rotateX(' + ((0.5 - y) * 12) + 'deg) translateZ(6px)';
+      });
+      b.addEventListener('mouseleave', function () { b.style.transform = ''; });
+      cards.appendChild(b);
+    });
+    status('Evidence · online');
+  }
+  /* Antwort Wort für Wort einblenden. Erst formatieren (escapen, fett,
+     Links), dann nur die Textknoten in Wörter zerlegen — so bleiben <b> und
+     <a> heil. */
+  function reveal(el, text) {
+    el.innerHTML = fmt(text);
+    if (REDUCE) return;
+    var n = 0, walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), nodes = [];
+    while (walk.nextNode()) nodes.push(walk.currentNode);
+    nodes.forEach(function (tn) {
+      var parts = tn.nodeValue.split(/(\s+)/), frag = document.createDocumentFragment();
+      parts.forEach(function (p) {
+        if (!p) return;
+        if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; }
+        var s = document.createElement('span'); s.className = 'w'; s.textContent = p;
+        s.style.animationDelay = Math.min(n++ * 0.028, 2.6) + 's';
+        frag.appendChild(s);
+      });
+      tn.parentNode.replaceChild(frag, tn);
+    });
+  }
+  function renderQA(i, animate) {
+    shown = i;
+    var x = qa[i], v = $('lpAskView');
+    v.innerHTML = '<div class="you">' + esc(T('you')) + '</div><h2 class="q user">' + esc(x.q) + '</h2>' +
+      (x.a == null ? '<div class="scan"></div>' : '<div class="ans' + (x.err ? ' err' : '') + '"></div>') +
+      '<div id="lpAskOffer"></div>';
+    if (x.a != null) {
+      var el = v.querySelector('.ans');
+      if (animate && !x.err) reveal(el, x.a); else el.innerHTML = fmt(x.a);
+    }
+    $('lpAskScroll').scrollTop = 0;
+    trail();
+  }
+  function trail() {
+    var t = $('lpAskTrail'); t.innerHTML = '';
+    if (qa.length < 2) return;
+    var lab = document.createElement('span'); lab.textContent = T('earlier'); t.appendChild(lab);
+    qa.forEach(function (x, i) {
+      if (x.a == null) return;
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = x.q; b.title = x.q;
+      if (i === shown) b.className = 'cur';
+      b.addEventListener('click', function () { renderQA(i, false); });
+      t.appendChild(b);
+    });
+  }
+  function offerRow(kind, id) {
+    var row = $('lpAskOffer'); if (!row) return;
+    row.className = 'offer';
+    var y = document.createElement('button'); y.type = 'button'; y.className = 'y';
+    y.textContent = (kind === 'demo' ? T('yDemo') : T('yTrial')) + '  →';
+    y.style.animationDelay = '1.1s';
+    var n = document.createElement('button'); n.type = 'button'; n.className = 'n'; n.textContent = T('no');
+    n.style.animationDelay = '1.2s';
+    function choose(c) {
+      row.innerHTML = '';
+      try { fetch(URL_ + '/choice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, choice: c }), keepalive: true }); } catch (e) { }
+      if (c === 'no') { declined = true; status(T('np')); return; }
+      if (kind === 'demo') window.open('?demo=1', '_blank', 'noopener');
+      else { close(); if (typeof goToAuth === 'function') goToAuth('register'); }
+    }
+    y.addEventListener('click', function () { choose('yes'); });
+    n.addEventListener('click', function () { choose('no'); });
+    row.appendChild(y); row.appendChild(n);
+  }
+  function ask(q) {
+    if (busy) return;
+    busy = true; turn++;
+    $('lpAskGo').disabled = true;
+    var box = $('lpAsk'); box.classList.add('think');
+    if (bigC) bigC.set('think');
+    status(T('wait') + '…');
+    var item = { q: q, a: null }; qa.push(item);
+    renderQA(qa.length - 1, false);
+    var mayOffer = !declined && turn - lastOfferTurn > 2;
+    function done(text, err, offer, id) {
+      item.a = text; item.err = !!err;
+      box.classList.remove('think');
+      if (bigC) { if (err) bigC.set('idle'); else bigC.burst(); }
+      status('Evidence · online');
+      if (shown === qa.indexOf(item)) {
+        renderQA(qa.indexOf(item), true);
+        if (offer) offerRow(offer, id);
+      } else trail();
+    }
+    fetch(URL_, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: q, history: hist, lang: lang(), sid: sid, mayOffer: mayOffer })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok || !x.j.answer) {
+          var e = x.j && x.j.error;
+          done(e === 'slow_down' ? T('slow') : e === 'daily_limit' ? T('lim') : T('down'), true);
+          return;
+        }
+        hist.push({ r: 'u', t: q }, { r: 'a', t: x.j.answer });
+        if (hist.length > 16) hist = hist.slice(-16);
+        var off = mayOffer && (x.j.offer === 'demo' || x.j.offer === 'trial') ? x.j.offer : null;
+        if (off) lastOfferTurn = turn;
+        done(x.j.answer, false, off, x.j.id);
+      })
+      .catch(function () { done(T('net'), true); })
+      .then(function () { busy = false; $('lpAskGo').disabled = false; });
+  }
+
+  window.ApexAsk = { open: open };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
 })();
 </script>
 <script>
