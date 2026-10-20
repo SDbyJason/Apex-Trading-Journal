@@ -60261,19 +60261,72 @@ self.addEventListener('message', async (ev) => {
         return { iso: iso, pct: (hi - lo) / b.c[b.n - 1] * 100 };
       }).catch(function () { return null; });
   }
+  /* Days already in the R2 archive load instantly and cost the throttled
+     Dukascopy feed nothing, so the dice prefers them. The backfill walks all
+     instruments day by day backwards from "top", so /health's cursor is enough:
+     every day after cur.day up to top is complete, and once a full pass has
+     finished (floor set) everything from 2020-01-01 up to floor is too. */
+  var _arc = null, _arcAt = 0;
+  function archiveRanges() {
+    if (_arc && Date.now() - _arcAt < 10 * 60000) return Promise.resolve(_arc);
+    var late = new Promise(function (res) { setTimeout(function () { res(null); }, 2500); });
+    return Promise.race([late, fetch('https://dukascopy-worker.4kjyyyftv6.workers.dev/health')
+      .then(function (r) { return r.json(); })]).then(function (h) {
+        var b = h && h.backfill, out = [];
+        if (b && b.top) {
+          var from = Date.UTC(2020, 0, 1);
+          if (b.done) out.push([from, b.top]);
+          else {
+            out.push([b.day + 86400000, b.top]);
+            if (b.floor) out.push([from, b.floor]);
+          }
+        }
+        _arc = out; _arcAt = Date.now(); return out;
+      }).catch(function () { return []; });
+  }
+  /* The draw window narrowed to the archived days, if enough of them overlap
+     to keep the dice random; otherwise the full window as before. A filter
+     with nothing inside the archive (an FOMC day, say) falls back as well. */
+  function archivedWindows(w, arc) {
+    var out = [];
+    (arc || []).forEach(function (r) {
+      var lo = Math.max(w[0], r[0]), hi = Math.min(w[1], r[1] - (Math.ceil(S.days || 1) - 1) * 86400000);
+      if (hi - lo >= 5 * 86400000) out.push([lo, hi]);
+    });
+    return out;
+  }
+  function pickWindow(ws) {
+    var tot = 0; ws.forEach(function (r) { tot += r[1] - r[0]; });
+    var x = Math.random() * tot;
+    for (var i = 0; i < ws.length; i++) { x -= ws[i][1] - ws[i][0]; if (x <= 0) return ws[i]; }
+    return ws[ws.length - 1];
+  }
+  function inWins(iso, ws) {
+    var t = Date.parse(iso + 'T00:00:00Z');
+    return ws.some(function (r) { return t >= r[0] && t <= r[1]; });
+  }
   /** Resolves to { date, note }. The note never names the date — blind mode
       shows it too. */
   function rollDate() {
-    var w = rndWindow(), k = S.rndKind || 'any';
+    var full = rndWindow();
+    return archiveRanges().then(function (arc) { return rollDateIn(full, archivedWindows(full, arc)); });
+  }
+  function rollDateIn(full, aw) {
+    var w = aw.length ? pickWindow(aw) : full, k = S.rndKind || 'any';
+    // Lists (NFP/FOMC) are filtered to the archive, but only if that leaves one.
+    var prefer = function (list) {
+      var a = aw.length ? list.filter(function (d) { return inWins(d, aw); }) : [];
+      return a.length ? a : list;
+    };
     var fromList = function (list, label) {
       if (!list.length) return Promise.resolve({ date: randomWeekdayIn(w[0], w[1]), note: 'No ' + label + ' in range — any weekday instead' });
       return Promise.resolve({ date: list[Math.floor(Math.random() * list.length)], note: label });
     };
-    if (k === 'nfp') return fromList(nfpDates(w[0], w[1]), 'NFP day — release 08:30 New York');
+    if (k === 'nfp') return fromList(prefer(nfpDates(full[0], full[1])), 'NFP day — release 08:30 New York');
     if (k === 'fomc') {
-      return fromList(FOMC.filter(function (d) {
-        var t = Date.parse(d + 'T00:00:00Z'); return t >= w[0] && t <= w[1];
-      }), 'FOMC day — statement 14:00 New York');
+      return fromList(prefer(FOMC.filter(function (d) {
+        var t = Date.parse(d + 'T00:00:00Z'); return t >= full[0] && t <= full[1];
+      })), 'FOMC day — statement 14:00 New York');
     }
     if ((k === 'busy' || k === 'quiet') && window.ApexMarketData && window.ApexMarketData.getBars) {
       var cands = [];
