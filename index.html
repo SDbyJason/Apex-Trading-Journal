@@ -63937,7 +63937,7 @@ self.addEventListener('message', async (ev) => {
       'body.light .rh-hero{color:#1d1810;background:radial-gradient(900px 500px at 78% 40%,rgba(var(--gold-rgb),.22),transparent 60%),radial-gradient(700px 500px at 10% 100%,rgba(90,120,255,.10),transparent 60%),#f7f2e7;border-color:rgba(var(--gold-rgb),.35);box-shadow:0 30px 70px -34px rgba(80,60,20,.35),inset 0 1px 0 rgba(255,255,255,.8)}',
       'body.light .rh-hero::after{background:linear-gradient(90deg,rgba(247,242,231,.96) 0%,rgba(247,242,231,.78) 34%,rgba(247,242,231,0) 62%),linear-gradient(0deg,rgba(247,242,231,.9),transparent 28%)}',
       'body.light .rh-h1{color:#15110a}',
-      'body.light .rh-h1 em{background:linear-gradient(100deg,#b8862b,#8a6418 55%,#c99b3c)}',
+      'body.light .rh-h1 em{background-image:linear-gradient(100deg,#b8862b,#8a6418 55%,#c99b3c);-webkit-background-clip:text;background-clip:text;color:transparent}',
       'body.light .rh-sub{color:rgba(29,24,16,.72)}',
       'body.light .rh-b.s{color:#1d1810;background:rgba(255,255,255,.7);border-color:rgba(29,24,16,.16)}',
       'body.light .rh-chip{color:rgba(29,24,16,.7);background:rgba(255,255,255,.6);border-color:rgba(29,24,16,.1)}',
@@ -64117,7 +64117,7 @@ self.addEventListener('message', async (ev) => {
       var gWick = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.02, 1, 0.02)), gm);
       gWick.scale.y = wick.scale.y; gWick.position.copy(wick.position);
       var solid = new THREE.Group(); solid.add(body); solid.add(wick);
-      var lit = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: up ? 0x7dffc0 : 0xff8a9a, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false }));
+      var lit = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: up ? 0x7dffc0 : 0xff8a9a, transparent: true, opacity: document.body.classList.contains('light') ? 0 : 0.35, blending: THREE.AdditiveBlending, depthWrite: false }));
       lit.scale.copy(body.scale); lit.position.copy(body.position); solid.add(lit);
       var ghost = new THREE.Group(); ghost.add(gEdge); ghost.add(gWick);
       g.add(solid); g.add(ghost);
@@ -64148,7 +64148,7 @@ self.addEventListener('message', async (ev) => {
     var addMats = [curtain.material, curtain2.material, strip.material, line.material, dust.material, ghostMat];
     function applyTheme(L) {
       scene.fog.color.setHex(L ? 0xf7f2e7 : 0x07070a);
-      scene.fog.density = L ? 0.035 : 0.045;
+      scene.fog.density = L ? 0.018 : 0.045;
       floor.material.color.setHex(L ? 0xeee6d4 : 0x0a0a0d);
       floor.material.metalness = L ? 0.25 : 0.9; floor.material.roughness = L ? 0.55 : 0.35;
       grid.material.color && grid.material.color.setHex(L ? 0xc9b78f : 0x3a3020);
@@ -64156,11 +64156,16 @@ self.addEventListener('message', async (ev) => {
       ambientL.color.setHex(L ? 0xffffff : 0x2a2418); ambientL.intensity = L ? 1.4 : 0.9;
       addMats.forEach(function (m) { m.blending = L ? THREE.NormalBlending : THREE.AdditiveBlending; m.needsUpdate = true; });
       ghostMat.color.setHex(L ? 0x9a7420 : 0xe7c46e);
+      cs.forEach(function (g) { var lt = g.userData.solid.children[2]; if (lt) lt.material.opacity = L ? 0 : 0.35; });
       cs.forEach(function (g) { g.userData.ghost.children.forEach(function (m) { m.material.color.setHex(L ? 0x9a7420 : 0xe7c46e); m.material.blending = ghostMat.blending; m.material.needsUpdate = true; }); });
       line.material.color.setHex(L ? 0xa8781f : 0xffe3a0);
       strip.material.color.setHex(L ? 0xc99b3c : 0xffdb8a);
       dust.material.opacity = L ? 0.35 : 0.7;
-      mats.up.emissiveIntensity = mats.dn.emissiveIntensity = L ? 0.25 : 0.8;
+      mats.up.emissiveIntensity = mats.dn.emissiveIntensity = L ? 0 : 0.8;
+      mats.up.color.setHex(L ? 0x0a8f52 : UP); mats.dn.color.setHex(L ? 0xc4213c : DN);
+      mats.up.envMapIntensity = mats.dn.envMapIntensity = L ? 0 : 0.18;
+      mats.wick.color.setHex(L ? 0x8a7650 : 0xd9c9a3);
+      key.intensity = L ? 0.7 : 1.1; rim.intensity = L ? 0.3 : 1.2; nowLight.distance = L ? 5 : 9;
     }
     var isLight = function () { return document.body.classList.contains('light'); };
     applyTheme(isLight());
