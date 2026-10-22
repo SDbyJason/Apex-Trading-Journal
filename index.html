@@ -63927,11 +63927,22 @@ self.addEventListener('message', async (ev) => {
     var st = document.createElement('style'); st.id = 'rhCss';
     st.textContent = [
       '#page-replaylab{--rh-g:var(--gold,#c9a84c);--rh-gh:#f1d488}',
-      /* Bühne: immer dunkel, auch im hellen Theme — Kerzen leuchten nur auf Schwarz */
+      /* Bühne: dunkel; im hellen Theme gibt es weiter unten eine helle Variante */
       '.rh-hero{position:relative;overflow:hidden;border-radius:26px;min-height:440px;margin:4px 0 22px;color:#f5efe2;' +
         'background:radial-gradient(900px 500px at 78% 40%,rgba(var(--gold-rgb),.18),transparent 60%),radial-gradient(700px 500px at 10% 100%,rgba(60,90,255,.12),transparent 60%),#07070a;' +
         'border:1px solid rgba(var(--gold-rgb),.22);box-shadow:0 30px 80px -30px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05);isolation:isolate}',
       '.rh-hero canvas.rh-3d{position:absolute;inset:0;width:100%;height:100%;z-index:0}',
+      /* Helles Theme: helle Bühne, dunkle Schrift, Gold bleibt */
+      'body.light #page-replaylab{--rh-gh:#9a7420}',
+      'body.light .rh-hero{color:#1d1810;background:radial-gradient(900px 500px at 78% 40%,rgba(var(--gold-rgb),.22),transparent 60%),radial-gradient(700px 500px at 10% 100%,rgba(90,120,255,.10),transparent 60%),#f7f2e7;border-color:rgba(var(--gold-rgb),.35);box-shadow:0 30px 70px -34px rgba(80,60,20,.35),inset 0 1px 0 rgba(255,255,255,.8)}',
+      'body.light .rh-hero::after{background:linear-gradient(90deg,rgba(247,242,231,.96) 0%,rgba(247,242,231,.78) 34%,rgba(247,242,231,0) 62%),linear-gradient(0deg,rgba(247,242,231,.9),transparent 28%)}',
+      'body.light .rh-h1{color:#15110a}',
+      'body.light .rh-h1 em{background:linear-gradient(100deg,#b8862b,#8a6418 55%,#c99b3c)}',
+      'body.light .rh-sub{color:rgba(29,24,16,.72)}',
+      'body.light .rh-b.s{color:#1d1810;background:rgba(255,255,255,.7);border-color:rgba(29,24,16,.16)}',
+      'body.light .rh-chip{color:rgba(29,24,16,.7);background:rgba(255,255,255,.6);border-color:rgba(29,24,16,.1)}',
+      'body.light .rh-chip b{color:#15110a}',
+      'body.light .rh-tag{color:rgba(29,24,16,.45)}',
       '.rh-hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(7,7,10,.94) 0%,rgba(7,7,10,.72) 34%,rgba(7,7,10,0) 62%),linear-gradient(0deg,rgba(7,7,10,.85),transparent 28%)}',
       '.rh-in{position:relative;z-index:2;padding:46px 48px 40px;max-width:600px}',
       '.rh-eb{display:flex;align-items:center;gap:12px;font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.32em;text-transform:uppercase;color:var(--rh-gh)}',
@@ -63995,7 +64006,8 @@ self.addEventListener('message', async (ev) => {
       '@keyframes rhFlash{0%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),.7)}100%{box-shadow:0 0 0 22px rgba(var(--gold-rgb),0)}}',
 
       '@media (max-width:980px){.rh-modes{grid-template-columns:repeat(2,minmax(0,1fr))}}',
-      '@media (max-width:640px){.rh-hero{min-height:0;border-radius:20px}.rh-in{padding:28px 20px 150px}.rh-hero::after{background:linear-gradient(0deg,rgba(7,7,10,.2) 0%,rgba(7,7,10,.8) 45%,rgba(7,7,10,.95) 100%)}' +
+      '@media (max-width:640px){body.light .rh-hero::after{background:linear-gradient(0deg,rgba(247,242,231,.25) 0%,rgba(247,242,231,.85) 45%,rgba(247,242,231,.96) 100%)}' +
+        '.rh-hero{min-height:0;border-radius:20px}.rh-in{padding:28px 20px 150px}.rh-hero::after{background:linear-gradient(0deg,rgba(7,7,10,.2) 0%,rgba(7,7,10,.8) 45%,rgba(7,7,10,.95) 100%)}' +
         '.rh-h1{font-size:26px}.rh-sub{font-size:14px}.rh-tag{display:none}.rh-b{flex:1;justify-content:center}.rh-modes{gap:10px}.rh-m{padding:16px 14px}.rh-m .k{display:none}#rhHost .el-card{padding:18px 16px}}',
       '@media (prefers-reduced-motion:reduce){#page-replaylab *{animation:none!important}}'
     ].join('\n');
@@ -64033,7 +64045,7 @@ self.addEventListener('message', async (ev) => {
     scene.fog = new THREE.FogExp2(0x07070a, 0.045);
     var cam = new THREE.PerspectiveCamera(36, 2, 0.1, 120);
 
-    scene.add(new THREE.AmbientLight(0x2a2418, 0.9));
+    var ambientL = new THREE.AmbientLight(0x2a2418, 0.9); scene.add(ambientL);
     var key = new THREE.DirectionalLight(0xfff0d8, 1.1); key.position.set(-4, 9, 8); scene.add(key);
     var rim = new THREE.DirectionalLight(0x6f86ff, 1.2); rim.position.set(6, 3, -8); scene.add(rim);
     var nowLight = new THREE.PointLight(0xffd27a, 3.2, 9, 2); nowLight.position.set(0, 1.5, 1.2); scene.add(nowLight);
@@ -64077,6 +64089,7 @@ self.addEventListener('message', async (ev) => {
     var wickGeo = new THREE.CylinderGeometry(0.025, 0.025, 1, 8);
     var edgeGeo = new THREE.EdgesGeometry(bodyGeo);
     var UP = 0x0db36a, DN = 0xd9223f;
+    var ambient = null;
     var mats = {
       up: new THREE.MeshStandardMaterial({ color: UP, metalness: 0.15, roughness: 0.3, envMap: env, envMapIntensity: 0.18, emissive: 0x06572f, emissiveIntensity: 0.8 }),
       dn: new THREE.MeshStandardMaterial({ color: DN, metalness: 0.15, roughness: 0.3, envMap: env, envMapIntensity: 0.18, emissive: 0x6e0d1c, emissiveIntensity: 0.8 }),
@@ -64129,6 +64142,29 @@ self.addEventListener('message', async (ev) => {
     dx.fillStyle = dgr; dx.fillRect(0, 0, 32, 32);
     var dust = new THREE.Points(dg, new THREE.PointsMaterial({ size: 0.06, map: new THREE.CanvasTexture(dc), transparent: true, opacity: 0.7, depthWrite: false, blending: THREE.AdditiveBlending }));
     scene.add(dust);
+
+    /* Helles Theme: heller Nebel und Boden, normale statt additive Mischung
+       (additiv verschwindet auf Weiß), dunkleres Gold für Geister und Linie. */
+    var addMats = [curtain.material, curtain2.material, strip.material, line.material, dust.material, ghostMat];
+    function applyTheme(L) {
+      scene.fog.color.setHex(L ? 0xf7f2e7 : 0x07070a);
+      scene.fog.density = L ? 0.035 : 0.045;
+      floor.material.color.setHex(L ? 0xeee6d4 : 0x0a0a0d);
+      floor.material.metalness = L ? 0.25 : 0.9; floor.material.roughness = L ? 0.55 : 0.35;
+      grid.material.color && grid.material.color.setHex(L ? 0xc9b78f : 0x3a3020);
+      grid.material.opacity = L ? 0.7 : 0.55;
+      ambientL.color.setHex(L ? 0xffffff : 0x2a2418); ambientL.intensity = L ? 1.4 : 0.9;
+      addMats.forEach(function (m) { m.blending = L ? THREE.NormalBlending : THREE.AdditiveBlending; m.needsUpdate = true; });
+      ghostMat.color.setHex(L ? 0x9a7420 : 0xe7c46e);
+      cs.forEach(function (g) { g.userData.ghost.children.forEach(function (m) { m.material.color.setHex(L ? 0x9a7420 : 0xe7c46e); m.material.blending = ghostMat.blending; m.material.needsUpdate = true; }); });
+      line.material.color.setHex(L ? 0xa8781f : 0xffe3a0);
+      strip.material.color.setHex(L ? 0xc99b3c : 0xffdb8a);
+      dust.material.opacity = L ? 0.35 : 0.7;
+      mats.up.emissiveIntensity = mats.dn.emissiveIntensity = L ? 0.25 : 0.8;
+    }
+    var isLight = function () { return document.body.classList.contains('light'); };
+    applyTheme(isLight());
+    try { new MutationObserver(function () { applyTheme(isLight()); }).observe(document.body, { attributes: true, attributeFilter: ['class'] }); } catch (e) { }
 
     var cy = 0, head = N * 0.55, run = false, raf = 0, last = 0, t0 = performance.now(), mx = 0, my = 0, tmx = 0, tmy = 0;
     var mobile = false;
@@ -64206,6 +64242,7 @@ self.addEventListener('message', async (ev) => {
     });
     addEventListener('resize', function () { if (run) size(); });
     var api = {
+      setTheme: applyTheme,
       start: function () { if (run) return; run = true; size(); last = performance.now(); raf = requestAnimationFrame(frame); },
       stop: function () { run = false; if (raf) cancelAnimationFrame(raf); raf = 0; }
     };
