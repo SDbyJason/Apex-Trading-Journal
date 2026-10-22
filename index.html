@@ -15353,35 +15353,88 @@ function _authAction(type) {
   <!-- ══ SYMBOL STATS — now integrated as a sub-tab of Statistics page ══ -->
 
   <!-- ══ RULES ENGINE PAGE ═══════════════════════════════════════════ -->
+<style id="reCss">
+#page-rules .ph p{max-width:60ch}
+.re-ov{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.re-score,.re-kpis>div,.re-insight{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:18px}
+.re-score{display:flex;align-items:center;gap:18px;padding:20px 22px}
+.re-ring{--p:0;width:92px;height:92px;flex:none;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gold) calc(var(--p)*1%),var(--layer) 0);position:relative}
+.re-ring::before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--elevated)}
+.re-ring span{position:relative;font-family:var(--font-display);font-weight:800;font-size:22px;color:var(--ink)}
+.re-k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.re-v{font-family:var(--font-display);font-weight:800;font-size:20px;color:var(--ink);margin-top:4px}
+.re-s{font-size:13px;color:var(--ink3);margin-top:4px}
+.re-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.re-kpis>div{padding:16px;display:flex;flex-direction:column;justify-content:center}
+.re-kpis b{font-family:var(--font-display);font-size:24px;color:var(--ink);line-height:1.1}
+.re-kpis b small{font-size:13px;color:var(--ink3)}
+.re-kpis span{font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.35}
+.re-insight{grid-column:1/-1;display:flex;gap:12px;align-items:flex-start;padding:14px 18px;background:linear-gradient(135deg,rgba(var(--gold-rgb),.10),rgba(var(--gold-rgb),.03));border-color:rgba(var(--gold-rgb),.3)}
+.re-insight .ic{width:18px;height:18px;color:var(--gold);flex:none;margin-top:1px}
+.re-insight p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink2)}
+.re-insight b{color:var(--ink)} .re-insight b.pos,.re-rm b.pos{color:var(--profit)} .re-insight b.neg,.re-rm b.neg{color:var(--loss)}
+.re-card{border-radius:18px!important;padding:22px!important}
+.re-h{display:flex;justify-content:space-between;gap:12px;margin-bottom:14px}
+.re-sub{font-size:12.5px;color:var(--ink3);line-height:1.5;margin-top:4px;max-width:70ch}
+.re-list{display:flex;flex-direction:column;gap:8px}
+.re-rule{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:14px;background:var(--layer);border:0.5px solid var(--rim);transition:border-color .15s}
+.re-rule:hover{border-color:var(--rim2)}
+.re-rule.hit{border-left:3px solid var(--loss)}
+.re-rule.off{opacity:.55}
+.re-ric{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:var(--gold-dim);color:var(--gold)}
+.re-ric .ic{width:17px;height:17px}
+.re-rb{flex:1;min-width:0}
+.re-rt{font-size:14px;font-weight:650;color:var(--ink)}
+.re-rm{font-size:12px;color:var(--ink3);margin-top:3px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.re-rm .ic{width:12px;height:12px;vertical-align:-2px}
+.re-bad{color:var(--loss);font-weight:650}.re-ok{color:var(--profit)}.re-warn{color:#d9a032}
+.re-sw{position:relative;width:38px;height:22px;flex:none;cursor:pointer}
+.re-sw input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.re-sw i{position:absolute;inset:0;border-radius:99px;background:var(--rim2);transition:.2s}
+.re-sw i::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.re-sw input:checked+i{background:var(--gold)} .re-sw input:checked+i::after{left:19px}
+.re-sw input:focus-visible+i{outline:2px solid var(--gold);outline-offset:2px}
+.re-del{background:none;border:0;color:var(--ink3);cursor:pointer;padding:6px;border-radius:8px;display:grid;place-items:center}
+.re-del:hover{color:var(--loss);background:rgba(var(--loss-rgb),.08)} .re-del .ic{width:15px;height:15px}
+.re-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:26px 16px;border:1px dashed var(--rim2);border-radius:14px}
+.re-empty .ic{width:28px;height:28px;color:var(--gold);margin-bottom:4px}.re-empty b{color:var(--ink);font-size:15px}.re-empty span{font-size:13px;color:var(--ink3);max-width:46ch}
+.re-add{margin-top:18px;padding-top:18px;border-top:0.5px solid var(--rim)}
+.re-add-t{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:700;margin-bottom:10px}
+.re-cats{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.re-cats button{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:0.5px solid var(--rim);background:transparent;color:var(--ink3);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.re-cats button .ic{width:13px;height:13px}
+.re-cats button.on{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold)}
+.re-ex{display:flex;gap:8px;flex-wrap:wrap}
+.re-ex button{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:11px;border:0.5px solid var(--rim2);background:var(--layer);color:var(--ink);font:inherit;font-size:13px;cursor:pointer;transition:.15s}
+.re-ex button:hover{border-color:var(--gold-line);color:var(--gold)}
+.re-ex button .ic{width:13px;height:13px;color:var(--gold)}
+.re-ex button.on{opacity:.55;cursor:default}
+#page-rules .rule-add-row{margin-top:12px}
+#autoTagCard{border-radius:18px!important;margin-top:14px!important}
+body.light .re-score,body.light .re-kpis>div{background:#fff;border-color:rgba(0,0,0,.07);box-shadow:0 1px 2px rgba(0,0,0,.03)}
+body.light .re-ring::before{background:#fff}
+body.light .re-rule,body.light .re-ex button{background:#faf8f4;border-color:rgba(0,0,0,.07)}
+@media(max-width:900px){.re-ov{grid-template-columns:1fr}}
+@media(max-width:560px){.re-kpis{grid-template-columns:1fr 1fr 1fr}.re-kpis b{font-size:19px}.re-score{padding:16px}.re-ring{width:74px;height:74px}.re-rule{flex-wrap:wrap}}
+</style>
   <div class="page" id="page-rules">
     <div class="ph">
       <div class="ph-eyebrow">Risk</div>
       <h1 data-i18n-head="Rules Engine">Rules <span style="color:var(--gold)">Engine</span></h1>
-      <p>Your own hard limits — checked against every trade, flagged the moment one is broken</p>
+      <p>Your own hard limits — checked against every trade, with proof of what following them is worth.</p>
     </div>
-    <div class="glass-card">
-      <div class="stat-group-title">Your Trading Rules</div>
-      <div style="font-size:12px;color:var(--ink3);margin-bottom:14px">Rules are automatically checked against each trade. Violations are flagged in your journal with a warning badge.</div>
-      <div id="rulesList" class="rule-list">
-        <div style="color:var(--ink3);font-size:13px;padding:12px 0">No rules yet. Add your first rule below.</div>
-      </div>
-      <div class="rule-add-row">
-        <input class="apex-input rule-add-input" id="ruleInput" placeholder="e.g. No trade before 9:30, Max 3 trades per day..." onkeydown="if(event.key==='Enter')addRule()" />
-        <button class="apex-btn" onclick="addRule()">+ Add Rule</button>
-      </div>
-    </div>
-    <div class="glass-card" style="margin-top:12px">
-      <div class="stat-group-title">Rule Examples — click to use</div>
-      <div style="display:grid;gap:6px;margin-top:10px">
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">No trades before 09:30</div>
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">No trades after 17:00</div>
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">Max 3 trades per day</div>
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">No trades on Friday</div>
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">No trades on Monday</div>
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">Only trade in London session</div>
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">Only trade in New York session</div>
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">Only Buy trades allowed</div>
-        <div class="rule-example-row" onclick="document.getElementById('ruleInput').value=this.textContent.trim()">Only Sell trades allowed</div>
+    <div id="reOverview"></div>
+    <div class="glass-card re-card">
+      <div class="re-h"><div><div class="stat-group-title">Your trading rules</div>
+        <div class="re-sub">Every trade is checked automatically. A broken rule gets a warning badge in your journal and counts against your compliance.</div></div></div>
+      <div id="rulesList" class="re-list"></div>
+      <div class="re-add">
+        <div class="re-add-t">Add a rule</div>
+        <div id="reTemplates"></div>
+        <div class="rule-add-row">
+          <input class="apex-input rule-add-input" id="ruleInput" placeholder="Or write your own, e.g. No trades after 16:30" onkeydown="if(event.key==='Enter')addRule()" />
+          <button class="apex-btn" onclick="addRule()">Add rule</button>
+        </div>
       </div>
     </div>
   </div>
@@ -25621,11 +25674,12 @@ function addRule() {
   if (!input) return;
   var text = input.value.trim();
   if (!text) { showToast('\u26a0 Enter a rule'); return; }
+  if (tradeRules.some(function(r){ return String(r.text).toLowerCase()===text.toLowerCase(); })) { showToast('That rule already exists'); return; }
   tradeRules.push({ id: Date.now(), text: text, enabled: true });
   input.value = '';
   saveRules();
   renderRulesEngine();
-  showToast('\u2713 Rule added');
+  showToast(ruleKind(text) ? '\u2713 Rule added — checked against every trade' : 'Rule saved, but the engine cannot read it yet — try a template');
 }
 
 function toggleRule(id) {
@@ -25641,92 +25695,175 @@ function deleteRule(id, ok) {
   showToast('Rule removed');
 }
 
+/* ── Rules Engine v2 (22.10.2026) ─────────────────────────────────────
+   Rules stay plain sentences (stored as before), but every rule is now
+   checked against the right trade fields, and the page shows what the
+   rules are worth: compliance, clean-day streak and what breaking them
+   cost — per rule and overall. */
+var RULE_CATS = [
+  { k:'time', label:'Time',      ic:'clock',    ex:['No trades before 09:30','No trades after 17:00'] },
+  { k:'freq', label:'Frequency', ic:'zap',      ex:['Max 3 trades per day','Stop after 2 losses per day'] },
+  { k:'days', label:'Days',      ic:'calendar', ex:['No trades on Friday','No trades on Monday','Only trade on Tue, Wed, Thu'] },
+  { k:'sess', label:'Session',   ic:'globe',    ex:['Only trade in London session','Only trade in New York session'] },
+  { k:'risk', label:'Risk',      ic:'shield',   ex:['Min R:R 1.5','Max lot size 1'] },
+  { k:'mkt',  label:'Market',    ic:'target',   ex:['Only Buy trades allowed','Only Sell trades allowed','Only trade XAUUSD, NAS100'] }
+];
+var _reCat = 'time';
+function _reEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function _reIc(n){ return '<svg class=ic aria-hidden=true><use href=#i-'+n+' ></use></svg>'; }
+
+/* Which kind of rule a sentence is (for its icon) — null if the engine cannot read it. */
+function ruleKind(text){
+  var t=String(text||'').toLowerCase();
+  if (/no\s+trades?\s+(before|after)\s+\d/.test(t)) return 'time';
+  if (/max\s+\d+\s+trades?\s+per\s+day/.test(t) || /(stop\s+after|max)\s+\d+\s+loss(es)?(\s+in\s+a\s+row)?(\s+per\s+day)?/.test(t)) return 'freq';
+  if (/no\s+trades?\s+on\s+[a-z]+/.test(t) || /only\s+trade\s+on\s+[a-z]/.test(t)) return 'days';
+  if (/only trade in\s+[a-z\s]+?\s+session/.test(t)) return 'sess';
+  if (/min(imum)?\s+r\s*:\s*r\s+[\d.]+/.test(t) || /max(imum)?\s+lots?(\s+size)?\s+[\d.]+/.test(t)) return 'risk';
+  if (/only\s+(buy|sell|long|short)/.test(t) || /only\s+trade\s+[a-z0-9]{3,}/.test(t)) return 'mkt';
+  return null;
+}
+function _reHM(t){
+  var s=t.entryTime||t.time||t.opentime||'';
+  var m=String(s).match(/(\d{1,2})[:.](\d{2})/);
+  if (m) return (+m[1])*60+(+m[2]);
+  if (t.openTime){ var d=new Date(+t.openTime); if(!isNaN(d)) return d.getHours()*60+d.getMinutes(); }
+  return null;
+}
+function _reDow(t, dayKey){
+  if (t._dow) return t._dow;
+  var k=dayKey||t._date; if(!k) return '';
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(k+'T12:00:00').getDay()];
+}
+/* Does this one trade break this one rule? dayTrades = the trades of that day
+   in their stored order, needed for "max N per day" and "stop after N losses". */
+function ruleBreaks(ruleText, trade, dayKey, dayTrades){
+  var text=String(ruleText||'').toLowerCase(), m;
+  if ((m=text.match(/no\s+trades?\s+before\s+(\d{1,2})[:.]?(\d{2})?/))){ var hm=_reHM(trade); return hm!=null && hm < (+m[1])*60+(+(m[2]||0)); }
+  if ((m=text.match(/no\s+trades?\s+after\s+(\d{1,2})[:.]?(\d{2})?/))){ var hm2=_reHM(trade); return hm2!=null && hm2 > (+m[1])*60+(+(m[2]||0)); }
+  var list = dayTrades || ((dayKey && journalData[dayKey] && journalData[dayKey].trades) || []);
+  var pos = list.indexOf(trade); if (pos<0 && trade._idx!=null) pos=trade._idx;
+  if ((m=text.match(/max\s+(\d+)\s+trades?\s+per\s+day/))) return pos>=+m[1];
+  if ((m=text.match(/(?:stop\s+after|max)\s+(\d+)\s+loss(?:es)?/))){
+    var lim=+m[1], losses=0, inRow=/in\s+a\s+row/.test(text);
+    for (var i=0;i<pos && i<list.length;i++){ var p=parseFloat(list[i].pips); if(p<0) losses++; else if(inRow && p>0) losses=0; }
+    return losses>=lim;
+  }
+  if ((m=text.match(/only trade in\s+([a-z\s]+?)\s+session/))) return !!trade.session && trade.session.toLowerCase().indexOf(m[1].trim())<0;
+  if ((m=text.match(/no\s+trades?\s+on\s+([a-z]+)/))){ var dw=_reDow(trade,dayKey).toLowerCase(); return !!dw && dw.indexOf(m[1].slice(0,3))===0; }
+  if ((m=text.match(/only\s+trade\s+on\s+([a-z,\s]+)/))){
+    var days=m[1].split(/[,\s]+/).map(function(d){return d.slice(0,3);}).filter(function(d){ return /^(mon|tue|wed|thu|fri|sat|sun)$/.test(d); });
+    var dw2=_reDow(trade,dayKey).toLowerCase(); return !!dw2 && days.length>0 && !days.some(function(d){ return dw2.indexOf(d)===0; });
+  }
+  if ((m=text.match(/min(?:imum)?\s+r\s*:\s*r\s+([\d.]+)/))){ var rr=parseFloat(trade.rr); return !isNaN(rr) && rr < +m[1]; }
+  if ((m=text.match(/max(?:imum)?\s+lots?(?:\s+size)?\s+([\d.]+)/))){ var l=parseFloat(trade.lots); return !isNaN(l) && l > +m[1]; }
+  if (text.indexOf('only buy')>=0 || text.indexOf('only long')>=0) return !!trade.dir && !apexIsLong(trade.dir);
+  if (text.indexOf('only sell')>=0 || text.indexOf('only short')>=0) return !!trade.dir && apexIsLong(trade.dir);
+  if ((m=text.match(/only\s+trade\s+([a-z0-9]{3,}(?:\s*,\s*[a-z0-9]{3,})*)\s*$/))){
+    var syms=m[1].split(/\s*,\s*/), s=String(trade.symbol||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    return !!s && !syms.some(function(x){ return s.indexOf(x.replace(/[^a-z0-9]/g,''))>=0; });
+  }
+  return false;
+}
+function checkTradeRuleViolations(trade, dayKey){
+  var out=[], list=(dayKey && journalData[dayKey] && journalData[dayKey].trades)||null;
+  tradeRules.filter(function(r){ return r.enabled; }).forEach(function(r){ if (ruleBreaks(r.text, trade, dayKey, list)) out.push(r.text); });
+  return out;
+}
+
+/* Last 30 days: which trades broke which rule, and what that cost. */
+function _reStats(){
+  var all=[]; try{ all=getAllTrades(); }catch(e){}
+  var cut=new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+  var recent=all.filter(function(t){ return t._date && t._date>=cut; });
+  var byDay={}; recent.forEach(function(t){ (byDay[t._date]=byDay[t._date]||[]).push(t); });
+  Object.keys(byDay).forEach(function(k){ byDay[k].sort(function(a,b){ return a._idx-b._idx; }); });
+  function money(t){ try{ var c=calcTradePnl(t); if(c && c.pnlUsd!=null && !isNaN(c.pnlUsd)) return c.pnlUsd; }catch(e){} return null; }
+  var act=tradeRules.filter(function(r){ return r.enabled; });
+  var per={}; tradeRules.forEach(function(r){ per[r.id]={ n:0, usd:0, hasUsd:false, pips:0, wins:0, last:null }; });
+  var broken=[], clean=[], dayBad={};
+  recent.forEach(function(t){
+    var bad=false;
+    tradeRules.forEach(function(r){
+      if (!ruleBreaks(r.text, t, t._date, byDay[t._date])) return;
+      var s=per[r.id]; s.n++; var u=money(t); if(u!=null){ s.usd+=u; s.hasUsd=true; }
+      var p=parseFloat(t.pips); if(!isNaN(p)){ s.pips+=p; if(p>0) s.wins++; }
+      if (!s.last || t._date>s.last) s.last=t._date;
+      if (r.enabled) bad=true;
+    });
+    (bad?broken:clean).push(t); if(bad) dayBad[t._date]=1;
+  });
+  function agg(list){ var usd=0, hasUsd=false, pips=0, w=0, n=0; list.forEach(function(t){ var u=money(t); if(u!=null){ usd+=u; hasUsd=true; } var p=parseFloat(t.pips); if(!isNaN(p)){ pips+=p; n++; if(p>0) w++; } }); return { n:list.length, usd:usd, hasUsd:hasUsd, pips:pips, wr:n?Math.round(w/n*100):null }; }
+  var days=Object.keys(byDay).sort().reverse(), streak=0;
+  for (var i=0;i<days.length;i++){ if(dayBad[days[i]]) break; streak++; }
+  return { total:recent.length, active:act.length, per:per, broken:agg(broken), clean:agg(clean), streak:streak, days:days.length,
+           compliance: recent.length ? Math.round(clean.length/recent.length*100) : null };
+}
+function _reMoney(a){
+  if (!a.hasUsd) return (a.pips>=0?'+':'')+Math.round(a.pips)+' pips';
+  var v=toDisplayCurrency(a.usd), sym=(typeof getPnlSymbol==='function'?getPnlSymbol():'$');
+  return (v<0?'−':'+')+sym+Math.abs(v).toLocaleString(undefined,{maximumFractionDigits:0});
+}
+function _reAgo(k){ if(!k) return 'never'; var d=Math.round((new Date().setHours(12,0,0,0)-new Date(k+'T12:00:00'))/86400000); return d<=0?'today':d===1?'yesterday':d+' days ago'; }
+
 function renderRulesEngine() {
-  var list = document.getElementById('rulesList');
-  if (!list) return;
-  if (!tradeRules.length) {
-    list.innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:12px 0">No rules yet. Add your first rule below.</div>';
-    return;
+  var list=document.getElementById('rulesList'); if(!list) return;
+  var S=_reStats();
+  /* Overview */
+  var ov=document.getElementById('reOverview');
+  if (ov){
+    if (!tradeRules.length){ ov.innerHTML=''; }
+    else {
+      var b=S.broken, c=S.clean, comp=S.compliance;
+      var insight = !S.total ? 'No trades in the last 30 days yet — your rules are armed and will check every new trade.'
+        : !b.n ? 'Every trade in the last 30 days followed your rules. That is the whole point.'
+        : 'Trades that broke a rule: <b>'+(b.wr==null?'—':b.wr+'%')+' win rate</b>, <b class="'+((b.hasUsd?b.usd:b.pips)<0?'neg':'pos')+'">'+_reMoney(b)+'</b>. '+
+          'Trades that followed them: <b>'+(c.wr==null?'—':c.wr+'%')+' win rate</b>, <b class="'+((c.hasUsd?c.usd:c.pips)<0?'neg':'pos')+'">'+_reMoney(c)+'</b>.';
+      ov.innerHTML =
+        '<div class="re-ov">'+
+          '<div class="re-score"><div class="re-ring" style="--p:'+(comp==null?0:comp)+'"><span>'+(comp==null?'—':comp+'%')+'</span></div>'+
+            '<div><div class="re-k">Rule compliance · 30 days</div><div class="re-v">'+(comp==null?'No trades yet':comp>=90?'Disciplined':comp>=70?'Mostly on plan':'Rules are being broken')+'</div>'+
+            '<div class="re-s">'+(S.total?(S.total-b.n)+' of '+S.total+' trades followed every active rule':'Checks start with your next trade')+'</div></div></div>'+
+          '<div class="re-kpis">'+
+            '<div><b>'+b.n+'</b><span>Trades broke a rule</span></div>'+
+            '<div><b>'+S.streak+'<small> d</small></b><span>Clean trading days in a row</span></div>'+
+            '<div><b>'+S.active+'<small>/'+tradeRules.length+'</small></b><span>Rules active</span></div>'+
+          '</div>'+
+          '<div class="re-insight">'+_reIc('bulb')+'<p>'+insight+'</p></div>'+
+        '</div>';
+    }
   }
-  list.innerHTML = tradeRules.map(function(r) {
-    return '<div class="rule-card ' + (r.enabled ? '' : 'rule-disabled') + '">' +
-      /* Der sichtbare Regeltext steht daneben, ist aber nicht verknuepft —
-         ohne aria-label sagt eine Sprachausgabe nur "Kontrollkaestchen". */
-      '<input type="checkbox" class="rule-toggle" ' + (r.enabled ? 'checked' : '') +
-        ' aria-label="Rule active: ' + String(r.text).replace(/"/g, '&quot;') + '"' +
-        ' onchange="toggleRule(' + r.id + ')">' +
-      '<span class="rule-text">' + r.text + '</span>' +
-      '<button class="rule-del" onclick="deleteRule(' + r.id + ')" title="Delete rule">&#x2715;</button>' +
+  /* Rule cards */
+  if (!tradeRules.length){
+    list.innerHTML='<div class="re-empty">'+_reIc('shield')+'<b>No rules yet</b><span>Pick one below or write your own. Every trade will be checked against it automatically.</span></div>';
+  } else {
+    list.innerHTML = tradeRules.map(function(r){
+      var k=ruleKind(r.text), cat=RULE_CATS.filter(function(x){ return x.k===k; })[0], s=S.per[r.id]||{n:0};
+      var pnl = s.n ? (s.hasUsd ? {hasUsd:true, usd:s.usd} : {hasUsd:false, pips:s.pips}) : null;
+      var neg = pnl && (pnl.hasUsd?pnl.usd:pnl.pips)<0;
+      return '<div class="re-rule'+(r.enabled?'':' off')+(s.n?' hit':'')+'">'+
+        '<span class="re-ric">'+_reIc(cat?cat.ic:'note')+'</span>'+
+        '<div class="re-rb"><div class="re-rt">'+_reEsc(r.text)+'</div>'+
+          '<div class="re-rm">'+(k?'':'<span class="re-warn">'+_reIc('alert')+' Not recognised — use one of the templates</span> · ')+
+            (s.n ? '<span class="re-bad">Broken '+s.n+'× in 30 days</span> · last '+_reAgo(s.last)+' · '+(s.n?Math.round(s.wins/s.n*100):0)+'% win · <b class="'+(neg?'neg':'pos')+'">'+_reMoney(pnl)+'</b>'
+                  : (k?'<span class="re-ok">'+_reIc('check')+' Not broken in 30 days</span>':''))+
+          '</div></div>'+
+        '<label class="re-sw" title="'+(r.enabled?'Active':'Paused')+'"><input type="checkbox" '+(r.enabled?'checked':'')+' aria-label="Rule active: '+_reEsc(r.text)+'" onchange="toggleRule('+r.id+')"><i></i></label>'+
+        '<button class="re-del" onclick="deleteRule('+r.id+')" title="Delete rule" aria-label="Delete rule">'+_reIc('trash')+'</button>'+
       '</div>';
-  }).join('');
-}
-
-function checkTradeRuleViolations(trade, dayKey) {
-  var violations = [];
-  var enabledRules = tradeRules.filter(function(r) { return r.enabled; });
-  for (var ri = 0; ri < enabledRules.length; ri++) {
-    var rule = enabledRules[ri];
-    var text = rule.text.toLowerCase();
-
-    // No trades before HH:MM
-    var beforeMatch = text.match(/no\s+trades?\s+before\s+(\d{1,2})[:.]?(\d{2})/);
-    if (beforeMatch) {
-      var limitH = parseInt(beforeMatch[1]), limitM = parseInt(beforeMatch[2]);
-      var trTime = trade.time || trade.opentime || '';
-      if (trTime) {
-        var tp = trTime.match(/(\d{1,2})[:.](\d{2})/);
-        if (tp && (parseInt(tp[1])*60 + parseInt(tp[2])) < (limitH*60 + limitM)) { violations.push(rule.text); continue; }
-      }
-    }
-
-    // No trades after HH:MM
-    var afterMatch = text.match(/no\s+trades?\s+after\s+(\d{1,2})[:.]?(\d{2})/);
-    if (afterMatch) {
-      var alH = parseInt(afterMatch[1]), alM = parseInt(afterMatch[2]);
-      var atTime = trade.time || trade.opentime || '';
-      if (atTime) {
-        var atp = atTime.match(/(\d{1,2})[:.](\d{2})/);
-        if (atp && (parseInt(atp[1])*60 + parseInt(atp[2])) > (alH*60 + alM)) { violations.push(rule.text); continue; }
-      }
-    }
-
-    // Max N trades per day
-    var maxMatch = text.match(/max\s+(\d+)\s+trades?\s+per\s+day/);
-    if (maxMatch && dayKey) {
-      var max = parseInt(maxMatch[1]);
-      var cnt = (journalData[dayKey] && journalData[dayKey].trades) ? journalData[dayKey].trades.length : 0;
-      if (cnt > max) { violations.push(rule.text + ' (' + cnt + ' today)'); continue; }
-    }
-
-    // Only trade in X session
-    var sessMatch = text.match(/only trade in\s+([a-z\s]+?)\s+session/i);
-    if (sessMatch && trade.session) {
-      var allowed = sessMatch[1].trim().toLowerCase();
-      if (!trade.session.toLowerCase().includes(allowed)) { violations.push(rule.text); continue; }
-    }
-
-    // No trades on <day>
-    var noDayMatch = text.match(/no\s+trades?\s+on\s+([a-z]+)/);
-    if (noDayMatch && trade._dow) {
-      var rday = noDayMatch[1].trim().toLowerCase().slice(0,3);
-      if (trade._dow.toLowerCase().startsWith(rday)) { violations.push(rule.text); continue; }
-    }
-
-    // Only trade on <days>
-    var onlyDayMatch = text.match(/only\s+trade\s+on\s+([a-z,\s]+)/);
-    if (onlyDayMatch && trade._dow) {
-      var allowedDays = onlyDayMatch[1].split(/[,\s]+/).map(function(d){return d.trim().toLowerCase().slice(0,3);}).filter(Boolean);
-      if (!allowedDays.some(function(d){return trade._dow.toLowerCase().startsWith(d);})) { violations.push(rule.text); continue; }
-    }
-
-    // Only Buy / Only Sell
-    /* Gegen die normalisierte Richtung pruefen: ein Importtrade heisst
-       "short", nicht "sell" — die Regel griff bei ihm vorher nicht. */
-    if ((text.includes('only buy') || text.includes('only long')) && trade.dir && !apexIsLong(trade.dir)) { violations.push(rule.text); continue; }
-    if ((text.includes('only sell') || text.includes('only short')) && trade.dir && apexIsLong(trade.dir)) { violations.push(rule.text); continue; }
+    }).join('');
   }
-  return violations;
+  /* Templates */
+  var tp=document.getElementById('reTemplates');
+  if (tp){
+    var cur=RULE_CATS.filter(function(x){ return x.k===_reCat; })[0]||RULE_CATS[0];
+    var have={}; tradeRules.forEach(function(r){ have[String(r.text).toLowerCase()]=1; });
+    tp.innerHTML='<div class="re-cats">'+RULE_CATS.map(function(x){ return '<button class="'+(x.k===cur.k?'on':'')+'" onclick="_reCat=\''+x.k+'\';renderRulesEngine()">'+_reIc(x.ic)+x.label+'</button>'; }).join('')+'</div>'+
+      '<div class="re-ex">'+cur.ex.map(function(e){ var on=have[e.toLowerCase()];
+        return '<button class="'+(on?'on':'')+'" '+(on?'disabled':'')+' onclick="_reUse(this.getAttribute(\'data-t\'))" data-t="'+_reEsc(e)+'">'+(on?_reIc('check'):_reIc('plus'))+_reEsc(e)+'</button>'; }).join('')+'</div>';
+  }
 }
+function _reUse(t){ var i=document.getElementById('ruleInput'); if(!i) return; i.value=t; i.focus(); i.setSelectionRange(t.length,t.length); }
 
 // Patch renderTrades to flag violations
 (function() {
@@ -47620,11 +47757,11 @@ body.light .pt-sugg{background:var(--layer)}
     var FIELDS = {
       hour:            { label:'Entry hour', ops:['>=','<=','=='], vType:'num'  },
       session:         { label:'Session',           ops:['=='],          vType:'text' },
-      dir:             { label:'Richtung',          ops:['=='],          vType:'dir'  },
+      dir:             { label:'Direction',          ops:['=='],          vType:'dir'  },
       lots:            { label:'Lot size',         ops:['>=','<='],     vType:'num'  },
-      rr:              { label:'Geplantes R:R',     ops:['>=','<='],     vType:'num'  },
+      rr:              { label:'Planned R:R',     ops:['>=','<='],     vType:'num'  },
       pips:            { label:'Pips',              ops:['>','<'],       vType:'num'  },
-      weekday:         { label:'Wochentag',         ops:['=='],          vType:'dow'  },
+      weekday:         { label:'Weekday',         ops:['=='],          vType:'dow'  },
       lossStreakToday: { label:'Losing streak today (nth loss)', ops:['>='], vType:'num' },
       lotsVsAvg:       { label:'Lot size vs. your average (×)', ops:['>=','<='], vType:'num' }
     };
@@ -47701,8 +47838,7 @@ body.light .pt-sugg{background:var(--layer)}
         host=document.createElement('div'); host.className='glass-card'; host.id='autoTagCard'; host.style.marginTop='12px';
         /* After the page header. firstChild is a whitespace text node, so
            "firstChild.nextSibling" put this card ABOVE the "Rules" title. */
-        var ph=page.querySelector(':scope > .ph');
-        page.insertBefore(host, ph ? ph.nextSibling : page.firstChild);
+        page.appendChild(host);
       }
       return host;
     }
@@ -47724,7 +47860,7 @@ body.light .pt-sugg{background:var(--layer)}
         host.innerHTML='<div class="stat-group-title"><svg class=ic aria-hidden=true><use href=#i-pin ></use></svg> Automatic tagging <span style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;color:var(--gold);background:var(--gold-dim);vertical-align:2px">Pro</span></div>'+
           '<div style="text-align:center;padding:18px 12px">'+
             '<div style="font-size:28px"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg></div>'+
-            '<div style="font-size:13px;color:var(--ink);font-weight:700;margin:6px 0">Auto-Tagging &amp; KI-Tags — Pro</div>'+
+            '<div style="font-size:13px;color:var(--ink);font-weight:700;margin:6px 0">Auto-tagging &amp; AI tags — Pro</div>'+
             '<div style="font-size:12px;color:var(--ink3);max-width:430px;margin:0 auto 12px;line-height:1.55">Automatic tag rules (e.g. \u201eentry after 16:00 \u2192 Overtrading") and AI suggestions are a Pro feature. Manual tagging stays free.</div>'+
             '<button onclick="if(typeof openUpgradeModal===\'function\')openUpgradeModal()" style="padding:9px 22px;background:linear-gradient(135deg,#c9a84c,#e8c96a);border:none;border-radius:10px;color:#07080b;font-family:var(--font-display);font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.03em"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Upgrade to Pro</button>'+
           '</div>';
@@ -47735,12 +47871,12 @@ body.light .pt-sugg{background:var(--layer)}
         '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
           '<div><div class="stat-group-title"><svg class=ic aria-hidden=true><use href=#i-pin ></use></svg> Automatic tagging</div>'+
           '<div style="font-size:12px;color:var(--ink3);margin-top:2px">Applies tags automatically from your rules. You can remove an auto tag (<svg class=ic aria-hidden=true><use href=#i-bot ></use></svg>) on a trade at any time — it will not come back.</div></div>'+
-          '<div class="atsw'+(isOn()?' on':'')+'" id="atagGlobal" title="An/Aus"></div>'+
+          '<div class="atsw'+(isOn()?' on':'')+'" id="atagGlobal" title="On/Off"></div>'+
         '</div>'+
         '<div style="margin-top:14px" id="atagList">'+
           rs.map(function(r,idx){ return '<div class="atr-row'+(r.enabled&&isOn()?'':' off')+'" data-i="'+idx+'">'+
             '<div class="atsw'+(r.enabled?' on':'')+'" data-act="toggle"></div>'+
-            '<div><span class="atr-tag">'+esc(r.tag)+'</span> <span class="atr-desc">wenn '+ruleDesc(r)+'</span></div>'+
+            '<div><span class="atr-tag">'+esc(r.tag)+'</span> <span class="atr-desc">when '+ruleDesc(r)+'</span></div>'+
             '<span class="atr-x" data-act="edit" title="Edit">✎</span>'+
             '<span class="atr-x" data-act="del" title="Delete">✕</span>'+
           '</div>'; }).join('') +
