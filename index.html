@@ -62410,9 +62410,11 @@ self.addEventListener('message', async (ev) => {
     b.orders.forEach(function (o) {
       lv.push({ key: 'o' + o.id, kind: 'entry', orderId: o.id, price: o.price, style: 3, drag: true,
                 title: o.type.replace(/([a-z])([A-Z])/, '$1 $2').replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + fmtLots(o.lots) });
-      if (o.sl != null) lv.push({ key: 'os' + o.id, kind: 'sl', price: o.sl, style: 3, title: 'SL' });
+      if (o.sl != null) lv.push({ key: 'os' + o.id, kind: 'sl', orderId: o.id, part: 'sl', price: o.sl, style: 3, drag: true,
+                                  title: 'SL ' + fmtPips(Math.abs(pipsOf(o.sl - o.price))) });
       (o.tps || []).forEach(function (x) {
-        lv.push({ key: 'ot' + o.id + '_' + x.n, kind: 'tp', price: x.price, style: 3, title: 'TP' + x.n });
+        lv.push({ key: 'ot' + o.id + '_' + x.n, kind: 'tp', orderId: o.id, part: 'tp', n: x.n, price: x.price, style: 3, drag: true,
+                  title: 'TP' + x.n + ' ' + fmtPips(Math.abs(pipsOf(x.price - o.price))) });
       });
     });
 
@@ -62432,11 +62434,18 @@ self.addEventListener('message', async (ev) => {
         // and targets move with it, so the distances stay what you planned.
         var o = b.orders.find(function (x) { return x.id === lv.orderId; });
         if (o) {
-          var d = px - o.price, opt = { tag: o.tag, trailPips: o.trailPips };
-          if (o.sl != null) opt.sl = b.round(o.sl + d);
-          if (o.tps && o.tps.length) opt.tps = o.tps.map(function (t) { return { price: b.round(t.price + d), lots: t.lots }; });
+          var part = lv.part || 'entry';
+          var d = part === 'entry' ? px - o.price : 0, at = part === 'entry' ? px : o.price;
+          var opt = { tag: o.tag, trailPips: o.trailPips };
+          if (o.sl != null) opt.sl = part === 'sl' ? px : b.round(o.sl + d);
+          if (o.tps && o.tps.length) opt.tps = o.tps.map(function (t) {
+            return { price: (part === 'tp' && t.n === lv.n) ? px : b.round(t.price + d), lots: t.lots };
+          });
           S.session.cancel(o.id);
-          try { S.session.pending(o.type, px, o.lots, opt); toast(o.type + ' → ' + fmtPx(px)); }
+          try {
+            S.session.pending(o.type, at, o.lots, opt);
+            toast(part === 'entry' ? o.type + ' → ' + fmtPx(px) : (part === 'sl' ? 'Stop' : 'TP' + lv.n) + ' → ' + fmtPx(px));
+          }
           catch (e2) { S.session.pending(o.type, o.price, o.lots, Object.assign(opt, { sl: o.sl, tps: o.tps })); throw e2; }
         }
       } else if (lv.kind === 'sl') {
@@ -62466,6 +62475,11 @@ self.addEventListener('message', async (ev) => {
       if (!o || !q0) return null;
       var bad = (o.type === 'buyLimit' && price >= q0.ask) || (o.type === 'buyStop' && price <= q0.ask) ||
                 (o.type === 'sellLimit' && price <= q0.bid) || (o.type === 'sellStop' && price >= q0.bid);
+      if (lv.part === 'sl' || lv.part === 'tp') {
+        var sg = o.side === 'buy' ? 1 : -1, pp = b.toPips(price - o.price) * sg;
+        var wrongSide = lv.part === 'sl' ? pp >= 0 : pp <= 0;
+        return (lv.part === 'sl' ? 'SL ' : 'TP' + lv.n + ' ') + fmtPips(pp, true) + (wrongSide ? '  ⚠' : '');
+      }
       return o.type + ' ' + fmtPx(price) + (bad ? '  ⚠' : '');
     }
     var p = b.positions.find(function (x) { return x.id === lv.posId; });
