@@ -8150,7 +8150,8 @@ table.tv-li i{font-style:normal;font-size:10px;color:var(--gold);margin-left:4px
 .arp-swatches.auf{position:relative}
 .arp-swatches.auf .arp-sw:not(.on){display:inline-block}
 .aw-rail .arp-swatches.auf{display:grid!important;grid-template-columns:repeat(2,auto);gap:4px}
-body:not(.arp-mehr-auf) [data-arp-redo],body:not(.arp-mehr-auf) [data-arp-clearall],body:not(.arp-mehr-auf) [data-arp-list],
+.apd-t:disabled,.arp-tool:disabled{opacity:.32;cursor:default;pointer-events:none}
+body:not(.arp-mehr-auf) [data-arp-clearall],body:not(.arp-mehr-auf) [data-arp-list],
 body:not(.arp-mehr-auf) [data-arp-zoomout],body:not(.arp-mehr-auf) [data-arp-zoomin],body:not(.arp-mehr-auf) [data-arp-fit]{display:none!important}
 body.arp-mehr-auf .arp-mehr{color:var(--gold)}
 .tv-rpv-k{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}
@@ -13124,6 +13125,7 @@ function _authAction(type) {
           </button>
           <div class="nav-group-drop" id="navgdrop-analysis">
             <button class="nav-item" onclick="nav('edgelab');closeNavGroups()" id="nav-edgelab">Edge Lab</button>
+            <button class="nav-item" onclick="nav('replaylab');closeNavGroups()" id="nav-replaylab">Market Replay</button>
             <!-- Live-Chart vorerst ausgeblendet: es gibt keine kostenlose
                  Kursquelle, die Spot-Gold in Echtzeit liefert, ohne dass der
                  Nutzer seinen Broker verbindet. Der Code bleibt vollstaendig
@@ -16551,7 +16553,7 @@ function nav(id) {
      leaves the app on a blank screen with no page active at all. */
   var pageEl = document.getElementById('page-'+id);
   if (!pageEl) {
-    var builders = { propfirm: window.ApexPropPlus, developer: window.ApexDev, edgelab: window.EdgeLab, live: window.ApexLive, chart: window.ApexTV };
+    var builders = { replaylab: { render: function(){ if (window.ApexReplayHub) ApexReplayHub.render(); } }, propfirm: window.ApexPropPlus, developer: window.ApexDev, edgelab: window.EdgeLab, live: window.ApexLive, chart: window.ApexTV };
     var b = builders[id];
     if (b && typeof b.render === 'function') { try { b.render(); } catch (e) {} }
     pageEl = document.getElementById('page-'+id);
@@ -16587,7 +16589,7 @@ function nav(id) {
   document.querySelectorAll('.mbn-item').forEach(b => b.classList.remove('active'));
   var mbnMap = { overview:'overview', journal:'trading', calendar:'trading', stats:'trading',
     calculators:'tools', econews:'tools', developer:'tools', glossary:'tools', books:'tools', psychology:'analysis', insights:'analysis', setups:'analysis', propfirm:'analysis',
-    indicator:'analysis', playbooks:'analysis', community:'social', feed:'social', news:'social', inbox:'social', settings:'settings' };
+    indicator:'analysis', playbooks:'analysis', replaylab:'analysis', edgelab:'analysis', community:'social', feed:'social', news:'social', inbox:'social', settings:'settings' };
   var mbnTarget = document.getElementById('mbn-' + (mbnMap[id] || id));
   if (mbnTarget) mbnTarget.classList.add('active');
 }
@@ -63891,6 +63893,570 @@ self.addEventListener('message', async (ev) => {
 
 </script>
 <script>
+/* ═══════════════════════════════════════════════════════════════════
+   MARKET REPLAY — eigene Seite  (window.ApexReplayHub, 21.10.2026)
+
+   Vorher lag Market Replay als elfter von sechzehn Reitern in Edge Lab —
+   das wichtigste Werkzeug zum Üben war das am schwersten zu findende.
+   Jetzt hat es eine eigene Seite (Analysis → Market Replay) mit:
+
+     - einer 3D-Bühne, die zeigt, was das Werkzeug tut: Kerzen laufen auf
+       eine leuchtende „Jetzt"-Ebene zu; was davor liegt, ist fest und echt,
+       was dahinter liegt, nur ein Gitter — die Zukunft bleibt verborgen.
+     - vier Einstiegen (Klassisch · Blind · Funded · Strategy Lab), die nur
+       den bestehenden Zustand von ApexReplayUI setzen,
+     - darunter dem unveränderten Starter und den gespeicherten Backtests,
+       optisch neu eingefasst.
+
+   Nichts am Replay selbst ist nachgebaut: ApexReplayUI.render(host) läuft
+   wie zuvor, nur in einem anderen Behälter. EdgeLab.go('sim') leitet
+   hierher um, damit alle alten Wege (Demo-Link, Teilen-Link, Strategy Lab
+   → Replay, Prop-Cockpit) ankommen.
+   ═══════════════════════════════════════════════════════════════════ */
+(function apexReplayHub() {
+  'use strict';
+  var H = {}; window.ApexReplayHub = H;
+  var REDUCE = false;
+  try { REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function isPro() { return window.currentPlan === 'pro'; }
+
+  /* ───────── Stil ───────── */
+  function css() {
+    if (document.getElementById('rhCss')) return;
+    var st = document.createElement('style'); st.id = 'rhCss';
+    st.textContent = [
+      '#page-replaylab{--rh-g:var(--gold,#c9a84c);--rh-gh:#f1d488}',
+      /* Bühne: immer dunkel, auch im hellen Theme — Kerzen leuchten nur auf Schwarz */
+      '.rh-hero{position:relative;overflow:hidden;border-radius:26px;min-height:440px;margin:4px 0 22px;color:#f5efe2;' +
+        'background:radial-gradient(900px 500px at 78% 40%,rgba(var(--gold-rgb),.18),transparent 60%),radial-gradient(700px 500px at 10% 100%,rgba(60,90,255,.12),transparent 60%),#07070a;' +
+        'border:1px solid rgba(var(--gold-rgb),.22);box-shadow:0 30px 80px -30px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05);isolation:isolate}',
+      '.rh-hero canvas.rh-3d{position:absolute;inset:0;width:100%;height:100%;z-index:0}',
+      '.rh-hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(7,7,10,.94) 0%,rgba(7,7,10,.72) 34%,rgba(7,7,10,0) 62%),linear-gradient(0deg,rgba(7,7,10,.85),transparent 28%)}',
+      '.rh-in{position:relative;z-index:2;padding:46px 48px 40px;max-width:600px}',
+      '.rh-eb{display:flex;align-items:center;gap:12px;font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.32em;text-transform:uppercase;color:var(--rh-gh)}',
+      '.rh-eb::before{content:"";width:32px;height:1px;background:linear-gradient(90deg,var(--rh-g),transparent)}',
+      '.rh-eb i{font-style:normal;padding:4px 8px;border-radius:6px;border:1px solid rgba(var(--gold-rgb),.4);letter-spacing:.16em;font-size:9.5px}',
+      '.rh-h1{margin:18px 0 0;font:800 clamp(34px,4.4vw,60px)/1.0 var(--font-display,inherit);letter-spacing:-.025em;color:#fbf6ea}',
+      '.rh-h1 em{font-style:normal;display:block;background:linear-gradient(100deg,#f7e2a6,#c99b3c 55%,#f7e2a6);-webkit-background-clip:text;background-clip:text;color:transparent}',
+      '.rh-sub{margin:18px 0 0;font-size:15.5px;line-height:1.6;color:rgba(245,239,226,.74);max-width:48ch}',
+      '.rh-act{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}',
+      '.rh-b{position:relative;display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:14px;border:0;cursor:pointer;font:700 14px/1 var(--font-display,inherit);letter-spacing:.01em;transition:transform .2s,box-shadow .3s}',
+      '.rh-b .ic{width:16px;height:16px}',
+      '.rh-b.p{color:#140f05;background:linear-gradient(135deg,#f3d995,#c9a043);box-shadow:0 16px 40px -12px rgba(var(--gold-rgb),.75);isolation:isolate}',
+      '.rh-b.p::before{content:"";position:absolute;inset:-2px;border-radius:16px;z-index:-1;background:conic-gradient(from var(--rha,0deg),transparent 0 72%,#fff6d8 82%,transparent 92%);animation:rhSpin 2.8s linear infinite;filter:blur(1px)}',
+      '.rh-b.s{color:#f5efe2;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}',
+      '.rh-b:hover{transform:translateY(-2px)}',
+      '.rh-b.s:hover{border-color:rgba(var(--gold-rgb),.6)}',
+      '@property --rha{syntax:"<angle>";inherits:false;initial-value:0deg}',
+      '@keyframes rhSpin{to{--rha:360deg}}',
+      '.rh-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}',
+      '.rh-chip{display:inline-flex;align-items:baseline;gap:7px;padding:8px 12px;border-radius:999px;font-size:12px;color:rgba(245,239,226,.72);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)}',
+      '.rh-chip b{font:700 13px/1 var(--font-display,inherit);color:#fff}',
+      '.rh-tag{position:absolute;z-index:2;right:26px;bottom:22px;font:500 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,239,226,.45);text-align:right}',
+      '.rh-tag b{color:var(--rh-gh);font-weight:600}',
+      '.rh-css{position:absolute;inset:0;z-index:0;background:repeating-linear-gradient(90deg,transparent 0 46px,rgba(var(--gold-rgb),.05) 46px 47px)}',
+
+      /* Einstiege */
+      '.rh-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px;perspective:1000px}',
+      '.rh-m{position:relative;text-align:left;cursor:pointer;padding:20px 18px 18px;border-radius:20px;color:var(--ink);overflow:hidden;' +
+        'background:linear-gradient(160deg,rgba(var(--gold-rgb),.07),transparent 60%),var(--elevated);border:1px solid var(--rim);' +
+        'transition:transform .25s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;transform-style:preserve-3d}',
+      '.rh-m::before{content:"";position:absolute;inset:0;background:radial-gradient(240px circle at var(--px,50%) var(--py,50%),rgba(var(--gold-rgb),.16),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}',
+      '.rh-m:hover{border-color:var(--gold-line);box-shadow:0 22px 46px -24px rgba(0,0,0,.6)}',
+      '.rh-m:hover::before{opacity:1}',
+      '.rh-m.on{border-color:var(--rh-g);box-shadow:0 0 0 1px var(--rh-g) inset,0 22px 46px -24px rgba(var(--gold-rgb),.5)}',
+      '.rh-m .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px;background:rgba(var(--gold-rgb),.12);color:var(--rh-g);border:1px solid rgba(var(--gold-rgb),.25);transform:translateZ(24px)}',
+      '.rh-m .ico .ic{width:20px;height:20px}',
+      '.rh-m b{display:block;font:700 15px/1.2 var(--font-display,inherit);transform:translateZ(18px)}',
+      '.rh-m span{display:block;margin-top:6px;font-size:12.5px;line-height:1.45;color:var(--ink3);transform:translateZ(12px)}',
+      '.rh-m .k{position:absolute;top:16px;right:16px;font:600 9.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;color:var(--ink4)}',
+
+      /* Der bestehende Starter, neu eingefasst */
+      '#rhHost .el-card{border-radius:22px;padding:24px 26px;border:1px solid var(--rim);' +
+        'background:linear-gradient(180deg,rgba(var(--gold-rgb),.045),transparent 140px),var(--elevated);box-shadow:0 18px 50px -30px rgba(0,0,0,.55)}',
+      '#rhHost .arp-setup>h3{font:800 24px/1.1 var(--font-display,inherit);letter-spacing:-.01em;text-transform:none;margin:0;color:var(--ink)}',
+      '#rhHost .arp-setup .el-fld label{color:var(--ink3);font-size:10.5px;letter-spacing:.1em}',
+      '#rhHost .arp-hint{color:var(--ink3)}',
+      '#rhHost .el-sub{color:var(--ink3);font-size:13.5px}',
+      '#rhHost .el-card>h3{text-transform:none;letter-spacing:-.01em;font:800 18px/1.2 var(--font-display,inherit);color:var(--ink)}',
+      '#rhHost .arp-setup>h3::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 12px 3px 0;background:var(--rh-g);box-shadow:0 0 0 4px rgba(var(--gold-rgb),.18),0 0 18px var(--rh-g);animation:rhLive 2s ease-in-out infinite}',
+      '@keyframes rhLive{50%{box-shadow:0 0 0 7px rgba(var(--gold-rgb),.05),0 0 8px var(--rh-g)}}',
+      '#rhHost .arp-setup .el-fld input,#rhHost .arp-setup .el-fld select{border-radius:12px}',
+      '#rhHost .arp-seg{border-radius:12px}',
+      '#rhHost .arp-go{border-radius:14px!important;padding-left:26px!important;padding-right:28px!important;box-shadow:0 14px 34px -12px rgba(var(--gold-rgb),.75)!important;position:relative;overflow:hidden}',
+      '#rhHost .arp-go::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);animation:rhSheen 3.6s ease-in-out infinite}',
+      '@keyframes rhSheen{0%,55%{left:-60%}85%,100%{left:130%}}',
+      '#rhHost .arp-dice{transition:transform .5s cubic-bezier(.3,1.6,.5,1)}',
+      '#rhHost .arp-dice:hover{transform:rotate(-18deg) scale(1.08)}',
+      '#rhHost .arp-dice.rolling{animation:rhRoll .6s linear infinite}',
+      '@keyframes rhRoll{to{transform:rotate(360deg)}}',
+      '#rhHost .arp-setup.rh-flash{animation:rhFlash 1.2s ease}',
+      '@keyframes rhFlash{0%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),.7)}100%{box-shadow:0 0 0 22px rgba(var(--gold-rgb),0)}}',
+
+      '@media (max-width:980px){.rh-modes{grid-template-columns:repeat(2,minmax(0,1fr))}}',
+      '@media (max-width:640px){.rh-hero{min-height:0;border-radius:20px}.rh-in{padding:28px 20px 150px}.rh-hero::after{background:linear-gradient(0deg,rgba(7,7,10,.2) 0%,rgba(7,7,10,.8) 45%,rgba(7,7,10,.95) 100%)}' +
+        '.rh-h1{font-size:26px}.rh-sub{font-size:14px}.rh-tag{display:none}.rh-b{flex:1;justify-content:center}.rh-modes{gap:10px}.rh-m{padding:16px 14px}.rh-m .k{display:none}#rhHost .el-card{padding:18px 16px}}',
+      '@media (prefers-reduced-motion:reduce){#page-replaylab *{animation:none!important}}'
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+
+  /* ═══════════ 3D-Bühne: Kerzen durch die „Jetzt"-Ebene ═══════════
+     Eine endlose Kursreihe aus echten 3D-Kerzen (Körper als Kasten mit
+     abgefasten Kanten, Docht als Zylinder) wandert nach links. Rechts der
+     Ebene sind die Kerzen nur Drahtgitter: man weiß, dass dort etwas
+     kommt, aber nicht was. Beim Durchtritt „materialisiert" die Kerze —
+     sie wächst aus der Ebene und bekommt Farbe. Dazu eine leuchtende
+     Kurslinie, ein spiegelnder Boden und Staub im Licht. */
+  var scene3d = null;
+  function loadThree() {
+    if (window.THREE) return Promise.resolve();
+    if (loadThree.p) return loadThree.p;
+    loadThree.p = new Promise(function (res, rej) {
+      var sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'; sc.async = true;
+      sc.onload = function () { window.THREE ? res() : rej(); }; sc.onerror = rej;
+      document.head.appendChild(sc);
+    });
+    return loadThree.p;
+  }
+  function webgl() { try { var c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; } }
+
+  function buildScene(canvas, hero) {
+    var THREE = window.THREE;
+    var R = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    R.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    R.outputEncoding = THREE.sRGBEncoding;
+    R.toneMapping = THREE.NoToneMapping;
+    var scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x07070a, 0.045);
+    var cam = new THREE.PerspectiveCamera(36, 2, 0.1, 120);
+
+    scene.add(new THREE.AmbientLight(0x2a2418, 0.9));
+    var key = new THREE.DirectionalLight(0xfff0d8, 1.1); key.position.set(-4, 9, 8); scene.add(key);
+    var rim = new THREE.DirectionalLight(0x6f86ff, 1.2); rim.position.set(6, 3, -8); scene.add(rim);
+    var nowLight = new THREE.PointLight(0xffd27a, 3.2, 9, 2); nowLight.position.set(0, 1.5, 1.2); scene.add(nowLight);
+
+    // Reflexionsumgebung für Metallkanten (gemalt, keine Datei)
+    var envC = document.createElement('canvas'); envC.width = 256; envC.height = 128;
+    var ex = envC.getContext('2d'), eg = ex.createLinearGradient(0, 0, 0, 128);
+    eg.addColorStop(0, '#2a2114'); eg.addColorStop(.5, '#050506'); eg.addColorStop(1, '#141009');
+    ex.fillStyle = eg; ex.fillRect(0, 0, 256, 128);
+    ex.fillStyle = 'rgba(255,230,170,.9)'; ex.fillRect(60, 18, 50, 10); ex.fillStyle = 'rgba(140,160,255,.5)'; ex.fillRect(170, 40, 40, 8);
+    var envT = new THREE.CanvasTexture(envC); envT.mapping = THREE.EquirectangularReflectionMapping;
+    var pm = new THREE.PMREMGenerator(R), env = pm.fromEquirectangular(envT).texture; envT.dispose(); pm.dispose();
+
+    var world = new THREE.Group(); scene.add(world);
+
+    // Boden: dunkler Spiegel + feines Gitter, das zur Ferne ausläuft
+    var floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 40),
+      new THREE.MeshStandardMaterial({ color: 0x0a0a0d, metalness: 0.9, roughness: 0.35, envMap: env, envMapIntensity: 0.6 }));
+    floor.rotation.x = -Math.PI / 2; floor.position.y = -2.6; scene.add(floor);
+    var grid = new THREE.GridHelper(80, 80, 0x3a3020, 0x1c1812);
+    grid.position.y = -2.59; grid.material.transparent = true; grid.material.opacity = 0.55; scene.add(grid);
+
+    // Die „Jetzt"-Ebene: weicher Lichtvorhang mit heller Kante
+    var pc = document.createElement('canvas'); pc.width = 64; pc.height = 256;
+    var px = pc.getContext('2d'), pg = px.createLinearGradient(0, 0, 64, 0);
+    pg.addColorStop(0, 'rgba(255,210,120,0)'); pg.addColorStop(.48, 'rgba(255,214,130,.55)'); pg.addColorStop(.5, 'rgba(255,245,215,1)'); pg.addColorStop(.52, 'rgba(255,214,130,.55)'); pg.addColorStop(1, 'rgba(255,210,120,0)');
+    px.fillStyle = pg; px.fillRect(0, 0, 64, 256);
+    var vg = px.createLinearGradient(0, 0, 0, 256); vg.addColorStop(0, 'rgba(0,0,0,1)'); vg.addColorStop(.2, 'rgba(0,0,0,0)'); vg.addColorStop(.85, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,1)');
+    px.globalCompositeOperation = 'destination-out'; px.fillStyle = vg; px.fillRect(0, 0, 64, 256);
+    var curtain = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 7.5),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(pc), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
+    curtain.rotation.y = Math.PI / 2; curtain.position.set(0, 0.9, 0); scene.add(curtain);
+    var curtain2 = curtain.clone(); curtain2.rotation.y = 0; curtain2.scale.set(0.35, 1, 1); scene.add(curtain2);
+    // Leuchtstreifen am Boden unter der Ebene
+    var strip = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 14), new THREE.MeshBasicMaterial({ color: 0xffdb8a, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
+    strip.rotation.x = -Math.PI / 2; strip.position.set(0, -2.58, 0); scene.add(strip);
+
+    /* Kerzen */
+    var SP = 0.72, N = 46, W = 0.44, YS = 1.7;   // YS: Kursbewegung in Weltmaßen
+    var bodyGeo = new THREE.BoxGeometry(W, 1, W, 1, 1, 1);
+    var wickGeo = new THREE.CylinderGeometry(0.025, 0.025, 1, 8);
+    var edgeGeo = new THREE.EdgesGeometry(bodyGeo);
+    var UP = 0x0db36a, DN = 0xd9223f;
+    var mats = {
+      up: new THREE.MeshStandardMaterial({ color: UP, metalness: 0.15, roughness: 0.3, envMap: env, envMapIntensity: 0.18, emissive: 0x06572f, emissiveIntensity: 0.8 }),
+      dn: new THREE.MeshStandardMaterial({ color: DN, metalness: 0.15, roughness: 0.3, envMap: env, envMapIntensity: 0.18, emissive: 0x6e0d1c, emissiveIntensity: 0.8 }),
+      wick: new THREE.MeshStandardMaterial({ color: 0xd9c9a3, metalness: 0.8, roughness: 0.3, envMap: env })
+    };
+    var ghostMat = new THREE.LineBasicMaterial({ color: 0xe7c46e, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false });
+    var price = 0, cs = [];
+    function nextOHLC() {
+      var o = price, drift = (Math.random() - 0.48) * 0.8;
+      var c = o + drift + Math.sin(cs.length * 0.21) * 0.06;
+      var h = Math.max(o, c) + Math.random() * 0.4 + 0.06, l = Math.min(o, c) - Math.random() * 0.4 - 0.06;
+      price = c * 0.96;                   // zieht sanft zur Mitte zurück
+      return { o: o * YS, h: h * YS, l: l * YS, c: c * YS };
+    }
+    function makeCandle(i) {
+      var d = nextOHLC(), up = d.c >= d.o, g = new THREE.Group();
+      var bh = Math.max(0.12, Math.abs(d.c - d.o));
+      var body = new THREE.Mesh(bodyGeo, up ? mats.up : mats.dn);
+      body.scale.y = bh; body.position.y = (d.o + d.c) / 2;
+      var wick = new THREE.Mesh(wickGeo, mats.wick);
+      wick.scale.y = d.h - d.l; wick.position.y = (d.h + d.l) / 2;
+      var gm = ghostMat.clone();   // eigenes Material: die Deckkraft hängt an der Position
+      var gEdge = new THREE.LineSegments(edgeGeo, gm);
+      gEdge.scale.copy(body.scale); gEdge.position.copy(body.position);
+      var gWick = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.02, 1, 0.02)), gm);
+      gWick.scale.y = wick.scale.y; gWick.position.copy(wick.position);
+      var solid = new THREE.Group(); solid.add(body); solid.add(wick);
+      var lit = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: up ? 0x7dffc0 : 0xff8a9a, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false }));
+      lit.scale.copy(body.scale); lit.position.copy(body.position); solid.add(lit);
+      var ghost = new THREE.Group(); ghost.add(gEdge); ghost.add(gWick);
+      g.add(solid); g.add(ghost);
+      g.userData = { i: i, d: d, solid: solid, ghost: ghost, rev: 0 };
+      world.add(g);
+      return g;
+    }
+    for (var i = 0; i < N; i++) cs.push(makeCandle(i));
+
+    // Kurslinie durch die Schlusskurse der aufgedeckten Kerzen
+    var LMAX = N, lpos = new Float32Array(LMAX * 3);
+    var lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(lpos, 3));
+    var line = new THREE.Line(lg, new THREE.LineBasicMaterial({ color: 0xffe3a0, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+    world.add(line);
+
+    // Staub im Licht
+    var DN_ = 420, dp = new Float32Array(DN_ * 3), dseed = [];
+    for (var k = 0; k < DN_; k++) { dseed.push([Math.random() * 30 - 15, Math.random() * 7 - 2, Math.random() * 10 - 6, Math.random()]); }
+    var dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.BufferAttribute(dp, 3));
+    var dc = document.createElement('canvas'); dc.width = dc.height = 32;
+    var dx = dc.getContext('2d'), dgr = dx.createRadialGradient(16, 16, 0, 16, 16, 16); dgr.addColorStop(0, 'rgba(255,235,190,1)'); dgr.addColorStop(1, 'rgba(255,220,150,0)');
+    dx.fillStyle = dgr; dx.fillRect(0, 0, 32, 32);
+    var dust = new THREE.Points(dg, new THREE.PointsMaterial({ size: 0.06, map: new THREE.CanvasTexture(dc), transparent: true, opacity: 0.7, depthWrite: false, blending: THREE.AdditiveBlending }));
+    scene.add(dust);
+
+    var cy = 0, head = N * 0.55, run = false, raf = 0, last = 0, t0 = performance.now(), mx = 0, my = 0, tmx = 0, tmy = 0;
+    var mobile = false;
+    function size() {
+      var w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
+      R.setSize(w, h, false); cam.aspect = w / h;
+      mobile = w < 640;
+      cam.fov = mobile ? 52 : 36;
+      cam.updateProjectionMatrix();
+    }
+    function frame(now) {
+      raf = 0; if (!run) return;
+      var dt = Math.min(0.05, (now - last) / 1000); last = now;
+      var hb = hero.getBoundingClientRect();
+      if (!hero.offsetParent || hb.bottom < 0 || hb.top > innerHeight) { raf = requestAnimationFrame(frame); return; }
+      var t = (now - t0) / 1000;
+      head += dt * 0.55;
+      mx += (tmx - mx) * Math.min(1, dt * 2.5); my += (tmy - my) * Math.min(1, dt * 2.5);
+
+      // Kamera: leichte Fahrt + Maus-Parallaxe; die Ebene steht im rechten Drittel
+      // Die Ebene soll bei ~66 % der Breite stehen (rechts vom Text): Blickpunkt
+      // um ein Drittel der halben Sichtbreite nach links versetzen.
+      var halfW = Math.tan(cam.fov * Math.PI / 360) * 10.4 * cam.aspect;
+      var off = mobile ? -halfW * 0.15 : -halfW * 0.34;
+      cam.position.set(off + 1.0 + Math.sin(t * 0.12) * 0.5 + mx * 1.2, 1.5 + my * 0.8, 10.4 + Math.cos(t * 0.1) * 0.4);
+      cam.lookAt(off + mx * 0.4, 0.9, 0);
+
+
+      var minI = Infinity, nl = 0, pts = [];
+      for (var j = 0; j < cs.length; j++) {
+        var g = cs[j], u = g.userData;
+        var x = (u.i - head) * SP;
+        if (x < -SP * (N * 0.62)) {          // links hinausgelaufen → hinten neu anstellen
+          var maxI = -Infinity; for (var q = 0; q < cs.length; q++) maxI = Math.max(maxI, cs[q].userData.i);
+          world.remove(g); g.traverse(function (m) { if (m.material && m.material !== ghostMat && m.material !== mats.up && m.material !== mats.dn && m.material !== mats.wick) m.material.dispose(); }); cs[j] = makeCandle(maxI + 1); g = cs[j]; u = g.userData; x = (u.i - head) * SP;
+        }
+        g.position.x = x;
+        var target = x < 0 ? 1 : 0;
+        u.rev += (target - u.rev) * Math.min(1, dt * 5);
+        var r = u.rev;
+        u.solid.visible = r > 0.01; u.ghost.visible = r < 0.99;
+        u.solid.scale.set(1, Math.max(0.001, r), 1);
+        u.solid.position.y = (1 - r) * (u.d.o + u.d.c) / 2;   // wächst aus der eigenen Mitte
+        u.ghost.children.forEach(function (m) { m.material.opacity = 0.8 * (1 - r) * Math.max(0.15, 1 - x / 18); });
+        if (r > 0.5) pts.push([x, u.d.c, u.i]);
+      }
+      pts.sort(function (a, b) { return a[2] - b[2]; });
+      for (var p = 0; p < pts.length && nl < LMAX; p++) { lpos[nl * 3] = pts[p][0]; lpos[nl * 3 + 1] = pts[p][1]; lpos[nl * 3 + 2] = W * 0.7; nl++; }
+      lg.setDrawRange(0, nl); lg.attributes.position.needsUpdate = true;
+      // Der Kurs wandert — die Bühne folgt ihm weich, damit er mittig bleibt
+      var sum = 0, cnt = 0;
+      for (var a2 = Math.max(0, pts.length - 14); a2 < pts.length; a2++) { sum += pts[a2][1]; cnt++; }
+      if (cnt) cy += (sum / cnt - cy) * Math.min(1, dt * 0.9);
+      world.position.y = (mobile ? -0.3 : 0.9) - cy;
+
+      var pulse = 0.85 + Math.sin(t * 2.2) * 0.15;
+      curtain.material.opacity = pulse; curtain2.material.opacity = 0.5 * pulse;
+      nowLight.intensity = 2.6 + Math.sin(t * 2.2) * 0.6;
+      for (var z = 0; z < DN_; z++) {
+        var s = dseed[z];
+        dp[z * 3] = ((s[0] - t * 0.25 * (0.4 + s[3]) + 15) % 30 + 30) % 30 - 15;
+        dp[z * 3 + 1] = s[1] + Math.sin(t * 0.6 + s[3] * 9) * 0.15;
+        dp[z * 3 + 2] = s[2];
+      }
+      dg.attributes.position.needsUpdate = true;
+
+      R.render(scene, cam);
+      if (!REDUCE) raf = requestAnimationFrame(frame);
+    }
+    H._dbg = { cs: cs, cam: cam, world: world, head: function () { return head; },
+      step: function (n) { for (var i = 0; i < (n || 1); i++) { run = true; last = performance.now() - 40; frame(performance.now()); } } };
+    hero.addEventListener('mousemove', function (e) {
+      var b = hero.getBoundingClientRect();
+      tmx = (e.clientX - b.left) / b.width - 0.5; tmy = (e.clientY - b.top) / b.height - 0.5;
+    });
+    addEventListener('resize', function () { if (run) size(); });
+    var api = {
+      start: function () { if (run) return; run = true; size(); last = performance.now(); raf = requestAnimationFrame(frame); },
+      stop: function () { run = false; if (raf) cancelAnimationFrame(raf); raf = 0; }
+    };
+    /* Nur zeichnen, solange die Bühne im Bild ist. Bewusst kein
+       IntersectionObserver: der meldete beim Aufbau (Seite noch display:none)
+       „unsichtbar", stoppte die Schleife und meldete das Sichtbarwerden nie. */
+    document.addEventListener('visibilitychange', function () { if (document.hidden) api.stop(); else if (H._on) api.start(); });
+    return api;
+  }
+
+  /* ───────── Seite ───────── */
+  var MODES = [
+    ['classic', 'i-play', 'Classic replay', 'Pick an instrument and a day, trade it forward candle by candle.', '01'],
+    ['blind', 'i-lock', 'Blind mode', 'A random day you cannot know — revealed only in the review. No hindsight.', '02'],
+    ['funded', 'i-target', 'Funded challenge', 'Trade under a real prop firm’s size, drawdown and daily-loss rules.', '03'],
+    ['strategy', 'i-zap', 'Strategy Lab', 'Write the rules once and let them run over years of history.', '04']
+  ];
+  function icon(id) { return '<svg class=ic aria-hidden=true><use href=#' + id + ' ></use></svg>'; }
+
+  function build() {
+    if (document.getElementById('page-replaylab')) return;
+    var host = document.getElementById('page-edgelab') || document.getElementById('page-rules') || document.getElementById('page-stats');
+    if (!host || !host.parentNode) return;
+    css();
+    var p = document.createElement('div');
+    p.className = 'page'; p.id = 'page-replaylab';
+    p.innerHTML =
+      '<section class="rh-hero" id="rhHero">' +
+        '<canvas class="rh-3d" id="rh3d" aria-hidden="true"></canvas>' +
+        '<div class="rh-in">' +
+          '<div class="rh-eb notranslate" translate="no">Market Replay <i>Backtest</i></div>' +
+          '<h1 class="rh-h1">Trade the past.<em>Without hindsight.</em></h1>' +
+          '<p class="rh-sub">Rewind the real market to any day, hide everything after it and trade forward one candle at a time — on real tick data with real historical spreads. Then let the review tell you what your process did.</p>' +
+          '<div class="rh-act">' +
+            '<button type="button" class="rh-b p" data-rh="start">' + icon('i-play') + 'Start a replay</button>' +
+            '<button type="button" class="rh-b s" data-rh="dice">' + icon('i-dice') + 'Roll a random day</button>' +
+          '</div>' +
+          '<div class="rh-chips">' +
+            '<span class="rh-chip"><b id="rhNInstr">61</b> instruments</span>' +
+            '<span class="rh-chip"><b>Tick</b> accurate</span>' +
+            '<span class="rh-chip"><b>Bid/ask</b> spreads</span>' +
+            '<span class="rh-chip"><b id="rhNSaved">—</b> saved backtests</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="rh-tag">Left of the light: <b>what happened</b><br>Right of it: <b>hidden</b></div>' +
+      '</section>' +
+      '<div class="rh-modes" id="rhModes">' +
+        MODES.map(function (m) {
+          return '<button type="button" class="rh-m" data-mode="' + m[0] + '"><span class="k">' + m[4] + '</span>' +
+            '<div class="ico">' + icon(m[1]) + '</div><b>' + esc(m[2]) + '</b><span>' + esc(m[3]) + '</span></button>';
+        }).join('') +
+      '</div>' +
+      '<div id="rhHost"></div>';
+    host.parentNode.insertBefore(p, host.nextSibling);
+
+    p.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('[data-rh],[data-mode]');
+      if (!a) return;
+      var act = a.getAttribute('data-rh'), mode = a.getAttribute('data-mode');
+      if (act === 'start') { focusSetup(); return; }
+      if (act === 'dice') {
+        focusSetup(function () { var d = document.getElementById('arpRand'); if (d) d.click(); });
+        return;
+      }
+      if (mode) setMode(mode);
+    });
+    p.querySelectorAll('.rh-m').forEach(function (b) {
+      b.addEventListener('mousemove', function (e) {
+        var r = b.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        b.style.setProperty('--px', x * 100 + '%'); b.style.setProperty('--py', y * 100 + '%');
+        b.style.transform = 'rotateY(' + (x - 0.5) * 12 + 'deg) rotateX(' + (0.5 - y) * 10 + 'deg) translateY(-3px)';
+      });
+      b.addEventListener('mouseleave', function () { b.style.transform = ''; });
+    });
+  }
+
+  function focusSetup(then) {
+    var card = document.querySelector('#rhHost .arp-setup');
+    if (!card) { if (then) then(); return; }
+    card.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' });
+    card.classList.remove('rh-flash'); void card.offsetWidth; card.classList.add('rh-flash');
+    if (then) setTimeout(then, REDUCE ? 0 : 450);
+  }
+  function setMode(mode) {
+    if (mode === 'strategy') {
+      if (typeof window.nav === 'function') window.nav('edgelab');
+      setTimeout(function () { if (window.EdgeLab && EdgeLab.go) EdgeLab.go('strategy'); }, 30);
+      return;
+    }
+    var S = window.ApexReplayUI && window.ApexReplayUI._state;
+    if (S) {
+      S.blind = mode === 'blind';
+      S.funded = mode === 'funded';
+      if (mode !== 'blind') S.mystery = false;
+    }
+    mountReplay();
+    markMode();
+    focusSetup();
+  }
+  function markMode() {
+    var S = window.ApexReplayUI && window.ApexReplayUI._state;
+    var cur = !S ? '' : S.funded ? 'funded' : S.blind ? 'blind' : 'classic';
+    document.querySelectorAll('#rhModes .rh-m').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-mode') === cur); });
+  }
+
+  function lockedHtml() {
+    return '<div class="el-card" style="text-align:center;padding:40px 24px">' +
+      '<h3 style="font:800 22px/1.2 var(--font-display);margin:0 0 10px">Market Replay is part of Pro</h3>' +
+      '<p style="color:var(--ink3);max-width:52ch;margin:0 auto 20px;line-height:1.6">Rewind any past day on real tick data and trade it forward — classic, blind or under a prop firm’s rules, with a full process review after every session. Try it free for 7 days, no card.</p>' +
+      '<button class="apex-btn apex-btn--solid apex-btn--lg" onclick="if(typeof openUpgradeModal===\'function\')openUpgradeModal()">Unlock Market Replay</button>' +
+      '<div style="margin-top:14px"><a href="?demo=1&amp;screen=replaylab" target="_blank" rel="noopener" style="color:var(--gold);font-size:13px">Or try it in the live demo ↗</a></div></div>';
+  }
+
+  function mountReplay() {
+    var host = document.getElementById('rhHost'); if (!host) return;
+    if (!isPro() && !window.APEX_SHARED_REPLAY) { host.innerHTML = lockedHtml(); return; }
+    if (!window.ApexReplayUI) { host.innerHTML = '<div class="el-card"><div class="el-note">Market Replay module not loaded.</div></div>'; return; }
+    window.ApexReplayUI.render(host);
+    markMode();
+    // Der Starter baut sich bei jedem Umschalter neu — die Karten folgen ihm.
+    if (!host._rhObs) {
+      host._rhObs = new MutationObserver(function () { markMode(); });
+      host._rhObs.observe(host, { childList: true });
+    }
+    countSaved();
+  }
+  function countSaved() {
+    var el = document.getElementById('rhNSaved'); if (!el) return;
+    var S = window.ApexReplayStore;
+    if (S && typeof S.list === 'function') {
+      try {
+        Promise.resolve(S.list()).then(function (l) { el.textContent = Array.isArray(l) ? l.length : '—'; }).catch(function () { });
+      } catch (e) { }
+    }
+    var n = window.ApexMarketData && window.ApexMarketData.instrumentCount;
+    try { if (typeof n === 'function') n = n(); } catch (e) { n = null; }
+    if (typeof n === 'number' && n > 0) document.getElementById('rhNInstr').textContent = n;
+  }
+
+  H.render = function () {
+    build();
+    H._on = true;
+    mountReplay();
+    var hero = document.getElementById('rhHero');
+    if (!hero) return;
+    if (!scene3d && !H._building) {
+      if (webgl()) {
+        H._building = true;
+        loadThree().then(function () {
+          scene3d = buildScene(document.getElementById('rh3d'), hero);
+          if (H._on) scene3d.start();
+        }).catch(function () { fallback(hero); });
+      } else fallback(hero);
+    } else if (scene3d) scene3d.start();
+  };
+  function fallback(hero) {
+    var c = document.getElementById('rh3d'); if (c) c.outerHTML = '<div class="rh-css" aria-hidden="true"></div>';
+  }
+  H.leave = function () {
+    H._on = false;
+    if (scene3d) scene3d.stop();
+    if (window.ApexReplayUI) { try { window.ApexReplayUI.teardown(); } catch (e) { } }
+  };
+
+  /* nav() kennt die Seite über den builders-Weg nicht — deshalb hier
+     umhüllt: hinein → aufbauen und rendern, hinaus → Replay sauber
+     abbauen (Chart, Timer, Tastatur), wie es Edge Lab beim Reiterwechsel tut. */
+  function wrapNav() {
+    if (typeof window.nav !== 'function' || window.nav._rh) return false;
+    var orig = window.nav;
+    var w = function (id) {
+      if (id !== 'replaylab' && H._on) H.leave();
+      if (id === 'replaylab') build();
+      var r = orig.apply(this, arguments);
+      if (id === 'replaylab') {
+        H.render(); i18n();
+        var m = document.getElementById('mbn-analysis'); if (m) m.classList.add('active');
+      }
+      return r;
+    };
+    w._rh = true;
+    window.nav = w;
+    try { nav = w; } catch (e) { }
+    return true;
+  }
+  /* Edge Lab → Market Replay leitet hierher. Alle bisherigen Wege
+     (Demo-Link eltab=sim, Teilen-Link, Strategy Lab „Im Replay öffnen",
+     Prop-Cockpit „Challenge üben") rufen EdgeLab.go('sim'). */
+  function wrapEdgeLab() {
+    var EL = window.EdgeLab;
+    if (!EL || !EL.go || EL.go._rh) return !!(EL && EL.go && EL.go._rh);
+    var og = EL.go;
+    var g = function (tab) {
+      if (tab === 'sim') {
+        if (EL.tab === 'sim' || EL.tab === 'strategy') og.call(EL, 'metrics');
+        window.nav('replaylab');
+        return;
+      }
+      return og.apply(EL, arguments);
+    };
+    g._rh = true; EL.go = g;
+    return true;
+  }
+  /* Handübersetzt statt Google: GT machte aus „Trade the past" „Tausche die
+     Vergangenheit". Gleiche Schicht wie die Landing (ApexI18n.addScoped). */
+  var I18N = {
+    'Trade the past.': ['Trade die Vergangenheit.', 'Opera el pasado.', 'Opere o passado.', 'Tradez le passé.'],
+    'Without hindsight.': ['Ohne zu wissen, was kommt.', 'Sin ver el futuro.', 'Sem ver o futuro.', 'Sans connaître la suite.'],
+    'Rewind the real market to any day, hide everything after it and trade forward one candle at a time — on real tick data with real historical spreads. Then let the review tell you what your process did.':
+      ['Spul den echten Markt auf einen beliebigen Tag zurück, blende alles danach aus und trade Kerze für Kerze vorwärts — auf echten Tickdaten mit echten historischen Spreads. Danach zeigt dir die Auswertung, was dein Prozess getan hat.',
+       'Rebobina el mercado real a cualquier día, oculta todo lo que vino después y opera vela a vela — con datos tick reales y spreads históricos reales. Después, la revisión te dice qué hizo tu proceso.',
+       'Volte o mercado real a qualquer dia, esconda tudo o que veio depois e opere vela a vela — com dados tick reais e spreads históricos reais. Depois, a revisão mostra o que o seu processo fez.',
+       'Rembobinez le marché réel à n’importe quel jour, masquez tout ce qui suit et tradez bougie par bougie — sur de vraies données tick avec les vrais spreads historiques. La revue vous dit ensuite ce qu’a fait votre process.'],
+    'Start a replay': ['Replay starten', 'Iniciar replay', 'Iniciar replay', 'Lancer un replay'],
+    'Roll a random day': ['Zufälligen Tag würfeln', 'Día al azar', 'Dia aleatório', 'Jour au hasard'],
+    'instruments': ['Instrumente', 'instrumentos', 'instrumentos', 'instruments'],
+    'accurate': ['genau', 'exacto', 'exato', 'précis'],
+    'spreads': ['Spreads', 'spreads', 'spreads', 'spreads'],
+    'saved backtests': ['gespeicherte Backtests', 'backtests guardados', 'backtests salvos', 'backtests enregistrés'],
+    'Classic replay': ['Klassisches Replay', 'Replay clásico', 'Replay clássico', 'Replay classique'],
+    'Pick an instrument and a day, trade it forward candle by candle.': ['Instrument und Tag wählen, Kerze für Kerze vorwärts traden.', 'Elige instrumento y día, y opéralo vela a vela.', 'Escolha instrumento e dia, e opere vela a vela.', 'Choisissez un instrument et un jour, tradez bougie par bougie.'],
+    'Blind mode': ['Blindmodus', 'Modo ciego', 'Modo cego', 'Mode aveugle'],
+    'A random day you cannot know — revealed only in the review. No hindsight.': ['Ein zufälliger Tag, den du nicht kennen kannst — aufgedeckt erst in der Auswertung.', 'Un día al azar que no puedes conocer — se revela solo en la revisión.', 'Um dia aleatório que você não pode conhecer — revelado só na revisão.', 'Un jour au hasard que vous ne pouvez pas connaître — révélé seulement dans la revue.'],
+    'Funded challenge': ['Funded-Challenge', 'Desafío fondeado', 'Desafio financiado', 'Challenge financé'],
+    'Trade under a real prop firm’s size, drawdown and daily-loss rules.': ['Trade unter Kontogröße, Drawdown- und Tagesverlust-Regeln einer echten Prop-Firma.', 'Opera con el tamaño, drawdown y pérdida diaria de una prop firm real.', 'Opere com o tamanho, drawdown e perda diária de uma prop firm real.', 'Tradez avec la taille, le drawdown et la perte journalière d’une vraie prop firm.'],
+    'Strategy Lab': ['Strategy Lab', 'Strategy Lab', 'Strategy Lab', 'Strategy Lab'],
+    'Write the rules once and let them run over years of history.': ['Regeln einmal aufschreiben und über Jahre an Historie laufen lassen.', 'Escribe las reglas una vez y ejecútalas sobre años de historia.', 'Escreva as regras uma vez e rode-as sobre anos de histórico.', 'Écrivez les règles une fois et faites-les tourner sur des années d’historique.'],
+    'Left of the light:': ['Links vom Licht:', 'A la izquierda de la luz:', 'À esquerda da luz:', 'À gauche de la lumière :'],
+    'what happened': ['was passiert ist', 'lo que pasó', 'o que aconteceu', 'ce qui s’est passé'],
+    'Right of it:': ['Rechts davon:', 'A la derecha:', 'À direita:', 'À droite :'],
+    'hidden': ['verborgen', 'oculto', 'oculto', 'caché'],
+    'Market Replay is part of Pro': ['Market Replay gehört zu Pro', 'Market Replay es parte de Pro', 'Market Replay faz parte do Pro', 'Market Replay fait partie de Pro'],
+    'Unlock Market Replay': ['Market Replay freischalten', 'Desbloquear Market Replay', 'Desbloquear Market Replay', 'Débloquer Market Replay'],
+    'Or try it in the live demo ↗': ['Oder in der Live-Demo ausprobieren ↗', 'O pruébalo en la demo ↗', 'Ou experimente na demo ↗', 'Ou essayez-le dans la démo ↗']
+  };
+  function i18n() {
+    var I = window.ApexI18n;
+    if (!I || !I.addScoped) return false;
+    if (!i18n.done) { I.addScoped('#page-replaylab', I18N); i18n.done = true; }
+    try { var pg = document.getElementById('page-replaylab'); if (pg && I.apply) I.apply(pg); } catch (e) { }
+    return true;
+  }
+  H._i18n = i18n;
+
+  (function boot(n) {
+    var a = wrapNav(), b = wrapEdgeLab();
+    if ((!a || !b) && n < 80) setTimeout(function () { boot(n + 1); }, 250);
+  })(0);
+})();
+</script>
+<script>
 /* Evidence drawing + appearance modules */
 /* ════════════════════════════════════════════════════════════════
    Evidence — Chart drawing tools  (window.ApexDraw)
@@ -64115,6 +64681,8 @@ self.addEventListener('message', async (ev) => {
     this._build();
     this._buildStyleBar();
     adoptCloud(this);
+    // Leisten entstehen oft erst nach attach() — Knopfzustand danach setzen.
+    var me = this; setTimeout(function () { me._syncHist(); }, 0); setTimeout(function () { me._syncHist(); }, 600);
   }
 
   /* ─────────────── Verlauf ─────────────── */
@@ -65193,7 +65761,7 @@ self.addEventListener('message', async (ev) => {
 
   Draw.prototype._bindEdit = function () {
     var self = this, el = this.el;
-    var drag = null, moved = false;
+    var drag = null, moved = false, pending = null;
 
     function local(e) {
       var r = el.getBoundingClientRect();
@@ -65222,6 +65790,16 @@ self.addEventListener('message', async (ev) => {
         if (self.sel) { self.sel = null; self._syncStyleBar(); self.sync(); }
         return;
       }
+      /* ERST AUSWÄHLEN, DANN ZIEHEN (22.10.2026). Vorher hing eine Zeichnung
+         schon beim ersten Berühren am Finger: wer auf dem Handy den Chart
+         verschieben wollte und dabei eine Zone streifte, schob die Zone.
+         Jetzt markiert der erste Tipp nur — der Chart bekommt die Geste
+         weiter. Verschieben geht erst an einer schon markierten Zeichnung,
+         wie bei TradingView auf dem Handy. */
+      if (hit.shape.id !== self.sel) {
+        pending = { id: hit.shape.id, x: pt.x, y: pt.y };
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
       self.sel = hit.shape.id;
@@ -65233,7 +65811,8 @@ self.addEventListener('message', async (ev) => {
                /* Zustand VOR dem Zug festhalten. Erst beim Loslassen und nur
                   bei echter Bewegung wandert er in den Verlauf — sonst fuellte
                   jeder Klick auf eine Form den Stapel mit Nichts. */
-               before: self._snap() };
+               before: self._snap(),
+               slop: (e.pointerType === 'touch' || e.pointerType === 'pen') ? 10 : 5 };
       moved = false;
       self._freezeChart(true);            // Chart still halten, solange geschoben wird
       self._prevTouchAction = el.style.touchAction;
@@ -65262,7 +65841,9 @@ self.addEventListener('message', async (ev) => {
       e.stopPropagation();
       var pt = local(e);
       var dx = pt.x - drag.x, dy = pt.y - drag.y;
-      if (!moved && Math.hypot(dx, dy) < 2) return;    // ignore a shaky click
+      // Erst ab einer echten Bewegung verschieben — ein zittriger Finger
+      // oder Klick soll die Zeichnung nicht versetzen.
+      if (!moved && Math.hypot(dx, dy) < drag.slop) return;
       moved = true;
       // dx/dy bleiben der Abstand zum Anfang des Zuges — drag.x/y werden
       // bewusst NICHT nachgezogen, sonst summiert sich der Rundungsfehler.
@@ -65271,6 +65852,15 @@ self.addEventListener('message', async (ev) => {
     };
 
     this._onEdUp = function (e) {
+      if (pending) {
+        // Tipp ohne Wischen → markieren. War es ein Wischen, gehörte es dem Chart.
+        var pp = pending; pending = null;
+        var up = local(e);
+        if (Math.hypot(up.x - pp.x, up.y - pp.y) < 8 && e.type !== 'pointercancel') {
+          self.sel = pp.id; self._syncStyleBar(); self.sync();
+          if (e.pointerType === 'touch' || e.pointerType === 'pen') el.style.touchAction = 'none';
+        }
+      }
       if (!drag) return;
       var before = drag.before;      // vor dem Nullen sichern
       drag = null;
@@ -65567,6 +66157,15 @@ self.addEventListener('message', async (ev) => {
     this._syncStyleBar();
     this.sync();
     this._onChange(this.shapes.length);
+    this._syncHist();
+  };
+  /* Rückgängig/Wiederholen sichtbar machen, ob es etwas zurückzunehmen gibt —
+     ausgegraute Knöpfe statt Klicks ins Leere. Gilt für jede Leiste, die
+     diese Zeichenebene bedient (eigene apd-Leiste oder die des Replays). */
+  Draw.prototype._syncHist = function () {
+    var u = !this.canUndo(), r = !this.canRedo();
+    document.querySelectorAll('[data-apd-undo],[data-arp-undo]').forEach(function (b) { b.disabled = u; });
+    document.querySelectorAll('[data-apd-redo],[data-arp-redo]').forEach(function (b) { b.disabled = r; });
   };
 
   /* ─────────────── public ─────────────── */
@@ -65935,6 +66534,7 @@ self.addEventListener('message', async (ev) => {
         '<button class="apd-t' + (draw.magnet ? ' on' : '') + '" data-apd-magnet ' +
           'title="Magnet — snap points to the candle\'s open, high, low or close" aria-label="Magnet mode">🧲</button>' +
         '<button class="apd-t" data-apd-undo title="Undo (Ctrl+Z)" aria-label="Undo">↺</button>' +
+        '<button class="apd-t" data-apd-redo title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↻</button>' +
       '</div>' +
       /* Die Liste haengt an der Leiste, nicht am Chart: sie soll mitwandern,
          wenn die Leiste in die linke Spalte der Werkstatt zieht. */
