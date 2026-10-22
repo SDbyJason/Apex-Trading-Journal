@@ -61620,7 +61620,7 @@ self.addEventListener('message', async (ev) => {
           '<kbd>B</kbd> buy · <kbd>S</kbd> sell · <kbd>X</kbd> close half · <kbd>E</kbd> break-even · ' +
           '<kbd>C</kbd> close all · <kbd>R</kbd> review · <kbd>+</kbd>/<kbd>−</kbd> zoom · ' +
           '<kbd>Esc</kbd> cursor · <kbd>Home</kbd>/<kbd>End</kbd> start/end' +
-          '  —  drag the <b>SL</b> and <b>TP</b> lines on the chart to move them mid-trade, ' +
+          '  —  <b>drag BUY/SELL onto the chart</b> or <b>right-click</b> it to place a limit or stop order at that price, drag the <b>SL</b>, <b>TP</b> and pending-order lines to move them, ' +
           'drag the bar above to jump anywhere, <kbd>⇥</kbd> back to the newest candle</div>' +
       '</div>' +
 
@@ -62273,21 +62273,22 @@ self.addEventListener('message', async (ev) => {
     return out;
   }
 
-  function trade(side) {
+  function trade(side, kindOver, pxOver) {
     if (!S.session) return;
     readTicket();
     var b = S.session.broker;
     var q = b.quote();
     if (!q) { toast('Step the replay first'); return; }
+    var kind = kindOver || S.orderKind;
 
     // Stops and targets are entered as a DISTANCE IN PIPS, measured from
     // whichever price the order will actually fill at — the live quote for a
     // market order, the chosen level for a pending one.
-    var ref = S.orderKind === 'market'
+    var ref = kind === 'market'
       ? (side === 'buy' ? q.ask : q.bid)
-      : parseFloat((document.getElementById('arpPrice') || {}).value);
+      : (pxOver != null ? b.round(pxOver) : parseFloat((document.getElementById('arpPrice') || {}).value));
 
-    if (S.orderKind !== 'market' && !isFinite(ref)) { toast('Enter a price level first'); return; }
+    if (kind !== 'market' && !isFinite(ref)) { toast('Enter a price level first'); return; }
 
     var opt = {};
     if (S.slPips > 0) opt.sl = b.round(side === 'buy' ? ref - b.pipsToPx(S.slPips) : ref + b.pipsToPx(S.slPips));
@@ -62304,10 +62305,10 @@ self.addEventListener('message', async (ev) => {
     b.autoBreakEven = S.autoBE;
 
     try {
-      if (S.orderKind === 'market') {
+      if (kind === 'market') {
         S.session.market(side, S.lots, opt);
       } else {
-        var type = side + (S.orderKind === 'limit' ? 'Limit' : 'Stop');
+        var type = side + (kind === 'limit' ? 'Limit' : 'Stop');
         S.session.pending(type, ref, S.lots, opt);
         toast('Order placed: ' + type + ' @ ' + fmtPx(ref));
       }
@@ -62316,6 +62317,67 @@ self.addEventListener('message', async (ev) => {
     } catch (e) {
       toast('⚠ ' + e.message);
     }
+  }
+
+
+  /* ─────────── orders from the chart ───────────
+     Right-click (or long-press) anywhere on the replay chart: the menu offers
+     a buy and a sell order AT THAT PRICE. Below the market a buy is a limit
+     and a sell is a stop; above it, the other way round — the menu picks the
+     right type so you never have to think about it. Size, stop and targets
+     come from the order ticket, exactly like the Buy/Sell buttons. */
+  function closeCtx() { var m = document.getElementById('arpCtx'); if (m) m.remove(); }
+  function openCtx(x, y, price) {
+    closeCtx();
+    var b = S.session && S.session.broker, q = b && b.quote();
+    if (!q) { toast('Step the replay first'); return; }
+    readTicket();
+    var px = b.round(price);
+    var buy  = px < q.ask ? 'limit' : 'stop';
+    var sell = px > q.bid ? 'limit' : 'stop';
+    var m = document.createElement('div');
+    m.id = 'arpCtx'; m.className = 'arp-ctx'; m.setAttribute('role', 'menu');
+    m.innerHTML =
+      '<div class="h">' + fmtPx(px) + '<span>' + fmtLots(S.lots) + ' ' + lotWord().toLowerCase() +
+        (S.slPips > 0 ? ' · SL ' + S.slPips + pipAbbr() : ' · no stop') + '</span></div>' +
+      '<button role="menuitem" class="buy" data-ctx="buy" data-k="' + buy + '"><i></i>Buy ' + buy + ' @ ' + fmtPx(px) + '</button>' +
+      '<button role="menuitem" class="sell" data-ctx="sell" data-k="' + sell + '"><i></i>Sell ' + sell + ' @ ' + fmtPx(px) + '</button>' +
+      '<div class="f">Size, stop and targets from the order ticket</div>';
+    document.body.appendChild(m);
+    var r = m.getBoundingClientRect();
+    m.style.left = Math.min(x, innerWidth - r.width - 8) + 'px';
+    m.style.top  = Math.min(y, innerHeight - r.height - 8) + 'px';
+    m.querySelectorAll('[data-ctx]').forEach(function (btn) {
+      btn.onclick = function () { closeCtx(); trade(btn.getAttribute('data-ctx'), btn.getAttribute('data-k'), px); };
+    });
+    var first = m.querySelector('button'); if (first) first.focus();
+  }
+  function chartCtx(e) {
+    if (!S.chart || !S.chart.el || !S.session || !S.chart.series) return;
+    if (!S.chart.el.contains(e.target) || (e.target.closest && e.target.closest('.arp-onchart'))) return;
+    if (S.draw && S.draw.tool && S.draw.tool !== 'cursor') return;
+    var r = S.chart.el.getBoundingClientRect();
+    var price = S.chart.series.coordinateToPrice(e.clientY - r.top);
+    if (price == null || !isFinite(price)) return;
+    e.preventDefault();
+    openCtx(e.clientX, e.clientY, price);
+  }
+  if (!window._arpCtxBound) {
+    window._arpCtxBound = true;
+    document.addEventListener('contextmenu', function (e) { try { chartCtx(e); } catch (x) {} }, true);
+    document.addEventListener('pointerdown', function (e) { var m = document.getElementById('arpCtx'); if (m && !m.contains(e.target)) closeCtx(); }, true);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCtx(); }, true);
+    window.addEventListener('scroll', closeCtx, true);
+    var st = document.createElement('style'); st.textContent =
+      '.arp-ctx{position:fixed;z-index:100200;min-width:230px;padding:6px;border-radius:14px;background:var(--elevated,#16171b);border:0.5px solid var(--rim2,rgba(255,255,255,.14));box-shadow:0 18px 50px -12px rgba(0,0,0,.5);font-family:var(--font-body,inherit)}' +
+      'body.light .arp-ctx{background:#fff;border-color:rgba(0,0,0,.1);box-shadow:0 18px 50px -14px rgba(40,30,10,.3)}' +
+      '.arp-ctx .h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 10px 8px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}' +
+      '.arp-ctx .h span{font-weight:500;font-size:11.5px;color:var(--ink3)}' +
+      '.arp-ctx button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:0;border-radius:9px;padding:9px 10px;font:inherit;font-size:13px;font-weight:650;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums}' +
+      '.arp-ctx button:hover,.arp-ctx button:focus-visible{background:rgba(var(--gold-rgb),.09);outline:none}' +
+      '.arp-ctx button i{width:8px;height:8px;border-radius:50%;flex:none}.arp-ctx .buy i{background:var(--profit)}.arp-ctx .sell i{background:var(--loss)}' +
+      '.arp-ctx .f{padding:6px 10px 4px;font-size:11px;color:var(--ink3);border-top:0.5px solid var(--rim);margin-top:4px}';
+    document.head.appendChild(st);
   }
 
   /* ─────────── the lines on the chart ───────────
@@ -62346,7 +62408,8 @@ self.addEventListener('message', async (ev) => {
 
     // Pending orders get thin dotted lines so a resting limit is visible too.
     b.orders.forEach(function (o) {
-      lv.push({ key: 'o' + o.id, kind: 'entry', price: o.price, style: 3, title: o.type });
+      lv.push({ key: 'o' + o.id, kind: 'entry', orderId: o.id, price: o.price, style: 3, drag: true,
+                title: o.type.replace(/([a-z])([A-Z])/, '$1 $2').replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + fmtLots(o.lots) });
       if (o.sl != null) lv.push({ key: 'os' + o.id, kind: 'sl', price: o.sl, style: 3, title: 'SL' });
       (o.tps || []).forEach(function (x) {
         lv.push({ key: 'ot' + o.id + '_' + x.n, kind: 'tp', price: x.price, style: 3, title: 'TP' + x.n });
@@ -62364,7 +62427,19 @@ self.addEventListener('message', async (ev) => {
     var b = S.session.broker;
     var px = b.round(price);
     try {
-      if (lv.kind === 'sl') {
+      if (lv.orderId != null) {
+        // Pending order moved: cancel and re-place at the new level; its stop
+        // and targets move with it, so the distances stay what you planned.
+        var o = b.orders.find(function (x) { return x.id === lv.orderId; });
+        if (o) {
+          var d = px - o.price, opt = { tag: o.tag, trailPips: o.trailPips };
+          if (o.sl != null) opt.sl = b.round(o.sl + d);
+          if (o.tps && o.tps.length) opt.tps = o.tps.map(function (t) { return { price: b.round(t.price + d), lots: t.lots }; });
+          S.session.cancel(o.id);
+          try { S.session.pending(o.type, px, o.lots, opt); toast(o.type + ' → ' + fmtPx(px)); }
+          catch (e2) { S.session.pending(o.type, o.price, o.lots, Object.assign(opt, { sl: o.sl, tps: o.tps })); throw e2; }
+        }
+      } else if (lv.kind === 'sl') {
         S.session.modify(lv.posId, { sl: px });
         toast('Stop → ' + fmtPx(px));
       } else if (lv.kind === 'tp') {
@@ -62386,6 +62461,13 @@ self.addEventListener('message', async (ev) => {
   function dragLabel(lv, price) {
     var b = S.session && S.session.broker;
     if (!b) return null;
+    if (lv.orderId != null) {
+      var o = b.orders.find(function (x) { return x.id === lv.orderId; }), q0 = b.quote();
+      if (!o || !q0) return null;
+      var bad = (o.type === 'buyLimit' && price >= q0.ask) || (o.type === 'buyStop' && price <= q0.ask) ||
+                (o.type === 'sellLimit' && price <= q0.bid) || (o.type === 'sellStop' && price >= q0.bid);
+      return o.type + ' ' + fmtPx(price) + (bad ? '  ⚠' : '');
+    }
     var p = b.positions.find(function (x) { return x.id === lv.posId; });
     if (!p) return null;
     var q = b.quote();
@@ -62629,8 +62711,71 @@ self.addEventListener('message', async (ev) => {
     on('arpBuy', 'click', function () { trade('buy'); });
     on('arpSell', 'click', function () { trade('sell'); });
     // The same two actions, on the chart itself.
-    on('arpOcBuy', 'click', function () { trade('buy'); });
-    on('arpOcSell', 'click', function () { trade('sell'); });
+    /* Klick = Market-Order. Gedrückt halten und auf den Chart ziehen = Order
+       genau an dem Preis, wo man loslässt (unter dem Kurs Buy Limit / Sell
+       Stop, darüber Sell Limit / Buy Stop). Eine Linie mit Preis folgt der Maus. */
+    ['buy', 'sell'].forEach(function (side) {
+      var btn = document.getElementById(side === 'buy' ? 'arpOcBuy' : 'arpOcSell');
+      if (!btn) return;
+      var drag = null, swallow = false;
+      function priceAt(y) {
+        if (!S.chart || !S.chart.series || !S.chart.el) return null;
+        var r = S.chart.el.getBoundingClientRect();
+        if (y < r.top || y > r.bottom) return null;
+        var p = S.chart.series.coordinateToPrice(y - r.top);
+        return (p == null || !isFinite(p)) ? null : p;
+      }
+      function kindFor(px) {
+        var q = S.session && S.session.broker.quote(); if (!q) return null;
+        return side === 'buy' ? (px < q.ask ? 'limit' : 'stop') : (px > q.bid ? 'limit' : 'stop');
+      }
+      function ghost(y, px) {
+        var g = document.getElementById('arpDragLine');
+        if (!g) { g = document.createElement('div'); g.id = 'arpDragLine'; g.className = 'arp-dragline ' + side; g.innerHTML = '<span></span>'; document.body.appendChild(g); }
+        var r = S.chart.el.getBoundingClientRect();
+        g.style.left = r.left + 'px'; g.style.width = r.width + 'px'; g.style.top = y + 'px';
+        g.style.display = px == null ? 'none' : '';
+        if (px != null) g.firstChild.textContent = (side === 'buy' ? 'Buy ' : 'Sell ') + kindFor(px) + ' @ ' + fmtPx(S.session.broker.round(px)) + ' · ' + fmtLots(S.lots);
+      }
+      function stopGhost() { var g = document.getElementById('arpDragLine'); if (g) g.remove(); document.body.classList.remove('arp-dragging'); }
+      btn.addEventListener('pointerdown', function (e) {
+        if (e.button > 0 || btn.disabled) return;
+        drag = { x: e.clientX, y: e.clientY, on: false };
+        try { btn.setPointerCapture(e.pointerId); } catch (x) {}
+      });
+      btn.addEventListener('pointermove', function (e) {
+        if (!drag) return;
+        if (!drag.on && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+        if (!drag.on) { drag.on = true; readTicket(); document.body.classList.add('arp-dragging'); }
+        e.preventDefault();
+        ghost(e.clientY, priceAt(e.clientY));
+      });
+      function end(e, cancel) {
+        if (!drag) return;
+        var d = drag; drag = null;
+        try { btn.releasePointerCapture(e.pointerId); } catch (x) {}
+        if (!d.on) return;                  // a plain click — the click handler places the market order
+        swallow = true; setTimeout(function () { swallow = false; }, 0);
+        stopGhost();
+        var px = cancel ? null : priceAt(e.clientY);
+        if (px == null) { if (!cancel) toast('Drop the order on the chart'); return; }
+        trade(side, kindFor(px), px);
+      }
+      btn.addEventListener('pointerup', function (e) { end(e, false); });
+      btn.addEventListener('pointercancel', function (e) { end(e, true); });
+      btn.addEventListener('click', function (e) { if (swallow) { swallow = false; e.preventDefault(); return; } trade(side); });
+      btn.title = (side === 'buy' ? 'Buy at the ask (B)' : 'Sell at the bid (S)') + ' — or drag onto the chart for a limit/stop order';
+    });
+    if (!document.getElementById('arpDragCss')) {
+      var dc = document.createElement('style'); dc.id = 'arpDragCss';
+      dc.textContent = '.arp-dragline{position:fixed;z-index:100150;height:0;border-top:2px dashed var(--profit);pointer-events:none}' +
+        '.arp-dragline.sell{border-top-color:var(--loss)}' +
+        '.arp-dragline span{position:absolute;right:70px;top:-13px;padding:3px 9px;border-radius:7px;font:700 12px/1.3 var(--font-body,inherit);font-variant-numeric:tabular-nums;color:#fff;background:var(--profit);white-space:nowrap;box-shadow:0 6px 16px -6px rgba(0,0,0,.4)}' +
+        '.arp-dragline.sell span{background:var(--loss)}' +
+        'body.arp-dragging,body.arp-dragging *{cursor:grabbing!important;user-select:none!important}' +
+        '.arp-oc{touch-action:none}';
+      document.head.appendChild(dc);
+    }
     /* Die Losgröße über dem Chart und die im Ticket sind dasselbe. Was hier
        getippt wird, geht ins Ticket — von dort liest trade() beim Kauf. */
     on('arpOcLots', 'input', function () {
@@ -89090,14 +89235,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       lv.push({ key: 'kl' + i, kind: 'kl', price: s.p, title: s.k, color: evFarben().levels, style: 2,
                 width: 1, axis: false });
     });
-    var S = TV._setup;
-    if (S && S.richtung !== 'none') {
-      if (isFinite(S.einstieg)) lv.push({ key: 'e', kind: 'entry', price: S.einstieg, title: 'Entry' });
-      if (isFinite(S.stop)) lv.push({ key: 's', kind: 'sl', price: S.stop, title: 'SL' });
-      (S.ziele || []).forEach(function (z, i) {
-        lv.push({ key: 't' + i, kind: 'tp', price: z.p, title: S.ziele.length > 1 ? 'TP' + (i + 1) : 'TP' });
-      });
-    }
+    /* Kein Entry/SL/TP des KI-Setups mehr auf dem Chart (22.10.2026): Linien
+       wie bei einer offenen Position, obwohl niemand den Trade hat und man
+       hier gar nicht handeln kann — die Zahlen stehen in der Setup-Karte. */
     inst.setLevels(lv);
     if (EV._legMalen) try { EV._legMalen(null); } catch (x) {}
     try { evNewsLaden(); evUeberlagerung(); } catch (x) {}
