@@ -50164,7 +50164,94 @@ body.light .pt-sugg{background:var(--layer)}
       '.mt-sess li .ic{color:var(--gold);width:13px;height:13px;margin-top:1px}',
       '.mt-tfil{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 12px}',
       'body.light .mt-ck{background:#fff}',
-      '@media(max-width:700px){.mt-cock{grid-template-columns:repeat(2,minmax(0,1fr))}.mt-seg{margin-left:0}.mt-search{max-width:none}.mt-arow .mt-flags{display:none}.mt-mrow{grid-template-columns:minmax(80px,1fr) 70px 34px 56px}}'
+      '@media(max-width:700px){.mt-cock{grid-template-columns:repeat(2,minmax(0,1fr))}.mt-seg{margin-left:0}.mt-search{max-width:none}.mt-arow .mt-flags{display:none}.mt-mrow{grid-template-columns:minmax(80px,1fr) 70px 34px 56px}}',
+      /* ===== Design v3 (22.10.2026) ===== */
+      '#page-mentor .ph{margin-bottom:18px}',
+      '#page-mentor .ph p{max-width:62ch}',
+      '.mt-head{margin-bottom:20px}',
+      '.mt-tabs{display:inline-flex;gap:2px;padding:4px;border-radius:13px;background:var(--layer);border:0.5px solid var(--rim2);max-width:100%;overflow-x:auto;scrollbar-width:none}',
+      '.mt-tab{display:inline-flex;align-items:center;gap:7px;background:transparent;border:0;border-radius:9px;color:var(--ink3);padding:8px 15px;font-size:13px;font-weight:650;letter-spacing:0;white-space:nowrap}',
+      '.mt-tab:hover{color:var(--ink);background:rgba(var(--gold-rgb),.06)}',
+      '.mt-tab.active{background:var(--elevated);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.18),0 0 0 .5px var(--rim2)}',
+      '.mt-tab .mt-pill{margin-left:0;min-width:18px;height:18px;line-height:18px;border-radius:9px;padding:0 5px}',
+      'body.light .mt-tabs{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.06)}',
+      'body.light .mt-tab{background:transparent;border:0}',
+      'body.light .mt-tab.active{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 0 0 .5px rgba(0,0,0,.06)}',
+      '.mt-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:10px;font-weight:650;line-height:1.2;white-space:nowrap}',
+      '.mt-btn .ic{width:15px;height:15px;flex:none;margin:0;vertical-align:middle}',
+      '.mt-btn.sm{padding:7px 12px;border-radius:9px}',
+      '.mt-btn.gold{background:linear-gradient(135deg,#e6c66e,#c9a043);color:#14100a;box-shadow:0 6px 16px -8px rgba(var(--gold-rgb),.8)}',
+      '.mt-btn.gold:hover{filter:brightness(1.05);background:linear-gradient(135deg,#ecd07c,#cfa74a)}',
+      'body.light .mt-btn{background:#fff;border-color:rgba(0,0,0,.1)}',
+      'body.light .mt-btn:hover{background:rgba(var(--gold-rgb),.07);border-color:rgba(var(--gold-rgb),.45)}',
+      'body.light .mt-btn.gold{background:linear-gradient(135deg,#e2bf62,#c49a3c);border-color:transparent;color:#14100a}',
+      'body.light .mt-btn.danger{color:var(--loss)}',
+      '.mt-card{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:18px;padding:20px 22px;margin-bottom:16px}',
+      'body.light .mt-card,body.light .mt-scard{background:#fff;border:0.5px solid rgba(0,0,0,.07);box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 30px -18px rgba(40,30,10,.18)}',
+      '.mt-card h3{font-size:15.5px;display:flex;align-items:center;gap:8px}',
+      '.mt-attn-h{align-items:center;justify-content:space-between}',
+      '.mt-attn-h .mt-sub{flex-basis:100%;order:3}',
+      /* leere Zustände: Symbol mittig in einer Kachel */
+      '.mt-empty{padding:44px 20px}',
+      '.mt-empty>.ic{display:grid!important;place-items:center;width:56px;height:56px;margin:0 auto 14px;border-radius:16px;background:rgba(var(--gold-rgb),.1);color:var(--gold);opacity:1;font-size:0}',
+      '.mt-empty>.ic svg,.mt-empty>.ic .ic{width:26px;height:26px}',
+      '.mt-empty .mt-row{justify-content:center}',
+      /* Kennzahlen oben: 6 gleich breite Kacheln */
+      '.mt-cock{grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:18px}',
+      '.mt-ck{padding:12px 14px;border-radius:14px;align-items:flex-start;flex-direction:column;gap:8px}',
+      '.mt-ck > .ic{width:28px;height:28px;padding:6px}',
+      '.mt-cock .mt-ck .v{font-size:22px}',
+      'body.light .mt-ck{background:#fff;border:0.5px solid rgba(0,0,0,.07);box-shadow:0 1px 2px rgba(0,0,0,.03)}',
+      '@media(max-width:1100px){.mt-cock{grid-template-columns:repeat(3,minmax(0,1fr))}}',
+      '@media(max-width:640px){.mt-cock{grid-template-columns:repeat(2,minmax(0,1fr))}}',
+      /* Arbeitsfläche */
+      '.mt-cws{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}',
+      '.mt-cmain{min-width:0}',
+      '.mt-caside{min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:12px}',
+      '.mt-caside .mt-card{margin:0;padding:18px}',
+      '.mt-caside .mt-week-r{grid-template-columns:1fr;gap:4px}',
+      '.mt-caside .mt-week-r .who{padding-top:6px}',
+      '.mt-caside h3{font-size:14.5px}',
+      '.mt-caside .mt-attn-h{gap:8px;margin-bottom:8px}',
+      '.mt-caside .mt-biz-k{display:flex;flex-direction:column;gap:0;margin-top:4px}',
+      '.mt-caside .mt-biz-k div{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:baseline;gap:10px;background:none!important;border:0!important;border-bottom:0.5px solid var(--rim)!important;border-radius:0;padding:8px 2px}',
+      '.mt-caside .mt-biz-k div:last-child{border-bottom:0!important}',
+      '.mt-caside .mt-biz-k b{font-size:14px;font-variant-numeric:tabular-nums}',
+      '.mt-caside .mt-biz-k span{font-size:13px;color:var(--ink2)}',
+      'body.light .mt-biz-k div{background:rgba(0,0,0,.025);border-color:rgba(0,0,0,.05)}',
+      '@media(max-width:1100px){.mt-cws{grid-template-columns:1fr}.mt-caside{position:static;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}}',
+      '.mt-sec-h{display:flex;align-items:baseline;gap:8px;margin:6px 0 12px}',
+      '.mt-sec-h h2{margin:0;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink)}',
+      '.mt-sec-h span{font-size:12px;font-weight:700;color:var(--ink3);background:var(--layer);border:0.5px solid var(--rim2);border-radius:999px;padding:1px 8px}',
+      '.mt-tools .mt-in{height:38px}',
+      '.mt-grid{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}',
+      /* Schülerkarte */
+      '.mt-scard{background:var(--elevated);border:0.5px solid var(--rim2);border-radius:18px;padding:18px}',
+      '.mt-scard:hover{border-color:rgba(var(--gold-rgb),.45);box-shadow:0 14px 34px -20px rgba(var(--gold-rgb),.55)}',
+      '.mt-kpi{background:var(--layer);border:0.5px solid var(--rim);border-radius:10px;padding:10px 6px}',
+      'body.light .mt-kpi{background:#faf8f4;border-color:rgba(0,0,0,.05)}',
+      '.mt-kpi .l{font-size:9.5px;letter-spacing:.08em}',
+      '.mt-kpis8{grid-template-columns:repeat(4,minmax(0,1fr))!important}',
+      '@media(max-width:560px){.mt-kpis8{grid-template-columns:repeat(2,minmax(0,1fr))!important}}',
+      /* Schüler-Detail: Kopf mit Hauptaktionen + Mehr-Menü */
+      '.mt-dhead{padding:20px 22px}',
+      '.mt-dact{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px;padding-top:16px;border-top:0.5px solid var(--rim)}',
+      '.mt-more{position:relative}',
+      '.mt-more>summary{list-style:none;cursor:pointer}',
+      '.mt-more>summary::-webkit-details-marker{display:none}',
+      '.mt-more[open]>summary{border-color:rgba(var(--gold-rgb),.45)}',
+      '.mt-more-p{position:absolute;z-index:30;top:calc(100% + 6px);left:0;min-width:240px;padding:6px;border-radius:14px;background:var(--elevated);border:0.5px solid var(--rim2);box-shadow:0 18px 50px -12px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px}',
+      'body.light .mt-more-p{background:#fff;border-color:rgba(0,0,0,.08);box-shadow:0 18px 50px -14px rgba(40,30,10,.28)}',
+      '.mt-more-p>button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:0;border-radius:9px;padding:9px 10px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}',
+      '.mt-more-p>button:hover{background:rgba(var(--gold-rgb),.08)}',
+      '.mt-more-p>button .ic{width:15px;height:15px;color:var(--ink3)}',
+      '.mt-more-p>button.danger{color:var(--loss)}',
+      '.mt-more-team{display:flex;gap:6px;padding:8px 6px;margin:2px 0;border-top:0.5px solid var(--rim);border-bottom:0.5px solid var(--rim)}',
+      '.mt-more-team .mt-in{padding:7px 10px}',
+      '.mt-dtabs{margin:6px 0 18px}',
+      '.mt-dtabs button{font-size:13.5px;padding:11px 13px}',
+      '.mt-side{border-radius:16px}',
+      'body.light .mt-side{background:#fff;border-color:rgba(0,0,0,.07)}'
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -50571,8 +50658,7 @@ body.light .pt-sugg{background:var(--layer)}
     var sess=rows.map(function(r){ return nextSession(r.m.id); }).filter(Boolean).sort(function(a,b){ return a.when-b.when; })[0];
     function ck(v,l,cls,ic){ return '<div class="mt-ck '+(cls||'')+'">'+(ic?svgI(ic):'')+'<div><div class="v">'+v+'</div><div class="l">'+l+'</div></div></div>'; }
     return '<div class="mt-cock">'+
-      ck(rows.length,'Students','','users')+
-      ck(active+'<small>/'+rows.length+'</small>','Active this week','','zap')+
+      ck(rows.length,active+' active this week','','users')+
       ck(need,'Need attention',need?'warn':'','alert')+
       ck(t7,'Trades · 7 days','','chart')+
       ck(avgWr==null?'—':avgWr+'%','Avg win rate · 30 d','','target')+
@@ -50706,11 +50792,11 @@ body.light .pt-sugg{background:var(--layer)}
     try{ aktivSync(); }catch(e){}
     host.innerHTML=
       cockpitHtml(rows)+
-      bizCard()+
+      '<div class="mt-cws"><div class="mt-cmain">'+
       appsCard()+
       attentionHtml(rows)+
-      liveCard()+
-      weekCard()+
+      (ST.availOpen?weekCard():'')+
+      '<div class="mt-sec-h"><h2>Students</h2><span>'+live.length+'</span></div>'+
       '<div class="mt-tools">'+
         '<div class="mt-search">'+svgI('search')+'<input class="mt-in" id="mtQ" placeholder="Search students…" aria-label="Search students" value="'+esc(ST.q||'')+'" oninput="ApexMentor._q(this.value)"></div>'+
         (tl.length?'<div class="mt-chips">'+[['','All']].concat(tl.map(function(t){ return [t,t]; })).map(function(t){
@@ -50729,7 +50815,8 @@ body.light .pt-sugg{background:var(--layer)}
         '<div class="mt-grp-l">'+live.map(function(m){ var on=(ST.grpSel||[]).indexOf(m.id)>=0;
           return '<label class="mt-grp-i'+(on?' on':'')+'"><input type="checkbox"'+(on?' checked':'')+' onchange="ApexMentor._grpSel(\''+m.id+'\',this.checked)">'+avatar(m.studentName, m.studentUid, '')+'<span>'+esc(m.studentName||'Student')+(m.team?' <i>'+esc(m.team)+'</i>':'')+'</span></label>'; }).join('')+'</div>'+
         '<div class="mt-row" style="margin-top:10px"><button class="mt-btn gold" onclick="ApexMentor._grpStart(true)">'+svgI('video')+' Start video call</button><button class="mt-btn" onclick="ApexMentor._grpStart(false)">'+svgI('phone')+' Voice only</button><span class="mt-sub" style="margin:0">'+(ST.grpSel||[]).length+' of 4 picked</span></div></div>':'')+
-      '<div id="mtRoster"></div>';
+      '<div id="mtRoster"></div></div>'+
+      '<aside class="mt-caside" aria-label="Overview">'+liveCard()+(ST.availOpen?'':weekCard())+bizCard()+'</aside></div>';
     paintRoster();
   }
 
@@ -50783,16 +50870,18 @@ body.light .pt-sugg{background:var(--layer)}
           '<p class="mt-sub" style="margin:3px 0 0;font-size:12px">Shared: '+esc(SCOPE_FIELDS.filter(function(f){return sc[f.k];}).map(function(f){return f.label;}).join(', '))+(sc.days>0?' · last '+sc.days+' days':' · entire history')+'</p></div>'+
           (ns?'<div class="mt-next">'+svgI('calendar')+'<div><b>Next 1:1 '+untilLabel(ns.when)+'</b><span>'+esc(new Date(ns.when).toLocaleString([], {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}))+'</span></div></div>':'')+
         '</div>'+
-        '<div class="mt-row" style="margin-top:14px">'+
-          (coach?'<input class="mt-in" id="mtTeam_'+m.id+'" value="'+esc(m.team||'')+'" placeholder="Team" style="max-width:150px">'+
-          '<button class="mt-btn sm" onclick="ApexMentor.setTeam(\''+m.id+'\')">Set team</button>':'')+
-          '<button class="mt-btn sm" onclick="ApexMentor.refresh(\''+m.id+'\')">'+svgI('refresh')+' Refresh</button>'+
+        '<div class="mt-dact">'+
+          (typeof window.openDM==='function'?'<button class="mt-btn sm" onclick="openDM(\''+esc(m.studentUid)+'\',\''+esc(m.studentName||'Trader').replace(/'/g,'')+'\')">'+svgI('mail')+' Message</button>':'')+
           (window.ApexCall?'<button class="mt-btn gold sm" onclick="ApexCall.start(\''+m.id+'\',false)">'+svgI('phone')+' Call</button>'+
             '<button class="mt-btn sm" onclick="ApexCall.start(\''+m.id+'\',true)">'+svgI('video')+' Video</button>':'')+
-          (typeof window.openDM==='function'?'<button class="mt-btn sm" onclick="openDM(\''+esc(m.studentUid)+'\',\''+esc(m.studentName||'Trader').replace(/'/g,'')+'\')">'+svgI('mail')+' Message</button>':'')+
           '<button class="mt-btn sm" onclick="ApexMentor.report(\''+m.id+'\')">'+svgI('download')+' Report</button>'+
-          '<button class="mt-btn sm" onclick="ApexMentor.monthReport(\''+m.id+'\')">'+svgI('calendar')+' Monthly report</button>'+
-          (coach?'<button class="mt-btn danger sm" onclick="ApexMentor.revoke(\''+m.id+'\')">Remove</button>':'')+
+          '<details class="mt-more"><summary class="mt-btn sm" aria-label="More actions">More</summary><div class="mt-more-p">'+
+            '<button onclick="ApexMentor.refresh(\''+m.id+'\')">'+svgI('refresh')+' Refresh data</button>'+
+            '<button onclick="ApexMentor.monthReport(\''+m.id+'\')">'+svgI('calendar')+' Monthly report</button>'+
+            (coach?'<div class="mt-more-team"><input class="mt-in" id="mtTeam_'+m.id+'" value="'+esc(m.team||'')+'" placeholder="Team name">'+
+              '<button class="mt-btn sm" onclick="ApexMentor.setTeam(\''+m.id+'\')">Set</button></div>'+
+              '<button class="danger" onclick="ApexMentor.revoke(\''+m.id+'\')">Remove student</button>':'')+
+          '</div></details>'+
         '</div>'+
       '</div>';
 
@@ -50821,7 +50910,7 @@ body.light .pt-sugg{background:var(--layer)}
         '<div>'+
           '<div class="mt-card">'+
             '<h3>Performance</h3>'+
-            '<div class="mt-kpis" style="grid-template-columns:repeat(auto-fit,minmax(84px,1fr))">'+
+            '<div class="mt-kpis mt-kpis8">'+
               kpi(s.trades,'Trades')+kpi(s.winRate+'%','Win rate')+
               kpi(fmtP(s.netPips), 'Net pips', s.netPips>=0?'pos':'neg')+
               kpi(s.pf==null?'—':s.pf,'Profit factor')+
