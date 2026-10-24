@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-24a';
+  window.APEX_BUILD = '2026-10-24b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -5446,6 +5446,9 @@ body.light .prop-dd-status .goal-status-text { color: var(--ink3); }
 /* ══════════════════════════════════════
    SETTINGS TABS
 ══════════════════════════════════════ */
+/* Settings → Connect: Fit und Discord nebeneinander, auf dem Handy untereinander */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;align-items:start}
+.cx-grid > div:empty{display:none}
 .settings-tab-nav {
   display: flex; gap: 4px; flex-wrap: wrap;
   max-width: 900px; margin-bottom: 20px;
@@ -14419,6 +14422,9 @@ function _authAction(type) {
       <button class="settings-tab-btn" onclick="switchSettingsTab('ctrader')" id="stab-ctrader">
         <span class="stb-icon"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg></span> Auto Tracking
       </button>
+      <button class="settings-tab-btn" onclick="switchSettingsTab('connect')" id="stab-connect">
+        <span class="stb-icon"><svg class=ic aria-hidden=true><use href=#i-users ></use></svg></span> Connect
+      </button>
       <button class="settings-tab-btn" onclick="switchSettingsTab('funded')" id="stab-funded">
         <span class="stb-icon"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg></span> Funded Mode
       </button>
@@ -14460,6 +14466,13 @@ function _authAction(type) {
           <div style="font-size:22px;margin-bottom:10px"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg></div>
           <div class="gc-title" style="margin-bottom:4px">Auto Tracking <span style="font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;color:var(--gold);background:var(--gold-dim);vertical-align:2px">Pro</span></div>
           <div style="font-size:11px;color:var(--ink3)">cTrader, MT5, ATAS, Quantower, TradingView — auto-import trades</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:0.05em">→ Configure</div>
+        </div>
+
+        <div class="glass-card" style="cursor:pointer" onclick="switchSettingsTab('connect')">
+          <div style="font-size:22px;margin-bottom:10px"><svg class=ic aria-hidden=true><use href=#i-users ></use></svg></div>
+          <div class="gc-title" style="margin-bottom:4px">Connect</div>
+          <div style="font-size:11px;color:var(--ink3)"><span class="notranslate" translate="no">Evidence Fit</span> and Discord — apps that work with your journal</div>
           <div style="margin-top:10px;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:0.05em">→ Configure</div>
         </div>
 
@@ -14655,8 +14668,6 @@ function _authAction(type) {
           <button class="at-plat-btn"        data-plat="quantower"  onclick="ApexAutoTrack.select('quantower')"><svg class=ic aria-hidden=true><use href=#i-signal ></use></svg> Quantower</button>
           <button class="at-plat-btn"        data-plat="ninjatrader" onclick="ApexAutoTrack.select('ninjatrader')"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg> NinjaTrader <span class="at-soon">beta</span></button>
           <button class="at-plat-btn"        data-plat="tradovate"  onclick="ApexAutoTrack.select('tradovate')"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg> Tradovate <span class="at-soon">soon</span></button>
-          <button class="at-plat-btn"        data-plat="fit"        onclick="ApexAutoTrack.select('fit');if(window.ApexFit)ApexFit.render()"><svg class=ic aria-hidden=true><use href=#i-moon ></use></svg> <span class="notranslate" translate="no">Evidence Fit</span></button>
-          <button class="at-plat-btn"        data-plat="discord"    onclick="ApexAutoTrack.select('discord');if(window.ApexDiscordLink)ApexDiscordLink.render()"><svg class=ic aria-hidden=true><use href=#i-chat ></use></svg> Discord</button>
           <button class="at-plat-btn"        data-plat="exchange"   onclick="ApexAutoTrack.select('exchange')"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> Crypto &amp; IBKR</button>
         </div>
 
@@ -14671,10 +14682,6 @@ function _authAction(type) {
         <!-- ── Webhook-based platforms (rendered by ApexAutoTrack) ── -->
         <!-- ── Tradovate panel (native OAuth, rendered by ApexTradovate) ── -->
         <div class="at-panel" data-plat="tradovate"  style="display:none" id="atPanel-tradovate"></div>
-        <!-- ── Discord /log (ApexDiscordLink, discord-worker.js) ── -->
-        <div class="at-panel" data-plat="discord"    style="display:none" id="atPanel-discord"></div>
-        <!-- ── Evidence Fit (ApexFit) ── -->
-        <div class="at-panel" data-plat="fit"        style="display:none" id="atPanel-fit"></div>
         <div class="at-panel" data-plat="mt5"        style="display:none" id="atPanel-mt5"></div>
         <div class="at-panel" data-plat="tradingview" style="display:none" id="atPanel-tradingview"></div>
         <div class="at-panel" data-plat="atas"       style="display:none" id="atPanel-atas"></div>
@@ -14684,6 +14691,21 @@ function _authAction(type) {
         <div class="at-panel" data-plat="ninjatrader" style="display:none" id="atPanel-ninjatrader"></div>
       </div>
     </div><!-- /spanel-ctrader -->
+
+    <!-- ═══ TAB: CONNECT (24.10.2026) — apps that are not trade imports:
+         Evidence Fit (body data) and Discord (/log). The panels keep their
+         ids, so ApexFit / ApexDiscordLink render into them unchanged. ═══ -->
+    <div class="settings-panel" id="spanel-connect">
+      <div style="max-width:900px">
+        <div style="font-size:13px;color:var(--ink3);margin-bottom:16px;line-height:1.6">
+          Other apps that work with your journal. Each one only sends what you allow, and you can disconnect at any time.
+        </div>
+        <div class="cx-grid">
+          <div id="atPanel-fit"></div>
+          <div id="atPanel-discord"></div>
+        </div>
+      </div>
+    </div><!-- /spanel-connect -->
 
     <!-- ═══ TAB: FUNDED MODE ═══ -->
     <div class="settings-panel" id="spanel-funded">
@@ -17509,6 +17531,10 @@ function switchSettingsTab(tab) {
         wr.checked = !(d.exists && d.data() && d.data().weeklyReview === false);
       }).catch(function(){});
     }
+  }
+  if (tab === 'connect') {
+    try { if (window.ApexFit) ApexFit.render(); } catch(e){}
+    try { if (window.ApexDiscordLink) ApexDiscordLink.render(); } catch(e){}
   }
   if (tab === 'privacy') {
     ['profileVisibility','dmVisibility'].forEach(function(k) {
@@ -95561,6 +95587,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'Manage Subscription': ['Abo verwalten', 'Gestionar suscripción', 'Gerenciar assinatura', 'Gérer l’abonnement'],
     'Auto Tracking':     ['Auto-Tracking', 'Seguimiento automático', 'Rastreamento automático', 'Suivi automatique'],
     'Auto-Sync':         ['Auto-Sync', 'Sincronización automática', 'Sincronização automática', 'Synchronisation auto'],
+    'Connect':           ['Verbinden', 'Conectar', 'Conectar', 'Connecter'],
     'Funded Mode':       ['Funded-Modus', 'Modo fondeado', 'Modo fundado', 'Mode financé'],
     'Bug Report & Rating': ['Fehler melden & bewerten', 'Reportar error y valorar', 'Relatar erro e avaliar', 'Signaler un bug & noter'],
     'Experience Level':  ['Erfahrungsstufe', 'Nivel de experiencia', 'Nível de experiência', 'Niveau d’expérience'],
@@ -104492,16 +104519,16 @@ body.light::before{ opacity:.45; }
 
   var GROUPS = [
     { k:'account',   label:'Account',   tabs:['overview','profile','privacy','invite','partner'] },
-    { k:'trading',   label:'Trading',   tabs:['trading','ctrader','funded'] },
+    { k:'trading',   label:'Trading',   tabs:['trading','ctrader','connect','funded'] },
     { k:'community', label:'Community', tabs:['community'] },
     { k:'help',      label:'Help',      tabs:['bugreport'] }
   ];
   var TITLES = { overview:'Overview', profile:'Profile', privacy:'Privacy', invite:'Invite & Earn', partner:'Partner program', trading:'Trading',
-    ctrader:'Auto Tracking', funded:'Funded Mode', community:'Community', bugreport:'Bug Report & Rating' };
+    ctrader:'Auto Tracking', connect:'Connect', funded:'Funded Mode', community:'Community', bugreport:'Bug Report & Rating' };
   var DESCS = { overview:'Your account, plan and what is still to set up.', profile:'Photo, name and what the AI coach knows about you.',
     privacy:'Who can see your profile and message you.', invite:'Your referral link and what it has earned.',
     partner:'Your partner link, code, commission and payouts.',
-    trading:'Journal behaviour while you log trades.', ctrader:'Brokers and platforms that import trades automatically.',
+    trading:'Journal behaviour while you log trades.', ctrader:'Brokers and platforms that import trades automatically.', connect:'Evidence Fit and Discord — apps that work with your journal.',
     funded:'Prop firm rules, drawdown limits and account phase.', community:'Leaderboard, messages, notifications and e-mails.',
     bugreport:'Tell us what broke, what is missing, or how we are doing.' };
 
@@ -109566,7 +109593,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
 /* ════════════════════════════════════════════════════════════════
    Evidence — Discord /log  (window.ApexDiscordLink)   24.10.2026
    ────────────────────────────────────────────────────────────────
-   Die Karte in Auto Tracking → Discord. Sie erzeugt den Einmal-Code für
+   Die Karte in Einstellungen → Connect → Discord. Sie erzeugt den Einmal-Code für
    /link (15 Minuten, einmal nutzbar) und erklärt /log. Alles Weitere
    macht discord-worker.js. Der Code wird mit der eigenen uid angelegt —
    firestore.rules erlaubt nichts anderes; lesen kann ihn nur der Worker.
@@ -109759,7 +109786,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
           '<li><span>Create a one-time code.</span> ' + (_code
             ? '<code class="dc-code notranslate" translate="no">' + esc(_code) + '</code> <button class="mc-b" onclick="ApexFit.copy()">Copy</button> <i class="dc-exp"><span>valid for</span> ' + nb(left) + ' <span>min</span></i>'
             : '<button class="mc-b pri" onclick="ApexFit.create()"' + (_busy ? ' disabled' : '') + '>Create code</button>') + '</li>' +
-          '<li><span>Enter it in Evidence Fit under Setup and choose what to share.</span> <a href="' + esc(app()) + '" target="_blank" rel="noopener">Open Evidence Fit ↗</a></li>' +
+          '<li><span>Enter it in Evidence Fit under Settings and choose what to share.</span> <a href="' + esc(app()) + '" target="_blank" rel="noopener">Open Evidence Fit ↗</a></li>' +
         '</ol>';
     }
     host.innerHTML = '<div class="glass-card fit-card">' + head + html + (_err ? '<div class="mc-err">' + esc(_err) + '</div>' : '') + '</div>';
@@ -109808,7 +109835,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       'Copy': ['Kopieren', 'Copiar', 'Copiar', 'Copier'],
       'valid for': ['gültig für', 'válido', 'válido por', 'valable'],
       'min': ['Min.', 'min', 'min', 'min'],
-      'Enter it in Evidence Fit under Setup and choose what to share.': ['Gib ihn in Evidence Fit unter Setup ein und wähle, was geteilt wird.', 'Introdúcelo en Evidence Fit, en Setup, y elige qué compartir.', 'Digite no Evidence Fit, em Setup, e escolha o que compartilhar.', 'Saisissez-le dans Evidence Fit, sous Setup, et choisissez ce qui est partagé.'],
+      'Enter it in Evidence Fit under Settings and choose what to share.': ['Gib ihn in Evidence Fit unter Einstellungen ein und wähle, was geteilt wird.', 'Introdúcelo en Evidence Fit, en Ajustes, y elige qué compartir.', 'Digite no Evidence Fit, em Configurações, e escolha o que compartilhar.', 'Saisissez-le dans Evidence Fit, sous Réglages, et choisissez ce qui est partagé.'],
       'Sign in first.': ['Bitte zuerst anmelden.', 'Inicia sesión primero.', 'Entre primeiro.', 'Connectez-vous d’abord.'],
       'Could not create a code. Please try again.': ['Der Code ließ sich nicht erzeugen. Bitte noch einmal versuchen.', 'No se pudo crear el código. Inténtalo de nuevo.', 'Não foi possível criar o código. Tente de novo.', 'Impossible de créer le code. Réessayez.'],
       'Disconnecting failed. Please try again.': ['Trennen fehlgeschlagen. Bitte noch einmal versuchen.', 'No se pudo desconectar. Inténtalo de nuevo.', 'Falha ao desconectar. Tente de novo.', 'La déconnexion a échoué. Réessayez.'],
