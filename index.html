@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-24c';
+  window.APEX_BUILD = '2026-10-24d';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -11289,8 +11289,10 @@ body.light #landingPage * {
            bleibt als Beleg; die drei Zeilen sagen, wofür man zahlt. -->
       <div class="lp-price-desc">Everything in Free, plus three things:</div>
       <div class="lp-jobs"><div><b>Automatic</b><span>Your broker fills the journal — cTrader, crypto exchanges and live trackers, even while the app is closed.</span></div><div><b>Honest numbers</b><span>Edge &amp; Leaks, the Evidence Score and 68 Stat Lab metrics — each one with how many trades stand behind it.</span></div><div><b>Practice</b><span>Market Replay and Strategy Drills on real history, under your prop firm’s actual rules.</span></div></div>
+      <div class="lp-fit-bonus"><svg class=ic aria-hidden=true><use href=#i-moon ></use></svg> <span><b>+ <span class="notranslate" translate="no">Evidence Fit</span> included</b> — the fitness &amp; sleep app with every AI feature, normally €4.99 / $5.59 a month</span></div>
       <ul class="lp-price-feats">
         <li>Everything in Free</li>
+        <li><b><span class="notranslate" translate="no">Evidence Fit</span> included</b>&nbsp;— fitness, sleep &amp; nutrition tracking with all AI features, linked to your journal</li>
         <li><b>Automatic sync</b>&nbsp;— cTrader (keeps running while the app is closed), MT5 Cloud Sync with your investor password, Auto-Tracking for MT5 · ATAS · Quantower · TradingView · NinjaTrader (beta), Binance &amp; Bybit</li>
         <li><b>Market Replay</b>&nbsp;— rewind any past day &amp; trade it candle by candle</li>
         <li><b>AI Trading Coach</b> + proactive insights</li>
@@ -11517,6 +11519,7 @@ body.light #landingPage * {
         <tr><td>Weekly Intelligence Reports + PDF export</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Economic calendar + event alerts</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Goal tracker</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td><span class="notranslate" translate="no">Evidence Fit</span> included — fitness, sleep &amp; check-in app with all AI features, tested against your trades (normally €4.99 / $5.59 a month)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
       </tbody>
     </table>
     </div>
@@ -12400,6 +12403,7 @@ body.light #landingPage * {
 
     <!-- Pro in drei Aufgaben (24.10.2026), vor der langen Liste. -->
     <div class="apex-jobs"><div><b>Automatic</b><span>Your broker fills the journal — cTrader, crypto exchanges and live trackers, even while the app is closed.</span></div><div><b>Honest numbers</b><span>Edge &amp; Leaks, the Evidence Score and 68 Stat Lab metrics — each one with how many trades stand behind it.</span></div><div><b>Practice</b><span>Market Replay and Strategy Drills on real history, under your prop firm’s actual rules.</span></div></div>
+    <div class="lp-fit-bonus apex-fit-bonus"><svg class=ic aria-hidden=true><use href=#i-moon ></use></svg> <span><b>+ <span class="notranslate" translate="no">Evidence Fit</span> included</b> — the fitness &amp; sleep app with every AI feature, normally €4.99 / $5.59 a month</span></div>
 
     <div class="apex-upgrade-features">
 
@@ -12517,6 +12521,7 @@ body.light #landingPage * {
         </div>
       </div>
       <div class="apex-feat-category"><svg class=ic aria-hidden=true><use href=#i-link ></use></svg> Sync &amp; data</div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-moon ></use></svg></div><div><div class="apex-feat-label"><span class="notranslate" translate="no">Evidence Fit</span> included</div><div class="apex-feat-desc">The separate fitness app — meals, training, sleep and a daily check-in — with every AI feature unlocked, normally €4.99 / $5.59 a month. Connect it, and Edge &amp; Leaks tests how sleep, stress and caffeine change your trading.</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-signal ></use></svg></div><div><div class="apex-feat-label">Is my journal still receiving trades?</div><div class="apex-feat-desc">One page that answers it for every connection at once. A broken link is otherwise invisible: nothing errors, nothing looks missing, the journal simply stops growing and you find out weeks later &mdash; at which point you stop believing any number in the app. After three failed attempts in a row you also get an email, so you do not have to be the one checking. Each day&rsquo;s P&amp;L from the broker is also compared with what the journal computed, and a gap is flagged</div></div></div>
       <div class="apex-feat-item apex-feat-full">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-key ></use></svg></div>
@@ -30012,6 +30017,11 @@ document.addEventListener('keydown', function(e) {
       "Writing, drawing and images are free for up to 3 books. Pro adds unlimited books, trade cards from your journal (compact, standard, chart, polaroid, comparison, gallery pages), a daily trading page, PDF and image export, and AI handwriting-to-text and page summaries": ["Schreiben, Zeichnen und Bilder sind für bis zu 3 Bücher kostenlos. Pro ergänzt unbegrenzt viele Bücher, Trade-Karten aus deinem Journal (kompakt, Standard, Chart, Polaroid, Vergleich, Galerieseiten), eine tägliche Trading-Seite, PDF- und Bildexport sowie KI-Handschrifterkennung und Seitenzusammenfassungen", "Escribir, dibujar e imágenes son gratis hasta 3 libros. Pro añade libros ilimitados, fichas de operaciones de tu diario (compacta, estándar, gráfico, polaroid, comparación, páginas de galería), una página diaria de trading, exportación a PDF e imagen, y reconocimiento de escritura a mano y resúmenes de página con IA", "Escrever, desenhar e imagens são grátis para até 3 livros. O Pro adiciona livros ilimitados, cartões de operação do seu diário (compacto, padrão, gráfico, polaroid, comparação, páginas de galeria), uma página diária de trading, exportação em PDF e imagem, e reconhecimento de escrita à mão e resumos de página com IA", "Écrire, dessiner et les images sont gratuits jusqu’à 3 livres. Pro ajoute des livres illimités, des cartes de trade de votre journal (compacte, standard, graphique, polaroid, comparaison, pages galerie), une page de trading quotidienne, l’export PDF et image, et la reconnaissance d’écriture manuscrite et les résumés de page par IA"],
       "Share books read-only": ["Bücher zum reinen Lesen teilen", "Comparte libros en solo lectura", "Compartilhe livros somente leitura", "Partagez des livres en lecture seule"],
       "Share a book with up to 3 servers (all members or staff only), your coach, your students or single traders, whole or chosen pages. Readers cannot edit, copy, export or share it further — the server enforces it. Watermark, hidden money amounts, optional comments and a log of who opened it": ["Teile ein Buch mit bis zu 3 Servern (alle Mitglieder oder nur das Team), deinem Coach, deinen Schülern oder einzelnen Tradern, ganz oder ausgewählte Seiten. Leser können es nicht bearbeiten, kopieren, exportieren oder weiterteilen – der Server setzt das durch. Wasserzeichen, ausgeblendete Geldbeträge, optionale Kommentare und ein Protokoll, wer es geöffnet hat", "Comparte un libro con hasta 3 servidores (todos los miembros o solo el equipo), tu coach, tus alumnos o traders sueltos, entero o páginas elegidas. Los lectores no pueden editarlo, copiarlo, exportarlo ni compartirlo; el servidor lo impone. Marca de agua, importes ocultos, comentarios opcionales y un registro de quién lo abrió", "Compartilhe um livro com até 3 servidores (todos os membros ou só a equipe), seu coach, seus alunos ou traders individuais, inteiro ou páginas escolhidas. Leitores não podem editar, copiar, exportar nem repassar — o servidor garante. Marca d’água, valores ocultos, comentários opcionais e um registro de quem abriu", "Partagez un livre avec jusqu’à 3 serveurs (tous les membres ou l’équipe seulement), votre coach, vos élèves ou des traders précis, en entier ou par pages choisies. Les lecteurs ne peuvent ni le modifier, ni le copier, ni l’exporter, ni le repartager — le serveur l’impose. Filigrane, montants masqués, commentaires facultatifs et journal des ouvertures"],
+      "Evidence Fit included": ["Evidence Fit inklusive", "Evidence Fit incluido", "Evidence Fit incluído", "Evidence Fit inclus"],
+      "included": ["inklusive", "incluido", "incluído", "inclus"],
+      "+ Evidence Fit included": ["+ Evidence Fit inklusive", "+ Evidence Fit incluido", "+ Evidence Fit incluído", "+ Evidence Fit inclus"],
+      "— the fitness & sleep app with every AI feature, normally €4.99 / $5.59 a month": ["— die Fitness- & Schlaf-App mit allen KI-Funktionen, sonst 4,99 € / 5,59 $ im Monat", "— la app de fitness y sueño con todas las funciones de IA, normalmente 4,99 € / 5,59 $ al mes", "— o app de treino e sono com todos os recursos de IA, normalmente 4,99 € / 5,59 $ por mês", "— l’app fitness et sommeil avec toutes les fonctions IA, normalement 4,99 € / 5,59 $ par mois"],
+      "The separate fitness app — meals, training, sleep and a daily check-in — with every AI feature unlocked, normally €4.99 / $5.59 a month. Connect it, and Edge & Leaks tests how sleep, stress and caffeine change your trading.": ["Die eigene Fitness-App – Mahlzeiten, Training, Schlaf und ein täglicher Check-in – mit allen KI-Funktionen freigeschaltet, sonst 4,99 € / 5,59 $ im Monat. Verbinde sie, und Edge & Leaks testet, wie Schlaf, Stress und Koffein dein Trading verändern.", "La app de fitness aparte —comidas, entrenamiento, sueño y un check-in diario— con todas las funciones de IA desbloqueadas, normalmente 4,99 € / 5,59 $ al mes. Conéctala y Edge & Leaks prueba cómo el sueño, el estrés y la cafeína cambian tu trading.", "O app de treino separado — refeições, treino, sono e um check-in diário — com todos os recursos de IA liberados, normalmente 4,99 € / 5,59 $ por mês. Conecte-o e o Edge & Leaks testa como sono, estresse e cafeína mudam o seu trading.", "L’app fitness à part — repas, entraînement, sommeil et un check-in quotidien — avec toutes les fonctions IA débloquées, normalement 4,99 € / 5,59 $ par mois. Connecte-la, et Edge & Leaks teste comment le sommeil, le stress et la caféine changent ton trading."],
       "Glossary AI lookup": ["KI-Nachschlagen im Glossar", "Consulta de glosario con IA", "Consulta de glossário com IA", "Recherche IA dans le glossaire"],
       "The glossary itself is free — 429 trading terms, abbreviations written out and explained. Pro adds the lookup for everything it does not cover: the AI explains the term, or tells you plainly that it is not a trading term at all": ["Das Glossar selbst ist kostenlos – 429 Trading-Begriffe, Abkürzungen ausgeschrieben und erklärt. Pro ergänzt das Nachschlagen für alles, was es nicht abdeckt: Die KI erklärt den Begriff oder sagt dir klar, dass es gar kein Trading-Begriff ist", "El glosario en sí es gratis: 429 términos de trading, abreviaturas desarrolladas y explicadas. Pro añade la consulta de todo lo que no cubre: la IA explica el término o te dice claramente que no es un término de trading", "O glossário em si é grátis — 429 termos de trading, abreviações por extenso e explicadas. O Pro adiciona a consulta de tudo o que ele não cobre: a IA explica o termo ou diz com clareza que nem é termo de trading", "Le glossaire lui-même est gratuit — 429 termes de trading, abréviations développées et expliquées. Pro ajoute la recherche pour tout ce qu’il ne couvre pas : l’IA explique le terme ou vous dit franchement que ce n’en est pas un"],
       "Try 7 days free": ["7 Tage kostenlos testen", "Prueba 7 días gratis", "Teste 7 dias grátis", "Essayez 7 jours gratuitement"],
@@ -101681,6 +101691,10 @@ body:not(.lp-on) #lpProgress{ display:none; }
 #landingPage #founder{ contain-intrinsic-size:auto 640px; }
 /* Pro in drei Aufgaben */
 #landingPage .lp-jobs{ display:grid; gap:8px; margin:6px 0 18px; }
+.lp-fit-bonus{ display:flex; gap:9px; align-items:flex-start; margin:-8px 0 16px; padding:9px 12px; border-radius:10px; border:0.5px dashed var(--gold-line); background:rgba(var(--gold-rgb),.05); font-size:12.5px; line-height:1.45; color:var(--ink2); }
+.lp-fit-bonus .ic{ width:16px; height:16px; color:var(--gold); flex:none; margin-top:1px }
+.lp-fit-bonus b{ color:var(--ink) }
+.apex-fit-bonus{ margin:8px 0 6px }
 #landingPage .lp-jobs > div{ border:1px solid var(--lp-line); border-radius:12px; padding:11px 13px; background:rgba(var(--gold-rgb),.04); }
 #landingPage .lp-jobs b{ display:block; color:var(--lp-gold-hi); font-family:var(--lp-display); font-size:.98rem; }
 #landingPage .lp-jobs span{ display:block; color:var(--lp-mute); font-size:.88rem; line-height:1.5; margin-top:2px; }
@@ -102957,6 +102971,11 @@ body.light::before{ opacity:.45; }
     "— paste past trades as cards, compare them, build galleries; unlimited books": ["— vergangene Trades als Karten einfügen, vergleichen, Galerien bauen; unbegrenzt viele Bücher", "— pega operaciones pasadas como tarjetas, compáralas, crea galerías; libros ilimitados", "— cole operações passadas como cartões, compare-as, monte galerias; livros ilimitados", "— collez d’anciens trades en cartes, comparez-les, créez des galeries ; livres illimités"],
     "Share books read-only": ["Bücher nur lesend teilen", "Comparte libros en modo lectura", "Compartilhe livros só para leitura", "Partage de livres en lecture seule"],
     "— with a server, your coach, students or single traders; nobody can edit or pass it on": ["— mit einem Server, deinem Coach, Schülern oder einzelnen Tradern; niemand kann bearbeiten oder weitergeben", "— con un servidor, tu coach, alumnos o traders concretos; nadie puede editar ni reenviar", "— com um servidor, seu coach, alunos ou traders específicos; ninguém pode editar nem repassar", "— avec un serveur, votre coach, des élèves ou des traders précis ; personne ne peut modifier ni transmettre"],
+    "included": ["inklusive", "incluido", "incluído", "inclus"],
+    "— fitness, sleep & nutrition tracking with all AI features, linked to your journal": ["— Fitness-, Schlaf- & Ernährungs-Tracking mit allen KI-Funktionen, verbunden mit deinem Journal", "— seguimiento de fitness, sueño y nutrición con todas las funciones de IA, vinculado a tu diario", "— acompanhamento de treino, sono e nutrição com todos os recursos de IA, ligado ao seu diário", "— suivi fitness, sommeil et nutrition avec toutes les fonctions IA, relié à ton journal"],
+    "+ Evidence Fit included": ["+ Evidence Fit inklusive", "+ Evidence Fit incluido", "+ Evidence Fit incluído", "+ Evidence Fit inclus"],
+    "— the fitness & sleep app with every AI feature, normally €4.99 / $5.59 a month": ["— die Fitness- & Schlaf-App mit allen KI-Funktionen, sonst 4,99 € / 5,59 $ im Monat", "— la app de fitness y sueño con todas las funciones de IA, normalmente 4,99 € / 5,59 $ al mes", "— o app de treino e sono com todos os recursos de IA, normalmente 4,99 € / 5,59 $ por mês", "— l’app fitness et sommeil avec toutes les fonctions IA, normalement 4,99 € / 5,59 $ par mois"],
+    "included — fitness, sleep & check-in app with all AI features, tested against your trades (normally €4.99 / $5.59 a month)": ["inklusive – Fitness-, Schlaf- & Check-in-App mit allen KI-Funktionen, gegen deine Trades getestet (sonst 4,99 € / 5,59 $ im Monat)", "incluido: app de fitness, sueño y check-in con todas las funciones de IA, probada contra tus operaciones (normalmente 4,99 € / 5,59 $ al mes)", "incluído — app de treino, sono e check-in com todos os recursos de IA, testado contra as suas operações (normalmente 4,99 € / 5,59 $ por mês)", "inclus — app fitness, sommeil et check-in avec toutes les fonctions IA, testée face à tes trades (normalement 4,99 € / 5,59 $ par mois)"],
     "Glossary AI lookup": ["Glossar-KI-Suche", "Búsqueda con IA en el glosario", "Busca com IA no glossário", "Recherche IA dans le glossaire"],
     "— any term the 429 curated ones do not cover, explained on demand": ["— jeder Begriff, den die 429 kuratierten nicht abdecken, auf Abruf erklärt", "— cualquier término que no cubran los 429 seleccionados, explicado al momento", "— qualquer termo fora dos 429 selecionados, explicado na hora", "— tout terme absent des 429 sélectionnés, expliqué à la demande"],
     "Manual trade journal & notes": ["Manuelles Trade-Journal & Notizen", "Diario manual de operaciones y notas", "Diário manual de operações e notas", "Journal de trading manuel et notes"],
@@ -109799,7 +109818,13 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
           '<li><span>Enter it in Evidence Fit under Setup and choose what to share.</span> <a href="' + esc(app()) + '" target="_blank" rel="noopener">Open Evidence Fit ↗</a></li>' +
         '</ol>';
     }
-    host.innerHTML = '<div class="glass-card fit-card">' + head + html + (_err ? '<div class="mc-err">' + esc(_err) + '</div>' : '') + '</div>';
+    /* Pro-Vorteil (24.10.2026): mit Evidence Pro sind alle KI-Funktionen in
+       Evidence Fit inklusive (der Fit-Worker prüft das über die Verbindung). */
+    var pro = window.currentPlan === 'pro';
+    var perk = !api() ? '' : pro
+      ? '<div class="fit-perk on"><svg class=ic aria-hidden=true><use href=#i-check ></use></svg> <span><b>Included with your Pro.</b> ' + (LINK ? 'Every AI feature in Evidence Fit is unlocked for you.' : 'Connect, and every AI feature in Evidence Fit unlocks for free.') + '</span></div>'
+      : '<div class="fit-perk"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> <span><b>Free with Pro.</b> Pro unlocks every AI feature in Evidence Fit — normally €4.99 / $5.59 a month on its own.</span> <button class="mc-b pri" onclick="openUpgradeModal()">See Pro</button></div>';
+    host.innerHTML = '<div class="glass-card fit-card">' + head + perk + html + (_err ? '<div class="mc-err">' + esc(_err) + '</div>' : '') + '</div>';
     try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(host); } catch(e){}
   };
 
@@ -109832,6 +109857,12 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       'next to your trades — and tested by Edge & Leaks like every other condition.': ['neben deinen Trades – und von Edge & Leaks getestet wie jede andere Bedingung.', 'junto a tus operaciones, y probados por Edge & Leaks como cualquier otra condición.', 'ao lado das suas operações — e testados pelo Edge & Leaks como qualquer outra condição.', 'à côté de vos trades — et testés par Edge & Leaks comme toute autre condition.'],
       'Coming soon': ['Kommt bald', 'Próximamente', 'Em breve', 'Bientôt'],
       'Connected.': ['Verbunden.', 'Conectado.', 'Conectado.', 'Connecté.'],
+      'Included with your Pro.': ['In deinem Pro enthalten.', 'Incluido en tu Pro.', 'Incluído no seu Pro.', 'Inclus dans ton Pro.'],
+      'Every AI feature in Evidence Fit is unlocked for you.': ['Alle KI-Funktionen in Evidence Fit sind für dich freigeschaltet.', 'Todas las funciones de IA de Evidence Fit están desbloqueadas para ti.', 'Todos os recursos de IA do Evidence Fit estão liberados para você.', 'Toutes les fonctions IA d’Evidence Fit sont débloquées pour toi.'],
+      'Connect, and every AI feature in Evidence Fit unlocks for free.': ['Verbinde dich, und alle KI-Funktionen in Evidence Fit werden kostenlos freigeschaltet.', 'Conéctate y todas las funciones de IA de Evidence Fit se desbloquean gratis.', 'Conecte e todos os recursos de IA do Evidence Fit são liberados de graça.', 'Connecte-toi et toutes les fonctions IA d’Evidence Fit se débloquent gratuitement.'],
+      'Free with Pro.': ['Mit Pro kostenlos.', 'Gratis con Pro.', 'Grátis com Pro.', 'Gratuit avec Pro.'],
+      'Pro unlocks every AI feature in Evidence Fit — normally €4.99 / $5.59 a month on its own.': ['Pro schaltet alle KI-Funktionen in Evidence Fit frei – einzeln sonst 4,99 € / 5,59 $ im Monat.', 'Pro desbloquea todas las funciones de IA de Evidence Fit; por separado, normalmente 4,99 € / 5,59 $ al mes.', 'O Pro libera todos os recursos de IA do Evidence Fit — sozinho, normalmente 4,99 € / 5,59 $ por mês.', 'Pro débloque toutes les fonctions IA d’Evidence Fit — seule, normalement 4,99 € / 5,59 $ par mois.'],
+      'See Pro': ['Pro ansehen', 'Ver Pro', 'Ver Pro', 'Voir Pro'],
       'Shared:': ['Geteilt:', 'Compartido:', 'Compartilhado:', 'Partagé :'],
       'Sleep & readiness': ['Schlaf & Readiness', 'Sueño y readiness', 'Sono e readiness', 'Sommeil et readiness'],
       'Nutrition': ['Ernährung', 'Nutrición', 'Alimentação', 'Alimentation'],
@@ -109880,6 +109911,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       '.fit-soon{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4,#777);border:0.5px solid var(--rim2);border-radius:20px;padding:2px 8px;margin-left:6px;white-space:nowrap}' +
       '.fit-steps{margin:12px 0 0;padding-left:20px;display:grid;gap:10px;font-size:13px;color:var(--ink2);line-height:1.6}.fit-steps a{color:var(--gold)}' +
       '.fit-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.fit-acts a{text-decoration:none}' +
+      '.fit-perk{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin:2px 0 10px;padding:8px 10px;border-radius:9px;border:0.5px dashed var(--gold-line);background:rgba(var(--gold-rgb),.05);font-size:12px;line-height:1.45}.fit-perk .ic{width:15px;height:15px;color:var(--gold);flex:none;margin-top:1px}.fit-perk span{flex:1;min-width:180px}.fit-perk.on{border-style:solid}' +
       '#fitDayLine{font-size:12px;color:var(--ink2);margin:0 0 10px;padding:7px 11px;border-radius:9px;border:0.5px solid var(--rim);background:var(--layer)}' +
       '#fitDayLine b{color:var(--ink)}.fit-tag{font-weight:700;color:var(--gold);margin-right:4px}';
     document.head.appendChild(s);
