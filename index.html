@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-24e';
+  window.APEX_BUILD = '2026-10-24f';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -38431,6 +38431,7 @@ body.light .pc-rules{background:var(--layer)}
 #page-channels .cs-at{color:var(--gold);background:rgba(var(--gold-rgb),0.13);border-radius:4px;padding:0 3px;font-weight:600}
 #page-channels .cs-pinmark{color:var(--gold);display:inline-flex;margin-left:2px}
 #page-channels .cs-inrow{flex-wrap:wrap}
+.cs-rep-list{display:flex;flex-direction:column;gap:4px}.cs-rep-opt{display:flex !important;flex-direction:row !important;gap:10px;align-items:center;justify-content:flex-start;width:100%;margin:0 !important;padding:8px 10px;border-radius:8px;border:0.5px solid var(--rim);cursor:pointer;font-size:13px;font-weight:400;color:var(--ink);text-transform:none;letter-spacing:normal;text-align:left}.cs-rep-opt:hover{background:var(--layer)}.cs-rep-opt input{width:16px !important;height:16px;flex:none;margin:0 !important;padding:0;accent-color:var(--gold)}.cs-rep-opt span{flex:1;min-width:0}.cs-rep-opt:has(input:checked){border-color:var(--gold-line);background:rgba(var(--gold-rgb),.06)}
 #page-channels .cs-replybar{flex:0 0 100%;order:-1;margin:0 0 8px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);background:var(--layer);border:0.5px solid var(--rim);border-radius:8px;padding:6px 10px}
 #page-channels .cs-replybar span{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #page-channels .cs-replybar b{color:var(--gold)}
@@ -38488,6 +38489,7 @@ body.light .pc-rules{background:var(--layer)}
   background:var(--void) !important;
 }
 body.cs-focus-on{overflow:hidden !important}
+/* 24.10.2026: Fenster, die aus dem Server heraus aufgehen (Profil, Nachricht, Trade, Chart), lagen unter der Server-Ebene (z 9000) – offen, aber unsichtbar. */\nbody.cs-focus-on #profileOverlay,body.cs-focus-on #dmOverlay,body.cs-focus-on #tradeEditOverlay,body.cs-focus-on #cgOverlay{z-index:9600 !important}
 body.cs-focus-on .mobile-bottom-nav,
 body.cs-focus-on #modeToggleBtn{display:none !important}
 /* Siehe .aw-flat: .page.active > * traegt eine Einblend-Animation mit
@@ -41159,6 +41161,30 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
      Regeln (Raid, Verifizierung, Regeln akzeptiert, Links fuer Neue);
      Wortlisten und Spam-Muster laufen im Client — wer sie umgeht, landet
      trotzdem in der Warteschlange, sobald jemand meldet. */
+  (function(){
+    var T={ 'Spam or flooding':['Spam oder Fluten','Spam o mensajes masivos','Spam ou flood','Spam ou flood'],
+      'Insults or harassment':['Beleidigung oder Belästigung','Insultos o acoso','Insultos ou assédio','Insultes ou harcèlement'],
+      'Selling signals or advertising':['Signalverkauf oder Werbung','Venta de señales o publicidad','Venda de sinais ou publicidade','Vente de signaux ou publicité'],
+      'Scam or fake profit claims':['Betrug oder erfundene Gewinne','Estafa o ganancias inventadas','Golpe ou lucros inventados','Arnaque ou faux gains'],
+      'Dangerous misinformation':['Gefährliche Falschinformation','Desinformación peligrosa','Desinformação perigosa','Désinformation dangereuse'],
+      'Something else':['Etwas anderes','Otra cosa','Outra coisa','Autre chose'],
+      'Report member':['Mitglied melden','Denunciar miembro','Denunciar membro','Signaler le membre'],
+      'Report message':['Nachricht melden','Denunciar mensaje','Denunciar mensagem','Signaler le message'],
+      'Send report':['Meldung senden','Enviar denuncia','Enviar denúncia','Envoyer le signalement'],
+      'Anything the moderators should know (optional)':['Was die Moderatoren wissen sollten (optional)','Algo que los moderadores deban saber (opcional)','Algo que os moderadores devam saber (opcional)','Ce que les modérateurs doivent savoir (facultatif)'] };
+    function reg(){ if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('.cs-rep-list, .cs-rep-scope', T); else setTimeout(reg, 300); }
+    reg();
+    /* Titel und Knopf baut ApexDialog selbst – dort direkt übersetzt einsetzen. */
+    var INTRO = {
+      en:['Report this message from {n} to the moderators of this server.','Report {n} to the moderators of this server.','They see who reported it; the person reported does not.'],
+      de:['Diese Nachricht von {n} an die Moderatoren dieses Servers melden.','{n} an die Moderatoren dieses Servers melden.','Sie sehen, wer gemeldet hat – die gemeldete Person nicht.'],
+      es:['Denunciar este mensaje de {n} a los moderadores de este servidor.','Denunciar a {n} a los moderadores de este servidor.','Ellos ven quién lo denunció; la persona denunciada no.'],
+      pt:['Denunciar esta mensagem de {n} aos moderadores deste servidor.','Denunciar {n} aos moderadores deste servidor.','Eles veem quem denunciou; a pessoa denunciada não.'],
+      fr:['Signaler ce message de {n} aux modérateurs de ce serveur.','Signaler {n} aux modérateurs de ce serveur.','Ils voient qui a signalé ; la personne signalée, non.'] };
+    CS._repIntro = function(kind, nameHtml){ var l = String(window.apexResolvedLang||document.documentElement.lang||'en').slice(0,2); var t = INTRO[l] || INTRO.en;
+      return (kind==='msg' ? t[0] : t[1]).replace('{n}', nameHtml) + ' ' + t[2]; };
+    CS._repT = function(k){ var i = ['de','es','pt','fr'].indexOf(String(window.apexResolvedLang||document.documentElement.lang||'en').slice(0,2)); return (i >= 0 && T[k]) ? T[k][i] : k; };
+  })();
   var REPORT_REASONS=[['spam','Spam or flooding'],['abuse','Insults or harassment'],['signals','Selling signals or advertising'],['scam','Scam or fake profit claims'],['misinfo','Dangerous misinformation'],['other','Something else']];
   function reasonLabel(k){ var r=REPORT_REASONS.filter(function(x){ return x[0]===k; })[0]; return r?r[1]:(k||''); }
   function repRef(sid){ return db.collection('apexServers').doc(sid||CS.cur.id).collection('reports'); }
@@ -41166,11 +41192,14 @@ body.light #page-channels .cs-wrap{background:var(--surface)}body.light #page-ch
   CS.report=function(kind, targetId, targetUid, targetName){
     if(!CS.cur||!ready()) return; closePop(); closeFly();
     var m = kind==='msg' ? findMsg(targetId) : null;
-    var html='<div style="text-align:left"><div style="font-size:13px;color:var(--ink2);margin-bottom:10px">'+(kind==='msg'?'Report this message from <b class="notranslate" translate="no">'+esc(targetName)+'</b> to the moderators of this server.':'Report <b class="notranslate" translate="no">'+esc(targetName)+'</b> to the moderators of this server.')+' They see who reported it; the person reported does not.</div>'+
+    var html='<div style="text-align:left"><div class="notranslate" translate="no" style="font-size:13px;color:var(--ink2);margin-bottom:10px">'+CS._repIntro(kind, '<b>'+esc(targetName)+'</b>')+'</div>'+
       (m&&m.d.text?'<div style="font-size:12px;color:var(--ink3);border-left:2px solid var(--rim2);padding:4px 10px;margin-bottom:10px;max-height:80px;overflow:hidden">'+esc(String(m.d.text).slice(0,240))+'</div>':'')+
-      '<div id="csRepReasons" style="display:flex;flex-direction:column;gap:6px">'+REPORT_REASONS.map(function(r,i){ return '<label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink);text-transform:none;letter-spacing:normal;font-weight:400;margin:0;cursor:pointer"><input type="radio" name="csRep" value="'+r[0]+'"'+(i===0?' checked':'')+'> '+r[1]+'</label>'; }).join('')+'</div>'+
-      '<textarea id="csRepNote" rows="2" maxlength="500" placeholder="Anything the moderators should know (optional)" style="width:100%;box-sizing:border-box;margin-top:10px;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink);padding:8px 10px;font:inherit;font-size:13px"></textarea></div>';
-    ApexDialog.confirm(html, { title: kind==='msg'?'Report message':'Report member', okText:'Send report', html:true }).then(function(yes){
+      '<div id="csRepReasons" class="cs-rep-list">'+REPORT_REASONS.map(function(r,i){ return '<label class="cs-rep-opt"><input type="radio" name="csRep" value="'+r[0]+'"'+(i===0?' checked':'')+'><span>'+r[1]+'</span></label>'; }).join('')+'</div>'+
+      '<textarea id="csRepNote" rows="2" maxlength="500" placeholder="'+CS._repT('Anything the moderators should know (optional)')+'" style="width:100%;box-sizing:border-box;margin-top:10px;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink);padding:8px 10px;font:inherit;font-size:13px"></textarea></div>';
+    var dlg = ApexDialog.confirm(html, { title: CS._repT(kind==='msg'?'Report message':'Report member'), okText: CS._repT('Send report'), html:true });
+    /* Handübersetzt statt Google Translate – GT zerlegte „Scam or fake profit claims“ in Bruchstücke. */
+    setTimeout(function(){ try { var el=document.getElementById('csRepReasons'); if (el && window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el.closest('[role=dialog]')||el.parentNode); } catch(e){} }, 0);
+    dlg.then(function(yes){
       if(!yes) return;
       var r=document.querySelector('input[name="csRep"]:checked'), note=(document.getElementById('csRepNote')||{}).value||'';
       var doc={ kind:kind, targetId:targetId, targetUid:targetUid||'', targetName:targetName||'', reason:r?r.value:'other', note:String(note).slice(0,500),
