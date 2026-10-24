@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-24d';
+  window.APEX_BUILD = '2026-10-24e';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -11536,7 +11536,7 @@ body.light #landingPage * {
     <span class="lp-refnote-ico"><svg class=ic aria-hidden=true><use href=#i-gift ></use></svg></span>
     <div>
       <div class="lp-refnote-t">Bring a friend, get a month free</div>
-      <div class="lp-refnote-s">Every account gets a personal invite link. Your friend pays <strong>20 % less</strong> for their first month, and once that payment goes through you get <strong>a full month of Pro</strong>&nbsp;— as billing credit if you subscribe, as extra time if you do not. No cap on how many. Applies to the monthly plan, and the reward lands on the first payment, not on sign-up.</div>
+      <div class="lp-refnote-s">Every account gets a personal invite link. Your friend pays <strong>10 % less</strong> for their first month, and once that payment goes through you get <strong>a full month of Pro</strong>&nbsp;— as billing credit if you subscribe, as extra time if you do not. No cap on how many. Applies to the monthly plan, and the reward lands on the first payment, not on sign-up.</div>
     </div>
   </div>
   <style>
@@ -12616,7 +12616,7 @@ body.light #landingPage * {
       <span style="font-size:18px;line-height:1.1"><svg class=ic aria-hidden=true><use href=#i-gift ></use></svg></span>
       <div style="font-size:12px;color:var(--ink2);line-height:1.6">
         <strong style="color:var(--ink)">Every friend you bring pays for a month of yours.</strong>
-        They get 20&nbsp;% off their first month, and once that payment clears you get a full month of Pro
+        They get 10&nbsp;% off their first month, and once that payment clears you get a full month of Pro
         credited to your account. No cap. You will find your invite link under Settings once you are in.
       </div>
     </div>
@@ -30026,7 +30026,7 @@ document.addEventListener('keydown', function(e) {
       "The glossary itself is free — 429 trading terms, abbreviations written out and explained. Pro adds the lookup for everything it does not cover: the AI explains the term, or tells you plainly that it is not a trading term at all": ["Das Glossar selbst ist kostenlos – 429 Trading-Begriffe, Abkürzungen ausgeschrieben und erklärt. Pro ergänzt das Nachschlagen für alles, was es nicht abdeckt: Die KI erklärt den Begriff oder sagt dir klar, dass es gar kein Trading-Begriff ist", "El glosario en sí es gratis: 429 términos de trading, abreviaturas desarrolladas y explicadas. Pro añade la consulta de todo lo que no cubre: la IA explica el término o te dice claramente que no es un término de trading", "O glossário em si é grátis — 429 termos de trading, abreviações por extenso e explicadas. O Pro adiciona a consulta de tudo o que ele não cobre: a IA explica o termo ou diz com clareza que nem é termo de trading", "Le glossaire lui-même est gratuit — 429 termes de trading, abréviations développées et expliquées. Pro ajoute la recherche pour tout ce qu’il ne couvre pas : l’IA explique le terme ou vous dit franchement que ce n’en est pas un"],
       "Try 7 days free": ["7 Tage kostenlos testen", "Prueba 7 días gratis", "Teste 7 dias grátis", "Essayez 7 jours gratuitement"],
       "or go straight to Pro": ["oder direkt zu Pro", "o pásate directo a Pro", "ou vá direto para o Pro", "ou passez directement à Pro"],
-      "They get 20 % off their first month, and once that payment clears you get a full month of Pro credited to your account. No cap. You will find your invite link under Settings once you are in.": ["Sie bekommen 20 % Rabatt auf ihren ersten Monat, und sobald diese Zahlung durch ist, wird dir ein ganzer Monat Pro gutgeschrieben. Keine Obergrenze. Deinen Einladungslink findest du in den Einstellungen, sobald du drin bist.", "Obtienen un 20 % de descuento en su primer mes y, en cuanto se cobra ese pago, se te abona un mes completo de Pro. Sin límite. Encontrarás tu enlace de invitación en Ajustes cuando entres.", "Eles ganham 20 % de desconto no primeiro mês e, assim que esse pagamento é compensado, você recebe um mês inteiro de Pro creditado. Sem limite. Seu link de convite fica em Configurações depois que você entrar.", "Ils obtiennent 20 % de réduction sur leur premier mois, et dès que ce paiement passe, un mois complet de Pro vous est crédité. Sans plafond. Vous trouverez votre lien d’invitation dans les Réglages une fois inscrit."],
+      "They get 10 % off their first month, and once that payment clears you get a full month of Pro credited to your account. No cap. You will find your invite link under Settings once you are in.": ["Sie bekommen 10 % Rabatt auf ihren ersten Monat, und sobald diese Zahlung durch ist, wird dir ein ganzer Monat Pro gutgeschrieben. Keine Obergrenze. Deinen Einladungslink findest du in den Einstellungen, sobald du drin bist.", "Obtienen un 10 % de descuento en su primer mes y, en cuanto se cobra ese pago, se te abona un mes completo de Pro. Sin límite. Encontrarás tu enlace de invitación en Ajustes cuando entres.", "Eles ganham 10 % de desconto no primeiro mês e, assim que esse pagamento é compensado, você recebe um mês inteiro de Pro creditado. Sem limite. Seu link de convite fica em Configurações depois que você entrar.", "Ils obtiennent 10 % de réduction sur leur premier mois, et dès que ce paiement passe, un mois complet de Pro vous est crédité. Sans plafond. Vous trouverez votre lien d’invitation dans les Réglages une fois inscrit."],
       "Monthly plan only": ["Nur im Monatsabo", "Solo plan mensual", "Só no plano mensal", "Offre mensuelle uniquement"],
       "Flexible, cancel any time": ["Flexibel, jederzeit kündbar", "Flexible, cancela cuando quieras", "Flexível, cancele quando quiser", "Flexible, résiliable à tout moment"],
       "SAVE 22%": ["22 % SPAREN", "AHORRA 22 %", "ECONOMIZE 22 %", "ÉCONOMISEZ 22 %"],
@@ -77909,7 +77909,7 @@ body.light .apxFR-card { background: #fff; }
    ════════════════════════════════════════════════════════════════ */
 (function(){
   "use strict";
-  var FRIEND_DISCOUNT = 20;   // muss zu REFERRAL_FRIEND_DISCOUNT im Checkout-Worker passen
+  var FRIEND_DISCOUNT = 10;   // muss zu REFERRAL_FRIEND_DISCOUNT im Checkout-Worker passen
   var _code = null, _busy = false;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
@@ -77970,7 +77970,7 @@ body.light .apxFR-card { background: #fff; }
 
       el.innerHTML =
         '<div class="apxRef-hero">'
-        + '<h3 class="apxRef-h">Give 20 %, get a free month</h3>'
+        + '<h3 class="apxRef-h">Give ' + FRIEND_DISCOUNT + ' %, get a free month</h3>'
         + '<p class="apxRef-p">Send your link to someone who trades. They get <strong>'
         + FRIEND_DISCOUNT + ' % off their first month</strong>. When their first payment goes through, '
         + 'you get <strong>a full month of Pro for free</strong>&nbsp;— credited automatically, no limit on how many.</p>'
@@ -103279,7 +103279,7 @@ body.light::before{ opacity:.45; }
     "Free vs": ["Free vs","Free vs","Free vs","Free vs"],
     "Bring a friend, get a month free": ["Bring einen Freund mit, bekomm einen Monat gratis","Trae a un amigo y consigue un mes gratis","Traga um amigo e ganhe um mês grátis","Parrainez un ami, recevez un mois offert"],
     "Every account gets a personal invite link. Your friend pays": ["Jedes Konto bekommt einen persönlichen Einladungslink. Dein Freund zahlt","Cada cuenta tiene un enlace de invitación personal. Tu amigo paga un","Cada conta recebe um link de convite pessoal. Seu amigo paga","Chaque compte reçoit un lien d’invitation personnel. Votre ami paie"],
-    "20 % less": ["20 % weniger","20 % menos","20 % menos","20 % de moins"],
+    "10 % less": ["10 % weniger","10 % menos","10 % menos","10 % de moins"],
     "for their first month, and once that payment goes through you get": ["im ersten Monat, und sobald diese Zahlung durch ist, bekommst du","el primer mes, y en cuanto ese pago se completa recibes","no primeiro mês, e assim que esse pagamento passa você ganha","le premier mois, et dès que ce paiement passe, vous recevez"],
     "a full month of Pro": ["einen ganzen Monat Pro","un mes completo de Pro","um mês inteiro de Pro","un mois complet de Pro"],
     "— as billing credit if you subscribe, as extra time if you do not. No cap on how many. Applies to the monthly plan, and the reward lands on the first payment, not on sign-up.": ["– als Guthaben, wenn du ein Abo hast, als zusätzliche Zeit, wenn nicht. Keine Obergrenze. Gilt für das Monatsabo, und die Belohnung kommt mit der ersten Zahlung, nicht mit der Anmeldung.","— como crédito si estás suscrito, como tiempo extra si no. Sin límite. Se aplica al plan mensual y la recompensa llega con el primer pago, no con el registro.","— como crédito se você assina, como tempo extra se não. Sem limite. Vale para o plano mensal, e a recompensa chega com o primeiro pagamento, não com o cadastro.","— en crédit si vous êtes abonné, en temps supplémentaire sinon. Sans plafond. Valable pour l’offre mensuelle, et la récompense arrive au premier paiement, pas à l’inscription."],
