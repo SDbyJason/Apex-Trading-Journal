@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-24b';
+  window.APEX_BUILD = '2026-10-24c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -32782,6 +32782,16 @@ function goToAuthPro(screen) {
         if (fb && fb.readiness != null) { if (fb.readiness < 50) out.push('Body: Readiness under 50'); else if (fb.readiness >= 75) out.push('Body: Readiness 75 or more'); }
         if (fb && fb.trained === true) out.push('Body: Trained that day');
         if (fp && fp.alcoholDrinks > 0) out.push('Body: Alcohol the day before');
+        /* Check-in aus Fit (24.10.2026): Schlafqualität, Zubettgehzeit,
+           Energie/Stimmung/Stress (1–5), Koffein, krank, Achtsamkeit. */
+        if (fb && fb.sleepQ != null && fb.sleepQ <= 2) out.push('Body: Slept poorly');
+        if (fb && fb.bedHour != null && fb.bedHour >= 24) out.push('Body: Went to bed after midnight');
+        if (fb && fb.energy != null && fb.energy <= 2) out.push('Body: Low energy');
+        if (fb && fb.mood != null && fb.mood <= 2) out.push('Body: Low mood');
+        if (fb && fb.stress != null && fb.stress >= 4) out.push('Body: High stress');
+        if (fb && fb.caffeineMg != null && fb.caffeineMg >= 400) out.push('Body: 400 mg caffeine or more');
+        if (fb && fb.sick === true) out.push('Body: Sick that day');
+        if (fb && fb.mindMin > 0) out.push('Body: Meditated that day');
       }
     } catch (e) {}
     var hm = holdMin(t);
@@ -32922,7 +32932,7 @@ function goToAuthPro(screen) {
         'Broke my rules':'when you broke your rules', 'Risk above my rule':'with risk above your rule',
         'Held under 5 minutes':'held under 5 minutes', 'Held over 4 hours':'held over 4 hours' },
       subj:'Trades', subjLong:'Long trades', subjShort:'Short trades',
-      bod:{ 'Slept under 6 h':'after under 6 h of sleep', 'Slept 8 h or more':'after 8 h of sleep or more', 'Readiness under 50':'with readiness under 50', 'Readiness 75 or more':'with readiness of 75 or more', 'Trained that day':'on days you trained', 'Alcohol the day before':'after drinking the day before' },
+      bod:{ 'Slept under 6 h':'after under 6 h of sleep', 'Slept 8 h or more':'after 8 h of sleep or more', 'Readiness under 50':'with readiness under 50', 'Readiness 75 or more':'with readiness of 75 or more', 'Trained that day':'on days you trained', 'Alcohol the day before':'after drinking the day before', 'Slept poorly':'after a poor night', 'Went to bed after midnight':'after going to bed after midnight', 'Low energy':'on low-energy days', 'Low mood':'on low-mood days', 'High stress':'on high-stress days', '400 mg caffeine or more':'on days with 400 mg caffeine or more', 'Sick that day':'on days you were sick', 'Meditated that day':'on days you meditated' },
       and:' and ', leak:'{s} {c} do {d} worse per trade than your others — {t} lost over {n} trades.',
       edge:'{s} {c} do {d} better per trade than your others — {t} gained over {n} trades.',
       ok:'This holds up statistically.', watch:'Promising, but not proven yet — keep logging.', stats:'Statistics' },
@@ -32937,7 +32947,7 @@ function goToAuthPro(screen) {
         'Broke my rules':'wenn du deine Regeln gebrochen hast', 'Risk above my rule':'mit Risiko über deiner Regel',
         'Held under 5 minutes':'unter 5 Minuten gehalten', 'Held over 4 hours':'über 4 Stunden gehalten' },
       subj:'Trades', subjLong:'Long-Trades', subjShort:'Short-Trades',
-      bod:{ 'Slept under 6 h':'nach unter 6 h Schlaf', 'Slept 8 h or more':'nach 8 h Schlaf oder mehr', 'Readiness under 50':'mit Readiness unter 50', 'Readiness 75 or more':'mit Readiness ab 75', 'Trained that day':'an Tagen mit Training', 'Alcohol the day before':'nach Alkohol am Vortag' },
+      bod:{ 'Slept under 6 h':'nach unter 6 h Schlaf', 'Slept 8 h or more':'nach 8 h Schlaf oder mehr', 'Readiness under 50':'mit Readiness unter 50', 'Readiness 75 or more':'mit Readiness ab 75', 'Trained that day':'an Tagen mit Training', 'Alcohol the day before':'nach Alkohol am Vortag', 'Slept poorly':'nach einer schlechten Nacht', 'Went to bed after midnight':'nach Zubettgehen nach Mitternacht', 'Low energy':'an Tagen mit wenig Energie', 'Low mood':'an Tagen mit schlechter Stimmung', 'High stress':'an Tagen mit hohem Stress', '400 mg caffeine or more':'an Tagen mit 400 mg Koffein oder mehr', 'Sick that day':'an Tagen, an denen du krank warst', 'Meditated that day':'an Tagen mit Meditation' },
       and:' und ', leak:'{s} {c} schneiden pro Trade {d} schlechter ab als deine anderen – {t} verloren über {n} Trades.',
       edge:'{s} {c} schneiden pro Trade {d} besser ab als deine anderen – {t} gewonnen über {n} Trades.',
       ok:'Das ist statistisch belastbar.', watch:'Vielversprechend, aber noch nicht belegt – weiter loggen.', stats:'Statistik' },
@@ -32952,7 +32962,7 @@ function goToAuthPro(screen) {
         'Broke my rules':'cuando rompiste tus reglas', 'Risk above my rule':'con riesgo por encima de tu regla',
         'Held under 5 minutes':'mantenidas menos de 5 minutos', 'Held over 4 hours':'mantenidas más de 4 horas' },
       subj:'Las operaciones', subjLong:'Las operaciones en largo', subjShort:'Las operaciones en corto',
-      bod:{ 'Slept under 6 h':'tras dormir menos de 6 h', 'Slept 8 h or more':'tras dormir 8 h o más', 'Readiness under 50':'con readiness por debajo de 50', 'Readiness 75 or more':'con readiness de 75 o más', 'Trained that day':'los días en que entrenaste', 'Alcohol the day before':'tras beber alcohol el día anterior' },
+      bod:{ 'Slept under 6 h':'tras dormir menos de 6 h', 'Slept 8 h or more':'tras dormir 8 h o más', 'Readiness under 50':'con readiness por debajo de 50', 'Readiness 75 or more':'con readiness de 75 o más', 'Trained that day':'los días en que entrenaste', 'Alcohol the day before':'tras beber alcohol el día anterior', 'Slept poorly':'tras una mala noche', 'Went to bed after midnight':'tras acostarte después de medianoche', 'Low energy':'en días con poca energía', 'Low mood':'en días de bajo ánimo', 'High stress':'en días de mucho estrés', '400 mg caffeine or more':'en días con 400 mg de cafeína o más', 'Sick that day':'en días en que estabas enfermo', 'Meditated that day':'en días en que meditaste' },
       and:' y ', leak:'{s} {c} rinden {d} peor por operación que las demás: {t} perdidos en {n} operaciones.',
       edge:'{s} {c} rinden {d} mejor por operación que las demás: {t} ganados en {n} operaciones.',
       ok:'Esto se sostiene estadísticamente.', watch:'Prometedor, pero aún sin probar: sigue registrando.', stats:'Estadística' },
@@ -32967,7 +32977,7 @@ function goToAuthPro(screen) {
         'Broke my rules':'quando você quebrou suas regras', 'Risk above my rule':'com risco acima da sua regra',
         'Held under 5 minutes':'mantidas menos de 5 minutos', 'Held over 4 hours':'mantidas mais de 4 horas' },
       subj:'Operações', subjLong:'Operações compradas', subjShort:'Operações vendidas',
-      bod:{ 'Slept under 6 h':'depois de dormir menos de 6 h', 'Slept 8 h or more':'depois de dormir 8 h ou mais', 'Readiness under 50':'com readiness abaixo de 50', 'Readiness 75 or more':'com readiness de 75 ou mais', 'Trained that day':'nos dias em que você treinou', 'Alcohol the day before':'depois de beber no dia anterior' },
+      bod:{ 'Slept under 6 h':'depois de dormir menos de 6 h', 'Slept 8 h or more':'depois de dormir 8 h ou mais', 'Readiness under 50':'com readiness abaixo de 50', 'Readiness 75 or more':'com readiness de 75 ou mais', 'Trained that day':'nos dias em que você treinou', 'Alcohol the day before':'depois de beber no dia anterior', 'Slept poorly':'depois de uma noite ruim', 'Went to bed after midnight':'depois de deitar após a meia-noite', 'Low energy':'em dias de pouca energia', 'Low mood':'em dias de humor baixo', 'High stress':'em dias de muito estresse', '400 mg caffeine or more':'em dias com 400 mg de cafeína ou mais', 'Sick that day':'em dias em que você estava doente', 'Meditated that day':'em dias em que você meditou' },
       and:' e ', leak:'{s} {c} rendem {d} a menos por operação do que as outras — {t} perdidos em {n} operações.',
       edge:'{s} {c} rendem {d} a mais por operação do que as outras — {t} ganhos em {n} operações.',
       ok:'Isso se sustenta estatisticamente.', watch:'Promissor, mas ainda não comprovado — continue registrando.', stats:'Estatística' },
@@ -32982,7 +32992,7 @@ function goToAuthPro(screen) {
         'Broke my rules':'quand vous avez enfreint vos règles', 'Risk above my rule':'avec un risque au-dessus de votre règle',
         'Held under 5 minutes':'tenus moins de 5 minutes', 'Held over 4 hours':'tenus plus de 4 heures' },
       subj:'Les trades', subjLong:'Les trades à l’achat', subjShort:'Les trades à la vente',
-      bod:{ 'Slept under 6 h':'après moins de 6 h de sommeil', 'Slept 8 h or more':'après 8 h de sommeil ou plus', 'Readiness under 50':'avec une readiness sous 50', 'Readiness 75 or more':'avec une readiness de 75 ou plus', 'Trained that day':'les jours où vous vous êtes entraîné', 'Alcohol the day before':'après avoir bu la veille' },
+      bod:{ 'Slept under 6 h':'après moins de 6 h de sommeil', 'Slept 8 h or more':'après 8 h de sommeil ou plus', 'Readiness under 50':'avec une readiness sous 50', 'Readiness 75 or more':'avec une readiness de 75 ou plus', 'Trained that day':'les jours où vous vous êtes entraîné', 'Alcohol the day before':'après avoir bu la veille', 'Slept poorly':'après une mauvaise nuit', 'Went to bed after midnight':'après un coucher après minuit', 'Low energy':'les jours de faible énergie', 'Low mood':'les jours de moral bas', 'High stress':'les jours de fort stress', '400 mg caffeine or more':'les jours avec 400 mg de caféine ou plus', 'Sick that day':'les jours où tu étais malade', 'Meditated that day':'les jours où tu as médité' },
       and:' et ', leak:'{s} {c} font {d} de moins par trade que les autres — {t} perdus sur {n} trades.',
       edge:'{s} {c} font {d} de plus par trade que les autres — {t} gagnés sur {n} trades.',
       ok:'Cela tient statistiquement.', watch:'Prometteur, mais pas encore prouvé — continuez à journaliser.', stats:'Statistiques' }
@@ -109764,7 +109774,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       .then(function(){ _busy = false; F.render(); F.renderDay(); });
   };
 
-  var CAT = { sleep: 'Sleep & readiness', nutrition: 'Nutrition', training: 'Training', body: 'Body' };
+  var CAT = { sleep: 'Sleep & readiness', nutrition: 'Nutrition', training: 'Training', body: 'Body', mind: 'Mood & stress' };
   F.render = function(){
     var host = document.getElementById('atPanel-fit'); if (!host) return;
     var head = '<div class="gc-title" style="margin-bottom:6px"><svg class=ic aria-hidden=true><use href=#i-moon ></use></svg> <span class="notranslate" translate="no">Evidence Fit</span></div>';
@@ -109786,7 +109796,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
           '<li><span>Create a one-time code.</span> ' + (_code
             ? '<code class="dc-code notranslate" translate="no">' + esc(_code) + '</code> <button class="mc-b" onclick="ApexFit.copy()">Copy</button> <i class="dc-exp"><span>valid for</span> ' + nb(left) + ' <span>min</span></i>'
             : '<button class="mc-b pri" onclick="ApexFit.create()"' + (_busy ? ' disabled' : '') + '>Create code</button>') + '</li>' +
-          '<li><span>Enter it in Evidence Fit under Settings and choose what to share.</span> <a href="' + esc(app()) + '" target="_blank" rel="noopener">Open Evidence Fit ↗</a></li>' +
+          '<li><span>Enter it in Evidence Fit under Setup and choose what to share.</span> <a href="' + esc(app()) + '" target="_blank" rel="noopener">Open Evidence Fit ↗</a></li>' +
         '</ol>';
     }
     host.innerHTML = '<div class="glass-card fit-card">' + head + html + (_err ? '<div class="mc-err">' + esc(_err) + '</div>' : '') + '</div>';
@@ -109803,6 +109813,11 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
     var dec = function(v){ try { return Number(v).toLocaleString(lg, { maximumFractionDigits: 1 }); } catch(e){ return String(v); } };
     if (b && b.sleepH != null) bits.push('<span>Slept</span> ' + nb(dec(b.sleepH)) + ' <span>h</span>');
     if (b && b.readiness != null) bits.push('<span>Readiness</span> ' + nb(b.readiness));
+    if (b && b.sleepQ != null) bits.push('<span>Sleep quality</span> ' + nb(b.sleepQ) + '/5');
+    if (b && b.stress != null) bits.push('<span>Stress</span> ' + nb(b.stress) + '/5');
+    if (b && b.energy != null) bits.push('<span>Energy</span> ' + nb(b.energy) + '/5');
+    if (b && b.caffeineMg) bits.push(nb(b.caffeineMg) + ' <span>mg caffeine</span>');
+    if (b && b.sick === true) bits.push('<span>Sick</span>');
     if (p && p.alcoholDrinks) bits.push(nb(p.alcoholDrinks) + ' <span>' + (p.alcoholDrinks === 1 ? 'drink the day before' : 'drinks the day before') + '</span>');
     if (b && b.trained === true) bits.push('<span>Trained</span>');
     if (b && b.kcal != null) bits.push(nb(b.kcal) + ' <span>kcal</span>');
@@ -109822,6 +109837,12 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       'Nutrition': ['Ernährung', 'Nutrición', 'Alimentação', 'Alimentation'],
       'Training': ['Training', 'Entrenamiento', 'Treino', 'Entraînement'],
       'Body': ['Körper', 'Cuerpo', 'Corpo', 'Corps'],
+      'Mood & stress': ['Stimmung & Stress', 'Ánimo y estrés', 'Humor e estresse', 'Humeur et stress'],
+      'Sleep quality': ['Schlafqualität', 'Calidad del sueño', 'Qualidade do sono', 'Qualité du sommeil'],
+      'Stress': ['Stress', 'Estrés', 'Estresse', 'Stress'],
+      'Energy': ['Energie', 'Energía', 'Energia', 'Énergie'],
+      'mg caffeine': ['mg Koffein', 'mg de cafeína', 'mg de cafeína', 'mg de caféine'],
+      'Sick': ['Krank', 'Enfermo', 'Doente', 'Malade'],
       'Days received:': ['Empfangene Tage:', 'Días recibidos:', 'Dias recebidos:', 'Jours reçus :'],
       'latest': ['zuletzt', 'el último', 'o último', 'dernier'],
       'No days received yet — they arrive after the next change in Evidence Fit.': ['Noch keine Tage empfangen – sie kommen nach der nächsten Änderung in Evidence Fit.', 'Aún no hay días: llegan tras el próximo cambio en Evidence Fit.', 'Nenhum dia ainda — eles chegam após a próxima alteração no Evidence Fit.', 'Aucun jour reçu pour l’instant — ils arrivent après la prochaine modification dans Evidence Fit.'],
@@ -109835,7 +109856,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       'Copy': ['Kopieren', 'Copiar', 'Copiar', 'Copier'],
       'valid for': ['gültig für', 'válido', 'válido por', 'valable'],
       'min': ['Min.', 'min', 'min', 'min'],
-      'Enter it in Evidence Fit under Settings and choose what to share.': ['Gib ihn in Evidence Fit unter Einstellungen ein und wähle, was geteilt wird.', 'Introdúcelo en Evidence Fit, en Ajustes, y elige qué compartir.', 'Digite no Evidence Fit, em Configurações, e escolha o que compartilhar.', 'Saisissez-le dans Evidence Fit, sous Réglages, et choisissez ce qui est partagé.'],
+      'Enter it in Evidence Fit under Setup and choose what to share.': ['Gib ihn in Evidence Fit unter Setup ein und wähle, was geteilt wird.', 'Introdúcelo en Evidence Fit, en Setup, y elige qué compartir.', 'Digite no Evidence Fit, em Setup, e escolha o que compartilhar.', 'Saisissez-le dans Evidence Fit, sous Setup, et choisissez ce qui est partagé.'],
       'Sign in first.': ['Bitte zuerst anmelden.', 'Inicia sesión primero.', 'Entre primeiro.', 'Connectez-vous d’abord.'],
       'Could not create a code. Please try again.': ['Der Code ließ sich nicht erzeugen. Bitte noch einmal versuchen.', 'No se pudo crear el código. Inténtalo de nuevo.', 'Não foi possível criar o código. Tente de novo.', 'Impossible de créer le code. Réessayez.'],
       'Disconnecting failed. Please try again.': ['Trennen fehlgeschlagen. Bitte noch einmal versuchen.', 'No se pudo desconectar. Inténtalo de nuevo.', 'Falha ao desconectar. Tente de novo.', 'La déconnexion a échoué. Réessayez.'],
