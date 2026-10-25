@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-25d';
+  window.APEX_BUILD = '2026-10-25e';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -11212,6 +11212,31 @@ body.light #landingPage * {
 
 <div class="lp-divider"></div>
 
+<!-- ══════ STREAMER (25.10.2026) — echter 3D-Banner als Live-Vorschau.
+     iframe lädt erst beim Sichtbarwerden (loading=lazy), skaliert per --k. ══════ -->
+<section class="lp-section" id="streamers">
+  <div class="lp-label reveal">For streamers</div>
+  <h2 class="lp-title reveal">Trade live. <em>Show the real numbers.</em></h2>
+  <p class="lp-lead reveal">Add two browser sources in OBS or Streamlabs: a live overlay that reads your journal, and a 3D sponsor banner with your own referral code. Your viewers get 10% off, you earn on every subscription.</p>
+  <div class="lp-stream-demo lp-keep reveal">
+    <div class="lp-stream-frame"><iframe src="/banner.html?code=YOURCODE&amp;format=wide" loading="lazy" title="3D sponsor banner preview" tabindex="-1"></iframe></div>
+    <div class="lp-stream-cap">Live preview — the same banner your viewers see on stream</div>
+  </div>
+  <script>(function(){var f=document.querySelector('.lp-stream-frame');if(!f)return;function k(){f.style.setProperty('--k',f.clientWidth/1920)}k();try{new ResizeObserver(k).observe(f)}catch(e){addEventListener('resize',k)}})();</script>
+  <div class="lp-steps">
+    <div class="lp-step reveal d1"><span class="lp-step-n">1</span><div class="lp-step-t">Live overlay</div><div class="lp-step-d">Today's R, P&amp;L or pips, win rate and open trades — updated from your journal while you trade. Hide money amounts with one switch.</div></div>
+    <div class="lp-step reveal d2"><span class="lp-step-n">2</span><div class="lp-step-t">3D sponsor banner</div><div class="lp-step-d">A rendered gold banner with your code, in landscape for Twitch and YouTube or portrait for TikTok, Reels and Shorts. Record it as a transparent video too.</div></div>
+    <div class="lp-step reveal d3"><span class="lp-step-n">3</span><div class="lp-step-t">Copy, paste, done</div><div class="lp-step-d">Settings → Streaming gives you the links. Paste them as browser sources — no plugin, no download.</div></div>
+  </div>
+  <div class="lp-switch-go lp-keep reveal">
+    <div class="lp-switch-btns">
+      <button type="button" onclick="location.href='/streamers.html'">Streamer program →</button>
+    </div>
+  </div>
+</section>
+
+<div class="lp-divider"></div>
+
 <!-- ══════ GRÜNDER (23.10.2026) ══════
      Ein Gesicht vor dem Preis. Nur, was Jason selbst freigegeben hat: Name
      ohne Foto (Initialen-Kachel), er tradet Forex/CFDs, Futures und
@@ -14462,6 +14487,9 @@ function _authAction(type) {
       <button class="settings-tab-btn" onclick="switchSettingsTab('community')" id="stab-community">
         <span class="stb-icon"><svg class=ic aria-hidden=true><use href=#i-users ></use></svg></span> Community
       </button>
+      <button class="settings-tab-btn" onclick="switchSettingsTab('streaming')" id="stab-streaming">
+        <span class="stb-icon"><svg class=ic aria-hidden=true><use href=#i-video ></use></svg></span> Streaming
+      </button>
       <button class="settings-tab-btn" onclick="switchSettingsTab('privacy')" id="stab-privacy">
         <span class="stb-icon"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg></span> Privacy
       </button>
@@ -14504,6 +14532,13 @@ function _authAction(type) {
           <div style="font-size:22px;margin-bottom:10px"><svg class=ic aria-hidden=true><use href=#i-users ></use></svg></div>
           <div class="gc-title" style="margin-bottom:4px">Connect</div>
           <div style="font-size:11px;color:var(--ink3)"><span class="notranslate" translate="no">Evidence Fit</span> and Discord — apps that work with your journal</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:0.05em">→ Configure</div>
+        </div>
+
+        <div class="glass-card" style="cursor:pointer" onclick="switchSettingsTab('streaming')">
+          <div style="font-size:22px;margin-bottom:10px"><svg class=ic aria-hidden=true><use href=#i-video ></use></svg></div>
+          <div class="gc-title" style="margin-bottom:4px">Streaming</div>
+          <div style="font-size:11px;color:var(--ink3)">Live overlay and 3D sponsor banner for OBS, TikTok and YouTube</div>
           <div style="margin-top:10px;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:0.05em">→ Configure</div>
         </div>
 
@@ -14735,10 +14770,22 @@ function _authAction(type) {
         <div class="cx-grid">
           <div id="atPanel-fit"></div>
           <div id="atPanel-discord"></div>
-          <div id="atPanel-overlay"></div>
         </div>
       </div>
     </div><!-- /spanel-connect -->
+
+    <!-- ═══ TAB: STREAMING (25.10.2026) — live overlay and the 3D sponsor
+         banner for OBS / Streamlabs / TikTok. ApexOverlay renders into
+         #atPanel-overlay, wherever it sits. ═══ -->
+    <div class="settings-panel" id="spanel-streaming">
+      <div style="max-width:900px">
+        <div style="font-size:13px;color:var(--ink3);margin-bottom:16px;line-height:1.6">
+          Put your trading on stream: live numbers straight from your journal, and a 3D sponsor banner with your referral code — for OBS, Streamlabs, TikTok, Reels and Shorts.
+          <a href="/streamers.html" target="_blank" rel="noopener" style="color:var(--gold)">How streamers use it ↗</a>
+        </div>
+        <div id="atPanel-overlay"></div>
+      </div>
+    </div><!-- /spanel-streaming -->
 
     <!-- ═══ TAB: FUNDED MODE ═══ -->
     <div class="settings-panel" id="spanel-funded">
@@ -17574,6 +17621,8 @@ function switchSettingsTab(tab) {
   if (tab === 'connect') {
     try { if (window.ApexFit) ApexFit.render(); } catch(e){}
     try { if (window.ApexDiscordLink) ApexDiscordLink.render(); } catch(e){}
+  }
+  if (tab === 'streaming') {
     try { if (window.ApexOverlay) ApexOverlay.render(); } catch(e){}
   }
   if (tab === 'privacy') {
@@ -95746,6 +95795,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'Auto Tracking':     ['Auto-Tracking', 'Seguimiento automático', 'Rastreamento automático', 'Suivi automatique'],
     'Auto-Sync':         ['Auto-Sync', 'Sincronización automática', 'Sincronização automática', 'Synchronisation auto'],
     'Connect':           ['Verbinden', 'Conectar', 'Conectar', 'Connecter'],
+    'Streaming':         ['Streaming', 'Streaming', 'Streaming', 'Streaming'],
     'Funded Mode':       ['Funded-Modus', 'Modo fondeado', 'Modo fundado', 'Mode financé'],
     'Bug Report & Rating': ['Fehler melden & bewerten', 'Reportar error y valorar', 'Relatar erro e avaliar', 'Signaler un bug & noter'],
     'Experience Level':  ['Erfahrungsstufe', 'Nivel de experiencia', 'Nível de experiência', 'Niveau d’expérience'],
@@ -102217,6 +102267,10 @@ body.light::before{ opacity:.45; }
   .bk-modal, .bk-modal .bx, .mbn-item.active::before{ animation:none!important; }
   #toast{ transform:none; }
 }
+.lp-stream-demo{max-width:960px;margin:28px auto 8px}
+.lp-stream-frame{position:relative;aspect-ratio:1920/440;border-radius:16px;overflow:hidden;background:radial-gradient(120% 90% at 50% 20%,#1d2333,#07090d);border:1px solid rgba(255,255,255,.08);container-type:inline-size}
+.lp-stream-frame iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform-origin:0 0;transform:scale(var(--k,.5)) translateY(-325px);pointer-events:none}
+.lp-stream-cap{text-align:center;font-size:12px;color:var(--ink3,#8a93a6);margin-top:10px}
 </style>
 
 <script id="apex-polish-2609-js">
@@ -103265,6 +103319,18 @@ body.light::before{ opacity:.45; }
     "There is an import preset for each of these apps. Symbol, direction, prices, size, P&L, setup and notes are matched automatically. If a column does not match, you assign it once by hand, and the preset remembers it.": ["Für jede dieser Apps gibt es eine Import-Vorlage. Symbol, Richtung, Preise, Größe, P&L, Setup und Notizen werden automatisch zugeordnet. Passt eine Spalte nicht, ordnest du sie einmal von Hand zu, und die Vorlage merkt es sich.", "Hay una plantilla de importación para cada una de estas apps. Símbolo, dirección, precios, tamaño, P&L, setup y notas se asignan automáticamente. Si una columna no coincide, la asignas una vez a mano y la plantilla lo recuerda.", "Há um modelo de importação para cada um desses apps. Símbolo, direção, preços, tamanho, P&L, setup e notas são associados automaticamente. Se uma coluna não bater, você a associa uma vez à mão e o modelo lembra.", "Il existe un modèle d’import pour chacune de ces apps. Symbole, sens, prix, taille, P&L, setup et notes sont associés automatiquement. Si une colonne ne correspond pas, vous l’associez une fois à la main et le modèle s’en souvient."],
     "The import check shows duplicates, missing stops and timezone problems before any trade is saved. Nothing is imported until you confirm.": ["Der Import-Check zeigt Duplikate, fehlende Stops und Zeitzonenprobleme, bevor ein Trade gespeichert wird. Importiert wird erst, wenn du bestätigst.", "La revisión de importación muestra duplicados, stops que faltan y problemas de zona horaria antes de guardar ninguna operación. No se importa nada hasta que confirmes.", "A checagem de importação mostra duplicados, stops ausentes e problemas de fuso horário antes de gravar qualquer operação. Nada é importado até você confirmar.", "Le contrôle d’import montre les doublons, les stops manquants et les problèmes de fuseau horaire avant tout enregistrement. Rien n’est importé avant votre confirmation."],
     "Screenshots and chart images are not included, because these apps do not put them into their export files. Importing is free on every plan — no trial and no card needed.": ["Screenshots und Chartbilder kommen nicht mit, weil diese Apps sie nicht in ihre Exportdateien schreiben. Der Import ist in jedem Plan kostenlos — ohne Testphase und ohne Karte.", "Las capturas y las imágenes de gráficos no se incluyen, porque estas apps no las ponen en sus archivos de exportación. Importar es gratis en todos los planes, sin prueba ni tarjeta.", "Capturas de tela e imagens de gráficos não vêm junto, porque esses apps não as colocam nos arquivos de exportação. Importar é grátis em todos os planos — sem teste e sem cartão.", "Les captures et images de graphiques ne suivent pas, car ces apps ne les mettent pas dans leurs fichiers d’export. L’import est gratuit dans toutes les offres — sans essai ni carte."],
+    "For streamers": ["Für Streamer", "Para streamers", "Para streamers", "Pour les streamers"],
+    "Trade live. ": ["Live traden. ", "Opera en vivo. ", "Opere ao vivo. ", "Tradez en direct. "],
+    "Show the real numbers.": ["Zeig die echten Zahlen.", "Muestra los números reales.", "Mostre os números reais.", "Montrez les vrais chiffres."],
+    "Add two browser sources in OBS or Streamlabs: a live overlay that reads your journal, and a 3D sponsor banner with your own referral code. Your viewers get 10% off, you earn on every subscription.": ["Füge in OBS oder Streamlabs zwei Browserquellen hinzu: ein Live-Overlay, das dein Journal liest, und ein 3D-Sponsorbanner mit deinem eigenen Empfehlungscode. Deine Zuschauer bekommen 10 % Rabatt, du verdienst an jedem Abo.", "Añade dos fuentes de navegador en OBS o Streamlabs: un overlay en vivo que lee tu diario y un banner de patrocinio 3D con tu propio código de referido. Tus espectadores obtienen un 10 % de descuento y tú ganas con cada suscripción.", "Adicione duas fontes de navegador no OBS ou Streamlabs: um overlay ao vivo que lê seu diário e um banner de patrocínio 3D com seu próprio código de indicação. Seus espectadores ganham 10% de desconto e você ganha em cada assinatura.", "Ajoutez deux sources navigateur dans OBS ou Streamlabs : un overlay en direct qui lit votre journal et une bannière sponsor 3D avec votre propre code de parrainage. Vos spectateurs obtiennent 10 % de réduction, vous gagnez sur chaque abonnement."],
+    "Live preview — the same banner your viewers see on stream": ["Live-Vorschau — dasselbe Banner, das deine Zuschauer im Stream sehen", "Vista previa en vivo: el mismo banner que ven tus espectadores", "Prévia ao vivo — o mesmo banner que seus espectadores veem", "Aperçu en direct — la même bannière que voient vos spectateurs"],
+    "Live overlay": ["Live-Overlay", "Overlay en vivo", "Overlay ao vivo", "Overlay en direct"],
+    "Today's R, P&L or pips, win rate and open trades — updated from your journal while you trade. Hide money amounts with one switch.": ["Heutiges R, P&L oder Pips, Trefferquote und offene Trades — aus deinem Journal aktualisiert, während du tradest. Geldbeträge mit einem Schalter ausblenden.", "R, P&L o pips de hoy, tasa de acierto y operaciones abiertas, actualizados desde tu diario mientras operas. Oculta los importes con un interruptor.", "R, P&L ou pips de hoje, taxa de acerto e trades abertos — atualizados do seu diário enquanto você opera. Oculte valores com um botão.", "R, P&L ou pips du jour, taux de réussite et trades ouverts — mis à jour depuis votre journal pendant que vous tradez. Masquez les montants d’un clic."],
+    "3D sponsor banner": ["3D-Sponsorbanner", "Banner de patrocinio 3D", "Banner de patrocínio 3D", "Bannière sponsor 3D"],
+    "A rendered gold banner with your code, in landscape for Twitch and YouTube or portrait for TikTok, Reels and Shorts. Record it as a transparent video too.": ["Ein gerendertes Goldbanner mit deinem Code, quer für Twitch und YouTube oder hochkant für TikTok, Reels und Shorts. Auch als transparentes Video aufnehmbar.", "Un banner dorado renderizado con tu código, horizontal para Twitch y YouTube o vertical para TikTok, Reels y Shorts. También puedes grabarlo como vídeo transparente.", "Um banner dourado renderizado com seu código, horizontal para Twitch e YouTube ou vertical para TikTok, Reels e Shorts. Também pode ser gravado como vídeo transparente.", "Une bannière dorée rendue avec votre code, en paysage pour Twitch et YouTube ou en portrait pour TikTok, Reels et Shorts. Enregistrable aussi en vidéo transparente."],
+    "Copy, paste, done": ["Kopieren, einfügen, fertig", "Copiar, pegar, listo", "Copiar, colar, pronto", "Copier, coller, terminé"],
+    "Settings → Streaming gives you the links. Paste them as browser sources — no plugin, no download.": ["Unter Einstellungen → Streaming bekommst du die Links. Als Browserquellen einfügen — kein Plugin, kein Download.", "En Ajustes → Streaming tienes los enlaces. Pégalos como fuentes de navegador, sin plugin ni descarga.", "Em Configurações → Streaming você recebe os links. Cole como fontes de navegador — sem plugin, sem download.", "Paramètres → Streaming vous donne les liens. Collez-les comme sources navigateur — sans plugin ni téléchargement."],
+    "Streamer program →": ["Streamer-Programm →", "Programa para streamers →", "Programa para streamers →", "Programme streamers →"],
     "Most traders who try a new journal already keep one somewhere else. Starting from zero would throw away your history, and your history is the whole point of a journal.": ["Die meisten, die ein neues Journal ausprobieren, führen schon irgendwo eins. Bei null anzufangen hieße, deine Historie wegzuwerfen, und genau die ist der Sinn eines Journals.", "La mayoría de los traders que prueban un diario nuevo ya llevan uno en otra parte. Empezar de cero sería tirar tu historial, y tu historial es todo el sentido de un diario.", "A maioria dos traders que testam um novo diário já mantém um em outro lugar. Começar do zero jogaria fora seu histórico, e seu histórico é todo o sentido de um diário.", "La plupart des traders qui essaient un nouveau journal en tiennent déjà un ailleurs. Repartir de zéro jetterait votre historique, et votre historique est tout l’intérêt d’un journal."],
     "Written inside the app by people who use it, and published only after review. Nothing here is scripted or bought.": ["Geschrieben in der App von Leuten, die sie nutzen, und erst nach Prüfung veröffentlicht. Nichts davon ist gestellt oder gekauft.", "Escrito dentro de la app por personas que la usan, y publicado solo tras una revisión. Nada aquí está guionizado ni comprado.", "Escrito dentro do app por pessoas que o usam, e publicado só depois de revisado. Nada aqui é roteirizado ou comprado.", "Rédigé dans l’app par des personnes qui l’utilisent, et publié seulement après vérification. Rien ici n’est scénarisé ni acheté."],
     "soon": ["bald", "pronto", "em breve", "bientôt"],
@@ -104701,15 +104767,15 @@ body.light::before{ opacity:.45; }
   var GROUPS = [
     { k:'account',   label:'Account',   tabs:['overview','profile','privacy','invite','partner'] },
     { k:'trading',   label:'Trading',   tabs:['trading','ctrader','connect','funded'] },
-    { k:'community', label:'Community', tabs:['community'] },
+    { k:'community', label:'Community', tabs:['community','streaming'] },
     { k:'help',      label:'Help',      tabs:['bugreport'] }
   ];
   var TITLES = { overview:'Overview', profile:'Profile', privacy:'Privacy', invite:'Invite & Earn', partner:'Partner program', trading:'Trading',
-    ctrader:'Auto Tracking', connect:'Connect', funded:'Funded Mode', community:'Community', bugreport:'Bug Report & Rating' };
+    ctrader:'Auto Tracking', connect:'Connect', streaming:'Streaming', funded:'Funded Mode', community:'Community', bugreport:'Bug Report & Rating' };
   var DESCS = { overview:'Your account, plan and what is still to set up.', profile:'Photo, name and what the AI coach knows about you.',
     privacy:'Who can see your profile and message you.', invite:'Your referral link and what it has earned.',
     partner:'Your partner link, code, commission and payouts.',
-    trading:'Journal behaviour while you log trades.', ctrader:'Brokers and platforms that import trades automatically.', connect:'Evidence Fit, Discord and your stream overlay — apps that work with your journal.',
+    trading:'Journal behaviour while you log trades.', ctrader:'Brokers and platforms that import trades automatically.', connect:'Evidence Fit and Discord — apps that work with your journal.', streaming:'Live overlay and 3D sponsor banner for your stream, with your referral code.',
     funded:'Prop firm rules, drawdown limits and account phase.', community:'Leaderboard, messages, notifications and e-mails.',
     bugreport:'Tell us what broke, what is missing, or how we are doing.' };
 
