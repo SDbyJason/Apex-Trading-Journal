@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Trader Funding Journal — EOD & Intraday Trailing Drawdown | Evidence</title>
+<meta name="description" content="A trading journal for Apex Trader Funding: the EOD and the intraday trailing drawdown modelled separately, the 30-day limit, and your futures trades in whole contracts.">
+<link rel="canonical" href="https://evidencetrading.com/apex-trading-journal.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/apex-trading-journal.html">
+<meta property="og:title" content="Apex Trader Funding Journal — EOD & Intraday Trailing Drawdown | Evidence">
+<meta property="og:description" content="A trading journal for Apex Trader Funding: the EOD and the intraday trailing drawdown modelled separately, the 30-day limit, and your futures trades in whole contracts.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400&family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080b;--panel:#0d0f13;--line:rgba(255,255,255,.09);--gold:#c9a84c;
+--gold-hi:#e8c96a;--ink:#f2efe9;--ink2:#c8c2b6;--mute:#8b8578;--pos:#3ecf8e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);
+font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:0 22px}
+header.nav{border-bottom:1px solid var(--line);position:sticky;top:0;
+background:rgba(7,8,11,.9);backdrop-filter:blur(10px);z-index:10}
+header.nav .wrap{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--ink);font-size:15px}
+.brand-mark{width:28px;height:28px;border-radius:8px;display:block;flex:none}
+.nav-cta{margin-left:auto;border:1px solid rgba(201,168,76,.4);border-radius:9px;
+padding:8px 16px;font-size:13.5px;font-weight:600}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3rem);line-height:1.12;
+letter-spacing:-.02em;color:var(--ink);margin:48px 0 14px;font-weight:800}
+h2{font-family:'Syne',sans-serif;font-size:clamp(1.35rem,3vw,1.75rem);color:var(--ink);
+margin:44px 0 12px;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.05rem;color:var(--ink);margin:28px 0 8px;font-weight:700}
+.lede{font-size:1.12rem;color:var(--ink2);margin-bottom:30px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.16em;
+text-transform:uppercase;color:var(--gold);margin-top:44px}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;
+background:rgba(255,255,255,.015)}
+.card.gold{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.05)}
+.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;margin:22px 0;font-size:14.5px;display:block;overflow-x:auto}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:700;font-size:13px}
+td.y{color:var(--pos);font-weight:700}td.n{color:var(--mute)}
+ul{padding-left:20px}li{margin-bottom:9px}
+code{font-family:'DM Mono',monospace;font-size:13.5px;background:rgba(255,255,255,.05);
+padding:2px 6px;border-radius:5px;color:var(--ink)}
+.cta{display:inline-block;background:linear-gradient(135deg,var(--gold-hi),var(--gold));
+color:#07080b;font-weight:800;padding:13px 26px;border-radius:11px;margin:8px 10px 8px 0;
+font-size:15px}
+.cta:hover{text-decoration:none;filter:brightness(1.06)}
+.cta.ghost{background:none;color:var(--gold);border:1px solid rgba(201,168,76,.4)}
+footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0 50px;
+font-size:13px;color:var(--mute)}
+footer a{color:var(--mute)}
+footer .links{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px}
+.related{display:grid;gap:10px;margin:18px 0}
+.related a{border:1px solid var(--line);border-radius:11px;padding:13px 15px;
+color:var(--ink);font-weight:600;font-size:14.5px}
+.related a:hover{border-color:rgba(201,168,76,.4);text-decoration:none}
+.related a span{display:block;color:var(--mute);font-weight:400;font-size:13px;margin-top:2px}
+.note{font-size:13.5px;color:var(--mute);border-left:2px solid var(--line);
+padding-left:14px;margin:20px 0}
+table.rules{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:15px}table.rules th,table.rules td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid rgba(201,168,76,.18)}table.rules th{width:34%;font-weight:600;color:#c9a84c}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="/"><svg class="brand-mark" viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg> Evidence Trading</a>
+  <a class="nav-cta" href="/">Open the app →</a>
+</div></header>
+
+<main class="wrap">
+<h1>A trading journal for Apex Trader Funding accounts</h1>
+<p class="lede">Apex sells two evaluations that look the same and are not: one trails at the end of the day, the other in real time. Which one you hold decides how much room you really have after a good morning.</p>
+
+<h2>Apex Trader Funding’s rules, as Evidence measures them</h2>
+<h3>Apex 4.0 — EOD evaluation</h3>
+<table class="rules">
+<tr><th>Profit target / max loss</th><td>$25k: $1,500 / $1,000 · $50k: $3,000 / $2,000 · $100k: $6,000 / $3,000 · $150k: $9,000 / $4,000</td></tr>
+<tr><th>Drawdown</th><td>Trails at the end of the day</td></tr>
+<tr><th>Daily loss</th><td>Only pauses the session</td></tr>
+<tr><th>Minimum days</th><td>None</td></tr>
+<tr><th>Consistency</th><td>None in the evaluation</td></tr>
+<tr><th>Time limit</th><td>30 days</td></tr>
+</table>
+<h3>Apex 4.0 — Intraday evaluation</h3>
+<table class="rules">
+<tr><th>Profit target / max loss</th><td>Same as the EOD evaluation</td></tr>
+<tr><th>Drawdown</th><td>Follows your highest balance in real time</td></tr>
+<tr><th>Daily loss</th><td>None</td></tr>
+</table>
+<p class="note">Apex 4.0, for accounts bought from 1 March 2026. From independent summaries, because Apex’s own help centre could not be read when we checked. Older accounts follow the old rules, and where the intraday limit stops depends on the platform — check yours. Checked on 7 October 2026. Source: <a href="https://tradingfunder.com/apex-trader-funding-rules" rel="noopener">Trading Funder — Apex Trader Funding rules</a>.</p>
+
+<h2>Set once, measured everywhere</h2>
+<p>Pick Apex Trader Funding, the programme, your account size and the phase in the Prop mode — five short
+steps. From then on the whole app measures that account with these rules: a bar under the
+navigation with the distance to your max loss in dollars and the room left today, the challenge on
+top of the overview, a warning on the trade card when a stop would use most of today’s room, and a
+plain message when every condition is met or which rule broke on which day.</p>
+<p>Apex’s trading day ends at 5 pm New York time. Evidence counts the day on that clock.</p>
+
+<h2>Getting the trades in</h2>
+<p>Apex accounts run on Rithmic and Tradovate. Evidence has no direct connection to either yet: your trades come in through a statement import, which knows Apex’s export, or live through the NinjaTrader tracker (beta).</p>
+
+<h2>What a journal adds to the rule numbers</h2>
+<ul>
+<li><strong>Edge &amp; Leaks</strong> — every symbol, session, hour and habit tested against your other trades, so you see what passes challenges for you and what quietly fails them.</li>
+<li><strong>A cost ledger</strong> for fees, resets and payouts, so you know what the account really cost.</li>
+<li><strong>Guardrails</strong> — a personal stop below Apex Trader Funding’s daily limit, a trade cap and a cooldown after a loss. Free.</li>
+</ul>
+
+<h2>When you do not need Evidence</h2>
+<p>If you want your Apex trades to arrive without any import, a journal with a Tradovate connection fits better today. Evidence does not have one yet.</p>
+
+<div class="card gold">
+<h3>See the Prop cockpit on sample data</h3>
+<a class="cta" href="/?demo=1">Open the live demo →</a>
+<a class="cta ghost" href="/">Create a free account</a>
+</div>
+
+<p class="note">Evidence is not affiliated with Apex Trader Funding. Rules change — always check yours against your own account. The Prop mode for one challenge is free; several at once, the cost ledger and the post-mortem are part of Pro.</p>
+
+<h2>Related</h2>
+<div class="related">
+      <a href="/prop-firm-trading-journal.html">Prop firm trading journal<span>trailing, EOD and static drawdown, the consistency rule and guardrails</span></a>
+      <a href="/ftmo-trading-journal.html">FTMO trading journal<span>FTMO’s rules tracked on your own trades</span></a>
+      <a href="/the5ers-trading-journal.html">The5ers trading journal<span>The5ers’s rules tracked on your own trades</span></a>
+      <a href="/myfundedfutures-trading-journal.html">MyFundedFutures trading journal<span>MyFundedFutures’s rules tracked on your own trades</span></a>
+      <a href="/ctrader-trading-journal.html">cTrader trading journal<span>journals cTrader accounts by itself, and captures SL/TP while the position is still open</span></a>
+      <a href="/trading-journal-market-replay.html">Trading journal with market replay<span>trade any past day again, candle by candle, on real tick data</span></a>
+      <a href="/crypto-trading-journal.html">Crypto trading journal<span>Binance and Bybit sync through a read-only API key</span></a>
+</div>
+</main>
+
+<footer><div class="wrap">
+  <div class="links">
+    <a href="/">Home</a>
+    <a href="/?demo=1">Live demo</a>
+    <a href="/ctrader-trading-journal.html">cTrader journal</a>
+    <a href="/prop-firm-trading-journal.html">Prop firm journal</a>
+    <a href="/trading-journal-market-replay.html">Market replay</a>
+    <a href="/crypto-trading-journal.html">Crypto journal</a>
+    <a href="/evidence-vs-tradezella.html">vs TradeZella</a>
+    <a href="/evidence-vs-tradersync.html">vs TraderSync</a>
+    <a href="/changelog.html">Changelog</a>
+  </div>
+  <div>© 2026 Evidence Trading · Journal, analytics and market replay for traders.
+  Evidence reads your trade history. It never places, changes or closes a trade.</div>
+</div></footer>
+</body>
+</html>

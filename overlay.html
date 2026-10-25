@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Evidence — Stream overlay</title>
+<!-- Stream overlay for OBS / Streamlabs (browser source). 25.10.2026.
+     URL:  /overlay.html?k=<overlay key>&layout=card|bar|poster&show=pnl|r|pips
+           &money=0  (never show amounts)   &promo=0 (no referral line)
+           &corner=bl|br|tl|tr (card)  &scale=1.0  &lang=en|de
+     The key is an OVERLAY key: the API lets it read /v1/overlay and nothing
+     else, so a leaked URL only shows what is already on screen.
+     Background is transparent — OBS draws it over the stream. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#E8C24A;--gold-hi:#F9E894;--gold-deep:#AE801A;--ink:#F4EFE3;--ink2:#B9B2A2;--pos:#3ECF8E;--neg:#F0636A;--bg:rgba(12,12,12,.86);--line:rgba(232,194,74,.35);--s:1}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:transparent;overflow:hidden;width:100%;height:100%}
+body{font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.mono{font-family:'DM Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.flat{color:var(--ink2)}
+.mark{width:calc(28px*var(--s));height:calc(28px*var(--s));flex:none}
+.brand{display:flex;align-items:center;gap:calc(8px*var(--s));font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.02em;font-size:calc(13px*var(--s))}
+.brand small{display:block;font-family:'Instrument Sans';font-weight:600;font-size:calc(9px*var(--s));letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.live{display:inline-flex;align-items:center;gap:5px;font-size:calc(9px*var(--s));letter-spacing:.16em;font-weight:700;color:var(--neg);text-transform:uppercase}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--neg);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:calc(16px*var(--s));backdrop-filter:blur(10px);box-shadow:0 10px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04)}
+/* ── card ── */
+#card{position:fixed;width:calc(300px*var(--s));padding:calc(14px*var(--s)) calc(16px*var(--s))}
+#card.bl{left:24px;bottom:24px}#card.br{right:24px;bottom:24px}#card.tl{left:24px;top:24px}#card.tr{right:24px;top:24px}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:calc(10px*var(--s))}
+.big{font-size:calc(34px*var(--s));font-weight:700;line-height:1.05;margin:calc(2px*var(--s)) 0 calc(4px*var(--s))}
+.lbl{font-size:calc(10px*var(--s));letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(8px*var(--s));margin-top:calc(10px*var(--s));padding-top:calc(10px*var(--s));border-top:1px solid rgba(255,255,255,.07)}
+.grid b{display:block;font-size:calc(16px*var(--s));font-weight:700;margin-top:2px}
+.openline,.lastline{font-size:calc(12px*var(--s));color:var(--ink2);margin-top:calc(8px*var(--s))}
+.openline b,.lastline b{color:var(--ink)}
+.promo{margin-top:calc(10px*var(--s));padding:calc(7px*var(--s)) calc(10px*var(--s));border-radius:calc(9px*var(--s));background:linear-gradient(135deg,rgba(249,232,148,.14),rgba(174,128,26,.12));border:1px solid var(--line);font-size:calc(11.5px*var(--s));line-height:1.35}
+.promo b{color:var(--gold-hi)}
+/* ── bar ── */
+#bar{position:fixed;left:0;right:0;bottom:0;height:calc(46px*var(--s));display:flex;align-items:center;gap:calc(22px*var(--s));padding:0 calc(18px*var(--s));border-radius:0;border-left:0;border-right:0;border-bottom:0;white-space:nowrap;overflow:hidden}
+#bar .seg{display:flex;align-items:baseline;gap:7px;font-size:calc(15px*var(--s))}
+#bar .seg .lbl{font-size:calc(9.5px*var(--s))}
+#bar .sep{width:1px;height:55%;background:rgba(255,255,255,.12)}
+#bar .promo{margin:0 0 0 auto;padding:calc(5px*var(--s)) calc(10px*var(--s))}
+@media (max-width:1100px){#bar .promo{display:none}}
+/* ── poster ── */
+#poster{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(520px*var(--s));padding:calc(28px*var(--s)) calc(30px*var(--s));text-align:center}
+#poster .mark{width:calc(64px*var(--s));height:calc(64px*var(--s));margin:0 auto calc(12px*var(--s))}
+#poster h1{font-family:'Syne',sans-serif;font-weight:800;font-size:calc(30px*var(--s));line-height:1.1}
+#poster h1 span{background:linear-gradient(135deg,var(--gold-hi),var(--gold),var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+#poster p{color:var(--ink2);font-size:calc(14px*var(--s));margin:calc(10px*var(--s)) auto 0;max-width:90%}
+#poster .stats{display:flex;justify-content:center;gap:calc(26px*var(--s));margin:calc(18px*var(--s)) 0 calc(6px*var(--s))}
+#poster .stats b{display:block;font-size:calc(24px*var(--s))}
+#poster .url{margin-top:calc(14px*var(--s));font-family:'DM Mono';font-size:calc(16px*var(--s));color:var(--gold-hi)}
+#poster .promo{display:inline-block;font-size:calc(14px*var(--s))}
+/* trade flash */
+.flash{position:fixed;left:50%;top:calc(18%);transform:translate(-50%,-10px) scale(.96);opacity:0;padding:calc(12px*var(--s)) calc(22px*var(--s));border-radius:calc(14px*var(--s));font-weight:700;font-size:calc(20px*var(--s));transition:opacity .35s,transform .35s;pointer-events:none}
+.flash.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.flash.pos{background:rgba(20,60,40,.92);border:1px solid var(--pos);color:#CFF7E2}
+.flash.neg{background:rgba(70,20,24,.92);border:1px solid var(--neg);color:#FFD5D8}
+.bump{animation:bump .6s}
+@keyframes bump{30%{transform:scale(1.08)}}
+.err{position:fixed;left:24px;bottom:24px;max-width:420px;padding:12px 14px;font-size:13px;color:#FFD5D8}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs><symbol id="et" viewBox="0 0 512 512"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/></g></symbol></defs></svg>
+
+<div id="root"></div>
+<div class="flash" id="flash"></div>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'https://apexapi.4kjyyyftv6.workers.dev';
+  var q = new URLSearchParams(location.search);
+  var KEY = q.get('k') || '';
+  var LAYOUT = /^(card|bar|poster)$/.test(q.get('layout')) ? q.get('layout') : 'card';
+  var SHOW = /^(pnl|r|pips)$/.test(q.get('show')) ? q.get('show') : 'r';
+  var MONEY = q.get('money') !== '0';
+  var PROMO = q.get('promo') !== '0';
+  var CORNER = /^(bl|br|tl|tr)$/.test(q.get('corner')) ? q.get('corner') : 'bl';
+  var SCALE = Math.max(0.5, Math.min(2.5, parseFloat(q.get('scale')) || 1));
+  var DE = (q.get('lang') || navigator.language || 'en').slice(0, 2) === 'de';
+  document.documentElement.style.setProperty('--s', SCALE);
+  document.documentElement.lang = DE ? 'de' : 'en';
+
+  var T = DE ? {
+    today: 'Heute', week: '7 Tage', trades: 'Trades', win: 'Trefferquote', streak: 'Serie', open: 'Offen',
+    last: 'Letzter Trade', journal: 'Live-Journal', tagline: 'Jeder Trade, automatisch gemessen.',
+    promo: function (c) { return c ? 'Mein Journal: <b>evidencetrading.com</b> · Code <b>' + c + '</b> = 10 % auf den ersten Monat'
+                                    : 'Mein Journal: <b>evidencetrading.com</b>'; },
+    code: function (c) { return 'Code <b>' + c + '</b> = 10 % auf den ersten Monat'; },
+    closed: 'Trade geschlossen', posterTitle: 'Gemessen mit <span>Evidence</span>',
+    posterText: 'Das Trading-Journal, das sich selbst füllt — und dir zeigt, was wirklich funktioniert.',
+    noKey: 'Overlay-Link unvollständig: Erstelle ihn in Evidence unter Einstellungen → Connect → Stream-Overlay.',
+    bad: 'Dieser Overlay-Key gilt nicht mehr. Erstelle in Evidence einen neuen.'
+  } : {
+    today: 'Today', week: '7 days', trades: 'Trades', win: 'Win rate', streak: 'Streak', open: 'Open',
+    last: 'Last trade', journal: 'Live journal', tagline: 'Every trade, measured automatically.',
+    promo: function (c) { return c ? 'My journal: <b>evidencetrading.com</b> · code <b>' + c + '</b> = 10% off the first month'
+                                    : 'My journal: <b>evidencetrading.com</b>'; },
+    code: function (c) { return 'Code <b>' + c + '</b> = 10% off the first month'; },
+    closed: 'Trade closed', posterTitle: 'Measured with <span>Evidence</span>',
+    posterText: 'The trading journal that fills itself — and shows what actually works.',
+    noKey: 'Overlay link incomplete: create it in Evidence under Settings → Connect → Stream overlay.',
+    bad: 'This overlay key is no longer valid. Create a new one in Evidence.'
+  };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  /* The headline figure. Money only when allowed AND known; otherwise R,
+     otherwise pips — never a number the journal does not actually have. */
+  function headline(s) {
+    var want = SHOW === 'pnl' && !MONEY ? 'r' : SHOW;
+    var order = want === 'pnl' ? ['pnl', 'r', 'pips'] : want === 'r' ? ['r', 'pips'] : ['pips', 'r'];
+    for (var i = 0; i < order.length; i++) {
+      var k = order[i], v = s[k];
+      if (v == null || (k === 'pnl' && !MONEY)) continue;
+      return { v: v, txt: fmt(k, v) };
+    }
+    return { v: 0, txt: '—' };
+  }
+  function fmt(kind, v) {
+    if (v == null) return '—';
+    var sign = v > 0 ? '+' : v < 0 ? '−' : '';
+    var a = Math.abs(v);
+    if (kind === 'pnl') { var d = Math.round(a) === a ? 0 : 2; return sign + '$' + a.toLocaleString(DE ? 'de-DE' : 'en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+    if (kind === 'r') return sign + a.toLocaleString(DE ? 'de-DE' : 'en-US', { maximumFractionDigits: 2 }) + 'R';
+    return sign + a.toLocaleString(DE ? 'de-DE' : 'en-US', { maximumFractionDigits: 1 }) + (DE ? ' Pips' : ' pips');
+  }
+  function cls(v) { return v > 0 ? 'pos' : v < 0 ? 'neg' : 'flat'; }
+  function mark() { return '<svg class="mark" aria-hidden="true"><use href="#et"/></svg>'; }
+  function brand() { return '<div class="brand">' + mark() + '<div>Evidence<small>' + T.journal + '</small></div></div>'; }
+  function promo(d) { return PROMO ? '<div class="promo">' + T.promo(d.referralCode ? esc(d.referralCode) : '') + '</div>' : ''; }
+  function lastLine(d) {
+    if (!d.last) return '';
+    var l = d.last, h = headline({ pnl: l.pnl, r: l.r, pips: l.pips });
+    return '<div class="lastline">' + T.last + ': <b>' + esc(l.symbol || '') + '</b> ' + esc(l.direction || '') + ' <b class="mono ' + cls(h.v) + '">' + h.txt + '</b></div>';
+  }
+  function openLine(d) {
+    if (!d.open || !d.open.length) return '';
+    return '<div class="openline"><span class="live"><i></i>' + T.open + '</span> ' + d.open.map(function (o) { return '<b>' + esc(o.symbol) + '</b> ' + esc(o.direction || ''); }).join(' · ') + '</div>';
+  }
+
+  function render(d) {
+    var root = document.getElementById('root'), t = d.today, w = d.week, h = headline(t), hw = headline(w);
+    if (LAYOUT === 'bar') {
+      root.innerHTML = '<div id="bar" class="panel">' + brand() +
+        '<div class="sep"></div><div class="seg"><span class="lbl">' + T.today + '</span><b class="mono ' + cls(h.v) + '" id="hl">' + h.txt + '</b></div>' +
+        '<div class="seg"><span class="lbl">' + T.trades + '</span><b class="mono">' + t.trades + '</b></div>' +
+        '<div class="seg"><span class="lbl">' + T.win + '</span><b class="mono">' + (t.winRate == null ? '—' : t.winRate + '%') + '</b></div>' +
+        '<div class="sep"></div><div class="seg"><span class="lbl">' + T.week + '</span><b class="mono ' + cls(hw.v) + '">' + hw.txt + '</b></div>' +
+        '<div class="seg"><span class="lbl">' + T.streak + '</span><b class="mono">' + d.streak + '</b></div>' +
+        (d.open && d.open.length ? '<div class="sep"></div>' + openLine(d).replace('openline', 'seg') : '') +
+        promo(d) + '</div>';
+    } else if (LAYOUT === 'poster') {
+      root.innerHTML = '<div id="poster" class="panel">' + mark() + '<h1>' + T.posterTitle + '</h1><p>' + T.posterText + '</p>' +
+        '<div class="stats"><div><span class="lbl">' + T.today + '</span><b class="mono ' + cls(h.v) + '" id="hl">' + h.txt + '</b></div>' +
+        '<div><span class="lbl">' + T.week + '</span><b class="mono ' + cls(hw.v) + '">' + hw.txt + '</b></div>' +
+        '<div><span class="lbl">' + T.streak + '</span><b class="mono">' + d.streak + '</b></div></div>' +
+        (PROMO ? '<div class="url">evidencetrading.com</div>' + (d.referralCode ? '<div class="promo">' + T.code(esc(d.referralCode)) + '</div>' : '') : '') + '</div>';
+    } else {
+      root.innerHTML = '<div id="card" class="panel ' + CORNER + '"><div class="head">' + brand() + '<span class="live"><i></i>Live</span></div>' +
+        '<div class="lbl">' + T.today + '</div><div class="big mono ' + cls(h.v) + '" id="hl">' + h.txt + '</div>' +
+        '<div class="grid"><div><span class="lbl">' + T.trades + '</span><b class="mono">' + t.trades + '</b></div>' +
+        '<div><span class="lbl">' + T.win + '</span><b class="mono">' + (t.winRate == null ? '—' : t.winRate + '%') + '</b></div>' +
+        '<div><span class="lbl">' + T.streak + '</span><b class="mono">' + d.streak + '</b></div></div>' +
+        openLine(d) + lastLine(d) + promo(d) + '</div>';
+    }
+  }
+
+  var prev = null, flashT = null;
+  function flash(d) {
+    if (!prev || !d.last) return;
+    var changed = d.today.trades > prev.today.trades;
+    if (!changed) return;
+    var h = headline({ pnl: d.last.pnl, r: d.last.r, pips: d.last.pips });
+    var el = document.getElementById('flash');
+    el.className = 'flash show ' + (h.v >= 0 ? 'pos' : 'neg');
+    el.innerHTML = T.closed + ' · ' + esc(d.last.symbol || '') + ' <span class="mono">' + h.txt + '</span>';
+    clearTimeout(flashT); flashT = setTimeout(function () { el.className = 'flash'; }, 6000);
+    var hl = document.getElementById('hl'); if (hl) { hl.classList.remove('bump'); void hl.offsetWidth; hl.classList.add('bump'); }
+  }
+  function error(msg) { document.getElementById('root').innerHTML = '<div class="err panel">' + esc(msg) + '</div>'; }
+
+  /* Demo data when the page is opened with ?demo=1 — for the setup preview
+     in the app, so the streamer sees the look before creating a key. */
+  var DEMO = { username: 'demo', referralCode: 'DEMO10', day: today(), streak: 3,
+    today: { trades: 4, wins: 3, losses: 1, winRate: 75, pips: 38.5, r: 2.4, pnl: 612.5 },
+    week: { trades: 17, wins: 11, losses: 6, winRate: 65, pips: 104.2, r: 6.8, pnl: 1840 },
+    last: { symbol: 'NQ', direction: 'long', pips: 12, r: 1.2, pnl: 240 }, open: [{ symbol: 'ES', direction: 'short' }] };
+
+  function load() {
+    if (q.get('demo') === '1') { render(DEMO); prev = DEMO; return; }
+    if (!KEY) { error(T.noKey); return; }
+    fetch(API + '/v1/overlay?day=' + today(), { headers: { Authorization: 'Bearer ' + KEY } })
+      .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+      .then(function (x) {
+        if (x.s === 401 || x.s === 403) { error(T.bad); return; }
+        if (!x.j || !x.j.ok) return;                 // keep the last good view on a hiccup
+        render(x.j.data); flash(x.j.data); prev = x.j.data;
+      })
+      .catch(function () { /* offline for a moment — keep what is on screen */ });
+  }
+  load();
+  setInterval(load, 20000);
+})();
+</script>
+</body>
+</html>

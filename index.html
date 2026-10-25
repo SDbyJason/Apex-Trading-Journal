@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-25a';
+  window.APEX_BUILD = '2026-10-25b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -11180,6 +11180,20 @@ body.light #landingPage * {
       <div class="lp-step-d">The import check shows duplicates, missing stops and timezone problems before any trade is saved. Nothing is imported until you confirm.</div>
     </div>
   </div>
+  <!-- Startknöpfe (25.10.2026): Registrierung → Import mit der richtigen Vorlage
+       und der Export-Anleitung der jeweiligen App. -->
+  <div class="lp-switch-go lp-keep reveal">
+    <div class="lp-switch-q">Where are your trades now?</div>
+    <div class="lp-switch-btns">
+      <button type="button" onclick="lpStartImport('tradezella')"><span class="notranslate" translate="no">TradeZella</span> →</button>
+      <button type="button" onclick="lpStartImport('tradersync')"><span class="notranslate" translate="no">TraderSync</span> →</button>
+      <button type="button" onclick="lpStartImport('tradervue')"><span class="notranslate" translate="no">Tradervue</span> →</button>
+      <button type="button" onclick="lpStartImport('tradesviz')"><span class="notranslate" translate="no">TradesViz</span> →</button>
+      <button type="button" onclick="lpStartImport('edgewonk')"><span class="notranslate" translate="no">Edgewonk</span> →</button>
+      <button type="button" onclick="lpStartImport('trademetria')"><span class="notranslate" translate="no">Trademetria</span> →</button>
+    </div>
+    <div class="lp-switch-sub">Create your free account and the import opens with the right preset and the export steps for that app.</div>
+  </div>
   <p class="lp-fine reveal">Screenshots and chart images are not included, because these apps do not put them into their export files. Importing is free on every plan — no trial and no card needed.</p>
 
   <div class="lp-own reveal">
@@ -11323,6 +11337,7 @@ body.light #landingPage * {
         <li><b>REST API</b>&nbsp;— read your journal from any tool with your own key</li>
         <li><b>Outgoing webhooks</b>&nbsp;— send trades, day summaries &amp; rule breaches to Zapier, Make, Discord or Slack</li>
         <li><b>TopstepX auto-sync</b>&nbsp;— your Topstep accounts on ProjectX fill the journal by themselves, scale-outs joined into one trade</li>
+        <li><b>Stream overlay</b>&nbsp;— your day live in OBS or Streamlabs, straight from the journal, with your referral code</li>
         <li><b>Futures &amp; prop accounts</b>&nbsp;— Topstep, Apex, MyFundedFutures, NinjaTrader, Rithmic and Tradovate statements imported and mapped once</li>
         <li>Weekly Intelligence Reports &amp; PDF export</li>
         <li><b>Psychology dashboard</b>&nbsp;— Mind Score, trends, mistake &amp; strength heatmaps, discipline streak</li>
@@ -11497,6 +11512,7 @@ body.light #landingPage * {
         <tr><td>MT5 Cloud Sync — investor password, no EA or PC needed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (beta)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Crypto Auto-Sync — Binance &amp; Bybit read-only API key</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Stream overlay for OBS / Streamlabs — live P&amp;L or R, win rate, streak and open trade, with a read-only overlay key</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>TopstepX Auto-Sync — futures prop accounts on ProjectX, partial exits joined into one trade</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Statement import — every supported broker &amp; prop firm, the format detected automatically</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Import from another journal — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
@@ -11827,7 +11843,12 @@ body.light #landingPage * {
   <ul class="footer-links">
     <li><a href="/ctrader-trading-journal.html">cTrader trading journal</a></li>
     <li><a href="/prop-firm-trading-journal.html">Prop firm trading journal</a></li>
+    <li><a href="/streamers.html">For streamers — live overlay</a></li>
     <li><a href="/topstep-trading-journal.html">Topstep trading journal</a></li>
+    <li><a href="/ftmo-trading-journal.html">FTMO trading journal</a></li>
+    <li><a href="/apex-trading-journal.html">Apex Trader Funding trading journal</a></li>
+    <li><a href="/the5ers-trading-journal.html">The5ers trading journal</a></li>
+    <li><a href="/myfundedfutures-trading-journal.html">MyFundedFutures trading journal</a></li>
     <li><a href="/trading-journal-market-replay.html">Trading journal with market replay</a></li>
     <li><a href="/evidence-vs-tradezella.html">Evidence vs TradeZella</a></li>
     <li><a href="/evidence-vs-tradersync.html">Evidence vs TraderSync</a></li>
@@ -12446,6 +12467,7 @@ body.light #landingPage * {
           <div class="apex-feat-desc">A read-only API key from Binance or Bybit and your fills arrive by themselves every ten minutes — no export, no upload. Keys with trading or withdrawal rights are refused</div>
         </div>
       </div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-video ></use></svg></div><div><div class="apex-feat-label">Stream overlay</div><div class="apex-feat-desc">Put your day on stream: P&amp;L or R, win rate, streak and the trade you are in, updated from your journal every 20 seconds — as a card, a bar or a poster, with your referral code for viewers</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg></div><div><div class="apex-feat-label">TopstepX — direct connection</div><div class="apex-feat-desc">Your ProjectX username and API key, and every Topstep account under it syncs on its own — evaluations and funded. Scale-ins and partial exits become one trade with the platform's own P&amp;L and fees</div></div></div>
       <div class="apex-feat-item apex-feat-full">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-bot ></use></svg></div>
@@ -14713,6 +14735,7 @@ function _authAction(type) {
         <div class="cx-grid">
           <div id="atPanel-fit"></div>
           <div id="atPanel-discord"></div>
+          <div id="atPanel-overlay"></div>
         </div>
       </div>
     </div><!-- /spanel-connect -->
@@ -16773,6 +16796,12 @@ function bootApp() {
   loadProfilePic();   // Restore saved profile picture
   loadCoachProfile(); // Load saved trader profile for AI Coach
 
+  // ── Wechsel-Import von der Landing (25.10.2026) ──
+  var wantImport = sessionStorage.getItem('apexWantsImport');
+  if (wantImport) {
+    sessionStorage.removeItem('apexWantsImport');
+    setTimeout(function(){ try { openCsvImportWith(wantImport); } catch(e){} }, 900);
+  }
   // ── "Start with Pro" Flag prüfen → Upgrade Modal öffnen ──
   if (sessionStorage.getItem('apexWantsPro') === '1') {
     sessionStorage.removeItem('apexWantsPro');
@@ -17545,6 +17574,7 @@ function switchSettingsTab(tab) {
   if (tab === 'connect') {
     try { if (window.ApexFit) ApexFit.render(); } catch(e){}
     try { if (window.ApexDiscordLink) ApexDiscordLink.render(); } catch(e){}
+    try { if (window.ApexOverlay) ApexOverlay.render(); } catch(e){}
   }
   if (tab === 'privacy') {
     ['profileVisibility','dmVisibility'].forEach(function(k) {
@@ -24996,6 +25026,17 @@ function openCsvImport(){
   csvBuildPresetPicker();
   csvUpdateHint();
 }
+/* Wechsel-Import (25.10.2026): die Landing schickt „Ich komme von X“ hierher —
+   nach der Registrierung oder sofort, wenn schon angemeldet. */
+function openCsvImportWith(preset){
+  if (typeof nav === 'function') { try { nav('journal'); } catch(e){} }
+  openCsvImport();
+  if (preset && CSV_PRESETS[preset]){
+    var sel = document.getElementById('csvPresetSelect'); if (sel) sel.value = preset;
+    setCsvFormat(preset);
+  }
+}
+window.openCsvImportWith = openCsvImportWith;
 function closeCsvImport(){
   document.getElementById('csvImportOverlay').classList.remove('open');
 }
@@ -29866,6 +29907,8 @@ document.addEventListener('keydown', function(e) {
       "Connect up to 3 MetaTrader 5 accounts with the read-only investor password — every trade reaches your journal, including trades from the MT5 phone app, with no Expert Advisor and no PC running. Optional import of the last 30 or 90 days": ["Verbinde bis zu 3 MetaTrader-5-Konten mit dem nur lesenden Investor-Passwort – jeder Trade landet in deinem Journal, auch aus der MT5-Handy-App, ohne Expert Advisor und ohne laufenden PC. Auf Wunsch mit Import der letzten 30 oder 90 Tage", "Conecta hasta 3 cuentas de MetaTrader 5 con la contraseña de inversor de solo lectura: cada operación llega a tu diario, también las de la app móvil de MT5, sin Expert Advisor ni PC encendido. Importación opcional de los últimos 30 o 90 días", "Conecte até 3 contas MetaTrader 5 com a senha de investidor somente leitura — cada operação chega ao seu diário, inclusive as do app de celular do MT5, sem Expert Advisor e sem PC ligado. Importação opcional dos últimos 30 ou 90 dias", "Connectez jusqu’à 3 comptes MetaTrader 5 avec le mot de passe investisseur en lecture seule — chaque trade arrive dans votre journal, y compris ceux de l’application mobile MT5, sans Expert Advisor ni PC allumé. Import facultatif des 30 ou 90 derniers jours"],
       "Auto-Tracking — MT5 · ATAS · Quantower · TradingView · NinjaTrader (beta)": ["Auto-Tracking – MT5 · ATAS · Quantower · TradingView · NinjaTrader (Beta)", "Auto-Tracking — MT5 · ATAS · Quantower · TradingView · NinjaTrader (beta)", "Auto-Tracking — MT5 · ATAS · Quantower · TradingView · NinjaTrader (beta)", "Auto-Tracking — MT5 · ATAS · Quantower · TradingView · NinjaTrader (bêta)"],
       "Trades post to your journal in real time (exact broker P&L, SL/TP) — even while the app is closed": ["Trades landen in Echtzeit in deinem Journal (exaktes Broker-P&L, SL/TP) – auch bei geschlossener App", "Las operaciones llegan a tu diario en tiempo real (P&L exacto del bróker, SL/TP), incluso con la app cerrada", "As operações chegam ao seu diário em tempo real (P&L exato da corretora, SL/TP) — mesmo com o app fechado", "Les trades arrivent dans votre journal en temps réel (P&L exact du courtier, SL/TP) — même application fermée"],
+      "Stream overlay": ["Stream-Overlay", "Overlay para stream", "Overlay para live", "Overlay de stream"],
+      "Put your day on stream: P&L or R, win rate, streak and the trade you are in, updated from your journal every 20 seconds — as a card, a bar or a poster, with your referral code for viewers": ["Bring deinen Tag in den Stream: P&L oder R, Trefferquote, Serie und der laufende Trade, alle 20 Sekunden aus deinem Journal aktualisiert – als Karte, Leiste oder Poster, mit deinem Empfehlungscode für Zuschauer", "Lleva tu día al stream: P&L o R, tasa de acierto, racha y la operación abierta, actualizado desde tu diario cada 20 segundos — como tarjeta, barra o póster, con tu código de referido para los espectadores", "Leve seu dia para a live: P&L ou R, taxa de acerto, sequência e a operação aberta, atualizado do diário a cada 20 segundos — como cartão, barra ou pôster, com seu código de indicação para quem assiste", "Mets ta journée en stream : P&L ou R, taux de réussite, série et le trade en cours, mis à jour depuis ton journal toutes les 20 secondes — en carte, bandeau ou affiche, avec ton code de parrainage pour les spectateurs"],
       "TopstepX — direct connection": ["TopstepX – direkte Verbindung", "TopstepX: conexión directa", "TopstepX — conexão direta", "TopstepX — connexion directe"],
       "Your ProjectX username and API key, and every Topstep account under it syncs on its own — evaluations and funded. Scale-ins and partial exits become one trade with the platform's own P&L and fees": ["Dein ProjectX-Benutzername und API-Key – und jedes Topstep-Konto darunter synchronisiert sich selbst, Evaluation und Funded. Nachkäufe und Teilausstiege werden ein Trade mit P&L und Gebühren der Plattform", "Tu usuario y clave API de ProjectX, y cada cuenta de Topstep bajo ellos se sincroniza sola: evaluaciones y fondeadas. Entradas escalonadas y salidas parciales se vuelven una operación con el P&L y las comisiones de la plataforma", "Seu usuário e chave de API do ProjectX, e cada conta Topstep nele sincroniza sozinha — avaliações e financiadas. Entradas escalonadas e saídas parciais viram uma operação com o P&L e as taxas da plataforma", "Ton identifiant et ta clé API ProjectX, et chaque compte Topstep associé se synchronise seul — évaluations et financés. Renforts et sorties partielles deviennent un trade avec le P&L et les frais de la plateforme"],
       "Crypto — direct connection": ["Krypto – direkte Verbindung", "Cripto: conexión directa", "Cripto — conexão direta", "Crypto — connexion directe"],
@@ -32307,6 +32350,17 @@ function goToAuth(screen) {
   window.scrollTo(0, 0);
   if (typeof showScreen === 'function') showScreen(screen);
 }
+
+// Wechsel-Import: merkt sich die Herkunft, öffnet nach der Anmeldung den Import (25.10.2026)
+function lpStartImport(preset) {
+  if (window.currentUID && window.currentUID !== 'demo' && typeof openCsvImportWith === 'function') {
+    var lp = document.getElementById('landingPage'); if (lp) lp.style.display = 'none';
+    openCsvImportWith(preset); return;
+  }
+  sessionStorage.setItem('apexWantsImport', preset);
+  goToAuth('register');
+}
+window.lpStartImport = lpStartImport;
 
 // Wie goToAuth, aber setzt ein Flag damit nach Login → Upgrade Modal öffnet
 function goToAuthPro(screen) {
@@ -101775,6 +101829,12 @@ body:not(.lp-on) #lpProgress{ display:none; }
 #landingPage #founder{ contain-intrinsic-size:auto 640px; }
 /* Pro in drei Aufgaben */
 #landingPage .lp-jobs{ display:grid; gap:8px; margin:6px 0 18px; }
+#landingPage .lp-switch-go{ margin:22px auto 14px; max-width:860px; text-align:center }
+#landingPage .lp-switch-q{ font-family:var(--font-display); font-weight:700; font-size:17px; color:var(--ink); margin-bottom:12px }
+#landingPage .lp-switch-btns{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px }
+#landingPage .lp-switch-btns button{ background:var(--layer); border:0.5px solid var(--gold-line); color:var(--ink); border-radius:999px; padding:9px 16px; font:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s,transform .2s }
+#landingPage .lp-switch-btns button:hover{ background:rgba(var(--gold-rgb),.12); transform:translateY(-1px) }
+#landingPage .lp-switch-sub{ font-size:12.5px; color:var(--ink3); margin-top:10px }
 .lp-fit-bonus{ display:flex; gap:9px; align-items:flex-start; margin:-8px 0 16px; padding:9px 12px; border-radius:10px; border:0.5px dashed var(--gold-line); background:rgba(var(--gold-rgb),.05); font-size:12.5px; line-height:1.45; color:var(--ink2); }
 .lp-fit-bonus .ic{ width:16px; height:16px; color:var(--gold); flex:none; margin-top:1px }
 .lp-fit-bonus b{ color:var(--ink) }
@@ -103164,6 +103224,11 @@ body.light::before{ opacity:.45; }
     "Background sync — cTrader syncs while the app is closed": ["Hintergrund-Sync — cTrader synchronisiert bei geschlossener App", "Sincronización en segundo plano — cTrader sincroniza con la app cerrada", "Sincronização em segundo plano — o cTrader sincroniza com o app fechado", "Synchronisation en arrière-plan — cTrader se synchronise app fermée"],
     "MT5 Cloud Sync — investor password, no EA or PC needed": ["MT5 Cloud Sync — Investor-Passwort, kein EA oder PC nötig", "MT5 Cloud Sync — contraseña de inversor, sin EA ni PC", "MT5 Cloud Sync — senha de investidor, sem EA nem PC", "MT5 Cloud Sync — mot de passe investisseur, sans EA ni PC"],
     "Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (beta)": ["Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (Beta)", "Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (beta)", "Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (beta)", "Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (bêta)"],
+    "Where are your trades now?": ["Wo liegen deine Trades gerade?", "¿Dónde están tus operaciones ahora?", "Onde estão suas operações agora?", "Où sont tes trades aujourd’hui ?"],
+    "Create your free account and the import opens with the right preset and the export steps for that app.": ["Erstelle dein kostenloses Konto – der Import öffnet sich mit der passenden Vorlage und den Export-Schritten für diese App.", "Crea tu cuenta gratuita y la importación se abre con la plantilla correcta y los pasos de exportación de esa app.", "Crie sua conta gratuita e a importação abre com o modelo certo e os passos de exportação desse app.", "Crée ton compte gratuit et l’import s’ouvre avec le bon modèle et les étapes d’export de cette app."],
+    "Stream overlay": ["Stream-Overlay", "Overlay para stream", "Overlay para live", "Overlay de stream"],
+    "— your day live in OBS or Streamlabs, straight from the journal, with your referral code": ["— dein Tag live in OBS oder Streamlabs, direkt aus dem Journal, mit deinem Empfehlungscode", "— tu día en directo en OBS o Streamlabs, directo desde el diario, con tu código de referido", "— seu dia ao vivo no OBS ou Streamlabs, direto do diário, com seu código de indicação", "— ta journée en direct dans OBS ou Streamlabs, depuis le journal, avec ton code de parrainage"],
+    "Stream overlay for OBS / Streamlabs — live P&L or R, win rate, streak and open trade, with a read-only overlay key": ["Stream-Overlay für OBS / Streamlabs – live P&L oder R, Trefferquote, Serie und offener Trade, mit eigenem Nur-Lese-Overlay-Key", "Overlay para OBS / Streamlabs: P&L o R en directo, tasa de acierto, racha y operación abierta, con una clave de solo lectura", "Overlay para OBS / Streamlabs — P&L ou R ao vivo, taxa de acerto, sequência e operação aberta, com chave só de leitura", "Overlay pour OBS / Streamlabs — P&L ou R en direct, taux de réussite, série et trade ouvert, avec une clé en lecture seule"],
     "TopstepX auto-sync": ["TopstepX-Auto-Sync", "Auto-sync de TopstepX", "Auto-sync do TopstepX", "Synchro auto TopstepX"],
     "— your Topstep accounts on ProjectX fill the journal by themselves, scale-outs joined into one trade": ["— deine Topstep-Konten auf ProjectX füllen das Journal von selbst, Teilausstiege werden zu einem Trade zusammengeführt", "— tus cuentas de Topstep en ProjectX llenan el diario solas; las salidas parciales se unen en una operación", "— suas contas Topstep no ProjectX preenchem o diário sozinhas; saídas parciais viram uma única operação", "— tes comptes Topstep sur ProjectX remplissent le journal tout seuls, les sorties partielles réunies en un trade"],
     "TopstepX Auto-Sync — futures prop accounts on ProjectX, partial exits joined into one trade": ["TopstepX-Auto-Sync — Futures-Prop-Konten auf ProjectX, Teilausstiege zu einem Trade zusammengeführt", "Auto-sync de TopstepX: cuentas prop de futuros en ProjectX, salidas parciales unidas en una operación", "Auto-sync do TopstepX — contas prop de futuros no ProjectX, saídas parciais unidas em uma operação", "Synchro auto TopstepX — comptes prop futures sur ProjectX, sorties partielles réunies en un trade"],
@@ -104644,7 +104709,7 @@ body.light::before{ opacity:.45; }
   var DESCS = { overview:'Your account, plan and what is still to set up.', profile:'Photo, name and what the AI coach knows about you.',
     privacy:'Who can see your profile and message you.', invite:'Your referral link and what it has earned.',
     partner:'Your partner link, code, commission and payouts.',
-    trading:'Journal behaviour while you log trades.', ctrader:'Brokers and platforms that import trades automatically.', connect:'Evidence Fit and Discord — apps that work with your journal.',
+    trading:'Journal behaviour while you log trades.', ctrader:'Brokers and platforms that import trades automatically.', connect:'Evidence Fit, Discord and your stream overlay — apps that work with your journal.',
     funded:'Prop firm rules, drawdown limits and account phase.', community:'Leaderboard, messages, notifications and e-mails.',
     bugreport:'Tell us what broke, what is missing, or how we are doing.' };
 
@@ -110016,6 +110081,122 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       if (db()) { clearInterval(iv); F.load(); }
     }, 1000);
   });
+})();
+</script>
+<script>
+/* ═══════════════ Stream overlay for OBS (ApexOverlay) — 25.10.2026 ═══════════════
+   Settings → Connect → Stream overlay. Creates an OVERLAY key (apexApiKeys,
+   scope 'overlay'): the API lets it read /v1/overlay and nothing else, so a
+   URL that leaks on stream reveals only what the overlay already shows.
+   The key is kept on this device (it cannot be read back from Firestore)
+   to rebuild the link; "New link" replaces it, "Turn off" deletes it.
+   The page itself is /overlay.html — transparent, made for a browser source. */
+(function(){
+  'use strict';
+  var O = window.ApexOverlay = {};
+  var BASE = 'https://evidencetrading.com/overlay.html';
+  var opt = { layout: 'card', show: 'r', money: true, promo: true, corner: 'bl', scale: 1 };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function lsKey(){ return 'apexOverlay_' + (window.currentUID || 'local'); }
+  function saved(){ try { return JSON.parse(localStorage.getItem(lsKey()) || 'null'); } catch(e){ return null; } }
+  function store(v){ try { if (v) localStorage.setItem(lsKey(), JSON.stringify(v)); else localStorage.removeItem(lsKey()); } catch(e){} }
+  (function(){ var s = saved(); if (s && s.opt) for (var k in s.opt) opt[k] = s.opt[k]; })();
+  function isPro(){ return window.currentPlan === 'pro'; }
+  function lang(){ return String(window.apexResolvedLang || document.documentElement.lang || 'en').slice(0,2) === 'de' ? 'de' : 'en'; }
+  function token(n){ var a = new Uint8Array(n), c = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789', o = '';
+    crypto.getRandomValues(a); for (var i = 0; i < n; i++) o += c[a[i] % c.length]; return o; }
+  function params(){
+    var p = 'layout=' + opt.layout + '&show=' + opt.show + (opt.money ? '' : '&money=0') + (opt.promo ? '' : '&promo=0') +
+      (opt.layout === 'card' ? '&corner=' + opt.corner : '') + (opt.scale !== 1 ? '&scale=' + opt.scale : '') + '&lang=' + lang();
+    return p;
+  }
+  O.url = function(){ var s = saved(); return s && s.key ? BASE + '?k=' + s.key + '&' + params() : ''; };
+  O.set = function(k, v){ opt[k] = v; var s = saved() || {}; s.opt = opt; store(s); O.render(); };
+  O.create = function(){
+    if (!isPro()) { if (typeof openUpgradeModal === 'function') openUpgradeModal(); return; }
+    if (!window.db || !window.currentUID || window.currentUID === 'demo') { if (window.showToast) showToast('Sign in first'); return; }
+    var old = saved(), key = 'evo_' + token(28);
+    db.collection('apexApiKeys').doc(key).set({ uid: currentUID, label: 'Stream overlay', scope: 'overlay', createdAt: Date.now(), revoked: false, lastUsed: null })
+      .then(function(){
+        if (old && old.key) db.collection('apexApiKeys').doc(old.key).delete().catch(function(){});
+        store({ key: key, opt: opt }); O.render();
+        if (window.showToast) showToast('Overlay link ready');
+      }).catch(function(e){ if (window.showToast) showToast('Could not create the link: ' + (e && e.message || 'error')); });
+  };
+  O.off = function(){
+    var s = saved(); if (!s || !s.key) return;
+    var go = function(){ db.collection('apexApiKeys').doc(s.key).delete().catch(function(){}); store({ opt: opt }); O.render(); };
+    if (window.ApexDialog && ApexDialog.confirm) ApexDialog.confirm('Turn the overlay off? The link in OBS stops working right away.', { title: 'Stream overlay', okText: 'Turn off', danger: true }).then(function(y){ if (y) go(); });
+    else if (confirm('Turn the overlay off?')) go();
+  };
+  O.copy = function(){ var u = O.url(); if (!u) return; try { navigator.clipboard.writeText(u); if (window.showToast) showToast('Copied — paste it into OBS'); } catch(e){} };
+  function sel(k, list){ return '<select class="ovl-in" onchange="ApexOverlay.set(\'' + k + '\', this.value)">' + list.map(function(x){ return '<option value="' + x[0] + '"' + (String(opt[k]) === String(x[0]) ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>'; }
+  function chk(k, label){ return '<label class="ovl-chk"><input type="checkbox"' + (opt[k] ? ' checked' : '') + ' onchange="ApexOverlay.set(\'' + k + '\', this.checked)"> <span>' + label + '</span></label>'; }
+  O.render = function(){
+    var host = document.getElementById('atPanel-overlay'); if (!host) return;
+    var s = saved(), url = O.url();
+    var prev = '/overlay.html?demo=1&' + params();
+    host.innerHTML = '<div class="glass-card ovl-card">' +
+      '<div class="gc-title" style="margin-bottom:6px"><svg class=ic aria-hidden=true><use href=#i-video ></use></svg> Stream overlay</div>' +
+      '<div class="ovl-p">Show your day live on stream — P&amp;L or R, win rate, streak, the trade you are in — as an overlay for OBS or Streamlabs. It updates by itself every 20 seconds, and a closed trade flashes on screen.</div>' +
+      '<div class="ovl-prev"><iframe title="Overlay preview" src="' + esc(prev) + '" loading="lazy"></iframe></div>' +
+      '<div class="ovl-grid">' +
+        '<div><span class="ovl-l">Layout</span>' + sel('layout', [['card','Card'],['bar','Bar along the bottom'],['poster','Poster (breaks, intro)']]) + '</div>' +
+        '<div><span class="ovl-l">Main number</span>' + sel('show', [['r','R'],['pnl','Money'],['pips','Pips']]) + '</div>' +
+        (opt.layout === 'card' ? '<div><span class="ovl-l">Corner</span>' + sel('corner', [['bl','Bottom left'],['br','Bottom right'],['tl','Top left'],['tr','Top right']]) + '</div>' : '') +
+        '<div><span class="ovl-l">Size</span>' + sel('scale', [['0.8','Small'],['1','Normal'],['1.3','Large'],['1.6','Extra large']]) + '</div>' +
+      '</div>' +
+      '<div class="ovl-chks">' + chk('money', 'Show money amounts') + chk('promo', 'Show my journal link and referral code') + '</div>' +
+      (url
+        ? '<div class="ovl-url"><input class="ovl-in notranslate" translate="no" readonly value="' + esc(url) + '" onclick="this.select()"><button class="mc-b pri" onclick="ApexOverlay.copy()">Copy</button></div>' +
+          '<ol class="ovl-steps"><li><span>In OBS: Sources → + → Browser.</span></li><li><span>Paste the link, width 1920, height 1080.</span></li><li><span>Done — the background is transparent.</span></li></ol>' +
+          '<div class="ovl-acts"><button class="mc-b" onclick="ApexOverlay.create()">New link</button><button class="mc-b" onclick="ApexOverlay.off()">Turn off</button></div>' +
+          '<div class="ovl-note"><span>The link can only read these overlay numbers — never your notes, screenshots or other trades. Keep it out of view anyway; “New link” replaces it.</span></div>'
+        : '<div class="ovl-acts"><button class="mc-b pri" onclick="ApexOverlay.create()">Create overlay link</button></div>' +
+          (isPro() ? '' : '<div class="ovl-note"><span>Part of Pro.</span></div>')) +
+      '</div>';
+    try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(host); } catch(e){}
+  };
+  var css = document.createElement('style');
+  css.textContent = '.ovl-p{font-size:12.5px;color:var(--ink2);line-height:1.55;margin-bottom:10px}' +
+    '.ovl-prev{position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;border:0.5px solid var(--rim);background:linear-gradient(135deg,#1d2636,#36202a);margin-bottom:12px}' +
+    '.ovl-prev iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform-origin:0 0;transform:scale(var(--k,.2));pointer-events:none}' +
+    '.ovl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.ovl-l{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}' +
+    '.ovl-in{width:100%;box-sizing:border-box;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink);padding:7px 9px;font:inherit;font-size:12.5px}' +
+    '.ovl-chks{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0}.ovl-chk{display:flex !important;gap:7px;align-items:center;font-size:12.5px;color:var(--ink);text-transform:none;letter-spacing:normal;font-weight:400;margin:0 !important;cursor:pointer}.ovl-chk input{width:auto !important;margin:0}' +
+    '.ovl-url{display:flex;gap:8px;margin:6px 0 8px}.ovl-url .ovl-in{font-family:var(--font-mono);font-size:11px}' +
+    '.ovl-steps{margin:4px 0 8px 18px;font-size:12px;color:var(--ink2);line-height:1.6}.ovl-acts{display:flex;gap:8px;flex-wrap:wrap}.ovl-note{font-size:11.5px;color:var(--ink3);margin-top:8px;line-height:1.5}';
+  document.head.appendChild(css);
+  // Fit the 1920×1080 preview into the card width.
+  function fitPrev(){ document.querySelectorAll('.ovl-prev').forEach(function(p){ p.style.setProperty('--k', (p.clientWidth / 1920).toFixed(4)); }); }
+  setInterval(fitPrev, 500); window.addEventListener('resize', fitPrev);
+  (function(){
+    var T = {
+      'Stream overlay': ['Stream-Overlay','Overlay para stream','Overlay para live','Overlay de stream'],
+      'Show your day live on stream — P&L or R, win rate, streak, the trade you are in — as an overlay for OBS or Streamlabs. It updates by itself every 20 seconds, and a closed trade flashes on screen.': ['Zeig deinen Tag live im Stream – P&L oder R, Trefferquote, Serie, den laufenden Trade – als Overlay für OBS oder Streamlabs. Es aktualisiert sich alle 20 Sekunden selbst, und ein geschlossener Trade blinkt kurz auf.','Muestra tu día en directo — P&L o R, tasa de acierto, racha, la operación abierta — como overlay para OBS o Streamlabs. Se actualiza solo cada 20 segundos y una operación cerrada aparece en pantalla.','Mostre seu dia ao vivo — P&L ou R, taxa de acerto, sequência, a operação aberta — como overlay para OBS ou Streamlabs. Atualiza sozinho a cada 20 segundos, e uma operação fechada pisca na tela.','Montre ta journée en direct — P&L ou R, taux de réussite, série, le trade en cours — en overlay pour OBS ou Streamlabs. Mise à jour toutes les 20 secondes, et un trade clôturé s’affiche à l’écran.'],
+      'Layout': ['Layout','Diseño','Layout','Disposition'], 'Card': ['Karte','Tarjeta','Cartão','Carte'],
+      'Bar along the bottom': ['Leiste unten','Barra inferior','Barra inferior','Bandeau en bas'],
+      'Poster (breaks, intro)': ['Poster (Pausen, Intro)','Póster (pausas, intro)','Pôster (pausas, intro)','Affiche (pauses, intro)'],
+      'Main number': ['Hauptzahl','Cifra principal','Número principal','Chiffre principal'], 'Money': ['Geld','Dinero','Dinheiro','Argent'],
+      'Pips': ['Pips','Pips','Pips','Pips'], 'Corner': ['Ecke','Esquina','Canto','Coin'],
+      'Bottom left': ['Unten links','Abajo izquierda','Inferior esquerdo','En bas à gauche'], 'Bottom right': ['Unten rechts','Abajo derecha','Inferior direito','En bas à droite'],
+      'Top left': ['Oben links','Arriba izquierda','Superior esquerdo','En haut à gauche'], 'Top right': ['Oben rechts','Arriba derecha','Superior direito','En haut à droite'],
+      'Size': ['Größe','Tamaño','Tamanho','Taille'], 'Small': ['Klein','Pequeño','Pequeno','Petit'], 'Normal': ['Normal','Normal','Normal','Normal'],
+      'Large': ['Groß','Grande','Grande','Grand'], 'Extra large': ['Sehr groß','Muy grande','Muito grande','Très grand'],
+      'Show money amounts': ['Geldbeträge zeigen','Mostrar importes','Mostrar valores','Afficher les montants'],
+      'Show my journal link and referral code': ['Meinen Journal-Link und Empfehlungscode zeigen','Mostrar mi enlace y código de referido','Mostrar meu link e código de indicação','Afficher mon lien et mon code de parrainage'],
+      'Copy': ['Kopieren','Copiar','Copiar','Copier'],
+      'In OBS: Sources → + → Browser.': ['In OBS: Quellen → + → Browser.','En OBS: Fuentes → + → Navegador.','No OBS: Fontes → + → Navegador.','Dans OBS : Sources → + → Navigateur.'],
+      'Paste the link, width 1920, height 1080.': ['Link einfügen, Breite 1920, Höhe 1080.','Pega el enlace, ancho 1920, alto 1080.','Cole o link, largura 1920, altura 1080.','Colle le lien, largeur 1920, hauteur 1080.'],
+      'Done — the background is transparent.': ['Fertig – der Hintergrund ist durchsichtig.','Listo: el fondo es transparente.','Pronto — o fundo é transparente.','C’est prêt — le fond est transparent.'],
+      'New link': ['Neuer Link','Nuevo enlace','Novo link','Nouveau lien'], 'Turn off': ['Ausschalten','Desactivar','Desligar','Désactiver'],
+      'The link can only read these overlay numbers — never your notes, screenshots or other trades. Keep it out of view anyway; “New link” replaces it.': ['Der Link kann nur diese Overlay-Zahlen lesen – nie deine Notizen, Screenshots oder andere Trades. Zeig ihn trotzdem nicht im Bild; „Neuer Link“ ersetzt ihn.','El enlace solo lee estas cifras del overlay, nunca tus notas, capturas u otras operaciones. Aun así, no lo muestres; «Nuevo enlace» lo reemplaza.','O link só lê estes números do overlay — nunca suas notas, capturas ou outras operações. Mesmo assim, não o mostre; “Novo link” o substitui.','Le lien ne lit que ces chiffres de l’overlay — jamais tes notes, captures ou autres trades. Ne le montre pas quand même ; « Nouveau lien » le remplace.'],
+      'Create overlay link': ['Overlay-Link erstellen','Crear enlace del overlay','Criar link do overlay','Créer le lien de l’overlay'],
+      'Part of Pro.': ['Teil von Pro.','Parte de Pro.','Parte do Pro.','Inclus dans Pro.']
+    };
+    function reg(){ if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('.ovl-card', T); else setTimeout(reg, 300); }
+    reg();
+  })();
 })();
 </script>
 </body>

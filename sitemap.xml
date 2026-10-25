@@ -24,6 +24,31 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://evidencetrading.com/streamers.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://evidencetrading.com/ftmo-trading-journal.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://evidencetrading.com/apex-trading-journal.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://evidencetrading.com/the5ers-trading-journal.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://evidencetrading.com/myfundedfutures-trading-journal.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://evidencetrading.com/trading-journal-market-replay.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
