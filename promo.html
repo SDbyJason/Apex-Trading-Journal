@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Evidence — Animated promo banner</title>
+<!-- Animated 3D promo banner for streams. 25.10.2026.
+     Browser source in OBS / Streamlabs, 1920×1080, transparent background:
+       /promo.html?mode=flyby|ticker &code=ABC123 &every=120 &pos=bl|br|tl|tr
+                  &lang=en|de &scale=1 &msg=<own line, max 60 chars>
+     mode=flyby   the gold ET mark spins in, a panel unfolds with three lines,
+                  then everything leaves again — once every `every` seconds.
+     mode=ticker  a bar along the bottom with the lines scrolling through.
+     record=1     shows a button that records ONE cycle as a WebM video with a
+                  transparent background (Chrome / Edge) — for a media source.
+     Everything is drawn in one WebGL canvas (text included), so the recording
+     contains exactly what the browser source shows. -->
+<style>
+html,body{margin:0;background:transparent;overflow:hidden;width:100%;height:100%}
+canvas{display:block}
+#rec{position:fixed;left:50%;top:24px;transform:translateX(-50%);z-index:5;font:600 15px system-ui,sans-serif;padding:12px 18px;border-radius:12px;border:1px solid #c9a84c;background:#151515;color:#f4efe3;cursor:pointer;display:none}
+#rec.on{background:#7a1f24;border-color:#f0636a}
+#recHint{position:fixed;left:50%;top:74px;transform:translateX(-50%);font:13px system-ui,sans-serif;color:#b9b2a2;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:8px;display:none;max-width:560px;text-align:center}
+</style>
+</head>
+<body>
+<button id="rec" type="button">● Record one cycle as video</button>
+<div id="recHint"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var MODE = q.get('mode') === 'ticker' ? 'ticker' : 'flyby';
+  var CODE = (q.get('code') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
+  var EVERY = Math.max(20, Math.min(1800, parseInt(q.get('every'), 10) || 120));
+  var POS = /^(bl|br|tl|tr)$/.test(q.get('pos')) ? q.get('pos') : 'bl';
+  var SCALE = Math.max(0.5, Math.min(2, parseFloat(q.get('scale')) || 1));
+  var MSG = (q.get('msg') || '').replace(/[<>]/g, '').slice(0, 60);
+  var DE = (q.get('lang') || navigator.language || 'en').slice(0, 2) === 'de';
+  var RECORD = q.get('record') === '1';
+
+  var LINES = DE ? [
+    'Evidence — das Trading-Journal, das sich selbst füllt',
+    CODE ? 'Code ' + CODE + ': 10 % auf den ersten Monat' : 'Kostenlos starten · keine Karte',
+    'evidencetrading.com'
+  ] : [
+    'Evidence — the trading journal that fills itself',
+    CODE ? 'Code ' + CODE + ': 10% off your first month' : 'Start free · no card needed',
+    'evidencetrading.com'
+  ];
+  if (MSG) LINES.splice(1, 0, MSG);
+
+  var W = 1920, H = 1080;
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true, premultipliedAlpha: false });
+  renderer.setClearColor(0x000000, 0);
+  renderer.setPixelRatio(1);
+  document.body.appendChild(renderer.domElement);
+  var scene = new THREE.Scene();
+  var cam = new THREE.OrthographicCamera(-W / 2, W / 2, H / 2, -H / 2, -3000, 3000);
+  cam.position.z = 1000;
+  function fit() {
+    var w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h);
+    // Always lay out on a 1920×1080 stage, scaled to the window (OBS uses 1920×1080).
+    var k = Math.min(w / W, h / H);
+    cam.left = -w / 2 / k; cam.right = w / 2 / k; cam.top = h / 2 / k; cam.bottom = -h / 2 / k;
+    cam.updateProjectionMatrix();
+  }
+  fit(); addEventListener('resize', fit);
+
+  /* ── light: warm key from the top left, a gold rim, and a sweeping spot ── */
+  scene.add(new THREE.HemisphereLight(0xfff4d6, 0x201608, 0.85));
+  var key = new THREE.DirectionalLight(0xffffff, 1.4); key.position.set(-400, 600, 900); scene.add(key);
+  var rim = new THREE.DirectionalLight(0xffcc55, 1.1); rim.position.set(700, -300, 300); scene.add(rim);
+  var sweep = new THREE.PointLight(0xfff0c0, 2.2, 1400); sweep.position.set(0, 0, 400); scene.add(sweep);
+
+  /* ── the ET mark as a real 3D object ── */
+  function rr(x, y, w, h, r) {   // rounded rect shape, y up
+    var s = new THREE.Shape();
+    s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+    s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+    s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+    return s;
+  }
+  /* Without an environment map a fully metallic material reflects nothing and
+     turns brown — so: less metal, a warm emissive base, and a small generated
+     gradient as reflection so the edges flash gold when the mark turns. */
+  var envC = document.createElement('canvas'); envC.width = 256; envC.height = 128;
+  var ex = envC.getContext('2d'), eg = ex.createLinearGradient(0, 0, 0, 128);
+  eg.addColorStop(0, '#fff6d8'); eg.addColorStop(0.45, '#f2c94c'); eg.addColorStop(0.55, '#5a4010'); eg.addColorStop(1, '#1a1206');
+  ex.fillStyle = eg; ex.fillRect(0, 0, 256, 128);
+  var envTex = new THREE.CanvasTexture(envC); envTex.mapping = THREE.EquirectangularReflectionMapping;
+  var gold = new THREE.MeshStandardMaterial({ color: 0xf2c94c, metalness: 0.75, roughness: 0.22, emissive: 0x6a4a08, emissiveIntensity: 0.45, envMap: envTex, envMapIntensity: 1.2 });
+  var tileMat = new THREE.MeshStandardMaterial({ color: 0x151515, metalness: 0.3, roughness: 0.55 });
+  var edgeMat = new THREE.MeshStandardMaterial({ color: 0xb8922c, metalness: 0.7, roughness: 0.3, envMap: envTex, envMapIntensity: 1 });
+  var mark = new THREE.Group();
+  // 512-unit logo coordinates (y flipped), centred
+  var tile = new THREE.Mesh(new THREE.ExtrudeGeometry(rr(-256, -256, 512, 512, 118), { depth: 60, bevelEnabled: true, bevelSize: 10, bevelThickness: 10, bevelSegments: 4, curveSegments: 12 }), [tileMat, edgeMat]);
+  tile.position.z = -60; mark.add(tile);
+  [[98, 112, 287, 84], [175, 112, 91, 329], [175, 231, 189, 77], [175, 357, 189, 84]].forEach(function (b) {
+    var x = b[0] - 256, y = 256 - b[1] - b[3];
+    var g = new THREE.ExtrudeGeometry(rr(x, y, b[2], b[3], 25), { depth: 46, bevelEnabled: true, bevelSize: 5, bevelThickness: 6, bevelSegments: 3, curveSegments: 8 });
+    var m = new THREE.Mesh(g, gold); m.position.z = 8; mark.add(m);
+  });
+  scene.add(mark);
+
+  /* ── the text panel: a 2D canvas as a texture, so it records with the 3D ── */
+  var pc = document.createElement('canvas'); pc.width = MODE === 'ticker' ? 3712 : 2048; pc.height = 256;   // ticker: same aspect as the 1920×132 bar
+  var px = pc.getContext('2d');
+  var tex = new THREE.CanvasTexture(pc); tex.anisotropy = 4;
+  var panelW = 1180, panelH = 148;
+  var panel = new THREE.Mesh(new THREE.PlaneGeometry(panelW, panelH), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+  scene.add(panel);
+
+  function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  /* draw(lineIndex, progress 0..1 inside that line, gloss 0..1, scrollX for ticker) */
+  function drawPanel(i, p, gloss, scroll) {
+    var w = pc.width, h = pc.height;
+    px.clearRect(0, 0, w, h);
+    roundRect(px, 6, 6, w - 12, h - 12, MODE === 'ticker' ? 0 : 44);
+    var bg = px.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, 'rgba(22,20,16,0.94)'); bg.addColorStop(1, 'rgba(10,10,10,0.94)');
+    px.fillStyle = bg; px.fill();
+    px.lineWidth = 5; var bd = px.createLinearGradient(0, 0, w, 0);
+    bd.addColorStop(0, '#AE801A'); bd.addColorStop(0.5, '#F9E894'); bd.addColorStop(1, '#AE801A');
+    px.strokeStyle = bd; px.stroke();
+    px.save(); roundRect(px, 6, 6, w - 12, h - 12, MODE === 'ticker' ? 0 : 44); px.clip();
+    // light sweep across the panel
+    var gx = -400 + gloss * (w + 800);
+    var sg = px.createLinearGradient(gx - 260, 0, gx + 260, 0);
+    sg.addColorStop(0, 'rgba(255,240,190,0)'); sg.addColorStop(0.5, 'rgba(255,240,190,0.16)'); sg.addColorStop(1, 'rgba(255,240,190,0)');
+    px.fillStyle = sg; px.fillRect(0, 0, w, h);
+    px.textBaseline = 'middle';
+    if (MODE === 'ticker') {
+      px.font = '700 92px "Segoe UI", "Helvetica Neue", Arial, sans-serif';
+      var item = LINES.join('      ◆      ') + '      ◆      ';
+      // text runs right of the 3D mark, never underneath it
+      px.save(); px.beginPath(); px.rect(400, 0, w - 400, h); px.clip();
+      var fade = px.createLinearGradient(400, 0, 560, 0);
+      var iw = px.measureText(item).width, x = 400 - (scroll % iw);
+      var tg = px.createLinearGradient(0, 0, 0, h); tg.addColorStop(0, '#FFF6CF'); tg.addColorStop(1, '#E8C24A');
+      px.fillStyle = tg;
+      for (; x < w; x += iw) px.fillText(item, x, h / 2 + 4);
+      px.restore();
+    } else {
+      var line = LINES[i % LINES.length];
+      // slide up + fade in, hold, fade out
+      var a = p < 0.12 ? p / 0.12 : p > 0.88 ? (1 - p) / 0.12 : 1;
+      var dy = p < 0.12 ? (1 - p / 0.12) * 40 : p > 0.88 ? -((p - 0.88) / 0.12) * 40 : 0;
+      var big = /evidencetrading\.com/.test(line);
+      px.font = (big ? '800 104px ' : '700 82px ') + '"Segoe UI", "Helvetica Neue", Arial, sans-serif';
+      px.globalAlpha = Math.max(0, Math.min(1, a));
+      var g2 = px.createLinearGradient(0, 40, 0, h - 40);
+      g2.addColorStop(0, big ? '#FFF6CF' : '#F4EFE3'); g2.addColorStop(1, big ? '#E8C24A' : '#D9D2C2');
+      px.fillStyle = g2;
+      var maxW = w - 120, tw = px.measureText(line).width;
+      var sx = tw > maxW ? maxW / tw : 1;
+      px.save(); px.translate(60, h / 2 + 4 + dy); px.scale(sx, 1); px.fillText(line, 0, 0); px.restore();
+      px.globalAlpha = 1;
+    }
+    px.restore();
+    tex.needsUpdate = true;
+  }
+
+  /* ── layout per mode / corner ── */
+  var S = SCALE;
+  var markSize = (MODE === 'ticker' ? 120 : 190) * S;          // on-screen size of the ET tile
+  mark.scale.setScalar(markSize / 512);
+  var anchor = { x: 0, y: 0 };
+  function place() {
+    var L = cam.left, R = cam.right, T = cam.top, B = cam.bottom, m = 70 * S;
+    if (MODE === 'ticker') {
+      var bw = (R - L), bh = 132 * S;
+      panel.scale.set(bw / panelW, bh / panelH, 1);
+      panel.position.set(0, B + bh / 2, 0);
+      anchor = { x: L + markSize / 2 + 30 * S, y: B + bh / 2 };
+      return;
+    }
+    var left = POS[1] === 'l', top = POS[0] === 't';
+    var y = top ? T - m - markSize / 2 : B + m + markSize / 2;
+    var x = left ? L + m + markSize / 2 : R - m - markSize / 2;
+    anchor = { x: x, y: y, dir: left ? 1 : -1 };
+  }
+
+  /* ── timeline ── */
+  var D = 4.2 + LINES.length * 2.6;            // one flyby, seconds
+  var t0 = performance.now() / 1000 - (EVERY - 1.5);   // first run 1.5 s after load
+  var recording = null;
+  function ease(x) { return x < 0 ? 0 : x > 1 ? 1 : 1 - Math.pow(1 - x, 3); }
+  function easeIn(x) { return x < 0 ? 0 : x > 1 ? 1 : x * x * x; }
+
+  function frame() {
+    requestAnimationFrame(frame);
+    place();
+    var now = performance.now() / 1000;
+    if (MODE === 'ticker') {
+      mark.visible = panel.visible = true;
+      var bh = 132 * S;
+      mark.position.set(anchor.x, anchor.y, 120);
+      mark.rotation.y = Math.sin(now * 0.9) * 0.55;
+      mark.rotation.x = Math.sin(now * 0.6) * 0.12;
+      // panel starts right of the mark
+      panel.position.x = 0;
+      drawPanel(0, 0, (now * 0.12) % 1, now * 240);
+      sweep.position.set(cam.left + ((now * 0.2) % 1) * (cam.right - cam.left), cam.bottom + bh, 400);
+      renderer.render(scene, cam);
+      return;
+    }
+    var t = recording ? now - recording.start : (now - t0) % EVERY;
+    if (t > D) { mark.visible = panel.visible = false; renderer.render(scene, cam); return; }
+    mark.visible = true;
+    var dir = anchor.dir || 1;
+    // 0–1.1 s: the mark flies in spinning; last 1.1 s: flies out
+    var inP = ease(t / 1.1), outP = easeIn((t - (D - 1.1)) / 1.1);
+    var off = (1 - inP) * -dir * 900 * S + outP * -dir * 900 * S;
+    mark.position.set(anchor.x + off, anchor.y, 120);
+    mark.rotation.y = (1 - inP) * Math.PI * 4 * dir + outP * -Math.PI * 3 * dir + Math.sin(t * 1.6) * 0.18 * inP * (1 - outP);
+    mark.rotation.x = Math.sin(t * 1.1) * 0.08;
+    // panel unfolds from the mark (0.9–1.6 s) and folds back before the exit
+    var open = ease((t - 0.9) / 0.7) * (1 - ease((t - (D - 1.7)) / 0.6));
+    panel.visible = open > 0.01;
+    var pw = panelW * S, ph = panelH * S;
+    panel.scale.set(Math.max(0.001, open) * S, S, 1);
+    var gap = 24 * S;
+    panel.position.set(anchor.x + dir * (markSize / 2 + gap + (pw * open) / 2), anchor.y, 0);
+    // lines: each gets 2.6 s after the panel is open
+    var lt = t - 1.6, li = Math.max(0, Math.floor(lt / 2.6)), lp = (lt - li * 2.6) / 2.6;
+    if (lt < 0) { li = 0; lp = 0.12; }
+    if (li >= LINES.length) { li = LINES.length - 1; lp = 0.5; }
+    drawPanel(li, lp, ((t - 1.0) / (D - 2)) % 1, 0);
+    sweep.position.set(anchor.x + dir * (markSize + (t / D) * pw), anchor.y + 80 * S, 420);
+    renderer.render(scene, cam);
+    if (recording && t > D + 0.3) stopRec();
+  }
+  requestAnimationFrame(frame);
+
+  /* ── record one cycle as WebM with transparency ── */
+  var btn = document.getElementById('rec'), hint = document.getElementById('recHint');
+  if (RECORD) { btn.style.display = 'block'; hint.style.display = 'block';
+    hint.textContent = DE ? 'Nimmt einen Durchlauf als WebM mit durchsichtigem Hintergrund auf (Chrome/Edge). In OBS als Medienquelle einfügen.'
+                          : 'Records one cycle as WebM with a transparent background (Chrome/Edge). Add it in OBS as a media source.'; }
+  var mr = null, chunks = [];
+  function stopRec() {
+    if (!mr) return; var r = mr; mr = null; recording = null; r.stop();
+  }
+  btn.onclick = function () {
+    if (mr) return;
+    var type = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].filter(function (t) { return window.MediaRecorder && MediaRecorder.isTypeSupported(t); })[0];
+    if (!type) { hint.textContent = DE ? 'Dieser Browser kann nicht aufnehmen — bitte Chrome oder Edge nehmen.' : 'This browser cannot record — use Chrome or Edge.'; return; }
+    chunks = [];
+    var stream = renderer.domElement.captureStream(60);
+    mr = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 12e6 });
+    mr.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    mr.onstop = function () {
+      btn.classList.remove('on'); btn.textContent = DE ? '● Nochmal aufnehmen' : '● Record again';
+      var blob = new Blob(chunks, { type: 'video/webm' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'evidence-promo-' + MODE + (CODE ? '-' + CODE : '') + '.webm'; a.click();
+    };
+    mr.start(250);
+    btn.classList.add('on'); btn.textContent = DE ? '■ Nimmt auf …' : '■ Recording …';
+    recording = { start: performance.now() / 1000 };
+    if (MODE === 'ticker') setTimeout(stopRec, 20000);
+  };
+})();
+</script>
+</body>
+</html>

@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-25b';
+  window.APEX_BUILD = '2026-10-25c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -110095,7 +110095,19 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
   'use strict';
   var O = window.ApexOverlay = {};
   var BASE = 'https://evidencetrading.com/overlay.html';
-  var opt = { layout: 'card', show: 'r', money: true, promo: true, corner: 'bl', scale: 1 };
+  var opt = { layout: 'card', show: 'r', money: true, promo: true, corner: 'bl', scale: 1, pmode: 'flyby', pevery: '300' };
+  var PROMO = 'https://evidencetrading.com/promo.html';
+  var _ref = null;   // the user's referral code, for the promo banner
+  function loadRef(){
+    if (_ref !== null || !window.db || !window.currentUID || window.currentUID === 'demo') return;
+    _ref = '';
+    db.collection('apexUsers').doc(currentUID).get().then(function(d){ _ref = (d.exists && d.data().referralCode) || ''; O.render(); }).catch(function(){});
+  }
+  O.promoUrl = function(record){
+    return PROMO + '?mode=' + opt.pmode + (opt.pmode === 'flyby' ? '&every=' + opt.pevery + '&pos=' + opt.corner : '') +
+      (_ref ? '&code=' + encodeURIComponent(_ref) : '') + '&lang=' + lang() + (record ? '&record=1' : '');
+  };
+  O.copyPromo = function(){ try { navigator.clipboard.writeText(O.promoUrl(false)); if (window.showToast) showToast('Copied — paste it into OBS'); } catch(e){} };
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function lsKey(){ return 'apexOverlay_' + (window.currentUID || 'local'); }
   function saved(){ try { return JSON.parse(localStorage.getItem(lsKey()) || 'null'); } catch(e){ return null; } }
@@ -110154,7 +110166,19 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
           '<div class="ovl-note"><span>The link can only read these overlay numbers — never your notes, screenshots or other trades. Keep it out of view anyway; “New link” replaces it.</span></div>'
         : '<div class="ovl-acts"><button class="mc-b pri" onclick="ApexOverlay.create()">Create overlay link</button></div>' +
           (isPro() ? '' : '<div class="ovl-note"><span>Part of Pro.</span></div>')) +
+      '<div class="ovl-sep"></div>' +
+      '<div class="gc-title" style="margin-bottom:6px"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Animated promo banner</div>' +
+      '<div class="ovl-p">A 3D banner with the gold Evidence mark that flies through the picture now and then — or runs along the bottom — with your referral code. As a browser source, or as a video file with a transparent background.</div>' +
+      '<div class="ovl-prev"><iframe title="Promo preview" src="' + esc('/promo.html?mode=' + opt.pmode + '&every=20&pos=' + opt.corner + '&lang=' + lang() + (_ref ? '&code=' + encodeURIComponent(_ref) : '')) + '" loading="lazy"></iframe></div>' +
+      '<div class="ovl-grid">' +
+        '<div><span class="ovl-l">Style</span>' + sel('pmode', [['flyby','Fly-in with panel'],['ticker','Ticker along the bottom']]) + '</div>' +
+        (opt.pmode === 'flyby' ? '<div><span class="ovl-l">How often</span>' + sel('pevery', [['120','Every 2 minutes'],['300','Every 5 minutes'],['600','Every 10 minutes'],['1200','Every 20 minutes']]) + '</div>' : '') +
+      '</div>' +
+      '<div class="ovl-url" style="margin-top:10px"><input class="ovl-in notranslate" translate="no" readonly value="' + esc(O.promoUrl(false)) + '" onclick="this.select()"><button class="mc-b pri" onclick="ApexOverlay.copyPromo()">Copy</button></div>' +
+      '<div class="ovl-acts"><a class="mc-b" href="' + esc(O.promoUrl(true)) + '" target="_blank" rel="noopener">Download as video</a></div>' +
+      '<div class="ovl-note"><span>The video is recorded in your browser (Chrome or Edge) as WebM with a transparent background — in OBS add it as a media source and tick “Loop”.</span>' + (_ref ? '' : ' <span>Create your referral link under Invite &amp; Earn first, and the code appears in the banner.</span>') + '</div>' +
       '</div>';
+    loadRef();
     try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(host); } catch(e){}
   };
   var css = document.createElement('style');
@@ -110165,6 +110189,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
     '.ovl-in{width:100%;box-sizing:border-box;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink);padding:7px 9px;font:inherit;font-size:12.5px}' +
     '.ovl-chks{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0}.ovl-chk{display:flex !important;gap:7px;align-items:center;font-size:12.5px;color:var(--ink);text-transform:none;letter-spacing:normal;font-weight:400;margin:0 !important;cursor:pointer}.ovl-chk input{width:auto !important;margin:0}' +
     '.ovl-url{display:flex;gap:8px;margin:6px 0 8px}.ovl-url .ovl-in{font-family:var(--font-mono);font-size:11px}' +
+    '.ovl-sep{height:0.5px;background:var(--rim);margin:16px 0 12px}' +
     '.ovl-steps{margin:4px 0 8px 18px;font-size:12px;color:var(--ink2);line-height:1.6}.ovl-acts{display:flex;gap:8px;flex-wrap:wrap}.ovl-note{font-size:11.5px;color:var(--ink3);margin-top:8px;line-height:1.5}';
   document.head.appendChild(css);
   // Fit the 1920×1080 preview into the card width.
@@ -110192,7 +110217,17 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       'New link': ['Neuer Link','Nuevo enlace','Novo link','Nouveau lien'], 'Turn off': ['Ausschalten','Desactivar','Desligar','Désactiver'],
       'The link can only read these overlay numbers — never your notes, screenshots or other trades. Keep it out of view anyway; “New link” replaces it.': ['Der Link kann nur diese Overlay-Zahlen lesen – nie deine Notizen, Screenshots oder andere Trades. Zeig ihn trotzdem nicht im Bild; „Neuer Link“ ersetzt ihn.','El enlace solo lee estas cifras del overlay, nunca tus notas, capturas u otras operaciones. Aun así, no lo muestres; «Nuevo enlace» lo reemplaza.','O link só lê estes números do overlay — nunca suas notas, capturas ou outras operações. Mesmo assim, não o mostre; “Novo link” o substitui.','Le lien ne lit que ces chiffres de l’overlay — jamais tes notes, captures ou autres trades. Ne le montre pas quand même ; « Nouveau lien » le remplace.'],
       'Create overlay link': ['Overlay-Link erstellen','Crear enlace del overlay','Criar link do overlay','Créer le lien de l’overlay'],
-      'Part of Pro.': ['Teil von Pro.','Parte de Pro.','Parte do Pro.','Inclus dans Pro.']
+      'Part of Pro.': ['Teil von Pro.','Parte de Pro.','Parte do Pro.','Inclus dans Pro.'],
+      'Animated promo banner': ['Animiertes Werbebanner','Banner promocional animado','Banner promocional animado','Bannière promo animée'],
+      'A 3D banner with the gold Evidence mark that flies through the picture now and then — or runs along the bottom — with your referral code. As a browser source, or as a video file with a transparent background.': ['Ein 3D-Banner mit dem goldenen Evidence-Zeichen, das ab und zu durchs Bild fliegt – oder unten durchläuft – mit deinem Empfehlungscode. Als Browserquelle oder als Videodatei mit durchsichtigem Hintergrund.','Un banner 3D con la marca dorada de Evidence que cruza la imagen de vez en cuando —o recorre la parte inferior— con tu código de referido. Como fuente de navegador o como vídeo con fondo transparente.','Um banner 3D com a marca dourada da Evidence que atravessa a tela de vez em quando — ou corre na parte de baixo — com seu código de indicação. Como fonte de navegador ou como vídeo com fundo transparente.','Une bannière 3D avec le logo doré d’Evidence qui traverse l’image de temps en temps — ou défile en bas — avec ton code de parrainage. En source navigateur ou en vidéo à fond transparent.'],
+      'Style': ['Art','Estilo','Estilo','Style'], 'Fly-in with panel': ['Einflug mit Tafel','Entrada con panel','Entrada com painel','Arrivée avec panneau'],
+      'Ticker along the bottom': ['Laufband unten','Cinta inferior','Faixa inferior','Bandeau défilant en bas'],
+      'How often': ['Wie oft','Frecuencia','Frequência','Fréquence'], 'Every 2 minutes': ['Alle 2 Minuten','Cada 2 minutos','A cada 2 minutos','Toutes les 2 minutes'],
+      'Every 5 minutes': ['Alle 5 Minuten','Cada 5 minutos','A cada 5 minutos','Toutes les 5 minutes'], 'Every 10 minutes': ['Alle 10 Minuten','Cada 10 minutos','A cada 10 minutos','Toutes les 10 minutes'],
+      'Every 20 minutes': ['Alle 20 Minuten','Cada 20 minutos','A cada 20 minutos','Toutes les 20 minutes'],
+      'The video is recorded in your browser (Chrome or Edge) as WebM with a transparent background — in OBS add it as a media source and tick “Loop”.': ['Das Video wird in deinem Browser (Chrome oder Edge) als WebM mit durchsichtigem Hintergrund aufgenommen – in OBS als Medienquelle einfügen und „Wiederholen“ anhaken.','El vídeo se graba en tu navegador (Chrome o Edge) como WebM con fondo transparente; en OBS añádelo como fuente multimedia y marca «Bucle».','O vídeo é gravado no seu navegador (Chrome ou Edge) como WebM com fundo transparente — no OBS adicione como fonte de mídia e marque “Repetir”.','La vidéo est enregistrée dans ton navigateur (Chrome ou Edge) en WebM à fond transparent — dans OBS, ajoute-la comme source média et coche « Boucle ».'],
+      'Download as video': ['Als Video herunterladen','Descargar como vídeo','Baixar como vídeo','Télécharger en vidéo'],
+      'Create your referral link under Invite & Earn first, and the code appears in the banner.': ['Erstelle zuerst unter „Einladen & Verdienen“ deinen Empfehlungslink – dann steht der Code im Banner.','Crea primero tu enlace de referido en Invitar y ganar, y el código aparecerá en el banner.','Crie primeiro seu link de indicação em Convidar e ganhar, e o código aparece no banner.','Crée d’abord ton lien de parrainage dans Inviter et gagner, et le code apparaîtra dans la bannière.']
     };
     function reg(){ if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('.ovl-card', T); else setTimeout(reg, 300); }
     reg();
