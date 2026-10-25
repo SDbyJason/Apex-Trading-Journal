@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Topstep Trading Journal — TopstepX Auto-Sync | Evidence</title>
+<meta name="description" content="A trading journal for Topstep: TopstepX accounts sync by themselves through ProjectX, partial exits become one trade, and the Trading Combine rules are tracked for you.">
+<link rel="canonical" href="https://evidencetrading.com/topstep-trading-journal.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/topstep-trading-journal.html">
+<meta property="og:title" content="Topstep Trading Journal — TopstepX Auto-Sync | Evidence">
+<meta property="og:description" content="A trading journal for Topstep: TopstepX accounts sync by themselves through ProjectX, partial exits become one trade, and the Trading Combine rules are tracked for you.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400&family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080b;--panel:#0d0f13;--line:rgba(255,255,255,.09);--gold:#c9a84c;
+--gold-hi:#e8c96a;--ink:#f2efe9;--ink2:#c8c2b6;--mute:#8b8578;--pos:#3ecf8e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);
+font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:0 22px}
+header.nav{border-bottom:1px solid var(--line);position:sticky;top:0;
+background:rgba(7,8,11,.9);backdrop-filter:blur(10px);z-index:10}
+header.nav .wrap{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--ink);font-size:15px}
+.brand-mark{width:28px;height:28px;border-radius:8px;display:block;flex:none}
+.nav-cta{margin-left:auto;border:1px solid rgba(201,168,76,.4);border-radius:9px;
+padding:8px 16px;font-size:13.5px;font-weight:600}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3rem);line-height:1.12;
+letter-spacing:-.02em;color:var(--ink);margin:48px 0 14px;font-weight:800}
+h2{font-family:'Syne',sans-serif;font-size:clamp(1.35rem,3vw,1.75rem);color:var(--ink);
+margin:44px 0 12px;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.05rem;color:var(--ink);margin:28px 0 8px;font-weight:700}
+.lede{font-size:1.12rem;color:var(--ink2);margin-bottom:30px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.16em;
+text-transform:uppercase;color:var(--gold);margin-top:44px}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;
+background:rgba(255,255,255,.015)}
+.card.gold{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.05)}
+.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;margin:22px 0;font-size:14.5px;display:block;overflow-x:auto}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:700;font-size:13px}
+td.y{color:var(--pos);font-weight:700}td.n{color:var(--mute)}
+ul{padding-left:20px}li{margin-bottom:9px}
+code{font-family:'DM Mono',monospace;font-size:13.5px;background:rgba(255,255,255,.05);
+padding:2px 6px;border-radius:5px;color:var(--ink)}
+.cta{display:inline-block;background:linear-gradient(135deg,var(--gold-hi),var(--gold));
+color:#07080b;font-weight:800;padding:13px 26px;border-radius:11px;margin:8px 10px 8px 0;
+font-size:15px}
+.cta:hover{text-decoration:none;filter:brightness(1.06)}
+.cta.ghost{background:none;color:var(--gold);border:1px solid rgba(201,168,76,.4)}
+footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0 50px;
+font-size:13px;color:var(--mute)}
+footer a{color:var(--mute)}
+footer .links{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px}
+.related{display:grid;gap:10px;margin:18px 0}
+.related a{border:1px solid var(--line);border-radius:11px;padding:13px 15px;
+color:var(--ink);font-weight:600;font-size:14.5px}
+.related a:hover{border-color:rgba(201,168,76,.4);text-decoration:none}
+.related a span{display:block;color:var(--mute);font-weight:400;font-size:13px;margin-top:2px}
+.note{font-size:13.5px;color:var(--mute);border-left:2px solid var(--line);
+padding-left:14px;margin:20px 0}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="/"><svg class="brand-mark" viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient><radialGradient id="etS" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFF8DE" stop-opacity=".72"/><stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient><clipPath id="etM"><rect x="98" y="112" width="287" height="84" rx="25"/><rect x="175" y="112" width="91" height="329" rx="25"/><rect x="175" y="231" width="189" height="77" rx="25"/><rect x="175" y="357" width="189" height="84" rx="25"/></clipPath></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><g clip-path="url(#etM)"><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/><circle cx="347" cy="147" r="77" fill="url(#etS)"/></g></svg> Evidence Trading</a>
+  <a class="nav-cta" href="/">Open the app →</a>
+</div></header>
+
+<main class="wrap">
+<h1>A trading journal for Topstep that fills itself</h1>
+<p class="lede">Typing futures trades into a journal by hand is where most journals die — especially
+on a Topstep account, where one session can mean a dozen fills for three trades. Evidence connects
+to TopstepX directly and does the bookkeeping for you.</p>
+
+<h2>TopstepX sync, without exports</h2>
+<p>TopstepX runs on ProjectX, and ProjectX lets every trader create their own API key. You enter
+your TopstepX username and that key once in Evidence, under Auto Tracking → TopstepX. From then on
+every account under that login — Trading Combines and Express Funded accounts — sends its trades
+to your journal every ten minutes, whether the app is open or not. The first sync brings in the
+last 30 days.</p>
+<p>The API key comes with a ProjectX subscription that you pay to ProjectX, not to Evidence. Topstep
+lists how to get one in TopstepX under Settings → API.</p>
+
+<h2>Scale-ins and partial exits stay one trade</h2>
+<p>Futures traders rarely get in and out in one fill. A journal that pairs single fills turns one
+trade with two partial exits into three trades — two of them nonsense. Evidence rebuilds each
+position from the fills: it nets them per account and contract and writes one trade when you are
+flat again, with your average entry, your average exit, the largest size you held, and the P&amp;L
+and fees exactly as TopstepX booked them. A position you flip from long to short is closed and
+re-opened, the way it actually happened.</p>
+
+<h2>The Trading Combine rules, already set</h2>
+<p>A Topstep account that arrives through the sync is created as a prop account with Topstep&rsquo;s
+rules: the profit target and the end-of-day maximum loss for its size, the consistency rule (your
+best day below 55&nbsp;% of the target) and the two-day minimum, counted on Topstep&rsquo;s own clock
+— the trading day ends at 5&nbsp;pm Chicago time. Evidence reads the size from the account name; if
+it cannot, it asks you once. Express Funded accounts are recognised as funded.</p>
+<p>From there the whole app measures that account the way Topstep does: the distance to your
+maximum loss in dollars, the room left today, a warning on the trade card when a stop would use most
+of it, and a plain message when every condition is met.</p>
+
+<h2>What you get on top of the bookkeeping</h2>
+<ul>
+<li><strong>Edge &amp; Leaks</strong> — every symbol, session, hour and habit tested against your
+other trades, so you see whether NQ in the first hour is really your edge.</li>
+<li><strong>Futures replay</strong> — ES, NQ, YM, GC, CL and the micros in whole contracts with CME
+tick values, to practise a setup on past days before you risk the combine.</li>
+<li><strong>A cost ledger</strong> for combines, resets and payouts, so you know what the account
+really cost you.</li>
+</ul>
+
+<h2>When another journal fits better</h2>
+<p>If you trade Topstep through Rithmic or NinjaTrader instead of TopstepX, there is no direct sync
+in Evidence yet — your trades come in through a statement import or the NinjaTrader tracker. And
+if your firm runs on Tradovate (Apex, MyFundedFutures), the direct connection is not available yet
+either; statement import works today.</p>
+
+<div class="card gold">
+<h3>Connect TopstepX in two minutes</h3>
+<a class="cta" href="/">Create a free account</a>
+<a class="cta ghost" href="/?demo=1">Open the live demo →</a>
+</div>
+
+<p class="note">Evidence is not affiliated with Topstep or ProjectX. TopstepX and Topstep are their
+owners&rsquo; trademarks. Rule figures follow Topstep&rsquo;s help centre as checked on 7 October
+2026 (<a href="https://help.topstep.com/en/articles/8284197-trading-combine-parameters" rel="noopener">Trading Combine parameters</a>)
+— always check yours against your own account. The TopstepX sync and futures replay are part of Pro.</p>
+
+<h2>Related</h2>
+<div class="related">
+      <a href="/prop-firm-trading-journal.html">Prop firm trading journal<span>trailing, EOD and static drawdown, the consistency rule and guardrails</span></a>
+      <a href="/ctrader-trading-journal.html">cTrader trading journal<span>journals cTrader accounts by itself, and captures SL/TP while the position is still open</span></a>
+      <a href="/trading-journal-market-replay.html">Trading journal with market replay<span>trade any past day again, candle by candle, on real tick data</span></a>
+      <a href="/crypto-trading-journal.html">Crypto trading journal<span>Binance and Bybit sync through a read-only API key</span></a>
+</div>
+</main>
+
+<footer><div class="wrap">
+  <div class="links">
+    <a href="/">Home</a>
+    <a href="/?demo=1">Live demo</a>
+    <a href="/ctrader-trading-journal.html">cTrader journal</a>
+    <a href="/prop-firm-trading-journal.html">Prop firm journal</a>
+    <a href="/trading-journal-market-replay.html">Market replay</a>
+    <a href="/crypto-trading-journal.html">Crypto journal</a>
+    <a href="/evidence-vs-tradezella.html">vs TradeZella</a>
+    <a href="/evidence-vs-tradersync.html">vs TraderSync</a>
+    <a href="/changelog.html">Changelog</a>
+  </div>
+  <div>© 2026 Evidence Trading · Journal, analytics and market replay for traders.
+  Evidence reads your trade history. It never places, changes or closes a trade.</div>
+</div></footer>
+</body>
+</html>

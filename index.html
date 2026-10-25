@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-24f';
+  window.APEX_BUILD = '2026-10-25a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -11322,6 +11322,7 @@ body.light #landingPage * {
         <li><b>Connection health</b>&nbsp;— every sync on one page, plus an email when one breaks and a check of your broker's P&amp;L against the journal</li>
         <li><b>REST API</b>&nbsp;— read your journal from any tool with your own key</li>
         <li><b>Outgoing webhooks</b>&nbsp;— send trades, day summaries &amp; rule breaches to Zapier, Make, Discord or Slack</li>
+        <li><b>TopstepX auto-sync</b>&nbsp;— your Topstep accounts on ProjectX fill the journal by themselves, scale-outs joined into one trade</li>
         <li><b>Futures &amp; prop accounts</b>&nbsp;— Topstep, Apex, MyFundedFutures, NinjaTrader, Rithmic and Tradovate statements imported and mapped once</li>
         <li>Weekly Intelligence Reports &amp; PDF export</li>
         <li><b>Psychology dashboard</b>&nbsp;— Mind Score, trends, mistake &amp; strength heatmaps, discipline streak</li>
@@ -11496,6 +11497,7 @@ body.light #landingPage * {
         <tr><td>MT5 Cloud Sync — investor password, no EA or PC needed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (beta)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Crypto Auto-Sync — Binance &amp; Bybit read-only API key</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>TopstepX Auto-Sync — futures prop accounts on ProjectX, partial exits joined into one trade</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Statement import — every supported broker &amp; prop firm, the format detected automatically</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Import from another journal — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Import check — executions, the file's own P&amp;L, duplicates, missing stops and timezone, shown before anything is written</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
@@ -11825,6 +11827,7 @@ body.light #landingPage * {
   <ul class="footer-links">
     <li><a href="/ctrader-trading-journal.html">cTrader trading journal</a></li>
     <li><a href="/prop-firm-trading-journal.html">Prop firm trading journal</a></li>
+    <li><a href="/topstep-trading-journal.html">Topstep trading journal</a></li>
     <li><a href="/trading-journal-market-replay.html">Trading journal with market replay</a></li>
     <li><a href="/evidence-vs-tradezella.html">Evidence vs TradeZella</a></li>
     <li><a href="/evidence-vs-tradersync.html">Evidence vs TraderSync</a></li>
@@ -12443,6 +12446,7 @@ body.light #landingPage * {
           <div class="apex-feat-desc">A read-only API key from Binance or Bybit and your fills arrive by themselves every ten minutes — no export, no upload. Keys with trading or withdrawal rights are refused</div>
         </div>
       </div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg></div><div><div class="apex-feat-label">TopstepX — direct connection</div><div class="apex-feat-desc">Your ProjectX username and API key, and every Topstep account under it syncs on its own — evaluations and funded. Scale-ins and partial exits become one trade with the platform's own P&amp;L and fees</div></div></div>
       <div class="apex-feat-item apex-feat-full">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-bot ></use></svg></div>
         <div>
@@ -14673,6 +14677,7 @@ function _authAction(type) {
           <button class="at-plat-btn"        data-plat="quantower"  onclick="ApexAutoTrack.select('quantower')"><svg class=ic aria-hidden=true><use href=#i-signal ></use></svg> Quantower</button>
           <button class="at-plat-btn"        data-plat="ninjatrader" onclick="ApexAutoTrack.select('ninjatrader')"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg> NinjaTrader <span class="at-soon">beta</span></button>
           <button class="at-plat-btn"        data-plat="tradovate"  onclick="ApexAutoTrack.select('tradovate')"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg> Tradovate <span class="at-soon">soon</span></button>
+          <button class="at-plat-btn"        data-plat="topstepx"   onclick="ApexAutoTrack.select('exchange');if(window.ApexExchange)ApexExchange.open('projectx')"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg> <span class="notranslate" translate="no">TopstepX</span></button>
           <button class="at-plat-btn"        data-plat="exchange"   onclick="ApexAutoTrack.select('exchange')"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> Crypto &amp; IBKR</button>
         </div>
 
@@ -29861,6 +29866,8 @@ document.addEventListener('keydown', function(e) {
       "Connect up to 3 MetaTrader 5 accounts with the read-only investor password — every trade reaches your journal, including trades from the MT5 phone app, with no Expert Advisor and no PC running. Optional import of the last 30 or 90 days": ["Verbinde bis zu 3 MetaTrader-5-Konten mit dem nur lesenden Investor-Passwort – jeder Trade landet in deinem Journal, auch aus der MT5-Handy-App, ohne Expert Advisor und ohne laufenden PC. Auf Wunsch mit Import der letzten 30 oder 90 Tage", "Conecta hasta 3 cuentas de MetaTrader 5 con la contraseña de inversor de solo lectura: cada operación llega a tu diario, también las de la app móvil de MT5, sin Expert Advisor ni PC encendido. Importación opcional de los últimos 30 o 90 días", "Conecte até 3 contas MetaTrader 5 com a senha de investidor somente leitura — cada operação chega ao seu diário, inclusive as do app de celular do MT5, sem Expert Advisor e sem PC ligado. Importação opcional dos últimos 30 ou 90 dias", "Connectez jusqu’à 3 comptes MetaTrader 5 avec le mot de passe investisseur en lecture seule — chaque trade arrive dans votre journal, y compris ceux de l’application mobile MT5, sans Expert Advisor ni PC allumé. Import facultatif des 30 ou 90 derniers jours"],
       "Auto-Tracking — MT5 · ATAS · Quantower · TradingView · NinjaTrader (beta)": ["Auto-Tracking – MT5 · ATAS · Quantower · TradingView · NinjaTrader (Beta)", "Auto-Tracking — MT5 · ATAS · Quantower · TradingView · NinjaTrader (beta)", "Auto-Tracking — MT5 · ATAS · Quantower · TradingView · NinjaTrader (beta)", "Auto-Tracking — MT5 · ATAS · Quantower · TradingView · NinjaTrader (bêta)"],
       "Trades post to your journal in real time (exact broker P&L, SL/TP) — even while the app is closed": ["Trades landen in Echtzeit in deinem Journal (exaktes Broker-P&L, SL/TP) – auch bei geschlossener App", "Las operaciones llegan a tu diario en tiempo real (P&L exacto del bróker, SL/TP), incluso con la app cerrada", "As operações chegam ao seu diário em tempo real (P&L exato da corretora, SL/TP) — mesmo com o app fechado", "Les trades arrivent dans votre journal en temps réel (P&L exact du courtier, SL/TP) — même application fermée"],
+      "TopstepX — direct connection": ["TopstepX – direkte Verbindung", "TopstepX: conexión directa", "TopstepX — conexão direta", "TopstepX — connexion directe"],
+      "Your ProjectX username and API key, and every Topstep account under it syncs on its own — evaluations and funded. Scale-ins and partial exits become one trade with the platform's own P&L and fees": ["Dein ProjectX-Benutzername und API-Key – und jedes Topstep-Konto darunter synchronisiert sich selbst, Evaluation und Funded. Nachkäufe und Teilausstiege werden ein Trade mit P&L und Gebühren der Plattform", "Tu usuario y clave API de ProjectX, y cada cuenta de Topstep bajo ellos se sincroniza sola: evaluaciones y fondeadas. Entradas escalonadas y salidas parciales se vuelven una operación con el P&L y las comisiones de la plataforma", "Seu usuário e chave de API do ProjectX, e cada conta Topstep nele sincroniza sozinha — avaliações e financiadas. Entradas escalonadas e saídas parciais viram uma operação com o P&L e as taxas da plataforma", "Ton identifiant et ta clé API ProjectX, et chaque compte Topstep associé se synchronise seul — évaluations et financés. Renforts et sorties partielles deviennent un trade avec le P&L et les frais de la plateforme"],
       "Crypto — direct connection": ["Krypto – direkte Verbindung", "Cripto: conexión directa", "Cripto — conexão direta", "Crypto — connexion directe"],
       "A read-only API key from Binance or Bybit and your fills arrive by themselves every ten minutes — no export, no upload. Keys with trading or withdrawal rights are refused": ["Ein nur lesender API-Schlüssel von Binance oder Bybit, und deine Ausführungen kommen alle zehn Minuten von selbst – kein Export, kein Upload. Schlüssel mit Handels- oder Auszahlungsrechten werden abgelehnt", "Una clave API de solo lectura de Binance o Bybit y tus ejecuciones llegan solas cada diez minutos, sin exportar ni subir nada. Las claves con permisos de operar o retirar se rechazan", "Uma chave de API somente leitura da Binance ou Bybit e suas execuções chegam sozinhas a cada dez minutos — sem exportar, sem enviar. Chaves com permissão de operar ou sacar são recusadas", "Une clé API en lecture seule de Binance ou Bybit et vos exécutions arrivent seules toutes les dix minutes — sans export ni envoi. Les clés autorisées à trader ou à retirer sont refusées"],
       "AI Trading Coach": ["KI-Trading-Coach", "Coach de trading con IA", "Coach de trading com IA", "Coach de trading IA"],
@@ -49144,6 +49151,15 @@ body.light .pt-sugg{background:var(--layer)}
         if(!legacy.broker && meta.broker) legacy.broker = meta.broker;
         return legacy;
       }
+    }
+    /* TopstepX sync: the account name IS the Topstep account. Created as a
+       prop account and handed to the Prop cockpit with Topstep's rules. */
+    if(src==='projectx'){
+      var g = (window.ApexPropPlus && ApexPropPlus.guessTopstep) ? ApexPropPlus.guessTopstep(acct) : null;
+      var made = A.create({ name: acct, broker:'Topstep', platform:'TopstepX', type: g ? 'prop' : 'practice', currency:'USD', startBalance: (g && g.balance) || '',
+                            origins:[o], note: g && g.guessed ? 'Account size not readable from the name — set it in the Prop cockpit.' : '' });
+      try { if(g && made && window.ApexPropPlus && ApexPropPlus.autoSetup) ApexPropPlus.autoSetup(made.id, g); } catch(e){}
+      return made;
     }
     return A.create({ name: meta.name || (platform.replace('MetaTrader ','MT')+' '+login), broker: meta.broker||'',
                       platform: platform, type: meta.type==='demo'?'demo':'live', currency: meta.currency||'USD',
@@ -74424,6 +74440,29 @@ self.addEventListener('message', async (ev) => {
     return { cfg: cfg, r: compute(cfg, key), firm: fm.id === 'custom' ? 'Own rules' : fm.name, mono: fm.mono, practice: !!cfg.practice,
              phase: ph.label, phaseId: cfg.phase || 'p1', outcome: outcomeOf(all, key) };
   };
+  /* TopstepX sync (25.10.2026): an account that arrives from the ProjectX
+     sync gets Topstep's rules by itself — size and phase read from the
+     account name. Only when nothing is configured yet; whatever the trader
+     set by hand is never overwritten. Pure part is P.guessTopstep (tested). */
+  P.guessTopstep = function (name) {
+    var n = String(name || '').toUpperCase();
+    if (/PRAC|PRACTICE|SIM/.test(n)) return null;                  // practice accounts are no challenge
+    var m = n.match(/(^|[^0-9])(50|100|150)K/), size = m ? Number(m[2]) * 1000 : 0;
+    var funded = /XFA|EXPRESS|FUNDED|LIVE/.test(n);
+    return { preset: 'topstep', balance: size, phase: funded ? 'funded' : 'p1', guessed: !size };
+  };
+  P.autoSetup = function (key, g) {
+    if (!key || !g || !PRESETS[g.preset]) return false;
+    var all = loadAll();
+    if (all.byAcc[key] && num(all.byAcc[key].balance) > 0) return false;
+    var c = blankCfg();
+    c.preset = g.preset; c.balance = g.balance || 0; c.phase = g.phase || 'p1';
+    var r = rulesFor(g.preset, c.balance, c.phase); if (r) for (var f in r) c[f] = r[f];
+    c.autoFrom = 'topstepx';
+    all.byAcc[key] = c; saveAll(all);
+    try { refreshOutside(); } catch (e) {}
+    return true;
+  };
   P.configured = function (key) {
     var all = loadAll(); return !!(all.byAcc[key] && num(all.byAcc[key].balance) > 0);
   };
@@ -78294,6 +78333,21 @@ body.light .apxFR-card { background: #fff; }
         + 'Bybit hands us all fills at once, so there is nothing else to configure. '
         + 'Note that Bybit only serves the last <strong>7 days</strong> of executions — older history '
         + 'has to come in once via CSV.' },
+    /* 25.10.2026: futures prop accounts on ProjectX (Topstep's TopstepX).
+       ProjectX has no read-only key, so the warning says so plainly instead
+       of the read-only promise the crypto venues get. */
+    projectx: { name: 'TopstepX (ProjectX)', meta: 'Futures prop accounts · username + API key',
+      warn: '<strong>This key can place orders</strong>&nbsp;— ProjectX has no read-only keys. Evidence only ever '
+        + 'reads accounts and trades with it and never sends an order. It is stored where no browser can read it back, '
+        + 'and you can revoke it in TopstepX at any time.',
+      fields: [
+        { k: 'userName', label: 'TopstepX username', ph: 'your platform username, not your e-mail' },
+        { k: 'apiKey',   label: 'API Key',           ph: 'shown by ProjectX only once', secret: true }
+      ],
+      help: 'TopstepX → <code>Settings</code> → <code>API</code> → link your <strong>ProjectX</strong> account, '
+        + 'subscribe to <em>ProjectX API Access</em> (a ProjectX subscription, paid to them, not to Evidence) and '
+        + 'create a key with <code>Add API Key</code>. Every account under that login syncs — evaluations and funded. '
+        + 'Scale-ins and partial exits are joined into one trade with the platform&rsquo;s own P&amp;L and fees.' },
     /* unavailable: IBKR refuses our sync servers' network (403 from every
        attempt, verified 07.08.2026). The code works; the route does not.
        Showing the form anyway would cost the trader ten minutes creating a
@@ -78353,14 +78407,14 @@ body.light .apxFR-card { background: #fff; }
     if (_open) {
       var e = EX[_open];
       form = '<div class="apxEx-form open">'
-        + '<div class="apxEx-warn"><strong>Read-only keys only.</strong> Evidence reads your trade history '
+        + '<div class="apxEx-warn">' + (e.warn || '<strong>Read-only keys only.</strong> Evidence reads your trade history '
           + 'and writes nothing back to the exchange. A key that can trade or withdraw has no use here — '
-          + 'and we reject one if the exchange tells us it has those rights.</div>'
+          + 'and we reject one if the exchange tells us it has those rights.') + '</div>'
         + '<div class="apxEx-help">' + e.help + '</div>'
         + e.fields.map(function(f){
             return '<div class="apxEx-field"><label>' + esc(f.label) + (f.opt ? ' <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span>' : '') + '</label>'
               + '<input class="apxEx-in" id="apxEx_' + f.k + '" autocomplete="off" spellcheck="false" '
-              + 'type="' + (/secret/i.test(f.k) ? 'password' : 'text') + '" placeholder="' + esc(f.ph || '') + '"></div>';
+              + 'type="' + (/secret/i.test(f.k) || f.secret ? 'password' : 'text') + '" placeholder="' + esc(f.ph || '') + '"></div>';
           }).join('')
         + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'
         + '<button class="apxRef-b primary" id="apxExSave" onclick="ApexExchange.save()">Connect ' + esc(e.name) + '</button>'
@@ -78377,7 +78431,7 @@ body.light .apxFR-card { background: #fff; }
 
     host.innerHTML =
       '<div class="glass-card" style="padding:18px;margin-bottom:14px">'
-      + '<div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:5px">Crypto &amp; IBKR — direct connection</div>'
+      + '<div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:5px">Crypto, futures props &amp; IBKR — direct connection</div>'
       + '<div class="apxEx-meta" style="margin-bottom:14px">Your trades arrive by themselves, every 10 minutes, '
         + 'whether or not the app is open. No CSV export, no upload. Requires Pro.</div>'
       + '<div class="apxEx-grid">' + cards + '</div>'
@@ -78459,7 +78513,8 @@ body.light .apxFR-card { background: #fff; }
         .doc(window.currentUID + '_' + ex).set(cfg, { merge: true })
         .then(function(){
           msg('Connected. The first sync runs within 10 minutes and pulls the last 30 days — '
-            + 'the trades appear in your journal by themselves.', 'ok');
+            + 'the trades appear in your journal by themselves.'
+            + (res.accounts && res.accounts.length ? '<br>Accounts found: <span class="notranslate" translate="no">' + res.accounts.map(esc).join(' · ') + '</span>' : ''), 'ok');
           if (window.showToast) showToast('✅︎ ' + EX[ex].name + ' connected');
           try { if (window.ApexFirstRun) ApexFirstRun.refresh(); } catch(e){}
         });
@@ -103109,6 +103164,9 @@ body.light::before{ opacity:.45; }
     "Background sync — cTrader syncs while the app is closed": ["Hintergrund-Sync — cTrader synchronisiert bei geschlossener App", "Sincronización en segundo plano — cTrader sincroniza con la app cerrada", "Sincronização em segundo plano — o cTrader sincroniza com o app fechado", "Synchronisation en arrière-plan — cTrader se synchronise app fermée"],
     "MT5 Cloud Sync — investor password, no EA or PC needed": ["MT5 Cloud Sync — Investor-Passwort, kein EA oder PC nötig", "MT5 Cloud Sync — contraseña de inversor, sin EA ni PC", "MT5 Cloud Sync — senha de investidor, sem EA nem PC", "MT5 Cloud Sync — mot de passe investisseur, sans EA ni PC"],
     "Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (beta)": ["Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (Beta)", "Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (beta)", "Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (beta)", "Auto-Tracking — MT5 / ATAS / Quantower / TradingView / NinjaTrader (bêta)"],
+    "TopstepX auto-sync": ["TopstepX-Auto-Sync", "Auto-sync de TopstepX", "Auto-sync do TopstepX", "Synchro auto TopstepX"],
+    "— your Topstep accounts on ProjectX fill the journal by themselves, scale-outs joined into one trade": ["— deine Topstep-Konten auf ProjectX füllen das Journal von selbst, Teilausstiege werden zu einem Trade zusammengeführt", "— tus cuentas de Topstep en ProjectX llenan el diario solas; las salidas parciales se unen en una operación", "— suas contas Topstep no ProjectX preenchem o diário sozinhas; saídas parciais viram uma única operação", "— tes comptes Topstep sur ProjectX remplissent le journal tout seuls, les sorties partielles réunies en un trade"],
+    "TopstepX Auto-Sync — futures prop accounts on ProjectX, partial exits joined into one trade": ["TopstepX-Auto-Sync — Futures-Prop-Konten auf ProjectX, Teilausstiege zu einem Trade zusammengeführt", "Auto-sync de TopstepX: cuentas prop de futuros en ProjectX, salidas parciales unidas en una operación", "Auto-sync do TopstepX — contas prop de futuros no ProjectX, saídas parciais unidas em uma operação", "Synchro auto TopstepX — comptes prop futures sur ProjectX, sorties partielles réunies en un trade"],
     "Crypto Auto-Sync — Binance & Bybit read-only API key": ["Krypto-Auto-Sync — Binance & Bybit mit Nur-Lese-API-Schlüssel", "Auto-Sync cripto — clave API de solo lectura de Binance y Bybit", "Auto-Sync cripto — chave de API somente leitura da Binance e Bybit", "Auto-Sync crypto — clé API en lecture seule Binance et Bybit"],
     "Statement import — every supported broker & prop firm, the format detected automatically": ["Kontoauszug-Import — jeder unterstützte Broker & jede Prop-Firma, Format automatisch erkannt", "Importación de extractos — todos los brókers y prop firms compatibles, formato detectado automáticamente", "Importação de extratos — toda corretora e prop firm suportada, formato detectado automaticamente", "Import de relevés — tous les courtiers et prop firms pris en charge, format détecté automatiquement"],
     "Import from another journal — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria": ["Import aus einem anderen Journal — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria", "Importación desde otro diario — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria", "Importação de outro diário — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria", "Import depuis un autre journal — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria"],
