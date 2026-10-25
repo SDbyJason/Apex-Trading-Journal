@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-25e';
+  window.APEX_BUILD = '2026-10-25f';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -11217,20 +11217,20 @@ body.light #landingPage * {
 <section class="lp-section" id="streamers">
   <div class="lp-label reveal">For streamers</div>
   <h2 class="lp-title reveal">Trade live. <em>Show the real numbers.</em></h2>
-  <p class="lp-lead reveal">Add two browser sources in OBS or Streamlabs: a live overlay that reads your journal, and a 3D sponsor banner with your own referral code. Your viewers get 10% off, you earn on every subscription.</p>
+  <p class="lp-lead reveal">Add your live numbers to OBS or Streamlabs as a browser source — straight from your journal. Streaming regularly? Streamer partners also get a 3D sponsor banner with their own code and earn on every subscription.</p>
   <div class="lp-stream-demo lp-keep reveal">
     <div class="lp-stream-frame"><iframe src="/banner.html?code=YOURCODE&amp;format=wide" loading="lazy" title="3D sponsor banner preview" tabindex="-1"></iframe></div>
-    <div class="lp-stream-cap">Live preview — the same banner your viewers see on stream</div>
+    <div class="lp-stream-cap">Live preview of the partner banner</div>
   </div>
   <script>(function(){var f=document.querySelector('.lp-stream-frame');if(!f)return;function k(){f.style.setProperty('--k',f.clientWidth/1920)}k();try{new ResizeObserver(k).observe(f)}catch(e){addEventListener('resize',k)}})();</script>
   <div class="lp-steps">
     <div class="lp-step reveal d1"><span class="lp-step-n">1</span><div class="lp-step-t">Live overlay</div><div class="lp-step-d">Today's R, P&amp;L or pips, win rate and open trades — updated from your journal while you trade. Hide money amounts with one switch.</div></div>
-    <div class="lp-step reveal d2"><span class="lp-step-n">2</span><div class="lp-step-t">3D sponsor banner</div><div class="lp-step-d">A rendered gold banner with your code, in landscape for Twitch and YouTube or portrait for TikTok, Reels and Shorts. Record it as a transparent video too.</div></div>
-    <div class="lp-step reveal d3"><span class="lp-step-n">3</span><div class="lp-step-t">Copy, paste, done</div><div class="lp-step-d">Settings → Streaming gives you the links. Paste them as browser sources — no plugin, no download.</div></div>
+    <div class="lp-step reveal d2"><span class="lp-step-n">2</span><div class="lp-step-t">3D sponsor banner for partners</div><div class="lp-step-d">Streamer partners get this gold banner with their own code, in landscape for Twitch and YouTube or portrait for TikTok, Reels and Shorts — and earn on every subscription.</div></div>
+    <div class="lp-step reveal d3"><span class="lp-step-n">3</span><div class="lp-step-t">Copy, paste, done</div><div class="lp-step-d">Settings → Streaming gives you the overlay link. Paste it as a browser source — no plugin, no download.</div></div>
   </div>
   <div class="lp-switch-go lp-keep reveal">
     <div class="lp-switch-btns">
-      <button type="button" onclick="location.href='/streamers.html'">Streamer program →</button>
+      <button type="button" onclick="location.href='/streamers.html'">Apply as a streamer partner →</button>
     </div>
   </div>
 </section>
@@ -14538,7 +14538,7 @@ function _authAction(type) {
         <div class="glass-card" style="cursor:pointer" onclick="switchSettingsTab('streaming')">
           <div style="font-size:22px;margin-bottom:10px"><svg class=ic aria-hidden=true><use href=#i-video ></use></svg></div>
           <div class="gc-title" style="margin-bottom:4px">Streaming</div>
-          <div style="font-size:11px;color:var(--ink3)">Live overlay and 3D sponsor banner for OBS, TikTok and YouTube</div>
+          <div style="font-size:11px;color:var(--ink3)">Live overlay for OBS and Streamlabs</div>
           <div style="margin-top:10px;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:0.05em">→ Configure</div>
         </div>
 
@@ -14780,7 +14780,7 @@ function _authAction(type) {
     <div class="settings-panel" id="spanel-streaming">
       <div style="max-width:900px">
         <div style="font-size:13px;color:var(--ink3);margin-bottom:16px;line-height:1.6">
-          Put your trading on stream: live numbers straight from your journal, and a 3D sponsor banner with your referral code — for OBS, Streamlabs, TikTok, Reels and Shorts.
+          Put your trading on stream: live numbers straight from your journal, for OBS and Streamlabs. Streamer partners also get a 3D sponsor banner with their own code.
           <a href="/streamers.html" target="_blank" rel="noopener" style="color:var(--gold)">How streamers use it ↗</a>
         </div>
         <div id="atPanel-overlay"></div>
@@ -78348,7 +78348,10 @@ body.light .apxFR-card { background: #fff; }
   function load(){
     return call('/affiliate/me').then(function(d){
       if (!d || !d.partner) return false;
-      _data = d; mount(); render(); return true;
+      _data = d; mount(); render();
+      window.ApexPartner.isPartner = true;
+      try { if (window.ApexOverlay) ApexOverlay.render(); } catch(e){}
+      return true;
     }).catch(function(){ return false; });
   }
 
@@ -103322,15 +103325,15 @@ body.light::before{ opacity:.45; }
     "For streamers": ["Für Streamer", "Para streamers", "Para streamers", "Pour les streamers"],
     "Trade live. ": ["Live traden. ", "Opera en vivo. ", "Opere ao vivo. ", "Tradez en direct. "],
     "Show the real numbers.": ["Zeig die echten Zahlen.", "Muestra los números reales.", "Mostre os números reais.", "Montrez les vrais chiffres."],
-    "Add two browser sources in OBS or Streamlabs: a live overlay that reads your journal, and a 3D sponsor banner with your own referral code. Your viewers get 10% off, you earn on every subscription.": ["Füge in OBS oder Streamlabs zwei Browserquellen hinzu: ein Live-Overlay, das dein Journal liest, und ein 3D-Sponsorbanner mit deinem eigenen Empfehlungscode. Deine Zuschauer bekommen 10 % Rabatt, du verdienst an jedem Abo.", "Añade dos fuentes de navegador en OBS o Streamlabs: un overlay en vivo que lee tu diario y un banner de patrocinio 3D con tu propio código de referido. Tus espectadores obtienen un 10 % de descuento y tú ganas con cada suscripción.", "Adicione duas fontes de navegador no OBS ou Streamlabs: um overlay ao vivo que lê seu diário e um banner de patrocínio 3D com seu próprio código de indicação. Seus espectadores ganham 10% de desconto e você ganha em cada assinatura.", "Ajoutez deux sources navigateur dans OBS ou Streamlabs : un overlay en direct qui lit votre journal et une bannière sponsor 3D avec votre propre code de parrainage. Vos spectateurs obtiennent 10 % de réduction, vous gagnez sur chaque abonnement."],
-    "Live preview — the same banner your viewers see on stream": ["Live-Vorschau — dasselbe Banner, das deine Zuschauer im Stream sehen", "Vista previa en vivo: el mismo banner que ven tus espectadores", "Prévia ao vivo — o mesmo banner que seus espectadores veem", "Aperçu en direct — la même bannière que voient vos spectateurs"],
     "Live overlay": ["Live-Overlay", "Overlay en vivo", "Overlay ao vivo", "Overlay en direct"],
     "Today's R, P&L or pips, win rate and open trades — updated from your journal while you trade. Hide money amounts with one switch.": ["Heutiges R, P&L oder Pips, Trefferquote und offene Trades — aus deinem Journal aktualisiert, während du tradest. Geldbeträge mit einem Schalter ausblenden.", "R, P&L o pips de hoy, tasa de acierto y operaciones abiertas, actualizados desde tu diario mientras operas. Oculta los importes con un interruptor.", "R, P&L ou pips de hoje, taxa de acerto e trades abertos — atualizados do seu diário enquanto você opera. Oculte valores com um botão.", "R, P&L ou pips du jour, taux de réussite et trades ouverts — mis à jour depuis votre journal pendant que vous tradez. Masquez les montants d’un clic."],
-    "3D sponsor banner": ["3D-Sponsorbanner", "Banner de patrocinio 3D", "Banner de patrocínio 3D", "Bannière sponsor 3D"],
-    "A rendered gold banner with your code, in landscape for Twitch and YouTube or portrait for TikTok, Reels and Shorts. Record it as a transparent video too.": ["Ein gerendertes Goldbanner mit deinem Code, quer für Twitch und YouTube oder hochkant für TikTok, Reels und Shorts. Auch als transparentes Video aufnehmbar.", "Un banner dorado renderizado con tu código, horizontal para Twitch y YouTube o vertical para TikTok, Reels y Shorts. También puedes grabarlo como vídeo transparente.", "Um banner dourado renderizado com seu código, horizontal para Twitch e YouTube ou vertical para TikTok, Reels e Shorts. Também pode ser gravado como vídeo transparente.", "Une bannière dorée rendue avec votre code, en paysage pour Twitch et YouTube ou en portrait pour TikTok, Reels et Shorts. Enregistrable aussi en vidéo transparente."],
     "Copy, paste, done": ["Kopieren, einfügen, fertig", "Copiar, pegar, listo", "Copiar, colar, pronto", "Copier, coller, terminé"],
-    "Settings → Streaming gives you the links. Paste them as browser sources — no plugin, no download.": ["Unter Einstellungen → Streaming bekommst du die Links. Als Browserquellen einfügen — kein Plugin, kein Download.", "En Ajustes → Streaming tienes los enlaces. Pégalos como fuentes de navegador, sin plugin ni descarga.", "Em Configurações → Streaming você recebe os links. Cole como fontes de navegador — sem plugin, sem download.", "Paramètres → Streaming vous donne les liens. Collez-les comme sources navigateur — sans plugin ni téléchargement."],
-    "Streamer program →": ["Streamer-Programm →", "Programa para streamers →", "Programa para streamers →", "Programme streamers →"],
+    "Add your live numbers to OBS or Streamlabs as a browser source — straight from your journal. Streaming regularly? Streamer partners also get a 3D sponsor banner with their own code and earn on every subscription.": ["Bring deine Live-Zahlen als Browserquelle in OBS oder Streamlabs — direkt aus deinem Journal. Du streamst regelmäßig? Streamer-Partner bekommen zusätzlich ein 3D-Sponsorbanner mit eigenem Code und verdienen an jedem Abo.", "Añade tus números en vivo a OBS o Streamlabs como fuente de navegador, directamente desde tu diario. ¿Haces streams con regularidad? Los partners streamers reciben además un banner de patrocinio 3D con su propio código y ganan con cada suscripción.", "Leve seus números ao vivo para o OBS ou Streamlabs como fonte de navegador — direto do seu diário. Faz streams com frequência? Parceiros streamers também recebem um banner de patrocínio 3D com código próprio e ganham em cada assinatura.", "Ajoutez vos chiffres en direct à OBS ou Streamlabs comme source navigateur — directement depuis votre journal. Vous streamez régulièrement ? Les partenaires streamers reçoivent aussi une bannière sponsor 3D avec leur propre code et gagnent sur chaque abonnement."],
+    "3D sponsor banner for partners": ["3D-Sponsorbanner für Partner", "Banner de patrocinio 3D para partners", "Banner de patrocínio 3D para parceiros", "Bannière sponsor 3D pour les partenaires"],
+    "Streamer partners get this gold banner with their own code, in landscape for Twitch and YouTube or portrait for TikTok, Reels and Shorts — and earn on every subscription.": ["Streamer-Partner bekommen dieses Goldbanner mit eigenem Code, quer für Twitch und YouTube oder hochkant für TikTok, Reels und Shorts — und verdienen an jedem Abo.", "Los partners streamers reciben este banner dorado con su propio código, horizontal para Twitch y YouTube o vertical para TikTok, Reels y Shorts, y ganan con cada suscripción.", "Parceiros streamers recebem este banner dourado com código próprio, horizontal para Twitch e YouTube ou vertical para TikTok, Reels e Shorts — e ganham em cada assinatura.", "Les partenaires streamers reçoivent cette bannière dorée avec leur propre code, en paysage pour Twitch et YouTube ou en portrait pour TikTok, Reels et Shorts — et gagnent sur chaque abonnement."],
+    "Settings → Streaming gives you the overlay link. Paste it as a browser source — no plugin, no download.": ["Unter Einstellungen → Streaming bekommst du den Overlay-Link. Als Browserquelle einfügen — kein Plugin, kein Download.", "En Ajustes → Streaming tienes el enlace del overlay. Pégalo como fuente de navegador, sin plugin ni descarga.", "Em Configurações → Streaming você recebe o link do overlay. Cole como fonte de navegador — sem plugin, sem download.", "Paramètres → Streaming vous donne le lien de l’overlay. Collez-le comme source navigateur — sans plugin ni téléchargement."],
+    "Live preview of the partner banner": ["Live-Vorschau des Partner-Banners", "Vista previa en vivo del banner de partner", "Prévia ao vivo do banner de parceiro", "Aperçu en direct de la bannière partenaire"],
+    "Apply as a streamer partner →": ["Als Streamer-Partner bewerben →", "Solicitar ser partner streamer →", "Candidatar-se como parceiro streamer →", "Devenir partenaire streamer →"],
     "Most traders who try a new journal already keep one somewhere else. Starting from zero would throw away your history, and your history is the whole point of a journal.": ["Die meisten, die ein neues Journal ausprobieren, führen schon irgendwo eins. Bei null anzufangen hieße, deine Historie wegzuwerfen, und genau die ist der Sinn eines Journals.", "La mayoría de los traders que prueban un diario nuevo ya llevan uno en otra parte. Empezar de cero sería tirar tu historial, y tu historial es todo el sentido de un diario.", "A maioria dos traders que testam um novo diário já mantém um em outro lugar. Começar do zero jogaria fora seu histórico, e seu histórico é todo o sentido de um diário.", "La plupart des traders qui essaient un nouveau journal en tiennent déjà un ailleurs. Repartir de zéro jetterait votre historique, et votre historique est tout l’intérêt d’un journal."],
     "Written inside the app by people who use it, and published only after review. Nothing here is scripted or bought.": ["Geschrieben in der App von Leuten, die sie nutzen, und erst nach Prüfung veröffentlicht. Nichts davon ist gestellt oder gekauft.", "Escrito dentro de la app por personas que la usan, y publicado solo tras una revisión. Nada aquí está guionizado ni comprado.", "Escrito dentro do app por pessoas que o usam, e publicado só depois de revisado. Nada aqui é roteirizado ou comprado.", "Rédigé dans l’app par des personnes qui l’utilisent, et publié seulement après vérification. Rien ici n’est scénarisé ni acheté."],
     "soon": ["bald", "pronto", "em breve", "bientôt"],
@@ -104775,7 +104778,7 @@ body.light::before{ opacity:.45; }
   var DESCS = { overview:'Your account, plan and what is still to set up.', profile:'Photo, name and what the AI coach knows about you.',
     privacy:'Who can see your profile and message you.', invite:'Your referral link and what it has earned.',
     partner:'Your partner link, code, commission and payouts.',
-    trading:'Journal behaviour while you log trades.', ctrader:'Brokers and platforms that import trades automatically.', connect:'Evidence Fit and Discord — apps that work with your journal.', streaming:'Live overlay and 3D sponsor banner for your stream, with your referral code.',
+    trading:'Journal behaviour while you log trades.', ctrader:'Brokers and platforms that import trades automatically.', connect:'Evidence Fit and Discord — apps that work with your journal.', streaming:'Live overlay for your stream — and the 3D sponsor banner for partners.',
     funded:'Prop firm rules, drawdown limits and account phase.', community:'Leaderboard, messages, notifications and e-mails.',
     bugreport:'Tell us what broke, what is missing, or how we are doing.' };
 
@@ -110212,6 +110215,11 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
   O.copy = function(){ var u = O.url(); if (!u) return; try { navigator.clipboard.writeText(u); if (window.showToast) showToast('Copied — paste it into OBS'); } catch(e){} };
   function sel(k, list){ return '<select class="ovl-in" onchange="ApexOverlay.set(\'' + k + '\', this.value)">' + list.map(function(x){ return '<option value="' + x[0] + '"' + (String(opt[k]) === String(x[0]) ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>'; }
   function chk(k, label){ return '<label class="ovl-chk"><input type="checkbox"' + (opt[k] ? ' checked' : '') + ' onchange="ApexOverlay.set(\'' + k + '\', this.checked)"> <span>' + label + '</span></label>'; }
+  /* 3D-Banner nur für Admin und freigeschaltete Partner (Provision gibt es nur dort). */
+  function canBanner(){
+    try { if (firebase.auth().currentUser.email === 'jasonziborius@gmail.com') return true; } catch(e){}
+    return !!(window.ApexPartner && ApexPartner.isPartner);
+  }
   O.render = function(){
     var host = document.getElementById('atPanel-overlay'); if (!host) return;
     var s = saved(), url = O.url();
@@ -110235,6 +110243,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
         : '<div class="ovl-acts"><button class="mc-b pri" onclick="ApexOverlay.create()">Create overlay link</button></div>' +
           (isPro() ? '' : '<div class="ovl-note"><span>Part of Pro.</span></div>')) +
       '<div class="ovl-sep"></div>' +
+      (canBanner() ? '' +
       '<div class="gc-title" style="margin-bottom:6px"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Animated promo banner</div>' +
       '<div class="ovl-p">A 3D banner with the gold Evidence mark and your referral code — as a sponsor bar that stays on screen, a fly-in now and then, or a ticker along the bottom. As a browser source, or as a video file with a transparent background.</div>' +
       '<div class="ovl-prev' + (opt.pmode === 'banner' && opt.pfmt === 'tall' ? ' tall' : '') + '"><iframe title="Promo preview" src="' + esc(opt.pmode === 'banner'
@@ -110248,6 +110257,9 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       '<div class="ovl-url" style="margin-top:10px"><input class="ovl-in notranslate" translate="no" readonly value="' + esc(O.promoUrl(false)) + '" onclick="this.select()"><button class="mc-b pri" onclick="ApexOverlay.copyPromo()">Copy</button></div>' +
       '<div class="ovl-acts"><a class="mc-b" href="' + esc(O.promoUrl(true)) + '" target="_blank" rel="noopener">Download as video</a></div>' +
       '<div class="ovl-note"><span>The video is recorded in your browser (Chrome or Edge) as WebM with a transparent background — in OBS add it as a media source and tick “Loop”.</span>' + (_ref ? '' : ' <span>Create your referral link under Invite &amp; Earn first, and the code appears in the banner.</span>') + '</div>' +
+      '' : '<div class="gc-title" style="margin-bottom:6px"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> 3D sponsor banner</div>' +
+        '<div class="ovl-p">A 3D sponsor banner with your own code and commission on every subscription is part of the streamer partner program.</div>' +
+        '<div class="ovl-acts"><a class="mc-b pri" href="/streamers.html" target="_blank" rel="noopener">Apply as a streamer partner</a></div>') +
       '</div>';
     loadRef();
     try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(host); } catch(e){}
