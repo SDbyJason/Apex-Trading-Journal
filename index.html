@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-25c';
+  window.APEX_BUILD = '2026-10-25d';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -110095,7 +110095,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
   'use strict';
   var O = window.ApexOverlay = {};
   var BASE = 'https://evidencetrading.com/overlay.html';
-  var opt = { layout: 'card', show: 'r', money: true, promo: true, corner: 'bl', scale: 1, pmode: 'flyby', pevery: '300' };
+  var opt = { layout: 'card', show: 'r', money: true, promo: true, corner: 'bl', scale: 1, pmode: 'banner', pevery: '300', pfmt: 'wide' };
   var PROMO = 'https://evidencetrading.com/promo.html';
   var _ref = null;   // the user's referral code, for the promo banner
   function loadRef(){
@@ -110104,6 +110104,8 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
     db.collection('apexUsers').doc(currentUID).get().then(function(d){ _ref = (d.exists && d.data().referralCode) || ''; O.render(); }).catch(function(){});
   }
   O.promoUrl = function(record){
+    if (opt.pmode === 'banner')
+      return 'https://evidencetrading.com/banner.html?format=' + opt.pfmt + (_ref ? '&code=' + encodeURIComponent(_ref) : '') + '&lang=' + lang() + (record ? '&record=1' : '');
     return PROMO + '?mode=' + opt.pmode + (opt.pmode === 'flyby' ? '&every=' + opt.pevery + '&pos=' + opt.corner : '') +
       (_ref ? '&code=' + encodeURIComponent(_ref) : '') + '&lang=' + lang() + (record ? '&record=1' : '');
   };
@@ -110168,10 +110170,13 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
           (isPro() ? '' : '<div class="ovl-note"><span>Part of Pro.</span></div>')) +
       '<div class="ovl-sep"></div>' +
       '<div class="gc-title" style="margin-bottom:6px"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Animated promo banner</div>' +
-      '<div class="ovl-p">A 3D banner with the gold Evidence mark that flies through the picture now and then — or runs along the bottom — with your referral code. As a browser source, or as a video file with a transparent background.</div>' +
-      '<div class="ovl-prev"><iframe title="Promo preview" src="' + esc('/promo.html?mode=' + opt.pmode + '&every=20&pos=' + opt.corner + '&lang=' + lang() + (_ref ? '&code=' + encodeURIComponent(_ref) : '')) + '" loading="lazy"></iframe></div>' +
+      '<div class="ovl-p">A 3D banner with the gold Evidence mark and your referral code — as a sponsor bar that stays on screen, a fly-in now and then, or a ticker along the bottom. As a browser source, or as a video file with a transparent background.</div>' +
+      '<div class="ovl-prev' + (opt.pmode === 'banner' && opt.pfmt === 'tall' ? ' tall' : '') + '"><iframe title="Promo preview" src="' + esc(opt.pmode === 'banner'
+          ? '/banner.html?format=' + opt.pfmt + '&lang=' + lang() + (_ref ? '&code=' + encodeURIComponent(_ref) : '')
+          : '/promo.html?mode=' + opt.pmode + '&every=20&pos=' + opt.corner + '&lang=' + lang() + (_ref ? '&code=' + encodeURIComponent(_ref) : '')) + '" loading="lazy"></iframe></div>' +
       '<div class="ovl-grid">' +
-        '<div><span class="ovl-l">Style</span>' + sel('pmode', [['flyby','Fly-in with panel'],['ticker','Ticker along the bottom']]) + '</div>' +
+        '<div><span class="ovl-l">Style</span>' + sel('pmode', [['banner','Sponsor banner (always on screen)'],['flyby','Fly-in with panel'],['ticker','Ticker along the bottom']]) + '</div>' +
+        (opt.pmode === 'banner' ? '<div><span class="ovl-l">Format</span>' + sel('pfmt', [['wide','Landscape — Twitch, YouTube'],['tall','Portrait — TikTok, Reels, Shorts']]) + '</div>' : '') +
         (opt.pmode === 'flyby' ? '<div><span class="ovl-l">How often</span>' + sel('pevery', [['120','Every 2 minutes'],['300','Every 5 minutes'],['600','Every 10 minutes'],['1200','Every 20 minutes']]) + '</div>' : '') +
       '</div>' +
       '<div class="ovl-url" style="margin-top:10px"><input class="ovl-in notranslate" translate="no" readonly value="' + esc(O.promoUrl(false)) + '" onclick="this.select()"><button class="mc-b pri" onclick="ApexOverlay.copyPromo()">Copy</button></div>' +
@@ -110185,6 +110190,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
   css.textContent = '.ovl-p{font-size:12.5px;color:var(--ink2);line-height:1.55;margin-bottom:10px}' +
     '.ovl-prev{position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;border:0.5px solid var(--rim);background:linear-gradient(135deg,#1d2636,#36202a);margin-bottom:12px}' +
     '.ovl-prev iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform-origin:0 0;transform:scale(var(--k,.2));pointer-events:none}' +
+    '.ovl-prev.tall{aspect-ratio:9/16;max-height:420px;width:auto;margin-left:auto;margin-right:auto}.ovl-prev.tall iframe{width:1080px;height:1920px}' +
     '.ovl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.ovl-l{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}' +
     '.ovl-in{width:100%;box-sizing:border-box;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;color:var(--ink);padding:7px 9px;font:inherit;font-size:12.5px}' +
     '.ovl-chks{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0}.ovl-chk{display:flex !important;gap:7px;align-items:center;font-size:12.5px;color:var(--ink);text-transform:none;letter-spacing:normal;font-weight:400;margin:0 !important;cursor:pointer}.ovl-chk input{width:auto !important;margin:0}' +
@@ -110193,7 +110199,7 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
     '.ovl-steps{margin:4px 0 8px 18px;font-size:12px;color:var(--ink2);line-height:1.6}.ovl-acts{display:flex;gap:8px;flex-wrap:wrap}.ovl-note{font-size:11.5px;color:var(--ink3);margin-top:8px;line-height:1.5}';
   document.head.appendChild(css);
   // Fit the 1920×1080 preview into the card width.
-  function fitPrev(){ document.querySelectorAll('.ovl-prev').forEach(function(p){ p.style.setProperty('--k', (p.clientWidth / 1920).toFixed(4)); }); }
+  function fitPrev(){ document.querySelectorAll('.ovl-prev').forEach(function(p){ p.style.setProperty('--k', (p.clientWidth / (p.classList.contains('tall') ? 1080 : 1920)).toFixed(4)); }); }
   setInterval(fitPrev, 500); window.addEventListener('resize', fitPrev);
   (function(){
     var T = {
@@ -110219,8 +110225,12 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
       'Create overlay link': ['Overlay-Link erstellen','Crear enlace del overlay','Criar link do overlay','Créer le lien de l’overlay'],
       'Part of Pro.': ['Teil von Pro.','Parte de Pro.','Parte do Pro.','Inclus dans Pro.'],
       'Animated promo banner': ['Animiertes Werbebanner','Banner promocional animado','Banner promocional animado','Bannière promo animée'],
-      'A 3D banner with the gold Evidence mark that flies through the picture now and then — or runs along the bottom — with your referral code. As a browser source, or as a video file with a transparent background.': ['Ein 3D-Banner mit dem goldenen Evidence-Zeichen, das ab und zu durchs Bild fliegt – oder unten durchläuft – mit deinem Empfehlungscode. Als Browserquelle oder als Videodatei mit durchsichtigem Hintergrund.','Un banner 3D con la marca dorada de Evidence que cruza la imagen de vez en cuando —o recorre la parte inferior— con tu código de referido. Como fuente de navegador o como vídeo con fondo transparente.','Um banner 3D com a marca dourada da Evidence que atravessa a tela de vez em quando — ou corre na parte de baixo — com seu código de indicação. Como fonte de navegador ou como vídeo com fundo transparente.','Une bannière 3D avec le logo doré d’Evidence qui traverse l’image de temps en temps — ou défile en bas — avec ton code de parrainage. En source navigateur ou en vidéo à fond transparent.'],
-      'Style': ['Art','Estilo','Estilo','Style'], 'Fly-in with panel': ['Einflug mit Tafel','Entrada con panel','Entrada com painel','Arrivée avec panneau'],
+      'A 3D banner with the gold Evidence mark and your referral code — as a sponsor bar that stays on screen, a fly-in now and then, or a ticker along the bottom. As a browser source, or as a video file with a transparent background.': ['Ein 3D-Banner mit dem goldenen Evidence-Zeichen und deinem Empfehlungscode – als Sponsor-Leiste, die im Bild bleibt, als Einflug ab und zu oder als Laufband unten. Als Browserquelle oder als Videodatei mit durchsichtigem Hintergrund.','Un banner 3D con la marca dorada de Evidence y tu código de referido: barra de patrocinio fija, entrada de vez en cuando o cinta inferior. Como fuente de navegador o como vídeo con fondo transparente.','Um banner 3D com a marca dourada da Evidence e seu código de indicação — barra de patrocínio fixa, entrada de vez em quando ou faixa inferior. Como fonte de navegador ou como vídeo com fundo transparente.','Une bannière 3D avec le logo doré d’Evidence et ton code de parrainage — barre sponsor fixe, arrivée de temps en temps ou bandeau en bas. En source navigateur ou en vidéo à fond transparent.'],
+      'Style': ['Art','Estilo','Estilo','Style'],
+      'Sponsor banner (always on screen)': ['Sponsor-Banner (immer im Bild)','Banner de patrocinio (siempre visible)','Banner de patrocínio (sempre visível)','Bannière sponsor (toujours visible)'],
+      'Format': ['Format','Formato','Formato','Format'],
+      'Landscape — Twitch, YouTube': ['Querformat – Twitch, YouTube','Horizontal: Twitch, YouTube','Paisagem — Twitch, YouTube','Paysage — Twitch, YouTube'],
+      'Portrait — TikTok, Reels, Shorts': ['Hochformat – TikTok, Reels, Shorts','Vertical: TikTok, Reels, Shorts','Retrato — TikTok, Reels, Shorts','Portrait — TikTok, Reels, Shorts'], 'Fly-in with panel': ['Einflug mit Tafel','Entrada con panel','Entrada com painel','Arrivée avec panneau'],
       'Ticker along the bottom': ['Laufband unten','Cinta inferior','Faixa inferior','Bandeau défilant en bas'],
       'How often': ['Wie oft','Frecuencia','Frequência','Fréquence'], 'Every 2 minutes': ['Alle 2 Minuten','Cada 2 minutos','A cada 2 minutos','Toutes les 2 minutes'],
       'Every 5 minutes': ['Alle 5 Minuten','Cada 5 minutos','A cada 5 minutos','Toutes les 5 minutes'], 'Every 10 minutes': ['Alle 10 Minuten','Cada 10 minutos','A cada 10 minutos','Toutes les 10 minutes'],
