@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-27b';
+  window.APEX_BUILD = '2026-10-28a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -14740,6 +14740,7 @@ function _authAction(type) {
           <button class="at-plat-btn"        data-plat="atas"       onclick="ApexAutoTrack.select('atas')"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg> ATAS</button>
           <button class="at-plat-btn"        data-plat="quantower"  onclick="ApexAutoTrack.select('quantower')"><svg class=ic aria-hidden=true><use href=#i-signal ></use></svg> Quantower</button>
           <button class="at-plat-btn"        data-plat="ninjatrader" onclick="ApexAutoTrack.select('ninjatrader')"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg> NinjaTrader <span class="at-soon">beta</span></button>
+          <button class="at-plat-btn"        data-plat="sierrachart" onclick="ApexAutoTrack.select('sierrachart')"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg> Sierra Chart <span class="at-soon">beta</span></button>
           <button class="at-plat-btn"        data-plat="tradovate"  onclick="ApexAutoTrack.select('tradovate')"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg> Tradovate <span class="at-soon">soon</span></button>
           <button class="at-plat-btn"        data-plat="topstepx"   onclick="ApexAutoTrack.select('exchange');if(window.ApexExchange)ApexExchange.open('projectx')"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg> <span class="notranslate" translate="no">TopstepX</span></button>
           <button class="at-plat-btn"        data-plat="exchange"   onclick="ApexAutoTrack.select('exchange')"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> Crypto &amp; IBKR</button>
@@ -14762,6 +14763,7 @@ function _authAction(type) {
         <!-- Crypto & IBKR — key-based connections, filled by ApexExchange -->
         <div class="at-panel" data-plat="exchange"   style="display:none" id="apxExHost"></div>
         <div class="at-panel" data-plat="quantower"  style="display:none" id="atPanel-quantower"></div>
+        <div class="at-panel" data-plat="sierrachart" style="display:none" id="atPanel-sierrachart"></div>
         <div class="at-panel" data-plat="ninjatrader" style="display:none" id="atPanel-ninjatrader"></div>
       </div>
     </div><!-- /spanel-ctrader -->
@@ -45318,6 +45320,182 @@ body.light .pt-sugg{background:var(--layer)}
     '}'
   ]).join('\n');
 
+  /* Sierra Chart: ACSIL study (C++, compiled inside Sierra Chart). Same outbox,
+     posId and stop semantics as the C# trackers. Written 28.10.2026, not
+     compiled on a real install. */
+  ART.sierrachart = [
+    '// Evidence Auto-Tracker for Sierra Chart (ACSIL study)',
+    '// Posts every order fill to your Evidence journal. It only reads; it never',
+    '// places, changes or cancels orders. Fills go into a small outbox file first',
+    '// and leave it only once the server answered, so nothing is lost when the',
+    '// internet drops or Sierra Chart closes mid-send.',
+    '// Add the study to ONE chart only (any symbol): it reads the fills of all',
+    '// symbols and accounts.',
+    '#include "sierrachart.h"',
+    '#include <string>',
+    '#include <vector>',
+    '#include <map>',
+    '#include <set>',
+    '#include <fstream>',
+    '#include <sstream>',
+    '#include <ctime>',
+    '#include <cmath>',
+    '',
+    'SCDLLName("Evidence Tracker")',
+    '',
+    'static const char* WEBHOOK = "__EVIDENCE_WEBHOOK__";',
+    '',
+    'namespace {',
+    '  std::string Dir, OutboxFile, SeenFile, PosFile;',
+    '  std::vector<std::string> Outbox;',
+    '  std::set<std::string> Seen;                        // fill ids already queued',
+    '  std::map<std::string, std::pair<double, std::string>> Pos;  // account|symbol -> net qty, posId',
+    '  std::map<std::string, std::string> SentStop;       // posId -> last stop sent',
+    '  int Pending = 0;                                   // HTTP request id in flight',
+    '  time_t PendingSince = 0, NextTry = 0;',
+    '  int Owner = 0;                                     // chart that runs the tracker',
+    '  bool Loaded = false;',
+    '',
+    '  std::string Num(double v) {                        // always a decimal point',
+    '    std::ostringstream s; s.imbue(std::locale::classic()); s.precision(10); s << v; return s.str();',
+    '  }',
+    '  std::string J(const std::string& v) {',
+    '    std::string o;',
+    '    for (char c : v) { if (c == \'"\' || c == \'\\\\\') o += \'\\\\\'; o += c; }',
+    '    return o;',
+    '  }',
+    '  long long Ms(const SCDateTime& t) {                // Sierra fill times are UTC',
+    '    return (long long)llround((t.GetAsDouble() - 25569.0) * 86400000.0);',
+    '  }',
+    '',
+    '  void SaveOutbox() { std::ofstream f(OutboxFile, std::ios::trunc); for (auto& l : Outbox) f << l << "\\n"; }',
+    '  void SaveSeen()   { std::ofstream f(SeenFile, std::ios::trunc); for (auto& s : Seen) f << s << "\\n"; }',
+    '  void SavePos() {',
+    '    std::ofstream f(PosFile, std::ios::trunc);',
+    '    for (auto& kv : Pos) f << kv.first << "\\t" << Num(kv.second.first) << "\\t" << kv.second.second << "\\n";',
+    '  }',
+    '  void Load(SCStudyInterfaceRef sc) {',
+    '    Dir = sc.DataFilesFolder().GetChars();',
+    '    if (!Dir.empty() && Dir.back() != \'\\\\\') Dir += "\\\\";',
+    '    OutboxFile = Dir + "EvidenceTracker-outbox.jsonl";',
+    '    SeenFile   = Dir + "EvidenceTracker-seen.txt";',
+    '    PosFile    = Dir + "EvidenceTracker-positions.txt";',
+    '    std::string l;',
+    '    { std::ifstream f(OutboxFile); while (std::getline(f, l)) if (!l.empty()) Outbox.push_back(l); }',
+    '    { std::ifstream f(SeenFile);   while (std::getline(f, l)) if (!l.empty()) Seen.insert(l); }',
+    '    { std::ifstream f(PosFile);',
+    '      while (std::getline(f, l)) {',
+    '        size_t a = l.find(\'\\t\'), b = l.find(\'\\t\', a + 1);',
+    '        if (a == std::string::npos || b == std::string::npos) continue;',
+    '        std::istringstream q(l.substr(a + 1, b - a - 1)); q.imbue(std::locale::classic());',
+    '        double n = 0; q >> n;',
+    '        Pos[l.substr(0, a)] = std::make_pair(n, l.substr(b + 1));',
+    '      } }',
+    '    Loaded = true;',
+    '  }',
+    '',
+    '  // Net position per account|symbol; a new id whenever it leaves flat.',
+    '  std::string PosIdFor(const std::string& key, bool buy, double qty, long long ms) {',
+    '    auto it = Pos.find(key);',
+    '    double net = it == Pos.end() ? 0 : it->second.first;',
+    '    std::string id = it == Pos.end() ? "" : it->second.second;',
+    '    if (std::fabs(net) < 1e-9 || id.empty()) {',
+    '      std::string k = key.size() > 30 ? key.substr(key.size() - 30) : key;',
+    '      id = k + "|" + std::to_string(ms);',
+    '    }',
+    '    net += buy ? qty : -qty;',
+    '    if (std::fabs(net) < 1e-9) Pos.erase(key); else Pos[key] = std::make_pair(net, id);',
+    '    SavePos();',
+    '    return id;',
+    '  }',
+    '',
+    '  void Queue(const std::string& js) { Outbox.push_back(js); SaveOutbox(); }',
+    '',
+    '  void Flush(SCStudyInterfaceRef sc) {',
+    '    if (Pending || Outbox.empty() || time(nullptr) < NextTry) return;',
+    '    n_ACSIL::s_HTTPHeader h; h.Name = "Content-Type"; h.Value = "application/json";',
+    '    Pending = sc.MakeHTTPPOSTRequest(WEBHOOK, Outbox.front().c_str(), &h, 1);',
+    '    PendingSince = time(nullptr);',
+    '    if (!Pending) NextTry = time(nullptr) + 60;',
+    '  }',
+    '}',
+    '',
+    'SCSFExport scsf_EvidenceTracker(SCStudyInterfaceRef sc)',
+    '{',
+    '  if (sc.SetDefaults) {',
+    '    sc.GraphName = "Evidence Tracker";',
+    '    sc.StudyDescription = "Posts your fills to your Evidence journal.";',
+    '    sc.AutoLoop = 0;',
+    '    sc.GraphRegion = 0;',
+    '    sc.UpdateAlways = 1;          // keep running between ticks (retries, stops)',
+    '    return;',
+    '  }',
+    '  if (sc.LastCallToFunction) { if (Owner == sc.ChartNumber) Owner = 0; return; }',
+    '  if (Owner == 0) Owner = sc.ChartNumber;',
+    '  if (Owner != sc.ChartNumber) return;   // a second copy on another chart stays idle',
+    '  if (!Loaded) {',
+    '    Load(sc);',
+    '    // First start ever: today\'s earlier fills are history, not new trades.',
+    '    if (Seen.empty()) {',
+    '      s_SCOrderFillData f;',
+    '      for (int i = 0; i < sc.GetOrderFillArraySize(); i++)',
+    '        if (sc.GetOrderFillEntry(i, f)) Seen.insert(std::string(f.FillExecutionServiceID.GetChars()) + "#" + std::to_string(f.InternalOrderID));',
+    '      Seen.insert("init");',
+    '      SaveSeen();',
+    '    }',
+    '  }',
+    '',
+    '  // ── answer to the request in flight ──',
+    '  if (Pending && sc.HTTPRequestID == Pending) {',
+    '    std::string r = sc.HTTPResponse.GetChars();',
+    '    Pending = 0;',
+    '    if (r == "ERROR" || r.empty()) NextTry = time(nullptr) + 60;   // keep it, retry in a minute',
+    '    else { Outbox.erase(Outbox.begin()); SaveOutbox(); }',
+    '  } else if (Pending && time(nullptr) - PendingSince > 30) {',
+    '    Pending = 0; NextTry = time(nullptr) + 60;                     // lost request',
+    '  }',
+    '',
+    '  // ── new fills ──',
+    '  s_SCOrderFillData f;',
+    '  bool changed = false;',
+    '  for (int i = 0; i < sc.GetOrderFillArraySize(); i++) {',
+    '    if (!sc.GetOrderFillEntry(i, f)) continue;',
+    '    std::string fid = std::string(f.FillExecutionServiceID.GetChars()) + "#" + std::to_string(f.InternalOrderID);',
+    '    if (!Seen.insert(fid).second) continue;',
+    '    changed = true;',
+    '    std::string sym = f.Symbol.GetChars(), acct = f.TradeAccount.GetChars();',
+    '    bool buy = f.BuySell == BSE_BUY;',
+    '    double qty = (double)f.Quantity;',
+    '    long long ms = Ms(f.FillDateTime);',
+    '    std::string pos = PosIdFor(acct + "|" + sym, buy, qty, ms);',
+    '    Queue("{\\"source\\":\\"sierrachart\\",\\"event\\":\\"fill\\",\\"symbol\\":\\"" + J(sym) +',
+    '          "\\",\\"dir\\":\\"" + (buy ? "long" : "short") + "\\",\\"posId\\":\\"" + J(pos) +',
+    '          "\\",\\"price\\":" + Num(f.FillPrice) + ",\\"volume\\":" + Num(qty) +',
+    '          ",\\"time\\":" + std::to_string(ms) + "}");',
+    '  }',
+    '  if (changed) SaveSeen();',
+    '',
+    '  // ── working stop of open positions (chart symbol) → initial / trailed stop ──',
+    '  s_SCTradeOrder o;',
+    '  for (int i = 0; sc.GetOrderByIndex(i, o) != SCTRADING_ORDER_ERROR; i++) {',
+    '    if (o.OrderStatusCode != SCT_OSC_OPEN) continue;',
+    '    if (o.OrderTypeAsInt != SCT_ORDERTYPE_STOP && o.OrderTypeAsInt != SCT_ORDERTYPE_STOP_LIMIT) continue;',
+    '    std::string key = std::string(o.TradeAccount.GetChars()) + "|" + o.Symbol.GetChars();',
+    '    auto it = Pos.find(key);',
+    '    if (it == Pos.end()) continue;                                   // flat',
+    '    if ((it->second.first > 0) != (o.BuySell == BSE_SELL)) continue;  // not the protective side',
+    '    std::string px = Num(o.Price1), id = it->second.second;',
+    '    if (SentStop[id] == px) continue;',
+    '    SentStop[id] = px;',
+    '    Queue("{\\"source\\":\\"sierrachart\\",\\"event\\":\\"modify\\",\\"symbol\\":\\"" + J(o.Symbol.GetChars()) +',
+    '          "\\",\\"posId\\":\\"" + J(id) + "\\",\\"sl\\":" + px + ",\\"time\\":" +',
+    '          std::to_string((long long)time(nullptr) * 1000) + "}");',
+    '  }',
+    '',
+    '  Flush(sc);',
+    '}'
+  ].join('\n');
+
   function field(){ return '<div class="at-field"><input class="at-wh-url" readonly value="'+esc(_webhook)+'"><button class="at-mini-btn" onclick="ApexAutoTrack.copyVal(this)">Copy</button></div>'; }
   /* Code blocks must survive a browser page-translation: Chrome/Safari
      translate text nodes, so `#property version` came out as
@@ -45426,6 +45604,26 @@ body.light .pt-sugg{background:var(--layer)}
         '<li><b>Scale-ins and partial exits</b> → a second fill in the same direction is ignored; the first opposite fill closes the trade. Adjust size or exit in the journal if you scale.</li></ul>')+
       NOTE+'</div>';
 
+    if(plat==='sierrachart') return '<div class="at-card">'+
+      '<div class="at-head"><div class="at-title"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg> Sierra Chart — ACSIL study</div><span class="at-badge">Free · C++ · beta</span></div>'+
+      '<p class="at-desc">A small Sierra Chart study posts every fill from your accounts to Evidence — Rithmic, CQG, Teton, Denali, sim, any connection. Fills on the same account and symbol are paired automatically: the entry opens the trade, the opposite fill closes it. It only listens; it cannot place or change orders. It also reports your working <b>stop order</b>, so trades get an initial stop and a real R. Fills that could not be sent (no internet, Sierra Chart closed) wait in an outbox file and go out later.</p>'+
+      '<div class="at-ok" style="border-color:rgba(var(--gold-rgb),.35)">Beta: this study is new. If it does not compile on your Sierra Chart version, send us the error from the build window (Settings → Bug report) and we fix it.</div>'+
+      step('1','Copy your personal webhook URL', '<p>Already injected into the code below — no manual pasting needed.</p>'+field())+
+      step('2','Save and compile the study', '<ul>'+
+        '<li>Download the file below and save it as <code>EvidenceTracker.cpp</code> in your Sierra Chart <code>ACS_Source</code> folder (default: <code>C:\\SierraChart\\ACS_Source</code>).</li>'+
+        '<li>In Sierra Chart: <b>Analysis → Build Custom Studies DLL</b> → select <code>EvidenceTracker.cpp</code> → <b>Remote Build</b> (no compiler needed on your PC).</li></ul>'+code(ART.sierrachart, 'EvidenceTracker.cpp'))+
+      step('3','Add it to one chart', '<ul>'+
+        '<li>Open any chart → <b>Analysis → Studies</b> → <b>Add Custom Study</b> → <b>Evidence Tracker</b> → OK.</li>'+
+        '<li>One chart is enough: it reads the fills of every symbol and account. Leave that chartbook open while you trade.</li>'+
+        '<li>Fills from before the very first start are skipped, so your history does not arrive twice. Import older trades as a statement.</li></ul>'+
+        '<div class="at-ok">✅︎ Place a test trade — it appears in Evidence within ~30&nbsp;s. The opposite fill closes it with the exit price.</div>')+
+      step('4','Troubleshooting', '<ul>'+
+        '<li><b>Compile errors</b> → ACSIL names can differ between Sierra Chart versions; the build window shows the line. Send it to us and we adjust the code.</li>'+
+        '<li><b>Nothing arrives</b> → the study must be on an open chart. Check <b>Window → Message Log</b> for HTTP errors.</li>'+
+        '<li><b>Stops missing</b> → the stop is read from the orders the chart sees; put the study on the chart of the symbol you trade if stops on other symbols do not show.</li>'+
+        '<li><b>Scale-ins and partial exits</b> → a second fill in the same direction is ignored; the first opposite fill closes the trade. Adjust size or exit in the journal if you scale.</li></ul>')+
+      NOTE+'</div>';
+
     if(plat==='quantower') return '<div class="at-card">'+
       '<div class="at-head"><div class="at-title"><svg class=ic aria-hidden=true><use href=#i-signal ></use></svg> Quantower — Plugin</div><span class="at-badge">Free · C#</span></div>'+
       '<p class="at-desc">A Quantower plugin subscribes to trade events and posts each fill (incl. the position ID) to Evidence. Fills on the same position are paired automatically — entry opens the trade, the closing fill sets the exit. It also reports your working <b>stop order</b>, so every trade gets its initial stop and a real R — and fills that could not be sent (no internet, platform closed) are kept and resent automatically.</p>'+
@@ -45449,7 +45647,7 @@ body.light .pt-sugg{background:var(--layer)}
   }
 
   function buildPanels(){
-    ['mt5','tradingview','atas','quantower','ninjatrader'].forEach(function(p){
+    ['mt5','tradingview','atas','quantower','ninjatrader','sierrachart'].forEach(function(p){
       var host=document.getElementById('atPanel-'+p);
       if(host){ host.innerHTML = panel(p); noTranslate(host); }
     });
@@ -45476,11 +45674,11 @@ body.light .pt-sugg{background:var(--layer)}
       '<button onclick="if(typeof openUpgradeModal===\'function\')openUpgradeModal()" style="padding:10px 24px;background:linear-gradient(135deg,#c9a84c,#e8c96a);border:none;border-radius:10px;color:#07080b;font-family:var(--font-display);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.03em"><svg class=ic aria-hidden=true><use href=#i-zap ></use></svg> Upgrade to Pro</button>'+
     '</div>';
   }
-  var LOCK_NAMES = { mt5:'MetaTrader 5', tradingview:'TradingView', atas:'ATAS', quantower:'Quantower', ninjatrader:'NinjaTrader' };
+  var LOCK_NAMES = { mt5:'MetaTrader 5', tradingview:'TradingView', atas:'ATAS', quantower:'Quantower', ninjatrader:'NinjaTrader', sierrachart:'Sierra Chart' };
   function renderLocks(){
     if(_lockShown) return;
     _lockShown = true;
-    ['mt5','tradingview','atas','quantower','ninjatrader'].forEach(function(p){
+    ['mt5','tradingview','atas','quantower','ninjatrader','sierrachart'].forEach(function(p){
       var host=document.getElementById('atPanel-'+p);
       if(host) host.innerHTML = lockCard(LOCK_NAMES[p]);
     });
@@ -49220,6 +49418,7 @@ body.light .pt-sugg{background:var(--layer)}
     mt4:       { name:'MetaTrader 4',   platform:'MetaTrader 4' },
     atas:      { name:'ATAS',           platform:'ATAS' },
     quantower: { name:'Quantower',      platform:'Quantower' },
+    sierrachart:{name:'Sierra Chart',   platform:'Sierra Chart' },
     tradingview:{name:'TradingView',    platform:'TradingView' },
     webhook:   { name:'Webhook Import', platform:'Other' },
     csv:       { name:'CSV Import',     platform:'Other' }
@@ -94335,7 +94534,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                    back to the broker figure and is counted, never guessed.
      The difference is "over" when it exceeds max($1, 0.5 % of the gross
      broker P&L moved) — below that it is rounding and spread on commission. */
-  var FILL_SOURCES = { tradovate:1, binance:1, bybit:1, ibkr:1, atas:1, quantower:1 };
+  var FILL_SOURCES = { tradovate:1, binance:1, bybit:1, ibkr:1, atas:1, quantower:1, sierrachart:1 };
   var RECON_DAYS = 30, DRAIN_GRACE_MS = 10 * 60000;
   function reconLedger(ledgers, trades, o){
     o = o || {};
@@ -94565,8 +94764,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 
     return Promise.all(jobs).then(function(){
       var NAMES = { mt5:'📊 MetaTrader 5', tradingview:'📈 TradingView',
-                    atas:'🎯 ATAS', quantower:'🧊 Quantower', ninjatrader:'NinjaTrader' };
-      var WEBHOOK = ['mt5','tradingview','atas','quantower','ninjatrader'];
+                    atas:'🎯 ATAS', quantower:'🧊 Quantower', ninjatrader:'NinjaTrader', sierrachart:'Sierra Chart' };
+      var WEBHOOK = ['mt5','tradingview','atas','quantower','ninjatrader','sierrachart'];
       /* Webhook platforms: one row per account the server has on record.
          That record is shared by every device, so the old "never synced on
          this laptop" false alarm is gone. The device-local stamp is only a
