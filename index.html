@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-28a';
+  window.APEX_BUILD = '2026-10-28b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -11360,7 +11360,7 @@ body.light #landingPage * {
         <li><b>Tick footprint</b>&nbsp;— price ticks per level inside each candle, in the replay and the zones view</li>
         <li><b>Liquidity heatmap</b>&nbsp;— Bookmap-style stop pools, swept bands and volume bubbles, in the replay and the zones view</li>
         <li><b>Chart workspace</b>&nbsp;— toolbar, stage and dock, no page scrolling</li>
-        <li>15 drawing tools with favourites — editable afterwards, with a position tool</li>
+        <li>23 drawing tools with favourites — editable afterwards, with a position tool</li>
         <li>Candlestick charts — drag entry / SL / TP</li>
         <li><b>Auto-Tagging</b> rules + AI tags · Multi-Frame charts</li>
         <li>S&amp;D Zones TradingView Indicator</li>
@@ -11512,7 +11512,7 @@ body.light #landingPage * {
         <tr><td>Prop size on the chart and the challenge in Start my day &amp; the coach</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Confluence — which of your conditions pay alone and in combination, with a minimum sample enforced</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Chart workspace — toolbar, stage and dock in one frame, no page scrolling</td><td class="c no">—</td><td class="c yes">✓</td></tr>
-        <tr><td>15 drawing tools with favourites — editable afterwards, plus a position tool with live R:R</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>23 drawing tools with favourites — editable afterwards, plus a position tool with live R:R</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr class="lp-compare-cat"><td colspan="3">AI &amp; Psychology</td></tr>
         <tr><td>AI Trading Coach — reads your journal, not a chatbot bolted on</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Start my day — the day's high-impact events plus your own record on this weekday and session</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -12548,7 +12548,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">👣</div><div><div class="apex-feat-label">Tick footprint</div><div class="apex-feat-desc">Inside each candle: how many price ticks went up and down at every level, in the market replay and the zones view (M1&ndash;M15). Built from Dukascopy price ticks &mdash; it counts price changes, not exchange volume, and says so</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🔥</div><div><div class="apex-feat-label">Liquidity heatmap</div><div class="apex-feat-desc">Where stops likely sit — beyond swing highs and lows and at the previous day’s high and low — drawn as yellow-to-red bands that end once price sweeps them, with traded volume as blue texture, volume bubbles and a COB profile. In the market replay, trade replay and zones view. Built from candles &mdash; a model of likely liquidity, not an order book, and it says so</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">A chart workspace, not a page that scrolls</div><div class="apex-feat-desc">Toolbar down the left, chart in the middle, your positions in a dock on the right, controls along the bottom &mdash; one frame that fits the screen. Before this the replay gave the chart 56 % of the window and put the playback controls and your open position below the fold; you could never see the chart and your own position at the same time. It is now 78.5 % with the dock closed, and nothing scrolls</div></div></div>
-      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">✎</div><div><div class="apex-feat-label">15 drawing tools, and they stay editable</div><div class="apex-feat-desc">Trend lines, rays, arrows, boxes, ellipses, Fibonacci, parallel channels, a measuring tool in pips, percent and bars &mdash; plus a long and short position tool with red risk and green reward and a live R:R, every edge draggable. Select, move and resize anything after the fact, and star the ones you use onto the bar</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">✎</div><div><div class="apex-feat-label">23 drawing tools, and they stay editable</div><div class="apex-feat-desc">Trend lines, rays, arrows, boxes, ellipses, Fibonacci retracements and extensions, parallel channels, pitchforks, anchored VWAP, a fixed-range volume profile, notes, price and date ranges, a measuring tool in pips, percent and bars &mdash; plus a long and short position tool with red risk and green reward and a live R:R, every edge draggable. Select, move and resize anything after the fact, and star the ones you use onto the bar</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg></div><div><div class="apex-feat-label">Candlestick Trade Charts</div><div class="apex-feat-desc">See every trade on real candles — drag entry / SL / TP directly on the chart and it updates your journal</div></div></div>
       <div class="apex-feat-item">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-pin ></use></svg></div>
@@ -30018,8 +30018,8 @@ document.addEventListener('keydown', function(e) {
       "Where stops likely sit — beyond swing highs and lows and at the previous day’s high and low — drawn as yellow-to-red bands that end once price sweeps them, with traded volume as blue texture, volume bubbles and a COB profile. In the market replay, trade replay and zones view. Built from candles — a model of likely liquidity, not an order book, and it says so": ["Wo Stops wahrscheinlich liegen – jenseits von Swing-Hochs und -Tiefs und am Hoch und Tief des Vortags –, gezeichnet als gelb-rote Bänder, die enden, sobald der Kurs sie abholt, mit gehandeltem Volumen als blauer Struktur, Volumenblasen und einem COB-Profil. Im Market Replay, Trade-Replay und in der Zonen-Ansicht. Aus Kerzen gebaut – ein Modell wahrscheinlicher Liquidität, kein Orderbuch, und das steht auch so da", "Dónde probablemente están los stops —más allá de máximos y mínimos de swing y en el máximo y mínimo del día anterior—, dibujados como bandas de amarillo a rojo que terminan cuando el precio las barre, con el volumen negociado como textura azul, burbujas de volumen y un perfil COB. En el market replay, el replay de operaciones y la vista de zonas. Hecho con velas: un modelo de liquidez probable, no un libro de órdenes, y lo dice", "Onde os stops provavelmente estão — além de topos e fundos de swing e na máxima e mínima do dia anterior —, desenhados como faixas do amarelo ao vermelho que terminam quando o preço as varre, com o volume negociado como textura azul, bolhas de volume e um perfil COB. No market replay, no replay de operações e na visão de zonas. Feito com candles — um modelo de liquidez provável, não um livro de ofertas, e diz isso", "Où se trouvent probablement les stops — au-delà des sommets et creux de swing et au plus haut et plus bas de la veille —, tracés en bandes du jaune au rouge qui s’arrêtent une fois balayées par le prix, avec le volume échangé en texture bleue, des bulles de volume et un profil COB. Dans le market replay, le replay de trades et la vue des zones. Construit à partir des bougies — un modèle de liquidité probable, pas un carnet d’ordres, et il le dit"],
       "A chart workspace, not a page that scrolls": ["Ein Chart-Arbeitsplatz, keine scrollende Seite", "Un espacio de trabajo de gráficos, no una página que se desplaza", "Um espaço de trabalho de gráficos, não uma página que rola", "Un espace de travail graphique, pas une page qui défile"],
       "Toolbar down the left, chart in the middle, your positions in a dock on the right, controls along the bottom — one frame that fits the screen. Before this the replay gave the chart 56 % of the window and put the playback controls and your open position below the fold; you could never see the chart and your own position at the same time. It is now 78.5 % with the dock closed, and nothing scrolls": ["Werkzeugleiste links, Chart in der Mitte, deine Positionen in einem Dock rechts, Steuerung unten – ein Rahmen, der auf den Bildschirm passt. Vorher bekam der Chart im Replay 56 % des Fensters, Wiedergabe-Steuerung und offene Position lagen unter dem Falz; Chart und eigene Position gleichzeitig zu sehen ging nie. Jetzt sind es 78,5 % bei geschlossenem Dock, und nichts scrollt", "Barra de herramientas a la izquierda, gráfico en el centro, tus posiciones en un panel a la derecha, controles abajo: un solo marco que cabe en la pantalla. Antes el replay daba al gráfico el 56 % de la ventana y dejaba los controles y tu posición abierta fuera de la vista; nunca podías ver el gráfico y tu posición a la vez. Ahora es el 78,5 % con el panel cerrado, y nada se desplaza", "Barra de ferramentas à esquerda, gráfico no meio, suas posições num painel à direita, controles embaixo — um quadro que cabe na tela. Antes o replay dava ao gráfico 56 % da janela e deixava os controles e sua posição aberta abaixo da dobra; nunca dava para ver o gráfico e sua posição ao mesmo tempo. Agora são 78,5 % com o painel fechado, e nada rola", "Barre d’outils à gauche, graphique au centre, vos positions dans un panneau à droite, commandes en bas — un seul cadre qui tient à l’écran. Avant, le replay donnait 56 % de la fenêtre au graphique et plaçait les commandes et votre position ouverte sous la ligne de flottaison ; impossible de voir le graphique et votre position en même temps. C’est maintenant 78,5 % panneau fermé, et rien ne défile"],
-      "15 drawing tools, and they stay editable": ["15 Zeichenwerkzeuge, und sie bleiben bearbeitbar", "15 herramientas de dibujo, y siguen siendo editables", "15 ferramentas de desenho, e continuam editáveis", "15 outils de dessin, qui restent modifiables"],
-      "Trend lines, rays, arrows, boxes, ellipses, Fibonacci, parallel channels, a measuring tool in pips, percent and bars — plus a long and short position tool with red risk and green reward and a live R:R, every edge draggable. Select, move and resize anything after the fact, and star the ones you use onto the bar": ["Trendlinien, Strahlen, Pfeile, Rechtecke, Ellipsen, Fibonacci, parallele Kanäle, ein Messwerkzeug in Pips, Prozent und Kerzen – dazu ein Long- und Short-Positionswerkzeug mit rotem Risiko, grünem Ertrag und Live-R:R, jede Kante ziehbar. Alles lässt sich nachträglich auswählen, verschieben und in der Größe ändern, und deine Favoriten markierst du mit einem Stern für die Leiste", "Líneas de tendencia, rayos, flechas, rectángulos, elipses, Fibonacci, canales paralelos, una regla en pips, porcentaje y velas, más una herramienta de posición larga y corta con riesgo en rojo, beneficio en verde y R:R en vivo, cada borde arrastrable. Selecciona, mueve y redimensiona todo después, y marca con estrella las que usas para tenerlas en la barra", "Linhas de tendência, raios, setas, retângulos, elipses, Fibonacci, canais paralelos, uma régua em pips, porcentagem e candles — mais uma ferramenta de posição comprada e vendida com risco em vermelho, ganho em verde e R:R ao vivo, cada borda arrastável. Selecione, mova e redimensione tudo depois, e marque com estrela as que usa para ficarem na barra", "Lignes de tendance, demi-droites, flèches, rectangles, ellipses, Fibonacci, canaux parallèles, un outil de mesure en pips, pourcentage et bougies — plus un outil de position long et short avec risque en rouge, gain en vert et R:R en direct, chaque bord déplaçable. Sélectionnez, déplacez et redimensionnez tout après coup, et mettez en favori ceux que vous utilisez pour la barre"],
+      "23 drawing tools, and they stay editable": ["23 Zeichenwerkzeuge, und sie bleiben bearbeitbar", "23 herramientas de dibujo, y siguen siendo editables", "23 ferramentas de desenho, e continuam editáveis", "23 outils de dessin, qui restent modifiables"],
+      "Trend lines, rays, arrows, boxes, ellipses, Fibonacci retracements and extensions, parallel channels, pitchforks, anchored VWAP, a fixed-range volume profile, notes, price and date ranges, a measuring tool in pips, percent and bars — plus a long and short position tool with red risk and green reward and a live R:R, every edge draggable. Select, move and resize anything after the fact, and star the ones you use onto the bar": ["Trendlinien, Strahlen, Pfeile, Rechtecke, Ellipsen, Fibonacci-Retracements und -Extensions, parallele Kanäle, Pitchforks, Anchored VWAP, ein Volumenprofil für einen festen Bereich, Notizen, Preis- und Zeitspannen, ein Messwerkzeug in Pips, Prozent und Kerzen – dazu ein Long- und Short-Positionswerkzeug mit rotem Risiko, grünem Ertrag und Live-R:R, jede Kante ziehbar. Alles lässt sich nachträglich auswählen, verschieben und in der Größe ändern, und deine Favoriten markierst du mit einem Stern für die Leiste", "Líneas de tendencia, rayos, flechas, rectángulos, elipses, retrocesos y extensiones de Fibonacci, canales paralelos, pitchforks, VWAP anclado, un perfil de volumen de rango fijo, notas, rangos de precio y de fecha, una regla en pips, porcentaje y velas, más una herramienta de posición larga y corta con riesgo en rojo, beneficio en verde y R:R en vivo, cada borde arrastrable. Selecciona, mueve y redimensiona todo después, y marca con estrella las que usas para tenerlas en la barra", "Linhas de tendência, raios, setas, retângulos, elipses, retrações e extensões de Fibonacci, canais paralelos, pitchforks, VWAP ancorado, um perfil de volume de faixa fixa, notas, intervalos de preço e de data, uma régua em pips, porcentagem e candles — mais uma ferramenta de posição comprada e vendida com risco em vermelho, ganho em verde e R:R ao vivo, cada borda arrastável. Selecione, mova e redimensione tudo depois, e marque com estrela as que usa para ficarem na barra", "Lignes de tendance, demi-droites, flèches, rectangles, ellipses, retracements et extensions de Fibonacci, canaux parallèles, fourchettes d'Andrews, VWAP ancré, un profil de volume sur plage fixe, notes, plages de prix et de dates, un outil de mesure en pips, pourcentage et bougies — plus un outil de position long et short avec risque en rouge, gain en vert et R:R en direct, chaque bord déplaçable. Sélectionnez, déplacez et redimensionnez tout après coup, et mettez en favori ceux que vous utilisez pour la barre"],
       "Candlestick Trade Charts": ["Kerzencharts zu jedem Trade", "Gráficos de velas por operación", "Gráficos de candles por operação", "Graphiques en bougies par trade"],
       "See every trade on real candles — drag entry / SL / TP directly on the chart and it updates your journal": ["Sieh jeden Trade auf echten Kerzen – zieh Einstieg / SL / TP direkt im Chart, und dein Journal wird aktualisiert", "Ve cada operación sobre velas reales: arrastra entrada / SL / TP en el gráfico y se actualiza tu diario", "Veja cada operação em candles reais — arraste entrada / SL / TP direto no gráfico e o diário é atualizado", "Voyez chaque trade sur de vraies bougies — déplacez entrée / SL / TP directement sur le graphique et votre journal se met à jour"],
       "Auto-Tagging Rules + AI Tags": ["Auto-Tagging-Regeln + KI-Tags", "Reglas de etiquetado automático + etiquetas de IA", "Regras de tag automático + tags de IA", "Règles de tag automatique + tags IA"],
@@ -57967,11 +57967,26 @@ self.addEventListener('message', async (ev) => {
     this._ovlSpecs = [];   // last setIndicators() argument, replayed after a reload
   }
 
-  /* Line and area series want {time,value}; candles and bars want OHLC. */
+  /* Line, area and baseline series want {time,value}; candles and bars want OHLC.
+     Heikin Ashi is computed from the real candles here — drawings, magnet and
+     every price lookup keep using the REAL prices in _all (28.10.2026). */
   function shapeRows(rows, type) {
-    if (type !== 'line' && type !== 'area') return rows;
-    return rows.map(function (r) { return { time: r.time, value: r.close }; });
+    if (type === 'line' || type === 'area' || type === 'baseline') {
+      return rows.map(function (r) { return { time: r.time, value: r.close }; });
+    }
+    if (type === 'heikin') {
+      var out = new Array(rows.length), po = null, pc = null;
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i], c = (r.open + r.high + r.low + r.close) / 4;
+        var o = po == null ? (r.open + r.close) / 2 : (po + pc) / 2;
+        out[i] = { time: r.time, open: o, high: Math.max(r.high, o, c), low: Math.min(r.low, o, c), close: c };
+        po = o; pc = c;
+      }
+      return out;
+    }
+    return rows;
   }
+  function isValueType(t) { return t === 'line' || t === 'area' || t === 'baseline'; }
 
   /* Ein zerstoertes Chart-Objekt muss stumm sein, nicht explodieren.
      ------------------------------------------------------------------
@@ -58073,8 +58088,10 @@ self.addEventListener('message', async (ev) => {
       this.series.applyOptions({ priceFormat: Object.assign({ type: 'price' }, precisionFor(bars.c[bars.n - 1])) });
     }
     this._rowsForType = shapeRows(this._rows, this._seriesType);
+    this._haLive = this._haPrev = null;
     this._shown = bars.n;
     this.series.setData(this._rowsForType);
+    if (this._seriesType === 'baseline') this._baseLevel();
     if (this.vol) this.vol.setData(this._volRows);
     /* A new dataset invalidates every indicator VALUE (different length,
        different prices), so the drawn series go away and whoever owns the
@@ -58218,8 +58235,92 @@ self.addEventListener('message', async (ev) => {
     this._hmCache = null;
     this._paintHeat();
 
+    // Volumenprofil (sichtbarer Bereich): hoechstens eins pro Chart.
+    this._vp = null;
+    this._ovlSpecs.forEach(function (sp) {
+      if (sp && sp.visible !== false && sp.vprofile) self._vp = sp.vprofile;
+    });
+    this._vpCache = null;
+    this._paintVp();
+
     this._paintOverlays();
     return this;
+  };
+
+  /* ─────────── Volumenprofil des sichtbaren Bereichs ───────────
+     Primitive wie Zonen und Heatmap — gezeichnet im selben Frame wie die
+     Kerzen, also ohne Nachziehen beim Scrollen. Die Rechnung selbst teilt
+     es sich mit dem Profil-Werkzeug der Zeichenebene (ApexDraw). */
+  function VpRenderer(inst) { this._i = inst; }
+  VpRenderer.prototype.draw = function (target) {
+    var inst = this._i;
+    try { target.useMediaCoordinateSpace(function (scope) { inst._drawVp(scope.context, scope.mediaSize); }); } catch (e) {}
+  };
+  function VpPaneView(inst) { this._r = new VpRenderer(inst); }
+  VpPaneView.prototype.update = function () {};
+  VpPaneView.prototype.renderer = function () { return this._r; };
+  VpPaneView.prototype.zOrder = function () { return 'top'; };
+  function VpPrimitive(inst) { this._views = [new VpPaneView(inst)]; }
+  VpPrimitive.prototype.updateAllViews = function () {};
+  VpPrimitive.prototype.paneViews = function () { return this._views; };
+  Instance.prototype._paintVp = function () {
+    if (!this._vp || !this.series) { this._dropVp(); return; }
+    if (this._vpPrimSeries !== this.series) {
+      this._dropVp();
+      this._vpPrim = new VpPrimitive(this);
+      this._vpPrimSeries = this.series;
+      try { this.series.attachPrimitive(this._vpPrim); } catch (e) { this._vpPrim = null; }
+    }
+  };
+  Instance.prototype._dropVp = function () {
+    if (this._vpPrim && this._vpPrimSeries) { try { this._vpPrimSeries.detachPrimitive(this._vpPrim); } catch (e) {} }
+    this._vpPrim = null; this._vpPrimSeries = null; this._vpCache = null;
+  };
+  Instance.prototype._drawVp = function (x, size) {
+    var q = this._vp, all = this._all, D = window.ApexDraw;
+    if (!q || !all || !all.n || !this.series || !D || !D.volumeProfile) return;
+    var last = Math.min(this._shown || 0, all.n) - 1;
+    if (last < 2) return;
+    var vr = this.chart.timeScale().getVisibleLogicalRange();
+    if (!vr) return;
+    var i0 = Math.max(0, Math.ceil(vr.from)), i1 = Math.min(last, Math.floor(vr.to));
+    if (i1 - i0 < 2) return;
+    var rows = Math.max(10, Math.min(300, Math.round(q.rows || 60))), va = q.va || 70;
+    var key = i0 + '|' + i1 + '|' + all.n + '|' + all.c[i1] + '|' + rows + '|' + va;
+    if (!this._vpCache || this._vpCache.k !== key) this._vpCache = { k: key, p: D.volumeProfile(all, i0, i1, rows, va) };
+    var P = this._vpCache.p;
+    if (!P) return;
+    var s = this.series, W = size.width, breite = W * Math.max(5, Math.min(60, q.width || 28)) / 100, links = q.side === 1;
+    var Y = function (p) { var v = s.priceToCoordinate(p); return (v == null || !isFinite(v)) ? null : v; };
+    for (var r = 0; r < P.rows; r++) {
+      var tot = P.up[r] + P.dn[r];
+      if (!(tot > 0)) continue;
+      var ya = Y(P.lo + (r + 1) * P.bin), yb = Y(P.lo + r * P.bin);
+      if (ya == null || yb == null) continue;
+      var hh = Math.max(1, Math.abs(yb - ya) - 1), top = Math.min(ya, yb) + 0.5;
+      var len = breite * tot / P.max, lu = len * P.up[r] / tot, inVA = r >= P.vaA && r <= P.vaB;
+      x.globalAlpha = inVA ? 0.5 : 0.2;
+      var sx = links ? 0 : W - len;
+      x.fillStyle = '#26a69a'; x.fillRect(sx, top, lu, hh);
+      x.fillStyle = '#ef5350'; x.fillRect(sx + lu, top, len - lu, hh);
+    }
+    x.globalAlpha = 1;
+    var pocP = P.lo + (P.poc + 0.5) * P.bin, yp = Y(pocP);
+    var vah = P.lo + (P.vaB + 1) * P.bin, val = P.lo + P.vaA * P.bin;
+    if (q.lines !== 0) {
+      x.save(); x.lineWidth = 1;
+      if (yp != null) { x.strokeStyle = 'rgba(245,166,35,0.9)'; x.beginPath(); x.moveTo(0, yp); x.lineTo(W, yp); x.stroke(); }
+      x.setLineDash([4, 4]); x.strokeStyle = 'rgba(160,170,190,0.55)';
+      [vah, val].forEach(function (pv) { var yy = Y(pv); if (yy != null) { x.beginPath(); x.moveTo(0, yy); x.lineTo(W, yy); x.stroke(); } });
+      x.restore();
+    }
+    x.font = '10px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+    x.fillStyle = 'rgba(245,166,35,0.95)';
+    if (yp != null) x.fillText('POC', links ? breite + 4 : W - breite - 28, yp - 3);
+    if (!P.mitV) {
+      x.fillStyle = 'rgba(160,170,190,0.8)';
+      x.fillText('Profile: time at price — this feed has no volume', links ? 6 : W - breite - 4 - x.measureText('Profile: time at price — this feed has no volume').width, 14);
+    }
   };
 
   /* ─────────── Zonen-Rechtecke ───────────
@@ -58925,6 +59026,31 @@ self.addEventListener('message', async (ev) => {
      sich aus echten Ticks aufbaut. `_shown` bleibt dabei die Zahl der
      FERTIGEN Kerzen — Indikatoren, Zonen und Broker sehen die halbe Kerze
      nicht; nur Kerzenbild und Footprint tun es. */
+  /** Eine einzelne rohe OHLC-Zeile in die Form der aktiven Serie bringen —
+      fuer die Live-Kerze und die halbe Kerze im Replay. Heikin Ashi braucht
+      dafuer die vorige HA-Kerze; laufen mehrere Live-Kerzen nacheinander auf,
+      ist das die zuletzt gelieferte. */
+  Instance.prototype._shapeOne = function (r) {
+    var t = this._seriesType;
+    if (isValueType(t)) return { time: r.time, value: r.close };
+    if (t !== 'heikin') return r;
+    var prev = null, L = this._haLive, rows = this._rowsForType || [];
+    if (L && L.time < r.time) prev = L;
+    else if (L && L.time === r.time && this._haPrev && this._haPrev.time < r.time) prev = this._haPrev;
+    else for (var i = rows.length - 1; i >= 0; i--) if (rows[i].time < r.time) { prev = rows[i]; break; }
+    var c = (r.open + r.high + r.low + r.close) / 4, o = prev ? (prev.open + prev.close) / 2 : (r.open + r.close) / 2;
+    var out = { time: r.time, open: o, high: Math.max(r.high, o, c), low: Math.min(r.low, o, c), close: c };
+    if (!L || r.time > L.time) { this._haPrev = L || prev; this._haLive = out; }
+    else if (r.time === L.time) this._haLive = out;
+    return out;
+  };
+  /** Live-Kerze anhaengen oder fortschreiben, in jeder Serienform. */
+  Instance.prototype.updateRow = function (raw) {
+    if (this._tot() || !raw) return this;
+    try { this.series.update(this._shapeOne(raw)); } catch (e) {}
+    return this;
+  };
+
   Instance.prototype.setForming = function (row, uptoMs) {
     if (this._tot() || !this._rows || !this.series) return this;
     if (!row) {
@@ -58935,7 +59061,7 @@ self.addEventListener('message', async (ev) => {
       return this;
     }
     this._forming = { row: row, upto: uptoMs, idx: this._shown };
-    try { this.series.update(row); } catch (e) {}
+    try { this.series.update(this._shapeOne(row)); } catch (e) {}
     return this;
   };
 
@@ -59257,7 +59383,8 @@ self.addEventListener('message', async (ev) => {
       layout: { background: { type: solid, color: bg }, textColor: s.text || '#8b91a1' },
       grid: { vertLines: { color: s.grid, visible: s.showGrid !== false },
               horzLines: { color: s.grid, visible: s.showGrid !== false } },
-      rightPriceScale: { borderColor: s.grid },
+      /* Skala: normal, logarithmisch oder Prozent (28.10.2026). */
+      rightPriceScale: { borderColor: s.grid, mode: ({ log: 1, pct: 2 })[s.scale] || 0 },
       timeScale: { borderColor: s.grid },
       crosshair: { vertLine: { color: s.crosshair, labelBackgroundColor: s.crosshair },
                    horzLine: { color: s.crosshair, labelBackgroundColor: s.crosshair } }
@@ -59274,7 +59401,20 @@ self.addEventListener('message', async (ev) => {
     // rest of the app.
     s = s || this._style || (window.ApexChartStyle && window.ApexChartStyle.defaults) || {};
     var t = this._seriesType || 'candles';
-    if (t === 'candles') {
+    if (t === 'hollow') {
+      /* Hohle Kerzen: steigende nur als Umriss, fallende gefuellt. */
+      this.series.applyOptions({
+        upColor: 'rgba(0,0,0,0)', downColor: s.down, borderVisible: true,
+        borderUpColor: s.up, borderDownColor: s.down,
+        wickUpColor: s.wickUp || s.up, wickDownColor: s.wickDown || s.down
+      });
+    } else if (t === 'baseline') {
+      this.series.applyOptions({
+        topLineColor: s.up, bottomLineColor: s.down, lineWidth: 2,
+        topFillColor1: 'rgba(62,207,142,0.28)', topFillColor2: 'rgba(62,207,142,0.04)',
+        bottomFillColor1: 'rgba(240,99,106,0.04)', bottomFillColor2: 'rgba(240,99,106,0.28)'
+      });
+    } else if (t === 'candles' || t === 'heikin') {
       this.series.applyOptions({
         upColor: s.up, downColor: s.down,
         borderVisible: s.border !== false,
@@ -59300,8 +59440,11 @@ self.addEventListener('message', async (ev) => {
 
     var LWC = window.LightweightCharts;
     var ctor = { candles: LWC.CandlestickSeries, bars: LWC.BarSeries,
-                 line: LWC.LineSeries, area: LWC.AreaSeries }[type];
+                 line: LWC.LineSeries, area: LWC.AreaSeries,
+                 hollow: LWC.CandlestickSeries, heikin: LWC.CandlestickSeries,
+                 baseline: LWC.BaselineSeries }[type];
     if (!ctor) return this;
+    this._haLive = this._haPrev = null;
 
     var savedLevels = this._levels || null;
     var shown = this._shown;
@@ -59321,6 +59464,7 @@ self.addEventListener('message', async (ev) => {
       }
     }
     this._shown = shown;
+    if (type === 'baseline') this._baseLevel();
     this._markersApi = LWC.createSeriesMarkers(this.series, []);
     if (savedLevels) this.setLevels(savedLevels);
     /* Zonen und Footprint hängen als Primitive an der alten Serie — mit
@@ -59328,7 +59472,18 @@ self.addEventListener('message', async (ev) => {
     try { this._paintZones(); } catch (e) {}
     try { if (this._fpOpts) this._paintFootprint(); } catch (e) {}
     try { if (this._hm) this._paintHeat(); } catch (e) {}
+    try { if (this._vp) this._paintVp(); } catch (e) {}
     return this;
+  };
+
+  /* Baseline: Grundlinie in der Mitte der juengsten 300 Schlusskurse —
+     oberhalb gruen, unterhalb rot, wie TradingViews "Base level 50 %". */
+  Instance.prototype._baseLevel = function () {
+    var a = this._all; if (!a || !a.n || !this.series) return;
+    var lo = Infinity, hi = -Infinity;
+    for (var i = Math.max(0, a.n - 300); i < a.n; i++) { if (a.c[i] < lo) lo = a.c[i]; if (a.c[i] > hi) hi = a.c[i]; }
+    if (!isFinite(lo)) return;
+    try { this.series.applyOptions({ baseValue: { type: 'price', price: (lo + hi) / 2 } }); } catch (e) {}
   };
 
   /** Re-read CSS vars after a light/dark toggle. */
@@ -59355,6 +59510,7 @@ self.addEventListener('message', async (ev) => {
     try { this._dropZones(); } catch (e) {}
     try { this._fpOpts = null; this._dropFootprint(); } catch (e) {}
     try { this._hm = null; this._dropHeat(); } catch (e) {}
+    try { this._vp = null; this._dropVp(); } catch (e) {}
     if (this._dragBound && this.el) {
       this.el.removeEventListener('pointerdown', this._onLvDown, true);
       this.el.removeEventListener('pointermove', this._onLvMove, true);
@@ -61542,7 +61698,8 @@ self.addEventListener('message', async (ev) => {
       '.arp-oc-unit{font-size:10px;letter-spacing:.06em;color:var(--ink3)}',
       '@media(max-width:760px){.arp-onchart{top:6px;padding:4px 5px;gap:5px}.arp-oc{padding:6px 12px}.arp-oc-mid{min-width:0;font-size:10px}}',
       /* drawing-tool menu behind the "…" button */
-      '.arp-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:30;min-width:250px;max-height:340px;overflow:auto;' +
+      '.arp-menu-g{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);padding:8px 8px 3px;border-top:0.5px solid var(--rim);margin-top:4px}',
+      '.arp-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:30;min-width:250px;max-height:min(560px,78vh);overflow:auto;' +
         'background:var(--elevated);border:0.5px solid var(--rim);border-radius:12px;padding:6px;box-shadow:0 18px 44px rgba(0,0,0,.45)}',
       '.arp-menu-h{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding:6px 8px 8px;display:flex;justify-content:space-between;gap:8px}',
       '.arp-menu-h span{text-transform:none;letter-spacing:0;color:var(--ink4)}',
@@ -62680,9 +62837,11 @@ self.addEventListener('message', async (ev) => {
     var favs = D.favourites();
     return '<div class="arp-menu" id="arpToolMenu" style="display:none">' +
       '<div class="arp-menu-h">Drawing tools <span><svg class=ic aria-hidden=true><use href=#i-star ></use></svg> keeps a tool on the bar</span></div>' +
-      D.TOOLS.filter(function (t) { return t[0] !== 'cursor' && t[0] !== 'erase'; }).map(function (t) {
+      D.TOOLS.filter(function (t) { return t[0] !== 'cursor' && t[0] !== 'erase'; }).map(function (t, i, arr) {
         var on = favs.indexOf(t[0]) >= 0;
-        return '<div class="arp-menu-row">' +
+        /* Gruppen wie in der Werkzeugleiste der Charts (28.10.2026). */
+        var kopf = (t[4] && (i === 0 || arr[i - 1][4] !== t[4])) ? '<div class="arp-menu-g">' + esc(t[4]) + '</div>' : '';
+        return kopf + '<div class="arp-menu-row">' +
           '<button class="arp-menu-pick" data-arp-tool="' + t[0] + '">' +
             '<span class="g">' + t[1] + '</span>' + esc(t[2]) + '</button>' +
           '<button class="arp-star' + (on ? ' on' : '') + '" data-arp-fav="' + t[0] +
@@ -66247,39 +66406,64 @@ self.addEventListener('message', async (ev) => {
        arbeitet, braucht genau diese drei. */
     { v: 1.272, on: false }, { v: 1.618, on: false }, { v: 2.618, on: false }
   ];
+  /* Fib-Erweiterung (trendbasiert): Zielmarken ab Punkt C, im Abstand des
+     Zuges A→B. Die Voreinstellung entspricht der von TradingView. */
+  var FIBX_DEFAULT = [
+    { v: 0, on: true }, { v: 0.382, on: false }, { v: 0.618, on: true }, { v: 1, on: true },
+    { v: 1.272, on: true }, { v: 1.618, on: true }, { v: 2, on: false }, { v: 2.618, on: true },
+    { v: 3.618, on: false }, { v: 4.236, on: false }
+  ];
   function fibCfg(s) {
     var c = s.fib || {};
+    var ext = s.type === 'fibext';
+    var def = ext ? FIBX_DEFAULT : FIB_DEFAULT;
     return {
       levels: (c.levels && c.levels.length) ? c.levels
-              : FIB_DEFAULT.map(function (l) { return { v: l.v, on: l.on }; }),
-      extend: c.extend || 'right',      // wie bisher: bis zum rechten Rand
+              : def.map(function (l) { return { v: l.v, on: l.on }; }),
+      extend: c.extend || (ext ? 'none' : 'right'),      // Retracement wie bisher bis zum rechten Rand
       fill:   !!c.fill,
       labels: c.labels === undefined ? 'both' : c.labels   // 'both'|'pct'|'price'|'none'
     };
   }
 
-  /* [id, glyph, label, needs two anchors?]
-     `cursor` and `erase` are modes rather than shapes and stay pinned in the
-     toolbar; everything else can be put on the favourites bar. */
+  /* [id, glyph, label, two anchors?, group]
+     Gruppen wie bei TradingView (28.10.2026): 24 Werkzeuge in einer flachen
+     Liste findet niemand mehr — die Ueberschriften im Menue kommen von hier. */
   var TOOLS = [
-    ['cursor',  '↖',  'Move, select & zoom',        false],
-    ['trend',   '╱',  'Trend line',                 true],
-    ['ray',     '↗',  'Ray — extends to the right', true],
-    ['arrow',   '➤',  'Arrow',                      true],
-    ['hline',   '─',  'Horizontal line',            false],
-    ['vline',   '│',  'Vertical line',              false],
-    ['rect',    '▭',  'Box',                        true],
-    ['ellipse', '◯',  'Ellipse',                    true],
-    ['channel', '⫽',  'Parallel channel',           true],
-    ['fib',     '≣',  'Fibonacci retracement',      true],
-    ['measure', '↔',  'Measure — pips, % and bars', true],
-    ['long',    '▲',  'Long position — entry, stop, target',  true],
-    ['short',   '▼',  'Short position — entry, stop, target', true],
-    ['text',    'T',  'Text label',                 false],
-    ['erase',   '⌫',  'Erase a drawing',            false]
+    ['cursor',   '↖',  'Move, select & zoom',                   false, ''],
+    ['trend',    '╱',  'Trend line',                            true,  'Lines'],
+    ['ray',      '↗',  'Ray — extends to the right',            true,  'Lines'],
+    ['hray',     '⟶',  'Horizontal ray',                        false, 'Lines'],
+    ['arrow',    '➤',  'Arrow',                                 true,  'Lines'],
+    ['hline',    '─',  'Horizontal line',                       false, 'Lines'],
+    ['vline',    '│',  'Vertical line',                         false, 'Lines'],
+    ['cross',    '┼',  'Cross line',                            false, 'Lines'],
+    ['channel',  '⫽',  'Parallel channel',                      true,  'Lines'],
+    ['pitchfork','⋔',  'Pitchfork (Andrews) — 3 clicks',        true,  'Lines'],
+    ['fib',      '≣',  'Fibonacci retracement',                 true,  'Fibonacci'],
+    ['fibext',   '≋',  'Fib extension (trend-based) — 3 clicks', true, 'Fibonacci'],
+    ['rect',     '▭',  'Box',                                   true,  'Shapes'],
+    ['ellipse',  '◯',  'Ellipse',                               true,  'Shapes'],
+    ['brush',    '〰', 'Brush (freehand)',                      true,  'Shapes'],
+    ['measure',  '↔',  'Measure — pips, % and bars',            true,  'Measure & position'],
+    ['prange',   '↕',  'Price range',                           true,  'Measure & position'],
+    ['drange',   '⇹',  'Date range',                            true,  'Measure & position'],
+    ['long',     '▲',  'Long position — entry, stop, target',   true,  'Measure & position'],
+    ['short',    '▼',  'Short position — entry, stop, target',  true,  'Measure & position'],
+    ['avwap',    '⚓',  'Anchored VWAP',                         false, 'Volume'],
+    ['vprof',    '▤',  'Fixed range volume profile',            true,  'Volume'],
+    ['text',     'T',  'Text label',                            false, 'Text'],
+    ['callout',  '❝',  'Note with pointer',                     true,  'Text'],
+    ['erase',    '⌫',  'Erase a drawing',                       false, '']
   ];
   var TOOL_BY_ID = {};
-  TOOLS.forEach(function (t) { TOOL_BY_ID[t[0]] = { id: t[0], glyph: t[1], label: t[2], two: t[3] }; });
+  TOOLS.forEach(function (t) { TOOL_BY_ID[t[0]] = { id: t[0], glyph: t[1], label: t[2], two: t[3], group: t[4] || '' }; });
+  /* Ein Klick setzt die Zeichnung, kein Ziehen. */
+  var SINGLE = { hline: 1, vline: 1, hray: 1, cross: 1, avwap: 1 };
+  /* Drei Punkte: A→B ziehen, dann C mit einem weiteren Klick. */
+  var THREE = { fibext: 1, pitchfork: 1 };
+  /* Worauf ein Preisalarm sitzen kann. */
+  var ALERTABLE = { hline: 1, hray: 1, cross: 1, trend: 1, ray: 1, rect: 1 };
 
   /* Which tools sit on the small bar. Everything else lives behind the "more"
      menu, so the toolbar stays short on a phone. Saved per user, because the
@@ -66300,6 +66484,194 @@ self.addEventListener('message', async (ev) => {
   var COLORS = ['#c9a84c', '#3ecf8e', '#f0636a', '#5aa9e6', '#b48ce8', '#e6e9ef'];
 
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  /* ─────────────── Mehrere Charts, eine Tastatur (28.10.2026) ───────────────
+     Jede Zeichenebene hing ihre Tasten an das document. Mit vier Charts im
+     Multi-Chart oder einem Replay im Hintergrund nahm Strg+Z deshalb in ALLEN
+     Ebenen gleichzeitig etwas zurueck. Jetzt gehoeren die Tasten genau einer:
+     der, in die zuletzt geklickt oder ueber die zuletzt die Maus gefahren
+     wurde — sonst der ersten sichtbaren. */
+  var INSTANCES = [], ACTIVE = null, CLIP = null;
+  function sichtbar(d) {
+    try { return !!(d && d.cv && d.el && d.el.getClientRects().length); } catch (e) { return false; }
+  }
+  function istZiel(d) {
+    if (ACTIVE && INSTANCES.indexOf(ACTIVE) >= 0 && sichtbar(ACTIVE)) return ACTIVE === d;
+    for (var i = 0; i < INSTANCES.length; i++) if (sichtbar(INSTANCES[i])) return INSTANCES[i] === d;
+    return false;
+  }
+  function tippt(e) {
+    var t = e && e.target; if (!t) return false;
+    var n = t.tagName;
+    return n === 'INPUT' || n === 'TEXTAREA' || n === 'SELECT' || !!t.isContentEditable;
+  }
+  function textMarkiert() {
+    try { var s = window.getSelection && window.getSelection(); return !!(s && !s.isCollapsed && String(s).trim()); }
+    catch (e) { return false; }
+  }
+
+  /* ─────────────── Zeitrahmen-Sichtbarkeit ───────────────
+     "Nur auf 15m und 1h zeigen" wie bei TradingView. Der Zeitrahmen kommt
+     aus den Daten selbst (Median-Abstand der Kerzen), nicht aus einem
+     Etikett — das stimmt in jeder Oberflaeche, auch in verdichteten. */
+  var TF_STUFEN = [['1m', 1], ['5m', 5], ['15m', 15], ['30m', 30], ['1h', 60], ['4h', 240], ['1D', 1440], ['1W', 10080]];
+  function tfStufe(ms) {
+    var m = ms / 60000;
+    if (!(m > 0)) return null;
+    var best = null, bd = Infinity;
+    TF_STUFEN.forEach(function (s) { var d = Math.abs(Math.log(m / s[1])); if (d < bd) { bd = d; best = s[0]; } });
+    return best;
+  }
+
+  function fmtP(p) { var d = Math.abs(p) > 1000 ? 2 : (Math.abs(p) > 20 ? 3 : 5); return (+p).toFixed(d); }
+
+  /* ─────────────── Volumen-Rechnungen (AVWAP, Profil) ─────────────── */
+  function erstIdx(all, tSec) {
+    var ms = tSec * 1000, lo = 0, hi = all.n - 1;
+    if (ms <= all.t[0]) return 0;
+    if (ms > all.t[hi]) return -1;
+    while (lo < hi) { var mid = (lo + hi) >> 1; if (all.t[mid] < ms) lo = mid + 1; else hi = mid; }
+    return lo;
+  }
+  function hatVolumen(all, i0, i1) {
+    if (!all.v) return false;
+    for (var i = i0; i <= i1; i++) if (all.v[i] > 0) return true;
+    return false;
+  }
+  /* VWAP ab dem Anker: Summe(Typ.Preis × Volumen) / Summe(Volumen).
+     Ohne Volumen im Feed (manche Forex-Quellen) gleich gewichtet — das ist
+     dann ein gleitender Durchschnitt seit dem Anker und wird so beschriftet. */
+  function avwapReihe(all, i0, i1, bands) {
+    var mitV = hatVolumen(all, i0, i1);
+    var pv = 0, vv = 0, p2 = 0, out = [];
+    for (var i = i0; i <= i1; i++) {
+      var tp = (all.h[i] + all.l[i] + all.c[i]) / 3, v = mitV ? (all.v[i] || 0) : 1;
+      pv += tp * v; vv += v; p2 += tp * tp * v;
+      if (vv <= 0) { out.push(null); continue; }
+      var w = pv / vv, sd = bands ? Math.sqrt(Math.max(0, p2 / vv - w * w)) : 0;
+      out.push({ i: i, v: w, sd: sd });
+    }
+    return { pts: out, mitV: mitV };
+  }
+  /* Volumenprofil eines Kerzenbereichs. Jede Kerze verteilt ihr Volumen
+     gleichmaessig auf die Preiszeilen zwischen Tief und Hoch — so rechnet
+     auch TradingView, solange keine Ticks vorliegen. Value Area: vom POC aus
+     jeweils zur volumenstaerkeren Nachbarzeile, bis vaPct erreicht ist. */
+  function volProfil(all, i0, i1, rows, vaPct) {
+    var lo = Infinity, hi = -Infinity, i;
+    for (i = i0; i <= i1; i++) { if (all.l[i] < lo) lo = all.l[i]; if (all.h[i] > hi) hi = all.h[i]; }
+    if (!(hi > lo) || rows < 2) return null;
+    var mitV = hatVolumen(all, i0, i1);
+    var bin = (hi - lo) / rows, up = new Float64Array(rows), dn = new Float64Array(rows);
+    for (i = i0; i <= i1; i++) {
+      var v = mitV ? (all.v[i] || 0) : 1;
+      if (!(v > 0)) continue;
+      var k0 = Math.max(0, Math.min(rows - 1, Math.floor((all.l[i] - lo) / bin)));
+      var k1 = Math.max(0, Math.min(rows - 1, Math.floor((all.h[i] - lo) / bin)));
+      var anteil = v / (k1 - k0 + 1), auf = all.c[i] >= all.o[i];
+      for (var k = k0; k <= k1; k++) { if (auf) up[k] += anteil; else dn[k] += anteil; }
+    }
+    var tot = 0, max = 0, poc = 0;
+    for (i = 0; i < rows; i++) { var s = up[i] + dn[i]; tot += s; if (s > max) { max = s; poc = i; } }
+    if (!(tot > 0)) return null;
+    var a = poc, b = poc, sum = up[poc] + dn[poc], ziel = tot * (vaPct || 70) / 100;
+    while (sum < ziel && (a > 0 || b < rows - 1)) {
+      var oben = b < rows - 1 ? up[b + 1] + dn[b + 1] : -1, unten = a > 0 ? up[a - 1] + dn[a - 1] : -1;
+      if (oben >= unten) { b++; sum += oben; } else { a--; sum += unten; }
+    }
+    return { lo: lo, hi: hi, bin: bin, rows: rows, up: up, dn: dn, max: max, poc: poc, vaA: a, vaB: b, mitV: mitV };
+  }
+
+  /* ─────────────── Preisalarme auf Zeichnungen ───────────────
+     Linie, Strahl, Kreuz, Trendlinie, Box. Geprueft wird bei jedem Kurs, den
+     die Seite bekommt (ApexDraw.checkAlerts) — solange Evidence offen ist,
+     auch im Hintergrund-Tab, dann als System-Benachrichtigung. */
+  var _letzterKurs = {}, _alarmZeit = {}, _ac = null;
+  function linienPreis(s, tSec) {
+    var a = s.points[0], b = s.points[1];
+    if (!a) return null;
+    if (s.type === 'hline' || s.type === 'cross') return a.p;
+    if (s.type === 'hray') return tSec >= a.t ? a.p : null;
+    if (!b || b.t === a.t) return null;
+    var f = (tSec - a.t) / (b.t - a.t);
+    var ext = s.type === 'ray' ? 'right' : (s.ext || 'none');
+    if (f < 0 && ext !== 'left' && ext !== 'both') return null;
+    if (f > 1 && ext !== 'right' && ext !== 'both') return null;
+    return a.p + (b.p - a.p) * f;
+  }
+  function piep() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    _ac = _ac || new AC();
+    var o = _ac.createOscillator(), g = _ac.createGain(), t = _ac.currentTime;
+    o.type = 'sine';
+    o.frequency.setValueAtTime(880, t); o.frequency.setValueAtTime(1320, t + 0.12);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+    o.connect(g); g.connect(_ac.destination); o.start(t); o.stop(t + 0.4);
+  }
+  function melden(text, tag) {
+    try { piep(); } catch (e) {}
+    try {
+      if (document.hidden) {
+        if (window.ApexPWA && window.ApexPWA.notify) window.ApexPWA.notify('Drawing alert', { body: text, tag: tag });
+        else if (typeof Notification !== 'undefined' && Notification.permission === 'granted')
+          new Notification('Drawing alert', { body: text, tag: tag, icon: 'icons/icon-192.png' });
+      }
+    } catch (e) {}
+    try { if (typeof window.showToast === 'function') window.showToast('🔔 ' + text); } catch (e) {}
+  }
+  function checkAlerts(symbol, price) {
+    price = +price;
+    if (!symbol || !isFinite(price)) return 0;
+    var key = storeKey(symbol, null);
+    var vorher = _letzterKurs[key];
+    _letzterKurs[key] = price;
+    if (vorher == null || vorher === price) return 0;
+    /* Die laufende Zeichenebene dieses Symbols, falls offen: ein einmaliger
+       Alarm schaltet sich dann sichtbar ab (die Glocke am Chart geht aus). */
+    var inst = null;
+    for (var i = 0; i < INSTANCES.length; i++) {
+      if (!INSTANCES[i].scope && storeKey(INSTANCES[i].symbol, null) === key) { inst = INSTANCES[i]; break; }
+    }
+    var shapes = inst ? inst.shapes : load(symbol, null);
+    var jetzt = Date.now() / 1000, n = 0, geaendert = false;
+    shapes.forEach(function (s) {
+      var al = s.alert;
+      if (!al || !al.on || !ALERTABLE[s.type] || !s.points || !s.points.length) return;
+      var trifft = false, txt = '';
+      if (s.type === 'rect') {
+        if (!s.points[1]) return;
+        var lo = Math.min(s.points[0].p, s.points[1].p), hi = Math.max(s.points[0].p, s.points[1].p);
+        var warDrin = vorher >= lo && vorher <= hi, istDrin = price >= lo && price <= hi;
+        trifft = al.dir === 'exit' ? (warDrin && !istDrin) : (!warDrin && istDrin);
+        txt = (al.dir === 'exit' ? 'left' : 'entered') + ' your box ' + fmtP(lo) + '–' + fmtP(hi) + ' at ' + fmtP(price);
+      } else {
+        var lv = linienPreis(s, jetzt);
+        if (lv == null) return;
+        var hoch = vorher < lv && price >= lv, runter = vorher > lv && price <= lv;
+        trifft = al.dir === 'up' ? hoch : al.dir === 'down' ? runter : (hoch || runter);
+        txt = 'crossed ' + (hoch ? 'above' : 'below') + ' your ' + String(TYPE_LABEL[s.type] || 'line').toLowerCase() + ' at ' + fmtP(lv);
+      }
+      if (!trifft) return;
+      var k = key + '|' + s.id;
+      if (Date.now() - (_alarmZeit[k] || 0) < 60000) return;     // Zittern um die Linie: einmal pro Minute
+      _alarmZeit[k] = Date.now();
+      n++;
+      al.last = Date.now();
+      if (al.mode !== 'every') al.on = false;
+      geaendert = true;
+      melden(String(symbol).split(':').pop() + ' ' + txt + (al.note ? ' — ' + al.note : ''), 'apd-' + s.id);
+    });
+    if (geaendert) { if (inst) inst._commit(); else save(symbol, shapes, null); }
+    return n;
+  }
+  function alarmErlauben() {
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission();
+    } catch (e) {}
+  }
 
   /* ─────────────── persistence ─────────────── */
   /* `scope` keeps a saved backtest's drawings to itself. Without it, reopening
@@ -66345,15 +66717,32 @@ self.addEventListener('message', async (ev) => {
     var c = cloudSym(symbol); if (!c) return null;
     return window.db.collection('apexUsers').doc(window.currentUID).collection('private').doc('drawings_' + c);
   }
+  /* Alle Zeichnungen in die Cloud, nicht nur die letzten 300 (28.10.2026).
+     Nur wenn das Dokument zu gross wird, fallen die AELTESTEN heraus — und
+     zwar nur aus der Cloud-Kopie, lokal bleibt alles. Wartende Schreibvorgaenge
+     gehen sofort raus, sobald die Seite in den Hintergrund geht oder
+     geschlossen wird: vorher ging eine Zeichnung verloren, wenn man den Tab
+     innerhalb von zwei Sekunden zumachte. */
+  var _pushWart = {};
+  function cloudSchreiben(k) {
+    var w = _pushWart[k]; if (!w) return;
+    delete _pushWart[k]; clearTimeout(_pushT[k]);
+    var liste = (w.shapes || []).slice(), j = JSON.stringify(liste);
+    while (j.length > CLOUD_MAX && liste.length > 1) { liste.splice(0, Math.max(1, Math.ceil(liste.length * 0.1))); j = JSON.stringify(liste); }
+    if (j.length > CLOUD_MAX) { try { console.warn('[draw] drawings on ' + k + ' too large for the cloud copy'); } catch (e) {} return; }
+    w.ref.set({ shapes: j, n: (w.shapes || []).length, at: w.at }).catch(function () {});
+  }
   function cloudPush(symbol, shapes) {
     var ref = cloudRef(symbol); if (!ref) return;
     var k = cloudSym(symbol); clearTimeout(_pushT[k]);
-    _pushT[k] = setTimeout(function () {
-      var j = JSON.stringify((shapes || []).slice(-300));
-      if (j.length > CLOUD_MAX) { try { console.warn('[draw] too many drawings on ' + k + ' for the cloud copy'); } catch (e) {} return; }
-      ref.set({ shapes: j, n: (shapes || []).length, at: localTs(symbol) || Date.now() }).catch(function () {});
-    }, 2000);
+    _pushWart[k] = { ref: ref, shapes: shapes, at: localTs(symbol) || Date.now() };
+    _pushT[k] = setTimeout(function () { cloudSchreiben(k); }, 2000);
   }
+  function allesSchreiben() { Object.keys(_pushWart).forEach(cloudSchreiben); }
+  try {
+    window.addEventListener('pagehide', allesSchreiben);
+    document.addEventListener('visibilitychange', function () { if (document.hidden) allesSchreiben(); });
+  } catch (e) {}
   function cloudPull(symbol) {
     var ref = cloudRef(symbol); if (!ref) return Promise.resolve(null);
     return ref.get().then(function (d) {
@@ -66411,6 +66800,9 @@ self.addEventListener('message', async (ev) => {
        Hand nie genau auf dem Docht sitzt. Pro Nutzer gemerkt. */
     this.magnet = loadMagnet();
     this._onChange = opts.onChange || function () {};
+    this._cache = {};      // AVWAP-/Profil-Rechnungen je Form
+    this._geo = {};
+    INSTANCES.push(this);
     /* Das CSS der Zeichenebene hing bisher an mountToolbar(). Der Market
        Replay baut seine Werkzeugleiste aber SELBST und ruft mountToolbar nie
        — dort wurde das CSS nur eingespielt, wenn man zufaellig die
@@ -66704,13 +67096,44 @@ self.addEventListener('message', async (ev) => {
     if (!ctx || !this.cv.width) return;
     var w = this.el.clientWidth, h = this.el.clientHeight;
     ctx.clearRect(0, 0, w, h);
+    /* Pixel-Geometrie der letzten Zeichnung je Form — fuers Treffen von
+       Formen, deren Lage erst beim Malen feststeht (AVWAP, Profil, Gabel). */
+    this._geo = {};
+    this._tfJetzt = tfStufe(this._step());
     var list = this.shapes.slice();
     if (this.draft) list.push(this.draft);
-    for (var i = 0; i < list.length; i++) { if (!list[i].hidden) this._paintShape(ctx, list[i], w, h); }
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].hidden || this._tfAus(list[i])) continue;
+      try { this._paintShape(ctx, list[i], w, h); } catch (e) { /* eine kaputte Form darf die anderen nicht mitnehmen */ }
+    }
     this._paintHandles(ctx, w, h);
     /* Hier und nicht nur beim Auswaehlen: _paint() laeuft bei jedem Schieben
        und Zoomen, also wandert die Leiste mit der Zeichnung mit. */
     this._syncStyleBar();
+  };
+
+  /** Ist die Form auf dem aktuellen Zeitrahmen ausgeblendet? */
+  Draw.prototype._tfAus = function (s) {
+    if (!s.tfv || !s.tfv.length) return false;
+    var t = this._tfJetzt || tfStufe(this._step());
+    return !!t && s.tfv.indexOf(t) < 0;
+  };
+
+  /** Wo die Griffe einer Form sitzen — fuers Malen und fuers Treffen dieselbe Stelle. */
+  Draw.prototype._handlePts = function (s) {
+    var self = this, out = [];
+    if (s.type === 'brush') return out;
+    if (s.type === 'avwap') {
+      var g = this._geo && this._geo[s.id];
+      if (g && g.poly && g.poly.length) out.push({ x: g.poly[0].x, y: g.poly[0].y, k: 0 });
+      return out;
+    }
+    s.points.forEach(function (pt, k) {
+      var x = self._x(pt.t), y = self._y(pt.p);
+      if (x == null || y == null) return;
+      out.push({ x: x, y: y, k: k });
+    });
+    return out;
   };
 
   /* Grab handles on the selected shape. Only the selected one gets them —
@@ -66720,13 +67143,23 @@ self.addEventListener('message', async (ev) => {
     var s = null;
     for (var i = 0; i < this.shapes.length; i++) if (this.shapes[i].id === this.sel) { s = this.shapes[i]; break; }
     if (!s) { this.sel = null; return; }
-    if (s.hidden) return;
+    if (s.hidden || this._tfAus(s)) return;
 
     ctx.save();
-    var self = this;
-    s.points.forEach(function (pt) {
-      var x = self._x(pt.t), y = self._y(pt.p);
-      if (x == null || y == null) return;
+    if (s.type === 'brush') {
+      // Freihand hat keine Griffe — der Rahmen zeigt, was markiert ist.
+      var g = this._geo[s.id];
+      if (g && g.poly && g.poly.length) {
+        var xs = g.poly.map(function (q) { return q.x; }), ys = g.poly.map(function (q) { return q.y; });
+        ctx.setLineDash([4, 3]); ctx.lineWidth = 1; ctx.strokeStyle = s.color || '#c9a84c';
+        ctx.strokeRect(Math.min.apply(null, xs) - 6, Math.min.apply(null, ys) - 6,
+                       Math.max.apply(null, xs) - Math.min.apply(null, xs) + 12, Math.max.apply(null, ys) - Math.min.apply(null, ys) + 12);
+      }
+      ctx.restore();
+      return;
+    }
+    this._handlePts(s).forEach(function (q) {
+      var x = q.x, y = q.y;
       // An hline can be grabbed anywhere along it; park its handle in view.
       if (s.type === 'hline') x = w * 0.5;
       if (s.type === 'vline') y = h * 0.5;
@@ -66763,13 +67196,7 @@ self.addEventListener('message', async (ev) => {
     if (s.type === 'hline') {
       if (y0 == null) { ctx.restore(); return; }
       ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(w, y0); ctx.stroke();
-      var lbl = this._fmtPrice(p0.p);
-      var tw = ctx.measureText(lbl).width;
-      ctx.globalAlpha = 0.85;
-      ctx.fillRect(w - tw - 10, y0 - 8, tw + 8, 16);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = '#07080b';
-      ctx.fillText(lbl, w - tw - 6, y0 + 4);
+      this._preisEtikett(ctx, s, y0, p0.p, w);
 
     } else if (s.type === 'vline') {
       if (x0 == null) { ctx.restore(); return; }
@@ -66777,14 +67204,17 @@ self.addEventListener('message', async (ev) => {
 
     } else if (s.type === 'trend') {
       if (x0 == null || x1 == null || y0 == null || y1 == null) { ctx.restore(); return; }
-      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+      /* "Extend" wie bei TradingView: links, rechts oder beidseitig weiter. */
+      var tl = verlaengert(x0, y0, x1, y1, s.ext, w);
+      ctx.beginPath(); ctx.moveTo(tl[0], tl[1]); ctx.lineTo(tl[2], tl[3]); ctx.stroke();
       this._handle(ctx, x0, y0); this._handle(ctx, x1, y1);
+      if (s.ext && s.ext !== 'none') this._geo[s.id] = { segs: [tl] };
 
     } else if (s.type === 'rect') {
       if (x0 == null || x1 == null || y0 == null || y1 == null) { ctx.restore(); return; }
       var rx = Math.min(x0, x1), ry = Math.min(y0, y1);
       var rw = Math.abs(x1 - x0), rh = Math.abs(y1 - y0);
-      ctx.globalAlpha = 0.13; ctx.fillRect(rx, ry, rw, rh);
+      ctx.globalAlpha = s.fillA != null ? s.fillA : 0.13; ctx.fillRect(rx, ry, rw, rh);
       ctx.globalAlpha = 1; ctx.strokeRect(rx, ry, rw, rh);
       /* Griffe wie in TradingView (16.10.2026): Ecken + Mitte jeder Seite.
          Links/rechts aendern nur die Breite, oben/unten nur die Hoehe. */
@@ -66856,8 +67286,17 @@ self.addEventListener('message', async (ev) => {
 
     } else if (s.type === 'text') {
       if (x0 == null || y0 == null) { ctx.restore(); return; }
-      ctx.font = '13px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
-      ctx.fillText(s.text || '', x0 + 4, y0 - 4);
+      var tsz = s.size || 13, tlh = Math.round(tsz * 1.3);
+      ctx.font = tsz + 'px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+      var tz = String(s.text || '').split('\n').slice(0, 12), tmax = 0;
+      tz.forEach(function (z) { tmax = Math.max(tmax, ctx.measureText(z).width); });
+      var tbx = x0 + 4, tby = y0 - 4 - tsz - (tz.length - 1) * tlh;
+      if (s.bg) {
+        ctx.save(); rundRect(ctx, tbx - 5, tby - 2, tmax + 10, tz.length * tlh + 6, 5);
+        ctx.fillStyle = 'rgba(14,16,22,0.88)'; ctx.fill(); ctx.restore();
+      }
+      tz.forEach(function (z, k) { ctx.fillText(z, tbx, tby + tsz + k * tlh); });
+      this._geo[s.id] = { rect: [tbx - 5, tby - 2, tmax + 10, tz.length * tlh + 6] };
 
     } else if (s.type === 'ray') {
       // Like a trend line, but carried on to the right edge — that is the half
@@ -66884,7 +67323,7 @@ self.addEventListener('message', async (ev) => {
       if (x0 == null || x1 == null || y0 == null || y1 == null) { ctx.restore(); return; }
       ctx.beginPath();
       ctx.ellipse((x0 + x1) / 2, (y0 + y1) / 2, Math.abs(x1 - x0) / 2, Math.abs(y1 - y0) / 2, 0, 0, Math.PI * 2);
-      ctx.globalAlpha = 0.12; ctx.fill();
+      ctx.globalAlpha = s.fillA != null ? s.fillA : 0.12; ctx.fill();
       ctx.globalAlpha = 1;   ctx.stroke();
 
     } else if (s.type === 'channel') {
@@ -66894,7 +67333,7 @@ self.addEventListener('message', async (ev) => {
       var off = p2 ? (this._y(p2.p) - y0) : 40;
       ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(x0, y0 + off); ctx.lineTo(x1, y1 + off); ctx.stroke();
-      ctx.globalAlpha = 0.08;
+      ctx.globalAlpha = s.fillA != null ? s.fillA : 0.08;
       ctx.beginPath();
       ctx.moveTo(x0, y0); ctx.lineTo(x1, y1);
       ctx.lineTo(x1, y1 + off); ctx.lineTo(x0, y0 + off);
@@ -66961,9 +67400,335 @@ self.addEventListener('message', async (ev) => {
       this._badge(ctx, xa + 4, yTpMid + 4, 'Target ' + (tpP || this._fmtPrice(rew)), '#3ecf8e');
       this._badge(ctx, xa + 4, ySlMid + 4, 'Stop ' + (slP || this._fmtPrice(risk)), '#f0636a');
       this._handle(ctx, xa, y0); this._handle(ctx, xa, y1); this._handle(ctx, xa, yT);
+
+    } else if (s.type === 'hray') {
+      if (x0 == null || y0 == null) { ctx.restore(); return; }
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(w, y0); ctx.stroke();
+      this._handle(ctx, x0, y0);
+      this._preisEtikett(ctx, s, y0, p0.p, w);
+      this._geo[s.id] = { segs: [[x0, y0, w, y0]] };
+
+    } else if (s.type === 'cross') {
+      if (x0 == null || y0 == null) { ctx.restore(); return; }
+      ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(w, y0); ctx.moveTo(x0, 0); ctx.lineTo(x0, h); ctx.stroke();
+      this._preisEtikett(ctx, s, y0, p0.p, w);
+      this._geo[s.id] = { segs: [[0, y0, w, y0], [x0, 0, x0, h]] };
+
+    } else if (s.type === 'pitchfork') {
+      /* Andrews: Median vom Griff A durch die Mitte von B und C, dazu zwei
+         Parallelen durch B und C. Alle drei laufen ueber den Rand hinaus. */
+      if (x0 == null || x1 == null || y0 == null || y1 == null) { ctx.restore(); return; }
+      var pq = s.points[2], x2 = pq ? this._x(pq.t) : null, y2 = pq ? this._y(pq.p) : null;
+      if (x2 == null || y2 == null) { x2 = x1; y2 = y1; }
+      var mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dxm = mx - x0, dym = my - y0;
+      var lm = Math.hypot(dxm, dym) || 1, fk = (w + h + 2000) / lm, exm = dxm * fk, eym = dym * fk;
+      ctx.globalAlpha = s.fillA != null ? s.fillA : 0.07;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 + exm, y1 + eym); ctx.lineTo(x2 + exm, y2 + eym); ctx.lineTo(x2, y2); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+      var segs = [[x0, y0, mx + exm, my + eym], [x1, y1, x1 + exm, y1 + eym], [x2, y2, x2 + exm, y2 + eym], [x1, y1, x2, y2]];
+      ctx.beginPath();
+      segs.forEach(function (g) { ctx.moveTo(g[0], g[1]); ctx.lineTo(g[2], g[3]); });
+      ctx.stroke();
+      this._handle(ctx, x0, y0); this._handle(ctx, x1, y1); this._handle(ctx, x2, y2);
+      this._geo[s.id] = { segs: segs };
+
+    } else if (s.type === 'fibext') {
+      if (x0 == null || x1 == null || y0 == null || y1 == null) { ctx.restore(); return; }
+      var pc = s.points[2], xC = pc ? this._x(pc.t) : null, yC = pc ? this._y(pc.p) : null, prC = pc ? pc.p : p1.p;
+      if (xC == null || yC == null) { xC = x1; yC = y1; }
+      var fsegs = [[x0, y0, x1, y1], [x1, y1, xC, yC]];
+      ctx.save(); ctx.setLineDash([4, 4]); ctx.globalAlpha = 0.85;
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineTo(xC, yC); ctx.stroke();
+      ctx.restore();
+      if (pc) {
+        var fx = fibCfg(s), zug = p1.p - p0.p;
+        var fl = xC, fr = xC + Math.max(60, Math.abs(x1 - x0));
+        if (fx.extend === 'right') fr = w; else if (fx.extend === 'both') { fl = 0; fr = w; }
+        var lvls = [];
+        for (var fi = 0; fi < fx.levels.length; fi++) {
+          var FL = fx.levels[fi];
+          if (!FL.on) continue;
+          var fy = this._y(prC + zug * FL.v);
+          if (fy != null) lvls.push({ y: fy, L: FL });
+        }
+        if (fx.fill) {
+          for (var fj = 1; fj < lvls.length; fj++) {
+            ctx.globalAlpha = 0.07; ctx.fillStyle = lvls[fj].L.c || s.color;
+            ctx.fillRect(fl, Math.min(lvls[fj - 1].y, lvls[fj].y), fr - fl, Math.abs(lvls[fj].y - lvls[fj - 1].y));
+          }
+          ctx.globalAlpha = 1;
+        }
+        for (var fk2 = 0; fk2 < lvls.length; fk2++) {
+          var q = lvls[fk2];
+          ctx.strokeStyle = q.L.c || s.color; ctx.fillStyle = q.L.c || s.color;
+          ctx.globalAlpha = (q.L.v === 0 || q.L.v === 1) ? 1 : 0.8;
+          ctx.beginPath(); ctx.moveTo(fl, q.y); ctx.lineTo(fr, q.y); ctx.stroke();
+          ctx.globalAlpha = 1;
+          if (fx.labels !== 'none') {
+            var fpct = String(+(q.L.v).toFixed(3)), fpr = this._fmtPrice(prC + zug * q.L.v);
+            ctx.fillText(fx.labels === 'pct' ? fpct : fx.labels === 'price' ? fpr : (fpct + '  ' + fpr), fl + 5, q.y - 3);
+          }
+          fsegs.push([fl, q.y, fr, q.y]);
+        }
+        ctx.strokeStyle = s.color; ctx.fillStyle = s.color;
+      }
+      this._handle(ctx, x0, y0); this._handle(ctx, x1, y1); if (pc) this._handle(ctx, xC, yC);
+      this._geo[s.id] = { segs: fsegs };
+
+    } else if (s.type === 'prange' || s.type === 'drange') {
+      if (x0 == null || x1 == null || y0 == null || y1 == null) { ctx.restore(); return; }
+      var bx = Math.min(x0, x1), by = Math.min(y0, y1), bw = Math.abs(x1 - x0), bh = Math.abs(y1 - y0);
+      ctx.globalAlpha = s.fillA != null ? s.fillA : 0.12; ctx.fillRect(bx, by, bw, bh); ctx.globalAlpha = 1;
+      if (s.type === 'prange') {
+        ctx.beginPath(); ctx.moveTo(bx, y0); ctx.lineTo(bx + bw, y0); ctx.moveTo(bx, y1); ctx.lineTo(bx + bw, y1); ctx.stroke();
+        var cxp = bx + bw / 2;
+        this._pfeil(ctx, cxp, y0, cxp, y1);
+        var dP = p1.p - p0.p, pipP = this._pips(dP), pctP = p0.p ? (dP / p0.p * 100) : 0;
+        this._badgeC(ctx, cxp, y1 < y0 ? y1 - 8 : y1 + 19,
+          (dP >= 0 ? '+' : '−') + this._fmtPrice(Math.abs(dP)) + ' (' + (dP >= 0 ? '+' : '−') + Math.abs(pctP).toFixed(2) + '%)' + (pipP ? '  ' + pipP : ''), s.color);
+      } else {
+        ctx.beginPath(); ctx.moveTo(x0, by); ctx.lineTo(x0, by + bh); ctx.moveTo(x1, by); ctx.lineTo(x1, by + bh); ctx.stroke();
+        var cyd = by + bh / 2;
+        this._pfeil(ctx, x0, cyd, x1, cyd);
+        var nb = Math.round(Math.abs(this._timeToLogical(p1.t) - this._timeToLogical(p0.t)));
+        var vol = 0, alld = this.ci && this.ci._all;
+        if (alld && alld.n && alld.v) {
+          var dA = erstIdx(alld, Math.min(p0.t, p1.t)), dB = erstIdx(alld, Math.max(p0.t, p1.t));
+          if (dA >= 0) { if (dB < 0) dB = alld.n; for (var dv = dA; dv < dB; dv++) vol += alld.v[dv] || 0; }
+        }
+        this._badgeC(ctx, bx + bw / 2, by + bh + 19,
+          nb + ' bar' + (nb === 1 ? '' : 's') + ' · ' + dauerText(Math.abs(p1.t - p0.t)) + (vol > 0 ? ' · Vol ' + kurzZahl(vol) : ''), s.color);
+      }
+      this._geo[s.id] = { rect: [bx, by, bw, bh] };
+
+    } else if (s.type === 'avwap') {
+      var all = this.ci && this.ci._all;
+      if (!all || !all.n || !p0) { ctx.restore(); return; }
+      var lastI = Math.min(all.n, this.ci._shown || all.n) - 1;
+      var ia = erstIdx(all, p0.t);
+      if (ia < 0 || ia > lastI) { ctx.restore(); return; }
+      var ck = ia + '|' + lastI + '|' + all.n + '|' + all.t[lastI] + '|' + all.c[lastI] + '|' + (s.bands ? 1 : 0);
+      var C = this._cache[s.id];
+      if (!C || C.k !== ck) C = this._cache[s.id] = { k: ck, r: avwapReihe(all, ia, lastI, !!s.bands) };
+      var X = this._xFn(), self2 = this, poly = [], obenB = [], untenB = [];
+      if (!X) { ctx.restore(); return; }
+      C.r.pts.forEach(function (q) {
+        if (!q) return;
+        var x = X(q.i);
+        if (x < -40 || x > w + 40) return;
+        var y = self2._y(q.v);
+        if (y == null) return;
+        poly.push({ x: x, y: y });
+        if (s.bands) { obenB.push({ x: x, y: self2._y(q.v + q.sd) }); untenB.push({ x: x, y: self2._y(q.v - q.sd) }); }
+      });
+      if (poly.length) {
+        ctx.lineJoin = 'round';
+        ctx.beginPath(); poly.forEach(function (q, k) { if (k) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.stroke();
+        if (s.bands) {
+          ctx.save(); ctx.globalAlpha = 0.55; ctx.setLineDash([3, 3]);
+          [obenB, untenB].forEach(function (b) {
+            ctx.beginPath(); b.forEach(function (q, k) { if (q.y == null) return; if (k) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.stroke();
+          });
+          ctx.restore();
+        }
+        var lq = C.r.pts[C.r.pts.length - 1], lp = poly[poly.length - 1];
+        if (lq && lp.x < w - 4) this._badge(ctx, lp.x + 8, lp.y + 4, (C.r.mitV ? 'VWAP ' : 'AVWAP* ') + this._fmtPrice(lq.v), s.color);
+        this._handle(ctx, poly[0].x, poly[0].y);
+      }
+      this._geo[s.id] = { poly: poly, mitV: C.r.mitV };
+
+    } else if (s.type === 'vprof') {
+      var av = this.ci && this.ci._all, me = this;
+      if (!av || !av.n || x0 == null || x1 == null || !p1) { ctx.restore(); return; }
+      var lastV = Math.min(av.n, this.ci._shown || av.n) - 1;
+      var tA = Math.min(p0.t, p1.t), tB = Math.max(p0.t, p1.t);
+      var j0 = erstIdx(av, tA);
+      if (j0 < 0 || j0 > lastV) { ctx.restore(); return; }
+      var j1 = erstIdx(av, tB);
+      j1 = j1 < 0 ? lastV : (av.t[j1] > tB * 1000 ? j1 - 1 : j1);
+      j1 = Math.min(j1, lastV);
+      if (j1 < j0) { ctx.restore(); return; }
+      var vc = s.vp || {}, rows = Math.max(6, Math.min(200, vc.rows || 24));
+      var vk = j0 + '|' + j1 + '|' + av.n + '|' + av.c[j1] + '|' + rows + '|' + (vc.va || 70);
+      var VC = this._cache[s.id];
+      if (!VC || VC.k !== vk) VC = this._cache[s.id] = { k: vk, p: volProfil(av, j0, j1, rows, vc.va || 70) };
+      var PR = VC.p;
+      var xl = Math.min(x0, x1), xr = Math.max(x0, x1), rwid = Math.max(1, xr - xl);
+      if (!PR) { this._geo[s.id] = { rect: [xl, 0, rwid, h] }; ctx.restore(); return; }
+      var yTop = this._y(PR.hi), yBot = this._y(PR.lo);
+      if (yTop == null || yBot == null) { ctx.restore(); return; }
+      ctx.globalAlpha = 0.045; ctx.fillRect(xl, yTop, rwid, yBot - yTop); ctx.globalAlpha = 1;
+      var breite = rwid * Math.max(5, Math.min(100, vc.width || 30)) / 100, rechts = vc.place === 'right';
+      var upC = vc.upC || '#26a69a', dnC = vc.dnC || '#ef5350';
+      for (var r = 0; r < PR.rows; r++) {
+        var tot = PR.up[r] + PR.dn[r];
+        if (!(tot > 0)) continue;
+        var ya = this._y(PR.lo + (r + 1) * PR.bin), yb = this._y(PR.lo + r * PR.bin);
+        if (ya == null || yb == null) continue;
+        var hh = Math.max(1, Math.abs(yb - ya) - 1), top2 = Math.min(ya, yb) + 0.5;
+        var len = breite * tot / PR.max, lu = len * PR.up[r] / tot;
+        var inVA = r >= PR.vaA && r <= PR.vaB;
+        ctx.globalAlpha = inVA ? 0.72 : 0.3;
+        var sx = rechts ? xr - len : xl;
+        ctx.fillStyle = upC; ctx.fillRect(sx, top2, lu, hh);
+        ctx.fillStyle = dnC; ctx.fillRect(sx + lu, top2, len - lu, hh);
+      }
+      ctx.globalAlpha = 1;
+      var pocP = PR.lo + (PR.poc + 0.5) * PR.bin, yPoc = this._y(pocP);
+      if (yPoc != null) {
+        ctx.strokeStyle = vc.pocC || '#f5a623'; ctx.lineWidth = 1.5; ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(xl, yPoc); ctx.lineTo(xr, yPoc); ctx.stroke();
+      }
+      var vah = PR.lo + (PR.vaB + 1) * PR.bin, val = PR.lo + PR.vaA * PR.bin;
+      if (vc.lines !== false) {
+        ctx.save(); ctx.setLineDash([4, 3]); ctx.globalAlpha = 0.7; ctx.lineWidth = 1; ctx.strokeStyle = s.color;
+        [vah, val].forEach(function (pv) { var yy = me._y(pv); if (yy != null) { ctx.beginPath(); ctx.moveTo(xl, yy); ctx.lineTo(xr, yy); ctx.stroke(); } });
+        ctx.restore();
+      }
+      if (this.sel === s.id || vc.labels) {
+        if (yPoc != null) this._badge(ctx, xr + 6, yPoc + 4, 'POC ' + this._fmtPrice(pocP), vc.pocC || '#f5a623');
+        var yh = this._y(vah), yl = this._y(val);
+        if (yh != null) this._badge(ctx, xr + 6, yh + 4, 'VAH ' + this._fmtPrice(vah), s.color);
+        if (yl != null) this._badge(ctx, xr + 6, yl + 4, 'VAL ' + this._fmtPrice(val), s.color);
+      }
+      if (!PR.mitV) { ctx.globalAlpha = 0.7; ctx.fillStyle = s.color; ctx.fillText('time at price · no volume in this feed', xl + 4, yTop - 5); ctx.globalAlpha = 1; }
+      ctx.strokeStyle = s.color;
+      this._geo[s.id] = { rect: [xl, Math.min(yTop, yBot), rwid, Math.abs(yBot - yTop)] };
+
+    } else if (s.type === 'callout') {
+      if (x0 == null || y0 == null || x1 == null || y1 == null) { ctx.restore(); return; }
+      var fsz = s.size || 13;
+      ctx.font = fsz + 'px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+      var zeilen = umbrechen(ctx, s.text || 'Note', 260), lh = Math.round(fsz * 1.35), pad = 8;
+      var tw2 = 0; zeilen.forEach(function (z) { tw2 = Math.max(tw2, ctx.measureText(z).width); });
+      var bw2 = Math.ceil(tw2) + pad * 2, bh2 = zeilen.length * lh + pad * 2 - (lh - fsz);
+      var kx = x1 - bw2 / 2, ky = y1 - bh2 / 2;
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x0, y0, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.save();
+      rundRect(ctx, kx, ky, bw2, bh2, 6);
+      ctx.fillStyle = 'rgba(14,16,22,0.94)'; ctx.fill();
+      ctx.lineWidth = 1.5; ctx.setLineDash([]); ctx.strokeStyle = s.color; ctx.stroke();
+      ctx.fillStyle = '#eef0f4';
+      zeilen.forEach(function (z, k) { ctx.fillText(z, kx + pad, ky + pad + fsz - 2 + k * lh); });
+      ctx.restore();
+      this._geo[s.id] = { rect: [kx, ky, bw2, bh2], segs: [[x0, y0, x1, y1]] };
+
+    } else if (s.type === 'brush') {
+      var bp = [], selfb = this;
+      s.points.forEach(function (pt) { var x = selfb._x(pt.t), y = selfb._y(pt.p); if (x != null && y != null) bp.push({ x: x, y: y }); });
+      if (bp.length < 2) { ctx.restore(); return; }
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(bp[0].x, bp[0].y);
+      for (var bi = 1; bi < bp.length - 1; bi++) {
+        ctx.quadraticCurveTo(bp[bi].x, bp[bi].y, (bp[bi].x + bp[bi + 1].x) / 2, (bp[bi].y + bp[bi + 1].y) / 2);
+      }
+      ctx.lineTo(bp[bp.length - 1].x, bp[bp.length - 1].y);
+      ctx.stroke();
+      this._geo[s.id] = { poly: bp };
+    }
+    /* Glocke an jeder Zeichnung mit scharfem Alarm — man sieht am Chart,
+       worauf man wartet. */
+    if (s.alert && s.alert.on && ALERTABLE[s.type]) {
+      var gx = null, gy = null;
+      if (s.type === 'hline' || s.type === 'hray' || s.type === 'cross') { gx = w - 104; gy = y0; }
+      else if (s.type === 'rect') { gx = Math.max(x0, x1) - 14; gy = Math.min(y0, y1) + 12; }
+      else if (x1 != null) { gx = x1 + 6; gy = y1; }
+      if (gx != null && gy != null) {
+        ctx.globalAlpha = 1; ctx.font = '11px sans-serif'; ctx.fillStyle = s.color;
+        ctx.fillText('🔔', gx, gy - 4);
+      }
     }
     ctx.restore();
   };
+
+  /** Preisschild am rechten Rand (Linie, Strahl, Kreuz). */
+  Draw.prototype._preisEtikett = function (ctx, s, y, p, w) {
+    var lbl = this._fmtPrice(p);
+    var tw = ctx.measureText(lbl).width;
+    ctx.save();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 0.85; ctx.fillStyle = s.color;
+    ctx.fillRect(w - tw - 10, y - 8, tw + 8, 16);
+    ctx.globalAlpha = 1; ctx.fillStyle = '#07080b';
+    ctx.fillText(lbl, w - tw - 6, y + 4);
+    ctx.restore();
+  };
+
+  /** Logischer Index → x, einmal je Bild aufgebaut statt je Punkt. */
+  Draw.prototype._xFn = function () {
+    var ts = this.ci.chart.timeScale();
+    var n = this.ci._shown || (this.ci._all ? this.ci._all.n : 0);
+    if (n < 2) return null;
+    var a = ts.logicalToCoordinate(0), b = ts.logicalToCoordinate(n - 1);
+    if (a == null || b == null) return null;
+    var k = (b - a) / (n - 1);
+    return function (l) { return a + l * k; };
+  };
+
+  /** Strich mit Pfeilspitze am Ende. */
+  Draw.prototype._pfeil = function (ctx, xa, ya, xb, yb) {
+    ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(xb, yb); ctx.stroke();
+    var ang = Math.atan2(yb - ya, xb - xa), hd = 8;
+    if (Math.hypot(xb - xa, yb - ya) < hd * 1.5) return;
+    ctx.beginPath();
+    ctx.moveTo(xb, yb);
+    ctx.lineTo(xb - hd * Math.cos(ang - 0.45), yb - hd * Math.sin(ang - 0.45));
+    ctx.lineTo(xb - hd * Math.cos(ang + 0.45), yb - hd * Math.sin(ang + 0.45));
+    ctx.closePath(); ctx.fill();
+  };
+
+  /** Etikett mittig ueber x. */
+  Draw.prototype._badgeC = function (ctx, cx, y, text, color) {
+    ctx.save();
+    ctx.font = '11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+    var tw = ctx.measureText(text).width;
+    ctx.restore();
+    this._badge(ctx, cx - tw / 2, y, text, color);
+  };
+
+  /** Verlaengerte Strecke (Trendlinie mit "Extend"). */
+  function verlaengert(x0, y0, x1, y1, ext, w) {
+    if (!ext || ext === 'none' || x0 === x1) return [x0, y0, x1, y1];
+    var L = x0 < x1 ? [x0, y0] : [x1, y1], R = x0 < x1 ? [x1, y1] : [x0, y0];
+    var m = (R[1] - L[1]) / (R[0] - L[0]);
+    if (ext === 'right' || ext === 'both') { var xr = w + 50; R = [xr, R[1] + m * (xr - R[0])]; }
+    if (ext === 'left' || ext === 'both') { var xl = -50; L = [xl, L[1] + m * (xl - L[0])]; }
+    return [L[0], L[1], R[0], R[1]];
+  }
+  function dauerText(sec) {
+    sec = Math.round(sec);
+    var d = Math.floor(sec / 86400), hh = Math.floor(sec % 86400 / 3600), mm = Math.floor(sec % 3600 / 60);
+    if (d) return d + 'd' + (hh ? ' ' + hh + 'h' : '');
+    if (hh) return hh + 'h' + (mm ? ' ' + mm + 'm' : '');
+    return mm + 'm';
+  }
+  function kurzZahl(v) {
+    if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
+    if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+    if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+    return String(Math.round(v));
+  }
+  function umbrechen(ctx, text, maxW) {
+    var out = [];
+    String(text).split('\n').forEach(function (absatz) {
+      var woerter = absatz.split(/\s+/), z = '';
+      woerter.forEach(function (wd) {
+        var t = z ? z + ' ' + wd : wd;
+        if (z && ctx.measureText(t).width > maxW) { out.push(z); z = wd; } else z = t;
+      });
+      out.push(z);
+    });
+    return out.slice(0, 12);
+  }
+  function rundRect(ctx, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+  }
 
   /** Pip distance for a price delta, using the app's own pip table. */
   Draw.prototype._pips = function (delta) {
@@ -67030,7 +67795,7 @@ self.addEventListener('message', async (ev) => {
     var grab = touch ? GRAB_T : GRAB;
     for (var i = this.shapes.length - 1; i >= 0; i--) {
       var s = this.shapes[i];
-      if (s.hidden) continue;          // was man nicht sieht, faengt man nicht
+      if (s.hidden || this._tfAus(s)) continue;          // was man nicht sieht, faengt man nicht
       // Anchor handles win over the body: on a small box they overlap, and
       // resizing is the more precise intent.
       // A position tool paints all three handles on its left edge, so the hit
@@ -67053,14 +67818,14 @@ self.addEventListener('message', async (ev) => {
         var bx = s.points[1] ? this._x(s.points[1].t) : null;
         if (ax != null) edgeX = (bx == null) ? ax : Math.min(ax, bx);
       }
-      for (var k = 0; k < s.points.length; k++) {
-        var hx = this._x(s.points[k].t), hy = this._y(s.points[k].p);
-        if (hx == null || hy == null) continue;
+      var hp = this._handlePts(s);
+      for (var k = 0; k < hp.length; k++) {
+        var hx = hp[k].x, hy = hp[k].y;
         // A horizontal line has no meaningful x anchor, a vertical none in y.
         if (s.type === 'hline') hx = px;
         if (s.type === 'vline') hy = py;
         if (edgeX != null) hx = edgeX;
-        if (Math.hypot(hx - px, hy - py) <= grab) return { shape: s, idx: i, part: 'p' + k };
+        if (Math.hypot(hx - px, hy - py) <= grab) return { shape: s, idx: i, part: 'p' + hp[k].k };
       }
       var d = this._distance(s, px, py);
       if (d != null && d <= grab) return { shape: s, idx: i, part: 'body' };
@@ -67077,9 +67842,12 @@ self.addEventListener('message', async (ev) => {
 
      Bewusst am Bildschirm verankert (wie Menue und Liste): die Werkzeugspalte
      der Werkstatt scrollt und wuerde alles beschneiden, was aus ihr ragt. */
+  var TEXTISH = { text: 1, callout: 1 };
+  var FILLABLE = { rect: 0.13, ellipse: 0.12, channel: 0.08, pitchfork: 0.07, prange: 0.12, drange: 0.12 };
   function fibDialog(draw, shape, btn) {
     var alt = document.querySelector('.apd-dlg');
     if (alt) alt.remove();
+    var istFib = shape.type === 'fib' || shape.type === 'fibext';
     var cfg = fibCfg(shape);
     /* Auf einer Kopie arbeiten: Abbrechen muss den Ausgangszustand
        zurueckgeben koennen, auch nach mehreren Klicks. */
@@ -67089,34 +67857,77 @@ self.addEventListener('message', async (ev) => {
     var box = document.createElement('div');
     box.className = 'apd-dlg';
 
+    function opt(wert, text, an) { return '<option value="' + wert + '"' + (an ? ' selected' : '') + '>' + text + '</option>'; }
     function zeichne() {
-      var istFib = shape.type === 'fib';
+      var al = shape.alert || {}, vp = shape.vp || {}, rechteck = shape.type === 'rect';
+      var tfv = shape.tfv && shape.tfv.length ? shape.tfv : null;
       box.innerHTML =
-        /* Kein esc() — in diesem Modul gibt es keins, und beides sind
-           unsere eigenen Konstanten, kein Nutzertext. */
+        /* Kein Nutzertext ohne escHtml — der Notiztext kommt vom Nutzer. */
         '<div class="apd-dlg-h"><b>' + (TYPE_LABEL[shape.type] || shape.type) + '</b>' +
           '<button class="apd-dlg-x" data-fd-close aria-label="Close">✕︎</button></div>' +
 
-        /* Farbe, Staerke und Strichart gab es bisher NUR in der schwebenden
-           Stilleiste. Kam die nicht, war eine Trendlinie ueberhaupt nicht mehr
-           zu aendern. Deshalb stehen sie jetzt auch hier — der Dialog ist ueber
-           Doppelklick von jeder Zeichnung aus erreichbar. */
         '<div class="apd-dlg-row"><label>Colour</label>' +
           '<div class="apd-dlg-sw">' + COLORS.map(function (c) {
             return '<button class="apd-sbar-sw' + (c === shape.color ? ' on' : '') +
                    '" data-fd-color="' + c + '" style="background:' + c + '" title="' + c + '"></button>';
-          }).join('') + '</div></div>' +
+          }).join('') +
+          '<label class="apd-sbar-sw apd-sbar-cc' + (COLORS.indexOf(shape.color) < 0 ? ' on' : '') + '" title="Any colour">' +
+            '<input type="color" data-fd-ccolor value="' + farbeVon(shape) + '" aria-label="Any colour"></label>' +
+          '</div></div>' +
 
+        (TEXTISH[shape.type] ? '' :
         '<div class="apd-dlg-row"><label>Width</label>' +
-          '<select data-fd-width>' + WIDTHS.map(function (w) {
-            return '<option value="' + w + '"' + (w === (shape.width || 1.5) ? ' selected' : '') + '>' + w + ' px</option>';
-          }).join('') + '</select></div>' +
-
+          '<select data-fd-width>' + WIDTHS.map(function (w) { return opt(w, w + ' px', w === (shape.width || 1.5)); }).join('') + '</select></div>' +
         '<div class="apd-dlg-row"><label>Line</label>' +
-          '<select data-fd-dash>' + DASHES.map(function (dd) {
-            return '<option value="' + dd[0] + '"' + (dd[0] === (shape.dash || 'solid') ? ' selected' : '') +
-                   '>' + dd[1] + '</option>';
-          }).join('') + '</select></div>' +
+          '<select data-fd-dash>' + DASHES.map(function (dd) { return opt(dd[0], dd[1], dd[0] === (shape.dash || 'solid')); }).join('') + '</select></div>') +
+
+        (!TEXTISH[shape.type] ? '' :
+        '<div class="apd-dlg-row apd-dlg-top"><label>Text</label>' +
+          '<textarea data-fd-text rows="3" maxlength="500">' + escHtml(shape.text || '') + '</textarea></div>' +
+        '<div class="apd-dlg-row"><label>Size</label><select data-fd-size>' +
+          [11, 13, 16, 20, 24].map(function (z) { return opt(z, z + ' px', z === (shape.size || 13)); }).join('') + '</select></div>' +
+        (shape.type === 'text' ? '<label class="apd-dlg-chk"><input type="checkbox" data-fd-tbg' + (shape.bg ? ' checked' : '') + '> Background behind the text</label>' : '')) +
+
+        (shape.type !== 'trend' ? '' :
+        '<div class="apd-dlg-row"><label>Extend</label><select data-fd-ext>' +
+          [['none', 'Not extended'], ['right', 'To the right'], ['left', 'To the left'], ['both', 'Both sides']].map(function (o) {
+            return opt(o[0], o[1], (shape.ext || 'none') === o[0]);
+          }).join('') + '</select></div>') +
+
+        (FILLABLE[shape.type] == null ? '' :
+        '<div class="apd-dlg-row"><label>Fill</label><input type="range" min="0" max="60" step="1" data-fd-filla value="' +
+          Math.round((shape.fillA != null ? shape.fillA : FILLABLE[shape.type]) * 100) + '"><span class="apd-dlg-val" data-fd-fillv>' +
+          Math.round((shape.fillA != null ? shape.fillA : FILLABLE[shape.type]) * 100) + '%</span></div>') +
+
+        (shape.type !== 'avwap' ? '' :
+        '<label class="apd-dlg-chk"><input type="checkbox" data-fd-bands' + (shape.bands ? ' checked' : '') + '> Standard-deviation bands (±1σ)</label>') +
+
+        (shape.type !== 'vprof' ? '' :
+        '<div class="apd-dlg-h2">Volume profile</div>' +
+        '<div class="apd-dlg-row"><label>Rows</label><input type="number" min="6" max="200" step="1" data-fd-vp="rows" value="' + (vp.rows || 24) + '"></div>' +
+        '<div class="apd-dlg-row"><label>Width %</label><input type="number" min="5" max="100" step="5" data-fd-vp="width" value="' + (vp.width || 30) + '"></div>' +
+        '<div class="apd-dlg-row"><label>Value area</label><input type="number" min="50" max="95" step="1" data-fd-vp="va" value="' + (vp.va || 70) + '"><span class="apd-dlg-val">%</span></div>' +
+        '<div class="apd-dlg-row"><label>Placement</label><select data-fd-vpplace>' + opt('left', 'Left', vp.place !== 'right') + opt('right', 'Right', vp.place === 'right') + '</select></div>' +
+        '<label class="apd-dlg-chk"><input type="checkbox" data-fd-vplines' + (vp.lines !== false ? ' checked' : '') + '> Value area high / low lines</label>' +
+        '<label class="apd-dlg-chk"><input type="checkbox" data-fd-vplabels' + (vp.labels ? ' checked' : '') + '> Always show POC / VAH / VAL prices</label>') +
+
+        (!ALERTABLE[shape.type] ? '' :
+        '<div class="apd-dlg-h2">Price alert</div>' +
+        '<div class="apd-dlg-row"><label>Alert</label><select data-fd-alert>' +
+          opt('off', 'Off', !al.on) +
+          (rechteck ? opt('enter', 'Price enters the box', al.on && al.dir !== 'exit') + opt('exit', 'Price leaves the box', al.on && al.dir === 'exit')
+                    : opt('cross', 'Price crosses', al.on && (!al.dir || al.dir === 'cross')) + opt('up', 'Crosses up', al.on && al.dir === 'up') + opt('down', 'Crosses down', al.on && al.dir === 'down')) +
+          '</select></div>' +
+        '<div class="apd-dlg-row"><label>Trigger</label><select data-fd-amode>' +
+          opt('once', 'Only once', al.mode !== 'every') + opt('every', 'Every time', al.mode === 'every') + '</select></div>' +
+        '<div class="apd-dlg-row"><label>Message</label><input type="text" maxlength="80" data-fd-anote placeholder="Optional" value="' + escHtml(al.note || '') + '"></div>' +
+        '<div class="apd-dlg-note">Fires while Evidence is open — sound and pop-up, and a notification when the tab is in the background.</div>') +
+
+        '<div class="apd-dlg-h2">Visible on</div>' +
+        '<div class="apd-dlg-tfs">' + TF_STUFEN.map(function (t) {
+          var an = !tfv || tfv.indexOf(t[0]) >= 0;
+          return '<button class="apd-dlg-tf' + (an ? ' on' : '') + '" data-fd-tf="' + t[0] + '">' + t[0] + '</button>';
+        }).join('') + '</div>' +
 
         (istFib ? '' :
           '<div class="apd-dlg-f">' +
@@ -67132,7 +67943,7 @@ self.addEventListener('message', async (ev) => {
           '<select data-fd-extend>' +
             ['none|Not extended', 'right|To the right', 'both|Both sides'].map(function (o) {
               var p = o.split('|');
-              return '<option value="' + p[0] + '"' + (arbeit.extend === p[0] ? ' selected' : '') + '>' + p[1] + '</option>';
+              return opt(p[0], p[1], arbeit.extend === p[0]);
             }).join('') +
           '</select></div>' +
 
@@ -67140,7 +67951,7 @@ self.addEventListener('message', async (ev) => {
           '<select data-fd-labels>' +
             ['both|Percent + price', 'pct|Percent only', 'price|Price only', 'none|None'].map(function (o) {
               var p = o.split('|');
-              return '<option value="' + p[0] + '"' + (arbeit.labels === p[0] ? ' selected' : '') + '>' + p[1] + '</option>';
+              return opt(p[0], p[1], arbeit.labels === p[0]);
             }).join('') +
           '</select></div>' +
 
@@ -67174,14 +67985,30 @@ self.addEventListener('message', async (ev) => {
       return /^#[0-9a-f]{6}$/i.test(c) ? c : '#c9a84c';
     }
     /* Uebernehmen heisst: auf die Form schreiben und neu zeichnen — man sieht
-       jede Aenderung sofort am Chart, ohne den Dialog zu schliessen. */
+       jede Aenderung sofort am Chart, ohne den Dialog zu schliessen. Nur bei
+       Fibonacci: vorher lief das auch beim Schliessen des Dialogs einer
+       Trendlinie und setzte dabei die Fibonacci-Voreinstellung zurueck. */
     function uebernehmen() {
+      if (!istFib) return;
       shape.fib = JSON.parse(JSON.stringify(arbeit));
       /* Die ganze Konfiguration wird zur Voreinstellung fuer die naechste
          Fibonacci — Levels, Farben, Beschriftung, Verlaengerung. Sonst
          stellt man 0.786 bei jeder einzelnen neu ein. */
-      rememberStyle('fib', { fib: JSON.parse(JSON.stringify(arbeit)) });
+      rememberStyle(shape.type, { fib: JSON.parse(JSON.stringify(arbeit)) });
       draw._commit();
+    }
+    function schliessen() {
+      box.remove();
+      document.removeEventListener('pointerdown', zu, true);
+      document.removeEventListener('keydown', taste, true);
+    }
+    function farbeSetzen(fc) {
+      draw._push(); shape.color = fc; draw.color = fc;
+      rememberStyle(shape.type, { color: fc }); draw._commit();
+      box.querySelectorAll('[data-fd-color]').forEach(function (b) {
+        b.classList.toggle('on', b.getAttribute('data-fd-color') === fc);
+      });
+      var cc = box.querySelector('.apd-sbar-cc'); if (cc) cc.classList.toggle('on', COLORS.indexOf(fc) < 0);
     }
 
     zeichne();
@@ -67194,7 +68021,7 @@ self.addEventListener('message', async (ev) => {
       e.preventDefault(); e.stopPropagation();
       var i;
       if (t.hasAttribute('data-fd-add')) {
-        arbeit.levels.push({ v: 1.5, on: true });
+        arbeit.levels.push({ v: shape.type === 'fibext' ? 3.618 : 1.5, on: true });
         zeichne(); placeList(box, btn); uebernehmen(); return;
       }
       if ((i = t.getAttribute('data-fd-del')) != null) {
@@ -67202,16 +68029,21 @@ self.addEventListener('message', async (ev) => {
         zeichne(); placeList(box, btn); uebernehmen(); return;
       }
       var fc = t.getAttribute && t.getAttribute('data-fd-color');
-      if (fc) {
-        draw._push(); shape.color = fc; draw.color = fc;
-        rememberStyle(shape.type, { color: fc }); draw._commit();
-        box.querySelectorAll('[data-fd-color]').forEach(function (b) {
-          b.classList.toggle('on', b.getAttribute('data-fd-color') === fc);
-        });
+      if (fc) { farbeSetzen(fc); return; }
+      var tf = t.getAttribute('data-fd-tf');
+      if (tf) {
+        draw._push();
+        var l = shape.tfv && shape.tfv.length ? shape.tfv.slice() : TF_STUFEN.map(function (x) { return x[0]; });
+        var at = l.indexOf(tf);
+        if (at >= 0) l.splice(at, 1); else l.push(tf);
+        if (!l.length || l.length === TF_STUFEN.length) delete shape.tfv; else shape.tfv = l;
+        draw._commit();
+        t.classList.toggle('on', !shape.tfv || shape.tfv.indexOf(tf) >= 0);
+        if (!shape.tfv) box.querySelectorAll('[data-fd-tf]').forEach(function (b) { b.classList.add('on'); });
         return;
       }
       if (t.hasAttribute('data-fd-del-shape')) {
-        draw._push(); draw.remove(shape.id); box.remove(); return;
+        draw._push(); draw.remove(shape.id); schliessen(); return;
       }
       if (t.hasAttribute('data-fd-dup')) {
         draw._push();
@@ -67219,26 +68051,44 @@ self.addEventListener('message', async (ev) => {
         kopie.id = uid();
         var dy = (shape.points[0] ? Math.abs(shape.points[0].p) * 0.001 : 0);
         kopie.points = kopie.points.map(function (pt) { return { t: pt.t, p: pt.p - dy }; });
-        draw.shapes.push(kopie); draw.sel = kopie.id; draw._commit(); box.remove(); return;
+        if (kopie.alert) kopie.alert.on = false;
+        draw.shapes.push(kopie); draw.sel = kopie.id; draw._commit(); schliessen(); return;
       }
       if (t.hasAttribute('data-fd-reset')) {
-        arbeit = { levels: FIB_DEFAULT.map(function (l) { return { v: l.v, on: l.on }; }),
-                   extend: 'right', fill: false, labels: 'both' };
+        arbeit = { levels: (shape.type === 'fibext' ? FIBX_DEFAULT : FIB_DEFAULT).map(function (l) { return { v: l.v, on: l.on }; }),
+                   extend: shape.type === 'fibext' ? 'none' : 'right', fill: false, labels: 'both' };
         zeichne(); placeList(box, btn); uebernehmen(); return;   // setzt auch die Voreinstellung zurueck
       }
       if (t.hasAttribute('data-fd-cancel')) {
         shape.fib = vorher === 'null' ? null : JSON.parse(vorher);
         if (!shape.fib) delete shape.fib;
-        draw._commit(); box.remove(); return;
+        draw._commit(); schliessen(); return;
       }
       if (t.hasAttribute('data-fd-ok') || t.hasAttribute('data-fd-close')) {
-        uebernehmen(); box.remove(); return;
+        uebernehmen(); schliessen(); return;
       }
     });
 
-    box.addEventListener('input', function (e) {
+    /* Ein Zug am Regler oder Farbrad ist EIN Schritt im Verlauf: gesichert
+       wird vor der ersten Aenderung, nicht bei jedem Zwischenwert. */
+    var gesichert = {};
+    function sichern(k) { if (!gesichert[k]) { draw._push(); gesichert[k] = true; } }
+    function aendern(e) {
       var t = e.target, i;
+      /* Selects und Haken feuern input UND change — nur einmal verarbeiten. */
+      var live = t.hasAttribute('data-fd-text') || t.hasAttribute('data-fd-ccolor') || t.hasAttribute('data-fd-filla') ||
+                 t.hasAttribute('data-fd-c') || t.hasAttribute('data-fd-v');
+      if (!live && e.type === 'input') return;
       /* Stil gilt sofort und wird zur Voreinstellung fuer dieses Werkzeug. */
+      if (t.hasAttribute('data-fd-ccolor')) {
+        sichern('cc'); shape.color = t.value;
+        if (e.type === 'change') {
+          draw.color = t.value; rememberStyle(shape.type, { color: t.value }); draw._commit(); gesichert.cc = false;
+          box.querySelectorAll('[data-fd-color]').forEach(function (b) { b.classList.remove('on'); });
+          var cc0 = box.querySelector('.apd-sbar-cc'); if (cc0) cc0.classList.add('on');
+        } else draw.sync();
+        return;
+      }
       if (t.hasAttribute('data-fd-width')) {
         draw._push(); shape.width = parseFloat(t.value); draw.width = shape.width;
         rememberStyle(shape.type, { width: shape.width }); draw._commit(); return;
@@ -67246,6 +68096,50 @@ self.addEventListener('message', async (ev) => {
       if (t.hasAttribute('data-fd-dash')) {
         draw._push(); shape.dash = t.value; draw.dash = t.value;
         rememberStyle(shape.type, { dash: t.value }); draw._commit(); return;
+      }
+      if (t.hasAttribute('data-fd-text')) {
+        sichern('tx');
+        shape.text = String(t.value).slice(0, 500);
+        if (e.type === 'change') { draw._commit(); gesichert.tx = false; } else draw.sync();
+        return;
+      }
+      if (t.hasAttribute('data-fd-size')) { draw._push(); shape.size = +t.value; rememberStyle(shape.type, { size: shape.size }); draw._commit(); return; }
+      if (t.hasAttribute('data-fd-tbg')) { draw._push(); shape.bg = t.checked; draw._commit(); return; }
+      if (t.hasAttribute('data-fd-ext')) { draw._push(); shape.ext = t.value; rememberStyle('trend', { ext: t.value }); draw._commit(); return; }
+      if (t.hasAttribute('data-fd-filla')) {
+        var fv = box.querySelector('[data-fd-fillv]'); if (fv) fv.textContent = t.value + '%';
+        sichern('fa'); shape.fillA = (+t.value) / 100;
+        if (e.type === 'change') { rememberStyle(shape.type, { fillA: shape.fillA }); draw._commit(); gesichert.fa = false; }
+        else draw.sync();
+        return;
+      }
+      if (t.hasAttribute('data-fd-bands')) { draw._push(); shape.bands = t.checked; draw._commit(); return; }
+      var vpk = t.getAttribute('data-fd-vp');
+      if (vpk) {
+        if (e.type !== 'change') return;
+        var n = parseFloat(t.value), lim = { rows: [6, 200], width: [5, 100], va: [50, 95] }[vpk];
+        if (!isFinite(n)) return;
+        draw._push(); shape.vp = shape.vp || {}; shape.vp[vpk] = Math.max(lim[0], Math.min(lim[1], Math.round(n)));
+        t.value = shape.vp[vpk];
+        rememberStyle('vprof', { vp: JSON.parse(JSON.stringify(shape.vp)) }); draw._commit(); return;
+      }
+      if (t.hasAttribute('data-fd-vpplace') || t.hasAttribute('data-fd-vplines') || t.hasAttribute('data-fd-vplabels')) {
+        draw._push(); shape.vp = shape.vp || {};
+        if (t.hasAttribute('data-fd-vpplace')) shape.vp.place = t.value;
+        else if (t.hasAttribute('data-fd-vplines')) shape.vp.lines = t.checked;
+        else shape.vp.labels = t.checked;
+        rememberStyle('vprof', { vp: JSON.parse(JSON.stringify(shape.vp)) }); draw._commit(); return;
+      }
+      if (t.hasAttribute('data-fd-alert') || t.hasAttribute('data-fd-amode') || t.hasAttribute('data-fd-anote')) {
+        if (t.hasAttribute('data-fd-anote') && e.type !== 'change') return;
+        draw._push();
+        var a = shape.alert || (shape.alert = { on: false, mode: 'once' });
+        if (t.hasAttribute('data-fd-alert')) {
+          if (t.value === 'off') a.on = false;
+          else { a.on = true; a.dir = t.value; alarmErlauben(); }
+        } else if (t.hasAttribute('data-fd-amode')) a.mode = t.value;
+        else a.note = String(t.value).slice(0, 80);
+        draw._commit(); return;
       }
       if (t.hasAttribute('data-fd-fill')) arbeit.fill = t.checked;
       else if (t.hasAttribute('data-fd-extend')) arbeit.extend = t.value;
@@ -67256,14 +68150,20 @@ self.addEventListener('message', async (ev) => {
       } else if ((i = t.getAttribute('data-fd-c')) != null) arbeit.levels[+i].c = t.value;
       else return;
       uebernehmen();
-    });
+    }
+    box.addEventListener('input', aendern);
+    box.addEventListener('change', aendern);
     /* Klick daneben schliesst — mit dem zuletzt gesehenen Zustand, weil jede
-       Aenderung schon uebernommen wurde. */
+       Aenderung schon uebernommen wurde. Esc ebenso. */
+    function zu(ev) { if (!box.contains(ev.target)) { uebernehmen(); schliessen(); } }
+    function taste(ev) { if (ev.key === 'Escape') { ev.stopPropagation(); uebernehmen(); schliessen(); } }
     setTimeout(function () {
-      document.addEventListener('pointerdown', function zu(ev) {
-        if (!box.contains(ev.target)) { box.remove(); document.removeEventListener('pointerdown', zu, true); }
-      }, true);
+      document.addEventListener('pointerdown', zu, true);
+      document.addEventListener('keydown', taste, true);
     }, 0);
+    /* Notiz/Text: gleich ins Feld, Tippen geht sofort los. */
+    var ta = box.querySelector('[data-fd-text]');
+    if (ta) setTimeout(function () { try { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } catch (e) {} }, 30);
     return box;
   }
 
@@ -67287,7 +68187,9 @@ self.addEventListener('message', async (ev) => {
     bar.innerHTML =
       '<div class="apd-sbar-g">' + COLORS.map(function (c) {
         return '<button class="apd-sbar-sw" data-sb-color="' + c + '" style="background:' + c + '" title="' + c + '"></button>';
-      }).join('') + '</div>' +
+      }).join('') +
+        '<label class="apd-sbar-sw apd-sbar-cc" title="Any colour"><input type="color" data-sb-custom aria-label="Any colour"></label>' +
+      '</div>' +
       '<i class="apd-sbar-sep"></i>' +
       '<div class="apd-sbar-g">' + WIDTHS.map(function (w) {
         return '<button class="apd-sbar-b" data-sb-width="' + w + '" title="Line width ' + w + '">' +
@@ -67299,13 +68201,29 @@ self.addEventListener('message', async (ev) => {
       }).join('') + '</div>' +
       '<i class="apd-sbar-sep"></i>' +
       '<div class="apd-sbar-g">' +
-        '<button class="apd-sbar-b" data-sb-cfg title="Settings">⚙︎</button>' +
-        '<button class="apd-sbar-b" data-sb-dup title="Duplicate">⧉</button>' +
+        '<button class="apd-sbar-b" data-sb-alert title="Price alert on this drawing">🔔</button>' +
+        '<button class="apd-sbar-b" data-sb-cfg title="Settings (double-click the drawing)">⚙︎</button>' +
+        '<button class="apd-sbar-b" data-sb-dup title="Duplicate (Ctrl+C, Ctrl+V · Alt-drag)">⧉</button>' +
         '<button class="apd-sbar-b" data-sb-lock title="Lock in place">🔓</button>' +
         '<button class="apd-sbar-b danger" data-sb-del title="Delete (Del)">✕︎</button>' +
       '</div>';
 
     bar.addEventListener('pointerdown', function (e) { e.stopPropagation(); }, true);
+    /* Beliebige Farbe: ein Zug am Farbrad ist ein Schritt im Verlauf. */
+    var ccGesichert = false;
+    function eigeneFarbe(e) {
+      var t = e.target;
+      if (!t || !t.hasAttribute || !t.hasAttribute('data-sb-custom')) return;
+      var sh = self._byId(self.sel); if (!sh) return;
+      if (!ccGesichert) { self._push(); ccGesichert = true; }
+      sh.color = t.value;
+      if (e.type === 'change') {
+        self.color = t.value; rememberStyle(sh.type, { color: t.value });
+        self._commit(); ccGesichert = false;
+      } else self.sync();
+    }
+    bar.addEventListener('input', eigeneFarbe);
+    bar.addEventListener('change', eigeneFarbe);
     bar.addEventListener('click', function (e) {
       var b = e.target.closest ? e.target.closest('button') : null;
       if (!b) return;
@@ -67323,12 +68241,26 @@ self.addEventListener('message', async (ev) => {
       else if (dh)  { self._push(); sh.dash = dh; self.dash = dh;
                       rememberStyle(sh.type, { dash: dh }); self._commit(); }
       else if (b.hasAttribute('data-sb-cfg')) { fibDialog(self, sh, b); return; }
+      else if (b.hasAttribute('data-sb-alert')) {
+        self._push();
+        var a = sh.alert || (sh.alert = { on: false, mode: 'once' });
+        a.on = !a.on;
+        if (a.on) {
+          if (!a.dir) a.dir = sh.type === 'rect' ? 'enter' : 'cross';
+          alarmErlauben();
+          if (typeof window.showToast === 'function') {
+            window.showToast(sh.type === 'rect' ? 'Alert set — when price enters this box' : 'Alert set — when price crosses this line');
+          }
+        }
+        self._commit();
+      }
       else if (b.hasAttribute('data-sb-lock')) { self.toggleLocked(sh.id); }
       else if (b.hasAttribute('data-sb-del'))  { self._push(); self.remove(sh.id); }
       else if (b.hasAttribute('data-sb-dup')) {
         self._push();
         var copy = JSON.parse(JSON.stringify(sh));
         copy.id = uid();
+        if (copy.alert) copy.alert.on = false;
         /* Leicht versetzt, sonst liegt die Kopie exakt unter dem Original
            und man haelt sie fuer einen Fehlklick. */
         var dy = (sh.points[0] ? Math.abs(sh.points[0].p) * 0.001 : 0);
@@ -67354,7 +68286,7 @@ self.addEventListener('message', async (ev) => {
     var bar = this._sbar;
     if (!bar) return;
     var s = this.sel ? this._byId(this.sel) : null;
-    if (!s || s.hidden) {
+    if (!s || s.hidden || this._tfAus(s)) {
       bar.style.display = 'none';
       if (this.el) this.el.style.touchAction = '';   // Chart darf wieder schwenken
       return;
@@ -67367,16 +68299,26 @@ self.addEventListener('message', async (ev) => {
       if (x != null) xs.push(x);
       if (y != null) ys.push(y);
     }
+    /* Formen, die ueber ihre Punkte hinausragen (Profil, Notiz, Text):
+       die gemalte Flaeche zaehlt, sonst laege die Leiste mitten darauf. */
+    var gg = this._geo && this._geo[s.id];
+    if (gg && gg.rect) { ys.push(gg.rect[1], gg.rect[1] + gg.rect[3]); xs.push(gg.rect[0], gg.rect[0] + gg.rect[2]); }
     if (!ys.length) { bar.style.display = 'none'; return; }
     bar.style.display = '';
+    /* Natives Vollbild malt nur den Vollbild-Teilbaum: die Leiste muss dann
+       dort haengen, sonst geht sie unsichtbar dahinter auf (28.10.2026). */
+    var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+    var heim = fsEl && this.el && fsEl.contains(this.el) ? fsEl : document.body;
+    if (bar.parentNode !== heim) heim.appendChild(bar);
     /* xs/ys sind chart-lokal; die Leiste haengt am Body und rechnet deshalb
        in Bildschirmkoordinaten. */
     var host = this.el.getBoundingClientRect();
     var bw = bar.offsetWidth || 240, bh = bar.offsetHeight || 30;
     var cx = (xs.length ? (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2
                         : host.width / 2) + host.left;
-    var top = Math.min.apply(null, ys) + host.top - bh - 10;
-    if (top < host.top + 4) top = Math.max.apply(null, ys) + host.top + 10;   // kein Platz oben → darunter
+    /* 16 px Luft: Griffe (Radius 5) und Etiketten liegen sonst unter der Leiste. */
+    var top = Math.min.apply(null, ys) + host.top - bh - 16;
+    if (top < host.top + 4) top = Math.max.apply(null, ys) + host.top + 16;   // kein Platz oben → darunter
     var maxL = window.innerWidth - bw - 4, maxT = window.innerHeight - bh - 4;
     bar.style.left = Math.round(Math.max(4, Math.min(maxL, cx - bw / 2))) + 'px';
     bar.style.top  = Math.round(Math.max(4, Math.min(maxT, top))) + 'px';
@@ -67396,6 +68338,16 @@ self.addEventListener('message', async (ev) => {
        hat die Geste dann schon als Schwenk vergeben. */
     if (this.el) this.el.style.touchAction = 'none';
 
+    var cc = bar.querySelector('.apd-sbar-cc'), ci = bar.querySelector('[data-sb-custom]');
+    if (cc) cc.classList.toggle('on', COLORS.indexOf(s.color) < 0);
+    if (ci && /^#[0-9a-f]{6}$/i.test(s.color || '') && document.activeElement !== ci) ci.value = s.color;
+    var ab = bar.querySelector('[data-sb-alert]');
+    if (ab) {
+      ab.style.display = ALERTABLE[s.type] ? '' : 'none';
+      var scharf = !!(s.alert && s.alert.on);
+      ab.classList.toggle('on', scharf);
+      ab.title = scharf ? 'Alert is on — click to switch it off' : 'Price alert on this drawing';
+    }
     var lk = bar.querySelector('[data-sb-lock]');
     if (lk) { lk.textContent = s.locked ? '🔒' : '🔓'; lk.classList.toggle('on', !!s.locked); }
     /* Das Zahnrad erscheint nur, wo es auch etwas einzustellen gibt —
@@ -67460,7 +68412,7 @@ self.addEventListener('message', async (ev) => {
     }
   };
 
-  Draw.prototype._shift = function (s, part, dx, dy, orig) {
+  Draw.prototype._shift = function (s, part, dx, dy, orig, ohneMagnet) {
     var self = this;
     var base = orig || s.points;
     /* Positionswerkzeuge: alle drei Griffe werden auf der linken Kante
@@ -67476,6 +68428,7 @@ self.addEventListener('message', async (ev) => {
       t = (t == null ? pt.t : t); p = (p == null ? pt.p : p);
       /* Auch beim Verschieben einrasten — ein Level, das man nachtraeglich
          zurechtrueckt, soll genauso auf dem Docht landen wie beim Ziehen. */
+      if (ohneMagnet) return { t: t, p: p };
       if (!nurPreis) { var m = self._magnet(t, p); t = m.t; p = m.p; }
       else { var m2 = self._magnet(t, p); p = m2.p; }
       return { t: t, p: p };
@@ -67524,6 +68477,7 @@ self.addEventListener('message', async (ev) => {
     }
 
     this._onEdDown = function (e) {
+      ACTIVE = self;                         // die Tastatur gehoert jetzt diesem Chart
       if (!usable(e)) return;
       var pt = local(e);
       var hit = self._hit(pt.x, pt.y, e.pointerType === 'touch' || e.pointerType === 'pen');
@@ -67536,29 +68490,37 @@ self.addEventListener('message', async (ev) => {
         if (self.sel) { self.sel = null; self._syncStyleBar(); self.sync(); }
         return;
       }
-      /* ERST AUSWÄHLEN, DANN ZIEHEN (22.10.2026). Vorher hing eine Zeichnung
-         schon beim ersten Berühren am Finger: wer auf dem Handy den Chart
-         verschieben wollte und dabei eine Zone streifte, schob die Zone.
-         Jetzt markiert der erste Tipp nur — der Chart bekommt die Geste
-         weiter. Verschieben geht erst an einer schon markierten Zeichnung,
-         wie bei TradingView auf dem Handy. */
-      if (hit.shape.id !== self.sel) {
+      /* ERST AUSWÄHLEN, DANN ZIEHEN (22.10.2026) — aber nur mit dem Finger.
+         Wer auf dem Handy den Chart verschieben wollte und dabei eine Zone
+         streifte, schob die Zone. Mit der Maus gibt es das Problem nicht:
+         dort greift man wie bei TradingView sofort zu (28.10.2026). */
+      var finger = e.pointerType === 'touch' || e.pointerType === 'pen';
+      if (hit.shape.id !== self.sel && finger) {
         pending = { id: hit.shape.id, x: pt.x, y: pt.y };
         return;
       }
       e.preventDefault();
       e.stopPropagation();
-      self.sel = hit.shape.id;
+      var ziel = hit.shape, before = self._snap();
+      /* Alt/Option-Ziehen klont — die Kopie wandert, das Original bleibt. */
+      if (e.altKey && !finger) {
+        var kopie = JSON.parse(JSON.stringify(ziel));
+        kopie.id = uid();
+        if (kopie.alert) kopie.alert.on = false;
+        self.shapes.push(kopie);
+        ziel = kopie;
+      }
+      self.sel = ziel.id;
       self._syncStyleBar();
       // Ausgangspunkte festhalten: jeder Mausschritt rechnet gegen DIESE Werte,
       // nicht gegen den letzten Zwischenstand (siehe _shift).
-      drag = { s: hit.shape, part: hit.part, x: pt.x, y: pt.y,
-               orig: hit.shape.points.map(function (p) { return { t: p.t, p: p.p }; }),
+      drag = { s: ziel, part: e.altKey && !finger ? 'body' : hit.part, x: pt.x, y: pt.y,
+               orig: ziel.points.map(function (p) { return { t: p.t, p: p.p }; }),
                /* Zustand VOR dem Zug festhalten. Erst beim Loslassen und nur
                   bei echter Bewegung wandert er in den Verlauf — sonst fuellte
                   jeder Klick auf eine Form den Stapel mit Nichts. */
-               before: self._snap(),
-               slop: (e.pointerType === 'touch' || e.pointerType === 'pen') ? 10 : 5 };
+               before: before, klon: ziel !== hit.shape,
+               slop: finger ? 10 : 4 };
       moved = false;
       self._freezeChart(true);            // Chart still halten, solange geschoben wird
       self._prevTouchAction = el.style.touchAction;
@@ -67579,7 +68541,7 @@ self.addEventListener('message', async (ev) => {
         // Hover feedback so it is discoverable that shapes can be grabbed.
         if (usable(e) && self.shapes.length) {
           var h = self._hit(local(e).x, local(e).y, false);
-          el.style.cursor = h ? (h.part === 'body' ? 'move' : (h.part === 'el' || h.part === 'er') ? 'ew-resize' : (h.part === 'et' || h.part === 'eb') ? 'ns-resize' : 'pointer') : '';
+          el.style.cursor = h ? (h.part === 'body' ? (h.shape.locked ? 'pointer' : 'move') : (h.part === 'el' || h.part === 'er') ? 'ew-resize' : (h.part === 'et' || h.part === 'eb') ? 'ns-resize' : 'pointer') : '';
         }
         return;
       }
@@ -67591,6 +68553,8 @@ self.addEventListener('message', async (ev) => {
       // oder Klick soll die Zeichnung nicht versetzen.
       if (!moved && Math.hypot(dx, dy) < drag.slop) return;
       moved = true;
+      /* Umschalt beim Verschieben: nur waagerecht oder nur senkrecht. */
+      if (e.shiftKey && drag.part === 'body') { if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0; }
       // dx/dy bleiben der Abstand zum Anfang des Zuges — drag.x/y werden
       // bewusst NICHT nachgezogen, sonst summiert sich der Rundungsfehler.
       self._shift(drag.s, drag.part, dx, dy, drag.orig);
@@ -67608,36 +68572,93 @@ self.addEventListener('message', async (ev) => {
         }
       }
       if (!drag) return;
-      var before = drag.before;      // vor dem Nullen sichern
+      var d0 = drag;      // vor dem Nullen sichern
       drag = null;
       self._freezeChart(false);
       el.style.touchAction = self.sel ? 'none' : (self._prevTouchAction || '');
       try { el.releasePointerCapture(e.pointerId); } catch (err) {}
       e.stopPropagation();
       if (moved) {
-        self._undo.push(before);
-        if (self._undo.length > 60) self._undo.shift();
+        self._undo.push(d0.before);
+        if (self._undo.length > HIST_MAX) self._undo.shift();
         self._redo.length = 0;
         self._commit();                                 // only persist real edits
+      } else if (d0.klon) {
+        // Alt-Klick ohne Ziehen: keine Kopie hinterlassen.
+        var ki = self.shapes.indexOf(d0.s);
+        if (ki >= 0) self.shapes.splice(ki, 1);
+        self.sel = null; self._syncStyleBar(); self.sync();
       }
     };
 
-    this._onEdKey = function (e) {
-      if (!self.sel) return;
-      var t = e.target && e.target.tagName;
-      if (t === 'INPUT' || t === 'SELECT' || t === 'TEXTAREA') return;
-      if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); self.deleteSelected(); }
-      else if (e.key === 'Escape') { self.sel = null; self._syncStyleBar(); self.sync(); }
-    };
+    this._onEdEnter = function (e) { if (e.pointerType === 'mouse') ACTIVE = self; };
 
-    /* Strg+Z / Strg+Umschalt+Z. Eigener Horcher, weil er auch ohne Auswahl
-       gelten muss — _onEdKey steigt vorher aus, wenn nichts markiert ist. */
-    this._onEdUndoKey = function (e) {
-      if (!(e.ctrlKey || e.metaKey) || String(e.key).toLowerCase() !== 'z') return;
-      var t = e.target && e.target.tagName;
-      if (t === 'INPUT' || t === 'SELECT' || t === 'TEXTAREA') return;
-      e.preventDefault();
-      if (e.shiftKey) self.redo(); else self.undo();
+    /* ── Tastatur ─────────────────────────────────────────────────
+       Entf/Rueck loescht, Esc bricht ab, Pfeile schieben (Umschalt: x10),
+       Strg/Cmd+C/V kopiert, Strg/Cmd+Z/Umschalt+Z, Alt+Buchstabe waehlt ein
+       Werkzeug wie bei TradingView. Alles nur fuer den Chart, dem die
+       Tastatur gerade gehoert (siehe istZiel). */
+    var ALT_TOOLS = { KeyT: 'trend', KeyH: 'hline', KeyJ: 'hray', KeyV: 'vline', KeyC: 'cross',
+                      KeyF: 'fib', KeyR: 'rect', KeyM: 'measure', KeyB: 'brush', KeyN: 'callout' };
+    var schubZeit = 0;
+    this._onKey = function (e) {
+      if (tippt(e) || !istZiel(self)) return;
+      var k = e.key, mod = e.ctrlKey || e.metaKey;
+      // Rueckgaengig / Wiederholen
+      if (mod && !e.altKey && String(k).toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) self.redo(); else self.undo();
+        return;
+      }
+      if (mod && !e.altKey && String(k).toLowerCase() === 'y') { e.preventDefault(); self.redo(); return; }
+      // Kopieren / Einfuegen
+      if (mod && !e.altKey && String(k).toLowerCase() === 'c') {
+        var sc = self.sel && self._byId(self.sel);
+        if (!sc || textMarkiert()) return;
+        e.preventDefault();
+        CLIP = { shape: JSON.parse(JSON.stringify(sc)), sym: self.symbol, n: 0 };
+        if (typeof window.showToast === 'function') window.showToast('Drawing copied — Ctrl+V pastes it');
+        return;
+      }
+      if (mod && !e.altKey && String(k).toLowerCase() === 'v') {
+        if (!CLIP) return;
+        e.preventDefault();
+        self.paste();
+        return;
+      }
+      // Werkzeuge per Alt+Buchstabe
+      if (e.altKey && !mod && ALT_TOOLS[e.code]) {
+        e.preventDefault();
+        var tl = ALT_TOOLS[e.code];
+        self.setTool(self.tool === tl ? 'cursor' : tl);
+        return;
+      }
+      if (k === 'Escape') {
+        if (self.draft) { self.draft = null; self._dragging = false; self._release(); self.sync(); }
+        if (self.tool !== 'cursor' && self.tool !== 'erase') { self.setTool('cursor'); return; }
+        if (self.tool === 'erase') { self.setTool('cursor'); return; }
+        if (self.sel) { self.sel = null; self._syncStyleBar(); self.sync(); }
+        return;
+      }
+      if (!self.sel || mod) return;
+      var s = self._byId(self.sel);
+      if (!s) return;
+      if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); self.deleteSelected(); return; }
+      if (/^Arrow(Up|Down|Left|Right)$/.test(k) && !s.locked) {
+        e.preventDefault();
+        /* Ein Druck = ein Pixel bzw. eine Kerze, mit Umschalt zehn. Schnell
+           hintereinander gedrueckt ist es EIN Schritt im Verlauf. */
+        if (Date.now() - schubZeit > 900) self._push();
+        schubZeit = Date.now();
+        var n = e.shiftKey ? 10 : 1, dx = 0, dy = 0;
+        if (k === 'ArrowUp') dy = -n; else if (k === 'ArrowDown') dy = n;
+        else {
+          var X = self._xFn();
+          dx = X ? (X(1) - X(0)) * n * (k === 'ArrowLeft' ? -1 : 1) : 0;
+        }
+        self._shift(s, 'body', dx, dy, s.points.map(function (p) { return { t: p.t, p: p.p }; }), true);
+        self._commit();
+      }
     };
 
     /* Doppelklick auf die Zeichnung oeffnet ihre Einstellungen — der Griff,
@@ -67664,8 +68685,32 @@ self.addEventListener('message', async (ev) => {
     el.addEventListener('pointermove', this._onEdMove, true);
     el.addEventListener('pointerup', this._onEdUp, true);
     el.addEventListener('pointercancel', this._onEdUp, true);
-    document.addEventListener('keydown', this._onEdKey);
-    document.addEventListener('keydown', this._onEdUndoKey);
+    el.addEventListener('pointerenter', this._onEdEnter);
+    document.addEventListener('keydown', this._onKey);
+  };
+
+  /** Eingefuegt wird, was zuletzt mit Strg+C kopiert wurde — auch auf einem
+      anderen Chart oder Instrument. Auf demselben Chart leicht versetzt, damit
+      man die Kopie als solche erkennt; jede weitere Kopie ein Stueck weiter. */
+  Draw.prototype.paste = function () {
+    if (!CLIP) return null;
+    var c = JSON.parse(JSON.stringify(CLIP.shape));
+    c.id = uid();
+    if (c.alert) c.alert.on = false;
+    if (storeKey(CLIP.sym, null) === storeKey(this.symbol, null)) {
+      CLIP.n++;
+      var X = this._xFn(), schritt = this._step() / 1000;
+      var y0 = c.points[0] ? this._y(c.points[0].p) : null;
+      var dyP = 0;
+      if (y0 != null) { var p2 = this._toPrice(y0 + 14 * CLIP.n); if (p2 != null) dyP = p2 - c.points[0].p; }
+      var dt = X ? Math.round(3 * CLIP.n * schritt) : 0;
+      c.points = c.points.map(function (pt) { return { t: pt.t + dt, p: pt.p + dyP }; });
+    }
+    this._push();
+    this.shapes.push(c);
+    this.sel = c.id;
+    this._commit();
+    return c;
   };
 
   /* ─────────────── interaction ─────────────── */
@@ -67676,45 +68721,67 @@ self.addEventListener('message', async (ev) => {
 
   Draw.prototype._down = function (e) {
     if (this.tool === 'cursor') return;
+    ACTIVE = this;
     // A second finger (pinch-zoom attempt) must not hijack an ongoing drag.
     if (this._pid != null) return;
     e.preventDefault();
+    var pt = this._pos(e);
+    var t = this._toTime(pt.x), p = this._toPrice(pt.y);
+    if (t == null || p == null) return;
+    var mg = this._magnet(t, p); t = mg.t; p = mg.p;
+
+    /* Dritter Punkt einer Gabel / Fib-Erweiterung: dieser Klick setzt ihn. */
+    if (this.draft && this.draft._ph2) {
+      this.draft.points[2] = { t: t, p: p };
+      delete this.draft._ph2;
+      this._push();
+      this.shapes.push(this.draft);
+      this.draft = null;
+      this._finishStroke();
+      return;
+    }
+
     this._pid = e.pointerId;
     this._touch = (e.pointerType === 'touch' || e.pointerType === 'pen');
     // Capture keeps the event stream on this element even when the finger
     // leaves the canvas — otherwise a drag off the edge silently stops.
     try { this.cv.setPointerCapture(e.pointerId); } catch (err) {}
-    var pt = this._pos(e);
-    var t = this._toTime(pt.x), p = this._toPrice(pt.y);
-    if (t == null || p == null) { this._release(e); return; }
-    var mg = this._magnet(t, p); t = mg.t; p = mg.p;
 
     if (this.tool === 'erase') { this._eraseAt(pt.x, pt.y); this._release(e); return; }
 
     if (this.tool === 'text') {
       // A modal blocks and swallows the pointerup, so let the pointer go first.
       this._release(e);
-      var self = this;
+      var self = this, pf = prefFor('text');
       setTimeout(async function () {
         var txt = await ApexDialog.prompt('Text');
         if (!txt) return;
         self._push();
         self.shapes.push({ id: uid(), type: 'text', color: self.color, width: self.width,
-                           points: [{ t: t, p: p }], text: txt });
+                           size: pf.size || 13, points: [{ t: t, p: p }], text: txt });
         self._finishStroke();
       }, 0);
       return;
     }
 
-    var single = (this.tool === 'hline' || this.tool === 'vline');
+    var single = !!SINGLE[this.tool];
+    var pref = prefFor(this.tool);
     this.draft = { id: uid(), type: this.tool, color: this.color, width: this.width,
                    dash: this.dash || 'solid',
                    points: single ? [{ t: t, p: p }] : [{ t: t, p: p }, { t: t, p: p }] };
     /* `dash` fehlte hier ganz: eine gestrichelte Linie liess sich gar nicht
        zeichnen, nur nachtraeglich umstellen. */
-    if (this.tool === 'fib') {
-      var fp = prefFor('fib');
-      if (fp.fib) this.draft.fib = JSON.parse(JSON.stringify(fp.fib));
+    if (this.tool === 'fib' || this.tool === 'fibext') {
+      if (pref.fib) this.draft.fib = JSON.parse(JSON.stringify(pref.fib));
+    }
+    if (pref.fillA != null) this.draft.fillA = pref.fillA;
+    if (this.tool === 'trend' && pref.ext) this.draft.ext = pref.ext;
+    if (this.tool === 'vprof' && pref.vp) this.draft.vp = JSON.parse(JSON.stringify(pref.vp));
+    if (this.tool === 'callout') this.draft.size = pref.size || 13;
+    /* Der AVWAP haengt an einer Kerze: Anker auf deren typischen Preis. */
+    if (this.tool === 'avwap') {
+      var all = this.ci && this.ci._all, ia = all && all.n ? this.ci.indexAt(t * 1000) : -1;
+      if (ia >= 0) this.draft.points[0] = { t: Math.floor(all.t[ia] / 1000), p: (all.h[ia] + all.l[ia] + all.c[ia]) / 3 };
     }
     // A channel carries a third anchor for its offset, a position tool for its
     // target. They are seeded here and refined in _move / by dragging later.
@@ -67722,6 +68789,7 @@ self.addEventListener('message', async (ev) => {
       this.draft.points.push({ t: t, p: p });
     }
     this._dragging = !single;
+    this._brushPx = this.tool === 'brush' ? [pt] : null;
     if (single) { this._push(); this.shapes.push(this.draft); this.draft = null; this._finishStroke(); this._release(e); }
     else this.sync();
   };
@@ -67731,10 +68799,14 @@ self.addEventListener('message', async (ev) => {
    *  zurechtrücken oder den Chart bewegen, nicht sofort die nächste ziehen.
    *  Das Radiergummi bleibt aktiv, dort löscht man meist mehrere hintereinander. */
   Draw.prototype._finishStroke = function () {
+    var neu = this.shapes[this.shapes.length - 1];
     this._commit();
     // Gilt für Maus wie Finger gleichermaßen. Das Radiergummi bleibt aktiv,
     // dort löscht man meist mehrere hintereinander.
     if (this.tool !== 'cursor' && this.tool !== 'erase') this.setTool('cursor');
+    /* Die fertige Zeichnung gleich markieren: Farbe, Alarm, Einstellungen
+       sind dann einen Klick entfernt — wie bei TradingView. */
+    if (neu && neu.type !== 'brush') { this.sel = neu.id; this._syncStyleBar(); this.sync(); }
   };
 
   /** Give the pointer back and allow the next stroke to start. */
@@ -67745,17 +68817,55 @@ self.addEventListener('message', async (ev) => {
     this._pid = null;
   };
 
+  /** Umschalt beim Zeichnen: Winkel auf 0°, 45° oder 90° einrasten. */
+  Draw.prototype._winkel = function (a, x, y) {
+    var ax = this._x(a.t), ay = this._y(a.p);
+    if (ax == null || ay == null) return null;
+    var dx = x - ax, dy = y - ay, len = Math.hypot(dx, dy);
+    var ang = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
+    var nx = ax + Math.cos(ang) * len, ny = ay + Math.sin(ang) * len;
+    if (Math.abs(Math.sin(ang)) < 1e-9) ny = ay;
+    if (Math.abs(Math.cos(ang)) < 1e-9) nx = ax;
+    var t = this._toTime(nx), p = this._toPrice(ny);
+    return (t == null || p == null) ? null : { t: t, p: p };
+  };
+
   Draw.prototype._move = function (e) {
+    /* Phase 2 der Drei-Punkt-Werkzeuge: Punkt C folgt der Maus. */
+    if (this.draft && this.draft._ph2 && !this._dragging) {
+      var q = this._pos(e), tq = this._toTime(q.x), pq = this._toPrice(q.y);
+      if (tq == null || pq == null) return;
+      var mq = this._magnet(tq, pq);
+      this.draft.points[2] = { t: mq.t, p: mq.p };
+      this.sync();
+      return;
+    }
     if (!this._dragging || !this.draft) return;
     if (this._pid != null && e.pointerId !== this._pid) return;   // ignore other fingers
     if (e.cancelable) e.preventDefault();
     var pt = this._pos(e);
     var t = this._toTime(pt.x), p = this._toPrice(pt.y);
     if (t == null || p == null) return;
+    var ty = this.draft.type;
+
+    if (ty === 'brush') {
+      /* Freihand: nur neue Punkte, die sich sichtbar bewegt haben. */
+      var lp = this._brushPx[this._brushPx.length - 1];
+      if (Math.hypot(pt.x - lp.x, pt.y - lp.y) < 2.5) return;
+      this._brushPx.push(pt);
+      if (this.draft.points.length === 2 && this.draft.points[0].t === this.draft.points[1].t && this.draft.points[0].p === this.draft.points[1].p) this.draft.points.pop();
+      if (this.draft.points.length < 2000) this.draft.points.push({ t: t, p: p });
+      this.sync();
+      return;
+    }
+
     var mg = this._magnet(t, p); t = mg.t; p = mg.p;
+    if (e.shiftKey && (ty === 'trend' || ty === 'ray' || ty === 'arrow' || ty === 'measure' || ty === 'fibext' || ty === 'pitchfork' || ty === 'channel')) {
+      var w = this._winkel(this.draft.points[0], pt.x, pt.y);
+      if (w) { t = w.t; p = w.p; }
+    }
     this.draft.points[1] = { t: t, p: p };
 
-    var ty = this.draft.type;
     if (ty === 'long' || ty === 'short') {
       /* Drag from entry to stop; the target is seeded at twice the risk, which
          is the ratio most people are aiming for anyway. Every edge stays
@@ -67786,6 +68896,13 @@ self.addEventListener('message', async (ev) => {
     this._release(e);
     if (!this._dragging || !this.draft) return;
     this._dragging = false;
+    var ty = this.draft.type;
+    if (ty === 'brush') {
+      if (this.draft.points.length < 2) { this.draft = null; this._brushPx = null; this.sync(); return; }
+      this._brushPx = null;
+      this._push(); this.shapes.push(this.draft); this.draft = null; this._finishStroke();
+      return;
+    }
     var a = this.draft.points[0], b = this.draft.points[1];
     // Ignore accidental taps that produced a zero-size shape. A finger is far
     // less precise than a mouse, so allow a bigger slop on touch.
@@ -67794,9 +68911,36 @@ self.addEventListener('message', async (ev) => {
     if (xa != null && xb != null && Math.abs(xa - xb) < slop && Math.abs(ya - yb) < slop) {
       this.draft = null; this.sync(); return;
     }
+    /* Gabel und Fib-Erweiterung brauchen noch Punkt C: der Entwurf bleibt
+       stehen, C folgt der Maus, der naechste Klick setzt ihn. */
+    if (THREE[ty]) {
+      this.draft._ph2 = true;
+      this.draft.points[2] = { t: b.t, p: b.p };
+      this.sync();
+      return;
+    }
     this._push();
     this.shapes.push(this.draft);
     this.draft = null;
+    var self = this;
+    /* Notiz: Text gleich nach dem Ziehen abfragen — ohne Text ist sie nichts. */
+    if (ty === 'callout') {
+      var neu = this.shapes[this.shapes.length - 1];
+      this._finishStroke();
+      setTimeout(async function () {
+        var txt = await ApexDialog.prompt('Note');
+        if (!txt) {
+          // Abgebrochen: als waere nichts gezeichnet worden, auch im Verlauf.
+          var ix = self.shapes.indexOf(neu);
+          if (ix >= 0) self.shapes.splice(ix, 1);
+          self._undo.pop(); self.sel = null; self._commit();
+          return;
+        }
+        neu.text = String(txt).slice(0, 500);
+        self._commit();
+      }, 0);
+      return;
+    }
     this._finishStroke();
   };
 
@@ -67805,7 +68949,7 @@ self.addEventListener('message', async (ev) => {
     var best = -1, bestD = this._touch ? 20 : 9;
     for (var i = this.shapes.length - 1; i >= 0; i--) {
       var s = this.shapes[i];
-      if (s.hidden || s.locked) continue;
+      if (s.hidden || s.locked || this._tfAus(s)) continue;
       var d = this._distance(s, px, py);
       if (d != null && d < bestD) { bestD = d; best = i; break; }
     }
@@ -67813,6 +68957,25 @@ self.addEventListener('message', async (ev) => {
   };
 
   Draw.prototype._distance = function (s, px, py) {
+    /* Formen, deren Lage erst beim Malen feststeht (AVWAP, Profil, Gabel,
+       Notiz, Freihand, verlaengerte Linien), treffen ueber ihre gemalte
+       Geometrie — exakt das, was man sieht. */
+    var g = this._geo && this._geo[s.id];
+    if (g) {
+      var best = null, j;
+      var nimm = function (v) { if (v != null && (best == null || v < best)) best = v; };
+      if (g.rect) {
+        var R = g.rect;
+        if (px >= R[0] && px <= R[0] + R[2] && py >= R[1] && py <= R[1] + R[3]) return 0;
+        nimm(distToSegment(px, py, R[0], R[1], R[0] + R[2], R[1]));
+        nimm(distToSegment(px, py, R[0], R[1] + R[3], R[0] + R[2], R[1] + R[3]));
+        nimm(distToSegment(px, py, R[0], R[1], R[0], R[1] + R[3]));
+        nimm(distToSegment(px, py, R[0] + R[2], R[1], R[0] + R[2], R[1] + R[3]));
+      }
+      if (g.segs) for (j = 0; j < g.segs.length; j++) nimm(distToSegment(px, py, g.segs[j][0], g.segs[j][1], g.segs[j][2], g.segs[j][3]));
+      if (g.poly) for (j = 1; j < g.poly.length; j++) nimm(distToSegment(px, py, g.poly[j - 1].x, g.poly[j - 1].y, g.poly[j].x, g.poly[j].y));
+      if (best != null) return best;
+    }
     var p0 = s.points[0], p1 = s.points[1];
     var x0 = p0 ? this._x(p0.t) : null, y0 = p0 ? this._y(p0.p) : null;
     var x1 = p1 ? this._x(p1.t) : null, y1 = p1 ? this._y(p1.p) : null;
@@ -68004,12 +69167,16 @@ self.addEventListener('message', async (ev) => {
   var TYPE_LABEL = {
     trend:'Trend line', ray:'Ray', arrow:'Arrow', hline:'Horizontal', vline:'Vertical',
     rect:'Box', ellipse:'Ellipse', channel:'Channel', fib:'Fibonacci',
-    measure:'Measure', long:'Long position', short:'Short position', text:'Text'
+    measure:'Measure', long:'Long position', short:'Short position', text:'Text',
+    hray:'Horizontal ray', cross:'Cross line', pitchfork:'Pitchfork', fibext:'Fib extension',
+    prange:'Price range', drange:'Date range', avwap:'Anchored VWAP', vprof:'Volume profile',
+    callout:'Note', brush:'Brush'
   };
   /** Beschreibung einer Zeichnung: Art plus der Preis, an dem sie haengt. */
   Draw.prototype.describe = function (s) {
     var lbl = TYPE_LABEL[s.type] || s.type;
-    if (s.type === 'text' && s.text) return lbl + ' — “' + String(s.text).slice(0, 22) + '”';
+    if ((s.type === 'text' || s.type === 'callout') && s.text) return lbl + ' — “' + String(s.text).slice(0, 22) + '”';
+    if (s.alert && s.alert.on) lbl = '🔔 ' + lbl;
     var p = s.points && s.points[0];
     return p ? lbl + ' · ' + this._fmtPrice(p.p) : lbl;
   };
@@ -68083,6 +69250,11 @@ self.addEventListener('message', async (ev) => {
   };
 
   Draw.prototype.destroy = function () {
+    var ii = INSTANCES.indexOf(this); if (ii >= 0) INSTANCES.splice(ii, 1);
+    if (ACTIVE === this) ACTIVE = null;
+    if (this._onKey) document.removeEventListener('keydown', this._onKey);
+    if (this._onEdEnter && this.el) this.el.removeEventListener('pointerenter', this._onEdEnter);
+    this._onKey = this._onEdEnter = null;
     /* Die Leiste haengt am Body und wuerde sonst nach dem Verlassen des
        Charts stehenbleiben. */
     if (this.el) this.el.style.touchAction = '';
@@ -68147,10 +69319,12 @@ self.addEventListener('message', async (ev) => {
       '.apd-menu-acts{border-top:0.5px solid var(--rim);margin-top:6px;padding-top:6px;display:grid}',
       '.apd-act{display:flex;align-items:center;gap:9px;background:none;border:0;color:var(--ink2);padding:7px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--font-body);text-align:left}',
       '.apd-act:hover{background:var(--raised);color:var(--ink)}.apd-act .g{width:18px;text-align:center}.apd-act .ic{width:13px;height:13px}.apd-act.danger{color:var(--loss)}',
-      '.apd-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:30;min-width:250px;max-height:340px;overflow:auto;' +
+      '.apd-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:30;min-width:250px;max-height:min(560px,78vh);overflow:auto;' +
         'background:var(--elevated);border:0.5px solid var(--rim);border-radius:12px;padding:6px;box-shadow:0 18px 44px rgba(0,0,0,.45)}',
       '.apd-menu-h{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding:6px 8px 8px;display:flex;justify-content:space-between;gap:8px}',
       '.apd-menu-h span{text-transform:none;letter-spacing:0;color:var(--ink4)}',
+      '.apd-menu-g{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);padding:8px 8px 3px;border-top:0.5px solid var(--rim);margin-top:4px}',
+      '.apd-menu-g:first-of-type{border-top:0;margin-top:0}',
       '.apd-row{display:flex;align-items:center;gap:4px}',
       '.apd-pick{flex:1;display:flex;align-items:center;gap:9px;background:none;border:0;color:var(--ink2);padding:7px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--font-body);text-align:left}',
       '.apd-pick:hover{background:var(--raised);color:var(--ink)}',
@@ -68236,6 +69410,21 @@ self.addEventListener('message', async (ev) => {
         'cursor:pointer;font-family:var(--font-body);font-size:12px;padding:6px 12px}',
       '.apd-dlg-b:hover{border-color:var(--gold-line);color:var(--ink)}',
       '.apd-dlg-b.prim{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold);font-weight:600}',
+      /* 28.10.2026: beliebige Farbe, Text, Zahlen, Zeitrahmen, Alarm */
+      '.apd-sbar-cc{position:relative;overflow:hidden;background:conic-gradient(#f0636a,#e6c34c,#3ecf8e,#5aa9e6,#b48ce8,#f0636a)!important;display:inline-block}',
+      '.apd-sbar-cc input{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer;border:0;padding:0}',
+      '.apd-dlg-top{align-items:flex-start}',
+      '.apd-dlg-row .apd-dlg-sw label{flex:none}',
+      '.apd-dlg-row textarea,.apd-dlg-row input[type=text],.apd-dlg-row input[type=number]{flex:1;min-width:0;background:var(--surface);border:0.5px solid var(--rim2);border-radius:8px;' +
+        'color:var(--ink);font-family:var(--font-body);font-size:12px;padding:5px 7px;outline:none;resize:vertical}',
+      '.apd-dlg-row textarea:focus,.apd-dlg-row input:focus,.apd-dlg-row select:focus{border-color:var(--gold-line)}',
+      '.apd-dlg-row input[type=range]{flex:1;accent-color:var(--gold)}',
+      '.apd-dlg-val{font-size:11px;color:var(--ink3);font-family:var(--font-mono);min-width:30px;text-align:right}',
+      '.apd-dlg-note{font-size:10.5px;color:var(--ink4);line-height:1.45;margin:-2px 0 8px}',
+      '.apd-dlg-tfs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}',
+      '.apd-dlg-tf{background:var(--surface);border:0.5px solid var(--rim2);border-radius:6px;color:var(--ink4);cursor:pointer;' +
+        'font-family:var(--font-mono);font-size:11px;padding:3px 7px}',
+      '.apd-dlg-tf.on{background:var(--gold-dim);border-color:var(--gold-line);color:var(--gold)}',
       '@media(max-width:760px){.apd-g{flex-wrap:wrap;justify-content:center}.apd-t{width:38px;height:38px;font-size:15px}.apd-sw{width:22px;height:22px}}'
     ].join('\n');
     document.head.appendChild(s);
@@ -68254,9 +69443,10 @@ self.addEventListener('message', async (ev) => {
         '<button class="apd-t" data-apd-more title="More drawing tools" aria-label="More drawing tools">…</button>' +
         '<div class="apd-menu" data-apd-menu style="display:none">' +
           '<div class="apd-menu-h">Drawing tools <span><svg class=ic aria-hidden=true><use href=#i-star ></use></svg> keeps a tool on the bar</span></div>' +
-          TOOLS.filter(function (t) { return t[0] !== 'cursor' && t[0] !== 'erase'; }).map(function (t) {
+          TOOLS.filter(function (t) { return t[0] !== 'cursor' && t[0] !== 'erase'; }).map(function (t, i, arr) {
             var on = favs.indexOf(t[0]) >= 0;
-            return '<div class="apd-row">' +
+            var kopf = (t[4] && (i === 0 || arr[i - 1][4] !== t[4])) ? '<div class="apd-menu-g">' + t[4] + '</div>' : '';
+            return kopf + '<div class="apd-row">' +
               '<button class="apd-pick" data-apd-tool="' + t[0] + '"><span class="g">' + t[1] + '</span>' + t[2] + '</button>' +
               '<button class="apd-star' + (on ? ' on' : '') + '" data-apd-fav="' + t[0] + '"><svg class=ic aria-hidden=true><use href=#i-star ></use></svg></button>' +
             '</div>';
@@ -68522,6 +69712,11 @@ self.addEventListener('message', async (ev) => {
     TOOL: TOOL_BY_ID,
     COLORS: COLORS,
     FIB: FIB,
+    /* Preisalarme auf Zeichnungen pruefen: bei jedem Live-Kurs aufrufen. */
+    checkAlerts: checkAlerts,
+    TF_STEPS: TF_STUFEN,
+    /* Volumenprofil-Rechnung, geteilt mit dem VRVP-Indikator im Chart. */
+    volumeProfile: volProfil,
     /* Favourites — which tools get a button instead of hiding in the menu.
        Persisted per user, so the bar looks the same in the next replay. */
     favourites: loadFavs,
@@ -68578,15 +69773,20 @@ self.addEventListener('message', async (ev) => {
   };
 
   var SERIES_TYPES = [
-    ['candles', 'Candles'],
-    ['bars',    'Bars'],
-    ['line',    'Line'],
-    ['area',    'Area']
+    ['candles',  'Candles'],
+    ['hollow',   'Hollow candles'],
+    ['heikin',   'Heikin Ashi'],
+    ['bars',     'Bars'],
+    ['line',     'Line'],
+    ['area',     'Area'],
+    ['baseline', 'Baseline']
   ];
+  var SCALES = [['normal', 'Normal'], ['log', 'Logarithmic'], ['pct', 'Percent']];
 
   var DEFAULTS = {
     preset: 'apex',
     seriesType: 'candles',
+    scale: 'normal',
     showGrid: true,
     showVolume: true,
     bg: 'transparent',
@@ -68661,6 +69861,9 @@ self.addEventListener('message', async (ev) => {
     return '' +
       '<div class="acs-row"><div class="acs-lbl">Theme</div><div class="acs-pills">' + presetBtns + '</div></div>' +
       '<div class="acs-row"><div class="acs-lbl">Style</div><div class="acs-pills">' + typeBtns + '</div></div>' +
+      '<div class="acs-row"><div class="acs-lbl">Scale</div><div class="acs-pills">' + SCALES.map(function (k) {
+        return '<button class="el-pill ' + ((s.scale || 'normal') === k[0] ? 'on' : '') + '" data-cs-scale="' + k[0] + '">' + esc(k[1]) + '</button>';
+      }).join('') + '</div></div>' +
       '<div class="acs-row"><div class="acs-lbl">Colours</div><div class="acs-colors">' +
         color('up',       'Up',         s.up,        '#3ecf8e') +
         color('down',     'Down',       s.down,      '#f0636a') +
@@ -68731,6 +69934,8 @@ self.addEventListener('message', async (ev) => {
       if (p) { applyPreset(s, p); commit(true); return; }
       var ty = t.getAttribute('data-cs-type');
       if (ty) { s.seriesType = ty; commit(true); return; }
+      var sc = t.getAttribute('data-cs-scale');
+      if (sc) { s.scale = sc; commit(true); return; }
       if (t.hasAttribute('data-cs-reset')) {
         for (var k in DEFAULTS) s[k] = DEFAULTS[k];
         commit(true);
@@ -68757,6 +69962,7 @@ self.addEventListener('message', async (ev) => {
     mount: mount,
     presets: PRESETS,
     seriesTypes: SERIES_TYPES,
+    scales: SCALES,
     defaults: DEFAULTS
   };
 })();
@@ -69904,6 +71110,18 @@ self.addEventListener('message', async (ev) => {
                var m = window.ApexLiqHeat ? window.ApexLiqHeat.build(b, q) : null;
                return { heatmap: m, bsl: m ? m.bsl : arr(b.n), ssl: m ? m.ssl : arr(b.n) };
              } },
+    /* Volumenprofil des sichtbaren Bereichs (VRVP, 28.10.2026). Wie Footprint
+       und Heatmap eine eigene Zeichenebene im Chart; gerechnet wird beim Malen
+       ueber genau die Kerzen, die man gerade sieht — scrollen oder zoomen
+       rechnet neu. Ohne Volumen im Feed zaehlt die Zeit am Preis (TPO). */
+    vp:    { label: 'Volume profile (visible range)', group: 'overlay', vprofile: true, noRules: true,
+             params: [['rows', 'Rows', 60, 10, 300],
+                      ['width', 'Width (% of the chart)', 28, 5, 60],
+                      ['va', 'Value area %', 70, 50, 95],
+                      ['side', 'Side (0 = right, 1 = left)', 0, 0, 1],
+                      ['lines', 'POC / VAH / VAL lines across the chart (1 = on)', 1, 0, 1]],
+             outputs: [],
+             calc: function () { return {}; } },
     smt:   { label: 'SMT divergence', group: 'pane', needsRef: true,
              params: [['left', 'Swing size', 5, 1, 50], ['right', 'Confirm bars', 2, 1, 50]],
              outputs: ['bull', 'bear'],
@@ -70060,6 +71278,7 @@ self.addEventListener('message', async (ev) => {
                               historicBars: q.historicBars } : null,
         footprint: d.footprint ? q : null,
         heatmap: d.heatmap ? { q: q, model: res.heatmap } : null,
+        vprofile: d.vprofile ? q : null,
         plots: plots,
         guides: d.guides || null,
         range: d.range || null,
@@ -70073,7 +71292,7 @@ self.addEventListener('message', async (ev) => {
   /** "EMA(20)" / "Bollinger Bands(20, 2)" — one label, used everywhere. */
   function label(id, params) {
     var d = DEF[id]; if (!d) return id;
-    if (d.heatmap) return d.label;       // zwanzig Zahlen in Klammern liest niemand
+    if (d.heatmap || d.vprofile) return d.label;       // zwanzig Zahlen in Klammern liest niemand
     var q = fillParams(id, params);
     var ps = d.params.map(function (p) { return q[p[0]]; });
     return d.label + (ps.length ? ' (' + ps.join(', ') + ')' : '');
@@ -84142,6 +85361,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     /* Schnellwahl und Schnellfragen: ein Zuhoerer am Behaelter, weil beide
        Leisten neu gebaut werden. */
     d.querySelector('#tvSchnell').addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-symsuche]')) { symSuche(); return; }
       if (e.target.closest && e.target.closest('[data-schnelledit]')) {
         var ed = document.getElementById('tvSchnellEdit');
         ed.hidden = !ed.hidden;
@@ -84214,9 +85434,13 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                  ['OANDA:US30USD', 'US30'], ['OANDA:DE30EUR', 'GER40']]],
     ['Forex', ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'USDCHF',
                'EURGBP', 'EURJPY', 'GBPJPY', 'EURCHF', 'AUDJPY', 'EURAUD', 'GBPAUD',
-               'CADJPY', 'NZDJPY', 'GBPCAD', 'EURCAD'].map(function (x) { return ['OANDA:' + x, x]; })],
+               'CADJPY', 'NZDJPY', 'GBPCAD', 'EURCAD',
+               /* 28.10.2026: weitere Paare, alle ueber Yahoo (kostenlos, echtzeitnah) */
+               'AUDCAD', 'AUDCHF', 'AUDNZD', 'CADCHF', 'CHFJPY', 'EURNZD', 'GBPCHF', 'GBPNZD',
+               'NZDCAD', 'NZDCHF', 'USDMXN', 'USDZAR', 'USDSGD'].map(function (x) { return ['OANDA:' + x, x]; })],
     ['Crypto', [['BINANCE:BTCUSDT', 'BTC'], ['BINANCE:ETHUSDT', 'ETH'],
-                ['BINANCE:SOLUSDT', 'SOL'], ['BINANCE:XRPUSDT', 'XRP']]]
+                ['BINANCE:SOLUSDT', 'SOL'], ['BINANCE:XRPUSDT', 'XRP'],
+                ['BINANCE:LTCUSDT', 'LTC'], ['BINANCE:ADAUSDT', 'ADA'], ['BINANCE:DOGEUSDT', 'DOGE']]]
   ];
   function katName(sym) {
     for (var g = 0; g < KATALOG.length; g++)
@@ -84247,7 +85471,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var jetzt = TV.sym || lies('sym', STD_SYM);
     var l = geordnet(meineLeiste());
     var ed = document.getElementById('tvSchnellEdit'), offen = !!(ed && !ed.hidden);
-    el.innerHTML = l.map(function (x) {
+    el.innerHTML = '<button class="tv-chip tv-chip-such" data-symsuche="1" title="Search instruments (/ or Ctrl+K)" aria-label="Search instruments">' +
+      '<svg class=ic aria-hidden=true><use href=#i-search ></use></svg>Search</button>' + l.map(function (x) {
       var an = x.s === jetzt;
       return '<button class="tv-chip notranslate' + (an ? ' on' : '') + (x.fav ? ' fav' : '') +
         '" translate="no" data-sym="' + x.s + '" aria-pressed="' + (an ? 'true' : 'false') + '">' +
@@ -84308,6 +85533,134 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     schnellEditor(); schnellFuellen();
   }
 
+  /* ── Symbolsuche (28.10.2026) ─────────────────────────────────
+     Wie bei TradingView: „/" oder Strg/Cmd+K oeffnet die Suche, Tippen
+     filtert, Pfeile + Enter waehlen, Esc schliesst. Gesucht wird in allem,
+     wofuer es Kerzen gibt (KATALOG) — nur dort kann die KI lesen und nur dort
+     zeichnet der Zones View. Ein gewaehltes Instrument kommt in die Leiste. */
+  var WAEHRUNG = { EUR: 'Euro', USD: 'US Dollar', GBP: 'British Pound', JPY: 'Japanese Yen', AUD: 'Australian Dollar',
+                   CAD: 'Canadian Dollar', CHF: 'Swiss Franc', NZD: 'New Zealand Dollar', MXN: 'Mexican Peso',
+                   ZAR: 'South African Rand', SGD: 'Singapore Dollar' };
+  var SYM_INFO = { 'OANDA:XAUUSD': 'Gold spot / US Dollar', 'OANDA:NAS100USD': 'Nasdaq 100 index',
+                   'OANDA:SPX500USD': 'S&P 500 index', 'OANDA:US30USD': 'Dow Jones 30 index', 'OANDA:DE30EUR': 'DAX 40 index (Germany)',
+                   'BINANCE:BTCUSDT': 'Bitcoin', 'BINANCE:ETHUSDT': 'Ethereum', 'BINANCE:SOLUSDT': 'Solana', 'BINANCE:XRPUSDT': 'XRP',
+                   'BINANCE:LTCUSDT': 'Litecoin', 'BINANCE:ADAUSDT': 'Cardano', 'BINANCE:DOGEUSDT': 'Dogecoin' };
+  function symBeschreibung(s, n) {
+    if (SYM_INFO[s]) return SYM_INFO[s];
+    var m = /^([A-Z]{3})([A-Z]{3})$/.exec(n);
+    return m && WAEHRUNG[m[1]] && WAEHRUNG[m[2]] ? WAEHRUNG[m[1]] + ' / ' + WAEHRUNG[m[2]] : '';
+  }
+  function symAlle() {
+    var out = [];
+    KATALOG.forEach(function (g) { g[1].forEach(function (x) { out.push({ s: x[0], n: x[1], g: g[0], d: symBeschreibung(x[0], x[1]) }); }); });
+    return out;
+  }
+  function symTreffer(q) {
+    q = String(q || '').trim().toLowerCase().replace(/[\/\s]/g, '');
+    var alle = symAlle();
+    if (!q) return alle;
+    return alle.map(function (x) {
+      var n = x.n.toLowerCase(), d = x.d.toLowerCase().replace(/[\/\s]/g, ''), s = x.s.toLowerCase();
+      var r = n.indexOf(q) === 0 ? 0 : n.indexOf(q) >= 0 ? 1 : d.indexOf(q) === 0 ? 2 : d.indexOf(q) >= 0 ? 3 : s.indexOf(q) >= 0 ? 4 : -1;
+      return { x: x, r: r };
+    }).filter(function (o) { return o.r >= 0; })
+      .sort(function (a, b) { return a.r - b.r || a.x.n.length - b.x.n.length; })
+      .map(function (o) { return o.x; });
+  }
+  function symSucheCss() {
+    if (document.getElementById('tvSsCss')) return;
+    var st = document.createElement('style'); st.id = 'tvSsCss';
+    st.textContent =
+      '.tv-ss-ov{position:fixed;inset:0;z-index:100040;background:rgba(5,6,9,.45);display:flex;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}' +
+      '.tv-ss{width:min(520px,100%);background:var(--raised);border:0.5px solid var(--rim2);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.5);overflow:hidden;font-family:var(--font-body)}' +
+      '.tv-ss-k{display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:0.5px solid var(--rim)}' +
+      '.tv-ss-k .ic{width:16px;height:16px;color:var(--ink3);flex:none}' +
+      '.tv-ss-in{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:15px;padding:14px 0;outline:none;font-family:inherit}' +
+      '.tv-ss-l{max-height:min(420px,58vh);overflow:auto;padding:6px}' +
+      '.tv-ss-g{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);padding:8px 10px 4px}' +
+      '.tv-ss-i{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-radius:8px;padding:8px 10px;cursor:pointer;color:var(--ink2);text-align:left;font-family:inherit}' +
+      '.tv-ss-i b{font-family:var(--font-mono);font-size:13px;color:var(--ink);min-width:84px;font-weight:600}' +
+      '.tv-ss-i span{font-size:12px;color:var(--ink3);flex:1;min-width:0}' +
+      '.tv-ss-i em{font-style:normal;font-size:10px;color:var(--gold);white-space:nowrap}' +
+      '.tv-ss-i.hi{background:var(--gold-dim)}' +
+      '.tv-ss-leer{padding:22px;color:var(--ink3);font-size:12px;text-align:center}' +
+      '.tv-ss-f{font-size:10.5px;color:var(--ink4);padding:8px 14px;border-top:0.5px solid var(--rim)}' +
+      '.tv-chip-such{display:inline-flex;align-items:center;gap:6px}.tv-chip-such .ic{width:13px;height:13px}' +
+      '@media (max-width:760px){.tv-ss-ov{padding-top:8vh}.tv-ss-i{padding:10px}}';
+    document.head.appendChild(st);
+  }
+  function symSuche() {
+    if (document.querySelector('.tv-ss-ov')) return;
+    symSucheCss();
+    var jetzt = TV.sym || lies('sym', STD_SYM), hi = 0, liste = [];
+    var ov = document.createElement('div');
+    ov.className = 'tv-ss-ov';
+    ov.innerHTML = '<div class="tv-ss" role="dialog" aria-modal="true" aria-label="Search instruments">' +
+      '<div class="tv-ss-k"><svg class=ic aria-hidden=true><use href=#i-search ></use></svg>' +
+      '<input class="tv-ss-in" type="search" autocomplete="off" spellcheck="false" placeholder="Search — e.g. gold, EURUSD, nasdaq, bitcoin" aria-label="Search instruments"></div>' +
+      '<div class="tv-ss-l" role="listbox"></div>' +
+      '<div class="tv-ss-f">↑ ↓ choose · Enter open · Esc close · open with / or Ctrl+K</div></div>';
+    document.body.appendChild(ov);
+    var inp = ov.querySelector('.tv-ss-in'), box = ov.querySelector('.tv-ss-l');
+    try { inp.focus(); } catch (e) {}
+    function malen() {
+      liste = symTreffer(inp.value);
+      if (hi >= liste.length) hi = Math.max(0, liste.length - 1);
+      if (!liste.length) { box.innerHTML = '<div class="tv-ss-leer">No instrument with candle data matches “' + escHtml(inp.value) + '”.</div>'; return; }
+      var gruppe = null, html = '', gruppiert = !inp.value.trim();
+      liste.forEach(function (x, i) {
+        if (gruppiert && x.g !== gruppe) { gruppe = x.g; html += '<div class="tv-ss-g">' + gruppe + '</div>'; }
+        html += '<button type="button" role="option" class="tv-ss-i' + (i === hi ? ' hi' : '') + '" data-ssi="' + i + '" aria-selected="' + (i === hi) + '">' +
+          '<b class="notranslate" translate="no">' + escHtml(x.n) + '</b><span>' + escHtml(x.d) + '</span>' +
+          (x.s === jetzt ? '<em>open now</em>' : (gruppiert ? '' : '<em>' + x.g + '</em>')) + '</button>';
+      });
+      box.innerHTML = html;
+      var h = box.querySelector('.tv-ss-i.hi'); if (h && h.scrollIntoView) h.scrollIntoView({ block: 'nearest' });
+    }
+    function zu() { ov.remove(); document.removeEventListener('keydown', taste, true); }
+    function nehmen(i) {
+      var x = liste[i]; if (!x) return;
+      zu();
+      var l = meineLeiste();
+      if (!l.some(function (y) { return y.s === x.s; })) { l.push({ s: x.s, fav: false }); leisteMerken(l); }
+      schnellFuellen();
+      symbolWechseln(x.s);
+    }
+    function taste(e) {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); zu(); return; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault(); e.stopPropagation();
+        hi = Math.max(0, Math.min(liste.length - 1, hi + (e.key === 'ArrowDown' ? 1 : -1)));
+        malen(); return;
+      }
+      if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); nehmen(hi); }
+    }
+    inp.addEventListener('input', function () { hi = 0; malen(); });
+    box.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-ssi]'); if (b) nehmen(+b.getAttribute('data-ssi')); });
+    box.addEventListener('mousemove', function (e) {
+      var b = e.target.closest && e.target.closest('[data-ssi]'); if (!b) return;
+      var i = +b.getAttribute('data-ssi'); if (i === hi) return;
+      var alt = box.querySelector('.tv-ss-i.hi'); if (alt) alt.classList.remove('hi');
+      b.classList.add('hi'); hi = i;
+    });
+    ov.addEventListener('pointerdown', function (e) { if (e.target === ov) zu(); });
+    document.addEventListener('keydown', taste, true);
+    malen();
+    setTimeout(function () { try { inp.focus(); } catch (e) {} }, 20);
+  }
+  TV.symSuche = symSuche;
+  document.addEventListener('keydown', function (e) {
+    var t = e.target && e.target.tagName;
+    if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT' || (e.target && e.target.isContentEditable)) return;
+    var auf = (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) ||
+              ((e.ctrlKey || e.metaKey) && !e.altKey && String(e.key).toLowerCase() === 'k');
+    if (!auf) return;
+    var pc = document.getElementById('page-chart');
+    if (!pc || !pc.getClientRects().length || !document.getElementById('tvSchnell')) return;
+    e.preventDefault();
+    symSuche();
+  });
+
   /* Wechsel per Chip. Das Widget kann das Instrument nur beim Aufbau setzen,
      also wird neu aufgebaut — ausgeloest vom Nutzer, nie von selbst.
      Alles, was zum alten Instrument gehoert, geht dabei mit: Level, Setup,
@@ -84319,7 +85672,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     TV._analyse = null; TV._urteil = null;
     verlauf = []; TV._fakten = '';
     letzteLaden();
-    EV.bars = null; EV.tf = '';
+    EV.bars = null; EV.tf = lies('evTf', '');   // der gewaehlte Zeitrahmen bleibt beim Symbolwechsel
     setupZeigen(null); levelZeigen(); malen();
     if (!proAn()) { var po = document.getElementById('tvKiOut'); if (po) po.innerHTML = PRO_WAND; }
     schnellFuellen();
@@ -84569,6 +85922,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
                sofort als ausgestoppt — und landete mit -1R in der Auswertung. */
             preisPruefen(TV.kurs.preis, TV.kurs.sym);
             try { ezAlarmPruefen(TV.kurs.preis, TV.kurs.sym); } catch (x) {}
+            /* Preisalarme auf Zeichnungen (Linie, Strahl, Box …) des offenen Instruments. */
+            try {
+              var dsy = EV.draw ? EV.draw.symbol : evSymName();
+              if (window.ApexDraw && ApexDraw.checkAlerts && dsy && symGleich(TV.kurs.sym, dsy)) ApexDraw.checkAlerts(dsy, TV.kurs.preis);
+            } catch (x) {}
             laufPruefen(TV.kurs.preis, TV.kurs.sym);
             ideenPruefen(TV.kurs.preis, TV.kurs.sym);
           });
@@ -84607,6 +85965,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     'OANDA:NZDJPY': 'NZD/JPY', 'OANDA:GBPCAD': 'GBP/CAD', 'OANDA:EURCAD': 'EUR/CAD',
     'BINANCE:BTCUSDT': 'BTC/USD', 'BINANCE:ETHUSDT': 'ETH/USD',
     'BINANCE:SOLUSDT': 'SOL/USD', 'BINANCE:XRPUSDT': 'XRP/USD',
+    'BINANCE:LTCUSDT': 'LTC/USD', 'BINANCE:ADAUSDT': 'ADA/USD', 'BINANCE:DOGEUSDT': 'DOGE/USD',
+    'OANDA:AUDCAD': 'AUD/CAD', 'OANDA:AUDCHF': 'AUD/CHF', 'OANDA:AUDNZD': 'AUD/NZD', 'OANDA:CADCHF': 'CAD/CHF',
+    'OANDA:CHFJPY': 'CHF/JPY', 'OANDA:EURNZD': 'EUR/NZD', 'OANDA:GBPCHF': 'GBP/CHF', 'OANDA:GBPNZD': 'GBP/NZD',
+    'OANDA:NZDCAD': 'NZD/CAD', 'OANDA:NZDCHF': 'NZD/CHF', 'OANDA:USDMXN': 'USD/MXN', 'OANDA:USDZAR': 'USD/ZAR',
+    'OANDA:USDSGD': 'USD/SGD',
     'OANDA:NAS100USD': 'NAS100', 'OANDA:SPX500USD': 'SPX500',
     'OANDA:US30USD': 'US30', 'OANDA:DE30EUR': 'GER40',
   };
@@ -88454,6 +89817,8 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
      auf einen Kasten oeffnet die Zone. Der TradingView-Chart laeuft dabei
      weiter: er liefert den Live-Kurs. */
   var EV = { inst: null, tf: '', an: false, laden: null, zonen: [], bars: null, fp: false };
+  /* Zeitrahmen gemerkt wie bei TradingView — vorher stand nach jedem Neuladen wieder M15. */
+  try { EV.tf = localStorage.getItem('apexTV_evTf') || ''; } catch (e) {}
   try { EV.fp = localStorage.getItem('apexTV_evfp') === '1'; } catch (e) {}
   try { EV.alle = localStorage.getItem('apexTV_evAlle') === '1'; } catch (e) {}
   /* Liquidity Heatmap (Bookmap-Optik) als eigener Schalter — dieselbe wie
@@ -89109,7 +90474,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       if (U && A) {
         U.list().forEach(function (c) {
           if (c.visible === false) return;
-          var d = A.DEF[c.id]; if (!d || d.heatmap || d.footprint || d.zones) return;
+          var d = A.DEF[c.id]; if (!d || d.heatmap || d.footprint || d.zones || d.vprofile) return;
           try {
             var r = A.compute(b, c.id, c.params), werte = [];
             (d.outputs || []).forEach(function (o) {
@@ -89260,7 +90625,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     box = document.createElement('div'); box.id = 'tvEvHilfe'; box.className = 'tv-ev-hilfe';
     var z = [['Z', 'Draw a supply zone'], ['Shift Z', 'Draw a demand zone'], ['H · T · M', 'Horizontal line · trend line · measure'],
              ['P', 'Position from the open zone'], ['A', 'Alerts for the open zone'], ['L', 'Zone list'], ['[ ]', 'Timeframe down · up'],
-             ['F', 'Full screen'], ['Esc', 'Cancel tool / close zone'], ['Space · →', 'Replay: play/pause · next candle'], ['?', 'This help']];
+             ['F', 'Full screen'], ['Esc', 'Cancel tool / close zone'], ['Space · →', 'Replay: play/pause · next candle'],
+             ['/ · Ctrl K', 'Search instruments'], ['Alt T · H · J · V · F · R', 'Trend · horizontal line · horizontal ray · vertical · Fibonacci · box'],
+             ['Ctrl C · Ctrl V', 'Copy · paste the selected drawing'], ['Alt + drag', 'Clone a drawing'],
+             ['← ↑ → ↓', 'Nudge the selected drawing (Shift: ×10)'], ['Shift', 'While drawing: snap to 0° / 45° / 90°'],
+             ['Ctrl Z · Ctrl Shift Z', 'Undo · redo'], ['?', 'This help']];
     box.innerHTML = '<b>Keyboard shortcuts</b>' + z.map(function (x) { return '<div><kbd class="notranslate" translate="no">' + x[0] + '</kbd><span>' + x[1] + '</span></div>'; }).join('') +
       '<button type="button" aria-label="Close">×</button>';
     box.querySelector('button').onclick = function () { box.remove(); };
@@ -89498,9 +90867,11 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       if (t < ab) return;
       var x = slots[t], o = x.o, h = x.h, l = x.l;
       if (t === lastT) { o = b.o[n - 1]; h = Math.max(h, b.h[n - 1]); l = Math.min(l, b.l[n - 1]); }   // laufende echte Kerze
-      var zeile = (typ === 'line' || typ === 'area') ? { time: Math.floor(t / 1000), value: x.c }
-                : { time: Math.floor(t / 1000), open: o, high: h, low: l, close: x.c };
-      try { EV.inst.series.update(zeile); } catch (e) {}
+      var roh = { time: Math.floor(t / 1000), open: o, high: h, low: l, close: x.c };
+      try {
+        if (EV.inst.updateRow) EV.inst.updateRow(roh);
+        else EV.inst.series.update((typ === 'line' || typ === 'area') ? { time: roh.time, value: x.c } : roh);
+      } catch (e) {}
     });
     EV._live = { basis: b, t: zeiten[zeiten.length - 1] };
   }
@@ -89575,6 +90946,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     var ana = function (t) { return mitBars.some(function (e) { return e.tf === t; }); };
     var tf = EV.tf && tfNamen.indexOf(EV.tf) >= 0 ? EV.tf
            : (ana(TF_NAME[wahl]) ? TF_NAME[wahl] : (mitBars[0] ? mitBars[0].tf : 'M15'));
+    if (EV.tf !== tf || lies('evTf', '') !== tf) merke('evTf', tf);
     EV.tf = tf;
     var tfs = document.getElementById('tvEvTfs');
     if (tfs) {
@@ -94236,6 +95608,32 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   }
   function unwatch(){ if(obs){ try{ obs.disconnect(); }catch(e){} obs = null; } }
 
+  /* Native fullscreen only paints the fullscreen element's own subtree. Menus,
+     colour pickers, dialogs and toasts are appended to <body>, so in full
+     screen they opened invisibly behind it (drawing edit menu, 28.10.2026).
+     While full screen is on, every new body child moves into the panel, and
+     back to <body> on exit so nothing is left inside a re-rendered panel. */
+  var adopted = [], adoptObs = null;
+  var SKIP = { SCRIPT:1, STYLE:1, LINK:1, IFRAME:1, NOSCRIPT:1, TEMPLATE:1 };
+  function adopt(n){
+    if(!cur || n.nodeType !== 1 || SKIP[n.tagName] || n === cur || n.contains(cur)) return;
+    if(n.id && /^goog/.test(n.id)) return;
+    try { cur.appendChild(n); adopted.push(n); } catch(e){}
+  }
+  function startAdopt(){
+    if(adoptObs || !window.MutationObserver) return;
+    adoptObs = new MutationObserver(function(muts){
+      if(!cur) return;
+      muts.forEach(function(m){ for(var i=0;i<m.addedNodes.length;i++) adopt(m.addedNodes[i]); });
+    });
+    adoptObs.observe(document.body, {childList:true});
+  }
+  function stopAdopt(el){
+    if(adoptObs){ try{ adoptObs.disconnect(); }catch(e){} adoptObs = null; }
+    adopted.forEach(function(n){ if(n.parentNode === el) try { document.body.appendChild(n); } catch(e){} });
+    adopted = [];
+  }
+
   function enter(el){
     if(!el) return;
     if(cur === el) return;
@@ -94244,6 +95642,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     el.classList.add('apex-fs');
     document.body.classList.add('apex-fs-on');
     reqNative(el);
+    startAdopt();
     watch(); paintBtns(); relayout();
   }
 
@@ -94254,6 +95653,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
     el.classList.remove('apex-fs');
     document.body.classList.remove('apex-fs-on');
     exitNative();
+    stopAdopt(el);
     unwatch(); paintBtns(); relayout();
   }
 
@@ -103309,7 +104709,7 @@ body.light::before{ opacity:.45; }
     "— Bookmap-style stop pools, swept bands and volume bubbles, in the replay and the zones view": ["— Stop-Pools im Bookmap-Stil, abgeräumte Bänder und Volumenblasen, im Replay und in der Zonenansicht", "— pools de stops al estilo Bookmap, bandas barridas y burbujas de volumen, en el replay y en la vista de zonas", "— pools de stops no estilo Bookmap, faixas varridas e bolhas de volume, no replay e na visão de zonas", "— pools de stops façon Bookmap, bandes balayées et bulles de volume, dans le replay et la vue des zones"],
     "Chart workspace": ["Chart-Werkstatt", "Espacio de gráficos", "Espaço de gráficos", "Espace graphique"],
     "— toolbar, stage and dock, no page scrolling": ["— Werkzeugleiste, Bühne und Dock, kein Seiten-Scrollen", "— barra de herramientas, escenario y dock, sin desplazar la página", "— barra de ferramentas, palco e dock, sem rolar a página", "— barre d’outils, scène et dock, sans défilement de page"],
-    "15 drawing tools with favourites — editable afterwards, with a position tool": ["15 Zeichenwerkzeuge mit Favoriten — nachträglich bearbeitbar, mit Positionswerkzeug", "15 herramientas de dibujo con favoritos — editables después, con herramienta de posición", "15 ferramentas de desenho com favoritos — editáveis depois, com ferramenta de posição", "15 outils de dessin avec favoris — modifiables ensuite, avec un outil de position"],
+    "23 drawing tools with favourites — editable afterwards, with a position tool": ["23 Zeichenwerkzeuge mit Favoriten — nachträglich bearbeitbar, mit Positionswerkzeug", "23 herramientas de dibujo con favoritos — editables después, con herramienta de posición", "23 ferramentas de desenho com favoritos — editáveis depois, com ferramenta de posição", "23 outils de dessin avec favoris — modifiables ensuite, avec un outil de position"],
     "Candlestick charts — drag entry / SL / TP": ["Kerzencharts — Einstieg / SL / TP ziehen", "Gráficos de velas — arrastra entrada / SL / TP", "Gráficos de velas — arraste entrada / SL / TP", "Graphiques en bougies — glissez entrée / SL / TP"],
     "Auto-Tagging": ["Auto-Tagging", "Etiquetado automático", "Tags automáticas", "Tags automatiques"],
     "rules + AI tags · Multi-Frame charts": ["Regeln + KI-Tags · Multi-Frame-Charts", "reglas + etiquetas de IA · gráficos multi-marco", "regras + tags de IA · gráficos multiquadro", "règles + tags IA · graphiques multi-cadres"],
@@ -103468,7 +104868,7 @@ body.light::before{ opacity:.45; }
     "Prop size on the chart and the challenge in Start my day & the coach": ["Prop-Positionsgröße im Chart und die Challenge in Start my day & im Coach", "Tamaño prop en el gráfico y el challenge en Start my day y en el coach", "Tamanho prop no gráfico e o challenge no Start my day e no coach", "Taille prop sur le graphique et le challenge dans Start my day et le coach"],
     "Confluence — which of your conditions pay alone and in combination, with a minimum sample enforced": ["Konfluenz — welche deiner Bedingungen sich einzeln und kombiniert auszahlen, mit Mindeststichprobe", "Confluencia — cuáles de tus condiciones rinden solas y combinadas, con una muestra mínima obligatoria", "Confluência — quais das suas condições pagam sozinhas e combinadas, com amostra mínima obrigatória", "Confluence — lesquelles de vos conditions paient seules et combinées, avec un échantillon minimum imposé"],
     "Chart workspace — toolbar, stage and dock in one frame, no page scrolling": ["Chart-Werkstatt — Werkzeugleiste, Bühne und Dock in einem Rahmen, kein Seiten-Scrollen", "Espacio de gráficos — barra de herramientas, escenario y dock en un marco, sin desplazar la página", "Espaço de gráficos — barra de ferramentas, palco e dock em um quadro, sem rolar a página", "Espace graphique — barre d’outils, scène et dock dans un cadre, sans défilement de page"],
-    "15 drawing tools with favourites — editable afterwards, plus a position tool with live R:R": ["15 Zeichenwerkzeuge mit Favoriten — nachträglich bearbeitbar, dazu ein Positionswerkzeug mit Live-R:R", "15 herramientas de dibujo con favoritos — editables después, más una herramienta de posición con R:R en vivo", "15 ferramentas de desenho com favoritos — editáveis depois, mais uma ferramenta de posição com R:R ao vivo", "15 outils de dessin avec favoris — modifiables ensuite, plus un outil de position avec R:R en direct"],
+    "23 drawing tools with favourites — editable afterwards, plus a position tool with live R:R": ["23 Zeichenwerkzeuge mit Favoriten — nachträglich bearbeitbar, dazu ein Positionswerkzeug mit Live-R:R", "23 herramientas de dibujo con favoritos — editables después, más una herramienta de posición con R:R en vivo", "23 ferramentas de desenho com favoritos — editáveis depois, mais uma ferramenta de posição com R:R ao vivo", "23 outils de dessin avec favoris — modifiables ensuite, plus un outil de position avec R:R en direct"],
     "AI Trading Coach — reads your journal, not a chatbot bolted on": ["KI-Trading-Coach — liest dein Journal, kein angeflanschter Chatbot", "Coach de trading con IA — lee tu diario, no es un chatbot añadido", "Coach de trading com IA — lê seu diário, não é um chatbot acoplado", "Coach de trading IA — lit votre journal, pas un chatbot greffé"],
     "Start my day — the day's high-impact events plus your own record on this weekday and session": ["Start my day — die wichtigen Termine des Tages plus deine eigene Bilanz an diesem Wochentag und in dieser Sitzung", "Start my day — los eventos de alto impacto del día y tu propio historial en este día y sesión", "Start my day — os eventos de alto impacto do dia e seu próprio histórico neste dia da semana e sessão", "Start my day — les événements à fort impact du jour et votre propre bilan ce jour de la semaine et sur cette session"],
     "Proactive AI insights (every 10 trades)": ["Proaktive KI-Hinweise (alle 10 Trades)", "Avisos proactivos de IA (cada 10 operaciones)", "Alertas proativos de IA (a cada 10 operações)", "Conseils IA proactifs (tous les 10 trades)"],
