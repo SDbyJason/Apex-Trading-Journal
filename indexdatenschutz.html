@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-28c';
+  window.APEX_BUILD = '2026-10-29a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -60442,9 +60442,14 @@ self.addEventListener('message', async (ev) => {
     // A session started "without the missing days" keeps that choice when
     // the timeframe changes — the same days are still missing.
     if (opts && opts.allowGaps) this._allowGaps = true;
+    /* Schnell hintereinander geklickt (1m, dann gleich 15m) kann die aeltere
+       Ladung zuletzt ankommen und den Chart mit dem falschen Zeitrahmen
+       ueberschreiben. Nur die juengste Ladung darf anwenden. */
+    var seq = this._loadSeq = (this._loadSeq || 0) + 1;
     return window.ApexMarketData.getBidAsk(this.symbol, from, to, this.tf,
                                            { onProgress: onProgress, allowGaps: !!this._allowGaps,
                                              skipDays: opts && opts.skipDays }).then(function (d) {
+      if (seq !== self._loadSeq) { var e = new Error('superseded'); e.superseded = true; throw e; }
       if (!d.n) throw new Error('No market data in that range (weekend or holiday?)');
       // Remember the requested window. Re-deriving it from the loaded bars on a
       // timeframe switch made the session grow by a day every time.
@@ -64689,6 +64694,12 @@ self.addEventListener('message', async (ev) => {
       x.classList.toggle('on', x.getAttribute('data-arp-tf') === tf);
     });
     S.session.setTimeframe(tf).then(function () {
+      /* load() rahmt den Chart am Aufwaerm-Punkt, danach springt der Cursor
+         an die alte Stelle — der Ausschnitt stand dann neben den Kerzen
+         (gequetscht links, rechts leer). Neu um den Cursor rahmen und die
+         Legende (Zeitrahmen + OHLC) nachziehen. */
+      if (S.chart) { S.chart.resetPriceScale(); S.chart.followTail(120); }
+      if (window.ApexWorkspace && window.ApexWorkspace.refreshLegend) window.ApexWorkspace.refreshLegend();
       if (S.draw) S.draw.sync();
       /* Extra charts only show HIGHER timeframes than the main one, so the
          choice (and whether 2 or 4 charts are possible at all) is rebuilt. */
@@ -64701,7 +64712,7 @@ self.addEventListener('message', async (ev) => {
       });
       if (wasPlaying) S.session.play();
       paint();
-    }).catch(function (e) { toast('⚠ ' + (e.message || 'timeframe switch failed')); });
+    }).catch(function (e) { if (!e || !e.superseded) toast('⚠ ' + ((e && e.message) || 'timeframe switch failed')); });
   }
 
   /* ─────────────── indicators on the replay chart ───────────────
@@ -95543,7 +95554,9 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       var chg = bar.o ? ((bar.c - bar.o) / bar.o * 100) : 0;
       box.innerHTML =
         '<b class="notranslate" translate="no">' + (name() || '') + '</b>' +
-        '<span class="k">' + (tf || '') + '</span>' +
+        /* Zeitrahmen vom Chart lesen: der Replay wechselt ihn, ohne die
+           Werkstatt neu aufzubauen — sonst stand nach 5m → 1h weiter „5m“. */
+        '<span class="k">' + ((chartInst && chartInst.tf) || tf || '') + '</span>' +
         '<span><span class="k">O</span> ' + fmt(bar.o, digits) + '</span>' +
         '<span><span class="k">H</span> ' + fmt(bar.h, digits) + '</span>' +
         '<span><span class="k">L</span> ' + fmt(bar.l, digits) + '</span>' +
