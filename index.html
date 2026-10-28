@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-28b';
+  window.APEX_BUILD = '2026-10-28c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -59379,15 +59379,23 @@ self.addEventListener('message', async (ev) => {
     var LWC = window.LightweightCharts;
     var solid = (LWC && LWC.ColorType) ? LWC.ColorType.Solid : 'solid';
     var bg = (s.bg && s.bg !== 'transparent') ? s.bg : 'rgba(0,0,0,0)';
+    /* Verlauf von oben nach unten (TradingView: Hintergrund „Gradient"). */
+    var hinter = s.bgGrad && s.bg2
+      ? { type: (LWC && LWC.ColorType && LWC.ColorType.VerticalGradient) || 'gradient', topColor: bg, bottomColor: s.bg2 }
+      : { type: solid, color: bg };
+    var gridAn = s.showGrid !== false;
+    var LS = (LWC && LWC.LineStyle) || { Solid: 0, Dotted: 1, Dashed: 2 };
+    var kreuz = ({ solid: LS.Solid, dotted: LS.Dotted })[s.crossStyle];
+    if (kreuz == null) kreuz = LS.Dashed;
     this.chart.applyOptions({
-      layout: { background: { type: solid, color: bg }, textColor: s.text || '#8b91a1' },
-      grid: { vertLines: { color: s.grid, visible: s.showGrid !== false },
-              horzLines: { color: s.grid, visible: s.showGrid !== false } },
+      layout: { background: hinter, textColor: s.text || '#8b91a1', fontSize: Math.max(9, Math.min(16, +s.fontSize || 12)) },
+      grid: { vertLines: { color: s.grid, visible: gridAn && s.gridV !== false },
+              horzLines: { color: s.grid, visible: gridAn && s.gridH !== false } },
       /* Skala: normal, logarithmisch oder Prozent (28.10.2026). */
       rightPriceScale: { borderColor: s.grid, mode: ({ log: 1, pct: 2 })[s.scale] || 0 },
       timeScale: { borderColor: s.grid },
-      crosshair: { vertLine: { color: s.crosshair, labelBackgroundColor: s.crosshair },
-                   horzLine: { color: s.crosshair, labelBackgroundColor: s.crosshair } }
+      crosshair: { vertLine: { color: s.crosshair, labelBackgroundColor: s.crosshair, style: kreuz },
+                   horzLine: { color: s.crosshair, labelBackgroundColor: s.crosshair, style: kreuz } }
     });
     this._applySeriesColors(s);
     if (this.vol) this.vol.applyOptions({ visible: s.showVolume !== false });
@@ -59401,24 +59409,29 @@ self.addEventListener('message', async (ev) => {
     // rest of the app.
     s = s || this._style || (window.ApexChartStyle && window.ApexChartStyle.defaults) || {};
     var t = this._seriesType || 'candles';
+    var CS = window.ApexChartStyle;
+    var mitA = function (c, a) {
+      if (!CS || !CS.parseColor) return c;
+      var p = CS.parseColor(c, '#3ecf8e'); return CS.makeColor(p.hex, p.a * a);
+    };
     if (t === 'hollow') {
       /* Hohle Kerzen: steigende nur als Umriss, fallende gefuellt. */
       this.series.applyOptions({
         upColor: 'rgba(0,0,0,0)', downColor: s.down, borderVisible: true,
-        borderUpColor: s.up, borderDownColor: s.down,
+        borderUpColor: s.borderUp || s.up, borderDownColor: s.borderDown || s.down,
         wickUpColor: s.wickUp || s.up, wickDownColor: s.wickDown || s.down
       });
     } else if (t === 'baseline') {
       this.series.applyOptions({
         topLineColor: s.up, bottomLineColor: s.down, lineWidth: 2,
-        topFillColor1: 'rgba(62,207,142,0.28)', topFillColor2: 'rgba(62,207,142,0.04)',
-        bottomFillColor1: 'rgba(240,99,106,0.04)', bottomFillColor2: 'rgba(240,99,106,0.28)'
+        topFillColor1: mitA(s.up, 0.28), topFillColor2: mitA(s.up, 0.04),
+        bottomFillColor1: mitA(s.down, 0.04), bottomFillColor2: mitA(s.down, 0.28)
       });
     } else if (t === 'candles' || t === 'heikin') {
       this.series.applyOptions({
         upColor: s.up, downColor: s.down,
         borderVisible: s.border !== false,
-        borderUpColor: s.up, borderDownColor: s.down,
+        borderUpColor: s.borderUp || s.up, borderDownColor: s.borderDown || s.down,
         wickUpColor: s.wickUp || s.up, wickDownColor: s.wickDown || s.down
       });
     } else if (t === 'bars') {
@@ -59426,8 +59439,9 @@ self.addEventListener('message', async (ev) => {
     } else if (t === 'line') {
       this.series.applyOptions({ color: s.up, lineWidth: 2 });
     } else if (t === 'area') {
-      this.series.applyOptions({ lineColor: s.up, topColor: s.up, bottomColor: 'rgba(0,0,0,0)' });
+      this.series.applyOptions({ lineColor: s.up, topColor: mitA(s.up, 0.4), bottomColor: 'rgba(0,0,0,0)' });
     }
+    try { this.series.applyOptions({ priceLineVisible: s.priceLine !== false }); } catch (e) {}
   };
 
   /* Switching chart type means replacing the series object, so every piece of
@@ -69797,7 +69811,20 @@ self.addEventListener('message', async (ev) => {
     wickUp: '#3ecf8e',
     wickDown: '#f0636a',
     border: true,
-    crosshair: '#c9a84c'
+    crosshair: '#c9a84c',
+    /* Seit 28.10.2026 (TradingView-Einstellungen): eigene Randfarben,
+       Verlauf im Hintergrund, Raster je Richtung, Fadenkreuz-Linie,
+       Schriftgroesse der Achsen, Kurslinie und Statuszeile. */
+    borderUp: '#3ecf8e',
+    borderDown: '#f0636a',
+    bgGrad: false,
+    bg2: '#0b0d11',
+    gridH: true,
+    gridV: true,
+    crossStyle: 'dashed',
+    fontSize: 12,
+    priceLine: true,
+    legend: true
   };
 
   function key() { return 'apexChartStyle_' + (window.currentUID || 'local'); }
@@ -69808,6 +69835,11 @@ self.addEventListener('message', async (ev) => {
     try {
       var raw = JSON.parse(localStorage.getItem(key()) || '{}');
       for (var j in raw) if (j in DEFAULTS) s[j] = raw[j];
+      /* Alte Einstellungen kannten keine Randfarben: der Rand trug immer
+         die Koerperfarbe. Ohne das bekaeme eine blaue Kerze ploetzlich
+         einen gruenen Rand. */
+      if (!('borderUp' in raw)) s.borderUp = s.up;
+      if (!('borderDown' in raw)) s.borderDown = s.down;
     } catch (e) {}
     return s;
   }
@@ -69823,6 +69855,9 @@ self.addEventListener('message', async (ev) => {
     ['bg', 'grid', 'text', 'up', 'down', 'wickUp', 'wickDown', 'border', 'crosshair'].forEach(function (k) {
       s[k] = p[k];
     });
+    s.borderUp = p.borderUp || p.up;
+    s.borderDown = p.borderDown || p.down;
+    s.bgGrad = false;
     return s;
   }
 
@@ -69838,63 +69873,154 @@ self.addEventListener('message', async (ev) => {
     return /^#[0-9a-f]{6}$/i.test(String(v)) ? v : fallback;
   }
 
-  function panelHtml(s) {
-    var presetBtns = Object.keys(PRESETS).map(function (k) {
-      return '<button class="el-pill ' + (s.preset === k ? 'on' : '') + '" data-cs-preset="' + k + '">' +
-             esc(PRESETS[k].label) + '</button>';
-    }).join('');
+  /* Farbe in Hex + Deckkraft zerlegen und wieder zusammensetzen. Raster und
+     Hintergrund sind rgba — ein reines <input type=color> konnte die
+     Deckkraft nicht halten und machte das Raster beim ersten Antippen
+     voll deckend. */
+  function parseCol(v, fallback) {
+    v = String(v == null ? '' : v).trim();
+    if (v === 'transparent') return { hex: hexFor(fallback, '#000000'), a: 0 };
+    var m = /^#([0-9a-f]{6})$/i.exec(v);
+    if (m) return { hex: '#' + m[1].toLowerCase(), a: 1 };
+    m = /^#([0-9a-f]{3})$/i.exec(v);
+    if (m) return { hex: '#' + m[1].replace(/(.)/g, '$1$1').toLowerCase(), a: 1 };
+    m = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/i.exec(v);
+    if (m) {
+      var h = '#' + [m[1], m[2], m[3]].map(function (x) {
+        var n = Math.max(0, Math.min(255, +x)); return (n < 16 ? '0' : '') + n.toString(16);
+      }).join('');
+      return { hex: h, a: m[4] == null ? 1 : Math.max(0, Math.min(1, +m[4])) };
+    }
+    return { hex: hexFor(fallback, '#000000'), a: 1 };
+  }
+  function mkCol(hex, a) {
+    if (!(a < 1)) return hex;
+    var n = parseInt(String(hex).slice(1), 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + (+(+a).toFixed(2)) + ')';
+  }
 
-    var typeBtns = SERIES_TYPES.map(function (t) {
-      return '<button class="el-pill ' + (s.seriesType === t[0] ? 'on' : '') + '" data-cs-type="' + t[0] + '">' +
-             esc(t[1]) + '</button>';
-    }).join('');
+  /* Palette wie bei TradingView: Grau-Leiter, kraeftige Farben, drei
+     Helligkeiten davon und die Evidence-Farben. */
+  var PALETTE = [
+    '#ffffff', '#e0e3eb', '#b2b5be', '#868993', '#5d606b', '#434651', '#2a2e39', '#1e222d', '#131722', '#000000',
+    '#f23645', '#ff9800', '#ffeb3b', '#4caf50', '#089981', '#00bcd4', '#2962ff', '#673ab7', '#9c27b0', '#e91e63',
+    '#fccbcd', '#ffe0b2', '#fff9c4', '#c8e6c9', '#ace5dc', '#b2ebf2', '#bbd9fb', '#d1c4e9', '#e1bee7', '#f8bbd0',
+    '#f7525f', '#ffb74d', '#fff176', '#81c784', '#42bda8', '#4dd0e1', '#5b9cf6', '#9575cd', '#ba68c8', '#f06292',
+    '#b22833', '#f57c00', '#fbc02d', '#388e3c', '#056656', '#0097a7', '#1848cc', '#512da8', '#7b1fa2', '#c2185b',
+    '#3ecf8e', '#f0636a', '#c9a84c', '#e8c96a', '#8b91a1', '#0b0d11', '#7aa2ff', '#4dd6a8', '#ff5f7e', '#d8dbe2'
+  ];
+  var FALLBACK = { up: '#3ecf8e', down: '#f0636a', borderUp: '#3ecf8e', borderDown: '#f0636a',
+                   wickUp: '#3ecf8e', wickDown: '#f0636a', bg: '#0b0d11', bg2: '#0b0d11',
+                   grid: '#1c2029', crosshair: '#c9a84c', text: '#8b91a1' };
+  var NAMES = { up: 'Up', down: 'Down', borderUp: 'Border up', borderDown: 'Border down',
+                wickUp: 'Wick up', wickDown: 'Wick down', bg: 'Background', bg2: 'Background (bottom)',
+                grid: 'Grid lines', crosshair: 'Crosshair', text: 'Scale text' };
 
-    function color(id, label, val, fallback) {
-      return '<label class="acs-c"><span>' + esc(label) + '</span>' +
-             '<input type="color" data-cs-color="' + id + '" value="' + hexFor(val, fallback) + '"></label>';
+  function panelHtml(s, open, opts) {
+    opts = opts || {};
+    function pills(attr, list, cur) {
+      return '<div class="acs-pills">' + list.map(function (x) {
+        return '<button type="button" class="el-pill ' + (cur === x[0] ? 'on' : '') + '" ' + attr + '="' + x[0] + '">' + esc(x[1]) + '</button>';
+      }).join('') + '</div>';
+    }
+    function chip(id) {
+      var c = parseCol(s[id], FALLBACK[id]);
+      return '<button type="button" class="acs-chip' + (open === id ? ' on' : '') + '" data-cs-pick="' + id + '" ' +
+             'title="' + esc(NAMES[id]) + '" aria-label="' + esc(NAMES[id]) + ' colour" aria-expanded="' + (open === id) + '">' +
+             '<i style="background:' + esc(mkCol(c.hex, c.a)) + '"></i></button>';
     }
     function toggle(id, label, on) {
       return '<label class="acs-t"><input type="checkbox" data-cs-flag="' + id + '"' + (on ? ' checked' : '') + '>' +
              esc(label) + '</label>';
     }
+    function row(label, body, ids) {
+      var h = '<div class="acs-row"><div class="acs-lbl">' + esc(label) + '</div><div class="acs-line">' + body + '</div></div>';
+      /* Die Palette klappt direkt unter der Zeile auf, zu der sie gehoert —
+         im Fluss statt schwebend, damit sie in keinem Vollbild, keiner
+         Bodenleiste und keinem Scroll-Container abgeschnitten wird. */
+      if (open && ids && ids.indexOf(open) >= 0) h += pickerHtml(open);
+      return h;
+    }
+    function pickerHtml(id) {
+      var c = parseCol(s[id], FALLBACK[id]);
+      return '<div class="acs-pop" data-cs-pop="' + id + '">' +
+        '<div class="acs-pop-h"><b>' + esc(NAMES[id]) + '</b><button type="button" class="acs-done" data-cs-done="1">Done</button></div>' +
+        '<div class="acs-pal">' + PALETTE.map(function (p) {
+          return '<button type="button" data-cs-sw="' + p + '" class="' + (p === c.hex ? 'on' : '') + '" style="background:' + p + '" aria-label="' + p + '"></button>';
+        }).join('') + '</div>' +
+        '<div class="acs-op"><span>Opacity</span><input type="range" min="0" max="100" step="1" data-cs-alpha value="' + Math.round(c.a * 100) + '">' +
+          '<b data-cs-alpha-v>' + Math.round(c.a * 100) + '%</b></div>' +
+        '<label class="acs-cust"><input type="color" data-cs-custom value="' + c.hex + '"><span>Custom colour</span>' +
+          '<code class="notranslate" translate="no" data-cs-hex>' + esc(c.hex.toUpperCase()) + '</code></label>' +
+      '</div>';
+    }
+    var gridMode = s.showGrid === false ? 'none' : (s.gridH !== false && s.gridV !== false) ? 'both' : s.gridH !== false ? 'h' : s.gridV !== false ? 'v' : 'none';
 
     return '' +
-      '<div class="acs-row"><div class="acs-lbl">Theme</div><div class="acs-pills">' + presetBtns + '</div></div>' +
-      '<div class="acs-row"><div class="acs-lbl">Style</div><div class="acs-pills">' + typeBtns + '</div></div>' +
-      '<div class="acs-row"><div class="acs-lbl">Scale</div><div class="acs-pills">' + SCALES.map(function (k) {
-        return '<button class="el-pill ' + ((s.scale || 'normal') === k[0] ? 'on' : '') + '" data-cs-scale="' + k[0] + '">' + esc(k[1]) + '</button>';
-      }).join('') + '</div></div>' +
-      '<div class="acs-row"><div class="acs-lbl">Colours</div><div class="acs-colors">' +
-        color('up',       'Up',         s.up,        '#3ecf8e') +
-        color('down',     'Down',       s.down,      '#f0636a') +
-        color('wickUp',   'Wick up',    s.wickUp,    '#3ecf8e') +
-        color('wickDown', 'Wick down',  s.wickDown,  '#f0636a') +
-        color('bg',       'Background', s.bg,        '#0b0d11') +
-        color('grid',     'Grid',       s.grid,      '#1c2029') +
-        color('crosshair','Crosshair',  s.crosshair, '#c9a84c') +
-      '</div></div>' +
-      '<div class="acs-row"><div class="acs-lbl">Show</div><div class="acs-toggles">' +
-        toggle('showGrid', 'Grid', s.showGrid) +
-        toggle('showVolume', 'Volume', s.showVolume) +
-        toggle('border', 'Candle borders', s.border) +
-      '</div></div>' +
-      '<div class="acs-row"><div class="acs-lbl"></div><div>' +
-        '<button class="el-btn" data-cs-reset>Reset to Evidence default</button>' +
-      '</div></div>';
+      '<div class="acs-sec">Theme</div>' +
+      '<div class="acs-row acs-row-full">' + pills('data-cs-preset', Object.keys(PRESETS).map(function (k) { return [k, PRESETS[k].label]; }), s.preset) + '</div>' +
+
+      '<div class="acs-sec">Candles</div>' +
+      '<div class="acs-row acs-row-full">' + pills('data-cs-type', SERIES_TYPES, s.seriesType) + '</div>' +
+      row('Body', chip('up') + chip('down'), ['up', 'down']) +
+      row('Borders', chip('borderUp') + chip('borderDown') + toggle('border', 'Show', s.border !== false), ['borderUp', 'borderDown']) +
+      row('Wicks', chip('wickUp') + chip('wickDown'), ['wickUp', 'wickDown']) +
+
+      '<div class="acs-sec">Canvas</div>' +
+      row('Background', chip('bg') + (s.bgGrad ? chip('bg2') : '') +
+        pills('data-cs-bgmode', [['solid', 'Solid'], ['grad', 'Gradient']], s.bgGrad ? 'grad' : 'solid'), ['bg', 'bg2']) +
+      row('Grid', chip('grid') + pills('data-cs-grid', [['both', 'Both'], ['h', 'Horiz.'], ['v', 'Vert.'], ['none', 'None']], gridMode), ['grid']) +
+      row('Crosshair', chip('crosshair') + pills('data-cs-cross', [['dashed', 'Dashed'], ['dotted', 'Dotted'], ['solid', 'Solid']], s.crossStyle || 'dashed'), ['crosshair']) +
+
+      '<div class="acs-sec">Scales</div>' +
+      row('Scale', pills('data-cs-scale', SCALES, s.scale || 'normal')) +
+      row('Text', chip('text') + pills('data-cs-font', [['10', '10'], ['11', '11'], ['12', '12'], ['13', '13'], ['14', '14']], String(s.fontSize || 12)), ['text']) +
+      row('Show', '<div class="acs-toggles">' +
+        toggle('priceLine', 'Last price line', s.priceLine !== false) +
+        toggle('showVolume', 'Volume', s.showVolume !== false) +
+        (opts.legend ? toggle('legend', 'OHLC values', s.legend !== false) : '') +
+      '</div>') +
+      '<div class="acs-row acs-row-full"><button type="button" class="el-btn" data-cs-reset>Reset to Evidence default</button></div>';
   }
 
   var CSS = [
     '.acs-panel{background:var(--layer);border:0.5px solid var(--rim);border-radius:12px;padding:14px 16px;margin-top:10px}',
-    '.acs-row{display:flex;gap:14px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid var(--rim)}',
+    '.acs-sec{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);font-weight:700;padding:12px 0 2px}',
+    '.acs-sec:first-child{padding-top:2px}',
+    '.acs-row{display:flex;gap:12px;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--rim)}',
     '.acs-row:last-child{border-bottom:none}',
-    '.acs-lbl{flex:0 0 84px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);font-weight:600;padding-top:6px}',
-    '.acs-pills{display:flex;gap:6px;flex-wrap:wrap}',
+    '.acs-row-full{display:block}',
+    '.acs-lbl{flex:0 0 84px;font-size:12px;color:var(--ink2)}',
+    '.acs-line{flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}',
+    '.acs-pills{display:flex;gap:5px;flex-wrap:wrap}',
+    '.acs-line .acs-pills{margin-left:auto}',
+    /* Im Einstellungsfenster umbrechen statt wischen — sonst stand „Bars" halb abgeschnitten am Rand. */
+    '.acs-panel .acs-pills.acs-pills{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none}',
+    '.acs-chip{width:30px;height:26px;padding:3px;border-radius:7px;border:0.5px solid var(--rim2);cursor:pointer;flex:none;' +
+      'background:repeating-conic-gradient(#8883 0 25%,transparent 0 50%) 50%/8px 8px}',
+    '.acs-chip i{display:block;width:100%;height:100%;border-radius:4px;box-shadow:inset 0 0 0 0.5px rgba(127,127,127,.35)}',
+    '.acs-chip.on{border-color:var(--gold);box-shadow:0 0 0 2px rgba(var(--gold-rgb),.25)}',
+    '.acs-pop{margin:2px 0 8px;padding:10px;border-radius:10px;background:var(--surface);border:0.5px solid var(--rim2)}',
+    '.acs-pop-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:12.5px;color:var(--ink)}',
+    '.acs-done{background:none;border:0.5px solid var(--gold-line);color:var(--gold);border-radius:7px;padding:4px 12px;font:inherit;font-size:12px;cursor:pointer}',
+    '.acs-pal{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}',
+    '.acs-pal button{aspect-ratio:1;min-height:20px;border-radius:5px;border:0.5px solid rgba(127,127,127,.35);cursor:pointer;padding:0}',
+    '.acs-pal button.on{outline:2px solid var(--gold);outline-offset:1px}',
+    '.acs-op{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:var(--ink2)}',
+    '.acs-op input{flex:1;accent-color:var(--gold)}',
+    '.acs-op b{min-width:38px;text-align:right;font-family:var(--font-mono);font-weight:500;color:var(--ink)}',
+    '.acs-cust{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--ink2);cursor:pointer}',
+    '.acs-cust input{width:34px;height:26px;border:0.5px solid var(--rim2);border-radius:6px;background:none;padding:0;cursor:pointer}',
+    '.acs-cust code{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;color:var(--ink3)}',
+    /* Alte Klassen bleiben — andere Panels benutzen sie noch. */
     '.acs-colors{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px;flex:1}',
     '.acs-c{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}',
     '.acs-c input[type=color]{width:26px;height:22px;border:0.5px solid var(--rim);border-radius:4px;background:none;padding:0;cursor:pointer}',
-    '.acs-toggles{display:flex;gap:14px;flex-wrap:wrap}',
+    '.acs-toggles{display:flex;gap:8px 14px;flex-wrap:wrap}',
     '.acs-t{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);cursor:pointer}',
-    '.acs-t input{accent-color:var(--gold)}'
+    '.acs-t input{accent-color:var(--gold)}',
+    '@media (max-width:600px){.acs-lbl{flex-basis:70px}.acs-line .acs-pills{margin-left:0}.acs-chip{width:34px;height:30px}' +
+      '.acs-pal{gap:5px}.acs-pal button{min-height:26px}.acs-op input{height:28px}}'
   ].join('\n');
 
   function injectCss() {
@@ -69910,12 +70036,14 @@ self.addEventListener('message', async (ev) => {
    * @param {HTMLElement} host  container that will hold the panel
    * @param {object} chartInst  ApexChart instance
    * @param {function} onApply  called after every change
+   * @param {object} [opts]     { legend: true } shows the OHLC-values switch
    */
-  function mount(host, chartInst, onApply) {
+  function mount(host, chartInst, onApply, opts) {
     injectCss();
     var s = load();
+    var open = null;
     host.className = 'acs-panel';
-    host.innerHTML = panelHtml(s);
+    host.innerHTML = panelHtml(s, open, opts);
 
     function commit(rerender) {
       save(s);
@@ -69923,21 +70051,73 @@ self.addEventListener('message', async (ev) => {
         chartInst.setStyle(s);
         chartInst.setSeriesType(s.seriesType, s);
       }
-      if (rerender) host.innerHTML = panelHtml(s);
+      if (rerender) host.innerHTML = panelHtml(s, open, opts);
       if (onApply) onApply(s);
+    }
+    /* Waehrend des Ziehens am Regler nicht neu aufbauen (der Regler wuerde
+       unter dem Finger ersetzt) — nur Vorschau-Kaestchen und Werte. */
+    /* Rand und Docht haengen an der Koerperfarbe, solange sie gleich sind —
+       sonst blieb nach „Up = blau" jede duenne Kerze gruen (der Rand deckt
+       sie fast ganz). Eigene Rand-/Dochtfarben bleiben unangetastet. */
+    var KOPPEL = { up: ['borderUp', 'wickUp'], down: ['borderDown', 'wickDown'] };
+    function setzeFarbe(k, v) {
+      var alt = String(s[k]).toLowerCase();
+      s[k] = v; s.preset = 'custom';
+      (KOPPEL[k] || []).forEach(function (j) { if (String(s[j]).toLowerCase() === alt) s[j] = v; });
+    }
+    function chipNeu() {
+      [].slice.call(host.querySelectorAll('[data-cs-pick]')).forEach(function (b) {
+        var id = b.getAttribute('data-cs-pick'), cc = parseCol(s[id], FALLBACK[id]), ii = b.querySelector('i');
+        if (ii) ii.style.background = mkCol(cc.hex, cc.a);
+      });
+      if (!open) return;
+      var c = parseCol(s[open], FALLBACK[open]);
+      var v = host.querySelector('[data-cs-alpha-v]'); if (v) v.textContent = Math.round(c.a * 100) + '%';
+      var hx = host.querySelector('[data-cs-hex]'); if (hx) hx.textContent = c.hex.toUpperCase();
+      [].slice.call(host.querySelectorAll('[data-cs-sw]')).forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-cs-sw') === c.hex); });
     }
 
     host.addEventListener('click', function (e) {
-      var t = e.target;
-      if (!t || !t.getAttribute) return;
+      var t = e.target && e.target.closest ? e.target.closest('button') : null;
+      if (!t || !host.contains(t)) return;
       var p = t.getAttribute('data-cs-preset');
-      if (p) { applyPreset(s, p); commit(true); return; }
+      if (p) { applyPreset(s, p); open = null; commit(true); return; }
       var ty = t.getAttribute('data-cs-type');
       if (ty) { s.seriesType = ty; commit(true); return; }
       var sc = t.getAttribute('data-cs-scale');
       if (sc) { s.scale = sc; commit(true); return; }
+      var pk = t.getAttribute('data-cs-pick');
+      if (pk) { open = open === pk ? null : pk; host.innerHTML = panelHtml(s, open, opts); return; }
+      if (t.hasAttribute('data-cs-done')) { open = null; host.innerHTML = panelHtml(s, open, opts); return; }
+      var sw = t.getAttribute('data-cs-sw');
+      if (sw && open) {
+        var alt = parseCol(s[open], FALLBACK[open]);
+        /* Volle Deckkraft, wenn die alte Farbe unsichtbar war — sonst
+           bewirkt ein Klick auf eine Farbe scheinbar nichts. */
+        setzeFarbe(open, mkCol(sw, alt.a > 0.02 ? alt.a : 1));
+        commit(false); chipNeu();
+        var al = host.querySelector('[data-cs-alpha]'); if (al) al.value = Math.round(parseCol(s[open]).a * 100);
+        return;
+      }
+      var bm = t.getAttribute('data-cs-bgmode');
+      if (bm) {
+        s.bgGrad = bm === 'grad';
+        if (s.bgGrad && parseCol(s.bg, '#0b0d11').a < 0.02) s.bg = '#131722';
+        if (!s.bgGrad && open === 'bg2') open = null;
+        s.preset = 'custom'; commit(true); return;
+      }
+      var gm = t.getAttribute('data-cs-grid');
+      if (gm) {
+        s.showGrid = gm !== 'none'; s.gridH = gm === 'both' || gm === 'h'; s.gridV = gm === 'both' || gm === 'v';
+        commit(true); return;
+      }
+      var cr = t.getAttribute('data-cs-cross');
+      if (cr) { s.crossStyle = cr; commit(true); return; }
+      var fs = t.getAttribute('data-cs-font');
+      if (fs) { s.fontSize = +fs; commit(true); return; }
       if (t.hasAttribute('data-cs-reset')) {
         for (var k in DEFAULTS) s[k] = DEFAULTS[k];
+        open = null;
         commit(true);
       }
     });
@@ -69945,8 +70125,18 @@ self.addEventListener('message', async (ev) => {
     host.addEventListener('input', function (e) {
       var t = e.target;
       if (!t || !t.getAttribute) return;
-      var c = t.getAttribute('data-cs-color');
-      if (c) { s[c] = t.value; s.preset = 'custom'; commit(false); return; }
+      if (t.hasAttribute('data-cs-alpha') && open) {
+        var c = parseCol(s[open], FALLBACK[open]);
+        setzeFarbe(open, mkCol(c.hex, (+t.value) / 100));
+        commit(false); chipNeu(); return;
+      }
+      if (t.hasAttribute('data-cs-custom') && open) {
+        var c2 = parseCol(s[open], FALLBACK[open]);
+        setzeFarbe(open, mkCol(t.value, c2.a > 0.02 ? c2.a : 1));
+        commit(false); chipNeu(); return;
+      }
+      var c3 = t.getAttribute('data-cs-color');
+      if (c3) { s[c3] = t.value; s.preset = 'custom'; commit(false); return; }
       var f = t.getAttribute('data-cs-flag');
       if (f) { s[f] = t.checked; commit(false); }
     });
@@ -69963,7 +70153,9 @@ self.addEventListener('message', async (ev) => {
     presets: PRESETS,
     seriesTypes: SERIES_TYPES,
     scales: SCALES,
-    defaults: DEFAULTS
+    defaults: DEFAULTS,
+    parseColor: parseCol,
+    makeColor: mkCol
   };
 })();
 
@@ -90460,6 +90652,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       host.style.position = host.style.position || 'relative';
       host.appendChild(box);
     }
+    box.hidden = evStilJetzt().legend === false;
     var st = (TV._levels && TV._levels.stellen) || 2;
     var zahl = function (v) { return isFinite(v) ? (+v).toFixed(Math.abs(v) >= 1000 ? Math.min(st, 2) : st) : '—'; };
     var malen = function (bar) {
@@ -90681,25 +90874,141 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       ['data-evbild', 'Save chart image', ''],
       ['data-evhilfe', 'Keyboard shortcuts', '?']
     ];
+    EV._menu = menu; EV._note = note;
+    var typ = evStilJetzt().seriesType || 'candles';
+    var railAuf = evRailHandyAuf();
+    /* Handy (28.10.2026, wie TradingView): Zeitrahmen als ein Knopf
+       „M15 ▾" statt sieben, Chart-Typ als Symbol, Farben hinter dem
+       Zahnrad, Zeichenwerkzeuge hinter dem Stift — alles in einer Zeile.
+       Am Desktop bleiben die Zeitrahmen-Knoepfe; die Handy-Knoepfe sind
+       dort per CSS aus. Die Klappmenues haengen am Chart (#tvEvDd), nicht
+       in der wischbaren Leiste, die sie sonst abschneidet. */
     return '<span class="tv-ev-br"></span><span class="tv-ev-sws">' +
+      '<button type="button" data-evtfdd="1" class="tv-ev-sw tv-ev-tfb notranslate' + (EV.dd === 'tf' ? ' on' : '') + '" translate="no" ' +
+        'aria-haspopup="true" aria-expanded="' + (EV.dd === 'tf') + '" aria-label="Timeframe ' + escHtml(EV.tf || '') + '" title="Timeframe">' +
+        escHtml(EV.tf || 'M15') + '<svg class="tv-ev-car" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4"/></svg></button>' +
+      '<button type="button" data-evtypdd="1" class="tv-ev-sw tv-ev-ico' + (EV.dd === 'typ' ? ' on' : '') + '" aria-haspopup="true" aria-expanded="' + (EV.dd === 'typ') + '" ' +
+        'title="Chart type & scale" aria-label="Chart type">' + (EV_TYP_ICON[typ] || EV_TYP_ICON.candles) + '</button>' +
       '<span class="tv-ev-lay" title="Charts side by side, each with its own timeframe">' +
       [1, 2, 4].map(function (k) { return '<button type="button" data-evlay="' + k + '" class="' + (EV.anzahl === k ? 'on' : '') + '" aria-label="' + k + ' chart' + (k > 1 ? 's' : '') + '">' + k + '</button>'; }).join('') + '</span>' +
-      '<button type="button" data-evind="1" class="tv-ev-sw tv-ev-indb' + (evIndOffen() ? ' on' : '') + '" title="Indicators and layers — zones, heatmap, footprint, sessions, news">' +
-        '<b class="fx">ƒx</b> Indicators' + (n ? '<i>' + n + '</i>' : '') + '</button>' +
-      '<span class="tv-ev-more"><button type="button" data-evmore="1" class="tv-ev-sw' + (EV.moreOpen ? ' on' : '') + '" aria-label="More" aria-expanded="' + !!EV.moreOpen + '">⋯</button>' +
-        (EV.moreOpen ? '<div class="tv-ev-pop" role="menu">' + menu.map(function (x) { return '<button type="button" role="menuitem" ' + x[0] + '="1">' + x[1] + (x[2] ? '<kbd>' + x[2] + '</kbd>' : '') + '</button>'; }).join('') + '</div>' : '') +
-      '</span>' +
+      '<button type="button" data-evind="1" class="tv-ev-sw tv-ev-indb' + (evIndOffen() ? ' on' : '') + '" title="Indicators and layers — zones, heatmap, footprint, sessions, news" aria-label="Indicators">' +
+        '<b class="fx">ƒx</b><span class="tv-ev-lbl"> Indicators</span>' + (n ? '<i>' + n + '</i>' : '') + '</button>' +
+      '<button type="button" data-evstil="1" class="tv-ev-sw tv-ev-ico' + (evStilOffen() ? ' on' : '') + '" title="Chart style & colours" aria-label="Chart style and colours">' +
+        '<svg class=ic aria-hidden=true><use href=#i-settings ></use></svg></button>' +
+      '<button type="button" data-evzeichnen="1" class="tv-ev-sw tv-ev-ico tv-ev-pen' + (railAuf ? ' on' : '') + '" aria-pressed="' + railAuf + '" title="Drawing tools" aria-label="Drawing tools">' +
+        '<svg class=ic aria-hidden=true><use href=#i-edit ></use></svg></button>' +
+      '<span class="tv-ev-more"><button type="button" data-evmore="1" class="tv-ev-sw' + (EV.dd === 'more' ? ' on' : '') + '" aria-haspopup="true" aria-label="More" aria-expanded="' + (EV.dd === 'more') + '">⋯</button></span>' +
       (note ? '<button type="button" class="tv-ev-sw tv-ev-info" title="' + escHtml(note) + '" aria-label="About this chart">ⓘ</button>' : '') +
     '</span>';
+  }
+
+  /* ── Klappmenues der Kopfleiste ── */
+  var EV_TYP_ICON = (function () {
+    var w = function (inner) { return '<svg class="tv-ev-typ" viewBox="0 0 18 18" aria-hidden="true">' + inner + '</svg>'; };
+    return {
+      candles: w('<path d="M5 2.5v13M13 3.5v11"/><rect x="3" y="5.5" width="4" height="6.5" rx=".6" class="f"/><rect x="11" y="6.5" width="4" height="5" rx=".6"/>'),
+      hollow: w('<path d="M5 2.5v3M5 12v3.5M13 3.5v3M13 11.5v3"/><rect x="3" y="5.5" width="4" height="6.5" rx=".6"/><rect x="11" y="6.5" width="4" height="5" rx=".6" class="f"/>'),
+      heikin: w('<path d="M5 3v12M13 2.5v11"/><rect x="3" y="6" width="4" height="7" rx=".6" class="f"/><rect x="11" y="4.5" width="4" height="6.5" rx=".6" class="f"/>'),
+      bars: w('<path d="M5 2.5v13M2.5 5.5H5M5 12h2.5M13 3.5v11M10.5 11.5H13M13 6h2.5"/>'),
+      line: w('<path d="M2 13l4.5-5 3.5 3 6-7.5"/>'),
+      area: w('<path d="M2 13l4.5-5 3.5 3 6-7.5V16H2z" class="a"/><path d="M2 13l4.5-5 3.5 3 6-7.5"/>'),
+      baseline: w('<path d="M2 9h14" stroke-dasharray="2 2"/><path d="M2 12l4-5 3 3.5 3-4 4 2"/>')
+    };
+  })();
+  function evStilJetzt() { try { return window.ApexChartStyle ? window.ApexChartStyle.load() : {}; } catch (e) { return {}; } }
+  function evHandy() { return !!(window.matchMedia && window.matchMedia('(max-width:760px)').matches); }
+  function evRailHandyAuf() { var m = document.getElementById('tvEvMain'); return !!(m && m.classList.contains('rail-m-auf')); }
+  /* Neue Optik auf ALLE Charts der Seite — vorher bekam nur der Hauptchart
+     die Farben, die Zusatzfenster erst nach dem Neuladen. */
+  function evStilAlle(cs, ohneHaupt) {
+    cs = cs || evStilJetzt();
+    var alle = (ohneHaupt ? [] : [EV.inst]).concat(EV.mehr.map(function (m) { return m.inst; }));
+    alle.forEach(function (inst) { if (!inst) return; try { inst.setStyle(cs); inst.setSeriesType(cs.seriesType, cs); } catch (e) {} });
+    var leg = document.getElementById('tvEvLeg'); if (leg) leg.hidden = cs.legend === false;
+    try { if (EV.draw && EV.draw.sync) EV.draw.sync(); } catch (e) {}
+    EV.mehr.forEach(function (m) { try { if (m.draw && m.draw.sync) m.draw.sync(); } catch (e) {} });
+  }
+  function evDdHtml(art) {
+    if (art === 'tf') {
+      var tfNamen = EV_ALLE_TF.map(function (x) { return x[0]; });
+      var ana = {}; [].slice.call(document.querySelectorAll('#tvEvTfs > [data-evtf].ana')).forEach(function (b) { ana[b.getAttribute('data-evtf')] = 1; });
+      var hatAna = Object.keys(ana).length;
+      return '<div class="tv-ev-dd-h">Timeframe</div><div class="tv-ev-dd-tf notranslate" translate="no">' +
+        tfNamen.map(function (t) {
+          return '<button type="button" data-evtf="' + t + '" class="' + (t === EV.tf ? 'on' : '') + (ana[t] ? ' ana' : '') + '">' + t + '</button>';
+        }).join('') + '</div>' +
+        (hatAna ? '<div class="tv-ev-dd-n"><i></i>Zones reviewed by the AI</div>' : '');
+    }
+    if (art === 'typ') {
+      var cs = evStilJetzt(), t0 = cs.seriesType || 'candles', sk = cs.scale || 'normal';
+      var typen = (window.ApexChartStyle && window.ApexChartStyle.seriesTypes) || [['candles', 'Candles']];
+      var skalen = (window.ApexChartStyle && window.ApexChartStyle.scales) || [];
+      return '<div class="tv-ev-dd-h">Chart type</div><div class="tv-ev-dd-l" role="menu">' +
+        typen.map(function (x) {
+          return '<button type="button" role="menuitemradio" aria-checked="' + (x[0] === t0) + '" data-evtyp="' + x[0] + '" class="' + (x[0] === t0 ? 'on' : '') + '">' +
+            (EV_TYP_ICON[x[0]] || '') + '<span>' + escHtml(x[1]) + '</span></button>';
+        }).join('') + '</div>' +
+        (skalen.length ? '<div class="tv-ev-dd-h">Price scale</div><div class="tv-ev-dd-seg">' + skalen.map(function (x) {
+          return '<button type="button" data-evskala="' + x[0] + '" class="notranslate' + (x[0] === sk ? ' on' : '') + '" translate="no">' + escHtml(x[0] === 'pct' ? '%' : x[0] === 'log' ? 'Log' : 'Normal') + '</button>';
+        }).join('') + '</div>' : '') +
+        '<button type="button" class="tv-ev-dd-mehr" data-evstil="1">Colours &amp; more settings…</button>';
+    }
+    var menu = EV._menu || [], note = EV._note || '';
+    return '<div class="tv-ev-dd-l" role="menu">' + menu.map(function (x) {
+        return '<button type="button" role="menuitem" ' + x[0] + '="1"' + (x[0] === 'data-evhilfe' ? ' class="tv-ev-dd-kbd"' : '') + '><span>' + x[1] + '</span>' + (x[2] ? '<kbd>' + x[2] + '</kbd>' : '') + '</button>';
+      }).join('') + '</div>' +
+      '<div class="tv-ev-dd-lay"><span>Layout</span>' + [1, 2, 4].map(function (k) {
+        return '<button type="button" data-evlay="' + k + '" class="' + (EV.anzahl === k ? 'on' : '') + '" aria-label="' + k + ' chart' + (k > 1 ? 's' : '') + '">' + k + '</button>';
+      }).join('') + '</div>' +
+      (note ? '<div class="tv-ev-dd-note">' + escHtml(note) + '</div>' : '');
+  }
+  function evDdZeigen() {
+    var ev = document.getElementById('tvEv'), box = document.getElementById('tvEvDd');
+    if (!EV.dd || !ev) { if (box) box.remove(); return; }
+    var knopf = document.querySelector(EV.dd === 'tf' ? '#tvEvTfs [data-evtfdd]' : EV.dd === 'typ' ? '#tvEvTfs [data-evtypdd]' : '#tvEvTfs [data-evmore]');
+    if (!box) {
+      box = document.createElement('div'); box.id = 'tvEvDd'; box.className = 'tv-ev-dd-pop';
+      box.onclick = evSchalterKlick;
+      ev.appendChild(box);
+    }
+    box.setAttribute('data-art', EV.dd);
+    box.innerHTML = evDdHtml(EV.dd);
+    /* Unter dem Knopf, aber nie ueber den Rand: am Handy ueber die ganze
+       Breite, am Desktop am Knopf ausgerichtet (⋯ rechtsbuendig). */
+    var er = ev.getBoundingClientRect(), kr = knopf ? knopf.getBoundingClientRect() : null;
+    box.style.top = Math.round((kr ? kr.bottom : er.top + 40) - er.top + 6) + 'px';
+    if (evHandy() && EV.dd !== 'tf') { box.style.left = '6px'; box.style.right = '6px'; return; }
+    box.style.right = 'auto';
+    var w = box.offsetWidth, x = kr ? (EV.dd === 'more' ? kr.right - er.left - w : kr.left - er.left) : 6;
+    box.style.left = Math.round(Math.max(6, Math.min(er.width - w - 6, x))) + 'px';
+  }
+  function evDdUm(art) { EV.dd = EV.dd === art ? null : art; evSchalterNeu(); evDdZeigen(); }
+  function evDdZu() { if (!EV.dd) return; EV.dd = null; evSchalterNeu(); evDdZeigen(); }
+  function evTypSetzen(typ, skala) {
+    if (!window.ApexChartStyle) return;
+    var cs = window.ApexChartStyle.load();
+    if (typ) cs.seriesType = typ;
+    if (skala) cs.scale = skala;
+    window.ApexChartStyle.save(cs);
+    evStilAlle(cs);
+    /* Offenes Einstellungsfenster zeigt sonst den alten Typ. */
+    if (evStilOffen()) { var h = document.getElementById('tvEvStil'); h.hidden = true; evStilUmschalten(); }
   }
   function evHmAn() {
     return !!EV.hm || !!(window.ApexIndicatorUI && window.ApexIndicatorUI.list().some(function (c) {
       return c.id === 'lhm' && c.visible !== false; }));
   }
   function evSchalterKlick(ev) {
-        var zu = ev.target && ev.target.closest && ev.target.closest('[data-evliste],[data-evrp],[data-evrpv],[data-evstil],[data-evbild],[data-evhilfe]');
-        if (zu && EV.moreOpen) { EV.moreOpen = false; setTimeout(evSchalterNeu, 0); }
-        if (ev.target && ev.target.closest && ev.target.closest('[data-evmore]')) { EV.moreOpen = !EV.moreOpen; evSchalterNeu(); return; }
+        var zu = ev.target && ev.target.closest && ev.target.closest('[data-evliste],[data-evrp],[data-evrpv],[data-evstil],[data-evbild],[data-evhilfe],[data-evlay]');
+        if (zu && EV.dd) { EV.dd = null; evDdZeigen(); setTimeout(evSchalterNeu, 0); }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evmore]')) { evDdUm('more'); return; }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evtfdd]')) { evDdUm('tf'); return; }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evtypdd]')) { evDdUm('typ'); return; }
+        var tyb = ev.target && ev.target.closest && ev.target.closest('[data-evtyp]');
+        if (tyb) { evTypSetzen(tyb.getAttribute('data-evtyp'), null); EV.dd = null; evSchalterNeu(); evDdZeigen(); return; }
+        var skb = ev.target && ev.target.closest && ev.target.closest('[data-evskala]');
+        if (skb) { evTypSetzen(null, skb.getAttribute('data-evskala')); evDdZeigen(); return; }
+        if (ev.target && ev.target.closest && ev.target.closest('[data-evzeichnen]')) { TV.evRail(); return; }
         var uh = ev.target && ev.target.closest && ev.target.closest('[data-ezunhide]');
         if (uh) { var Lx = evL(), dd = Lx && zsLaden(Lx.sym); if (dd) { dd.hidden = []; zsSichern(Lx.sym); evChartZeigen(); evSchichtenNeu(); } return; }
         var lyr = ev.target && ev.target.closest && ev.target.closest('.tv-ev-lt');
@@ -90746,13 +91055,16 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
         var k = ev.target && ev.target.closest && ev.target.closest('[data-evtf]');
         if (!k) return;
         EV.tf = k.getAttribute('data-evtf');
+        if (EV.dd) { EV.dd = null; evDdZeigen(); }
         evChartZeigen();
   }
   document.addEventListener('click', function (e) {
-    if (!EV.moreOpen) return;
-    if (e.target && e.target.closest && e.target.closest('.tv-ev-more')) return;
-    EV.moreOpen = false; evSchalterNeu();
+    if (!EV.dd) return;
+    if (e.target && e.target.closest && e.target.closest('#tvEvDd,[data-evmore],[data-evtfdd],[data-evtypdd]')) return;
+    evDdZu();
   });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && EV.dd) evDdZu(); });
+  if (window.addEventListener) window.addEventListener('resize', function () { if (EV.dd) evDdZeigen(); });
   function evSchalterNeu() {
     var tfs = document.getElementById('tvEvTfs'); if (!tfs) return;
     [].slice.call(tfs.querySelectorAll('.tv-ev-br,.tv-ev-sws')).forEach(function (b) { b.remove(); });
@@ -90788,7 +91100,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
       '<button type="button" class="tv-ev-stil-zu" aria-label="Close">×</button></div>' +
       '<div id="tvEvStilA"></div><div class="acs-panel" id="tvEvStilB">' + evStilHtml() + '</div>';
     var a = document.getElementById('tvEvStilA');
-    if (window.ApexChartStyle && a) window.ApexChartStyle.mount(a, EV.inst, null);
+    if (window.ApexChartStyle && a) window.ApexChartStyle.mount(a, EV.inst, function (cs) { evStilAlle(cs, true); evSchalterNeu(); }, { legend: true });
     h.querySelector('.tv-ev-stil-zu').onclick = function () {
       h.hidden = true;
       evSchalterNeu();
@@ -91008,10 +91320,18 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   /* Werkzeugspalte ein-/ausklappen (gemerkt). */
   TV.evRail = function () {
     var m = document.getElementById('tvEvMain'); if (!m) return;
+    /* Handy: die Spalte liegt UEBER dem Chart (kein Neu-Layout, kein
+       schmalerer Chart) und ist standardmaessig zu — wie bei TradingView,
+       wo die Zeichenleiste erst hinter dem Stift aufgeht. */
+    if (evHandy()) {
+      var auf = !m.classList.contains('rail-m-auf'); m.classList.toggle('rail-m-auf', auf); merke('evRailM', auf ? '1' : '0');
+      evSchalterNeu(); return;
+    }
     var zu = !m.classList.contains('rail-zu'); m.classList.toggle('rail-zu', zu); merke('evRailZu', zu ? '1' : '0');
     setTimeout(function () { try { var h = document.getElementById('tvEvChart'); if (EV.inst && h) EV.inst.chart.resize(h.clientWidth, h.clientHeight); } catch (e) {} }, 30);
   };
   try { if (lies('evRailZu', '0') === '1') setTimeout(function () { var m = document.getElementById('tvEvMain'); if (m) m.classList.add('rail-zu'); }, 0); } catch (e) {}
+  try { if (lies('evRailM', '0') === '1') setTimeout(function () { var m = document.getElementById('tvEvMain'); if (m) m.classList.add('rail-m-auf'); }, 0); } catch (e) {}
 
   /* ── Sessions, Tagestrennung, News auf dem Chart (Etappe 4.3) ──────
      Als eigene Ebene ueber dem Chart statt als Serie: die Baender folgen
@@ -111452,6 +111772,93 @@ body.light .cs-pop .cs-mini,body.light [id^="cs"][id$="Modal"] .cs-mini{backgrou
 @media (min-width:1100px){
   .qs{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
   .qs>.qs-h,.qs>.qs-bar{grid-column:1/-1}
+}
+/* ══ Handy-Chart kompakt (28.10.2026) ═════════════════════════════════
+   Wie TradingView auf dem Handy: EINE Leiste (M15 ▾ · Typ · ƒx · ⚙ · ✎ · ⋯),
+   der Chart nimmt fast den Bildschirm, Werkzeuge und Fenster liegen darueber
+   statt ihn zu verkleinern. Am Desktop kommen nur Typ-Knopf und Zahnrad dazu. */
+#tvEvTfs .tv-ev-sw.tv-ev-tfb,#tvEvTfs .tv-ev-sw.tv-ev-pen{display:none}
+#tvEvTfs .tv-ev-ico{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding-left:7px!important;padding-right:7px!important}
+#tvEvTfs .tv-ev-ico .ic{width:15px;height:15px}
+.tv-ev-typ{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tv-ev-typ .f{fill:currentColor}
+.tv-ev-typ .a{fill:currentColor;opacity:.22;stroke:none}
+#tvEvTfs .tv-ev-tfb{align-items:center;gap:6px;font-family:var(--font-mono);color:var(--ink);font-weight:600}
+.tv-ev-car{width:9px;height:6px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
+.tv-ev-leg[hidden]{display:none!important}
+.tv-ev-dd-pop{position:absolute;z-index:40;min-width:210px;max-width:calc(100% - 12px);max-height:min(440px,calc(100% - 56px));overflow:auto;padding:6px;border-radius:12px;background:var(--elevated);border:0.5px solid var(--rim2);box-shadow:0 16px 40px rgba(0,0,0,.45);overscroll-behavior:contain}
+body.light .tv-ev-dd-pop{background:#fff}
+.tv-ev-dd-h{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:6px 8px 4px}
+.tv-ev-dd-tf{display:grid;grid-template-columns:repeat(4,minmax(48px,1fr));gap:5px;padding:2px 4px 6px}
+.tv-ev-dd-tf button{position:relative;font-family:var(--font-mono);font-size:13px;min-height:38px;border-radius:8px;border:0.5px solid var(--rim2);background:var(--surface);color:var(--ink2);cursor:pointer}
+.tv-ev-dd-tf button.on{color:var(--gold);border-color:var(--gold-line);background:var(--gold-dim);font-weight:600}
+.tv-ev-dd-tf button.ana::after{content:"";position:absolute;right:5px;top:5px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.tv-ev-dd-n{display:flex;align-items:center;gap:7px;padding:2px 8px 6px;font-size:11.5px;color:var(--ink3)}
+.tv-ev-dd-n i{width:5px;height:5px;border-radius:50%;background:var(--gold);flex:none}
+.tv-ev-dd-l{display:grid;gap:1px}
+.tv-ev-dd-l button,.tv-ev-dd-mehr{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;border-radius:8px;padding:9px 10px;color:var(--ink2);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.tv-ev-dd-l button>span{flex:1}
+.tv-ev-dd-l button:hover,.tv-ev-dd-mehr:hover{background:var(--surface);color:var(--ink)}
+.tv-ev-dd-l button.on{color:var(--gold)}
+.tv-ev-dd-l kbd{font-family:var(--font-mono);font-size:11px;color:var(--ink3);border:0.5px solid var(--rim2);border-radius:4px;padding:0 5px}
+.tv-ev-dd-seg{display:flex;gap:4px;padding:2px 4px 6px}
+.tv-ev-dd-seg button{flex:1;min-height:32px;border-radius:7px;border:0.5px solid var(--rim2);background:var(--surface);color:var(--ink2);font:inherit;font-size:12.5px;cursor:pointer}
+.tv-ev-dd-seg button.on{color:var(--gold);border-color:var(--gold-line);background:var(--gold-dim)}
+.tv-ev-dd-mehr{margin-top:4px;border-top:0.5px solid var(--rim);border-radius:0 0 8px 8px;color:var(--gold)}
+.tv-ev-dd-lay,.tv-ev-dd-note{display:none}
+@media (pointer:coarse){.tv-ev-dd-kbd{display:none!important}}
+@media (max-width:760px){
+  /* Leiste: eine Zeile, nichts zum Wischen */
+  #page-chart .tv-ev-kopf{padding:5px 6px!important}
+  #tvEvTfs{overflow:visible!important}
+  #tvEvTfs>[data-evtf]{display:none!important}
+  #tvBuehne.ev-an #tvEvTfs .tv-ev-sws,#tvEvTfs .tv-ev-sws{overflow:visible!important;flex:1 1 100%!important;margin-left:0!important;gap:5px!important;justify-content:flex-start}
+  #tvEvTfs .tv-ev-sw.tv-ev-tfb,#tvEvTfs .tv-ev-sw.tv-ev-pen{display:inline-flex}
+  #tvEvTfs .tv-ev-lay,#tvEvTfs .tv-ev-info,#tvEvTfs .tv-ev-lbl{display:none!important}
+  #tvEvTfs .tv-ev-more{margin-left:auto}
+  #tvEvTfs .tv-ev-sw{min-height:34px}
+  #tvEvTfs .tv-ev-tfb{min-width:64px;justify-content:center}
+  .tv-ev-dd-lay{display:flex;align-items:center;gap:6px;padding:8px 10px 6px;border-top:0.5px solid var(--rim);margin-top:4px;font-size:14px;color:var(--ink2)}
+  .tv-ev-dd-lay span{flex:1}
+  .tv-ev-dd-lay button{min-width:40px;min-height:34px;border-radius:7px;border:0.5px solid var(--rim2);background:var(--surface);color:var(--ink2);font-family:var(--font-mono);cursor:pointer}
+  .tv-ev-dd-lay button.on{color:var(--gold);border-color:var(--gold-line);background:var(--gold-dim)}
+  .tv-ev-dd-note{display:block;padding:8px 10px 4px;font-size:11.5px;line-height:1.45;color:var(--ink3);border-top:0.5px solid var(--rim);margin-top:4px}
+  .tv-ev-dd-l button{padding:11px 10px;font-size:14px}
+  .tv-ev-dd-pop[data-art=typ] .tv-ev-dd-l{grid-template-columns:1fr 1fr;gap:2px}
+  .tv-ev-dd-pop[data-art=typ] .tv-ev-dd-l button{padding:10px 8px;font-size:13.5px}
+  /* Chart: fast der ganze Bildschirm statt 380 px */
+  #tvBuehne.ev-an:not(.apex-fs) .tv-ev-main{height:clamp(360px,calc(100vh - 304px),760px)!important}
+  @supports (height:100svh){#tvBuehne.ev-an:not(.apex-fs) .tv-ev-main{height:clamp(360px,calc(100svh - 304px),760px)!important}}
+  /* Werkzeugspalte: Overlay hinter dem Stift, standardmaessig zu */
+  .tv-ev-main .tv-ev-rail{position:absolute;left:0;top:0;bottom:0;z-index:7;display:none!important;width:42px!important;background:color-mix(in srgb,var(--layer) 94%,transparent);box-shadow:6px 0 18px rgba(0,0,0,.28)}
+  .tv-ev-main.rail-m-auf .tv-ev-rail{display:flex!important}
+  .tv-ev-main .tv-ev-railo{display:none!important}
+  .tv-ev-main.rail-zu .tv-ev-leg{left:4px}
+  .tv-ev-main.rail-m-auf .tv-ev-leg{left:48px}
+  /* OHLC-Zeile: eine Zeile, klein — vorher zwei Zeilen ueber den Kerzen */
+  .tv-ev-leg{flex-wrap:nowrap!important;white-space:nowrap;overflow:hidden;font-size:10px!important;gap:0 7px!important;padding:2px 6px!important;left:4px;top:4px;max-width:calc(100% - 72px)!important}
+  /* Fenster (Farben, Indikatoren, Listen) als Bodenblatt: oben bleibt der
+     Chart sichtbar, man sieht jede Farbaenderung sofort. */
+  #page-chart .tv-ev-stil{z-index:12!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;width:auto!important;max-height:min(60%,560px)!important;border-radius:16px 16px 0 0!important;padding:0 12px 12px!important;box-shadow:0 -14px 36px rgba(0,0,0,.45)!important;overscroll-behavior:contain}
+  #page-chart .tv-ev-stil-kopf{position:sticky;top:0;z-index:3;background:inherit;padding:16px 2px 8px!important}
+  #page-chart .tv-ev-stil-kopf::before{content:"";position:absolute;left:50%;top:6px;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--rim2)}
+}
+@media (max-width:600px){
+  /* Kopf: Name, Kurs und Aenderung in einer Zeile */
+  #page-chart .tv-kopf{padding:8px 10px!important;gap:6px 8px!important;margin-bottom:8px!important}
+  #page-chart .tv-inst{flex:1 1 auto!important;flex-direction:row!important;align-items:center;gap:8px!important;min-width:0}
+  #page-chart .tv-inst-z1{gap:6px;min-width:0}
+  #page-chart .tv-inst-name{font-size:15px;max-width:34vw}
+  #page-chart .tv-inst-sym{display:none}
+  #page-chart .tv-faehig{font-size:9px;padding:1px 6px;letter-spacing:.06em}
+  #page-chart .tv-inst-z2{gap:6px}
+  #page-chart .tv-preis{font-size:17px!important}
+  #page-chart .tv-aend{font-size:11.5px;padding:1px 5px}
+  #page-chart .tv-kitoggle{padding:6px 9px!important;min-height:32px}
+  #page-chart .tv-chip{padding:4px 11px!important;font-size:12.5px!important}
+  #page-chart .tv-ansicht{padding:4px 40px 4px 6px!important}
+  #page-chart .tv-ansicht button{padding:4px 11px;font-size:12px}
+  #page-chart .tv-voll{top:3px!important}
 }
 </style>
 <script>
