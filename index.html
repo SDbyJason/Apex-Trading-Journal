@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-30a';
+  window.APEX_BUILD = '2026-10-30b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -58008,6 +58008,20 @@ self.addEventListener('message', async (ev) => {
     var th = theme();
     var self = this;
     this.LWC = LWC;          // overlays need the series constructors later
+
+    /* Finger auf dem Chart gehoeren dem Chart (wie bei TradingView). Ohne
+       touch-action:none nahm der Browser jede senkrechte Bewegung als
+       Seiten-Scroll: auf dem Handy rutschte die ganze Evidence-Oberflaeche,
+       statt dass der Chart sich bewegte oder eine Fib gezogen wurde. Per
+       Klasse, nicht inline — die Zeichenebene setzt el.style.touchAction
+       zurueck auf '' und darf diese Regel dabei nicht mitloeschen. */
+    try { if (!document.getElementById('apxChartTouchCss')) {
+      var tcss = document.createElement('style');
+      tcss.id = 'apxChartTouchCss';
+      tcss.textContent = '.apx-chart-touch{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}';
+      document.head.appendChild(tcss);
+    }
+    this.el.classList.add('apx-chart-touch'); } catch (e) {}
 
     this.chart = LWC.createChart(this.el, {
       layout: { background: { type: LWC.ColorType.Solid, color: th.bg }, textColor: th.ink3,
