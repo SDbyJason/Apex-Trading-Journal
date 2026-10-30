@@ -1142,7 +1142,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-29a';
+  window.APEX_BUILD = '2026-10-30a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -59269,6 +59269,16 @@ self.addEventListener('message', async (ev) => {
       e.preventDefault();
       e.stopPropagation();
       self._lvDrag = { key: lv.key, lv: lv, price: lv.price };
+      /* Chart festhalten, solange die Linie haengt: auf dem Handy bekam
+         Lightweight Charts dieselbe Fingerbewegung als Touch-Geste und schob
+         den Chart mit — die Linie wanderte nicht, der Zug ging verloren. */
+      try {
+        self.chart.applyOptions({
+          handleScroll: { mouseWheel: false, pressedMouseMove: false, horzTouchDrag: false, vertTouchDrag: false },
+          handleScale:  { mouseWheel: false, pinch: false, axisPressedMouseMove: false }
+        });
+        self._lvFrozen = true;
+      } catch (err) {}
       self._prevTouch = self.el.style.touchAction;
       self.el.style.touchAction = 'none';
       self.el.style.cursor = 'ns-resize';
@@ -59298,6 +59308,14 @@ self.addEventListener('message', async (ev) => {
       if (!self._lvDrag) return;
       var d = self._lvDrag;
       self._lvDrag = null;
+      if (self._lvFrozen) {
+        self._lvFrozen = false;
+        // Ziehen geht nur mit dem Auswahl-Werkzeug — keine Zeichnung haelt den Chart.
+        try { self.chart.applyOptions({
+          handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
+          handleScale:  { mouseWheel: true, pinch: true, axisPressedMouseMove: true }
+        }); } catch (err) {}
+      }
       self.el.style.touchAction = self._prevTouch || '';
       self.el.style.cursor = '';
       try { self.el.releasePointerCapture(e.pointerId); } catch (err) {}
@@ -68755,6 +68773,18 @@ self.addEventListener('message', async (ev) => {
     if (t == null || p == null) return;
     var mg = this._magnet(t, p); t = mg.t; p = mg.p;
 
+    /* Zweiter Punkt nach einem Tipp: den Entwurf dorthin ziehen und den
+       normalen Zug weiterlaufen lassen — Loslassen schliesst ihn ab, ein
+       Weiterziehen korrigiert noch. */
+    if (this.draft && this.draft._tap2) {
+      delete this.draft._tap2;
+      this._pid = e.pointerId;
+      this._touch = (e.pointerType === 'touch' || e.pointerType === 'pen');
+      try { this.cv.setPointerCapture(e.pointerId); } catch (err) {}
+      this._dragging = true;
+      this._move(e);
+      return;
+    }
     /* Dritter Punkt einer Gabel / Fib-Erweiterung: dieser Klick setzt ihn. */
     if (this.draft && this.draft._ph2) {
       this.draft.points[2] = { t: t, p: p };
@@ -68934,7 +68964,10 @@ self.addEventListener('message', async (ev) => {
     var slop = this._touch ? 10 : 4;
     var xa = this._x(a.t), xb = this._x(b.t), ya = this._y(a.p), yb = this._y(b.p);
     if (xa != null && xb != null && Math.abs(xa - xb) < slop && Math.abs(ya - yb) < slop) {
-      this.draft = null; this.sync(); return;
+      /* Nur getippt statt gezogen: wie bei TradingView setzt der NAECHSTE
+         Tipp den zweiten Punkt. Auf dem Handy ging Fibonacci & Co. sonst nur
+         mit einem sauberen Zug — ein Tipp verwarf die Zeichnung still. */
+      this.draft._tap2 = true; this.sync(); return;
     }
     /* Gabel und Fib-Erweiterung brauchen noch Punkt C: der Entwurf bleibt
        stehen, C folgt der Maus, der naechste Klick setzt ihn. */
