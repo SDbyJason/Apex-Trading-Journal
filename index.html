@@ -1153,7 +1153,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-11-02a';
+  window.APEX_BUILD = '2026-11-02b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -10068,6 +10068,7 @@ body.light #landingPage * {
         "Import check before anything is written — duplicates, missing stops, timezone and the file's own P&L against the journal",
         "Exit Lab — every entry replayed on 1-minute prices under other exits (set and forget, fixed targets, break-even, trailing, time stops), with the price after the exit",
         "Account currency per account — broker P&L, commission and swap read in it and converted at daily ECB rates",
+        "Prop Challenge Simulator — a complete prop-firm challenge replayed day by day on real history with the firm’s rules, from Phase 1 to funded",
         "Your Twin — a disciplined copy that takes only your entries and keeps your own rules, with the difference split habit by habit",
         "Merge and split trades — partial fills into one position, undo any time",
         "MCP server — ask Claude, ChatGPT or Cursor about your own journal, read-only",
@@ -11410,6 +11411,7 @@ body.light #landingPage * {
         <li>Auto MFE / MAE from real price data</li>
         <li>Exit Lab — your entries replayed on real prices: set and forget, fixed targets, break-even, trailing and time stops, and the price after your exit</li>
         <li>Your Twin — your exact entries with your own rules kept every time; see in R and money what each habit costs you</li>
+        <li>Prop Challenge Simulator — a whole FTMO, Topstep or other firm challenge, day after day on real history, Phase 1 to funded</li>
         <li>Risk of Ruin, Sharpe &amp; Expectancy / setup</li>
         <li><b>Benchmark vs buy &amp; hold</b>&nbsp;— your Sharpe against S&amp;P 500, Nasdaq, MSCI World, 60/40, gold &amp; BTC</li>
         <li><b>R-Multiple &amp; Kelly</b>&nbsp;— R distribution, R per setup, optimal risk</li>
@@ -11527,6 +11529,7 @@ body.light #landingPage * {
         <tr><td>Auto MFE / MAE from price data</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Exit Lab — set and forget vs your exits, best target tested out of sample, price after the exit</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Your Twin — same entries, your rules kept: exits, revenge trades, overtrading and position size priced one by one</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Prop Challenge Simulator — multi-day challenge on real history, account carried day to day, firm rules, pass/fail report</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Risk of Ruin, Sharpe &amp; Expectancy / setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Benchmark vs buy &amp; hold — annualised Sharpe against S&amp;P 500, Nasdaq 100, MSCI World, 60/40, gold &amp; Bitcoin</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>R-Multiple analytics — distribution, cumulative R &amp; R per setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -12665,6 +12668,7 @@ body.light #landingPage * {
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">Auto MFE / MAE</div><div class="apex-feat-desc">Fetches price data & computes max favorable / adverse excursion automatically</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">Exit Lab</div><div class="apex-feat-desc">Your entries replayed on real prices under other exits — and what price did after you got out</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-users ></use></svg></div><div><div class="apex-feat-label">Your Twin</div><div class="apex-feat-desc">A copy of you that takes only your entries and never breaks your rules — and shows what every habit costs</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg></div><div><div class="apex-feat-label">Prop Challenge Simulator</div><div class="apex-feat-desc">A whole firm challenge, day after day on real history with the firm’s rules — the pressure of a real attempt without the fee</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg></div><div><div class="apex-feat-label">Risk of Ruin &amp; Sharpe</div><div class="apex-feat-desc">Institutional risk metrics + per-setup expectancy & profit factor</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">R-Multiple &amp; Kelly</div><div class="apex-feat-desc">R distribution, cumulative R and R per setup — plus the growth-optimal risk per trade</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">⏱</div><div><div class="apex-feat-label">Hold-Time &amp; Scale-Out Analysis</div><div class="apex-feat-desc">Expectancy by time in trade, and whether your partial exits beat simply holding</div></div></div>
@@ -30488,6 +30492,8 @@ document.addEventListener('keydown', function(e) {
       "Session review": ["Session-Bewertung", "Revisión de sesión", "Revisão da sessão", "Analyse de session"],
       "Intraday give-back, revenge windows, size drift after losses and rule adherence — with a coach verdict on the process, not the P&L": ["Zurückgegebene Gewinne im Tagesverlauf, Revenge-Fenster, Größenanstieg nach Verlusten und Regeltreue – mit einem Coach-Urteil über den Prozess, nicht über das P&L", "Ganancias devueltas en el día, ventanas de revenge, aumento de tamaño tras pérdidas y disciplina con las reglas, con un veredicto del coach sobre el proceso, no sobre el P&L", "Lucro devolvido no dia, janelas de revenge, aumento de tamanho após perdas e disciplina com as regras — com um veredito do coach sobre o processo, não sobre o P&L", "Gains rendus en séance, fenêtres de revenge, dérive de taille après les pertes et respect des règles — avec un verdict du coach sur le process, pas sur le P&L"],
       "Auto MFE / MAE": ["Automatisches MFE / MAE", "MFE / MAE automático", "MFE / MAE automático", "MFE / MAE automatique"],
+      "Prop Challenge Simulator": ["Prop-Challenge-Simulator", "Simulador de desafíos prop", "Simulador de desafios prop", "Simulateur de challenge prop"],
+      "A whole firm challenge, day after day on real history with the firm’s rules — the pressure of a real attempt without the fee": ["Eine ganze Firmen-Challenge, Tag für Tag auf echter Historie mit den Regeln der Firma – der Druck eines echten Versuchs ohne die Gebühr", "Un desafío completo de la firma, día a día con historia real y sus reglas: la presión de un intento real sin la tarifa", "Um desafio inteiro da firma, dia após dia em histórico real com as regras dela — a pressão de uma tentativa real sem a taxa", "Un challenge complet de la firme, jour après jour sur un historique réel avec ses règles — la pression d’une vraie tentative sans les frais"],
       "Your Twin": ["Dein Zwilling", "Tu gemelo", "Seu gêmeo", "Ton jumeau"],
       "A copy of you that takes only your entries and never breaks your rules — and shows what every habit costs": ["Eine Kopie von dir, die nur deine Einstiege nimmt und nie deine Regeln bricht – und zeigt, was jede Gewohnheit kostet", "Una copia de ti que solo toma tus entradas y nunca rompe tus reglas, y muestra lo que cuesta cada hábito", "Uma cópia de você que só pega suas entradas e nunca quebra suas regras — e mostra quanto custa cada hábito", "Une copie de toi qui ne prend que tes entrées et n’enfreint jamais tes règles — et montre ce que coûte chaque habitude"],
       "Exit Lab": ["Exit-Labor", "Laboratorio de salidas", "Laboratório de saídas", "Labo des sorties"],
@@ -61759,7 +61765,9 @@ self.addEventListener('message', async (ev) => {
        trug eine Sitzung die Regeln der vorherigen weiter — und die Leiste
        zeigte einen Floor, der zu einem Konto gehörte, das es nicht mehr gibt. */
     if (!S.funded) { try { ApexChallenge.stop(); } catch (e) {} return; }
-    try { ApexChallenge.start(S.fundedFirm, S.fundedSize); } catch (e) {}
+    try { ApexChallenge.start(S.fundedFirm, S.fundedSize, S.campaign ? S.campaign.phaseId : undefined); } catch (e) {}
+    // a campaign day continues yesterday's account (ApexCampaign)
+    if (S.campaign) { try { if (window.ApexCampaign) ApexCampaign.restoreInto(S.campaign); } catch (e) {} }
   }
 
   var MAX_TARGETS = 3;
@@ -62386,6 +62394,7 @@ self.addEventListener('message', async (ev) => {
      when it is torn down (tab switch, reload, closing the app), removed only
      when the trader ends it on purpose. */
   function snapshotResume() {
+    if (S.campaign) return;      // a campaign day is resumed from the campaign, not from here
     var s = S.session;
     if (!s || !s.data || S._rebuilding) return;
     var rec = currentRecord(S.savedName || defaultName());
@@ -63256,6 +63265,7 @@ self.addEventListener('message', async (ev) => {
       '<div class="el-card arp-setup"><h3>Market Replay</h3>' +
       '<p class="el-sub">Rewind the real market to any date and trade it forward candle by candle — the future stays hidden.</p>' +
       resumeHtml() +
+      (window.ApexCampaign ? ApexCampaign.setupCard() : '') +
       presetsHtml() +
       (S.err ? errBoxHtml() : '') +
       '<div class="arp-row">' +
@@ -65724,6 +65734,7 @@ self.addEventListener('message', async (ev) => {
 
   function start(body) {
     readSetupForm();
+    S.campaign = null;          // a session started from the form is never a campaign day
     S.err = null;
     S.errRetry = false;
     S.errGaps = null; S._retryRec = null; S._allowGaps = false; S._skipDays = null;
@@ -66230,6 +66241,19 @@ self.addEventListener('message', async (ev) => {
   }
 
   window.ApexReplayUI = { render: render, teardown: teardown, _state: S };
+  /* One day of a Prop Challenge Simulator campaign: the setup comes from the
+     campaign, not the form — one trading day, funded mode with the firm's
+     rules, the account at the carried balance. */
+  window.ApexReplayUI.campaignDay = function (body, o) {
+    try { teardown(); } catch (e) {}
+    try { var rv0 = document.getElementById('arpReview'); if (rv0) rv0.remove(); } catch (e) {}
+    S.symbol = o.symbol; S.date = o.date; S.tf = o.tf || '5m'; S.days = 1; S.startAt = 'auto';
+    S.blind = !!o.blind; S.mystery = false; S.revealed = false; S.playbook = '';
+    S.funded = true; S.fundedFirm = o.firm; S.fundedSize = o.size; S.balance = o.balance;
+    if (o.commRT != null) S.commRT = o.commRT;
+    S.campaign = o; S.err = null; S.errRetry = false; S.savedId = null; S.savedName = null; S.pbChecks = [];
+    launch(body);
+  };
 
   /* ─────────────── "back to <year>" on the landing page ───────────────
      A competitor writes "since September 2014"; we wrote "free tick-accurate
@@ -66714,6 +66738,7 @@ self.addEventListener('message', async (ev) => {
           '<div class="rh-act">' +
             '<button type="button" class="rh-b p" data-rh="start">' + icon('i-play') + 'Start a replay</button>' +
             '<button type="button" class="rh-b s" data-rh="dice">' + icon('i-dice') + 'Roll a random day</button>' +
+            '<button type="button" class="rh-b s" onclick="if(window.ApexCampaign)ApexCampaign.openNew()">' + icon('i-trophy') + 'Prop challenge</button>' +
           '</div>' +
           '<div class="rh-chips">' +
             '<span class="rh-chip"><b id="rhNInstr">61</b> instruments</span>' +
@@ -66893,6 +66918,7 @@ self.addEventListener('message', async (ev) => {
        'Rembobinez le marché réel à n’importe quel jour, masquez tout ce qui suit et tradez bougie par bougie — sur de vraies données tick avec les vrais spreads historiques. La revue vous dit ensuite ce qu’a fait votre process.'],
     'Start a replay': ['Replay starten', 'Iniciar replay', 'Iniciar replay', 'Lancer un replay'],
     'Roll a random day': ['Zufälligen Tag würfeln', 'Día al azar', 'Dia aleatório', 'Jour au hasard'],
+    'Prop challenge': ['Prop-Challenge', 'Desafío prop', 'Desafio prop', 'Challenge prop'],
     'instruments': ['Instrumente', 'instrumentos', 'instrumentos', 'instruments'],
     'accurate': ['genau', 'exacto', 'exato', 'précis'],
     'spreads': ['Spreads', 'spreads', 'spreads', 'spreads'],
@@ -99530,6 +99556,44 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
   };
   C.stop  = function(){ S = null; paint(); };
   C.state = function(){ return S; };
+
+  /* Prop Challenge Simulator (02.11.2026): a challenge that lasts many replay
+     sessions. endDay() closes the day the way the firm's clock would and
+     hands back a snapshot; restore() puts that snapshot under a fresh
+     session whose account starts at the carried balance. */
+  function curBal(){
+    try {
+      var sess = window.ApexReplayUI && ApexReplayUI._state && ApexReplayUI._state.session;
+      var st = sess && sess.state();
+      if (st && isFinite(Number(st.balance))) return S.start + (Number(st.balance) - S.baseline);
+    } catch(e){}
+    return null;
+  }
+  C.endDay = function(){
+    if (!S) return null;
+    var bal = curBal(); if (bal == null) bal = S.dayOpen;
+    var out = { status: S.status, reason: S.reason, balance: bal, dayPnl: bal - S.dayOpen, traded: !!S.dayHadTrade || bal !== S.dayOpen, floor: S.floor };
+    if (S.status === 'running'){
+      if (bal !== S.dayOpen) S.dayHadTrade = true;
+      rollDay(bal);
+      out.floor = S.floor;
+      var snap = {}; for (var k in S) if (k !== 'baseline') snap[k] = S[k];
+      snap.day = null; snap.balanceEnd = bal;
+      out.snap = JSON.parse(JSON.stringify(snap));
+    }
+    paint();
+    return out;
+  };
+  C.restore = function(snap){
+    if (!S || !snap) return S;
+    var b0 = S.baseline;
+    for (var k in snap) if (k !== 'baseline' && k !== 'balanceEnd') S[k] = snap[k];
+    // the session opened at the carried balance; map it onto challenge space
+    S.baseline = b0 - ((snap.balanceEnd != null ? snap.balanceEnd : S.start) - S.start);
+    S.day = null; S.status = 'running'; S.reason = ''; S.failedAt = null;
+    paint();
+    return S;
+  };
   C.active = function(){ return !!S && S.status === 'running'; };
 
   /* Rolls the day over: books the day's realised result, applies an
@@ -105743,6 +105807,7 @@ body.light::before{ opacity:.45; }
     "Session review": ["Sitzungsauswertung", "Revisión de la sesión", "Revisão da sessão", "Revue de session"],
     "— sequence, size drift & revenge-window detection": ["— Reihenfolge, Positionsgrößen-Drift & Revenge-Fenster", "— secuencia, deriva del tamaño y ventanas de revenge trading", "— sequência, desvio de tamanho e janelas de revenge trading", "— séquence, dérive de taille et fenêtres de revenge trading"],
     "Auto MFE / MAE from real price data": ["Automatisches MFE / MAE aus echten Kursdaten", "MFE / MAE automáticos con datos de precio reales", "MFE / MAE automáticos com dados de preço reais", "MFE / MAE automatiques à partir de vraies données de prix"],
+    "Prop Challenge Simulator — a whole FTMO, Topstep or other firm challenge, day after day on real history, Phase 1 to funded": ["Prop-Challenge-Simulator – eine ganze FTMO-, Topstep- oder andere Firmen-Challenge, Tag für Tag auf echter Historie, von Phase 1 bis funded", "Simulador de desafíos prop: un desafío completo de FTMO, Topstep u otra firma, día a día con historia real, de la fase 1 a fondeado", "Simulador de desafios prop — um desafio inteiro da FTMO, Topstep ou outra firma, dia após dia em histórico real, da fase 1 ao financiado", "Simulateur de challenge prop — un challenge FTMO, Topstep ou autre complet, jour après jour sur un historique réel, de la phase 1 au financement"],
     "Your Twin — your exact entries with your own rules kept every time; see in R and money what each habit costs you": ["Dein Zwilling – exakt deine Einstiege, deine eigenen Regeln jedes Mal eingehalten; in R und Geld sehen, was dich jede Gewohnheit kostet", "Tu gemelo: exactamente tus entradas con tus reglas cumplidas siempre; ve en R y en dinero lo que te cuesta cada hábito", "Seu gêmeo — exatamente suas entradas com suas regras cumpridas sempre; veja em R e em dinheiro quanto cada hábito custa", "Ton jumeau — exactement tes entrées, tes propres règles respectées à chaque fois ; vois en R et en argent ce que coûte chaque habitude"],
     "Exit Lab — your entries replayed on real prices: set and forget, fixed targets, break-even, trailing and time stops, and the price after your exit": ["Exit-Labor – deine Einstiege auf echten Kursen nachgespielt: Stop und Ziel stehen lassen, feste Ziele, Break-even, Trailing- und Zeitstopps und der Kurs nach deinem Ausstieg", "Laboratorio de salidas: tus entradas reproducidas con precios reales — dejar stop y objetivo, objetivos fijos, break-even, trailing y stops por tiempo, y el precio tras tu salida", "Laboratório de saídas — suas entradas reproduzidas com preços reais: deixar stop e alvo, alvos fixos, break-even, trailing e stops por tempo, e o preço após sua saída", "Labo des sorties — tes entrées rejouées sur des prix réels : stop et objectif laissés, objectifs fixes, break-even, stops suiveurs et temporels, et le prix après ta sortie"],
     "Risk of Ruin, Sharpe & Expectancy / setup": ["Risk of Ruin, Sharpe & Erwartungswert je Setup", "Riesgo de ruina, Sharpe y esperanza por setup", "Risco de ruína, Sharpe e expectativa por setup", "Risque de ruine, Sharpe et espérance par setup"],
@@ -105855,6 +105920,7 @@ body.light::before{ opacity:.45; }
     "Notes, tags & chart snapshots written during the replay": ["Notizen, Tags & Chart-Schnappschüsse während des Replays", "Notas, etiquetas y capturas del gráfico durante el replay", "Notas, tags e capturas do gráfico durante o replay", "Notes, tags et captures du graphique pendant le replay"],
     "Stop-vs-target collisions resolved from real ticks, not guessed": ["Stop-gegen-Ziel-Kollisionen aus echten Ticks entschieden, nicht geraten", "Choques entre stop y objetivo resueltos con ticks reales, no adivinados", "Colisões entre stop e alvo resolvidas com ticks reais, não adivinhadas", "Collisions stop/objectif tranchées avec les vrais ticks, pas devinées"],
     "Auto MFE / MAE from price data": ["Automatisches MFE / MAE aus Kursdaten", "MFE / MAE automáticos con datos de precio", "MFE / MAE automáticos com dados de preço", "MFE / MAE automatiques à partir des données de prix"],
+    "Prop Challenge Simulator — multi-day challenge on real history, account carried day to day, firm rules, pass/fail report": ["Prop-Challenge-Simulator – mehrtägige Challenge auf echter Historie, Konto von Tag zu Tag weitergeführt, Firmenregeln, Bericht zu Bestanden/Gescheitert", "Simulador de desafíos prop: desafío de varios días con historia real, cuenta llevada día a día, reglas de la firma, informe de aprobado/suspendido", "Simulador de desafios prop — desafio de vários dias em histórico real, conta levada dia a dia, regras da firma, relatório de aprovado/reprovado", "Simulateur de challenge prop — challenge sur plusieurs jours sur un historique réel, compte reporté de jour en jour, règles de la firme, rapport réussi/échoué"],
     "Your Twin — same entries, your rules kept: exits, revenge trades, overtrading and position size priced one by one": ["Dein Zwilling – gleiche Einstiege, deine Regeln eingehalten: Ausstiege, Revenge-Trades, Overtrading und Positionsgröße einzeln beziffert", "Tu gemelo: mismas entradas, tus reglas cumplidas; salidas, operaciones de venganza, sobreoperar y tamaño de posición valorados uno a uno", "Seu gêmeo — mesmas entradas, suas regras cumpridas: saídas, operações de vingança, overtrading e tamanho da posição avaliados um a um", "Ton jumeau — mêmes entrées, tes règles respectées : sorties, trades de revanche, surtrading et taille de position chiffrés un par un"],
     "Exit Lab — set and forget vs your exits, best target tested out of sample, price after the exit": ["Exit-Labor – Stop und Ziel stehen lassen gegen deine Ausstiege, bestes Ziel außerhalb der Stichprobe geprüft, Kurs nach dem Ausstieg", "Laboratorio de salidas: dejar stop y objetivo frente a tus salidas, mejor objetivo probado fuera de muestra, precio tras la salida", "Laboratório de saídas — deixar stop e alvo vs. suas saídas, melhor alvo testado fora da amostra, preço após a saída", "Labo des sorties — stop et objectif laissés contre tes sorties, meilleur objectif testé hors échantillon, prix après la sortie"],
     "Benchmark vs buy & hold — annualised Sharpe against S&P 500, Nasdaq 100, MSCI World, 60/40, gold & Bitcoin": ["Benchmark gegen Buy & Hold — annualisierter Sharpe gegen S&P 500, Nasdaq 100, MSCI World, 60/40, Gold & Bitcoin", "Benchmark frente a comprar y mantener — Sharpe anualizado frente a S&P 500, Nasdaq 100, MSCI World, 60/40, oro y Bitcoin", "Benchmark contra buy & hold — Sharpe anualizado contra S&P 500, Nasdaq 100, MSCI World, 60/40, ouro e Bitcoin", "Benchmark face au buy & hold — Sharpe annualisé face au S&P 500, Nasdaq 100, MSCI World, 60/40, or et Bitcoin"],
@@ -114926,6 +114992,425 @@ var ApexTwinEngine = (function () {
     w._tw = true; window.updateOverview = w; return true;
   }
   document.addEventListener('DOMContentLoaded', function () { css(); if (!hook()) setTimeout(hook, 1500); setTimeout(function () { try { TW.renderOverview(); } catch (e) {} }, 4000); });
+})();
+</script>
+<script>
+/* ApexCampaign — Prop Challenge Simulator (02.11.2026)
+   A whole prop-firm challenge, day after day, on real history. The trader
+   picks a firm, a size and a day in the past (or lets the time machine draw
+   one); every campaign day is a full Market Replay session of the next
+   trading day, and the account carries over: balance, trailing or
+   end-of-day floor, the trading days already counted, every day's profit for
+   the consistency rule. Phase 1 passed → Phase 2 starts on a fresh account
+   the next day, exactly as at the firm. A breach closes the account on the
+   bar it happened on — the rules are ApexChallenge's, i.e. the same rule
+   sets the prop cockpit measures live challenges against.
+
+   Why it matters: a real challenge costs a fee and a reset costs another.
+   Here the same pressure — "one more red day and it is over" — is free, and
+   the report says what actually ended each attempt.
+
+   Rules of the simulator:
+     · one trading day per session, Saturday and Sunday skipped
+     · flat at the end of the day: open positions are closed when the day is
+       ended (most intraday prop rules, and the only way to carry a clean
+       state into tomorrow's file)
+     · the firm's own day boundary and timezone come from the preset
+     · nothing about the future of a day is shown before it is traded; in
+       blind mode not even the date
+   Engine between the markers is pure — .claude/tests/campaign.test.js. */
+/* CAMPAIGN-ENGINE-START */
+var ApexCampaignEngine = (function () {
+  var K = {};
+  var DAY = 86400000;
+  function iso(ms) { return new Date(ms).toISOString().slice(0, 10); }
+  function wd(d) { return new Date(Date.parse(d + 'T00:00:00Z')).getUTCDay(); }
+  K.isTradingDay = function (d) { var w = wd(d); return w !== 0 && w !== 6; };
+  K.nextTradingDay = function (d) {
+    var t = Date.parse(d + 'T00:00:00Z') + DAY;
+    while (!K.isTradingDay(iso(t))) t += DAY;
+    return iso(t);
+  };
+  K.firstTradingDay = function (d) { return K.isTradingDay(d) ? d : K.nextTradingDay(d); };
+  /* A random weekday between two dates — the time machine. rnd() in [0,1). */
+  K.randomStart = function (rnd, from, to) {
+    var a = Date.parse(from + 'T00:00:00Z'), b = Date.parse(to + 'T00:00:00Z');
+    var t = a + Math.floor(rnd() * Math.max(1, (b - a) / DAY)) * DAY;
+    return K.firstTradingDay(iso(t));
+  };
+
+  K.create = function (o) {
+    var phases = (o.phases && o.phases.length ? o.phases : [{ id: 'p1', label: 'Phase 1', target: 1 }]).map(function (p) { return { id: p.id, label: p.label || p.id, target: p.target }; });
+    return {
+      v: 1, id: o.id || ('cmp_' + Date.now().toString(36)), firm: o.firm, firmLabel: o.firmLabel || o.firm, size: +o.size,
+      symbol: o.symbol, tf: o.tf || '5m', blind: !!o.blind, commRT: o.commRT || 0,
+      phases: phases, phaseIdx: 0, startDate: o.startDate, date: K.firstTradingDay(o.startDate), lastDate: o.lastDate || null,
+      balance: +o.size, snap: null, status: 'running', createdAt: o.now || Date.now(),
+      days: [], passed: [], result: null
+    };
+  };
+  K.phase = function (c) { return c.phases[c.phaseIdx] || null; };
+  function isFundedPhase(p) { return !p || p.id === 'funded' || !(p.target > 0); }
+
+  /* One finished campaign day → the next state. r = { date, symbol, status
+     ('running'|'failed'|'passed'), balance, dayPnl, floor, traded, reason,
+     snap }. Pure: returns a new object. */
+  K.applyDay = function (c0, r) {
+    var c = JSON.parse(JSON.stringify(c0));
+    if (c.status !== 'running') return c;
+    var ph = K.phase(c);
+    c.days.push({ date: r.date, symbol: r.symbol || c.symbol, phase: ph ? ph.id : '', status: r.status,
+                  pnl: +(+r.dayPnl || 0).toFixed(2), balance: +(+r.balance || 0).toFixed(2),
+                  floor: r.floor != null ? +(+r.floor).toFixed(2) : null, traded: !!r.traded, reason: r.reason || '' });
+    if (r.status === 'failed') {
+      c.status = 'failed';
+      c.result = { reason: r.reason || '', date: r.date, phase: ph ? ph.id : '', day: c.days.length, cause: K.cause(r.reason) };
+      c.snap = null;
+      return c;
+    }
+    if (r.status === 'passed') {
+      var inPhase = c.days.filter(function (d) { return d.phase === (ph && ph.id); });
+      c.passed.push({ phase: ph ? ph.id : '', label: ph ? ph.label : '', days: inPhase.length,
+                      traded: inPhase.filter(function (d) { return d.traded; }).length, date: r.date });
+      c.phaseIdx++;
+      c.snap = null;
+      c.balance = c.size;
+      if (isFundedPhase(K.phase(c))) {
+        c.status = 'funded';
+        c.result = { reason: 'Funded', date: r.date, days: c.days.length };
+        return c;
+      }
+    } else {
+      c.balance = +r.balance;
+      c.snap = r.snap || null;
+    }
+    c.date = K.nextTradingDay(r.date);
+    if (c.lastDate && c.date > c.lastDate) { c.status = 'ended'; c.result = { reason: 'Ran out of history', date: r.date }; }
+    return c;
+  };
+
+  K.cause = function (reason) {
+    var s = String(reason || '');
+    if (/daily/i.test(s)) return 'daily';
+    if (/drawdown|floor/i.test(s)) return 'max';
+    if (/consisten/i.test(s)) return 'consistency';
+    if (/time|days/i.test(s)) return 'time';
+    return 'other';
+  };
+  K.CAUSES = { daily: 'Daily loss limit', max: 'Max drawdown', consistency: 'Consistency rule', time: 'Time limit', other: 'Other' };
+
+  K.stats = function (list) {
+    var all = list || [];
+    var decided = all.filter(function (c) { return c.status === 'failed' || c.status === 'funded'; });
+    var funded = all.filter(function (c) { return c.status === 'funded'; });
+    var p1 = all.filter(function (c) { return c.passed.length || c.status === 'failed' || c.status === 'funded'; });
+    var p1pass = all.filter(function (c) { return c.passed.length > 0; });
+    var causes = {};
+    all.filter(function (c) { return c.status === 'failed'; }).forEach(function (c) { var k = (c.result && c.result.cause) || 'other'; causes[k] = (causes[k] || 0) + 1; });
+    var daysToFund = funded.map(function (c) { return c.days.length; });
+    var failDay = all.filter(function (c) { return c.status === 'failed'; }).map(function (c) { return c.days.length; });
+    var avg = function (a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; };
+    return { total: all.length, running: all.filter(function (c) { return c.status === 'running'; }).length,
+             decided: decided.length, funded: funded.length, failed: decided.length - funded.length,
+             passRate: decided.length ? funded.length / decided.length : null,
+             phase1Rate: p1.length ? p1pass.length / p1.length : null,
+             causes: causes, avgDaysToFund: avg(daysToFund), avgFailDay: avg(failDay) };
+  };
+  return K;
+})();
+/* CAMPAIGN-ENGINE-END */
+
+(function () {
+  var CP = {};
+  window.ApexCampaign = CP;
+  var K = ApexCampaignEngine;
+  var _active = null;      // campaign id whose day is being played
+
+  function uid() { return window.currentUID || 'local'; }
+  function key() { return 'apexCampaigns_v1_' + uid(); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function toast(m) { try { if (window.showToast) showToast(m); } catch (e) {} }
+  function money(v) { if (v == null || !isFinite(v)) return '—'; var a = Math.abs(v); return (v < 0 ? '−' : '') + '$' + a.toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+  function signed(v) { return (v > 0 ? '+' : '') + money(v); }
+  function load() { try { return JSON.parse(localStorage.getItem(key()) || '[]') || []; } catch (e) { return []; } }
+  function save(list) { try { localStorage.setItem(key(), JSON.stringify(list.slice(-60))); } catch (e) {} pushCloud(list); }
+  function get(id) { return load().filter(function (c) { return c.id === id; })[0] || null; }
+  function put(c) { var l = load().filter(function (x) { return x.id !== c.id; }); l.push(c); save(l); }
+  /* Mirrored into the owner-only private doc so a campaign started on the
+     laptop continues on the phone. Best effort; local is the source. */
+  function pushCloud(list) {
+    try { if (window.db && window.currentUID && window.currentUID !== 'demo') db.collection('apexUsers').doc(currentUID).collection('private').doc('campaigns').set({ list: JSON.stringify(list.slice(-60)), at: Date.now() }); } catch (e) {}
+  }
+  CP.pullCloud = function () {
+    try {
+      if (!(window.db && window.currentUID && window.currentUID !== 'demo')) return;
+      db.collection('apexUsers').doc(currentUID).collection('private').doc('campaigns').get().then(function (d) {
+        if (!d.exists) return;
+        var remote = []; try { remote = JSON.parse(d.data().list || '[]'); } catch (e) {}
+        var local = load(), byId = {};
+        local.concat(remote).forEach(function (c) { var o = byId[c.id]; if (!o || (c.days || []).length > (o.days || []).length) byId[c.id] = c; });
+        try { localStorage.setItem(key(), JSON.stringify(Object.keys(byId).map(function (k) { return byId[k]; }))); } catch (e) {}
+      }).catch(function () {});
+    } catch (e) {}
+  };
+  function presets() { try { return (window.ApexPropPlus && ApexPropPlus.PRESETS) || {}; } catch (e) { return {}; } }
+  function phasesOf(firm) { try { return ApexPropPlus.phasesOf(firm); } catch (e) { return [{ id: 'p1', label: 'Phase 1', target: 1 }]; } }
+  function sizesOf(firm) { try { return ApexPropPlus.sizesOf(firm) || []; } catch (e) { return []; } }
+  function lastDay() { return new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10); }
+  function dateLabel(c, d) { if (c.blind) return 'Day ' + (c.days.length + 1); try { return new Date(d + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); } catch (e) { return d; } }
+  function isPro() { return window.currentPlan === 'pro'; }
+
+  function css() {
+    if (document.getElementById('cmpCss')) return;
+    var s = document.createElement('style'); s.id = 'cmpCss';
+    s.textContent =
+      '.cmp-card{border:1px solid var(--gold-line);background:linear-gradient(180deg,rgba(var(--gold-rgb),.07),transparent);border-radius:var(--r-lg);padding:16px 18px;margin:0 0 14px}' +
+      '.cmp-card h3{margin:0 0 4px;font-size:var(--fs-md)}' +
+      '.cmp-sub{font-size:var(--fs-xs);color:var(--ink3);line-height:1.55;margin-bottom:10px}' +
+      '.cmp-list{display:flex;flex-direction:column;gap:8px;margin:10px 0}' +
+      '.cmp-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--rim2);border-radius:var(--r-md);padding:9px 12px;background:var(--surface)}' +
+      '.cmp-row .n{flex:1 1 200px;min-width:0;font-size:var(--fs-sm)}' +
+      '.cmp-row .n small{display:block;color:var(--ink3);font-size:var(--fs-xs);margin-top:2px}' +
+      '.cmp-pill{font-size:var(--fs-micro);font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:var(--r-pill);padding:3px 9px}' +
+      '.cmp-pill.run{background:rgba(var(--gold-rgb),.14);color:var(--gold)}.cmp-pill.ok{background:rgba(var(--profit-rgb),.14);color:var(--profit)}.cmp-pill.bad{background:rgba(var(--loss-rgb),.12);color:var(--loss)}.cmp-pill.end{background:var(--rim2);color:var(--ink3)}' +
+      '.cmp-stats{display:flex;gap:18px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--ink3);margin-top:6px}' +
+      '.cmp-stats b{display:block;font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:20px;color:var(--ink)}' +
+      '#cmpOv{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px);z-index:100000;display:none;align-items:center;justify-content:center;padding:16px}#cmpOv.open{display:flex}' +
+      '#cmpBox{background:var(--elevated);border:1px solid var(--rim2);border-radius:var(--r-lg);width:min(560px,100%);max-height:90vh;overflow:auto;padding:20px}' +
+      '#cmpBox h3{margin:0 0 6px;font-size:var(--fs-lg)}' +
+      '.cmp-f{margin:10px 0}.cmp-f label{display:block;font-size:var(--fs-xs);font-weight:600;color:var(--ink2);margin-bottom:5px}' +
+      '.cmp-f select,.cmp-f input[type=date]{width:100%;box-sizing:border-box;background:var(--surface);color:var(--ink);border:1px solid var(--rim2);border-radius:var(--r-sm);padding:8px 10px;font-size:var(--fs-sm)}' +
+      '.cmp-f .h{font-size:var(--fs-micro);color:var(--ink3);margin-top:4px;line-height:1.45}' +
+      '.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}@media(max-width:520px){.cmp-grid{grid-template-columns:1fr}}' +
+      '.cmp-btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.cmp-btns .apex-btn{flex:1;justify-content:center}' +
+      '.cmp-rule{font-size:var(--fs-xs);color:var(--ink2);background:var(--surface);border:1px solid var(--rim2);border-radius:var(--r-sm);padding:8px 10px;line-height:1.5;margin-top:6px}' +
+      '#cmpBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--gold-line);background:rgba(var(--gold-rgb),.08);border-radius:var(--r-md);padding:8px 12px;margin:6px 0;font-size:var(--fs-xs);color:var(--ink2)}' +
+      '#cmpBar b{color:var(--ink)}#cmpBar .sp{flex:1}' +
+      '.cmp-svg{width:100%;height:auto;display:block;margin:8px 0}' +
+      '.cmp-tbl{overflow-x:auto}.cmp-tbl table{width:100%;border-collapse:collapse;font-size:var(--fs-xs);font-family:var(--font-mono,DM Mono,monospace)}' +
+      '.cmp-tbl th{text-align:left;color:var(--ink3);font-weight:600;padding:5px 7px;border-bottom:1px solid var(--rim2)}.cmp-tbl td{padding:5px 7px;border-bottom:1px solid var(--rim)}';
+    document.head.appendChild(s);
+    var ov = document.createElement('div'); ov.id = 'cmpOv';
+    ov.innerHTML = '<div id="cmpBox" role="dialog" aria-modal="true"></div>';
+    ov.addEventListener('click', function (e) { if (e.target === ov) CP.close(); });
+    document.body.appendChild(ov);
+  }
+  function box(html) { css(); var b = document.getElementById('cmpBox'); b.innerHTML = html; document.getElementById('cmpOv').classList.add('open'); i18n(b); return b; }
+  CP.close = function () { var o = document.getElementById('cmpOv'); if (o) o.classList.remove('open'); };
+  function i18n(el) { try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {} }
+
+  function pill(c) {
+    return c.status === 'running' ? '<span class="cmp-pill run">' + esc((K.phase(c) || {}).label || 'Running') + '</span>'
+         : c.status === 'funded' ? '<span class="cmp-pill ok">Funded</span>'
+         : c.status === 'failed' ? '<span class="cmp-pill bad">Failed</span>' : '<span class="cmp-pill end">Ended</span>';
+  }
+
+  /* ── card on the Market Replay setup screen ── */
+  CP.setupCard = function () {
+    css();
+    var list = load().slice().reverse(), S = K.stats(list);
+    var running = list.filter(function (c) { return c.status === 'running'; });
+    var done = list.filter(function (c) { return c.status !== 'running'; }).slice(0, 4);
+    var row = function (c) {
+      var ph = K.phase(c), dd = c.days.length;
+      return '<div class="cmp-row"><div class="n"><b class="notranslate" translate="no">' + esc(c.firmLabel) + ' · ' + money(c.size) + '</b>' +
+        '<small><span class="notranslate" translate="no">' + esc(c.symbol) + '</span> · ' + dd + ' day' + (dd === 1 ? '' : 's') + ' · balance ' + money(c.status === 'running' ? c.balance : (c.days.length ? c.days[c.days.length - 1].balance : c.size)) + '</small></div>' +
+        pill(c) +
+        (c.status === 'running' ? '<button class="apex-btn apex-btn--solid apex-btn--sm" onclick="ApexCampaign.play(\'' + c.id + '\')">Trade ' + esc(c.blind ? 'next day' : dateLabel(c, c.date)) + '</button>' : '') +
+        '<button class="apex-btn apex-btn--ghost apex-btn--sm" onclick="ApexCampaign.report(\'' + c.id + '\')">Report</button></div>';
+    };
+    return '<div class="cmp-card"><h3>Prop Challenge Simulator</h3>' +
+      '<div class="cmp-sub">A whole challenge, day after day, on real history — your firm’s real rules, the account carried from one day to the next, Phase 1 to funded. The pressure of a real attempt, without the fee.</div>' +
+      (running.length || done.length ? '<div class="cmp-list">' + running.map(row).join('') + done.map(row).join('') + '</div>' : '') +
+      (S.decided ? '<div class="cmp-stats"><div><b class="notranslate" translate="no">' + Math.round(S.passRate * 100) + '%</b>funded</div><div><b class="notranslate" translate="no">' + S.decided + '</b>attempts</div>' +
+        (S.avgDaysToFund != null ? '<div><b class="notranslate" translate="no">' + Math.round(S.avgDaysToFund) + '</b>days to funded</div>' : '') +
+        (Object.keys(S.causes).length ? '<div><b>' + esc(K.CAUSES[Object.keys(S.causes).sort(function (a, b) { return S.causes[b] - S.causes[a]; })[0]]) + '</b>ends most attempts</div>' : '') + '</div>' : '') +
+      '<div class="cmp-btns" style="margin-top:12px"><button class="apex-btn apex-btn--solid" onclick="ApexCampaign.openNew()">Start a challenge</button></div></div>';
+  };
+
+  /* ── new campaign ── */
+  CP.openNew = function () {
+    if (!isPro() && !window.APEX_SHARED_REPLAY) { try { openUpgradeModal(); } catch (e) {} return; }
+    var P = presets(), firms = Object.keys(P).filter(function (k) { return k !== 'custom'; });
+    var firm = firms.indexOf('ftmo') >= 0 ? 'ftmo' : firms[0];
+    var syms = []; try { syms = ApexMarketData.instruments() || []; } catch (e) {}
+    var symOpts = syms.map(function (s) { return '<option value="' + esc(s[0]) + '"' + (s[0] === 'XAUUSD' ? ' selected' : '') + '>' + esc(s[1] || s[0]) + '</option>'; }).join('');
+    box('<h3>Start a challenge</h3><div class="cmp-sub">Every day is one Market Replay session. You decide when a day is over; the firm’s rules decide when the account is.</div>' +
+      '<div class="cmp-grid"><div class="cmp-f"><label>Prop firm</label><select id="cmpFirm" onchange="ApexCampaign._firm()">' + firms.map(function (k) { return '<option value="' + k + '"' + (k === firm ? ' selected' : '') + '>' + esc(P[k].label) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="cmp-f"><label>Account size</label><select id="cmpSize"></select></div></div>' +
+      '<div id="cmpRules" class="cmp-rule"></div>' +
+      '<div class="cmp-grid"><div class="cmp-f"><label>Instrument</label><select id="cmpSym">' + symOpts + '</select><div class="h">You can change it on any day.</div></div>' +
+      '<div class="cmp-f"><label>Chart timeframe</label><select id="cmpTf">' + [['1m', '1m'], ['5m', '5m'], ['15m', '15m'], ['1h', '1h']].map(function (t) { return '<option value="' + t[0] + '"' + (t[0] === '5m' ? ' selected' : '') + '>' + t[1] + '</option>'; }).join('') + '</select></div></div>' +
+      '<div class="cmp-grid"><div class="cmp-f"><label>Start day</label><select id="cmpWhen" onchange="document.getElementById(\'cmpDateW\').style.display=this.value===\'pick\'?\'\':\'none\'"><option value="random">Time machine — a random day since 2021</option><option value="pick">I pick the day</option></select></div>' +
+      '<div class="cmp-f" id="cmpDateW" style="display:none"><label>Date</label><input type="date" id="cmpDate" min="2020-01-02" max="' + lastDay() + '" value="2024-03-04"></div></div>' +
+      '<div class="cmp-f"><label><input type="checkbox" id="cmpBlind" style="margin-right:6px;accent-color:var(--gold)">Blind — hide the dates, so no memory of the news can help</label></div>' +
+      '<div class="cmp-btns"><button class="apex-btn apex-btn--ghost" onclick="ApexCampaign.close()">Cancel</button><button class="apex-btn apex-btn--solid" onclick="ApexCampaign.create()">Start day 1</button></div>');
+    CP._firm();
+  };
+  CP._firm = function () {
+    var f = (document.getElementById('cmpFirm') || {}).value, sizes = sizesOf(f);
+    if (!sizes.length) sizes = [25000, 50000, 100000];
+    var def = sizes.indexOf(100000) >= 0 ? 100000 : sizes.indexOf(50000) >= 0 ? 50000 : sizes[0];
+    var sel = document.getElementById('cmpSize');
+    if (sel) { sel.innerHTML = sizes.map(function (n) { return '<option value="' + n + '"' + (n === def ? ' selected' : '') + '>' + money(n) + '</option>'; }).join(''); sel.onchange = rules; }
+    rules();
+    function rules() {
+      var el = document.getElementById('cmpRules'); if (!el) return;
+      var size = +(document.getElementById('cmpSize') || {}).value || def, p = presets()[f] || {};
+      var ph = phasesOf(f).map(function (x) { return esc(x.label) + (x.target > 0 ? ' ' + x.target + '%' : ''); }).join(' → ');
+      var rr = null; try { rr = ApexPropPlus.rulesFor(f, size, 'p1'); } catch (e) {}
+      var q = Object.assign({}, p, rr || {});
+      el.innerHTML = '<b class="notranslate" translate="no">' + esc(p.label || f) + '</b>: ' + ph + ' · ' + (q.daily ? (+q.daily).toFixed(1).replace(/\.0$/, '') + '% daily loss · ' : 'no daily limit · ') + (+q.max || 0).toFixed(1).replace(/\.0$/, '') + '% max drawdown (' + (q.dd === 'trailing' ? 'intraday trailing' : q.dd === 'eod' ? 'end-of-day trailing' : 'static') + ')' + (q.minDays ? ' · min ' + q.minDays + ' trading days' : '') + (q.consistency ? ' · ' + q.consistency + '% consistency' : '');
+    }
+  };
+  CP.create = function () {
+    var v = function (id) { return (document.getElementById(id) || {}).value; };
+    var firm = v('cmpFirm'), P = presets()[firm] || {};
+    var start = v('cmpWhen') === 'pick' ? (v('cmpDate') || '2024-03-04') : K.randomStart(Math.random, '2021-01-04', new Date(Date.now() - 120 * 86400000).toISOString().slice(0, 10));
+    if (start > lastDay()) { toast('⚠ Pick a day at least two days ago'); return; }
+    var c = K.create({ firm: firm, firmLabel: P.label || firm, size: +v('cmpSize'), symbol: v('cmpSym') || 'XAUUSD', tf: v('cmpTf') || '5m',
+      blind: !!(document.getElementById('cmpBlind') || {}).checked, phases: phasesOf(firm), startDate: start, lastDate: lastDay() });
+    put(c); CP.close(); CP.play(c.id);
+  };
+
+  /* ── play one day: hand the replay its setup, restore the challenge ── */
+  CP.play = function (id, symbol) {
+    var c = get(id); if (!c || c.status !== 'running') return;
+    if (symbol) { c.symbol = symbol; put(c); }
+    _active = c.id;
+    try { if (window.nav) nav('replaylab'); } catch (e) {}
+    var tries = 0;
+    (function go() {
+      var host = document.getElementById('rhHost');
+      if (!host || !window.ApexReplayUI || !ApexReplayUI.campaignDay) { if (++tries < 40) return setTimeout(go, 150); toast('⚠ Market Replay is not ready'); return; }
+      var ph = K.phase(c);
+      ApexReplayUI.campaignDay(host, { id: c.id, symbol: c.symbol, date: c.date, tf: c.tf, balance: c.balance, firm: c.firm, size: c.size,
+        phaseId: ph ? ph.id : 'p1', snap: c.snap, blind: c.blind, commRT: c.commRT });
+      setTimeout(bar, 600);
+    })();
+  };
+  /* Called by the replay right after it started the challenge. */
+  CP.restoreInto = function (o) { try { if (o && o.snap && window.ApexChallenge && ApexChallenge.restore) ApexChallenge.restore(o.snap); } catch (e) {} };
+
+  function bar() {
+    var c = _active && get(_active); if (!c) return;
+    var host = document.getElementById('challengeBar'); if (!host || !host.parentNode) { setTimeout(bar, 500); return; }
+    var el = document.getElementById('cmpBar');
+    if (!el) { el = document.createElement('div'); el.id = 'cmpBar'; host.parentNode.insertBefore(el, host); }
+    var ph = K.phase(c);
+    el.innerHTML = '<span><b class="notranslate" translate="no">' + esc(c.firmLabel) + ' · ' + money(c.size) + '</b> · ' + esc(ph ? ph.label : '') + ' · <span>day</span> <b class="notranslate" translate="no">' + (c.days.length + 1) + '</b>' +
+      (c.blind ? '' : ' · <span class="notranslate" translate="no">' + esc(dateLabel(c, c.date)) + '</span>') + '</span><span class="sp"></span>' +
+      '<button class="apex-btn apex-btn--solid apex-btn--sm" onclick="ApexCampaign.endDay()">End the day</button>';
+    i18n(el);
+  }
+
+  /* ── end of a campaign day ── */
+  CP.endDay = function () {
+    var c = _active && get(_active); if (!c) return;
+    var R = window.ApexReplayUI && ApexReplayUI._state, sess = R && R.session;
+    var st0 = null; try { st0 = sess && sess.state(); } catch (e) {}
+    var openN = st0 ? (st0.openPositions | 0) : 0;
+    var finish = function () {
+      try { if (sess) { sess.closeAll(); sess.pause(); } } catch (e) {}
+      var r = null; try { r = ApexChallenge.endDay(); } catch (e) { r = null; }
+      if (!r) { toast('⚠ No challenge running in this replay'); return; }
+      var res = { date: c.date, symbol: (R && R.symbol) || c.symbol, status: r.status === 'failed' ? 'failed' : r.status === 'passed' ? 'passed' : 'running',
+                  balance: r.balance, dayPnl: r.dayPnl, floor: r.floor, traded: r.traded, reason: r.reason, snap: r.snap };
+      var next = K.applyDay(c, res); put(next); _active = next.status === 'running' ? next.id : null;
+      var b = document.getElementById('cmpBar'); if (b) b.remove();
+      dayDone(next, res);
+    };
+    if (openN > 0 && window.ApexDialog) {
+      ApexDialog.confirm('You have ' + openN + ' open position' + (openN === 1 ? '' : 's') + '. The day ends flat — they are closed at the current price.', { title: 'End the day', okText: 'Close and end the day' })
+        .then(function (ok) { if (ok) finish(); });
+    } else finish();
+  };
+  function dayDone(c, r) {
+    var ph = K.phase(c), last = c.days[c.days.length - 1] || {};
+    var head = c.status === 'failed' ? '<h3>Account closed</h3><div class="cmp-sub">' + esc(r.reason || '') + '</div>'
+      : c.status === 'funded' ? '<h3>Funded</h3><div class="cmp-sub">You passed every phase — the firm would hand you the account now.</div>'
+      : r.status === 'passed' ? '<h3>Phase passed</h3><div class="cmp-sub">' + esc(r.reason || '') + ' Next: ' + esc(ph ? ph.label : '') + ' on a fresh account, starting tomorrow.</div>'
+      : c.status === 'ended' ? '<h3>Out of history</h3><div class="cmp-sub">The campaign reached the most recent data.</div>'
+      : '<h3>Day done</h3>';
+    box(head +
+      '<div class="cmp-stats" style="margin:10px 0"><div><b class="notranslate ' + (last.pnl >= 0 ? 'pos' : 'neg') + '" translate="no">' + signed(last.pnl) + '</b>today</div>' +
+        '<div><b class="notranslate" translate="no">' + money(last.balance) + '</b>balance</div>' + (last.floor != null ? '<div><b class="notranslate" translate="no">' + money(last.floor) + '</b>floor</div>' : '') +
+        '<div><b class="notranslate" translate="no">' + c.days.length + '</b>days</div></div>' +
+      curveSvg(c) +
+      '<div class="cmp-btns">' + (c.status === 'running' ? '<button class="apex-btn apex-btn--ghost" onclick="ApexCampaign.close();ApexCampaign.home()">Later</button><button class="apex-btn apex-btn--solid" onclick="ApexCampaign.close();ApexCampaign.play(\'' + c.id + '\')">Trade the next day</button>'
+        : '<button class="apex-btn apex-btn--ghost" onclick="ApexCampaign.close();ApexCampaign.home()">Close</button><button class="apex-btn apex-btn--solid" onclick="ApexCampaign.close();ApexCampaign.openNew()">New attempt</button>') + '</div>');
+  }
+
+  function curveSvg(c) {
+    var d = c.days; if (!d.length) return '';
+    var pts = [c.size].concat(d.map(function (x) { return x.balance; })), fl = d.map(function (x) { return x.floor; }).filter(function (v) { return v != null; });
+    var all = pts.concat(fl), mx = Math.max.apply(null, all), mn = Math.min.apply(null, all);
+    var W = 520, H = 150, P = 18, n = pts.length;
+    var x = function (i) { return P + (n === 1 ? 0 : i * (W - 2 * P) / (n - 1)); }, y = function (v) { return P + (mx - v) * (H - 2 * P) / ((mx - mn) || 1); };
+    var line = pts.map(function (v, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' ');
+    var fline = d.map(function (z, i) { return z.floor == null ? '' : ((i ? 'L' : 'M') + x(i + 1).toFixed(1) + ' ' + y(z.floor).toFixed(1)); }).join(' ');
+    return '<svg class="cmp-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Balance by day and the drawdown floor">' +
+      (fline ? '<path d="' + fline + '" style="fill:none;stroke:var(--loss);stroke-width:1.5;stroke-dasharray:4 4"/>' : '') +
+      '<path d="' + line + '" style="fill:none;stroke:var(--gold);stroke-width:2.5"/></svg>';
+  }
+
+  CP.report = function (id) {
+    var c = get(id); if (!c) return;
+    var rows = c.days.map(function (d, i) {
+      return '<tr><td>' + (i + 1) + '</td><td class="notranslate" translate="no">' + esc(c.blind ? '—' : d.date) + '</td><td class="notranslate" translate="no">' + esc(d.symbol) + '</td><td>' + esc(((c.phases.filter(function (p) { return p.id === d.phase; })[0]) || {}).label || d.phase) + '</td>' +
+        '<td class="' + (d.pnl > 0 ? 'pos' : d.pnl < 0 ? 'neg' : '') + '">' + signed(d.pnl) + '</td><td>' + money(d.balance) + '</td><td>' + (d.floor != null ? money(d.floor) : '—') + '</td></tr>';
+    }).join('');
+    var outcome = c.status === 'failed' ? '<span class="cmp-pill bad">Failed</span> <span>' + esc(c.result && c.result.reason || '') + '</span>'
+      : c.status === 'funded' ? '<span class="cmp-pill ok">Funded</span> <span>after</span> <b class="notranslate" translate="no">' + c.days.length + '</b> <span>days</span>'
+      : pill(c);
+    box('<h3 class="notranslate" translate="no">' + esc(c.firmLabel) + ' · ' + money(c.size) + '</h3><div class="cmp-sub">' + outcome +
+      (c.passed.length ? '<br>' + c.passed.map(function (p) { return '<span>' + esc(p.label) + ' passed</span> · ' + p.days + ' <span>days</span>'; }).join('<br>') : '') + '</div>' +
+      curveSvg(c) + (rows ? '<div class="cmp-tbl"><table><tr><th>#</th><th>Date</th><th>Symbol</th><th>Phase</th><th>Day</th><th>Balance</th><th>Floor</th></tr>' + rows + '</table></div>' : '<div class="cmp-sub">No day traded yet.</div>') +
+      '<div class="cmp-btns">' + (c.status === 'running' ? '<button class="apex-btn apex-btn--solid" onclick="ApexCampaign.close();ApexCampaign.play(\'' + c.id + '\')">Trade the next day</button>' : '') +
+      '<button class="apex-btn apex-btn--ghost" onclick="ApexCampaign.remove(\'' + c.id + '\')">Delete</button><button class="apex-btn apex-btn--ghost" onclick="ApexCampaign.close()">Close</button></div>');
+  };
+  CP.remove = function (id) {
+    var go = function () { save(load().filter(function (c) { return c.id !== id; })); CP.close(); try { if (window.ApexReplayUI && ApexReplayUI._state && !ApexReplayUI._state.session) document.dispatchEvent(new Event('apex:campaigns')); } catch (e) {} toast('Campaign deleted'); };
+    if (window.ApexDialog) ApexDialog.confirm('Delete this campaign and its report?', { title: 'Delete', okText: 'Delete', danger: true }).then(function (ok) { if (ok) go(); }); else go();
+  };
+  CP.activeId = function () { return _active; };
+  /* Back to the Market Replay start screen, where the campaign card lives. */
+  CP.home = function () {
+    try { var h = document.getElementById('rhHost'); if (h && window.ApexReplayUI) { ApexReplayUI.teardown(); ApexReplayUI.render(h); } } catch (e) {}
+  };
+  CP.list = load;
+
+  var T = {
+    'Prop Challenge Simulator': ['Prop-Challenge-Simulator', 'Simulador de desafíos prop', 'Simulador de desafios prop', 'Simulateur de challenge prop'],
+    'A whole challenge, day after day, on real history — your firm’s real rules, the account carried from one day to the next, Phase 1 to funded. The pressure of a real attempt, without the fee.': ['Eine ganze Challenge, Tag für Tag, auf echter Historie – die echten Regeln deiner Firma, das Konto wird von Tag zu Tag weitergeführt, von Phase 1 bis funded. Der Druck eines echten Versuchs, ohne die Gebühr.', 'Un desafío completo, día a día, con historia real: las reglas reales de tu firma, la cuenta llevada de un día al siguiente, de la fase 1 a fondeado. La presión de un intento real, sin la tarifa.', 'Um desafio inteiro, dia após dia, em histórico real — as regras reais da sua firma, a conta levada de um dia para o outro, da fase 1 ao financiado. A pressão de uma tentativa real, sem a taxa.', 'Un challenge complet, jour après jour, sur un historique réel — les vraies règles de ta firme, le compte reporté d’un jour à l’autre, de la phase 1 au financement. La pression d’une vraie tentative, sans les frais.'],
+    'Start a challenge': ['Challenge starten', 'Empezar un desafío', 'Começar um desafio', 'Lancer un challenge'],
+    'Every day is one Market Replay session. You decide when a day is over; the firm’s rules decide when the account is.': ['Jeder Tag ist eine Market-Replay-Sitzung. Wann ein Tag vorbei ist, entscheidest du – wann das Konto vorbei ist, die Regeln der Firma.', 'Cada día es una sesión de Market Replay. Tú decides cuándo termina un día; las reglas de la firma, cuándo termina la cuenta.', 'Cada dia é uma sessão de Market Replay. Você decide quando um dia termina; as regras da firma, quando a conta termina.', 'Chaque jour est une session Market Replay. Tu décides quand la journée est finie ; les règles de la firme, quand le compte l’est.'],
+    'Prop firm': ['Prop-Firma', 'Prop firm', 'Prop firm', 'Prop firm'], 'Account size': ['Kontogröße', 'Tamaño de cuenta', 'Tamanho da conta', 'Taille du compte'],
+    'Instrument': ['Instrument', 'Instrumento', 'Instrumento', 'Instrument'], 'You can change it on any day.': ['Lässt sich an jedem Tag ändern.', 'Puedes cambiarlo cualquier día.', 'Pode mudar em qualquer dia.', 'Modifiable chaque jour.'],
+    'Chart timeframe': ['Chart-Zeitrahmen', 'Marco temporal', 'Tempo gráfico', 'Unité de temps'], 'Start day': ['Starttag', 'Día de inicio', 'Dia de início', 'Jour de départ'],
+    'Time machine — a random day since 2021': ['Zeitmaschine – ein zufälliger Tag seit 2021', 'Máquina del tiempo: un día al azar desde 2021', 'Máquina do tempo — um dia aleatório desde 2021', 'Machine à remonter le temps — un jour au hasard depuis 2021'],
+    'I pick the day': ['Ich wähle den Tag', 'Elijo el día', 'Eu escolho o dia', 'Je choisis le jour'], 'Date': ['Datum', 'Fecha', 'Data', 'Date'],
+    'Blind — hide the dates, so no memory of the news can help': ['Blind – Daten ausblenden, damit keine Erinnerung an die Nachrichten hilft', 'A ciegas: ocultar las fechas para que ningún recuerdo de las noticias ayude', 'Às cegas — ocultar as datas para que nenhuma lembrança das notícias ajude', 'À l’aveugle — masquer les dates pour qu’aucun souvenir de l’actualité n’aide'],
+    'Cancel': ['Abbrechen', 'Cancelar', 'Cancelar', 'Annuler'], 'Start day 1': ['Tag 1 starten', 'Empezar el día 1', 'Começar o dia 1', 'Commencer le jour 1'],
+    'End the day': ['Tag beenden', 'Terminar el día', 'Encerrar o dia', 'Terminer la journée'], 'day': ['Tag', 'día', 'dia', 'jour'],
+    'Account closed': ['Konto geschlossen', 'Cuenta cerrada', 'Conta encerrada', 'Compte clôturé'], 'Funded': ['Funded', 'Fondeado', 'Financiado', 'Financé'],
+    'You passed every phase — the firm would hand you the account now.': ['Du hast jede Phase bestanden – die Firma würde dir jetzt das Konto geben.', 'Superaste todas las fases: la firma te daría ahora la cuenta.', 'Você passou em todas as fases — a firma lhe entregaria a conta agora.', 'Tu as réussi toutes les phases — la firme te confierait le compte maintenant.'],
+    'Phase passed': ['Phase bestanden', 'Fase superada', 'Fase aprovada', 'Phase réussie'], 'Day done': ['Tag beendet', 'Día terminado', 'Dia concluído', 'Journée terminée'],
+    'Out of history': ['Ende der Historie', 'Fin del histórico', 'Fim do histórico', 'Fin de l’historique'],
+    'today': ['heute', 'hoy', 'hoje', 'aujourd’hui'], 'balance': ['Kontostand', 'saldo', 'saldo', 'solde'], 'floor': ['Floor', 'suelo', 'piso', 'plancher'], 'days': ['Tage', 'días', 'dias', 'jours'],
+    'Later': ['Später', 'Más tarde', 'Mais tarde', 'Plus tard'], 'Trade the next day': ['Nächsten Tag handeln', 'Operar el día siguiente', 'Operar o próximo dia', 'Trader le jour suivant'],
+    'Close': ['Schließen', 'Cerrar', 'Fechar', 'Fermer'], 'New attempt': ['Neuer Versuch', 'Nuevo intento', 'Nova tentativa', 'Nouvelle tentative'],
+    'Report': ['Bericht', 'Informe', 'Relatório', 'Rapport'], 'Delete': ['Löschen', 'Eliminar', 'Excluir', 'Supprimer'], 'Failed': ['Gescheitert', 'Fallido', 'Reprovado', 'Échoué'],
+    'funded': ['funded', 'fondeado', 'financiado', 'financé'], 'attempts': ['Versuche', 'intentos', 'tentativas', 'tentatives'], 'days to funded': ['Tage bis funded', 'días hasta fondeado', 'dias até financiado', 'jours jusqu’au financement'],
+    'ends most attempts': ['beendet die meisten Versuche', 'termina la mayoría de intentos', 'encerra a maioria das tentativas', 'met fin à la plupart des tentatives'],
+    'Daily loss limit': ['Tagesverlust-Limit', 'Límite de pérdida diaria', 'Limite de perda diária', 'Limite de perte journalière'], 'Max drawdown': ['Max. Drawdown', 'Drawdown máximo', 'Drawdown máximo', 'Drawdown max'],
+    'Consistency rule': ['Konsistenzregel', 'Regla de consistencia', 'Regra de consistência', 'Règle de constance'],
+    'No day traded yet.': ['Noch kein Tag gehandelt.', 'Aún no has operado ningún día.', 'Nenhum dia operado ainda.', 'Aucun jour tradé pour l’instant.'],
+    'Symbol': ['Symbol', 'Símbolo', 'Símbolo', 'Symbole'], 'Phase': ['Phase', 'Fase', 'Fase', 'Phase'], 'Day': ['Tag', 'Día', 'Dia', 'Jour'], 'Balance': ['Kontostand', 'Saldo', 'Saldo', 'Solde'], 'Floor': ['Floor', 'Suelo', 'Piso', 'Plancher']
+  };
+  function reg() { if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('.cmp-card, #cmpBox, #cmpBar', T); else setTimeout(reg, 300); }
+  reg();
+  document.addEventListener('DOMContentLoaded', function () { css(); setTimeout(CP.pullCloud, 5000); });
 })();
 </script>
 </body>
