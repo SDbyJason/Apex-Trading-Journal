@@ -428,6 +428,11 @@ window.APEX_PRICES = (function () {
         'Eingang, Börsen-Synchronisierung, Verbindungsweg (Tunnel) zum MT5-Server. Drittlandtransfer ' +
         'auf Grundlage der Standardvertragsklauseln. Das Investor-Passwort wird dabei nur ' +
         'durchgeleitet, nicht gespeichert.</p>' +
+        '<p><b>Frankfurter (api.frankfurter.dev) — Wechselkurse:</b> dein Browser ruft höchstens ' +
+        'zweimal am Tag die Referenzkurse der Europäischen Zentralbank ab, um Beträge aus der ' +
+        'Kontowährung in deine Anzeigewährung umzurechnen. Dabei wird technisch bedingt deine ' +
+        'IP-Adresse übertragen; Daten aus deinem Journal werden nicht gesendet. Rechtsgrundlage: ' +
+        'Art. 6 Abs. 1 lit. b DSGVO (korrekte Darstellung deiner Zahlen).</p>' +
         '<p><b>Dein Broker bzw. deine Prop-Firm (MetaQuotes-Handelsserver):</b> nur wenn du den ' +
         'MT5-Cloud-Sync nutzt. Übertragen werden Kontonummer und Investor-Passwort zur Anmeldung, ' +
         'wie bei jeder MetaTrader-Anmeldung.</p>' +
@@ -1142,7 +1147,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-10-30b';
+  window.APEX_BUILD = '2026-11-01a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -10055,6 +10060,10 @@ body.light #landingPage * {
         "Crypto auto-sync from Binance and Bybit via read-only API keys",
         "Statement import — 94 brokers and prop firms across 56 detected statement formats, with free column mapping",
         "Import check before anything is written — duplicates, missing stops, timezone and the file's own P&L against the journal",
+        "Exit Lab — every entry replayed on 1-minute prices under other exits (set and forget, fixed targets, break-even, trailing, time stops), with the price after the exit",
+        "Account currency per account — broker P&L, commission and swap read in it and converted at daily ECB rates",
+        "Merge and split trades — partial fills into one position, undo any time",
+        "Fee templates per account — commission filled in where a statement has none",
         "Connection health — every sync on one page, with an email when one stops delivering and a check of the broker's P&L against the journal",
         "Live chart with AI zone analysis across five timeframes, judged against your own playbook",
         "Click a zone for entry, stop and several take-profits, then track every idea to its result",
@@ -11390,6 +11399,7 @@ body.light #landingPage * {
         <li><b>Confluence</b>&nbsp;— which of your conditions actually pay, alone and combined</li>
         <li><b>Session review</b>&nbsp;— sequence, size drift &amp; revenge-window detection</li>
         <li>Auto MFE / MAE from real price data</li>
+        <li>Exit Lab — your entries replayed on real prices: set and forget, fixed targets, break-even, trailing and time stops, and the price after your exit</li>
         <li>Risk of Ruin, Sharpe &amp; Expectancy / setup</li>
         <li><b>Benchmark vs buy &amp; hold</b>&nbsp;— your Sharpe against S&amp;P 500, Nasdaq, MSCI World, 60/40, gold &amp; BTC</li>
         <li><b>R-Multiple &amp; Kelly</b>&nbsp;— R distribution, R per setup, optimal risk</li>
@@ -11443,9 +11453,11 @@ body.light #landingPage * {
         <tr><td>Journal search — notes, setups, tags &amp; mistakes</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Confidence on every number — how many trades stand behind each statistic</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Sign in with Google</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
-        <tr><td>16 display currencies &amp; auto-translation</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Account currency per account — booked P&amp;L converted at daily ECB rates, 16 display currencies &amp; auto-translation</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Forex, indices, crypto, futures &amp; multi-leg options</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Partial exits &amp; scale-out logging</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Merge and split trades — partial fills into one position, undo any time</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+        <tr><td>Fee templates per account — commission filled in where a statement has none</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Guardrails — daily loss limit, trade cap, cooldown &amp; revenge detection</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Prop mode — one challenge with your firm&rsquo;s real rules on every page: three drawdown models (trailing that stops at your starting balance included), daily limit on the firm&rsquo;s clock, consistency rule, personal stop</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Several prop challenges at once, with a cost &amp; payout ledger and &ldquo;what ended your challenges&rdquo;</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -11503,6 +11515,7 @@ body.light #landingPage * {
         <tr><td>Stop-vs-target collisions resolved from real ticks, not guessed</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Candlestick charts — drag entry / SL / TP</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto MFE / MAE from price data</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Exit Lab — set and forget vs your exits, best target tested out of sample, price after the exit</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Risk of Ruin, Sharpe &amp; Expectancy / setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Benchmark vs buy &amp; hold — annualised Sharpe against S&amp;P 500, Nasdaq 100, MSCI World, 60/40, gold &amp; Bitcoin</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>R-Multiple analytics — distribution, cumulative R &amp; R per setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -12629,6 +12642,7 @@ body.light #landingPage * {
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🧩</div><div><div class="apex-feat-label">Confluence — which of your conditions actually pay</div><div class="apex-feat-desc">Your playbook checklists already record which conditions held on each trade. This scores every single one, and every pair and triple, against the trades where they all held &mdash; measured as lift against your own baseline, because "this wins 70 %" is not a finding when you already win 70 %. Combinations below the minimum sample are not shown as findings at all</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-clipboard ></use></svg></div><div><div class="apex-feat-label">Session review</div><div class="apex-feat-desc">Intraday give-back, revenge windows, size drift after losses and rule adherence — with a coach verdict on the process, not the P&L</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">Auto MFE / MAE</div><div class="apex-feat-desc">Fetches price data & computes max favorable / adverse excursion automatically</div></div></div>
+      <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">Exit Lab</div><div class="apex-feat-desc">Your entries replayed on real prices under other exits — and what price did after you got out</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg></div><div><div class="apex-feat-label">Risk of Ruin &amp; Sharpe</div><div class="apex-feat-desc">Institutional risk metrics + per-setup expectancy & profit factor</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">R-Multiple &amp; Kelly</div><div class="apex-feat-desc">R distribution, cumulative R and R per setup — plus the growth-optimal risk per trade</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">⏱</div><div><div class="apex-feat-label">Hold-Time &amp; Scale-Out Analysis</div><div class="apex-feat-desc">Expectancy by time in trade, and whether your partial exits beat simply holding</div></div></div>
@@ -13831,6 +13845,9 @@ function _authAction(type) {
       <button class="apex-btn apex-btn--ghost" onclick="addPlannedTrade()" title="Write the plan BEFORE you place the order. The next matching fill (same symbol and side, within 12 hours) is attached to it automatically — or log the entry on this card yourself.">
         <svg class=ic aria-hidden=true><use href=#i-target ></use></svg> Plan a trade
       </button>
+      <button class="apex-btn apex-btn--ghost" id="mgModeBtn" onclick="if(window.ApexMerge)ApexMerge.toggle()" title="Select the partial fills of one position and merge them into a single trade">
+        <svg class=ic aria-hidden=true><use href=#i-scissors ></use></svg> Merge trades
+      </button>
       <button class="apex-btn apex-btn--ghost" onclick="openCsvImport()">
         <svg class=ic aria-hidden=true><use href=#i-folder ></use></svg> Import CSV
       </button>
@@ -14885,8 +14902,8 @@ function _authAction(type) {
             <!-- PnL Currency Toggle -->
             <div style="display:flex;align-items:center;justify-content:space-between;padding-top:4px">
               <div>
-                <div style="font-size:13px;font-weight:500;margin-bottom:2px"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> P&amp;L Anzeigewährung</div>
-                <div style="font-size:11px;color:var(--ink3)">Show monetary P&amp;L in USD or EUR</div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:2px"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> Display currency</div>
+                <div style="font-size:11px;color:var(--ink3)">The currency every figure is shown in</div>
               </div>
               <select id="pnlCurrencySelect" onchange="setPnlCurrency(this.value)" style="background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:9px 12px;font-size:13px;min-width:210px" aria-label="Profit and loss currency">
                 <option value="USD">$ USD — US Dollar</option>
@@ -14905,6 +14922,36 @@ function _authAction(type) {
                 <option value="PLN">zł PLN — Polish Zloty</option>
                 <option value="SEK">kr SEK — Swedish Krona</option>
                 <option value="NOK">kr NOK — Norwegian Krone</option>
+              </select>
+            </div>
+
+            <!-- Account currency (01.11.2026) — what the broker books in -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:4px">
+              <div style="min-width:0">
+                <div style="font-size:13px;font-weight:500;margin-bottom:2px"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> Account currency</div>
+                <div style="font-size:11px;color:var(--ink3)">What your broker books profit, commission and swap in. Used for trades whose account has no currency of its own — set it per account under Accounts.</div>
+                <div id="fxRateInfo" style="font-size:11px;color:var(--ink3);margin-top:4px"></div>
+              </div>
+              <select id="accountCurrencySelect" onchange="setAccountCurrency(this.value)" style="background:var(--surface);border:0.5px solid var(--rim);border-radius:8px;color:var(--ink);padding:9px 12px;font-size:13px;min-width:210px" aria-label="Account currency">
+                <option value="USD">$ USD — US Dollar</option>
+                <option value="EUR">€ EUR — Euro</option>
+                <option value="GBP">£ GBP — British Pound</option>
+                <option value="CHF">CHF — Swiss Franc</option>
+                <option value="JPY">¥ JPY — Japanese Yen</option>
+                <option value="AUD">A$ AUD — Australian Dollar</option>
+                <option value="CAD">C$ CAD — Canadian Dollar</option>
+                <option value="NZD">NZ$ NZD — New Zealand Dollar</option>
+                <option value="ZAR">R ZAR — South African Rand</option>
+                <option value="INR">₹ INR — Indian Rupee</option>
+                <option value="BRL">R$ BRL — Brazilian Real</option>
+                <option value="SGD">S$ SGD — Singapore Dollar</option>
+                <option value="AED">AED — UAE Dirham</option>
+                <option value="PLN">zł PLN — Polish Zloty</option>
+                <option value="SEK">kr SEK — Swedish Krona</option>
+                <option value="NOK">kr NOK — Norwegian Krone</option>
+                <option value="USC">US¢ USC — US cent account</option>
+                <option value="EUC">€¢ EUC — Euro cent account</option>
+                <option value="USDT">USDT — Tether (crypto)</option>
               </select>
             </div>
 
@@ -17774,6 +17821,9 @@ function applySettings() {
   var cur = (appSettings.pnlCurrency || 'USD');
   var curSel = document.getElementById('pnlCurrencySelect');
   if (curSel) curSel.value = cur;
+  var accSel = document.getElementById('accountCurrencySelect');
+  if (accSel) accSel.value = apexDefaultAccountCcy();
+  try { apexRenderFxInfo(); } catch (e) {}
 }
 
 function setPnlCurrency(cur) {
@@ -17782,6 +17832,33 @@ function setPnlCurrency(cur) {
   if (window.renderTrades) renderTrades();
   if (window.updateOverview) updateOverview();
 }
+
+/* The default account currency changes what booked money MEANS, not just
+   how it is shown — derived risk %, net R and every cache built on them have
+   to be rebuilt. */
+function setAccountCurrency(cur) {
+  saveSetting('accountCurrency', apexCcyCode(cur) || 'USD');
+  try { if (typeof invalidateTradeCache === 'function') invalidateTradeCache(); } catch (e) {}
+  if (window.renderTrades) renderTrades();
+  if (window.updateOverview) updateOverview();
+  try { document.dispatchEvent(new CustomEvent('apex:fx', { detail: { reason: 'accountCurrency' } })); } catch (e) {}
+}
+
+/* One line under the account currency: which rates are in use, and what a
+   unit of the default account currency is worth in the display currency. */
+function apexRenderFxInfo() {
+  var el = document.getElementById('fxRateInfo');
+  if (!el) return;
+  var acc = apexDefaultAccountCcy(), disp = getPnlCurrency();
+  var src = APEX_FX.perUsd ? ('ECB reference exchange rates of ' + (APEX_FX.date || 'today')) : 'built-in exchange rates (live ones not loaded yet)';
+  var line = 'Currency conversion: ' + src + '.';
+  if (acc !== disp) {
+    var one = apexFxConvert(1, acc, disp);
+    line += ' 1 ' + acc + ' = ' + (isFinite(one) ? one.toFixed(4) : '—') + ' ' + disp + '.';
+  } else line += ' Same as the display currency — figures are shown exactly as booked.';
+  el.textContent = line;
+}
+document.addEventListener('apex:fx', function () { try { apexRenderFxInfo(); } catch (e) {} });
 
 // ─── CURRENCY FILTER ──────────────────
 var activeCurrencyFilter = 'ALL';
@@ -18054,26 +18131,41 @@ var PIP_SPECS = {
 };
 
 // ─── PNL CURRENCY HELPERS ─────────────────────────────────────
-// EUR/USD rate used for EUR display (approximate, not live)
-var EUR_USD_RATE = 1.085; // update periodically or fetch live
-// Display currencies — perUsd = units per 1 USD (approximate static rates, like the EUR rate above)
-var CURRENCIES = {
+/* Two currencies meet in every money figure (01.11.2026):
+     · the ACCOUNT currency — what the broker booked the trade in. A booked
+       broker P&L (trade.pnl), the commission and the swap are all in it.
+     · the DISPLAY currency — what the trader chose to read figures in.
+   Before this date the first one did not exist: every booked P&L was taken as
+   US dollars, so +1,000 on a EUR account showed as €920 with EUR selected and
+   as "$1,000" with USD selected, and a EUR and a USD account were summed as if
+   they were one currency.
+
+   Every conversion runs through USD at ONE set of rates — the latest ECB
+   reference rates (ApexFx, refreshed twice a day), the static table below
+   when those are not loaded. One rate set is a deliberate choice: converting
+   a sum then equals summing the converted figures, so a day total always
+   matches its trades, and money whose account currency IS the display
+   currency is never converted at all — it reads exactly as the broker
+   booked it. */
+// Display currencies — perUsd = units per 1 USD. Static fallback only; the
+// live figures live in APEX_FX.perUsd once ApexFx has loaded them.
+var CURRENCIES = {  // fallback figures: ECB reference rates of 30.10.2026
   USD:{symbol:'$',   perUsd:1,     name:'US Dollar'},
-  EUR:{symbol:'€',   perUsd:0.92,  name:'Euro'},
-  GBP:{symbol:'£',   perUsd:0.79,  name:'British Pound'},
-  CHF:{symbol:'CHF ',perUsd:0.88,  name:'Swiss Franc'},
-  JPY:{symbol:'¥',   perUsd:157,   name:'Japanese Yen'},
-  AUD:{symbol:'A$',  perUsd:1.52,  name:'Australian Dollar'},
-  CAD:{symbol:'C$',  perUsd:1.37,  name:'Canadian Dollar'},
-  NZD:{symbol:'NZ$', perUsd:1.66,  name:'New Zealand Dollar'},
-  ZAR:{symbol:'R ',  perUsd:18.2,  name:'South African Rand'},
-  INR:{symbol:'₹',   perUsd:83.3,  name:'Indian Rupee'},
-  BRL:{symbol:'R$',  perUsd:5.4,   name:'Brazilian Real'},
-  SGD:{symbol:'S$',  perUsd:1.35,  name:'Singapore Dollar'},
-  AED:{symbol:'AED ',perUsd:3.67,  name:'UAE Dirham'},
-  PLN:{symbol:'zł ', perUsd:3.95,  name:'Polish Zloty'},
-  SEK:{symbol:'kr ', perUsd:10.6,  name:'Swedish Krona'},
-  NOK:{symbol:'kr ', perUsd:10.7,  name:'Norwegian Krone'}
+  EUR:{symbol:'€',   perUsd:0.895,  name:'Euro'},
+  GBP:{symbol:'£',   perUsd:0.746,  name:'British Pound'},
+  CHF:{symbol:'CHF ',perUsd:0.823,  name:'Swiss Franc'},
+  JPY:{symbol:'¥',   perUsd:157.3,   name:'Japanese Yen'},
+  AUD:{symbol:'A$',  perUsd:1.424,  name:'Australian Dollar'},
+  CAD:{symbol:'C$',  perUsd:1.397,  name:'Canadian Dollar'},
+  NZD:{symbol:'NZ$', perUsd:1.774,  name:'New Zealand Dollar'},
+  ZAR:{symbol:'R ',  perUsd:16.69,  name:'South African Rand'},
+  INR:{symbol:'₹',   perUsd:94.95,  name:'Indian Rupee'},
+  BRL:{symbol:'R$',  perUsd:5.43,   name:'Brazilian Real'},
+  SGD:{symbol:'S$',  perUsd:1.278,  name:'Singapore Dollar'},
+  AED:{symbol:'AED ',perUsd:3.6725,  name:'UAE Dirham'},
+  PLN:{symbol:'zł ', perUsd:3.942,  name:'Polish Zloty'},
+  SEK:{symbol:'kr ', perUsd:9.826,  name:'Swedish Krona'},
+  NOK:{symbol:'kr ', perUsd:9.230,  name:'Norwegian Krone'}
 };
 
 function getPnlCurrency() {
@@ -18085,10 +18177,84 @@ function getPnlSymbol() {
   return c ? c.symbol : '$';
 }
 
+/* Currencies brokers report that are not display currencies. Cent accounts
+   (MT4/MT5 "USC", "EUC") book in 1/100 of the base unit — a +5,000 USC trade
+   is $50, not $5,000. Stablecoin accounts settle 1:1 in dollars. */
+var FX_UNITS = {
+  USC: { base: 'USD', per: 100, symbol: 'US¢ ' },
+  EUC: { base: 'EUR', per: 100, symbol: '€¢ ' },
+  GBX: { base: 'GBP', per: 100, symbol: 'p ' },
+  USDT: { base: 'USD', per: 1, symbol: 'USDT ' },
+  USDC: { base: 'USD', per: 1, symbol: 'USDC ' },
+  BUSD: { base: 'USD', per: 1, symbol: 'BUSD ' }
+};
+/* Live rates, filled by ApexFx (perUsd = units per 1 USD, ECB date). Empty
+   until then: every lookup falls back to the static CURRENCIES table. */
+var APEX_FX = { perUsd: null, date: '', fetchedAt: 0, source: 'static' };
+
+function apexCcyCode(c) {
+  var s = String(c == null ? '' : c).trim().toUpperCase();
+  if (s === '$' || s === 'US$') return 'USD';
+  if (s === '€') return 'EUR';
+  if (s === '£') return 'GBP';
+  return /^[A-Z]{3,4}$/.test(s) ? s : '';
+}
+/* Units of `ccy` per 1 USD, or null when the currency is unknown. */
+function apexFxPerUsd(ccy) {
+  var c = apexCcyCode(ccy);
+  if (!c) return null;
+  if (c === 'USD') return 1;
+  var u = FX_UNITS[c];
+  if (u) { var b = apexFxPerUsd(u.base); return b == null ? null : b * u.per; }
+  var live = APEX_FX.perUsd && APEX_FX.perUsd[c];
+  if (live > 0 && isFinite(live)) return live;
+  var st = CURRENCIES[c];
+  return st && st.perUsd > 0 ? st.perUsd : null;
+}
+/* Convert an amount between two currencies. Same currency → the amount
+   itself, untouched (no float round trip through USD). An unknown currency
+   converts nothing rather than guessing a rate. */
+function apexFxConvert(amount, from, to) {
+  if (amount == null || amount === '' || !isFinite(amount)) return amount;
+  var f = apexCcyCode(from) || 'USD', t = apexCcyCode(to) || 'USD';
+  if (f === t) return +amount;
+  var pf = apexFxPerUsd(f), pt = apexFxPerUsd(t);
+  if (!pf || !pt) return +amount;
+  return amount / pf * pt;
+}
+function apexCcySymbol(ccy) {
+  var c = apexCcyCode(ccy) || 'USD';
+  if (CURRENCIES[c]) return CURRENCIES[c].symbol;
+  if (FX_UNITS[c]) return FX_UNITS[c].symbol;
+  return c + ' ';
+}
+/* The default for trades that belong to no account with a currency of its
+   own — manual entries and statement imports of traders who never set one. */
+function apexDefaultAccountCcy() {
+  try { return apexCcyCode(appSettings && appSettings.accountCurrency) || 'USD'; } catch (e) { return 'USD'; }
+}
+/* Currency of one account in the switcher, '' when it has none. */
+function apexAccountCcy(accountId) {
+  if (!accountId) return '';
+  try {
+    var a = window.ApexAccounts && ApexAccounts.get ? ApexAccounts.get(accountId) : null;
+    return a ? apexCcyCode(a.currency) : '';
+  } catch (e) { return ''; }
+}
+/* The currency a trade's booked money is in: the trade's own stamp (set by
+   an import that knew it), else its account's currency, else the default. */
+function apexTradeCcy(t) {
+  if (!t) return apexDefaultAccountCcy();
+  return apexCcyCode(t.ccy) || apexAccountCcy(t.account) || apexDefaultAccountCcy();
+}
+
 // Convert a USD amount to display currency
 function toDisplayCurrency(usd) {
-  var c = CURRENCIES[getPnlCurrency()];
-  return c ? usd * c.perUsd : usd;
+  // Number(): null and '' read as 0 and undefined as NaN — exactly what the
+  // old `usd * perUsd` gave its callers.
+  var n = Number(usd);
+  if (!isFinite(n)) return n;
+  return apexFxConvert(n, 'USD', getPnlCurrency());
 }
 
 /**
@@ -18193,17 +18359,32 @@ function calcTradePnl(trade) {
   if (isOptionTrade(trade) && !(trade.pnl !== undefined && trade.pnl !== null && trade.pnl !== '')) {
     var optUsd = calcOptionPnl(trade);
     if (optUsd != null && !isNaN(optUsd)) {
-      return { pnlUsd: optUsd, pnlDisplay: toDisplayCurrency(optUsd), hasExact: false, isOption: true };
+      // Premiums are quoted in dollars (US listed options) — the leg engine
+      // has no other currency to work in.
+      return { pnlUsd: optUsd, pnlDisplay: toDisplayCurrency(optUsd), hasExact: false, isOption: true,
+               ccy: 'USD', pnlNative: optUsd };
     }
     return null;
   }
 
-  // 1. Use imported PnL if available
+  /* The account currency of this trade — every booked amount on it (P&L,
+     commission, swap) is in this currency, not necessarily in dollars. */
+  var ccy = apexTradeCcy(trade);
+  var disp = getPnlCurrency();
+
+  // 1. Use imported PnL if available — exact, in the account currency
   if (trade.pnl !== undefined && trade.pnl !== null && trade.pnl !== '') {
     var raw = parseFloat(trade.pnl);
     if (!isNaN(raw)) {
-      var disp = toDisplayCurrency(raw);
-      return { pnlUsd: raw, pnlDisplay: disp, hasExact: true };
+      /* A booked P&L is net — unless the account says its statements are
+         before fees and the trade has no commission of its own. */
+      var feeEst = null;
+      if (trade.commission === undefined || trade.commission === null || trade.commission === '') {
+        var tfe = apexTemplateFee(trade);
+        if (tfe && tfe.gross) { feeEst = tfe.fee; raw = raw - tfe.fee; }
+      }
+      return { pnlUsd: apexFxConvert(raw, ccy, 'USD'), pnlDisplay: apexFxConvert(raw, ccy, disp),
+               hasExact: true, ccy: ccy, pnlNative: raw, feeEst: feeEst };
     }
   }
 
@@ -18226,11 +18407,106 @@ function calcTradePnl(trade) {
      gross; commission and swap are booked against it here, once, so every
      surface that asks this function shows the same net money. A booked
      broker P&L (step 1) is already net and is returned untouched. */
+  /* Pip values are dollars per lot; commission and swap come off the broker
+     statement, so they are in the account currency and go to dollars first. */
   var grossUsd   = pips * lots * pipVal;
   var comm = parseFloat(trade.commission), swap = parseFloat(trade.swap);
-  var pnlUsd     = grossUsd - (isFinite(comm) ? Math.abs(comm) : 0) + (isFinite(swap) ? swap : 0);
+  // no commission booked → the account's fee template, if it has one
+  var feeEst = null;
+  if (!isFinite(comm)) { var tfp = apexTemplateFee(trade); if (tfp) { comm = tfp.fee; feeEst = tfp.fee; } }
+  var commUsd = isFinite(comm) ? apexFxConvert(Math.abs(comm), ccy, 'USD') : 0;
+  var swapUsd = isFinite(swap) ? apexFxConvert(swap, ccy, 'USD') : 0;
+  var pnlUsd     = grossUsd - commUsd + swapUsd;
   var pnlDisplay = toDisplayCurrency(pnlUsd);
-  return { pnlUsd: pnlUsd, pnlDisplay: pnlDisplay, hasExact: false, grossUsd: grossUsd };
+  return { pnlUsd: pnlUsd, pnlDisplay: pnlDisplay, hasExact: false, grossUsd: grossUsd,
+           ccy: ccy, pnlNative: apexFxConvert(pnlUsd, 'USD', ccy), feeEst: feeEst };
+}
+
+/* A trade's net money in any currency. Its own account currency comes back
+   exactly as booked; anything else through the one rate set. The basis of
+   everything that runs in an account's currency — prop rules above all,
+   because a firm states its limits in the account currency. */
+function apexMoneyIn(t, ccy) {
+  var c = null;
+  try { c = calcTradePnl(t); } catch (e) { c = null; }
+  if (!c || c.pnlUsd == null || !isFinite(c.pnlUsd)) return null;
+  var want = apexCcyCode(ccy) || 'USD';
+  if (c.ccy === want && c.pnlNative != null && isFinite(c.pnlNative)) return c.pnlNative;
+  return apexFxConvert(c.pnlUsd, 'USD', want);
+}
+
+/* ─── FEE TEMPLATES (01.11.2026) ─────────────────────────────
+   Many statements — futures exports above all — carry no commission column,
+   so every result built from them was gross and every R too good. An account
+   can now hold a fee template: rows of { match, type, amount }, amounts in
+   the account currency, the first matching row wins (an exact symbol before
+   its class before "all"). It fills in ONLY where the trade has no
+   commission of its own; a booked broker P&L is left alone unless the
+   account says its statements are before fees (feesGross).
+     type  lot   — per lot / contract, round turn
+           side  — per lot / contract, per side (×2)
+           pct   — % of the traded value, per side (entry + exit)
+           trade — flat per trade */
+var FEE_TYPES = { lot: 'per lot / contract, round turn', side: 'per lot / contract, per side', pct: '% of traded value, per side', trade: 'per trade' };
+var FEE_CLASSES = { all: 'All instruments', fx: 'Forex', indices: 'Indices', metals: 'Metals', energy: 'Energy', crypto: 'Crypto', futures: 'Futures' };
+function apexFeeClass(sym) {
+  var raw = String(sym || '').toUpperCase().trim(), s = raw;
+  /* Futures first, on the symbol as written: the alias table turns a bare
+     "NQ" into the NAS100 CFD, and a futures fee must not become an index fee. */
+  try { if (typeof isFuturesSymbol === 'function' && isFuturesSymbol(raw)) return 'futures'; } catch (e) {}
+  try { if (typeof normalizeSymbol === 'function') s = normalizeSymbol(sym) || s; } catch (e) {}
+  if (!s) return '';
+  if (/^(XAU|XAG|XPT|XPD|GOLD|SILVER)/.test(s)) return 'metals';
+  if (/^(USOIL|UKOIL|WTI|BRENT|XTI|XBR|XNG|NGAS|NATGAS|OIL)/.test(s)) return 'energy';
+  if (/^(BTC|ETH|XRP|LTC|SOL|ADA|DOGE|BNB|DOT|AVAX|LINK|MATIC|TRX|XLM|SHIB|PEPE)/.test(s)) return 'crypto';
+  if (/^(NAS|US30|US100|US500|SPX|NDX|DJ|DAX|GER|DE40|UK100|FTSE|JPN|JP225|NIK|HK50|HSI|AUS200|FRA40|CAC|EU50|STOXX|US2000|RUT|ESP35|IT40|CHINA50|VIX)/.test(s)) return 'indices';
+  if (/^(EUR|USD|GBP|JPY|CHF|AUD|NZD|CAD|SEK|NOK|DKK|PLN|HUF|CZK|TRY|ZAR|MXN|SGD|HKD|CNH)(EUR|USD|GBP|JPY|CHF|AUD|NZD|CAD|SEK|NOK|DKK|PLN|HUF|CZK|TRY|ZAR|MXN|SGD|HKD|CNH)$/.test(s)) return 'fx';
+  return '';
+}
+function apexFeeSchedule(t) {
+  try {
+    var a = (t && t.account && window.ApexAccounts && ApexAccounts.get) ? ApexAccounts.get(t.account) : null;
+    if (a && Array.isArray(a.fees) && a.fees.length) return { rows: a.fees, gross: !!a.feesGross };
+  } catch (e) {}
+  return null;
+}
+/* The fee the template charges a trade, in the account currency, or null. */
+function apexTemplateFee(t, sched) {
+  var sc = sched || apexFeeSchedule(t);
+  if (!sc || !t) return null;
+  var raw = String(t.symbol || '').toUpperCase().trim(), s = raw;
+  try { if (typeof normalizeSymbol === 'function') s = normalizeSymbol(t.symbol) || s; } catch (e) {}
+  var root = ''; try { root = (typeof futuresRoot === 'function' && futuresRoot(raw)) || ''; } catch (e) {}
+  var cls = apexFeeClass(raw), rows = sc.rows || [], row = null, i;
+  function m(r) { return String(r && r.match || '').toUpperCase(); }
+  for (i = 0; i < rows.length && !row; i++) { var k = m(rows[i]); if (k && k !== 'ALL' && !FEE_CLASSES[k.toLowerCase()] && (k === raw || k === s || (root && k === root))) row = rows[i]; }
+  for (i = 0; i < rows.length && !row; i++) if (cls && m(rows[i]) === cls.toUpperCase()) row = rows[i];
+  for (i = 0; i < rows.length && !row; i++) if (m(rows[i]) === 'ALL' || m(rows[i]) === '') row = rows[i];
+  if (!row) return null;
+  var amt = parseFloat(row.amount), lots = parseFloat(t.lots);
+  if (!(amt > 0)) return null;
+  var fee = null;
+  if (row.type === 'trade') fee = amt;
+  else if (row.type === 'lot') fee = lots > 0 ? amt * lots : null;
+  else if (row.type === 'side') fee = lots > 0 ? amt * lots * 2 : null;
+  else if (row.type === 'pct') {
+    var spec = null; try { spec = getPipSpec(t.symbol); } catch (e) {}
+    var en = parseFloat(t.entry), ex = parseFloat(t.exit);
+    if (spec && spec.pipSize && spec.pipValuePerLot && lots > 0 && en > 0) {
+      var perUnit = spec.pipValuePerLot / spec.pipSize;        // dollars per 1.0 of price, per lot
+      var usd = amt / 100 * (en + (ex > 0 ? ex : en)) * lots * perUnit;
+      fee = apexFxConvert(usd, 'USD', apexTradeCcy(t));
+    }
+  }
+  return fee != null && isFinite(fee) ? { fee: Math.round(fee * 100) / 100, gross: sc.gross, row: row } : null;
+}
+/* Commission of a trade: its own when booked, else the template's estimate. */
+function apexTradeFee(t) {
+  if (!t) return null;
+  if (t.commission !== undefined && t.commission !== null && t.commission !== '' && isFinite(parseFloat(t.commission)))
+    return { amount: Math.abs(parseFloat(t.commission)), src: 'trade' };
+  var tf = apexTemplateFee(t);
+  return tf ? { amount: tf.fee, src: 'template', gross: tf.gross } : null;
 }
 
 /** Format PnL for display: "+$245.00" or "−€226.50" */
@@ -18491,18 +18767,24 @@ function apexRiskOf(t) {
   /* % of the account as it stood before this trade (start balance plus
      everything booked earlier — apexEquityPass), not of the start balance:
      in a drawdown the same dollar risk is a bigger bite. */
+  /* Balances are in the account currency, the money risk is in dollars —
+     compare like with like (a 0.5 % risk on a EUR account read as 0.55 %
+     before 01.11.2026). Guarded: the risk-model test loads this function
+     without the currency helpers. */
+  var _ccyT = (typeof apexTradeCcy === 'function') ? apexTradeCcy(t) : 'USD';
+  var _riskAcc = (out.riskUsd != null && typeof apexFxConvert === 'function') ? apexFxConvert(out.riskUsd, 'USD', _ccyT) : out.riskUsd;
   if (out.riskUsd != null && t.account) {
     var eq = null;
     try { if (window._apexEquityBefore) eq = window._apexEquityBefore.get(t); } catch (e) {}
     if (eq == null && window.ApexAccounts && ApexAccounts.get) {
       try { var acc = ApexAccounts.get(t.account); eq = acc ? apexNumOrNull(acc.startBalance) : null; } catch (e) {}
     }
-    if (eq && eq > 0) out.riskPct = out.riskUsd / eq * 100;
+    if (eq && eq > 0) out.riskPct = _riskAcc / eq * 100;
   }
   var _as = (typeof appSettings === 'object' && appSettings) || {};
   if (out.riskUsd != null && out.riskPct == null) {
     var size = apexNumOrNull(_as.riskAccountSize);
-    if (size && size > 0) out.riskPct = out.riskUsd / size * 100;
+    if (size && size > 0) out.riskPct = _riskAcc / size * 100;
   }
   /* Against the trader's own rule (Settings → Risk rule), with 10 % slack for
      rounding a lot size: 0.55 % on a 0.5 % rule is the rule, 0.6 % is not. */
@@ -18529,7 +18811,11 @@ function apexRiskOf(t) {
      costs but no money risk to scale them, net R is unknown, not guessed. */
   if (out.r != null) {
     var comm = apexNumOrNull(t.commission), swap = apexNumOrNull(t.swap);
+    // no commission booked → the account's fee template (01.11.2026)
+    if (comm == null && typeof apexTemplateFee === 'function') { try { var _tf = apexTemplateFee(t); if (_tf) comm = _tf.fee; } catch (e) {} }
     var costs = -Math.abs(comm || 0) + (swap || 0);
+    // booked in the account currency; the risk they are scaled by is dollars
+    if (costs !== 0 && typeof apexFxConvert === 'function') costs = apexFxConvert(costs, _ccyT, 'USD');
     if (moneyBased || costs === 0) out.rNet = out.r;
     else if (out.riskUsd > 0) out.rNet = out.r + costs / out.riskUsd;
   }
@@ -18616,8 +18902,11 @@ function apexEquityPass(journal) {
       if (!(id in eq)) { var acc = ApexAccounts.get(id); eq[id] = acc ? apexNumOrNull(acc.startBalance) : null; }
       if (eq[id] == null) return;
       map.set(r.t, eq[id]);
-      var pc = null; try { pc = calcTradePnl(r.t); } catch (e) {}
-      if (pc && pc.pnlUsd != null && isFinite(pc.pnlUsd)) eq[id] += pc.pnlUsd;
+      // the start balance is in the account currency, so is the running sum
+      var mv = null;
+      try { mv = (typeof apexMoneyIn === 'function') ? apexMoneyIn(r.t, apexTradeCcy(r.t)) : null; } catch (e) {}
+      if (mv == null) { var pc = null; try { pc = calcTradePnl(r.t); } catch (e) {} mv = pc ? pc.pnlUsd : null; }
+      if (mv != null && isFinite(mv)) eq[id] += mv;
     });
   } catch (e) {}
   return map;
@@ -19713,6 +20002,8 @@ function tcPlanBlock(t, i) {
           <div class="tc-field-label">Risk <span class="tc-field-flag">AUTO</span></div>
           <input class="tc-input mono" readonly tabindex="-1" value="${t.riskUsd != null ? tcAttr(getPnlSymbol() + toDisplayCurrency(t.riskUsd).toFixed(2)) : ''}" placeholder="needs stop + lots" title="Entry to initial stop × lots × pip value">
         </div>
+        ${window.ApexExitLab ? ApexExitLab.cardLine(t) : ''}
+        ${window.ApexMerge ? ApexMerge.cardButton(t, i) : ''}
       </div>
     </details>`;
 }
@@ -19772,7 +20063,16 @@ function buildTradeCard(t, i) {
           var fmtd = formatPnl(pc);
           if (fmtd) {
             var cls = pnlClass(pc);
-            return '<span id="pnl-badge-' + i + '" class="pnl-badge ' + cls + '" style="display:inline-block">' + fmtd + '</span>';
+            /* Booked in another currency than the one shown: say so, with the
+               broker's own figure, so a statement and the card can be matched. */
+            var ccyTip = '';
+            try {
+              if (pc.ccy && pc.ccy !== getPnlCurrency() && pc.pnlNative != null && isFinite(pc.pnlNative)) {
+                ccyTip = ' title="Booked ' + (pc.pnlNative >= 0 ? '+' : '−') + apexCcySymbol(pc.ccy) + Math.abs(pc.pnlNative).toFixed(2) +
+                         ' on the ' + pc.ccy + ' account · shown in ' + getPnlCurrency() + ' at the ECB rate"';
+              }
+            } catch (e) {}
+            return '<span id="pnl-badge-' + i + '" class="pnl-badge ' + cls + '" style="display:inline-block"' + ccyTip + '>' + fmtd + '</span>';
           }
           return '<span id="pnl-badge-' + i + '" class="pnl-badge" style="display:none"></span>';
         })()}
@@ -21953,7 +22253,7 @@ function _propStatus() {
 }
 function _propMoney(v) {
   if (v == null || isNaN(v)) return '—';
-  try { if (window.ApexPropPlus && ApexPropPlus.fmt) return ApexPropPlus.fmt(v, 0); } catch (e) {}
+  try { if (window.ApexPropPlus && ApexPropPlus.fmt) return ApexPropPlus.fmt(v, 0, ApexPropPlus.ccyNow ? ApexPropPlus.ccyNow() : ''); } catch (e) {}
   return (v < 0 ? '−' : '') + '$' + Math.abs(v).toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
@@ -22516,7 +22816,9 @@ function openTradeEdit(key, idx) {
   document.getElementById('tem-lots').value    = t.lots    || '';
   var _mf=document.getElementById('tem-mfe'); if(_mf) _mf.value = t.mfe || '';
   var _ma=document.getElementById('tem-mae'); if(_ma) _ma.value = t.mae || '';
-  var _cm=document.getElementById('tem-commission'); if(_cm) _cm.value = t.commission || '';
+  var _cm=document.getElementById('tem-commission'); if(_cm){ _cm.value = t.commission || '';
+    // show what the account's fee template charges when nothing is booked
+    try { var _tfe = (typeof apexTemplateFee==='function') ? apexTemplateFee(t) : null; _cm.placeholder = _tfe ? ('≈ ' + _tfe.fee.toFixed(2) + ' from the fee template') : '0.00'; } catch(e){ _cm.placeholder='0.00'; } }
   var _sp=document.getElementById('tem-spread'); if(_sp) _sp.value = t.spread || '';
   document.getElementById('tem-note').value    = t.note    || '';
 
@@ -25397,23 +25699,42 @@ function showCsvError(msg) {
       Object.keys(window.journalData || {}).forEach(function(k){
         var d = journalData[k];
         if (!d || !d.trades) return;
-        d.trades.forEach(function(t){ set[hashOf(t)] = k; });
+        d.trades.forEach(function(t){
+          set[hashOf(t)] = k;
+          /* A merged trade still "contains" its original fills, a split part
+             still stands for the trade it came from — neither may come back
+             through a sync or a re-import (ApexMerge, 01.11.2026). */
+          (t.mergedHashes || []).forEach(function(h){ set[h] = k; });
+          (t.mergedFrom || []).forEach(function(o){ try { set[hashOf(o)] = k; } catch(e){} });
+          if (t.splitOf) set[t.splitOf] = k;
+        });
       });
     } catch(e){}
     return set;
   }
 
+  /* The statement's own currency (01.11.2026). File total and journal total
+     are compared in it — the file's P&L column is in the account currency,
+     not necessarily dollars. */
+  function stmtCcy(){ return (S && S.ccy) || (typeof apexDefaultAccountCcy === 'function' ? apexDefaultAccountCcy() : 'USD'); }
   function usd(t){
     try {
+      if (typeof apexMoneyIn === 'function'){
+        var c = stmtCcy(), tt = {}; for (var k in t) tt[k] = t[k]; tt.ccy = c;
+        var v = apexMoneyIn(tt, c);
+        return (v != null && isFinite(v)) ? v : 0;
+      }
       var r = calcTradePnl(t);
       return (r && isFinite(r.pnlUsd)) ? r.pnlUsd : 0;
     } catch(e){ return 0; }
   }
 
   function money(n){
-    var s = (n < 0 ? '-' : '') + '$' + Math.abs(n).toFixed(2);
+    var sym = (typeof apexCcySymbol === 'function') ? apexCcySymbol(stmtCcy()) : '$';
+    var s = (n < 0 ? '-' : '') + sym + Math.abs(n).toFixed(2);
     return s;
   }
+  function lastImportCcy(){ try { return localStorage.getItem('apexImportCcy') || ''; } catch(e){ return ''; } }
 
   /* Shift every timestamp by N hours and re-derive the journal day and the
      session from the corrected time. A broker that reports in GMT+3 puts a
@@ -25527,6 +25848,16 @@ function showCsvError(msg) {
       '<select id="recTz" onchange="ApexReconcile.setShift(this.value)">' + opts + '</select>' +
       '</div>';
 
+    /* Account currency of the statement — the P&L, commission and swap
+       columns are in it. Asked, like the timezone, because few files say. */
+    var ccys = ['USD','EUR','GBP','CHF','AUD','CAD','JPY','NZD','SGD','ZAR','SEK','NOK','PLN','USC','EUC','USDT'];
+    html += '<div class="rec-tz">' +
+      '<div><strong>Account currency</strong><div class="rec-note">The currency your broker books this account in. ' +
+        'Profit, commission and swap in the file are read in it and converted for display.</div></div>' +
+      '<select id="recCcy" onchange="ApexReconcile.setCcy(this.value)">' + ccys.map(function(c){
+        return '<option value="' + c + '"' + (c === stmtCcy() ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select>' +
+      '</div>';
+
     html += '<div class="rec-range">' +
       (a.days.length ? a.days.length + ' trading day' + (a.days.length===1?'':'s') +
         ' · ' + a.first + (a.first !== a.last ? ' – ' + a.last : '')
@@ -25599,7 +25930,8 @@ function showCsvError(msg) {
   R.open = function(trades, report){
     if (!trades || !trades.length){ showToast('⚠ No trades to import'); return; }
     ensureDom();
-    S = { trades: trades, report: report || null, shift: 0, dupMode: 'skip' };
+    S = { trades: trades, report: report || null, shift: 0, dupMode: 'skip',
+          ccy: (typeof apexCcyCode === 'function' && apexCcyCode(lastImportCcy())) || (typeof apexDefaultAccountCcy === 'function' ? apexDefaultAccountCcy() : 'USD') };
     render();
     document.getElementById('recOverlay').classList.add('open');
   };
@@ -25609,6 +25941,7 @@ function showCsvError(msg) {
   };
   R.setShift   = function(v){ S.shift = parseInt(v, 10) || 0; render(); };
   R.setDupMode = function(m){ S.dupMode = m; render(); };
+  R.setCcy     = function(c){ S.ccy = (typeof apexCcyCode === 'function' && apexCcyCode(c)) || 'USD'; try { localStorage.setItem('apexImportCcy', S.ccy); } catch(e){} render(); };
 
   R.commit = function(){
     var a = analyse();
@@ -25622,6 +25955,7 @@ function showCsvError(msg) {
       if (!journalData[key]) journalData[key] = { trades:[], notes:'', disc:5, conf:5, focus:5, pat:5 };
       var clean = {};
       for (var k in trade) if (trade.hasOwnProperty(k) && k !== '_importDate') clean[k] = trade[k];
+      clean.ccy = stmtCcy();
       journalData[key].trades.push(clean);
       added++;
     });
@@ -30087,6 +30421,8 @@ document.addEventListener('keydown', function(e) {
       "Session review": ["Session-Bewertung", "Revisión de sesión", "Revisão da sessão", "Analyse de session"],
       "Intraday give-back, revenge windows, size drift after losses and rule adherence — with a coach verdict on the process, not the P&L": ["Zurückgegebene Gewinne im Tagesverlauf, Revenge-Fenster, Größenanstieg nach Verlusten und Regeltreue – mit einem Coach-Urteil über den Prozess, nicht über das P&L", "Ganancias devueltas en el día, ventanas de revenge, aumento de tamaño tras pérdidas y disciplina con las reglas, con un veredicto del coach sobre el proceso, no sobre el P&L", "Lucro devolvido no dia, janelas de revenge, aumento de tamanho após perdas e disciplina com as regras — com um veredito do coach sobre o processo, não sobre o P&L", "Gains rendus en séance, fenêtres de revenge, dérive de taille après les pertes et respect des règles — avec un verdict du coach sur le process, pas sur le P&L"],
       "Auto MFE / MAE": ["Automatisches MFE / MAE", "MFE / MAE automático", "MFE / MAE automático", "MFE / MAE automatique"],
+      "Exit Lab": ["Exit-Labor", "Laboratorio de salidas", "Laboratório de saídas", "Labo des sorties"],
+      "Your entries replayed on real prices under other exits — and what price did after you got out": ["Deine Einstiege auf echten Kursen mit anderen Ausstiegen nachgespielt – und was der Kurs nach deinem Ausstieg tat", "Tus entradas reproducidas con precios reales bajo otras salidas, y lo que hizo el precio después de salir", "Suas entradas reproduzidas com preços reais sob outras saídas — e o que o preço fez depois que você saiu", "Tes entrées rejouées sur des prix réels avec d’autres sorties — et ce que le prix a fait après ta sortie"],
       "Fetches price data & computes max favorable / adverse excursion automatically": ["Lädt Kursdaten und berechnet die maximale günstige und ungünstige Bewegung automatisch", "Obtiene datos de precio y calcula automáticamente la excursión máxima favorable y adversa", "Busca dados de preço e calcula automaticamente a excursão máxima favorável e adversa", "Récupère les données de prix et calcule automatiquement l’excursion maximale favorable et défavorable"],
       "Risk of Ruin & Sharpe": ["Ruinrisiko & Sharpe", "Riesgo de ruina y Sharpe", "Risco de ruína e Sharpe", "Risque de ruine et Sharpe"],
       "Institutional risk metrics + per-setup expectancy & profit factor": ["Risikokennzahlen auf institutionellem Niveau + Erwartungswert und Profit-Faktor pro Setup", "Métricas de riesgo institucionales + expectativa y profit factor por setup", "Métricas de risco institucionais + expectativa e profit factor por setup", "Métriques de risque institutionnelles + espérance et profit factor par setup"],
@@ -34504,7 +34840,7 @@ function goToAuthPro(screen) {
   /* ───────────────────── PAGE shell ───────────────────── */
   var TABS=[
     ['metrics','Metrics'],['finder','Edge & Leaks'],['dash','Dashboards'],['stats','Stat Lab'],['options','Options'],['rrisk','R & Risk'],['timing','Timing & Exits'],
-    ['mfemae','MFE / MAE'],['whatif','What-If'],['replay','Replay'],
+    ['mfemae','MFE / MAE'],['exitlab','Exit Lab'],['whatif','What-If'],['replay','Replay'],
     ['sim','Market Replay'],
     /* Strategy Lab is the automated counterpart of Market Replay: rules over
        historical bars instead of a human clicking through them. It sits next to
@@ -34583,7 +34919,7 @@ function goToAuthPro(screen) {
       return;
     }
     ({ metrics:renderMetrics, finder:function(b,r){ if(window.ApexEdgeFinder) ApexEdgeFinder.render(b,r); }, dash:renderDashboards, stats:renderStatLab, options:renderOptions, rrisk:renderRRisk, timing:renderTiming,
-       mfemae:renderMfeMae, whatif:renderWhatIf, replay:renderReplay,
+       mfemae:renderMfeMae, exitlab:function(b,r){ if(window.ApexExitLab) ApexExitLab.render(b,r); }, whatif:renderWhatIf, replay:renderReplay,
        sim:renderMarketReplay, strategy:renderStrategyLab,
        backtest:renderBacktest, gallery:renderGallery, missed:renderMissed, share:renderShare }[EL.tab]||renderMetrics)(body, rows);
   }
@@ -49349,7 +49685,8 @@ body.light .pt-sugg{background:var(--layer)}
       id: o.id || newId(),
       name: (o.name||'').trim() || 'Account '+(list.length+1),
       broker: o.broker||'', platform: o.platform||'', type: o.type||'live',
-      currency: o.currency||'USD',
+      // no currency from the broker → the trader's default account currency
+      currency: o.currency || (typeof apexDefaultAccountCcy==='function' ? apexDefaultAccountCcy() : 'USD'),
       startBalance: o.startBalance!=null? o.startBalance : '',
       target: o.target!=null? o.target : '',
       maxDD: o.maxDD!=null? o.maxDD : '',
@@ -49471,7 +49808,7 @@ body.light .pt-sugg{background:var(--layer)}
       return made;
     }
     return A.create({ name: meta.name || (platform.replace('MetaTrader ','MT')+' '+login), broker: meta.broker||'',
-                      platform: platform, type: meta.type==='demo'?'demo':'live', currency: meta.currency||'USD',
+                      platform: platform, type: meta.type==='demo'?'demo':'live', currency: meta.currency||'',
                       origins:[o], note: acct.indexOf('@')>0 ? 'Server '+acct.split('@').slice(1).join('@') : '' });
   }
 
@@ -49894,6 +50231,13 @@ body.light .pt-sugg{background:var(--layer)}
       '.acx-prog i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--profit))}',
       '.acx-prog-l{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3)}',
       '.acx-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}',
+      '.acx-fee-row{display:grid;grid-template-columns:minmax(120px,1.2fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(150px,1.6fr) auto;gap:6px;margin-bottom:6px;align-items:center}',
+      '.acx-fee-row .fs.off{visibility:hidden}',
+      '@media(max-width:640px){.acx-fee-row{grid-template-columns:1fr 1fr}.acx-fee-row .ft{grid-column:1/-1}}',
+      '.acx-fee-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 8px}',
+      '.acx-chk{display:flex!important;gap:8px;align-items:flex-start;font-size:12px!important;text-transform:none!important;letter-spacing:0!important;color:var(--ink2)!important;font-weight:400!important;line-height:1.45;cursor:pointer}',
+      '.acx-chk input{width:auto!important;flex:0 0 auto;margin:2px 0 0!important;padding:0!important;accent-color:var(--gold)}',
+      '.acx-fee-note{font-size:11px;color:var(--ink3);margin-top:6px;line-height:1.5}',
       '.acx-form{background:var(--elevated);border:0.5px solid var(--rim);border-radius:16px;padding:18px 20px;margin-bottom:16px}',
       '.acx-fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px;margin-bottom:14px}',
       '.acx-f{display:flex;flex-direction:column;gap:5px}',
@@ -49992,7 +50336,7 @@ body.light .pt-sugg{background:var(--layer)}
              leer, und Speichern machte aus jedem Prop-Konto ein Konto ohne Typ. */
           '<div class="acx-f"><label>Type</label><select id="acxType">'+TYPES.map(function(t){
             return '<option value="'+t.id+'"'+(t.id===(e.type||'live')?' selected':'')+'>'+t.label+'</option>'; }).join('')+'</select></div>'+
-          '<div class="acx-f"><label>Currency</label><select id="acxCur">'+['USD','EUR','GBP','CHF','AUD','CAD','JPY','SEK','NOK','PLN'].map(function(c){ return '<option'+(c===(e.currency||'USD')?' selected':'')+'>'+c+'</option>'; }).join('')+'</select></div>'+
+          '<div class="acx-f"><label title="What the broker books this account in — profit, commission and swap are read in it">Account currency</label><select id="acxCur">'+['USD','EUR','GBP','CHF','AUD','CAD','JPY','NZD','SGD','ZAR','SEK','NOK','PLN','USC','EUC','USDT'].map(function(c){ return '<option'+(c===(e.currency||'USD')?' selected':'')+'>'+c+'</option>'; }).join('')+'</select></div>'+
           '<div class="acx-f"><label>Start balance</label><input id="acxStart" type="number" step="any" placeholder="100000" value="'+esc(e.startBalance!=null?e.startBalance:'')+'"></div>'+
           /* Prop/Funded: the rules live in the Prop mode (firm, phase, real
              drawdown model) — two hand-typed numbers here would only drift
@@ -50008,6 +50352,22 @@ body.light .pt-sugg{background:var(--layer)}
           '<input id="acxGroup" list="acxGroupList" maxlength="30" placeholder="e.g. Topstep — the account switcher can then show all of them together" value="'+esc(e.group||'')+'">'+
           '<datalist id="acxGroupList">'+A.groups().map(function(g){ return '<option value="'+esc(g)+'">'; }).join('')+'</datalist></div>'+
         '<div class="acx-f" style="margin-bottom:14px"><label>Note</label><input id="acxNote" placeholder="Rules, payout schedule, anything worth remembering" value="'+esc(e.note||'')+'"></div>'+
+        /* Fee template (01.11.2026) — fills in commission where the
+           statement or the sync brought none. */
+        '<div class="acx-f acx-fees" style="margin-bottom:14px"><label>Fees <i style="font-style:normal;color:var(--ink3);font-weight:400;text-transform:none">(for trades that arrive without a commission)</i></label>'+
+          '<div id="acxFeeRows"></div>'+
+          '<div class="acx-fee-tools">'+
+            '<button type="button" class="acx-btn" id="acxFeeAdd">＋ Fee row</button>'+
+            '<select id="acxFeePreset" aria-label="Start from a typical fee"><option value="">Start from a typical fee…</option>'+
+              '<option value="fx7">Raw-spread forex — $7 per lot round turn</option>'+
+              '<option value="fx5">Forex — $5 per lot round turn</option>'+
+              '<option value="fut4">Futures — $4.00 per contract round turn</option>'+
+              '<option value="micro1">Micro futures — $1.00 per contract round turn</option>'+
+              '<option value="crypto01">Crypto — 0.1% per side</option></select>'+
+          '</div>'+
+          '<label class="acx-chk"><input type="checkbox" id="acxFeesGross"'+(e.feesGross?' checked':'')+'> The P&amp;L in my statements for this account is before fees — take the template off it too</label>'+
+          '<div class="acx-fee-note">Amounts in the account currency. The first matching row wins: a single symbol before its class before “All instruments”. A commission that is already on a trade always takes precedence.</div>'+
+        '</div>'+
         '<div class="acx-row">'+
           '<button class="acx-btn gold" id="acxSave">'+(isNew?'Create account':'Save changes')+'</button>'+
           '<button class="acx-btn" id="acxCancel">Cancel</button>'+
@@ -50019,6 +50379,43 @@ body.light .pt-sugg{background:var(--layer)}
       s.onclick=function(){ host.querySelectorAll('.acx-sw').forEach(function(x){x.classList.remove('on');}); s.classList.add('on'); };
     });
     host.querySelector('#acxCancel').onclick=function(){ EDIT=null; renderForm(); };
+    /* ── fee rows ── */
+    var FEES=(Array.isArray(e.fees)?e.fees:[]).map(function(r){ return { match:r.match||'all', type:r.type||'lot', amount:r.amount!=null?String(r.amount):'' }; });
+    var feeHost=host.querySelector('#acxFeeRows');
+    var CLS=(typeof FEE_CLASSES==='object'&&FEE_CLASSES)||{all:'All instruments'};
+    var TYP=(typeof FEE_TYPES==='object'&&FEE_TYPES)||{lot:'per lot / contract, round turn'};
+    function readFees(){
+      feeHost.querySelectorAll('.acx-fee-row').forEach(function(rw,i){
+        if(!FEES[i]) return;
+        var m=rw.querySelector('.fm').value, sym=rw.querySelector('.fs').value.trim().toUpperCase();
+        FEES[i].match = m==='__sym' ? (sym||'all') : m;
+        FEES[i].type = rw.querySelector('.ft').value;
+        FEES[i].amount = rw.querySelector('.fa').value;
+      });
+    }
+    function paintFees(){
+      feeHost.innerHTML = FEES.map(function(r,i){
+        var isCls = CLS[String(r.match).toLowerCase()]!=null;
+        return '<div class="acx-fee-row">'+
+          '<select class="fm" aria-label="Instruments">'+Object.keys(CLS).map(function(k){ return '<option value="'+k+'"'+(isCls&&String(r.match).toLowerCase()===k?' selected':'')+'>'+CLS[k]+'</option>'; }).join('')+
+            '<option value="__sym"'+(!isCls?' selected':'')+'>One symbol…</option></select>'+
+          '<input class="fs'+(isCls?' off':'')+'" placeholder="e.g. NQ or XAUUSD" aria-label="Symbol" value="'+(isCls?'':esc(r.match))+'">'+
+          '<input class="fa" type="number" step="any" min="0" placeholder="Amount" aria-label="Amount" value="'+esc(r.amount)+'">'+
+          '<select class="ft" aria-label="How it is charged">'+Object.keys(TYP).map(function(k){ return '<option value="'+k+'"'+(r.type===k?' selected':'')+'>'+TYP[k]+'</option>'; }).join('')+'</select>'+
+          '<button type="button" class="acx-ico" data-del="'+i+'" aria-label="Remove fee row">✕</button></div>';
+      }).join('');
+      feeHost.querySelectorAll('.fm').forEach(function(sl){ sl.onchange=function(){ var s2=sl.parentNode.querySelector('.fs'); s2.classList.toggle('off', sl.value!=='__sym'); if(sl.value==='__sym') s2.focus(); }; });
+      feeHost.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){ readFees(); FEES.splice(+b.getAttribute('data-del'),1); paintFees(); }; });
+      try{ if(window.ApexI18n&&ApexI18n.apply) ApexI18n.apply(feeHost); }catch(x){}
+    }
+    paintFees();
+    host.querySelector('#acxFeeAdd').onclick=function(){ readFees(); FEES.push({match:'all',type:'lot',amount:''}); paintFees(); };
+    host.querySelector('#acxFeePreset').onchange=function(){
+      var P={ fx7:[{match:'fx',type:'lot',amount:'7'}], fx5:[{match:'fx',type:'lot',amount:'5'}], fut4:[{match:'futures',type:'lot',amount:'4'}],
+              micro1:[{match:'futures',type:'lot',amount:'1'}], crypto01:[{match:'crypto',type:'pct',amount:'0.1'}] }[this.value];
+      if(P){ readFees(); P.forEach(function(r){ FEES.push(r); }); paintFees(); }
+      this.value='';
+    };
     var tsel=host.querySelector('#acxType');
     var syncGoal=function(){
       var prop = tsel && (tsel.value==='prop' || tsel.value==='funded' || tsel.value==='practice');
@@ -50039,11 +50436,18 @@ body.light .pt-sugg{background:var(--layer)}
         maxDD: host.querySelector('#acxDD').value,
         note: host.querySelector('#acxNote').value.trim(),
         group: (host.querySelector('#acxGroup')||{value:''}).value.trim().slice(0,30),
+        fees: (function(){ readFees(); return FEES.filter(function(r){ return parseFloat(r.amount)>0; }).map(function(r){ return { match:r.match, type:r.type, amount:String(parseFloat(r.amount)) }; }); })(),
+        feesGross: !!(host.querySelector('#acxFeesGross')||{}).checked,
         color: (host.querySelector('.acx-sw.on')||{}).getAttribute ? host.querySelector('.acx-sw.on').getAttribute('data-c') : PALETTE[0]
       };
       if(!data.name){ toast('Give the account a name first'); return; }
       var made = null;
+      var ccyChanged = !!(e.id && ((e.currency||'USD') !== data.currency ||
+        JSON.stringify(e.fees||[]) !== JSON.stringify(data.fees) || !!e.feesGross !== data.feesGross));
       if(e.id) A.update(e.id, data); else made = A.create(data);
+      /* A new account currency re-reads every booked amount of this account:
+         derived risk %, net R and all caches on top of them are rebuilt. */
+      if(ccyChanged){ try{ if(typeof invalidateTradeCache==='function') invalidateTradeCache(); }catch(x){} try{ if(window.renderTrades) renderTrades(); if(window.updateOverview) updateOverview(); }catch(x){} }
       EDIT=null; renderForm(); render(); renderChip();
       toast(e.id?'✓ Account saved':'✓ Account created');
       /* Ein neues Prop-/Funded-Konto: gleich die Challenge einrichten, statt
@@ -50095,7 +50499,21 @@ body.light .pt-sugg{background:var(--layer)}
       ? '<div class="acx-copy"><b class="notranslate" translate="no">'+cp.trades+'</b> <b>trades look like copies</b> '+
         '<span>— the same symbol and direction, opened within the same minute on several accounts. In “All accounts” or a group each copy counts on its own, so a win rate there can look more certain than it is. To judge your edge, pick a single account.</span></div>'
       : '';
-    host.innerHTML=copyNote+'<div class="acx-grid">'+accs.map(function(a){
+    /* 01.11.2026: booked money is read in each account's own currency. Older
+       accounts were all created as USD, so a trader on a EUR account sees a
+       one-time prompt to check the currency on each card. */
+    var fxNote='';
+    try{
+      var seen = localStorage.getItem('apexFxNotice1_'+uid());
+      var usdOnes = accs.filter(function(a){ return !a.archived && (a.currency||'USD')==='USD'; }).length;
+      if(!seen && usdOnes && (typeof getPnlCurrency==='function' ? getPnlCurrency()!=='USD' : false)){
+        fxNote='<div class="acx-copy"><b>Each account now has its own currency.</b> '+
+          '<span>Profit, commission and swap are read in the currency your broker books the account in and converted for display at the ECB rate. '+
+          usdOnes+' account'+(usdOnes===1?' is':'s are')+' set to USD — if your broker books in another currency, open the card with the pencil and change it.</span> '+
+          '<button class="acx-btn" style="margin-left:6px" onclick="try{localStorage.setItem(\'apexFxNotice1_'+uid()+'\',\'1\')}catch(e){};ApexAccounts.render&&ApexAccounts.render()">Got it</button></div>';
+      }
+    }catch(e){}
+    host.innerHTML=fxNote+copyNote+'<div class="acx-grid">'+accs.map(function(a){
       var s=A.stats(a.id), tm=typeMeta(a.type);
       var start=num(a.startBalance), target=num(a.target);
       var prog = (start!=null && target!=null && target>0) ? Math.max(0,Math.min(100, s.net/target*100)) : null;
@@ -50103,7 +50521,8 @@ body.light .pt-sugg{background:var(--layer)}
         '<div class="acx-card-h">'+
           '<div style="min-width:0">'+
             '<div class="acx-name">'+esc(a.name)+'</div>'+
-            '<div class="acx-meta">'+esc([a.broker,a.platform].filter(Boolean).join(' · ')||'—')+'</div>'+
+            '<div class="acx-meta">'+esc([a.broker,a.platform].filter(Boolean).join(' · ')||'—')+
+              ' · <b class="notranslate" translate="no" title="Account currency — what the broker books this account in">'+esc(a.currency||(typeof apexDefaultAccountCcy==='function'?apexDefaultAccountCcy():'USD'))+'</b></div>'+
           '</div>'+
           '<span class="acx-badge">'+tm.icon+' '+tm.label+'</span>'+
           '<div class="acx-acts">'+
@@ -50273,6 +50692,23 @@ body.light .pt-sugg{background:var(--layer)}
     else renderCurves(host);
   }
   A.render=render;
+  /* Fee editor labels — built at runtime, so Google meets them late and
+     guesses; the trading terms are written out here instead. */
+  (function(){
+    var T={
+      'All instruments':['Alle Instrumente','Todos los instrumentos','Todos os instrumentos','Tous les instruments'],
+      'Forex':['Forex','Forex','Forex','Forex'], 'Indices':['Indizes','Índices','Índices','Indices'], 'Metals':['Metalle','Metales','Metais','Métaux'],
+      'Energy':['Energie','Energía','Energia','Énergie'], 'Crypto':['Krypto','Cripto','Cripto','Crypto'], 'Futures':['Futures','Futuros','Futuros','Futures'],
+      'One symbol…':['Ein Symbol…','Un símbolo…','Um símbolo…','Un symbole…'],
+      'per lot / contract, round turn':['pro Lot / Kontrakt, Hin- und Rückweg','por lote / contrato, ida y vuelta','por lote / contrato, ida e volta','par lot / contrat, aller-retour'],
+      'per lot / contract, per side':['pro Lot / Kontrakt, je Seite','por lote / contrato, por lado','por lote / contrato, por lado','par lot / contrat, par côté'],
+      '% of traded value, per side':['% vom gehandelten Wert, je Seite','% del valor negociado, por lado','% do valor negociado, por lado','% de la valeur négociée, par côté'],
+      'per trade':['pro Trade','por operación','por operação','par trade'],
+      '＋ Fee row':['＋ Gebührenzeile','＋ Fila de comisión','＋ Linha de taxa','＋ Ligne de frais']
+    };
+    function reg(){ if(window.ApexI18n&&ApexI18n.addScoped) ApexI18n.addScoped('.acx-fees', T); else setTimeout(reg, 300); }
+    reg();
+  })();
 
   /* ─────────────── boot ─────────────── */
   function hookNav(){
@@ -75841,7 +76277,27 @@ self.addEventListener('message', async (ev) => {
   };
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function sym() { try { return window.getPnlSymbol ? getPnlSymbol() : '$'; } catch (e) { return '$'; } }
+  /* A challenge runs in its account's currency (01.11.2026): firms state the
+     balance, the target and the drawdown in it. Before, everything here ran in
+     the display currency — a Topstep $2,000 drawdown became €2,000 with EUR
+     selected and was checked against euro P&L. The cost ledger (fees,
+     resets, payouts) is the trader's own bookkeeping, typed in the display
+     currency, and is rendered in it (_fmtCcy). */
+  function ccyOf(key) {
+    try {
+      if (key && key !== ALL_KEY && typeof apexAccountCcy === 'function') { var c = apexAccountCcy(key); if (c) return c; }
+      return (typeof apexDefaultAccountCcy === 'function') ? apexDefaultAccountCcy() : 'USD';
+    } catch (e) { return 'USD'; }
+  }
+  var _fmtCcy = '';
+  function withCcy(ccy, fn) { var prev = _fmtCcy; _fmtCcy = ccy; try { return fn(); } finally { _fmtCcy = prev; } }
+  function sym(ccy) {
+    try {
+      var c = ccy || _fmtCcy || ccyOf(accKey());
+      if (typeof apexCcySymbol === 'function') return apexCcySymbol(c);
+      return window.getPnlSymbol ? getPnlSymbol() : '$';
+    } catch (e) { return '$'; }
+  }
   /* Wrapped in notranslate, and that is not cosmetic: Google Translate
      rewrites a "$" inside German text — it turned "$343" into "343 US-Dollar"
      in one cell and left "165 $" alone in the next, so a table of amounts
@@ -75850,15 +76306,15 @@ self.addEventListener('message', async (ev) => {
   /* Plain text — for anywhere the caller escapes its input (kpi() hints,
      title attributes, alert sentences). Using the HTML variant there prints
      the markup verbatim. */
-  function moneyTxt(v, d) {
+  function moneyTxt(v, d, ccy) {
     if (v == null || isNaN(v)) return '—';
     d = (d == null ? 2 : d);
-    return (v < 0 ? '−' : '') + sym() +
+    return (v < 0 ? '−' : '') + sym(ccy) +
       Math.abs(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
   }
-  function money(v, d) {
+  function money(v, d, ccy) {
     if (v == null || isNaN(v)) return '—';
-    return '<span translate="no" class="notranslate">' + moneyTxt(v, d) + '</span>';
+    return '<span translate="no" class="notranslate">' + moneyTxt(v, d, ccy) + '</span>';
   }
   /** A name that must survive machine translation — a firm or an account.
       "Apex Trader Funding" came back as "Apex Trader Finanzierung". */
@@ -75866,10 +76322,18 @@ self.addEventListener('message', async (ev) => {
     return '<span translate="no" class="notranslate">' + esc(t) + '</span>';
   }
   function num(v) { if (v === '' || v == null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
+  /* Realised value in the currency of the trade's own account — a key's
+     trades all belong to that account, so this is the challenge currency,
+     exact to the broker figure. */
   function valueOf(t) {
     try {
-      var c = window.calcTradePnl ? calcTradePnl(t) : null;
-      if (c && c.pnlUsd != null && !isNaN(c.pnlUsd)) return window.toDisplayCurrency ? toDisplayCurrency(c.pnlUsd) : c.pnlUsd;
+      if (typeof apexMoneyIn === 'function') {
+        var v = apexMoneyIn(t, ccyOf(t && t.account));
+        if (v != null && isFinite(v)) return v;
+      } else {
+        var c = window.calcTradePnl ? calcTradePnl(t) : null;
+        if (c && c.pnlUsd != null && !isNaN(c.pnlUsd)) return window.toDisplayCurrency ? toDisplayCurrency(c.pnlUsd) : c.pnlUsd;
+      }
     } catch (e) {}
     return num(t.pips);
   }
@@ -76079,7 +76543,9 @@ self.addEventListener('message', async (ev) => {
             var spec = window.getPipSpec ? getPipSpec(t.symbol) : null;
             if (spec && spec.pipSize && spec.pipValuePerLot) {
               r = Math.abs(e - sl) / spec.pipSize * lots * spec.pipValuePerLot;
-              if (window.toDisplayCurrency) r = toDisplayCurrency(r);
+              // pip values are dollars; the room it is measured against is in the challenge currency
+              if (typeof apexFxConvert === 'function') r = apexFxConvert(r, 'USD', ccyOf(key));
+              else if (window.toDisplayCurrency) r = toDisplayCurrency(r);
               /* A stop already beyond break-even locks in profit, not risk. */
               var isLong = window.apexIsLong ? apexIsLong(t.dir) : !/sell|short/i.test(t.dir || '');   // takes the direction string, not the trade
               if ((isLong && sl >= e) || (!isLong && sl <= e)) r = 0;
@@ -76118,7 +76584,7 @@ self.addEventListener('message', async (ev) => {
     var cfg = cfgFor(all, key);
     var pr = PRESETS[cfg.preset];
     var out = {
-      on: true, key: key, cfg: cfg, account: accountName(key),
+      on: true, key: key, cfg: cfg, account: accountName(key), ccy: ccyOf(key),
       firm: (pr && cfg.preset !== 'custom') ? pr.label : 'Custom rules',
       ddLabel: DD_LABEL[cfg.dd] || cfg.dd,
       ready: num(cfg.balance) > 0
@@ -76138,7 +76604,10 @@ self.addEventListener('message', async (ev) => {
     refreshOutside();
     P.render();
   };
-  P.fmt = moneyTxt;
+  P.fmt = function (v, d, ccy) { return moneyTxt(v, d, ccy); };
+  P.ccyOf = function (key) { return ccyOf(key == null ? accKey() : key); };
+  /* Currency of the challenge the Prop mode watches — cheap, no compute(). */
+  P.ccyNow = function () { try { var all = loadAll(), m = modeOf(all); return ccyOf(m.on ? (validKey(m.acc) || ALL_KEY) : accKey()); } catch (e) { return 'USD'; } };
   /* The personal stop (E3): a line BEFORE the firm's, so a bad day ends with
      room to spare instead of at the limit. Half of the firm's daily limit by
      default, 25–100 % adjustable. A firm without a daily limit (Topstep,
@@ -76215,7 +76684,7 @@ self.addEventListener('message', async (ev) => {
     if (!(all.byAcc[key] && num(all.byAcc[key].balance) > 0)) return null;
     var cfg = cfgFor(all, key), fm = firmOfPreset(cfg.preset);
     var ph = phasesOf(cfg.preset).filter(function (x) { return x.id === (cfg.phase || 'p1'); })[0] || { label: '' };
-    return { cfg: cfg, r: compute(cfg, key), firm: fm.id === 'custom' ? 'Own rules' : fm.name, mono: fm.mono, practice: !!cfg.practice,
+    return { cfg: cfg, r: compute(cfg, key), ccy: ccyOf(key), firm: fm.id === 'custom' ? 'Own rules' : fm.name, mono: fm.mono, practice: !!cfg.practice,
              phase: ph.label, phaseId: cfg.phase || 'p1', outcome: outcomeOf(all, key) };
   };
   /* TopstepX sync (25.10.2026): an account that arrives from the ProjectX
@@ -77098,7 +77567,8 @@ self.addEventListener('message', async (ev) => {
       '<ol class="pfx-tl">' + items.join('') + '</ol></div>';
   }
 
-  function ledgerHtml() {
+  function ledgerHtml() { return withCcy(window.getPnlCurrency ? getPnlCurrency() : 'USD', ledgerHtmlIn); }
+  function ledgerHtmlIn() {
     var l = loadLedger(), st = ledgerStats(l), key = accKey();
     var accName = accountName(key), oc = outcomeOf(loadAll(), key);
     function rows(kind, label, hint) {
@@ -77141,7 +77611,8 @@ self.addEventListener('message', async (ev) => {
 
   /* Every challenge side by side — only once there is more than one; with a
      single challenge it would repeat the card above number for number. */
-  function portfolioHtml() {
+  function portfolioHtml() { return withCcy(window.getPnlCurrency ? getPnlCurrency() : 'USD', portfolioHtmlIn); }
+  function portfolioHtmlIn() {
     var pf = portfolio();
     if (pf.rows.length < 2) return '';
     var t = pf.totals;
@@ -77152,7 +77623,7 @@ self.addEventListener('message', async (ev) => {
       var ph = phasesOf(x.cfg.preset).filter(function (p) { return p.id === (x.cfg.phase || 'p1'); })[0];
       return '<div class="pfx-pc' + (x.key === cur ? ' cur' : '') + '">' +
         '<div class="pfx-pc-h"><span class="pfx-mono notranslate" translate="no" style="width:30px;height:30px;font-size:11px;border-radius:8px">' + esc(fm.mono) + '</span>' +
-          '<div><b>' + keepName(x.name) + '</b><span>' + keepName(x.firm) + (num(x.cfg.balance) > 0 ? ' · ' + moneyTxt(num(x.cfg.balance), 0) : '') + (ph ? ' · ' + keepName(ph.label) : '') + '</span></div>' +
+          '<div><b>' + keepName(x.name) + '</b><span>' + keepName(x.firm) + (num(x.cfg.balance) > 0 ? ' · ' + moneyTxt(num(x.cfg.balance), 0, ccyOf(x.key)) : '') + (ph ? ' · ' + keepName(ph.label) : '') + '</span></div>' +
           '<span class="pfx-oc ' + x.outcome + '">' + OC_LABEL[x.outcome] + '</span></div>' +
         '<div class="pfx-pc-n"><span>Spent <b>' + money(x.stats.spent, 0) + '</b></span><span>Received <b>' + money(x.stats.earned, 0) + '</b></span>' +
           '<span>Net <b class="' + (x.stats.net >= 0 ? 'pos' : 'neg') + '">' + money(x.stats.net, 0) + '</b></span></div>' +
@@ -77713,7 +78184,8 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
   function tr(el) { try { if (P() && P().i18nNow) P().i18nNow(el); } catch (e) {} }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function keep(t) { return '<span class="notranslate" translate="no">' + esc(t) + '</span>'; }
-  function money(v) { return keep(P().fmt(v, 0)); }
+  // in the challenge's account currency — the one the firm states its rules in
+  function money(v) { var pp = P(); return keep(pp.fmt(v, 0, pp.ccyNow ? pp.ccyNow() : '')); }
   function num(v) { var n = parseFloat(v); return isNaN(n) ? 0 : n; }
   function todayStr() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function firm(id) { return P().FIRMS.filter(function (f) { return f.id === id; })[0] || null; }
@@ -78074,6 +78546,8 @@ body.light #page-propfirm .pf-card select, body.light #page-propfirm .pf-card in
       var spec = getPipSpec(t.symbol);
       if (!spec || !spec.pipSize || !spec.pipValuePerLot) return null;
       var usd = Math.abs(e - sl) / spec.pipSize * lots * spec.pipValuePerLot;
+      var pp = P();
+      if (typeof apexFxConvert === 'function' && pp && pp.ccyNow) return apexFxConvert(usd, 'USD', pp.ccyNow());
       return typeof toDisplayCurrency === 'function' ? toDisplayCurrency(usd) : usd;
     } catch (x) { return null; }
   }
@@ -105136,6 +105610,7 @@ body.light::before{ opacity:.45; }
     "Session review": ["Sitzungsauswertung", "Revisión de la sesión", "Revisão da sessão", "Revue de session"],
     "— sequence, size drift & revenge-window detection": ["— Reihenfolge, Positionsgrößen-Drift & Revenge-Fenster", "— secuencia, deriva del tamaño y ventanas de revenge trading", "— sequência, desvio de tamanho e janelas de revenge trading", "— séquence, dérive de taille et fenêtres de revenge trading"],
     "Auto MFE / MAE from real price data": ["Automatisches MFE / MAE aus echten Kursdaten", "MFE / MAE automáticos con datos de precio reales", "MFE / MAE automáticos com dados de preço reais", "MFE / MAE automatiques à partir de vraies données de prix"],
+    "Exit Lab — your entries replayed on real prices: set and forget, fixed targets, break-even, trailing and time stops, and the price after your exit": ["Exit-Labor – deine Einstiege auf echten Kursen nachgespielt: Stop und Ziel stehen lassen, feste Ziele, Break-even, Trailing- und Zeitstopps und der Kurs nach deinem Ausstieg", "Laboratorio de salidas: tus entradas reproducidas con precios reales — dejar stop y objetivo, objetivos fijos, break-even, trailing y stops por tiempo, y el precio tras tu salida", "Laboratório de saídas — suas entradas reproduzidas com preços reais: deixar stop e alvo, alvos fixos, break-even, trailing e stops por tempo, e o preço após sua saída", "Labo des sorties — tes entrées rejouées sur des prix réels : stop et objectif laissés, objectifs fixes, break-even, stops suiveurs et temporels, et le prix après ta sortie"],
     "Risk of Ruin, Sharpe & Expectancy / setup": ["Risk of Ruin, Sharpe & Erwartungswert je Setup", "Riesgo de ruina, Sharpe y esperanza por setup", "Risco de ruína, Sharpe e expectativa por setup", "Risque de ruine, Sharpe et espérance par setup"],
     "Benchmark vs buy & hold": ["Benchmark gegen Buy & Hold", "Benchmark frente a comprar y mantener", "Benchmark contra buy & hold", "Benchmark face au buy & hold"],
     "— your Sharpe against S&P 500, Nasdaq, MSCI World, 60/40, gold & BTC": ["— dein Sharpe gegen S&P 500, Nasdaq, MSCI World, 60/40, Gold & BTC", "— tu Sharpe frente a S&P 500, Nasdaq, MSCI World, 60/40, oro y BTC", "— seu Sharpe contra S&P 500, Nasdaq, MSCI World, 60/40, ouro e BTC", "— votre Sharpe face au S&P 500, Nasdaq, MSCI World, 60/40, or et BTC"],
@@ -105183,6 +105658,9 @@ body.light::before{ opacity:.45; }
     "Confidence on every number — how many trades stand behind each statistic": ["Konfidenz an jeder Zahl — wie viele Trades hinter jeder Kennzahl stehen", "Confianza en cada cifra — cuántas operaciones respaldan cada estadística", "Confiança em cada número — quantas operações sustentam cada estatística", "Fiabilité sur chaque chiffre — combien de trades soutiennent chaque statistique"],
     "Sign in with Google": ["Anmelden mit Google", "Inicio de sesión con Google", "Login com Google", "Connexion avec Google"],
     "16 display currencies & auto-translation": ["16 Anzeigewährungen & automatische Übersetzung", "16 divisas de visualización y traducción automática", "16 moedas de exibição e tradução automática", "16 devises d’affichage et traduction automatique"],
+    "Merge and split trades — partial fills into one position, undo any time": ["Trades zusammenführen und aufteilen – Teilausführungen zu einer Position, jederzeit rückgängig", "Unir y dividir operaciones: ejecuciones parciales en una posición, reversible en cualquier momento", "Juntar e dividir operações — execuções parciais em uma posição, reversível a qualquer momento", "Fusionner et scinder des trades — exécutions partielles en une position, réversible à tout moment"],
+    "Fee templates per account — commission filled in where a statement has none": ["Gebühren-Vorlagen pro Konto – Kommission wird ergänzt, wo ein Kontoauszug keine hat", "Plantillas de comisiones por cuenta: la comisión se completa donde el extracto no la trae", "Modelos de taxas por conta — a comissão é preenchida onde o extrato não a tem", "Modèles de frais par compte — la commission est ajoutée là où le relevé n’en a pas"],
+    "Account currency per account — booked P&L converted at daily ECB rates, 16 display currencies & auto-translation": ["Kontowährung je Konto – gebuchter G&V zum EZB-Tageskurs umgerechnet, 16 Anzeigewährungen & automatische Übersetzung", "Divisa por cuenta: P&L contabilizado convertido al tipo diario del BCE, 16 divisas de visualización y traducción automática", "Moeda por conta — P&L lançado convertido à taxa diária do BCE, 16 moedas de exibição e tradução automática", "Devise par compte — P&L comptabilisé converti au taux BCE du jour, 16 devises d’affichage et traduction automatique"],
     "Forex, indices, crypto, futures & multi-leg options": ["Forex, Indizes, Krypto, Futures & mehrbeinige Optionen", "Forex, índices, cripto, futuros y opciones de varias patas", "Forex, índices, cripto, futuros e opções com várias pernas", "Forex, indices, crypto, futures et options à plusieurs jambes"],
     "Partial exits & scale-out logging": ["Teilausstiege & Scale-out-Erfassung", "Salidas parciales y registro de scale-out", "Saídas parciais e registro de scale-out", "Sorties partielles et suivi des scale-out"],
     "Guardrails — daily loss limit, trade cap, cooldown & revenge detection": ["Guardrails — tägliches Verlustlimit, Trade-Obergrenze, Abkühlpause & Revenge-Erkennung", "Guardrails — límite diario de pérdidas, tope de operaciones, pausa y detección de revenge trading", "Guardrails — limite diário de perda, teto de operações, pausa e detecção de revenge trading", "Garde-fous — limite de perte quotidienne, plafond de trades, pause et détection du revenge trading"],
@@ -105241,6 +105719,7 @@ body.light::before{ opacity:.45; }
     "Notes, tags & chart snapshots written during the replay": ["Notizen, Tags & Chart-Schnappschüsse während des Replays", "Notas, etiquetas y capturas del gráfico durante el replay", "Notas, tags e capturas do gráfico durante o replay", "Notes, tags et captures du graphique pendant le replay"],
     "Stop-vs-target collisions resolved from real ticks, not guessed": ["Stop-gegen-Ziel-Kollisionen aus echten Ticks entschieden, nicht geraten", "Choques entre stop y objetivo resueltos con ticks reales, no adivinados", "Colisões entre stop e alvo resolvidas com ticks reais, não adivinhadas", "Collisions stop/objectif tranchées avec les vrais ticks, pas devinées"],
     "Auto MFE / MAE from price data": ["Automatisches MFE / MAE aus Kursdaten", "MFE / MAE automáticos con datos de precio", "MFE / MAE automáticos com dados de preço", "MFE / MAE automatiques à partir des données de prix"],
+    "Exit Lab — set and forget vs your exits, best target tested out of sample, price after the exit": ["Exit-Labor – Stop und Ziel stehen lassen gegen deine Ausstiege, bestes Ziel außerhalb der Stichprobe geprüft, Kurs nach dem Ausstieg", "Laboratorio de salidas: dejar stop y objetivo frente a tus salidas, mejor objetivo probado fuera de muestra, precio tras la salida", "Laboratório de saídas — deixar stop e alvo vs. suas saídas, melhor alvo testado fora da amostra, preço após a saída", "Labo des sorties — stop et objectif laissés contre tes sorties, meilleur objectif testé hors échantillon, prix après la sortie"],
     "Benchmark vs buy & hold — annualised Sharpe against S&P 500, Nasdaq 100, MSCI World, 60/40, gold & Bitcoin": ["Benchmark gegen Buy & Hold — annualisierter Sharpe gegen S&P 500, Nasdaq 100, MSCI World, 60/40, Gold & Bitcoin", "Benchmark frente a comprar y mantener — Sharpe anualizado frente a S&P 500, Nasdaq 100, MSCI World, 60/40, oro y Bitcoin", "Benchmark contra buy & hold — Sharpe anualizado contra S&P 500, Nasdaq 100, MSCI World, 60/40, ouro e Bitcoin", "Benchmark face au buy & hold — Sharpe annualisé face au S&P 500, Nasdaq 100, MSCI World, 60/40, or et Bitcoin"],
     "R-Multiple analytics — distribution, cumulative R & R per setup": ["R-Multiple-Analyse — Verteilung, kumuliertes R & R je Setup", "Análisis de múltiplos de R — distribución, R acumulado y R por setup", "Análise de múltiplos de R — distribuição, R acumulado e R por setup", "Analyse des multiples de R — distribution, R cumulé et R par setup"],
     "Kelly criterion — growth-optimal risk per trade": ["Kelly-Kriterium — wachstumsoptimales Risiko pro Trade", "Criterio de Kelly — riesgo óptimo para el crecimiento por operación", "Critério de Kelly — risco ideal para crescimento por operação", "Critère de Kelly — risque optimal pour la croissance par trade"],
@@ -112402,6 +112881,1081 @@ body.light .tv-ev-dd-pop{background:#fff}
     function reg(){ if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('.ovl-card', T); else setTimeout(reg, 300); }
     reg();
   })();
+})();
+</script>
+<script>
+/* ApexFx — live currency rates (01.11.2026)
+   The ECB reference rates, via Frankfurter (open source, no key): fetched at
+   most twice a day and kept in localStorage, so a reload never waits for the
+   network and the app keeps working offline on the last known rates. Until
+   the first fetch lands the static table in CURRENCIES is used; when it does,
+   the visible figures are re-rendered once. Only the rate table travels —
+   nothing from the journal is sent anywhere. */
+(function () {
+  var KEY = 'apexFxRates_v1';
+  var TTL = 12 * 3600 * 1000;
+  var URLS = ['https://api.frankfurter.dev/v1/latest?base=USD',
+              'https://api.frankfurter.app/latest?from=USD'];
+  var busy = false;
+  function apply(d, src) {
+    if (!d || !d.rates || typeof d.rates !== 'object') return false;
+    var r = { USD: 1 };
+    Object.keys(d.rates).forEach(function (k) { var v = +d.rates[k]; if (v > 0 && isFinite(v)) r[String(k).toUpperCase()] = v; });
+    if (!r.EUR) return false;
+    if (!r.AED) r.AED = 3.6725;          // pegged to the dollar; the ECB does not publish it
+    APEX_FX.perUsd = r;
+    APEX_FX.date = String(d.date || '');
+    APEX_FX.fetchedAt = +d.fetchedAt || Date.now();
+    APEX_FX.source = src || 'ecb';
+    return true;
+  }
+  function cached() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  function rerender() {
+    try { if (window.renderTrades) renderTrades(); } catch (e) {}
+    try { if (window.updateOverview) updateOverview(); } catch (e) {}
+    try { document.dispatchEvent(new CustomEvent('apex:fx', { detail: Fx.info() })); } catch (e) {}
+  }
+  function fetchFrom(i) {
+    if (i >= URLS.length) { busy = false; return Promise.resolve(false); }
+    return fetch(URLS[i], { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('fx ' + r.status); return r.json(); })
+      .then(function (d) {
+        var before = JSON.stringify(APEX_FX.perUsd || {});
+        d.fetchedAt = Date.now();
+        if (!apply(d, 'ecb')) throw new Error('fx shape');
+        try { localStorage.setItem(KEY, JSON.stringify({ date: d.date, rates: d.rates, fetchedAt: d.fetchedAt })); } catch (e) {}
+        busy = false;
+        if (JSON.stringify(APEX_FX.perUsd) !== before) rerender();
+        return true;
+      })
+      .catch(function () { return fetchFrom(i + 1); });
+  }
+  var Fx = {
+    refresh: function (force) {
+      var c = cached();
+      if (!force && c && Date.now() - (+c.fetchedAt || 0) < TTL) return Promise.resolve(false);
+      if (busy || typeof fetch !== 'function') return Promise.resolve(false);
+      busy = true;
+      return fetchFrom(0);
+    },
+    info: function () { return { date: APEX_FX.date, source: APEX_FX.source, fetchedAt: APEX_FX.fetchedAt }; },
+    perUsd: function (c) { return apexFxPerUsd(c); },
+    convert: function (v, from, to) { return apexFxConvert(v, from, to); }
+  };
+  window.ApexFx = Fx;
+  var c0 = cached();
+  if (c0) apply(c0, 'ecb');
+  // after the first paint — the rate table is never on the critical path
+  setTimeout(function () { Fx.refresh(false); }, 2500);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') Fx.refresh(false); });
+})();
+</script>
+<script>
+/* ApexExitLab — exit analysis on the real price path (01.11.2026)
+   TraderSync ("Rolling Exit"), Edgewonk ("Exit Analysis", "Trade
+   Management"), Tradervue and TradeZella ("Best Exit") all answer one
+   question the What-If tab could not: what would have happened to MY entries
+   with other exits? What-If only filtered trades and scaled them by MFE — it
+   never walked the price. This module does: for every closed trade with an
+   entry, an initial stop and real open/close times it loads the 1-minute bars
+   (Dukascopy via ApexMarketData — free, cached in IndexedDB and the R2
+   archive) and replays the trade bar by bar under alternative rules:
+
+     · set and forget — the original stop and target, untouched
+     · a fixed target at 0.5R … 5R
+     · break-even after +0.5R … +2R
+     · a trailing stop 0.5R … 2R behind the best price
+     · a time stop after 15 min … 4 h
+   and measures the price after the actual exit: how far it ran on, whether
+   the original target was hit after all, whether the stop would have been.
+
+   Honest by construction, because a flattering exit study is worse than none:
+     · pessimistic intrabar order — a bar that touches stop AND target counts
+       as the stop; a break-even or trail armed in a bar applies from the next
+     · the entry minute is skipped (its high/low may predate the fill)
+     · gaps fill at the bar's open, not at the stop
+     · R is price R before commission and swap, on both sides of every
+       comparison — the actual trade included
+     · a "best" rule is picked on the first half of the trades and judged on
+       the second half; a rule that only wins in hindsight says so
+   The engine (between the markers) is pure and has its own test:
+   .claude/tests/exitlab.test.js. */
+/* EXITLAB-ENGINE-START */
+var ApexExitEngine = (function () {
+  var E = {};
+  E.VERSION = 1;
+  E.FIXED = [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5];
+  E.BE = [0.5, 1, 1.5, 2];
+  E.TRAIL = [0.5, 1, 1.5, 2];
+  E.TIME = [15, 30, 60, 120, 240];
+  E.POST = [15, 60, 240];
+  E.MIN_N = 20;
+
+  /* First bar index whose open time is >= ms (binary search on b.t). */
+  function idxAt(b, ms) {
+    var lo = 0, hi = b.n;
+    while (lo < hi) { var mid = (lo + hi) >> 1; if (b.t[mid] < ms) lo = mid + 1; else hi = mid; }
+    return lo;
+  }
+  E.idxAt = idxAt;
+  /* The bar after the one that contains `ms` — the first bar whose whole
+     range is known to come after the fill. */
+  function idxAfterMinute(b, ms) { return idxAt(b, Math.floor(ms / 60000) * 60000 + 60000); }
+  E.idxAfterMinute = idxAfterMinute;
+
+  /* Walk one trade under one rule.
+     o = { dir: 1|-1, entry, risk (>0, price units), stop, target|null,
+           beAt (R)|null, trail (R)|null, timeEnd (ms)|null }
+     Returns { R, how, t } — how: stop | be | trail | target | time | open. */
+  function walk(b, i0, iEnd, o) {
+    var stop = o.stop, best = o.entry, beArmed = false, trailMoved = false;
+    var dir = o.dir, entry = o.entry, risk = o.risk;
+    function out(px, how, t) { return { R: (px - entry) * dir / risk, how: how, t: t }; }
+    if (!(iEnd > i0)) return null;
+    for (var i = i0; i < iEnd; i++) {
+      var t = b.t[i], op = b.o[i], h = b.h[i], l = b.l[i];
+      if (o.timeEnd != null && t >= o.timeEnd) return out(op, 'time', t);
+      var hitStop = dir > 0 ? l <= stop : h >= stop;
+      var hitTgt = o.target != null && (dir > 0 ? h >= o.target : l <= o.target);
+      if (hitStop) {
+        var px = (dir > 0 ? op < stop : op > stop) ? op : stop;      // gap through the stop
+        var how = trailMoved ? 'trail' : (beArmed && stop === entry ? 'be' : 'stop');
+        return out(px, how, t);
+      }
+      if (hitTgt) {
+        var px2 = (dir > 0 ? op > o.target : op < o.target) ? op : o.target;
+        return out(px2, 'target', t);
+      }
+      var fav = dir > 0 ? h : l;
+      if ((fav - best) * dir > 0) best = fav;
+      if (o.beAt != null && !beArmed && (best - entry) * dir >= o.beAt * risk) {
+        beArmed = true;
+        if ((entry - stop) * dir > 0) stop = entry;
+      }
+      if (o.trail != null) {
+        var ns = best - dir * o.trail * risk;
+        if ((ns - stop) * dir > 0) { stop = ns; trailMoved = true; }
+      }
+    }
+    return out(b.c[iEnd - 1], 'open', b.t[iEnd - 1]);
+  }
+  E.walk = walk;
+
+  /* Best and worst excursion in R between two bar indexes (inclusive start,
+     exclusive end), measured from a reference price. */
+  function excursion(b, i0, i1, ref, dir, risk) {
+    var fav = 0, adv = 0;
+    for (var i = i0; i < i1; i++) {
+      var f = ((dir > 0 ? b.h[i] : b.l[i]) - ref) * dir / risk;
+      var a = (ref - (dir > 0 ? b.l[i] : b.h[i])) * dir / risk;
+      if (f > fav) fav = f; if (a > adv) adv = a;
+    }
+    return { fav: fav, adv: adv };
+  }
+  E.excursion = excursion;
+
+  /* Minutes from `fromMs` until price first touches `level` (null = never
+     within the bars given). */
+  function firstTouch(b, i0, iEnd, level, dir, above, fromMs) {
+    for (var i = i0; i < iEnd; i++) {
+      var hit = above ? (dir > 0 ? b.h[i] >= level : b.l[i] <= level) : (dir > 0 ? b.l[i] <= level : b.h[i] >= level);
+      if (hit) return Math.max(0, Math.round((b.t[i] - fromMs) / 60000));
+    }
+    return null;
+  }
+
+  function rangeAround(b, ms, before, after) {
+    var j0 = idxAt(b, ms - before * 60000), j1 = idxAt(b, ms + after * 60000);
+    if (j1 <= j0) return null;
+    var hi = -Infinity, lo = Infinity;
+    for (var j = j0; j < j1; j++) { if (b.h[j] > hi) hi = b.h[j]; if (b.l[j] < lo) lo = b.l[j]; }
+    return { hi: hi, lo: lo };
+  }
+  E.pricesMatch = function (b, tr, risk) {
+    var tol = Math.max(0.25 * risk, tr.entry * 0.0003);
+    var re = rangeAround(b, tr.openMs, 2, 3);
+    if (!re || tr.entry < re.lo - tol || tr.entry > re.hi + tol) return false;
+    if (tr.exit > 0) {
+      var rx = rangeAround(b, tr.closeMs, 2, 3);
+      if (!rx || tr.exit < rx.lo - tol || tr.exit > rx.hi + tol) return false;
+    }
+    return true;
+  };
+
+  /* Everything about one trade, from its bars.
+     tr = { dir, entry, stop (initial), target|null, exit, openMs, closeMs,
+            actualR (price R, or the trade's own R when it scaled out) }
+     Returns null when the bars do not cover the trade. */
+  E.measure = function (b, tr) {
+    if (!b || !b.n || !(tr.entry > 0) || !(tr.stop > 0) || !(tr.closeMs > tr.openMs)) return null;
+    var risk = Math.abs(tr.entry - tr.stop);
+    if (!(risk > 0)) return null;
+    var dir = tr.dir > 0 ? 1 : -1;
+    // the stop must be on the losing side of the entry, or there is no R
+    if ((tr.entry - tr.stop) * dir <= 0) return null;
+    var i0 = idxAfterMinute(b, tr.openMs), iEnd = b.n;
+    var iExit = idxAt(b, Math.floor(tr.closeMs / 60000) * 60000);
+    if (i0 >= iEnd || iExit <= i0) return null;
+    /* The trade's own prices must be on the chart at its own times. A broker
+       that quotes an index CFD with an offset, a mapped-wrong symbol or a
+       mistyped time would otherwise replay a different market and report
+       confident nonsense. Tolerance: a quarter of the risk, at least 3 bp. */
+    if (!E.pricesMatch(b, tr, risk)) return { mismatch: true };
+    var base = { dir: dir, entry: tr.entry, risk: risk, stop: tr.stop, target: null, beAt: null, trail: null, timeEnd: null };
+    function run(p) { var o = {}; for (var k in base) o[k] = base[k]; for (var q in p) o[q] = p[q]; return walk(b, i0, iEnd, o); }
+    var tgt = (tr.target > 0 && (tr.target - tr.entry) * dir > 0) ? tr.target : null;
+    var res = { v: E.VERSION, risk: risk, actualR: tr.actualR, hasTarget: tgt != null, fixed: {}, be: {}, trail: {}, time: {}, post: {} };
+    res.hold = run({ target: tgt });
+    E.FIXED.forEach(function (r) { var x = run({ target: tr.entry + dir * r * risk }); res.fixed[r] = x ? +x.R.toFixed(3) : null; });
+    E.BE.forEach(function (r) { var x = run({ target: tgt, beAt: r }); res.be[r] = x ? +x.R.toFixed(3) : null; });
+    E.TRAIL.forEach(function (r) { var x = run({ trail: r }); res.trail[r] = x ? +x.R.toFixed(3) : null; });
+    E.TIME.forEach(function (m) { var x = run({ target: tgt, timeEnd: tr.openMs + m * 60000 }); res.time[m] = x ? +x.R.toFixed(3) : null; });
+    if (res.hold) res.hold = { R: +res.hold.R.toFixed(3), how: res.hold.how, min: Math.round((res.hold.t - tr.openMs) / 60000) };
+    // inside the trade: the move that was there to take
+    var inT = excursion(b, i0, Math.max(i0 + 1, iExit + 1), tr.entry, dir, risk);
+    res.mfeR = +inT.fav.toFixed(3); res.maeR = +inT.adv.toFixed(3);
+    // after the exit: from the first full minute after the close
+    var j0 = idxAfterMinute(b, tr.closeMs), ex = tr.exit > 0 ? tr.exit : null;
+    if (ex != null && j0 < iEnd) {
+      E.POST.forEach(function (m) {
+        var j1 = idxAt(b, tr.closeMs + m * 60000);
+        if (j1 > j0) { var e = excursion(b, j0, j1, ex, dir, risk); res.post[m] = { fav: +e.fav.toFixed(3), adv: +e.adv.toFixed(3) }; }
+      });
+      res.tpAfter = tgt != null && (tgt - ex) * dir > 0 ? firstTouch(b, j0, iEnd, tgt, dir, true, tr.closeMs) : null;
+      res.slAfter = (ex - tr.stop) * dir > 0 ? firstTouch(b, j0, iEnd, tr.stop, dir, false, tr.closeMs) : null;
+      // which came first after the exit, target or stop — the honest test of an early exit
+      if (res.tpAfter != null && res.slAfter != null) res.afterFirst = res.tpAfter < res.slAfter ? 'target' : (res.slAfter < res.tpAfter ? 'stop' : 'both');
+      else res.afterFirst = res.tpAfter != null ? 'target' : (res.slAfter != null ? 'stop' : null);
+    }
+    res.horizonMin = Math.round((b.t[iEnd - 1] - tr.openMs) / 60000);
+    return res;
+  };
+
+  function mean(a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; }
+  function sum(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
+  function median(a) { if (!a.length) return null; var s = a.slice().sort(function (x, y) { return x - y; }); var m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+  E.mean = mean; E.median = median;
+
+  /* Does a difference hold in both halves of the (chronological) list? */
+  function halves(rows, diffOf) {
+    var n = rows.length, h = n >> 1;
+    if (n < E.MIN_N) return { ok: false, thin: true, a: null, b: null };
+    var a = mean(rows.slice(0, h).map(diffOf)), b = mean(rows.slice(h).map(diffOf));
+    return { ok: a != null && b != null && ((a > 0 && b > 0) || (a < 0 && b < 0)), thin: false, a: a, b: b };
+  }
+  E.halves = halves;
+
+  /* Aggregate over measured trades, oldest first. Every block carries its n. */
+  E.summarize = function (rows) {
+    rows = (rows || []).filter(function (r) { return r && r.res && r.res.hold && r.res.actualR != null && isFinite(r.res.actualR); });
+    var S = { n: rows.length };
+    if (!rows.length) return S;
+    var act = rows.map(function (r) { return r.res.actualR; });
+    S.actual = { avg: mean(act), total: sum(act), wr: act.filter(function (v) { return v > 0; }).length / act.length };
+    // 1. management vs set and forget
+    var hold = rows.map(function (r) { return r.res.hold.R; });
+    S.hold = { avg: mean(hold), total: sum(hold), wr: hold.filter(function (v) { return v > 0; }).length / hold.length,
+               diff: sum(act) - sum(hold), halves: halves(rows, function (r) { return r.res.actualR - r.res.hold.R; }),
+               open: rows.filter(function (r) { return r.res.hold.how === 'open'; }).length };
+    // 2. grids
+    function grid(kind, keys) {
+      return keys.map(function (k) {
+        var v = rows.map(function (r) { return r.res[kind] && r.res[kind][k]; }).filter(function (x) { return x != null && isFinite(x); });
+        return { k: k, n: v.length, avg: mean(v), total: sum(v), wr: v.length ? v.filter(function (x) { return x > 0; }).length / v.length : null };
+      });
+    }
+    S.fixed = grid('fixed', E.FIXED); S.be = grid('be', E.BE); S.trail = grid('trail', E.TRAIL); S.time = grid('time', E.TIME);
+    /* 3. out of sample: the best fixed target on the first half, judged on
+       the second. Picking the best of ten after the fact always "wins". */
+    var h = rows.length >> 1;
+    if (rows.length >= E.MIN_N) {
+      var first = rows.slice(0, h), second = rows.slice(h);
+      var bestK = null, bestV = -Infinity;
+      E.FIXED.forEach(function (k) {
+        var v = mean(first.map(function (r) { return r.res.fixed[k]; }).filter(function (x) { return x != null; }));
+        if (v != null && v > bestV) { bestV = v; bestK = k; }
+      });
+      if (bestK != null) {
+        var oos = mean(second.map(function (r) { return r.res.fixed[bestK]; }).filter(function (x) { return x != null; }));
+        var oosAct = mean(second.map(function (r) { return r.res.actualR; }));
+        S.oos = { k: bestK, inSample: bestV, outSample: oos, actualSecond: oosAct, nSecond: second.length,
+                  holds: oos != null && oosAct != null && oos > oosAct };
+      }
+    }
+    // 4. after the exit
+    var withPost = rows.filter(function (r) { return r.res.post && r.res.post[60]; });
+    var winners = withPost.filter(function (r) { return r.res.actualR > 0; });
+    var runOn = winners.map(function (r) { return r.res.post[60].fav; });
+    S.after = {
+      n: withPost.length, winners: winners.length,
+      ranOn1R: winners.filter(function (r) { return r.res.post[60].fav >= 1; }).length,
+      medRunOn: median(runOn),
+      tpAfter: rows.filter(function (r) { return r.res.afterFirst === 'target'; }).length,
+      tpAfterMissedR: sum(rows.filter(function (r) { return r.res.afterFirst === 'target' && r.res.hasTarget; })
+        .map(function (r) { return Math.max(0, r.res.hold.R - r.res.actualR); })),
+      stopAfter: rows.filter(function (r) { return r.res.afterFirst === 'stop' && r.res.actualR > -1; }).length,
+      stopSavedR: sum(rows.filter(function (r) { return r.res.afterFirst === 'stop' && r.res.actualR > -1; })
+        .map(function (r) { return r.res.actualR - (-1); }))
+    };
+    // 5. efficiency — how much of the move inside the trade was banked
+    var eff = rows.filter(function (r) { return r.res.actualR > 0 && r.res.mfeR > 0; }).map(function (r) { return Math.min(1, r.res.actualR / r.res.mfeR); });
+    S.eff = { n: eff.length, avg: mean(eff), med: median(eff) };
+    S.mfe = { avg: mean(rows.map(function (r) { return r.res.mfeR; })), avgMae: mean(rows.map(function (r) { return r.res.maeR; })) };
+    return S;
+  };
+  return E;
+})();
+/* EXITLAB-ENGINE-END */
+
+(function () {
+  var XL = {};
+  window.ApexExitLab = XL;
+  var E = ApexExitEngine;
+  var MAX_CACHE = 900;
+  var state = { running: false, stop: false, done: 0, total: 0, failed: 0, msg: '' };
+
+  function uid() { return window.currentUID || 'local'; }
+  function key() { return 'apexExitLab_v' + E.VERSION + '_' + uid(); }
+  function loadCache() { try { return JSON.parse(localStorage.getItem(key()) || '{}') || {}; } catch (e) { return {}; } }
+  function saveCache(c) {
+    var ks = Object.keys(c);
+    if (ks.length > MAX_CACHE) {
+      ks.sort(function (a, b) { return (c[a].at || 0) - (c[b].at || 0); });
+      ks.slice(0, ks.length - MAX_CACHE).forEach(function (k) { delete c[k]; });
+    }
+    try { localStorage.setItem(key(), JSON.stringify(c)); } catch (e) {}
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function num(v) { if (v === '' || v == null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function fR(v, d) { if (v == null || !isFinite(v)) return '—'; return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d == null ? 2 : d) + 'R'; }
+  function pct(v) { return v == null || !isFinite(v) ? '—' : Math.round(v * 100) + '%'; }
+  function cls(v) { return v > 0 ? 'pos' : v < 0 ? 'neg' : ''; }
+
+  /* A stable id for a trade across reloads and devices. */
+  function tradeId(t) {
+    return String(t.id || t.tradeId || t.ticket || t.posId || '') + '|' + (t.symbol || '') + '|' + (t.openTime || '') + '|' + (t.entry || '');
+  }
+  function isLong(t) { try { return window.apexIsLong ? apexIsLong(t.dir) : /buy|long/i.test(String(t.dir || '')); } catch (e) { return false; } }
+  function hasDir(t) { return /buy|long|sell|short/i.test(String(t.dir || t.direction || '')); }
+
+  /* Why a trade can or cannot be measured — reported, never silently dropped. */
+  function eligibility(t) {
+    if (!t || t.planned) return 'planned';
+    if (typeof isOptionTrade === 'function' && isOptionTrade(t)) return 'options';
+    var entry = num(t.entry), exit = num(t.exit);
+    if (!(entry > 0) || !(exit > 0)) return 'no entry/exit price';
+    if (!hasDir(t)) return 'no direction';
+    var sl = window.apexInitialSl ? apexInitialSl(t) : num(t.initialSl || t.sl);
+    if (!(sl > 0)) return 'no stop';
+    var op = num(t.openTime), cl = num(t.closeTime);
+    if (!(op > 0) || !(cl > op)) return 'no open/close time';
+    if (!(window.ApexMarketData && ApexMarketData.supports(t.symbol))) return 'instrument not in the price feed';
+    return '';
+  }
+  XL.eligibility = eligibility;
+
+  function inputOf(t) {
+    var dir = isLong(t) ? 1 : -1, entry = num(t.entry), exit = num(t.exit);
+    var stop = window.apexInitialSl ? apexInitialSl(t) : num(t.initialSl || t.sl);
+    var risk = Math.abs(entry - stop);
+    var partial = Array.isArray(t.partials) && t.partials.length > 0;
+    // price R — the basis the simulation uses; a scaled-out trade keeps its own R
+    var actualR = partial ? (num(t.r) != null ? num(t.r) : null) : (exit - entry) * dir / risk;
+    return { dir: dir, entry: entry, stop: stop, target: num(t.tp), exit: exit,
+             openMs: num(t.openTime), closeMs: num(t.closeTime), actualR: actualR };
+  }
+
+  function allTrades() { try { return (typeof getAllTrades === 'function') ? getAllTrades() : []; } catch (e) { return []; } }
+  function chrono(list) {
+    return list.slice().sort(function (a, b) { return (num(a.openTime) || 0) - (num(b.openTime) || 0); });
+  }
+
+  function scan() {
+    var cache = loadCache(), out = { ok: [], measured: [], none: 0, mismatch: 0, why: {} };
+    chrono(allTrades()).forEach(function (t) {
+      var w = eligibility(t);
+      if (w) { if (w !== 'planned') out.why[w] = (out.why[w] || 0) + 1; return; }
+      var id = tradeId(t), c = cache[id];
+      out.ok.push(t);
+      if (c && c.res) out.measured.push({ t: t, id: id, res: c.res });
+      else if (c && c.mismatch) { out.none++; out.mismatch++; }
+      else if (c && c.none) out.none++;
+    });
+    return out;
+  }
+  XL.scan = scan;
+
+  function horizonOf(inp) {
+    var end = Math.max(inp.closeMs + 4 * 3600000, inp.openMs + 24 * 3600000);
+    end = Math.min(end, inp.openMs + 5 * 86400000, Date.now() - 60000);
+    return end;
+  }
+
+  function measureOne(t) {
+    var inp = inputOf(t);
+    if (inp.actualR == null) return Promise.resolve(null);
+    var from = Math.floor(inp.openMs / 60000) * 60000 - 60000, to = horizonOf(inp);
+    if (!(to > from)) return Promise.resolve(null);
+    return ApexMarketData.getBars(t.symbol, from, to, '1m').then(function (b) {
+      var res = E.measure(b, inp);
+      return res;
+    });
+  }
+  XL.measureOne = measureOne;
+
+  /* Measure every eligible trade that has no result yet. Two at a time —
+     the price feed throttles, and a throttled day is retried on the next run. */
+  var _gen = 0;
+  XL.run = function (opts) {
+    if (state.running) return;
+    var gen = ++_gen;
+    var sc = scan(), cache = loadCache(), fresh = {};
+    /* Merge, never overwrite: another tab, a reset or an earlier run may have
+       written since this run started. A run that was superseded writes nothing. */
+    function flush() { if (gen !== _gen) return; var cur = loadCache(); for (var k in fresh) cur[k] = fresh[k]; saveCache(cur); }
+    var todo = sc.ok.filter(function (t) { return !(cache[tradeId(t)] && cache[tradeId(t)].res) && !(cache[tradeId(t)] && cache[tradeId(t)].none); });
+    if (opts && opts.limit) todo = todo.slice(-opts.limit);
+    state = { running: true, stop: false, done: 0, total: todo.length, failed: 0, msg: '' };
+    paintProgress();
+    var i = 0;
+    function next() {
+      if (state.stop || i >= todo.length) return Promise.resolve();
+      var t = todo[i++];
+      return measureOne(t).then(function (res) {
+        var id = tradeId(t);
+        if (res && res.mismatch) fresh[id] = { at: Date.now(), none: true, mismatch: true };
+        else if (res) fresh[id] = { at: Date.now(), res: res };
+        else fresh[id] = { at: Date.now(), none: true };     // bars do not cover it — do not retry forever
+      }).catch(function (e) {
+        state.failed++;
+        if (e && e.code === 'FEED_BUSY') state.msg = 'The price feed is throttling — the rest is fetched on the next run.';
+      }).then(function () {
+        state.done++;
+        if (state.done % 5 === 0) flush();
+        paintProgress();
+        if (state.msg && state.failed >= 3) { state.stop = true; }
+        return next();
+      });
+    }
+    return Promise.all([next(), next()]).then(function () {
+      flush();
+      if (gen === _gen) { state.running = false; XL.refresh(); }
+    });
+  };
+  XL.stop = function () { state.stop = true; };
+  XL.reset = function () {
+    _gen++;                                   // a running measurement stops writing
+    state.stop = true; state.running = false;
+    try { localStorage.removeItem(key()); } catch (e) {}
+    XL.refresh();
+  };
+
+  function paintProgress() {
+    var el = document.getElementById('xlProgress');
+    if (!el) return;
+    if (!state.running) { el.innerHTML = ''; return; }
+    var p = state.total ? Math.round(state.done / state.total * 100) : 0;
+    el.innerHTML = '<div class="xl-prog"><div class="xl-prog-bar"><i style="width:' + p + '%"></i></div>' +
+      '<span>' + state.done + ' / ' + state.total + ' trades measured' + (state.failed ? ' · ' + state.failed + ' not loaded' : '') + '</span>' +
+      '<button class="el-btn" onclick="ApexExitLab.stop()">Stop</button></div>' +
+      (state.msg ? '<div class="el-note">' + esc(state.msg) + '</div>' : '');
+  }
+
+  /* ───────── rendering ───────── */
+  var _host = null;
+  XL.refresh = function () { if (_host && document.body.contains(_host)) XL.render(_host); };
+
+  function card(title, sub, inner) {
+    return '<div class="el-card"><h3>' + title + '</h3>' + (sub ? '<p class="el-sub">' + sub + '</p>' : '') + inner + '</div>';
+  }
+  function kpi(lbl, val, c, hint) {
+    return '<div class="el-kpi"><div class="lbl">' + lbl + '</div><div class="val ' + (c || '') + '">' + val + '</div>' + (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
+  }
+  function thin(n) { return n < E.MIN_N ? '<div class="el-note">Only ' + n + ' trade' + (n === 1 ? '' : 's') + ' — read this as a direction, not a result. ' + E.MIN_N + '+ trades make it worth acting on.</div>' : ''; }
+  function halvesBadge(h) {
+    if (!h || h.thin) return '<span class="xl-badge thin">too few trades to test</span>';
+    return h.ok ? '<span class="xl-badge ok">holds in both halves of your trades</span>'
+                : '<span class="xl-badge no">does not hold in both halves — could be chance</span>';
+  }
+
+  /* Inline SVG bars — theme colours through CSS variables, no chart library. */
+  function barsSvg(list, actual, fmtK) {
+    var vals = list.map(function (x) { return x.avg; }).filter(function (v) { return v != null; }).concat([actual]);
+    if (!vals.length) return '';
+    var max = Math.max.apply(null, vals.map(Math.abs).concat([0.25]));
+    var W = 560, H = 170, pad = 26, bw = (W - pad * 2) / list.length;
+    var zero = H / 2;
+    var g = list.map(function (x, i) {
+      if (x.avg == null) return '';
+      var hgt = Math.abs(x.avg) / max * (H / 2 - 18), y = x.avg >= 0 ? zero - hgt : zero;
+      var cx = pad + i * bw + bw / 2;
+      return '<rect x="' + (pad + i * bw + bw * 0.18).toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + (bw * 0.64).toFixed(1) + '" height="' + Math.max(1, hgt).toFixed(1) +
+        '" rx="3" style="fill:' + (x.avg >= 0 ? 'var(--profit)' : 'var(--loss)') + ';opacity:.85"><title>' + esc(fmtK(x.k)) + ': ' + fR(x.avg) + ' per trade (' + x.n + ')</title></rect>' +
+        '<text x="' + cx.toFixed(1) + '" y="' + (H - 4) + '" text-anchor="middle" style="fill:var(--ink3);font-size:10px">' + esc(fmtK(x.k)) + '</text>';
+    }).join('');
+    var ay = zero - actual / max * (H / 2 - 18);
+    var line = actual != null ? '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + ay.toFixed(1) + '" y2="' + ay.toFixed(1) + '" style="stroke:var(--gold);stroke-width:1.5;stroke-dasharray:5 4"/>' +
+      '<text x="' + (W - pad) + '" y="' + (ay - 5).toFixed(1) + '" text-anchor="end" style="fill:var(--gold);font-size:10px">your exits ' + fR(actual) + '</text>' : '';
+    return '<svg class="xl-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Average R per trade by rule">' +
+      '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + zero + '" y2="' + zero + '" style="stroke:var(--rim2);stroke-width:1"/>' + g + line + '</svg>';
+  }
+  function gridTable(list, actual, fmtK, hold) {
+    var best = null; list.forEach(function (x) { if (x.avg != null && (best == null || x.avg > best.avg)) best = x; });
+    return '<div class="xl-tbl"><table><tr><th>Rule</th><th>Avg R</th><th>Total R</th><th>Win rate</th><th>vs your exits</th></tr>' +
+      (hold ? '<tr class="xl-ref"><td>Set and forget</td><td class="' + cls(hold.avg) + '">' + fR(hold.avg) + '</td><td>' + fR(hold.total, 1) + '</td><td>' + pct(hold.wr) + '</td><td class="' + cls(hold.avg - actual) + '">' + fR(hold.avg - actual) + '</td></tr>' : '') +
+      list.map(function (x) {
+        return '<tr' + (best && x.k === best.k ? ' class="xl-best"' : '') + '><td>' + esc(fmtK(x.k)) + '</td><td class="' + cls(x.avg) + '">' + fR(x.avg) + '</td><td>' + fR(x.total, 1) +
+          '</td><td>' + pct(x.wr) + '</td><td class="' + cls(x.avg - actual) + '">' + (x.avg == null ? '—' : fR(x.avg - actual)) + '</td></tr>';
+      }).join('') + '</table></div>';
+  }
+
+  function css() {
+    if (document.getElementById('xlCss')) return;
+    var s = document.createElement('style'); s.id = 'xlCss';
+    s.textContent =
+      '.xl-svg{width:100%;max-width:640px;height:auto;display:block;margin:6px auto 2px}' +
+      '.xl-prog{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0;font-size:var(--fs-xs);color:var(--ink2)}' +
+      '.xl-prog-bar{flex:1 1 160px;height:6px;border-radius:var(--r-pill);background:var(--rim2);overflow:hidden}' +
+      '.xl-prog-bar i{display:block;height:100%;background:var(--gold)}' +
+      '.xl-badge{display:inline-block;font-size:var(--fs-micro);font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-pill);margin-top:6px}' +
+      '.xl-badge.ok{background:rgba(var(--profit-rgb),.12);color:var(--profit)}' +
+      '.xl-badge.no{background:rgba(var(--loss-rgb),.10);color:var(--loss)}' +
+      '.xl-badge.thin{background:var(--rim2);color:var(--ink3)}' +
+      '.xl-verdict{font-size:var(--fs-md);line-height:1.5;margin:6px 0 4px}' +
+      '.xl-tbl{overflow-x:auto;margin-top:8px}' +
+      '.xl-tbl table{width:100%;border-collapse:collapse;font-size:var(--fs-xs);font-family:var(--font-mono,DM Mono,monospace)}' +
+      '.xl-tbl th{text-align:left;color:var(--ink3);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--rim2);white-space:nowrap}' +
+      '.xl-tbl td{padding:6px 8px;border-bottom:1px solid var(--rim);white-space:nowrap}' +
+      '.xl-tbl tr.xl-best td{background:rgba(var(--gold-rgb),.08)}' +
+      '.xl-tbl tr.xl-ref td{color:var(--ink2);font-style:italic}' +
+      '.xl-tbl tr.xl-click{cursor:pointer}.xl-tbl tr.xl-click:hover td{background:var(--raised)}' +
+      '.xl-why{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}' +
+      '.xl-why span{font-size:var(--fs-micro);color:var(--ink3);border:1px solid var(--rim2);border-radius:var(--r-pill);padding:2px 8px}' +
+      '.xl-line{grid-column:1/-1;font-size:var(--fs-xs);color:var(--ink2);line-height:1.5;padding:8px 10px;border:1px solid var(--rim2);border-radius:var(--r-sm);background:var(--surface)}' +
+      '.xl-line b{font-weight:600}';
+    document.head.appendChild(s);
+  }
+
+  XL.render = function (body) {
+    css();
+    _host = body;
+    var sc = scan(), rows = sc.measured, S = E.summarize(rows);
+    var whyKeys = Object.keys(sc.why);
+    var left = sc.ok.length - rows.length - sc.none;
+    var head = card('Exit Lab',
+      'Your real entries replayed on 1-minute prices under other exits — set and forget, fixed targets, break-even, trailing and time stops — plus what price did after you got out.',
+      '<div class="el-kpis">' +
+        kpi('Trades that can be measured', sc.ok.length, '', 'entry, initial stop, direction and real open/close times') +
+        kpi('Measured', rows.length, '', left > 0 ? left + ' still to load' : 'all loaded') +
+      '</div>' +
+      '<div class="el-controls" style="margin-top:10px">' +
+        (left > 0 ? '<button class="el-btn" onclick="ApexExitLab.run()">Measure ' + left + ' trade' + (left === 1 ? '' : 's') + '</button>' : '') +
+        (rows.length ? '<button class="el-btn" onclick="ApexExitLab.reset()">Measure again from scratch</button>' : '') +
+      '</div>' +
+      '<div id="xlProgress"></div>' +
+      (sc.mismatch ? '<div class="el-note" style="margin-top:8px">' + sc.mismatch + ' trade' + (sc.mismatch === 1 ? '' : 's') + ': your entry or exit price is not on the reference chart at that minute — a broker price offset, another contract or a wrong time. Skipped rather than guessed.</div>' : '') +
+      (sc.none - sc.mismatch > 0 ? '<div class="el-note" style="margin-top:8px">' + (sc.none - sc.mismatch) + ' trade' + (sc.none - sc.mismatch === 1 ? ' was' : 's were') + ' shorter than two minutes or outside the price data — nothing to replay.</div>' : '') +
+      (whyKeys.length ? '<div class="el-note" style="margin-top:8px">Not measurable:</div><div class="xl-why">' + whyKeys.map(function (k) { return '<span>' + sc.why[k] + '× ' + esc(k) + '</span>'; }).join('') + '</div>' : ''));
+    if (!S.n) {
+      body.innerHTML = head + card('Nothing measured yet', '', '<div class="el-note">' +
+        (sc.ok.length ? 'Press “Measure” — the bars load from the free price feed and are kept on this device, so the next visit is instant.'
+                      : 'Trades need an entry and exit price, an initial stop, a direction and real open and close times (synced trades have them; for manual ones fill in the times on the card).') + '</div>');
+      paintProgress();
+      return;
+    }
+    var A = S.actual.avg;
+    // 1 — management vs set and forget
+    var d = S.hold.diff;
+    var verdict = Math.abs(d) < 0.05 * S.n
+      ? 'Your exits did about what leaving the original stop and target would have done.'
+      : (d > 0 ? 'Your trade management <b class="pos">added ' + fR(d, 1) + '</b> over ' + S.n + ' trades compared with leaving stop and target alone.'
+               : 'Leaving stop and target alone would have made <b class="pos">' + fR(-d, 1) + ' more</b> over ' + S.n + ' trades — your management <b class="neg">cost ' + fR(d, 1) + '</b>.');
+    var c1 = card('Your exits vs set and forget', 'The same entries, the original stop and target untouched until one is hit.',
+      '<div class="xl-verdict">' + verdict + '</div>' + halvesBadge(S.hold.halves) +
+      '<div class="el-kpis" style="margin-top:10px">' +
+        kpi('Your exits', fR(A), cls(A), pct(S.actual.wr) + ' winners · ' + fR(S.actual.total, 1) + ' total') +
+        kpi('Set and forget', fR(S.hold.avg), cls(S.hold.avg), pct(S.hold.wr) + ' winners · ' + fR(S.hold.total, 1) + ' total') +
+        kpi('Difference per trade', fR(A - S.hold.avg), cls(A - S.hold.avg), 'positive = your exits did better') +
+      '</div>' + (S.hold.open ? '<div class="el-note">' + S.hold.open + ' trade' + (S.hold.open === 1 ? '' : 's') + ' hit neither stop nor target within the window (up to 5 days) and are valued at the last price.</div>' : '') + thin(S.n));
+    // 2 — after the exit
+    var af = S.after;
+    var c2 = card('After you got out', 'Measured from the first full minute after your exit.',
+      '<div class="el-kpis">' +
+        kpi('Winners that ran 1R+ further', af.winners ? af.ranOn1R + ' of ' + af.winners : '—', af.ranOn1R > af.winners / 2 ? 'neg' : '', 'within an hour of your exit') +
+        kpi('Typical run after a win', fR(af.medRunOn), '', 'median, first hour') +
+        kpi('Target hit after you closed', af.tpAfter, af.tpAfter ? 'neg' : '', af.tpAfter ? fR(af.tpAfterMissedR, 1) + ' left on the table' : 'before the stop') +
+        kpi('Early exits that dodged the stop', af.stopAfter, af.stopAfter ? 'pos' : '', af.stopAfter ? fR(af.stopSavedR, 1) + ' saved vs a full loss' : '') +
+      '</div>' +
+      '<div class="el-note">Target and stop after your exit are checked in order — the one price touched first counts. ' +
+        (af.tpAfter > af.stopAfter ? 'More of your early exits would have reached the target than the stop.' : af.stopAfter > af.tpAfter ? 'More of your early exits were followed by the stop than the target — closing early paid.' : '') + '</div>' + thin(af.n));
+    // 3 — fixed targets
+    var oos = S.oos;
+    var oosTxt = oos ? '<div class="xl-verdict">Best target on your first ' + (S.n - oos.nSecond) + ' trades: <b>' + oos.k + 'R</b> (' + fR(oos.inSample) + ' per trade). ' +
+      'On the ' + oos.nSecond + ' trades after that it made <b class="' + cls(oos.outSample) + '">' + fR(oos.outSample) + '</b> against <b>' + fR(oos.actualSecond) + '</b> for your own exits — ' +
+      (oos.holds ? '<span class="pos">it still beat them out of sample.</span>' : '<span class="neg">it did not hold up out of sample.</span>') + '</div>' : thin(S.n);
+    var c3 = card('Fixed target', 'A take-profit at a fixed multiple of the initial risk, original stop. Dashed line: your own exits.',
+      barsSvg(S.fixed, A, function (k) { return k + 'R'; }) + oosTxt + gridTable(S.fixed, A, function (k) { return 'Target ' + k + 'R'; }, S.hold));
+    // 4 — break-even, trailing, time
+    var c4 = card('Break-even, trailing and time stops', 'Original stop and target, plus one management rule. Applied from the bar after it triggers.',
+      '<div class="el-sub" style="margin-top:6px">Break-even after</div>' + gridTable(S.be, A, function (k) { return 'Stop to entry at +' + k + 'R'; }) +
+      '<div class="el-sub" style="margin-top:12px">Trailing stop (no target)</div>' + gridTable(S.trail, A, function (k) { return 'Trail ' + k + 'R behind the best price'; }) +
+      '<div class="el-sub" style="margin-top:12px">Time stop</div>' + gridTable(S.time, A, function (k) { return 'Out after ' + (k < 60 ? k + ' min' : (k / 60) + ' h'); }));
+    // 5 — efficiency
+    var c5 = card('How much of the move you kept', 'Winning trades: your result as a share of the best price reached while you were in.',
+      '<div class="el-kpis">' + kpi('Average capture', pct(S.eff.avg), '', S.eff.n + ' winners') + kpi('Median capture', pct(S.eff.med)) +
+      kpi('Average best move inside the trade', fR(S.mfe.avg)) + kpi('Average heat taken', S.mfe.avgMae == null ? '—' : '−' + Math.abs(S.mfe.avgMae).toFixed(2) + 'R') + '</div>');
+    // 6 — per trade
+    var recent = rows.slice(-60).reverse();
+    var c6 = card('Trade by trade', 'Latest 60 measured trades. Click a row to open the trade on the chart.',
+      '<div class="xl-tbl"><table><tr><th>Date</th><th>Symbol</th><th>Your R</th><th>Set &amp; forget</th><th>Best inside</th><th>Run after (1 h)</th><th>After exit</th></tr>' +
+      recent.map(function (r) {
+        var x = r.res, p = x.post && x.post[60];
+        var after = x.afterFirst === 'target' ? 'target hit' : x.afterFirst === 'stop' ? 'stop hit' : x.afterFirst === 'both' ? 'both, same minute' : '—';
+        return '<tr class="xl-click" onclick="ApexExitLab.openTrade(\'' + esc(r.id).replace(/'/g, '&#39;') + '\')"><td>' + esc(r.t._date || '') + '</td><td class="notranslate" translate="no">' + esc(r.t.symbol || '') + '</td>' +
+          '<td class="' + cls(x.actualR) + '">' + fR(x.actualR) + '</td><td class="' + cls(x.hold.R) + '">' + fR(x.hold.R) + '</td><td>' + fR(x.mfeR) + '</td>' +
+          '<td>' + (p ? fR(p.fav) : '—') + '</td><td>' + after + '</td></tr>';
+      }).join('') + '</table></div>');
+    var foot = '<div class="el-note" style="margin:6px 2px 16px">How this is measured: 1-minute bid prices (Dukascopy). When one bar touches stop and target, the stop counts. ' +
+      'The minute of the entry is skipped, gaps fill at the next price, break-even and trailing stops act from the bar after they trigger. ' +
+      'All figures are price R before commission and swap — your own exits included — so the comparison is like for like.</div>';
+    body.innerHTML = head + c1 + c2 + c3 + c4 + c5 + c6 + foot;
+    paintProgress();
+  };
+
+  /* Open a measured trade on the Edge Lab chart. */
+  XL.openTrade = function (id) {
+    try {
+      var jd = window.journalData || {};
+      for (var k in jd) {
+        var ts = (jd[k] && jd[k].trades) || [];
+        for (var i = 0; i < ts.length; i++) {
+          if (tradeId(ts[i]) === id) { if (window.EdgeLab && EdgeLab.openTradeChartJ) EdgeLab.openTradeChartJ(k, i); return; }
+        }
+      }
+    } catch (e) {}
+  };
+
+  /* One line on the trade card, when the trade has been measured. */
+  XL.cardLine = function (t) {
+    try {
+      var c = loadCacheMemo()[tradeId(t)];
+      if (!c || !c.res || !c.res.hold) return '';
+      var x = c.res, p = x.post && x.post[60], bits = [];
+      bits.push('Set and forget: <b class="' + cls(x.hold.R) + '">' + fR(x.hold.R) + '</b> (' + (x.hold.how === 'target' ? 'target' : x.hold.how === 'stop' ? 'stop' : 'still open') + ')');
+      if (p) bits.push('price ran <b>' + fR(p.fav) + '</b> further in the hour after your exit');
+      if (x.afterFirst === 'target') bits.push('<b class="neg">your target was hit after you closed</b>');
+      else if (x.afterFirst === 'stop') bits.push('<b class="pos">the stop would have been hit after your exit</b>');
+      return '<div class="xl-line">Exit Lab · ' + bits.join(' · ') + '</div>';
+    } catch (e) { return ''; }
+  };
+  var _memo = null, _memoAt = 0;
+  function loadCacheMemo() { if (!_memo || Date.now() - _memoAt > 3000) { _memo = loadCache(); _memoAt = Date.now(); } return _memo; }
+  document.addEventListener('DOMContentLoaded', css);
+})();
+</script>
+<script>
+/* ApexMerge — merge and split trades (01.11.2026)
+   A statement or a sync that books every partial fill as its own trade turns
+   one position into five: five "wins", five R values, a win rate that is not
+   the trader's. And the reverse — one record for what were two decisions. Until
+   now neither could be repaired; TraderSync and Tradervue can.
+
+   Merge  (same day, same symbol, side and account, all closed): one trade with
+          the size-weighted entry, the exits kept as partial exits (the last one
+          to close is the trade's own exit), P&L, commission and swap summed.
+          The originals are kept on the merged trade (mergedFrom), so a merge
+          can always be undone exactly.
+   Split  · undo a merge — the originals come back unchanged
+          · one trade per exit — each partial exit becomes its own trade
+          · by size — two trades, P&L and costs shared by size
+   A sync or a re-import must not bring the merged-away fills back as new
+   trades: ApexReconcile.knownHashes() also counts the hashes listed in
+   mergedFrom and splitOf, and every sync path dedupes through it.
+
+   The engine between the markers is pure; tested in
+   .claude/tests/mergesplit.test.js. */
+/* MERGE-ENGINE-START */
+var ApexMergeEngine = (function () {
+  var M = {};
+  function num(v) { if (v === '' || v == null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function sideOf(t) { var d = String(t.dir || t.direction || '').toLowerCase(); return /long|buy/.test(d) ? 1 : /short|sell/.test(d) ? -1 : 0; }
+  function symOf(t) { var s = String(t.symbol || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); try { if (typeof normalizeSymbol === 'function') s = normalizeSymbol(t.symbol) || s; } catch (e) {} return s; }
+  function closed(t) { return num(t.exit) != null || num(t.pnl) != null; }
+  function round(v, d) { var f = Math.pow(10, d == null ? 2 : d); return Math.round(v * f) / f; }
+  function fmtPx(v, like) {
+    // keep the precision the trader's own prices are written in
+    var dec = 0; (like || []).forEach(function (s) { var m = String(s == null ? '' : s).split('.')[1]; if (m && m.length > dec) dec = m.length; });
+    return (+v).toFixed(Math.min(Math.max(dec, 0), 8));
+  }
+  /* Fields a merge or split must rebuild rather than copy — apexDeriveTrade
+     and the background measurement fill them again from the new trade. */
+  var DERIVED = ['r', 'rNet', 'rr', 'riskUsd', 'riskPct', 'slip', 'maeR', 'mfeR', 'mfe', 'mae', 'exitReasonAuto', 'volChecked', 'vol1m'];
+
+  /* Can these trades be merged? '' = yes, otherwise the reason. */
+  M.canMerge = function (list) {
+    if (!list || list.length < 2) return 'Pick at least two trades.';
+    var s0 = symOf(list[0]), d0 = sideOf(list[0]), a0 = list[0].account || '';
+    for (var i = 0; i < list.length; i++) {
+      var t = list[i];
+      if (t.planned) return 'A planned trade without a fill cannot be merged.';
+      if (Array.isArray(t.legs) && t.legs.length) return 'Options positions are merged by their legs, not here.';
+      if (!closed(t)) return 'Only closed trades can be merged — an open one is still being updated by its sync.';
+      if (symOf(t) !== s0) return 'All trades must be the same instrument.';
+      if (!sideOf(t) || sideOf(t) !== d0) return 'All trades must be the same direction.';
+      if ((t.account || '') !== a0) return 'All trades must belong to the same account.';
+      if (String(t.ccy || '') !== String(list[0].ccy || '')) return 'All trades must be booked in the same currency.';
+    }
+    return '';
+  };
+
+  M.merge = function (list, hashOf) {
+    var why = M.canMerge(list);
+    if (why) throw new Error(why);
+    var ts = list.map(clone).sort(function (a, b) { return (num(a.openTime) || 0) - (num(b.openTime) || 0); });
+    var first = ts[0], out = clone(first);
+    DERIVED.forEach(function (k) { delete out[k]; });
+    var lots = ts.map(function (t) { return num(t.lots); });
+    var haveLots = lots.every(function (l) { return l > 0; });
+    var w = haveLots ? lots : ts.map(function () { return 1; });
+    var W = w.reduce(function (a, b) { return a + b; }, 0);
+    var entries = ts.map(function (t) { return num(t.entry); });
+    if (entries.every(function (e) { return e != null; })) {
+      out.entry = fmtPx(entries.reduce(function (a, e, i) { return a + e * w[i]; }, 0) / W, ts.map(function (t) { return t.entry; }));
+    }
+    out.lots = haveLots ? String(round(W, 4)) : '';
+    // exits: the last to close is the trade's exit, the others become partial exits
+    var byClose = ts.slice().sort(function (a, b) { return (num(a.closeTime) || 0) - (num(b.closeTime) || 0); });
+    var last = byClose[byClose.length - 1];
+    var allExit = ts.every(function (t) { return num(t.exit) != null; });
+    if (allExit) {
+      out.exit = String(last.exit);
+      var legs = [];
+      byClose.slice(0, -1).forEach(function (t) { legs.push({ price: String(t.exit), lots: haveLots ? String(t.lots) : '' }); });
+      ts.forEach(function (t) { (t.partials || []).forEach(function (p) { legs.push({ price: String(p.price), lots: String(p.lots) }); }); });
+      if (legs.length) out.partials = legs; else delete out.partials;
+    } else { out.exit = ''; delete out.partials; }
+    function sumOf(k) { var v = ts.map(function (t) { return num(t[k]); }); return v.some(function (x) { return x != null; }) ? v.reduce(function (a, x) { return a + (x || 0); }, 0) : null; }
+    var pnls = ts.map(function (t) { return num(t.pnl); });
+    out.pnl = pnls.every(function (p) { return p != null; }) ? String(round(pnls.reduce(function (a, b) { return a + b; }, 0), 2)) : '';
+    var cm = sumOf('commission'), sw = sumOf('swap');
+    if (cm != null) out.commission = String(round(cm, 2));
+    if (sw != null) out.swap = String(round(sw, 2));
+    var pips = ts.map(function (t) { return num(t.pips); });
+    if (pips.every(function (p) { return p != null; })) out.pips = String(round(pips.reduce(function (a, p, i) { return a + p * w[i]; }, 0) / W, 1));
+    var opens = ts.map(function (t) { return num(t.openTime); }).filter(function (x) { return x > 0; });
+    var closes = ts.map(function (t) { return num(t.closeTime); }).filter(function (x) { return x > 0; });
+    if (opens.length) { out.openTime = Math.min.apply(null, opens); out.entryTime = first.entryTime || out.entryTime; }
+    if (closes.length) { out.closeTime = Math.max.apply(null, closes); out.exitTime = last.exitTime || out.exitTime; }
+    // text and tags from every part, nothing dropped
+    var notes = ts.map(function (t) { return String(t.note || '').trim(); }).filter(Boolean);
+    out.note = notes.filter(function (n, i) { return notes.indexOf(n) === i; }).join('\n— ');
+    ['mistakes', 'positives', 'tags', 'screenshots', 'charts', 'imgs'].forEach(function (k) {
+      var all = [], seen = {};
+      ts.forEach(function (t) { (Array.isArray(t[k]) ? t[k] : []).forEach(function (x) { var s = JSON.stringify(x); if (!seen[s]) { seen[s] = 1; all.push(x); } }); });
+      if (all.length) out[k] = all; else if (Array.isArray(out[k])) out[k] = [];
+    });
+    ['setup', 'session', 'tf', 'grade', 'preGrade', 'thesis', 'invalidation', 'regime', 'state', 'tp', 'sl', 'initialSl'].forEach(function (k) {
+      if (out[k] == null || out[k] === '') { for (var i = 1; i < ts.length; i++) if (ts[i][k] != null && ts[i][k] !== '') { out[k] = ts[i][k]; break; } }
+    });
+    // the originals, flat — a merge of merges still undoes to the real fills
+    var orig = [];
+    ts.forEach(function (t) { if (Array.isArray(t.mergedFrom) && t.mergedFrom.length) t.mergedFrom.forEach(function (o) { orig.push(o); }); else { var c = clone(t); delete c.mergedFrom; orig.push(c); } });
+    out.mergedFrom = orig;
+    if (hashOf) out.mergedHashes = orig.map(function (o) { try { return hashOf(o); } catch (e) { return null; } }).filter(Boolean);
+    out.mergedAt = Date.now();
+    return out;
+  };
+
+  /* Split modes available for one trade. */
+  M.splitModes = function (t) {
+    var m = [];
+    if (Array.isArray(t.mergedFrom) && t.mergedFrom.length > 1) m.push('unmerge');
+    if (Array.isArray(t.partials) && t.partials.some(function (p) { return num(p.price) != null && num(p.lots) > 0; }) && num(t.exit) != null && num(t.lots) > 0) m.push('perExit');
+    if (num(t.lots) > 0 && closed(t)) m.push('bySize');
+    return m;
+  };
+
+  /* Share money fields of `t` over parts with the given weights; the last
+     part takes the rounding remainder, so the parts always add up exactly. */
+  function share(t, parts, weights) {
+    var W = weights.reduce(function (a, b) { return a + b; }, 0);
+    ['pnl', 'commission', 'swap'].forEach(function (k) {
+      var v = num(t[k]); if (v == null) return;
+      var acc = 0;
+      parts.forEach(function (p, i) {
+        if (i < parts.length - 1) { var x = round(v * weights[i] / W, 2); p[k] = String(x); acc += x; }
+        else p[k] = String(round(v - acc, 2));
+      });
+    });
+  }
+
+  M.split = function (t, mode, opt, hashOf) {
+    var base = clone(t);
+    delete base.mergedFrom; delete base.mergedHashes; delete base.mergedAt;
+    DERIVED.forEach(function (k) { delete base[k]; });
+    var origHash = null; try { origHash = hashOf ? hashOf(t) : null; } catch (e) {}
+    var tid = t.tradeId || t.ticket || t.id || '';
+    function tag(p, i) {
+      if (origHash) p.splitOf = origHash;
+      if (tid && i > 0) { p.tradeId = String(tid) + '#' + (i + 1); delete p.ticket; delete p.id; }
+      p.splitAt = Date.now();
+      return p;
+    }
+    if (mode === 'unmerge') {
+      if (!(Array.isArray(t.mergedFrom) && t.mergedFrom.length)) throw new Error('This trade was not merged.');
+      return t.mergedFrom.map(clone);
+    }
+    if (mode === 'perExit') {
+      var legs = (t.partials || []).filter(function (p) { return num(p.price) != null && num(p.lots) > 0; });
+      var restLots = round(num(t.lots) - legs.reduce(function (a, p) { return a + num(p.lots); }, 0), 4);
+      var plan = legs.map(function (p) { return { exit: p.price, lots: num(p.lots) }; });
+      if (restLots > 1e-9) plan.push({ exit: t.exit, lots: restLots });
+      if (plan.length < 2) throw new Error('There is only one exit to split by.');
+      var dir = sideOf(t), entry = num(t.entry);
+      var parts = plan.map(function (q, i) {
+        var p = clone(base); delete p.partials;
+        p.exit = String(q.exit); p.lots = String(q.lots);
+        if (entry != null && num(t.pips) != null && num(t.exit) != null && num(t.exit) !== entry) {
+          // pips scale with the price move of this leg
+          p.pips = String(round(num(t.pips) * (num(q.exit) - entry) / (num(t.exit) - entry), 1));
+        }
+        return tag(p, i);
+      });
+      /* Money follows each leg's price move × size; when the moves cancel out
+         (no meaningful weights) it follows size alone. */
+      var gw = plan.map(function (q) { return entry == null ? 0 : (num(q.exit) - entry) * dir * q.lots; });
+      var G = gw.reduce(function (a, b) { return a + b; }, 0);
+      var sameSign = gw.every(function (g) { return g >= 0; }) || gw.every(function (g) { return g <= 0; });
+      var wts = (Math.abs(G) > 1e-12 && sameSign) ? gw : plan.map(function (q) { return q.lots; });
+      var pnl = num(t.pnl);
+      if (pnl != null) share({ pnl: t.pnl }, parts, wts);
+      share({ commission: t.commission, swap: t.swap }, parts, plan.map(function (q) { return q.lots; }));
+      return parts;
+    }
+    if (mode === 'bySize') {
+      var total = num(t.lots), a = num(opt && opt.lots);
+      if (!(a > 0) || !(a < total)) throw new Error('Choose a size between 0 and ' + total + '.');
+      var sizes = [round(a, 4), round(total - a, 4)];
+      var ps = sizes.map(function (l, i) { var p = clone(base); p.lots = String(l); if (Array.isArray(p.partials) && i > 0) delete p.partials; return tag(p, i); });
+      if (Array.isArray(ps[0].partials)) delete ps[0].partials;   // legs cannot be shared by size honestly
+      share(t, ps, sizes);
+      return ps;
+    }
+    throw new Error('Unknown split mode: ' + mode);
+  };
+  return M;
+})();
+/* MERGE-ENGINE-END */
+
+(function () {
+  var G = {};
+  window.ApexMerge = G;
+  var E = ApexMergeEngine;
+  var on = false, picked = {};
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function toast(m) { try { if (window.showToast) showToast(m); } catch (e) {} }
+  function day() { return (window.journalData && window.currentJournalKey) ? journalData[currentJournalKey] : null; }
+  function hashOf(t) { try { return window.ApexReconcile && ApexReconcile.hashOf ? ApexReconcile.hashOf(t) : null; } catch (e) { return null; } }
+
+  function css() {
+    if (document.getElementById('mgCss')) return;
+    var s = document.createElement('style'); s.id = 'mgCss';
+    s.textContent =
+      '.mg-on .trade-card{position:relative;padding-left:38px}' +
+      '.mg-pick{position:absolute;top:12px;left:8px;z-index:3;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:var(--r-sm);background:var(--elevated);border:1px solid var(--gold-line);box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer}' +
+      '.mg-pick input{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;margin:0}' +
+      '.mg-on .trade-card.mg-sel{outline:2px solid var(--gold);outline-offset:2px;border-radius:var(--r-md)}' +
+      '#mgBar{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:9000;display:none;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;' +
+        'background:var(--elevated);border:1px solid var(--gold-line);border-radius:var(--r-lg);padding:10px 14px;box-shadow:0 14px 40px rgba(0,0,0,.28);max-width:calc(100vw - 32px);font-size:var(--fs-sm);color:var(--ink2)}' +
+      '#mgBar.open{display:flex}' +
+      '#mgBar button:disabled{opacity:.4;cursor:not-allowed}' +
+      '@media(max-width:760px){#mgBar{bottom:calc(86px + env(safe-area-inset-bottom))}}' +
+      '#mgBar .mg-why{flex-basis:100%;text-align:center;font-size:var(--fs-xs);color:var(--loss)}' +
+      '#mgOv{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);z-index:100000;display:none;align-items:center;justify-content:center;padding:16px}' +
+      '#mgOv.open{display:flex}' +
+      '#mgBox{background:var(--elevated);border:1px solid var(--rim2);border-radius:var(--r-lg);width:min(520px,100%);max-height:88vh;overflow:auto;padding:20px}' +
+      '#mgBox h3{margin:0 0 4px;font-size:var(--fs-lg)}' +
+      '#mgBox .mg-sub{font-size:var(--fs-xs);color:var(--ink3);margin-bottom:14px;line-height:1.5}' +
+      '.mg-opt{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--rim2);border-radius:var(--r-md);padding:12px 14px;margin-bottom:8px;cursor:pointer;color:var(--ink)}' +
+      '.mg-opt:hover{border-color:var(--gold-line)}' +
+      '.mg-opt b{display:block;font-size:var(--fs-sm);margin-bottom:2px}' +
+      '.mg-opt span{font-size:var(--fs-xs);color:var(--ink3);line-height:1.45}' +
+      '.mg-size{display:flex;gap:8px;align-items:center;margin-top:8px}' +
+      '.mg-size input{flex:1;background:var(--surface);color:var(--ink);border:1px solid var(--rim2);border-radius:var(--r-sm);padding:8px 10px;font-size:var(--fs-sm)}' +
+      '.mg-prev{font-size:var(--fs-xs);color:var(--ink2);margin:10px 0 0;line-height:1.6}' +
+      '.mg-btns{display:flex;gap:8px;margin-top:14px}' +
+      '.mg-btns .apex-btn{flex:1;justify-content:center}';
+    document.head.appendChild(s);
+    var bar = document.createElement('div'); bar.id = 'mgBar'; document.body.appendChild(bar);
+    var ov = document.createElement('div'); ov.id = 'mgOv';
+    ov.innerHTML = '<div id="mgBox" role="dialog" aria-modal="true" aria-labelledby="mgTitle"></div>';
+    ov.addEventListener('click', function (e) { if (e.target === ov) G.closeSplit(); });
+    document.body.appendChild(ov);
+  }
+
+  /* ───────── merge mode ───────── */
+  G.toggle = function (force) {
+    css();
+    on = force == null ? !on : !!force;
+    picked = {};
+    var box = document.getElementById('tradesContainer');
+    if (box) box.classList.toggle('mg-on', on);
+    var btn = document.getElementById('mgModeBtn');
+    if (btn) btn.classList.toggle('apex-btn--solid', on);
+    G.decorate();
+  };
+  G.pick = function (i, val) { if (val) picked[i] = 1; else delete picked[i]; G.decorate(); };
+
+  function pickedTrades() {
+    var d = day(); if (!d) return [];
+    return Object.keys(picked).map(Number).sort(function (a, b) { return a - b; }).map(function (i) { return d.trades[i]; }).filter(Boolean);
+  }
+
+  G.decorate = function () {
+    var d = day(), trades = (d && d.trades) || [];
+    var box = document.getElementById('tradesContainer');
+    if (box) box.classList.toggle('mg-on', on);
+    trades.forEach(function (t, i) {
+      var card = document.getElementById('trade-card-' + i);
+      if (!card) return;
+      var el = card.querySelector(':scope > .mg-pick');
+      if (!on) { if (el) el.remove(); card.classList.remove('mg-sel'); return; }
+      if (!el) {
+        el = document.createElement('label'); el.className = 'mg-pick'; el.title = 'Select for merging';
+        el.innerHTML = '<input type="checkbox" aria-label="Select this trade for merging">';
+        el.addEventListener('click', function (e) { e.stopPropagation(); });
+        el.querySelector('input').addEventListener('change', function (e) { G.pick(i, e.target.checked); });
+        card.insertBefore(el, card.firstChild);
+      }
+      el.querySelector('input').checked = !!picked[i];
+      card.classList.toggle('mg-sel', !!picked[i]);
+    });
+    var bar = document.getElementById('mgBar');
+    if (!bar) return;
+    if (!on) { bar.classList.remove('open'); return; }
+    var list = pickedTrades(), why = list.length >= 2 ? E.canMerge(list) : '';
+    bar.innerHTML = '<span><b class="notranslate" translate="no">' + list.length + '</b> <span>selected</span></span>' +
+      '<button class="apex-btn apex-btn--solid apex-btn--sm" ' + (list.length >= 2 && !why ? '' : 'disabled') + ' onclick="ApexMerge.mergePicked()">Merge into one trade</button>' +
+      '<button class="apex-btn apex-btn--ghost apex-btn--sm" onclick="ApexMerge.toggle(false)">Done</button>' +
+      (why ? '<div class="mg-why">' + esc(why) + '</div>' : (list.length < 2 ? '<div class="mg-why" style="color:var(--ink3)">Tick the fills that belong to one position.</div>' : ''));
+    bar.classList.add('open');
+    i18n(bar);
+  };
+  // translate at once — otherwise Google is faster than the dictionary
+  function i18n(el) { try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {} }
+
+  G.mergePicked = function () {
+    var d = day(); if (!d) return;
+    var idx = Object.keys(picked).map(Number).sort(function (a, b) { return a - b; });
+    var list = idx.map(function (i) { return d.trades[i]; }).filter(Boolean);
+    var why = E.canMerge(list);
+    if (why) { toast('⚠ ' + why); return; }
+    var merged;
+    try { merged = E.merge(list, hashOf); } catch (e) { toast('⚠ ' + e.message); return; }
+    var at = idx[0];
+    for (var k = idx.length - 1; k >= 0; k--) d.trades.splice(idx[k], 1);
+    d.trades.splice(at, 0, merged);
+    after('✓ ' + list.length + ' trades merged into one — Split trade on the card undoes it');
+    G.toggle(false);
+  };
+
+  function after(msg) {
+    try { if (typeof invalidateTradeCache === 'function') invalidateTradeCache(); } catch (e) {}
+    try { if (typeof save === 'function') save(); } catch (e) {}
+    try { if (typeof renderTrades === 'function') renderTrades(); } catch (e) {}
+    try { if (typeof updateDayStats === 'function') updateDayStats(); } catch (e) {}
+    if (msg) toast(msg);
+  }
+
+  /* ───────── split ───────── */
+  var _split = null;
+  G.openSplit = function (i) {
+    css();
+    var d = day(), t = d && d.trades[i];
+    if (!t) return;
+    var modes = E.splitModes(t);
+    if (!modes.length) { toast('⚠ A trade needs a size and a result before it can be split'); return; }
+    _split = { i: i };
+    var lots = parseFloat(t.lots) || 0;
+    var h = '<h3 id="mgTitle">Split trade</h3><div class="mg-sub"><div class="notranslate" translate="no">' + esc((t.symbol || '') + ' · ' + (t.dir || '') + ' · ' + (t.lots || '?')) + '</div>' +
+      '<div>P&amp;L, commission and swap are shared between the parts so they still add up to this trade.</div></div>';
+    if (modes.indexOf('unmerge') >= 0) h += '<button class="mg-opt" onclick="ApexMerge.doSplit(\'unmerge\')"><b>Undo the merge</b><span>Bring back the original trades exactly as they were.</span></button>';
+    if (modes.indexOf('perExit') >= 0) h += '<button class="mg-opt" onclick="ApexMerge.doSplit(\'perExit\')"><b>One trade per exit</b><span>Each partial exit becomes its own trade; the rest closes at the exit price.</span></button>';
+    if (modes.indexOf('bySize') >= 0) h += '<div class="mg-opt" style="cursor:default"><b>By size</b><span>Two trades with the same prices; money shared by size.</span>' +
+      '<div class="mg-size"><input id="mgLots" type="number" step="any" min="0" max="' + lots + '" value="' + (lots > 0 ? +(lots / 2).toFixed(4) : '') + '" aria-label="Size of the first part">' +
+      '<span class="notranslate" translate="no" style="font-size:var(--fs-xs);color:var(--ink3)">/ ' + lots + '</span>' +
+      '<button class="apex-btn apex-btn--solid apex-btn--sm" onclick="ApexMerge.doSplit(\'bySize\')">Split</button></div></div>';
+    h += '<div class="mg-btns"><button class="apex-btn apex-btn--ghost" onclick="ApexMerge.closeSplit()">Cancel</button></div>';
+    document.getElementById('mgBox').innerHTML = h;
+    i18n(document.getElementById('mgBox'));
+    document.getElementById('mgOv').classList.add('open');
+  };
+  G.closeSplit = function () { var o = document.getElementById('mgOv'); if (o) o.classList.remove('open'); _split = null; };
+  G.doSplit = function (mode) {
+    var d = day(); if (!d || !_split) return;
+    var i = _split.i, t = d.trades[i];
+    var opt = {};
+    if (mode === 'bySize') opt.lots = (document.getElementById('mgLots') || {}).value;
+    var parts;
+    try { parts = E.split(t, mode, opt, hashOf); } catch (e) { toast('⚠ ' + e.message); return; }
+    d.trades.splice.apply(d.trades, [i, 1].concat(parts));
+    G.closeSplit();
+    after('✓ Split into ' + parts.length + ' trades');
+  };
+
+  /* Card hook: a "Split trade" button in the Execution & exit section. */
+  G.cardButton = function (t, i) {
+    try {
+      if (!E.splitModes(t).length) return '';
+      return '<div class="mg-card" style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+        '<button class="apex-btn apex-btn--ghost apex-btn--sm" type="button" onclick="ApexMerge.openSplit(' + i + ')"><svg class=ic aria-hidden=true><use href=#i-scissors ></use></svg> Split trade</button>' +
+        (Array.isArray(t.mergedFrom) && t.mergedFrom.length ? '<span style="font-size:var(--fs-xs);color:var(--ink3)" title="' + t.mergedFrom.length + ' fills">Merged trade</span>' : '') + '</div>';
+    } catch (e) { return ''; }
+  };
+
+  // re-decorate after every journal render
+  function hook() {
+    if (typeof window.renderTrades !== 'function' || window.renderTrades._mg) return false;
+    var o = window.renderTrades;
+    var w = function () { var x = o.apply(this, arguments); try { if (on) G.decorate(); } catch (e) {} return x; };
+    w._mg = true; window.renderTrades = w;
+    return true;
+  }
+  /* Hand-written translations — Google made "Merge trades" into
+     "Fusionsgeschäfte" and "parts" into "Handelspartner". */
+  var T = {
+    'Merge trades': ['Trades zusammenführen', 'Unir operaciones', 'Juntar operações', 'Fusionner des trades'],
+    'Merge into one trade': ['Zu einem Trade zusammenführen', 'Unir en una operación', 'Juntar em uma operação', 'Fusionner en un trade'],
+    'Done': ['Fertig', 'Listo', 'Concluído', 'Terminé'],
+    'selected': ['ausgewählt', 'seleccionadas', 'selecionadas', 'sélectionnés'],
+    'Tick the fills that belong to one position.': ['Hake die Fills an, die zu einer Position gehören.', 'Marca las ejecuciones que pertenecen a una posición.', 'Marque as execuções que pertencem a uma posição.', 'Coche les exécutions qui appartiennent à une position.'],
+    'Pick at least two trades.': ['Wähle mindestens zwei Trades.', 'Elige al menos dos operaciones.', 'Escolha pelo menos duas operações.', 'Choisis au moins deux trades.'],
+    'A planned trade without a fill cannot be merged.': ['Ein geplanter Trade ohne Ausführung kann nicht zusammengeführt werden.', 'Una operación planificada sin ejecución no se puede unir.', 'Uma operação planejada sem execução não pode ser juntada.', 'Un trade planifié sans exécution ne peut pas être fusionné.'],
+    'Options positions are merged by their legs, not here.': ['Optionspositionen werden über ihre Legs zusammengeführt, nicht hier.', 'Las posiciones de opciones se unen por sus patas, no aquí.', 'Posições de opções são juntadas pelas pernas, não aqui.', 'Les positions d’options se fusionnent par leurs jambes, pas ici.'],
+    'Only closed trades can be merged — an open one is still being updated by its sync.': ['Nur geschlossene Trades lassen sich zusammenführen – ein offener wird noch von seinem Sync aktualisiert.', 'Solo se pueden unir operaciones cerradas: una abierta aún la actualiza su sincronización.', 'Só operações fechadas podem ser juntadas — uma aberta ainda é atualizada pela sincronização.', 'Seuls les trades clôturés peuvent être fusionnés — un trade ouvert est encore mis à jour par sa synchronisation.'],
+    'All trades must be the same instrument.': ['Alle Trades müssen dasselbe Instrument sein.', 'Todas las operaciones deben ser del mismo instrumento.', 'Todas as operações devem ser do mesmo instrumento.', 'Tous les trades doivent porter sur le même instrument.'],
+    'All trades must be the same direction.': ['Alle Trades müssen dieselbe Richtung haben.', 'Todas las operaciones deben tener la misma dirección.', 'Todas as operações devem ter a mesma direção.', 'Tous les trades doivent avoir le même sens.'],
+    'All trades must belong to the same account.': ['Alle Trades müssen zum selben Konto gehören.', 'Todas las operaciones deben pertenecer a la misma cuenta.', 'Todas as operações devem pertencer à mesma conta.', 'Tous les trades doivent appartenir au même compte.'],
+    'All trades must be booked in the same currency.': ['Alle Trades müssen in derselben Währung gebucht sein.', 'Todas las operaciones deben estar en la misma divisa.', 'Todas as operações devem estar na mesma moeda.', 'Tous les trades doivent être comptabilisés dans la même devise.'],
+    'Split trade': ['Trade aufteilen', 'Dividir operación', 'Dividir operação', 'Scinder le trade'],
+    'P&L, commission and swap are shared between the parts so they still add up to this trade.': ['G&V, Kommission und Swap werden auf die Teile verteilt, sodass sie zusammen wieder genau diesen Trade ergeben.', 'P&L, comisión y swap se reparten entre las partes, de modo que siguen sumando esta operación.', 'P&L, comissão e swap são divididos entre as partes, que continuam somando esta operação.', 'P&L, commission et swap sont répartis entre les parties, qui redonnent ensemble ce trade.'],
+    'Undo the merge': ['Zusammenführung rückgängig machen', 'Deshacer la unión', 'Desfazer a junção', 'Annuler la fusion'],
+    'Bring back the original trades exactly as they were.': ['Holt die ursprünglichen Trades genau so zurück, wie sie waren.', 'Recupera las operaciones originales tal como eran.', 'Traz de volta as operações originais exatamente como eram.', 'Restaure les trades d’origine exactement tels qu’ils étaient.'],
+    'One trade per exit': ['Ein Trade pro Ausstieg', 'Una operación por salida', 'Uma operação por saída', 'Un trade par sortie'],
+    'Each partial exit becomes its own trade; the rest closes at the exit price.': ['Jeder Teilausstieg wird ein eigener Trade; der Rest schließt zum Ausstiegskurs.', 'Cada salida parcial se convierte en su propia operación; el resto cierra al precio de salida.', 'Cada saída parcial vira sua própria operação; o restante fecha no preço de saída.', 'Chaque sortie partielle devient son propre trade ; le reste se clôt au prix de sortie.'],
+    'By size': ['Nach Größe', 'Por tamaño', 'Por tamanho', 'Par taille'],
+    'Two trades with the same prices; money shared by size.': ['Zwei Trades mit denselben Kursen; Beträge nach Größe verteilt.', 'Dos operaciones con los mismos precios; importes repartidos por tamaño.', 'Duas operações com os mesmos preços; valores divididos por tamanho.', 'Deux trades aux mêmes prix ; montants répartis selon la taille.'],
+    'Split': ['Aufteilen', 'Dividir', 'Dividir', 'Scinder'],
+    'Cancel': ['Abbrechen', 'Cancelar', 'Cancelar', 'Annuler'],
+    'Merged trade': ['Zusammengeführter Trade', 'Operación unida', 'Operação unida', 'Trade fusionné']
+  };
+  function reg() { if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('#mgBox, #mgBar, #mgModeBtn, .mg-card', T); else setTimeout(reg, 300); }
+  reg();
+  document.addEventListener('DOMContentLoaded', function () { css(); if (!hook()) setTimeout(hook, 1500); });
+  // switching day or page ends the selection
+  document.addEventListener('apex:page', function () { if (on) G.toggle(false); });
 })();
 </script>
 </body>
