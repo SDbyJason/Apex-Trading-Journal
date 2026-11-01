@@ -1153,7 +1153,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-11-01d';
+  window.APEX_BUILD = '2026-11-02a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -10068,6 +10068,7 @@ body.light #landingPage * {
         "Import check before anything is written — duplicates, missing stops, timezone and the file's own P&L against the journal",
         "Exit Lab — every entry replayed on 1-minute prices under other exits (set and forget, fixed targets, break-even, trailing, time stops), with the price after the exit",
         "Account currency per account — broker P&L, commission and swap read in it and converted at daily ECB rates",
+        "Your Twin — a disciplined copy that takes only your entries and keeps your own rules, with the difference split habit by habit",
         "Merge and split trades — partial fills into one position, undo any time",
         "MCP server — ask Claude, ChatGPT or Cursor about your own journal, read-only",
         "Match-Trader & TradeLocker auto-sync — prop-firm platforms, read-only token or a sign-in whose password is never stored",
@@ -11408,6 +11409,7 @@ body.light #landingPage * {
         <li><b>Session review</b>&nbsp;— sequence, size drift &amp; revenge-window detection</li>
         <li>Auto MFE / MAE from real price data</li>
         <li>Exit Lab — your entries replayed on real prices: set and forget, fixed targets, break-even, trailing and time stops, and the price after your exit</li>
+        <li>Your Twin — your exact entries with your own rules kept every time; see in R and money what each habit costs you</li>
         <li>Risk of Ruin, Sharpe &amp; Expectancy / setup</li>
         <li><b>Benchmark vs buy &amp; hold</b>&nbsp;— your Sharpe against S&amp;P 500, Nasdaq, MSCI World, 60/40, gold &amp; BTC</li>
         <li><b>R-Multiple &amp; Kelly</b>&nbsp;— R distribution, R per setup, optimal risk</li>
@@ -11524,6 +11526,7 @@ body.light #landingPage * {
         <tr><td>Candlestick charts — drag entry / SL / TP</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Auto MFE / MAE from price data</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Exit Lab — set and forget vs your exits, best target tested out of sample, price after the exit</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Your Twin — same entries, your rules kept: exits, revenge trades, overtrading and position size priced one by one</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Risk of Ruin, Sharpe &amp; Expectancy / setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Benchmark vs buy &amp; hold — annualised Sharpe against S&amp;P 500, Nasdaq 100, MSCI World, 60/40, gold &amp; Bitcoin</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>R-Multiple analytics — distribution, cumulative R &amp; R per setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -12661,6 +12664,7 @@ body.light #landingPage * {
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-clipboard ></use></svg></div><div><div class="apex-feat-label">Session review</div><div class="apex-feat-desc">Intraday give-back, revenge windows, size drift after losses and rule adherence — with a coach verdict on the process, not the P&L</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">Auto MFE / MAE</div><div class="apex-feat-desc">Fetches price data & computes max favorable / adverse excursion automatically</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">Exit Lab</div><div class="apex-feat-desc">Your entries replayed on real prices under other exits — and what price did after you got out</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-users ></use></svg></div><div><div class="apex-feat-label">Your Twin</div><div class="apex-feat-desc">A copy of you that takes only your entries and never breaks your rules — and shows what every habit costs</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg></div><div><div class="apex-feat-label">Risk of Ruin &amp; Sharpe</div><div class="apex-feat-desc">Institutional risk metrics + per-setup expectancy & profit factor</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">R-Multiple &amp; Kelly</div><div class="apex-feat-desc">R distribution, cumulative R and R per setup — plus the growth-optimal risk per trade</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">⏱</div><div><div class="apex-feat-label">Hold-Time &amp; Scale-Out Analysis</div><div class="apex-feat-desc">Expectancy by time in trade, and whether your partial exits beat simply holding</div></div></div>
@@ -13419,6 +13423,7 @@ function _authAction(type) {
           </button>
           <div class="nav-group-drop" id="navgdrop-analysis">
             <button class="nav-item" onclick="nav('edgelab');closeNavGroups()" id="nav-edgelab">Edge Lab</button>
+            <button class="nav-item" onclick="nav('edgelab');setTimeout(function(){if(window.EdgeLab)EdgeLab.go('twin')},60);closeNavGroups()" id="nav-twin">Your Twin</button>
             <button class="nav-item" onclick="nav('replaylab');closeNavGroups()" id="nav-replaylab">Market Replay</button>
             <!-- Live-Chart vorerst ausgeblendet: es gibt keine kostenlose
                  Kursquelle, die Spot-Gold in Echtzeit liefert, ohne dass der
@@ -30483,6 +30488,8 @@ document.addEventListener('keydown', function(e) {
       "Session review": ["Session-Bewertung", "Revisión de sesión", "Revisão da sessão", "Analyse de session"],
       "Intraday give-back, revenge windows, size drift after losses and rule adherence — with a coach verdict on the process, not the P&L": ["Zurückgegebene Gewinne im Tagesverlauf, Revenge-Fenster, Größenanstieg nach Verlusten und Regeltreue – mit einem Coach-Urteil über den Prozess, nicht über das P&L", "Ganancias devueltas en el día, ventanas de revenge, aumento de tamaño tras pérdidas y disciplina con las reglas, con un veredicto del coach sobre el proceso, no sobre el P&L", "Lucro devolvido no dia, janelas de revenge, aumento de tamanho após perdas e disciplina com as regras — com um veredito do coach sobre o processo, não sobre o P&L", "Gains rendus en séance, fenêtres de revenge, dérive de taille après les pertes et respect des règles — avec un verdict du coach sur le process, pas sur le P&L"],
       "Auto MFE / MAE": ["Automatisches MFE / MAE", "MFE / MAE automático", "MFE / MAE automático", "MFE / MAE automatique"],
+      "Your Twin": ["Dein Zwilling", "Tu gemelo", "Seu gêmeo", "Ton jumeau"],
+      "A copy of you that takes only your entries and never breaks your rules — and shows what every habit costs": ["Eine Kopie von dir, die nur deine Einstiege nimmt und nie deine Regeln bricht – und zeigt, was jede Gewohnheit kostet", "Una copia de ti que solo toma tus entradas y nunca rompe tus reglas, y muestra lo que cuesta cada hábito", "Uma cópia de você que só pega suas entradas e nunca quebra suas regras — e mostra quanto custa cada hábito", "Une copie de toi qui ne prend que tes entrées et n’enfreint jamais tes règles — et montre ce que coûte chaque habitude"],
       "Exit Lab": ["Exit-Labor", "Laboratorio de salidas", "Laboratório de saídas", "Labo des sorties"],
       "Your entries replayed on real prices under other exits — and what price did after you got out": ["Deine Einstiege auf echten Kursen mit anderen Ausstiegen nachgespielt – und was der Kurs nach deinem Ausstieg tat", "Tus entradas reproducidas con precios reales bajo otras salidas, y lo que hizo el precio después de salir", "Suas entradas reproduzidas com preços reais sob outras saídas — e o que o preço fez depois que você saiu", "Tes entrées rejouées sur des prix réels avec d’autres sorties — et ce que le prix a fait après ta sortie"],
       "Fetches price data & computes max favorable / adverse excursion automatically": ["Lädt Kursdaten und berechnet die maximale günstige und ungünstige Bewegung automatisch", "Obtiene datos de precio y calcula automáticamente la excursión máxima favorable y adversa", "Busca dados de preço e calcula automaticamente a excursão máxima favorável e adversa", "Récupère les données de prix et calcule automatiquement l’excursion maximale favorable et défavorable"],
@@ -34901,7 +34908,7 @@ function goToAuthPro(screen) {
 
   /* ───────────────────── PAGE shell ───────────────────── */
   var TABS=[
-    ['metrics','Metrics'],['finder','Edge & Leaks'],['dash','Dashboards'],['stats','Stat Lab'],['options','Options'],['rrisk','R & Risk'],['timing','Timing & Exits'],
+    ['metrics','Metrics'],['twin','Your Twin'],['finder','Edge & Leaks'],['dash','Dashboards'],['stats','Stat Lab'],['options','Options'],['rrisk','R & Risk'],['timing','Timing & Exits'],
     ['mfemae','MFE / MAE'],['exitlab','Exit Lab'],['whatif','What-If'],['replay','Replay'],
     ['sim','Market Replay'],
     /* Strategy Lab is the automated counterpart of Market Replay: rules over
@@ -34963,6 +34970,8 @@ function goToAuthPro(screen) {
       if(subt) subt.style.display='none';
       // Erst das eigene Ergebnis, dann die Funktionsliste (23.10.2026).
       var pv=''; try{ pv=(window.ApexEdgeFinder&&ApexEdgeFinder.preview)?ApexEdgeFinder.preview(sortedValued()):''; }catch(e){ pv=''; }
+      // Your Twin (02.11.2026): the trader's own verdict first, numbers behind Pro
+      try{ if(window.ApexTwin&&ApexTwin.preview) pv=ApexTwin.preview()+pv; }catch(e){}
       body.innerHTML=pv+lockedHtml();
       // Sofort übersetzen — sonst ist Google schneller als das Wörterbuch.
       try{ if(window.ApexI18n&&ApexI18n.apply) ApexI18n.apply(body); }catch(e){}
@@ -34981,7 +34990,8 @@ function goToAuthPro(screen) {
       return;
     }
     ({ metrics:renderMetrics, finder:function(b,r){ if(window.ApexEdgeFinder) ApexEdgeFinder.render(b,r); }, dash:renderDashboards, stats:renderStatLab, options:renderOptions, rrisk:renderRRisk, timing:renderTiming,
-       mfemae:renderMfeMae, exitlab:function(b,r){ if(window.ApexExitLab) ApexExitLab.render(b,r); }, whatif:renderWhatIf, replay:renderReplay,
+       mfemae:renderMfeMae, exitlab:function(b,r){ if(window.ApexExitLab) ApexExitLab.render(b,r); },
+       twin:function(b){ if(window.ApexTwin) ApexTwin.render(b); }, whatif:renderWhatIf, replay:renderReplay,
        sim:renderMarketReplay, strategy:renderStrategyLab,
        backtest:renderBacktest, gallery:renderGallery, missed:renderMissed, share:renderShare }[EL.tab]||renderMetrics)(body, rows);
   }
@@ -105733,6 +105743,7 @@ body.light::before{ opacity:.45; }
     "Session review": ["Sitzungsauswertung", "Revisión de la sesión", "Revisão da sessão", "Revue de session"],
     "— sequence, size drift & revenge-window detection": ["— Reihenfolge, Positionsgrößen-Drift & Revenge-Fenster", "— secuencia, deriva del tamaño y ventanas de revenge trading", "— sequência, desvio de tamanho e janelas de revenge trading", "— séquence, dérive de taille et fenêtres de revenge trading"],
     "Auto MFE / MAE from real price data": ["Automatisches MFE / MAE aus echten Kursdaten", "MFE / MAE automáticos con datos de precio reales", "MFE / MAE automáticos com dados de preço reais", "MFE / MAE automatiques à partir de vraies données de prix"],
+    "Your Twin — your exact entries with your own rules kept every time; see in R and money what each habit costs you": ["Dein Zwilling – exakt deine Einstiege, deine eigenen Regeln jedes Mal eingehalten; in R und Geld sehen, was dich jede Gewohnheit kostet", "Tu gemelo: exactamente tus entradas con tus reglas cumplidas siempre; ve en R y en dinero lo que te cuesta cada hábito", "Seu gêmeo — exatamente suas entradas com suas regras cumpridas sempre; veja em R e em dinheiro quanto cada hábito custa", "Ton jumeau — exactement tes entrées, tes propres règles respectées à chaque fois ; vois en R et en argent ce que coûte chaque habitude"],
     "Exit Lab — your entries replayed on real prices: set and forget, fixed targets, break-even, trailing and time stops, and the price after your exit": ["Exit-Labor – deine Einstiege auf echten Kursen nachgespielt: Stop und Ziel stehen lassen, feste Ziele, Break-even, Trailing- und Zeitstopps und der Kurs nach deinem Ausstieg", "Laboratorio de salidas: tus entradas reproducidas con precios reales — dejar stop y objetivo, objetivos fijos, break-even, trailing y stops por tiempo, y el precio tras tu salida", "Laboratório de saídas — suas entradas reproduzidas com preços reais: deixar stop e alvo, alvos fixos, break-even, trailing e stops por tempo, e o preço após sua saída", "Labo des sorties — tes entrées rejouées sur des prix réels : stop et objectif laissés, objectifs fixes, break-even, stops suiveurs et temporels, et le prix après ta sortie"],
     "Risk of Ruin, Sharpe & Expectancy / setup": ["Risk of Ruin, Sharpe & Erwartungswert je Setup", "Riesgo de ruina, Sharpe y esperanza por setup", "Risco de ruína, Sharpe e expectativa por setup", "Risque de ruine, Sharpe et espérance par setup"],
     "Benchmark vs buy & hold": ["Benchmark gegen Buy & Hold", "Benchmark frente a comprar y mantener", "Benchmark contra buy & hold", "Benchmark face au buy & hold"],
@@ -105844,6 +105855,7 @@ body.light::before{ opacity:.45; }
     "Notes, tags & chart snapshots written during the replay": ["Notizen, Tags & Chart-Schnappschüsse während des Replays", "Notas, etiquetas y capturas del gráfico durante el replay", "Notas, tags e capturas do gráfico durante o replay", "Notes, tags et captures du graphique pendant le replay"],
     "Stop-vs-target collisions resolved from real ticks, not guessed": ["Stop-gegen-Ziel-Kollisionen aus echten Ticks entschieden, nicht geraten", "Choques entre stop y objetivo resueltos con ticks reales, no adivinados", "Colisões entre stop e alvo resolvidas com ticks reais, não adivinhadas", "Collisions stop/objectif tranchées avec les vrais ticks, pas devinées"],
     "Auto MFE / MAE from price data": ["Automatisches MFE / MAE aus Kursdaten", "MFE / MAE automáticos con datos de precio", "MFE / MAE automáticos com dados de preço", "MFE / MAE automatiques à partir des données de prix"],
+    "Your Twin — same entries, your rules kept: exits, revenge trades, overtrading and position size priced one by one": ["Dein Zwilling – gleiche Einstiege, deine Regeln eingehalten: Ausstiege, Revenge-Trades, Overtrading und Positionsgröße einzeln beziffert", "Tu gemelo: mismas entradas, tus reglas cumplidas; salidas, operaciones de venganza, sobreoperar y tamaño de posición valorados uno a uno", "Seu gêmeo — mesmas entradas, suas regras cumpridas: saídas, operações de vingança, overtrading e tamanho da posição avaliados um a um", "Ton jumeau — mêmes entrées, tes règles respectées : sorties, trades de revanche, surtrading et taille de position chiffrés un par un"],
     "Exit Lab — set and forget vs your exits, best target tested out of sample, price after the exit": ["Exit-Labor – Stop und Ziel stehen lassen gegen deine Ausstiege, bestes Ziel außerhalb der Stichprobe geprüft, Kurs nach dem Ausstieg", "Laboratorio de salidas: dejar stop y objetivo frente a tus salidas, mejor objetivo probado fuera de muestra, precio tras la salida", "Laboratório de saídas — deixar stop e alvo vs. suas saídas, melhor alvo testado fora da amostra, preço após a saída", "Labo des sorties — stop et objectif laissés contre tes sorties, meilleur objectif testé hors échantillon, prix après la sortie"],
     "Benchmark vs buy & hold — annualised Sharpe against S&P 500, Nasdaq 100, MSCI World, 60/40, gold & Bitcoin": ["Benchmark gegen Buy & Hold — annualisierter Sharpe gegen S&P 500, Nasdaq 100, MSCI World, 60/40, Gold & Bitcoin", "Benchmark frente a comprar y mantener — Sharpe anualizado frente a S&P 500, Nasdaq 100, MSCI World, 60/40, oro y Bitcoin", "Benchmark contra buy & hold — Sharpe anualizado contra S&P 500, Nasdaq 100, MSCI World, 60/40, ouro e Bitcoin", "Benchmark face au buy & hold — Sharpe annualisé face au S&P 500, Nasdaq 100, MSCI World, 60/40, or et Bitcoin"],
     "R-Multiple analytics — distribution, cumulative R & R per setup": ["R-Multiple-Analyse — Verteilung, kumuliertes R & R je Setup", "Análisis de múltiplos de R — distribución, R acumulado y R por setup", "Análise de múltiplos de R — distribuição, R acumulado e R por setup", "Analyse des multiples de R — distribution, R cumulé et R par setup"],
@@ -113382,6 +113394,11 @@ var ApexExitEngine = (function () {
     return '';
   }
   XL.eligibility = eligibility;
+  /* For ApexTwin: the measured result of one trade, its id, and whether it
+     is known to be unmeasurable (so nobody keeps asking for it). */
+  XL.idOf = function (t) { return tradeId(t); };
+  XL.resultFor = function (t) { var c = loadCacheMemo()[tradeId(t)]; return (c && c.res) || null; };
+  XL.knownNone = function (t) { var c = loadCacheMemo()[tradeId(t)]; return !!(c && c.none); };
 
   function inputOf(t) {
     var dir = isLong(t) ? 1 : -1, entry = num(t.entry), exit = num(t.exit);
@@ -113441,7 +113458,7 @@ var ApexExitEngine = (function () {
     var sc = scan(), cache = loadCache(), fresh = {};
     /* Merge, never overwrite: another tab, a reset or an earlier run may have
        written since this run started. A run that was superseded writes nothing. */
-    function flush() { if (gen !== _gen) return; var cur = loadCache(); for (var k in fresh) cur[k] = fresh[k]; saveCache(cur); }
+    function flush() { if (gen !== _gen) return; var cur = loadCache(); for (var k in fresh) cur[k] = fresh[k]; saveCache(cur); _memo = null; }
     var todo = sc.ok.filter(function (t) { return !(cache[tradeId(t)] && cache[tradeId(t)].res) && !(cache[tradeId(t)] && cache[tradeId(t)].none); });
     if (opts && opts.limit) todo = todo.slice(-opts.limit);
     state = { running: true, stop: false, done: 0, total: todo.length, failed: 0, msg: '' };
@@ -114412,6 +114429,503 @@ window.APEX_MFA_LIVE = window.APEX_MFA_LIVE !== undefined ? window.APEX_MFA_LIVE
     '.apx-shell-ios body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}' +
     '.apx-store-shell .apx-shell-only{display:block!important}';
   document.head.appendChild(css);
+})();
+</script>
+<script>
+/* ApexTwin — "Your Twin" (02.11.2026)
+   A disciplined copy of the trader that takes EXACTLY the same entries and
+   nothing else — no invented signals, no hindsight setups. What it changes
+   is only what a trader controls after the decision to enter:
+     · it keeps the trader's OWN rules every time: daily loss limit (in R),
+       trades-per-day cap, cooldown after a loss, the mistakes the trader
+       chose to cut, "rules broken" trades, a minimum setup grade
+     · it leaves the original stop and target alone (set and forget),
+       measured bar by bar on real prices by the Exit Lab engine — or, when
+       the trader picks it, the fixed target that won OUT OF SAMPLE there
+     · it risks the same amount on every trade
+   Then it splits the difference between the two into its causes, so the
+   trader reads "exits cost you 3.1R, revenge trades 1.4R, oversizing €220"
+   instead of a vague "be more disciplined".
+
+   Honest by construction:
+     · a trade whose price path was not measured keeps the trader's own exit
+       (counted, flagged, never guessed)
+     · the twin's state (day result, last loss) comes from the TWIN's own
+       outcomes, so its rules react to what happened to it
+     · the attribution adds up exactly: skips + exits = twin − you, in R;
+       sizing is reported separately in money, because R has no size
+   Engine between the markers is pure — .claude/tests/twin.test.js. */
+/* TWIN-ENGINE-START */
+var ApexTwinEngine = (function () {
+  var T = {};
+  T.DEFAULTS = { dailyLossR: 3, maxTrades: 0, cooldownMin: 0, skipMistakes: [], skipRulesBroken: true,
+                 gradeFilter: '', exit: 'hold', bestK: null };
+  T.REASONS = {
+    grade: 'Below your setup grade',
+    rules: 'You marked it "rules broken"',
+    mistake: 'Tagged with a mistake you cut',
+    dailyLimit: 'After your daily loss limit',
+    maxTrades: 'Beyond your trades-per-day cap',
+    cooldown: 'Inside the cooldown after a loss'
+  };
+  function num(v) { if (v === '' || v == null) return null; var n = +v; return isFinite(n) ? n : null; }
+  function sum(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
+  function median(a) { if (!a.length) return null; var s = a.slice().sort(function (x, y) { return x - y; }); var m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+  T.median = median;
+  function r2(v) { return Math.round(v * 1000) / 1000; }
+
+  /* trades: [{ id, day, openMs, closeMs, R, holdR, holdMin, fixed, money,
+                riskMoney, mistakes, followedRules, preGrade }]  */
+  T.run = function (trades, cfgIn) {
+    var cfg = {}; var k;
+    for (k in T.DEFAULTS) cfg[k] = T.DEFAULTS[k];
+    for (k in (cfgIn || {})) if (cfgIn[k] !== undefined) cfg[k] = cfgIn[k];
+    var cut = (cfg.skipMistakes || []).map(function (m) { return String(m).trim().toLowerCase(); }).filter(Boolean);
+    var grades = cfg.gradeFilter === 'A' ? ['A'] : cfg.gradeFilter === 'AB' ? ['A', 'B'] : null;
+    var list = (trades || []).filter(function (t) { return t && num(t.R) != null && t.day; })
+      .slice().sort(function (a, b) { return (a.day < b.day ? -1 : a.day > b.day ? 1 : 0) || ((num(a.openMs) || 0) - (num(b.openMs) || 0)); });
+    var state = {}, rows = [];
+    list.forEach(function (t) {
+      var d = state[t.day] || (state[t.day] = { r: 0, n: 0, lastLossEnd: null });
+      var reasons = [];
+      var g = String(t.preGrade || '').toUpperCase();
+      if (grades && g && grades.indexOf(g) < 0) reasons.push('grade');
+      if (cfg.skipRulesBroken && String(t.followedRules || '').toLowerCase() === 'no') reasons.push('rules');
+      var tagHit = (t.mistakes || []).map(function (m) { return String(m).trim().toLowerCase(); }).filter(function (m) { return cut.indexOf(m) >= 0; });
+      if (tagHit.length) reasons.push('mistake');
+      if (cfg.dailyLossR > 0 && d.r <= -cfg.dailyLossR + 1e-9) reasons.push('dailyLimit');
+      if (cfg.maxTrades > 0 && d.n >= cfg.maxTrades) reasons.push('maxTrades');
+      var op = num(t.openMs);
+      if (cfg.cooldownMin > 0 && d.lastLossEnd != null && op != null && op < d.lastLossEnd + cfg.cooldownMin * 60000) reasons.push('cooldown');
+      var row = { id: t.id, day: t.day, openMs: op, symbol: t.symbol || '', R: +t.R, kept: !reasons.length, reasons: reasons,
+                  tags: tagHit, twinR: null, exitSrc: null };
+      if (row.kept) {
+        var tr = null, src = 'unmeasured';
+        if (cfg.exit === 'best' && cfg.bestK != null && t.fixed && num(t.fixed[cfg.bestK]) != null) { tr = +t.fixed[cfg.bestK]; src = 'best'; }
+        else if (cfg.exit !== 'actual' && num(t.holdR) != null) { tr = +t.holdR; src = 'hold'; }
+        else { tr = +t.R; src = cfg.exit === 'actual' ? 'actual' : 'unmeasured'; }
+        row.twinR = tr; row.exitSrc = src;
+        d.r += tr; d.n++;
+        if (tr < 0) {
+          var end = (src === 'hold' && num(t.holdMin) != null && op != null) ? op + t.holdMin * 60000 : (num(t.closeMs) || op);
+          d.lastLossEnd = end;
+        }
+      }
+      row.money = num(t.money); row.riskMoney = num(t.riskMoney);
+      rows.push(row);
+    });
+    var kept = rows.filter(function (r) { return r.kept; }), skipped = rows.filter(function (r) { return !r.kept; });
+    var youTotal = sum(rows.map(function (r) { return r.R; })), twinTotal = sum(kept.map(function (r) { return r.twinR; }));
+    var skipBy = {};
+    skipped.forEach(function (r) { var k2 = r.reasons[0]; skipBy[k2] = (skipBy[k2] || 0) - r.R; });
+    var exitEffect = sum(kept.map(function (r) { return r.twinR - r.R; }));
+    /* Money: one risk unit = the trader's median risk per trade. Sizing is
+       what constant risk would have changed on the trader's OWN results. */
+    var risks = rows.map(function (r) { return r.riskMoney; }).filter(function (v) { return v != null && v > 0; });
+    var U = median(risks), sizing = null;
+    if (U) {
+      var both = rows.filter(function (r) { return r.money != null && r.riskMoney != null && r.riskMoney > 0; });
+      if (both.length) {
+        var youMoney = sum(both.map(function (r) { return r.money; })), constMoney = sum(both.map(function (r) { return r.R * U; }));
+        sizing = { unit: U, n: both.length, youMoney: youMoney, constMoney: constMoney, effect: constMoney - youMoney,
+                   sizeSpread: median(both.map(function (r) { return Math.abs(r.riskMoney / U - 1); })) };
+      }
+    }
+    var days = {}, order = [];
+    rows.forEach(function (r) {
+      var x = days[r.day]; if (!x) { x = days[r.day] = { day: r.day, youR: 0, twinR: 0, n: 0, kept: 0 }; order.push(r.day); }
+      x.youR += r.R; x.n++; if (r.kept) { x.twinR += r.twinR; x.kept++; }
+    });
+    var cy = 0, ct = 0, curve = { you: [0], twin: [0] };
+    rows.forEach(function (r) { cy += r.R; ct += r.kept ? r.twinR : 0; curve.you.push(r2(cy)); curve.twin.push(r2(ct)); });
+    var wr = function (a) { return a.length ? a.filter(function (v) { return v > 0; }).length / a.length : null; };
+    return {
+      cfg: cfg, n: rows.length, kept: kept.length, skipped: skipped.length,
+      you: { total: youTotal, avg: rows.length ? youTotal / rows.length : null, wr: wr(rows.map(function (r) { return r.R; })) },
+      twin: { total: twinTotal, avg: kept.length ? twinTotal / kept.length : null, wr: wr(kept.map(function (r) { return r.twinR; })) },
+      gap: twinTotal - youTotal,
+      attribution: { skip: sum(Object.keys(skipBy).map(function (k3) { return skipBy[k3]; })), skipBy: skipBy, exit: exitEffect,
+                     unmeasured: kept.filter(function (r) { return r.exitSrc === 'unmeasured'; }).length },
+      sizing: sizing, twinMoney: U ? twinTotal * U : null, unit: U,
+      rows: rows, days: order.map(function (d2) { return days[d2]; }), curve: curve
+    };
+  };
+
+  /* Default mistakes to cut: the impulsive ones among the trader's OWN tags. */
+  T.impulsive = function (tags) {
+    return (tags || []).filter(function (t) { return /revenge|fomo|over.?trad|chas|impuls|tilt|bored|no.?setup|moved.?stop|widen|early.?entry|greed|fear|rule/i.test(String(t)); });
+  };
+  return T;
+})();
+/* TWIN-ENGINE-END */
+
+(function () {
+  var TW = {};
+  window.ApexTwin = TW;
+  var E = ApexTwinEngine;
+  var PERIODS = [['30d', 'Last 30 days'], ['week', 'This week'], ['month', 'This month'], ['90d', 'Last 90 days'], ['all', 'All time']];
+  var _period = '30d', _host = null, _measuring = false, _autoDone = {};
+
+  function uid() { return window.currentUID || 'local'; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function num(v) { if (v === '' || v == null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function fR(v, d) { if (v == null || !isFinite(v)) return '—'; return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d == null ? 2 : d) + 'R'; }
+  function sym() { try { return window.getPnlSymbol ? getPnlSymbol() : '$'; } catch (e) { return '$'; } }
+  function fM(v) { if (v == null || !isFinite(v)) return '—'; var a = Math.abs(v); return (v > 0 ? '+' : v < 0 ? '−' : '') + sym() + (a >= 1000 ? Math.round(a).toLocaleString('en-US') : a.toFixed(2)); }
+  function cls(v) { return v > 0 ? 'pos' : v < 0 ? 'neg' : ''; }
+  function isPro() { return window.currentPlan === 'pro'; }
+  function pct(v) { return v == null || !isFinite(v) ? '—' : Math.round(v * 100) + '%'; }
+
+  /* ───────── settings: the trader's own rules ───────── */
+  function key() { return 'apexTwin_v1_' + uid(); }
+  function guard() { try { return window.ApexGuard && ApexGuard.get ? ApexGuard.get() : {}; } catch (e) { return {}; } }
+  function allTags() {
+    var seen = {}, out = [];
+    try { (getAllTrades() || []).forEach(function (t) { (t.mistakes || []).forEach(function (m) { var s = String(m).trim(); if (s && !seen[s.toLowerCase()]) { seen[s.toLowerCase()] = 1; out.push(s); } }); }); } catch (e) {}
+    return out;
+  }
+  function loadCfg() {
+    var c = null; try { c = JSON.parse(localStorage.getItem(key()) || 'null'); } catch (e) {}
+    if (c) return c;
+    var g = guard();
+    return { dailyLossR: 3, maxTrades: num(g.maxTrades) || 0, cooldownMin: num(g.cooldownMin) || 0,
+             skipMistakes: E.impulsive(allTags()), skipRulesBroken: true, gradeFilter: '', exit: 'hold', bestK: null, _auto: true };
+  }
+  function saveCfg(c) { delete c._auto; try { localStorage.setItem(key(), JSON.stringify(c)); } catch (e) {} }
+
+  /* ───────── data: the trader's closed trades, with the Exit Lab paths ───────── */
+  function inPeriod(day, p) {
+    if (p === 'all') return true;
+    var now = new Date(), d0;
+    if (p === 'week') { d0 = new Date(now); var wd = (d0.getDay() + 6) % 7; d0.setDate(d0.getDate() - wd); }
+    else if (p === 'month') d0 = new Date(now.getFullYear(), now.getMonth(), 1);
+    else d0 = new Date(now.getTime() - (p === '90d' ? 90 : 30) * 86400000);
+    var k = d0.getFullYear() + '-' + String(d0.getMonth() + 1).padStart(2, '0') + '-' + String(d0.getDate()).padStart(2, '0');
+    return day >= k;
+  }
+  function closed(t) { return t && !t.planned && ((t.exit !== '' && t.exit != null) || (t.pnl !== '' && t.pnl != null)); }
+  function buildTrades(p) {
+    var all = []; try { all = getAllTrades() || []; } catch (e) { all = []; }
+    var out = [];
+    all.forEach(function (t) {
+      if (!closed(t) || !t._date || !inPeriod(t._date, p)) return;
+      var res = null; try { res = window.ApexExitLab && ApexExitLab.resultFor ? ApexExitLab.resultFor(t) : null; } catch (e) {}
+      var R = res && res.actualR != null ? res.actualR : (window.apexRealR ? apexRealR(t) : null);
+      if (R == null || !isFinite(R)) return;
+      var money = null; try { var c = calcTradePnl(t); money = c ? c.pnlDisplay : null; } catch (e) {}
+      var risk = null; try { if (t.riskUsd != null && isFinite(+t.riskUsd) && +t.riskUsd > 0) risk = toDisplayCurrency(+t.riskUsd); } catch (e) {}
+      out.push({ id: (window.ApexExitLab && ApexExitLab.idOf) ? ApexExitLab.idOf(t) : (t.id || t.openTime), day: t._date,
+        openMs: num(t.openTime), closeMs: num(t.closeTime), symbol: t.symbol || '', setup: t.setup || '',
+        R: R, holdR: res && res.hold ? res.hold.R : null, holdMin: res && res.hold ? res.hold.min : null, fixed: res ? res.fixed : null,
+        money: money, riskMoney: risk, mistakes: t.mistakes || [], followedRules: t.followedRules || '', preGrade: t.preGrade || '', _t: t });
+    });
+    return out;
+  }
+  function needMeasure(p) {
+    var n = 0;
+    try {
+      (getAllTrades() || []).forEach(function (t) {
+        if (!closed(t) || !t._date || !inPeriod(t._date, p)) return;
+        if (ApexExitLab.eligibility(t)) return;
+        if (!ApexExitLab.resultFor(t) && !ApexExitLab.knownNone(t)) n++;
+      });
+    } catch (e) {}
+    return n;
+  }
+  function bestK() {
+    try { var sc = ApexExitLab.scan(), S = ApexExitEngine.summarize(sc.measured); return S.oos && S.oos.holds ? S.oos.k : null; } catch (e) { return null; }
+  }
+  TW.compute = function (p) {
+    var cfg = loadCfg();
+    if (cfg.exit === 'best') cfg.bestK = bestK();
+    return E.run(buildTrades(p || _period), cfg);
+  };
+
+  /* ───────── page (Edge Lab → Your Twin) ───────── */
+  function css() {
+    if (document.getElementById('twCss')) return;
+    var s = document.createElement('style'); s.id = 'twCss';
+    s.textContent =
+      '.tw-hero{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;margin:6px 0 4px}' +
+      '.tw-side{border:1px solid var(--rim2);border-radius:var(--r-lg);padding:14px 16px;background:var(--surface)}' +
+      '.tw-side.twin{border-color:var(--gold-line);background:rgba(var(--gold-rgb),.06)}' +
+      '.tw-side h4{margin:0 0 4px;font-size:var(--fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}' +
+      '.tw-side.twin h4{color:var(--gold)}' +
+      '.tw-big{font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;font-size:30px;line-height:1.1}' +
+      '.tw-sub{font-size:var(--fs-xs);color:var(--ink3);margin-top:4px;line-height:1.5}' +
+      '.tw-vs{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:var(--fs-xs);color:var(--ink3);gap:4px}' +
+      '.tw-vs b{font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:20px}' +
+      '@media(max-width:640px){.tw-hero{grid-template-columns:1fr}.tw-vs{flex-direction:row}}' +
+      '.tw-verdict{font-size:var(--fs-md);line-height:1.55;margin:12px 0 2px}' +
+      '.tw-svg{width:100%;max-width:760px;height:auto;display:block;margin:8px auto 0}' +
+      '.tw-legend{display:flex;gap:14px;font-size:var(--fs-xs);color:var(--ink3);justify-content:center;margin-top:4px}' +
+      '.tw-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}' +
+      '.tw-bar{display:grid;grid-template-columns:minmax(140px,1.2fr) 3fr auto;gap:10px;align-items:center;margin:7px 0;font-size:var(--fs-sm)}' +
+      '.tw-bar .t{height:10px;border-radius:var(--r-pill);background:var(--rim2);position:relative;overflow:hidden}' +
+      '.tw-bar .t i{position:absolute;top:0;bottom:0;border-radius:var(--r-pill)}' +
+      '.tw-bar .v{font-family:var(--font-mono,DM Mono,monospace);font-size:var(--fs-xs);min-width:72px;text-align:right}' +
+      '.tw-rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}' +
+      '.tw-rule{border:1px solid var(--rim2);border-radius:var(--r-md);padding:10px 12px;background:var(--surface)}' +
+      '.tw-rule label{display:block;font-size:var(--fs-xs);color:var(--ink2);margin-bottom:6px;font-weight:600}' +
+      '.tw-rule input[type=number],.tw-rule select{width:100%;box-sizing:border-box;background:var(--elevated);color:var(--ink);border:1px solid var(--rim2);border-radius:var(--r-sm);padding:7px 9px;font-size:var(--fs-sm)}' +
+      '.tw-rule .h{font-size:var(--fs-micro);color:var(--ink3);margin-top:5px;line-height:1.45}' +
+      '.tw-tags{display:flex;flex-wrap:wrap;gap:6px}' +
+      '.tw-tag{font-size:var(--fs-xs);border:1px solid var(--rim2);border-radius:var(--r-pill);padding:3px 10px;cursor:pointer;background:var(--elevated);color:var(--ink2);user-select:none}' +
+      '.tw-tag.on{border-color:var(--loss);color:var(--loss);background:rgba(var(--loss-rgb),.08);text-decoration:line-through}' +
+      '.tw-tbl{overflow-x:auto;margin-top:8px}.tw-tbl table{width:100%;border-collapse:collapse;font-size:var(--fs-xs);font-family:var(--font-mono,DM Mono,monospace)}' +
+      '.tw-tbl th{text-align:left;color:var(--ink3);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--rim2);white-space:nowrap}' +
+      '.tw-tbl td{padding:6px 8px;border-bottom:1px solid var(--rim);white-space:nowrap}' +
+      '.tw-click{cursor:pointer}.tw-click:hover td{background:var(--raised)}' +
+      '.tw-periods{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}' +
+      '.tw-periods button{font-size:var(--fs-xs);border:1px solid var(--rim2);border-radius:var(--r-pill);padding:5px 12px;background:var(--surface);color:var(--ink2);cursor:pointer}' +
+      '.tw-periods button.on{border-color:var(--gold-line);color:var(--gold);background:rgba(var(--gold-rgb),.08)}' +
+      '.tw-ov{display:flex;gap:14px;align-items:center;flex-wrap:wrap;cursor:pointer}' +
+      '.tw-ov .tw-ov-t{flex:1 1 240px;font-size:var(--fs-sm);line-height:1.55;color:var(--ink2)}' +
+      '.tw-ov .tw-ov-n{display:flex;gap:16px}' +
+      '.tw-ov .tw-ov-n div{font-size:var(--fs-micro);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}' +
+      '.tw-ov .tw-ov-n b{display:block;font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:22px;text-transform:none}';
+    document.head.appendChild(s);
+  }
+
+  function curveSvg(c) {
+    var you = c.you, tw = c.twin, n = you.length;
+    if (n < 3) return '';
+    var all = you.concat(tw), mx = Math.max.apply(null, all.concat([0.5])), mn = Math.min.apply(null, all.concat([-0.5]));
+    var W = 760, H = 220, P = 28;
+    var x = function (i) { return P + i * (W - 2 * P) / (n - 1); }, y = function (v) { return P + (mx - v) * (H - 2 * P) / (mx - mn || 1); };
+    var path = function (a) { return a.map(function (v, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' '); };
+    return '<svg class="tw-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Cumulative R — you and your twin">' +
+      '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '" style="stroke:var(--rim2);stroke-width:1"/>' +
+      '<path d="' + path(you) + '" style="fill:none;stroke:var(--ink3);stroke-width:2"/>' +
+      '<path d="' + path(tw) + '" style="fill:none;stroke:var(--gold);stroke-width:2.5"/>' +
+      '<text x="' + (W - P) + '" y="' + (y(tw[n - 1]) - 6).toFixed(1) + '" text-anchor="end" style="fill:var(--gold);font-size:11px">twin ' + fR(tw[n - 1], 1) + '</text>' +
+      '<text x="' + (W - P) + '" y="' + (y(you[n - 1]) + 14).toFixed(1) + '" text-anchor="end" style="fill:var(--ink3);font-size:11px">you ' + fR(you[n - 1], 1) + '</text>' +
+      '</svg><div class="tw-legend"><span><i style="background:var(--ink3)"></i>You</span><span><i style="background:var(--gold)"></i>Your twin</span><span>cumulative R, trade by trade</span></div>';
+  }
+
+  /* The gap, cause by cause — positive = it cost you (the twin did better). */
+  function causes(S) {
+    var out = [];
+    out.push({ label: S.cfg.exit === 'best' ? 'Exits (twin: tested target)' : 'Exits (twin: stop and target left alone)', v: S.attribution.exit });
+    Object.keys(S.attribution.skipBy).forEach(function (k) { out.push({ label: E.REASONS[k] || k, v: S.attribution.skipBy[k], skip: k }); });
+    out.sort(function (a, b) { return Math.abs(b.v) - Math.abs(a.v); });
+    return out;
+  }
+  function barsHtml(list) {
+    var mx = Math.max.apply(null, list.map(function (c) { return Math.abs(c.v); }).concat([0.25]));
+    return list.map(function (c) {
+      var w = Math.abs(c.v) / mx * 50;
+      var st = c.v >= 0 ? 'left:50%;width:' + w + '%;background:var(--loss)' : 'right:50%;width:' + w + '%;background:var(--profit)';
+      return '<div class="tw-bar"><span>' + esc(c.label) + '</span><div class="t"><i style="' + st + '"></i></div><span class="v ' + (c.v > 0 ? 'neg' : c.v < 0 ? 'pos' : '') + '">' +
+        (c.v > 0 ? 'cost ' + fR(c.v).replace('+', '') : c.v < 0 ? 'saved ' + fR(-c.v).replace('+', '') : '0R') + '</span></div>';
+    }).join('');
+  }
+  function verdict(S) {
+    var gap = S.gap;
+    if (S.n < 5) return 'Too few closed trades in this period for a fair comparison — pick a longer period.';
+    if (Math.abs(gap) < 0.25) return 'You and your twin are level — you already trade your own rules.';
+    var cs = causes(S).filter(function (c) { return c.v > 0; });
+    var tot = cs.reduce(function (a, c) { return a + c.v; }, 0);
+    // every label its own text node, so the hand-written dictionary can match it whole
+    var top = cs.slice(0, 3).map(function (c) { return '<span class="tw-cause">' + esc(c.label) + '</span> <b class="notranslate" translate="no">' + Math.round(c.v / tot * 100) + '%</b>'; }).join(' · ');
+    if (gap > 0) return '<span>Your twin made more than you on the same entries:</span> <b class="pos notranslate" translate="no">' + fR(gap, 1) + (S.unit ? ' ≈ ' + fM(gap * S.unit) : '') + '</b><br><span>Where it came from:</span> ' + top;
+    return '<span>You beat your twin — your active management is adding value.</span> <b class="pos notranslate" translate="no">' + fR(-gap, 1) + '</b>';
+  }
+
+  function ruleUi(cfg) {
+    var tags = allTags(), cut = (cfg.skipMistakes || []).map(function (t) { return t.toLowerCase(); });
+    return '<div class="tw-rules">' +
+      '<div class="tw-rule"><label>Daily loss limit</label><input type="number" min="0" step="0.5" value="' + (cfg.dailyLossR || 0) + '" onchange="ApexTwin.set(\'dailyLossR\',this.value)"><div class="h">In R. After that the twin stops for the day. 0 = no limit.</div></div>' +
+      '<div class="tw-rule"><label>Trades per day</label><input type="number" min="0" step="1" value="' + (cfg.maxTrades || 0) + '" onchange="ApexTwin.set(\'maxTrades\',this.value)"><div class="h">The twin takes your first N entries of a day. 0 = no cap.</div></div>' +
+      '<div class="tw-rule"><label>Cooldown after a loss</label><input type="number" min="0" step="5" value="' + (cfg.cooldownMin || 0) + '" onchange="ApexTwin.set(\'cooldownMin\',this.value)"><div class="h">Minutes the twin waits after a losing trade. 0 = none.</div></div>' +
+      '<div class="tw-rule"><label>Setup grade</label><select onchange="ApexTwin.set(\'gradeFilter\',this.value)">' +
+        [['', 'Every grade'], ['AB', 'A and B only'], ['A', 'A only']].map(function (o) { return '<option value="' + o[0] + '"' + (cfg.gradeFilter === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+        '</select><div class="h">Uses the grade you gave BEFORE the entry. Ungraded trades stay in.</div></div>' +
+      '<div class="tw-rule"><label>Exits</label><select onchange="ApexTwin.set(\'exit\',this.value)">' +
+        [['hold', 'Leave stop and target alone'], ['best', 'Best tested target (Exit Lab)'], ['actual', 'Exactly like you']].map(function (o) { return '<option value="' + o[0] + '"' + (cfg.exit === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+        '</select><div class="h">“Best tested” only applies when it held up out of sample in your Exit Lab.</div></div>' +
+      '<div class="tw-rule"><label><input type="checkbox"' + (cfg.skipRulesBroken ? ' checked' : '') + ' onchange="ApexTwin.set(\'skipRulesBroken\',this.checked)" style="margin-right:6px;accent-color:var(--gold)">Skip “rules broken” trades</label><div class="h">Trades where you answered “Followed my rules: no”.</div></div>' +
+      '</div>' +
+      '<div style="margin-top:12px"><div style="font-size:var(--fs-xs);font-weight:600;color:var(--ink2);margin-bottom:6px">Mistakes your twin never makes <span style="font-weight:400;color:var(--ink3)">— tap to cut or keep</span></div>' +
+        (tags.length ? '<div class="tw-tags">' + tags.map(function (t) { var on = cut.indexOf(t.toLowerCase()) >= 0; return '<span class="tw-tag' + (on ? ' on' : '') + '" onclick="ApexTwin.toggleTag(\'' + esc(t).replace(/'/g, '&#39;') + '\')">' + esc(t) + '</span>'; }).join('') + '</div>'
+                     : '<div class="el-note">No mistake tags on your trades yet — tag them on the trade card and your twin can cut them.</div>') +
+      '</div>';
+  }
+
+  TW.set = function (k, v) {
+    var c = loadCfg();
+    if (k === 'skipRulesBroken') c[k] = !!v;
+    else if (k === 'gradeFilter' || k === 'exit') c[k] = String(v);
+    else c[k] = Math.max(0, parseFloat(v) || 0);
+    saveCfg(c); TW.refresh();
+  };
+  TW.toggleTag = function (t) {
+    var c = loadCfg(), l = (c.skipMistakes || []).slice(), i = l.map(function (x) { return x.toLowerCase(); }).indexOf(String(t).toLowerCase());
+    if (i >= 0) l.splice(i, 1); else l.push(t);
+    c.skipMistakes = l; saveCfg(c); TW.refresh();
+  };
+  TW.period = function (p) { _period = p; TW.refresh(); };
+  TW.reset = function () { try { localStorage.removeItem(key()); } catch (e) {} TW.refresh(); };
+  TW.refresh = function () { if (_host && document.body.contains(_host)) TW.render(_host); try { TW.renderOverview(); } catch (e) {} };
+  TW.open = function (id) { try { if (window.ApexExitLab && ApexExitLab.openTrade) ApexExitLab.openTrade(id); } catch (e) {} };
+  TW.measure = function () {
+    if (_measuring || !window.ApexExitLab) return;
+    _measuring = true; TW.refresh();
+    Promise.resolve(ApexExitLab.run({ limit: 60 })).then(function () { _measuring = false; TW.refresh(); }, function () { _measuring = false; TW.refresh(); });
+  };
+
+  TW.render = function (body) {
+    css(); _host = body;
+    var cfg = loadCfg(), S = TW.compute(_period), miss = needMeasure(_period);
+    // first visit of a period: measure the missing price paths in the background
+    if (miss && !_measuring && !_autoDone[_period] && window.ApexExitLab) { _autoDone[_period] = 1; setTimeout(TW.measure, 400); }
+    var periods = '<div class="tw-periods">' + PERIODS.map(function (p) { return '<button class="' + (p[0] === _period ? 'on' : '') + '" onclick="ApexTwin.period(\'' + p[0] + '\')">' + p[1] + '</button>'; }).join('') + '</div>';
+    var head = '<div class="el-card"><h3>Your Twin</h3><p class="el-sub">Your exact entries — not one trade more. Your own rules, kept every time. Stop and target left alone, measured on real prices. The difference is what your habits cost you.</p>' + periods;
+    if (!S.n) {
+      body.innerHTML = head + '<div class="el-note" style="margin-top:12px">No closed trades with a result in this period yet.</div></div>';
+      return;
+    }
+    var gapCls = S.gap > 0 ? 'neg' : 'pos';
+    var hero = '<div class="tw-hero">' +
+      '<div class="tw-side"><h4>You</h4><div class="tw-big ' + cls(S.you.total) + '">' + fR(S.you.total, 1) + '</div><div class="tw-sub">' + S.n + ' trades · ' + pct(S.you.wr) + ' winners' + (S.sizing ? ' · ' + fM(S.sizing.youMoney) : '') + '</div></div>' +
+      '<div class="tw-vs"><span>difference</span><b class="' + gapCls + '">' + fR(S.gap, 1) + '</b>' + (S.unit ? '<span>≈ ' + fM(S.gap * S.unit) + '</span>' : '') + '</div>' +
+      '<div class="tw-side twin"><h4>Your twin</h4><div class="tw-big ' + cls(S.twin.total) + '">' + fR(S.twin.total, 1) + '</div><div class="tw-sub">' + S.kept + ' of your ' + S.n + ' trades · ' + pct(S.twin.wr) + ' winners' + (S.twinMoney != null ? ' · ' + fM(S.twinMoney) + ' at constant risk' : '') + '</div></div>' +
+      '</div><div class="tw-verdict">' + verdict(S) + '</div>' +
+      (miss ? '<div class="el-note" style="margin-top:6px">' + (_measuring ? 'Measuring the price paths of ' + miss + ' trade' + (miss === 1 ? '' : 's') + '… the twin updates by itself.' :
+        miss + ' trade' + (miss === 1 ? ' is' : 's are') + ' not measured on real prices yet — the twin keeps your exit there. <button class="el-btn" onclick="ApexTwin.measure()">Measure now</button>') + '</div>' : '') +
+      (S.attribution.unmeasured ? '<div class="el-note">' + S.attribution.unmeasured + ' kept trade' + (S.attribution.unmeasured === 1 ? '' : 's') + ' without a price path (no stop, no time or another instrument) count with your own exit.</div>' : '') +
+      '</div>';
+    var curve = '<div class="el-card"><h3>Trade by trade</h3>' + curveSvg(S.curve) + '</div>';
+    var cs = causes(S);
+    var why = '<div class="el-card"><h3>Where the difference comes from</h3><p class="el-sub">Each line is one habit. Red: the twin did better without it. Green: your way paid. They add up to the difference above.</p>' +
+      barsHtml(cs) +
+      (S.sizing && S.sizing.n >= 3 ? '<div class="tw-bar" style="margin-top:12px"><span>Position size <span style="color:var(--ink3)">(money only)</span></span><div class="t"><i style="' +
+        (S.sizing.effect >= 0 ? 'left:50%;width:' + Math.min(50, Math.abs(S.sizing.effect) / (Math.abs(S.sizing.youMoney) + Math.abs(S.sizing.effect) || 1) * 50) + '%;background:var(--loss)' : 'right:50%;width:' + Math.min(50, Math.abs(S.sizing.effect) / (Math.abs(S.sizing.youMoney) + Math.abs(S.sizing.effect) || 1) * 50) + '%;background:var(--profit)') +
+        '"></i></div><span class="v ' + (S.sizing.effect > 0 ? 'neg' : 'pos') + '">' + (S.sizing.effect > 0 ? 'cost ' : 'saved ') + fM(Math.abs(S.sizing.effect)).replace('+', '') + '</span></div>' +
+        '<div class="el-note">Your trades at one constant risk of ' + fM(S.sizing.unit).replace('+', '') + ' (your median) instead of the sizes you used — typical deviation ' + pct(S.sizing.sizeSpread) + '.</div>' : '') +
+      '</div>';
+    var rules = '<div class="el-card"><h3>Your twin’s rules</h3><p class="el-sub">These are YOUR rules — the twin just never breaks them. Change one and everything above recalculates.' +
+      (cfg._auto ? ' Started from your Guardrails and your impulsive mistake tags.' : '') + '</p>' + ruleUi(cfg) +
+      '<div style="margin-top:10px"><button class="el-btn" onclick="ApexTwin.reset()">Back to my defaults</button></div></div>';
+    var left = S.rows.filter(function (r) { return !r.kept; }).slice(-30).reverse();
+    var leftHtml = '<div class="el-card"><h3>Trades your twin left out</h3><p class="el-sub">' + S.skipped + ' of ' + S.n + '. Click one to open it on the chart.</p>' +
+      (left.length ? '<div class="tw-tbl"><table><tr><th>Day</th><th>Symbol</th><th>Your result</th><th>Why the twin skipped it</th></tr>' +
+        left.map(function (r) { return '<tr class="tw-click" onclick="ApexTwin.open(\'' + esc(String(r.id)).replace(/'/g, '&#39;') + '\')"><td>' + esc(r.day) + '</td><td class="notranslate" translate="no">' + esc(r.symbol) + '</td><td class="' + cls(r.R) + '">' + fR(r.R) + '</td><td>' + esc(E.REASONS[r.reasons[0]] || r.reasons[0]) + (r.tags && r.tags.length ? ' (' + esc(r.tags.join(', ')) + ')' : '') + '</td></tr>'; }).join('') + '</table></div>'
+        : '<div class="el-note">None — every one of your trades was within your rules.</div>') + '</div>';
+    var diff = S.rows.filter(function (r) { return r.kept && r.exitSrc !== 'unmeasured' && Math.abs(r.twinR - r.R) > 0.05; })
+      .sort(function (a, b) { return Math.abs(b.twinR - b.R) - Math.abs(a.twinR - a.R); }).slice(0, 15);
+    var diffHtml = '<div class="el-card"><h3>Biggest exit differences</h3><p class="el-sub">Same trade, other exit. Click one to see it on the chart.</p>' +
+      (diff.length ? '<div class="tw-tbl"><table><tr><th>Day</th><th>Symbol</th><th>You</th><th>Twin</th><th>Difference</th></tr>' +
+        diff.map(function (r) { var d = r.twinR - r.R; return '<tr class="tw-click" onclick="ApexTwin.open(\'' + esc(String(r.id)).replace(/'/g, '&#39;') + '\')"><td>' + esc(r.day) + '</td><td class="notranslate" translate="no">' + esc(r.symbol) + '</td><td class="' + cls(r.R) + '">' + fR(r.R) + '</td><td class="' + cls(r.twinR) + '">' + fR(r.twinR) + '</td><td class="' + (d > 0 ? 'neg' : 'pos') + '">' + (d > 0 ? 'twin +' : 'you +') + Math.abs(d).toFixed(2) + 'R</td></tr>'; }).join('') + '</table></div>'
+        : '<div class="el-note">No measured exit differences in this period yet.</div>') + '</div>';
+    var days = S.days.slice(-20).reverse();
+    var dayHtml = '<div class="el-card"><h3>Day by day</h3><div class="tw-tbl"><table><tr><th>Day</th><th>Trades</th><th>You</th><th>Twin</th><th>Twin took</th></tr>' +
+      days.map(function (d) { return '<tr><td>' + esc(d.day) + '</td><td>' + d.n + '</td><td class="' + cls(d.youR) + '">' + fR(d.youR) + '</td><td class="' + cls(d.twinR) + '">' + fR(d.twinR) + '</td><td>' + d.kept + ' of ' + d.n + '</td></tr>'; }).join('') + '</table></div></div>';
+    var foot = '<div class="el-note" style="margin:6px 2px 16px">How the twin works: it only ever takes entries you took, in the order you took them. Its rules react to its own results (its daily R, its last loss). ' +
+      'Exits come from the Exit Lab — 1-minute prices, the stop counted first when a bar touches both, the entry minute skipped. Results are in R before costs; money uses your median risk per trade.</div>';
+    body.innerHTML = '<div class="tw-page">' + head + hero + curve + why + rules + leftHtml + diffHtml + dayHtml + foot + '</div>';
+    try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(body); } catch (e) {}
+  };
+  /* Hand-written translations — Google made "Trades your twin left out" into
+     "trade with your twin who is left out". */
+  (function () {
+    var T = {
+      'Your Twin': ['Dein Zwilling', 'Tu gemelo', 'Seu gêmeo', 'Ton jumeau'],
+      'You': ['Du', 'Tú', 'Você', 'Toi'], 'Your twin': ['Dein Zwilling', 'Tu gemelo', 'Seu gêmeo', 'Ton jumeau'], 'difference': ['Unterschied', 'diferencia', 'diferença', 'écart'],
+      'Your exact entries — not one trade more. Your own rules, kept every time. Stop and target left alone, measured on real prices. The difference is what your habits cost you.':
+        ['Exakt deine Einstiege – kein Trade mehr. Deine eigenen Regeln, jedes Mal eingehalten. Stop und Ziel bleiben stehen, gemessen auf echten Kursen. Der Unterschied ist, was dich deine Gewohnheiten kosten.', 'Exactamente tus entradas, ni una operación más. Tus propias reglas, cumplidas siempre. Stop y objetivo sin tocar, medidos con precios reales. La diferencia es lo que te cuestan tus hábitos.', 'Exatamente suas entradas — nem uma operação a mais. Suas próprias regras, cumpridas sempre. Stop e alvo intocados, medidos com preços reais. A diferença é o que seus hábitos custam.', 'Exactement tes entrées — pas un trade de plus. Tes propres règles, respectées à chaque fois. Stop et objectif laissés en place, mesurés sur des prix réels. L’écart, c’est ce que tes habitudes te coûtent.'],
+      'Last 30 days': ['Letzte 30 Tage', 'Últimos 30 días', 'Últimos 30 dias', '30 derniers jours'], 'This week': ['Diese Woche', 'Esta semana', 'Esta semana', 'Cette semaine'], 'This month': ['Dieser Monat', 'Este mes', 'Este mês', 'Ce mois-ci'], 'Last 90 days': ['Letzte 90 Tage', 'Últimos 90 días', 'Últimos 90 dias', '90 derniers jours'], 'All time': ['Gesamter Zeitraum', 'Todo', 'Tudo', 'Depuis le début'],
+      'Your twin made more than you on the same entries:': ['Dein Zwilling hat mit denselben Einstiegen mehr gemacht als du:', 'Tu gemelo ganó más que tú con las mismas entradas:', 'Seu gêmeo ganhou mais que você com as mesmas entradas:', 'Ton jumeau a fait mieux que toi avec les mêmes entrées :'],
+      'Where it came from:': ['Woher es kommt:', 'De dónde viene:', 'De onde vem:', 'D’où ça vient :'],
+      'You beat your twin — your active management is adding value.': ['Du schlägst deinen Zwilling – dein aktives Management bringt etwas.', 'Superas a tu gemelo: tu gestión activa aporta valor.', 'Você supera seu gêmeo — sua gestão ativa agrega valor.', 'Tu bats ton jumeau — ta gestion active apporte quelque chose.'],
+      'You and your twin are level — you already trade your own rules.': ['Du und dein Zwilling liegen gleichauf – du handelst schon nach deinen Regeln.', 'Tú y tu gemelo estáis igualados: ya operas tus propias reglas.', 'Você e seu gêmeo estão empatados — você já opera suas próprias regras.', 'Toi et ton jumeau êtes à égalité — tu trades déjà tes propres règles.'],
+      'Trade by trade': ['Trade für Trade', 'Operación a operación', 'Operação a operação', 'Trade par trade'],
+      'Where the difference comes from': ['Woher der Unterschied kommt', 'De dónde viene la diferencia', 'De onde vem a diferença', 'D’où vient l’écart'],
+      'Each line is one habit. Red: the twin did better without it. Green: your way paid. They add up to the difference above.': ['Jede Zeile ist eine Gewohnheit. Rot: Ohne sie war der Zwilling besser. Grün: Dein Weg hat sich gelohnt. Zusammen ergeben sie den Unterschied oben.', 'Cada línea es un hábito. Rojo: el gemelo lo hizo mejor sin él. Verde: tu forma funcionó. Juntas suman la diferencia de arriba.', 'Cada linha é um hábito. Vermelho: o gêmeo foi melhor sem ele. Verde: seu jeito valeu. Juntas somam a diferença acima.', 'Chaque ligne est une habitude. Rouge : le jumeau a fait mieux sans elle. Vert : ta façon a payé. Ensemble, elles font l’écart ci-dessus.'],
+      'Exits (twin: stop and target left alone)': ['Ausstiege (Zwilling: Stop und Ziel stehen gelassen)', 'Salidas (gemelo: stop y objetivo sin tocar)', 'Saídas (gêmeo: stop e alvo intocados)', 'Sorties (jumeau : stop et objectif laissés)'],
+      'Exits (twin: tested target)': ['Ausstiege (Zwilling: getestetes Ziel)', 'Salidas (gemelo: objetivo probado)', 'Saídas (gêmeo: alvo testado)', 'Sorties (jumeau : objectif testé)'],
+      'Below your setup grade': ['Unter deiner Setup-Note', 'Por debajo de tu nota de setup', 'Abaixo da sua nota de setup', 'Sous ta note de setup'],
+      'You marked it "rules broken"': ['Von dir als „Regeln gebrochen“ markiert', 'Lo marcaste como «reglas rotas»', 'Você marcou como "regras quebradas"', 'Marqué « règles enfreintes » par toi'],
+      'Tagged with a mistake you cut': ['Mit einem Fehler markiert, den du streichst', 'Marcada con un error que eliminas', 'Marcada com um erro que você corta', 'Marqué d’une erreur que tu coupes'],
+      'After your daily loss limit': ['Nach deinem Tagesverlust-Limit', 'Tras tu límite de pérdida diaria', 'Depois do seu limite de perda diária', 'Après ta limite de perte journalière'],
+      'Beyond your trades-per-day cap': ['Über deiner Trade-Obergrenze pro Tag', 'Más allá de tu tope de operaciones por día', 'Além do seu limite de operações por dia', 'Au-delà de ton plafond de trades par jour'],
+      'Inside the cooldown after a loss': ['In der Pause nach einem Verlust', 'Dentro de la pausa tras una pérdida', 'Dentro da pausa após uma perda', 'Pendant la pause après une perte'],
+      'Your twin’s rules': ['Die Regeln deines Zwillings', 'Las reglas de tu gemelo', 'As regras do seu gêmeo', 'Les règles de ton jumeau'],
+      'Daily loss limit': ['Tagesverlust-Limit', 'Límite de pérdida diaria', 'Limite de perda diária', 'Limite de perte journalière'],
+      'Trades per day': ['Trades pro Tag', 'Operaciones por día', 'Operações por dia', 'Trades par jour'],
+      'Cooldown after a loss': ['Pause nach einem Verlust', 'Pausa tras una pérdida', 'Pausa após uma perda', 'Pause après une perte'],
+      'Setup grade': ['Setup-Note', 'Nota del setup', 'Nota do setup', 'Note du setup'], 'Exits': ['Ausstiege', 'Salidas', 'Saídas', 'Sorties'],
+      'Every grade': ['Jede Note', 'Todas las notas', 'Todas as notas', 'Toutes les notes'], 'A and B only': ['Nur A und B', 'Solo A y B', 'Só A e B', 'Seulement A et B'], 'A only': ['Nur A', 'Solo A', 'Só A', 'Seulement A'],
+      'Leave stop and target alone': ['Stop und Ziel stehen lassen', 'Dejar stop y objetivo', 'Deixar stop e alvo', 'Laisser stop et objectif'],
+      'Best tested target (Exit Lab)': ['Bestes getestetes Ziel (Exit-Labor)', 'Mejor objetivo probado (Exit Lab)', 'Melhor alvo testado (Exit Lab)', 'Meilleur objectif testé (Exit Lab)'],
+      'Exactly like you': ['Genau wie du', 'Exactamente como tú', 'Exatamente como você', 'Exactement comme toi'],
+      'Skip “rules broken” trades': ['„Regeln gebrochen“-Trades auslassen', 'Omitir operaciones con «reglas rotas»', 'Pular operações com "regras quebradas"', 'Ignorer les trades « règles enfreintes »'],
+      'Back to my defaults': ['Zurück zu meinen Standards', 'Volver a mis valores', 'Voltar aos meus padrões', 'Revenir à mes réglages'],
+      'Trades your twin left out': ['Trades, die dein Zwilling ausgelassen hat', 'Operaciones que tu gemelo omitió', 'Operações que seu gêmeo deixou de fora', 'Trades que ton jumeau a laissés de côté'],
+      'Why the twin skipped it': ['Warum der Zwilling ihn ausließ', 'Por qué la omitió el gemelo', 'Por que o gêmeo pulou', 'Pourquoi le jumeau l’a ignoré'],
+      'Biggest exit differences': ['Größte Unterschiede beim Ausstieg', 'Mayores diferencias en la salida', 'Maiores diferenças na saída', 'Plus grands écarts de sortie'],
+      'Same trade, other exit. Click one to see it on the chart.': ['Gleicher Trade, anderer Ausstieg. Anklicken öffnet ihn im Chart.', 'Misma operación, otra salida. Haz clic para verla en el gráfico.', 'Mesma operação, outra saída. Clique para ver no gráfico.', 'Même trade, autre sortie. Clique pour le voir sur le graphique.'],
+      'Day by day': ['Tag für Tag', 'Día a día', 'Dia a dia', 'Jour par jour'], 'Day': ['Tag', 'Día', 'Dia', 'Jour'], 'Symbol': ['Symbol', 'Símbolo', 'Símbolo', 'Symbole'], 'Trades': ['Trades', 'Operaciones', 'Operações', 'Trades'],
+      'Your result': ['Dein Ergebnis', 'Tu resultado', 'Seu resultado', 'Ton résultat'], 'Twin': ['Zwilling', 'Gemelo', 'Gêmeo', 'Jumeau'], 'Difference': ['Unterschied', 'Diferencia', 'Diferença', 'Écart'], 'Twin took': ['Zwilling nahm', 'El gemelo tomó', 'O gêmeo pegou', 'Le jumeau a pris'],
+      'Measure now': ['Jetzt messen', 'Medir ahora', 'Medir agora', 'Mesurer maintenant'],
+      'See my twin with Pro': ['Meinen Zwilling mit Pro sehen', 'Ver mi gemelo con Pro', 'Ver meu gêmeo com o Pro', 'Voir mon jumeau avec Pro'],
+      'Your Twin · last 30 days': ['Dein Zwilling · letzte 30 Tage', 'Tu gemelo · últimos 30 días', 'Seu gêmeo · últimos 30 dias', 'Ton jumeau · 30 derniers jours'],
+      'Same entries, your rules kept — left behind:': ['Gleiche Einstiege, deine Regeln eingehalten – liegen gelassen:', 'Mismas entradas, tus reglas cumplidas: dejado en la mesa:', 'Mesmas entradas, suas regras cumpridas — deixado na mesa:', 'Mêmes entrées, tes règles respectées — laissé sur la table :'],
+      'Biggest cause:': ['Größte Ursache:', 'Causa principal:', 'Maior causa:', 'Cause principale :'],
+      'You beat your rule-keeping twin.': ['Du schlägst deinen regeltreuen Zwilling.', 'Superas a tu gemelo disciplinado.', 'Você supera seu gêmeo disciplinado.', 'Tu bats ton jumeau discipliné.'],
+      'You and your twin are level.': ['Du und dein Zwilling liegen gleichauf.', 'Tú y tu gemelo estáis igualados.', 'Você e seu gêmeo estão empatados.', 'Toi et ton jumeau êtes à égalité.'],
+      'In the last 30 days your twin did better than you — with your exact entries and your own rules kept every time. Evidence Pro shows by how much and which habit cost you the most.': ['In den letzten 30 Tagen war dein Zwilling besser als du – mit exakt deinen Einstiegen und deinen eigenen Regeln, jedes Mal eingehalten. Evidence Pro zeigt, um wie viel und welche Gewohnheit dich am meisten gekostet hat.', 'En los últimos 30 días tu gemelo lo hizo mejor que tú, con exactamente tus entradas y tus propias reglas cumplidas siempre. Evidence Pro muestra por cuánto y qué hábito te costó más.', 'Nos últimos 30 dias seu gêmeo foi melhor que você — com exatamente suas entradas e suas regras cumpridas sempre. O Evidence Pro mostra por quanto e qual hábito custou mais.', 'Ces 30 derniers jours, ton jumeau a fait mieux que toi — avec exactement tes entrées et tes propres règles respectées à chaque fois. Evidence Pro montre de combien et quelle habitude t’a coûté le plus.'],
+      'In the last 30 days you kept up with your twin — your exact entries with your own rules kept every time. Evidence Pro shows the breakdown habit by habit.': ['In den letzten 30 Tagen hast du mit deinem Zwilling mitgehalten – exakt deine Einstiege, deine Regeln jedes Mal eingehalten. Evidence Pro zeigt die Aufschlüsselung Gewohnheit für Gewohnheit.', 'En los últimos 30 días has seguido el ritmo de tu gemelo: tus entradas exactas con tus reglas cumplidas siempre. Evidence Pro muestra el desglose hábito por hábito.', 'Nos últimos 30 dias você acompanhou seu gêmeo — suas entradas exatas com suas regras cumpridas sempre. O Evidence Pro mostra o detalhamento hábito por hábito.', 'Ces 30 derniers jours, tu as tenu le rythme de ton jumeau — tes entrées exactes avec tes règles respectées à chaque fois. Evidence Pro montre le détail habitude par habitude.']
+    };
+    function reg() { if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('.tw-page, #twinOvCard, .tw-preview', T); else setTimeout(reg, 300); }
+    reg();
+  })();
+
+  /* ───────── free preview and overview card ───────── */
+  var PV_BETTER = 'In the last 30 days your twin did better than you — with your exact entries and your own rules kept every time. Evidence Pro shows by how much and which habit cost you the most.';
+  var PV_LEVEL = 'In the last 30 days you kept up with your twin — your exact entries with your own rules kept every time. Evidence Pro shows the breakdown habit by habit.';
+  TW.preview = function () {
+    try {
+      var S = TW.compute('30d');
+      if (!S || S.n < 5) return '';
+      var better = S.gap > 0.25, txt = better ? PV_BETTER : PV_LEVEL;
+      return '<div class="el-card tw-preview" style="border-color:var(--gold-line)"><h3>Your Twin</h3><p class="el-sub" style="font-size:var(--fs-sm);line-height:1.6">' + txt + '</p>' +
+        '<button class="el-btn" onclick="if(window.openUpgradeModal)openUpgradeModal()">See my twin with Pro</button></div>';
+    } catch (e) { return ''; }
+  };
+  TW.renderOverview = function () {
+    var page = document.getElementById('page-overview'); if (!page) return;
+    var el = document.getElementById('twinOvCard');
+    var S = null; try { S = TW.compute('30d'); } catch (e) { S = null; }
+    if (!S || S.n < 5) { if (el) el.remove(); return; }
+    css();
+    if (!el) {
+      el = document.createElement('div'); el.id = 'twinOvCard'; el.className = 'glass-card'; el.style.margin = '0 0 14px';
+      var anchor = document.getElementById('dashboardEmptyState');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor.nextSibling); else page.appendChild(el);
+    }
+    var go = 'if(window.nav)nav(\'edgelab\');setTimeout(function(){if(window.EdgeLab)EdgeLab.go(\'twin\')},60)';
+    if (!isPro()) {
+      el.innerHTML = '<div class="tw-ov" onclick="' + go + '"><div class="tw-ov-t"><b style="color:var(--gold)">Your Twin</b><br><span>' +
+        (S.gap > 0.25 ? PV_BETTER : PV_LEVEL) + '</span></div></div>';
+      try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {}
+      return;
+    }
+    var top = causes(S).filter(function (c) { return c.v > 0; })[0];
+    el.innerHTML = '<div class="tw-ov" onclick="' + go + '"><div class="tw-ov-t"><b style="color:var(--gold)">Your Twin · last 30 days</b><br>' +
+      (S.gap > 0.25 ? '<span>Same entries, your rules kept — left behind:</span> <b class="neg notranslate" translate="no">' + fR(S.gap, 1) + '</b>' + (top ? '<br><span>Biggest cause:</span> <span class="tw-cause">' + esc(top.label) + '</span>' : '')
+                    : S.gap < -0.25 ? '<span>You beat your rule-keeping twin.</span> <b class="pos notranslate" translate="no">' + fR(-S.gap, 1) + '</b>' : '<span>You and your twin are level.</span>') + '</div>' +
+      '<div class="tw-ov-n"><div>You<b class="notranslate ' + cls(S.you.total) + '" translate="no">' + fR(S.you.total, 1) + '</b></div><div>Twin<b class="notranslate ' + cls(S.twin.total) + '" translate="no">' + fR(S.twin.total, 1) + '</b></div></div></div>';
+    try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {}
+  };
+
+  function hook() {
+    if (typeof window.updateOverview !== 'function' || window.updateOverview._tw) return false;
+    var o = window.updateOverview;
+    var w = function () { var x = o.apply(this, arguments); try { setTimeout(TW.renderOverview, 0); } catch (e) {} return x; };
+    w._tw = true; window.updateOverview = w; return true;
+  }
+  document.addEventListener('DOMContentLoaded', function () { css(); if (!hook()) setTimeout(hook, 1500); setTimeout(function () { try { TW.renderOverview(); } catch (e) {} }, 4000); });
 })();
 </script>
 </body>
