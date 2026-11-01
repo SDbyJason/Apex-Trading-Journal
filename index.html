@@ -427,7 +427,8 @@ window.APEX_PRICES = (function () {
         '<p><b>Cloudflare, Inc. — Workers:</b> Zahlungs-Webhooks, Marktdaten-Proxy, Auto-Tracking-' +
         'Eingang, Börsen-Synchronisierung, Verbindungsweg (Tunnel) zum MT5-Server. Drittlandtransfer ' +
         'auf Grundlage der Standardvertragsklauseln. Das Investor-Passwort wird dabei nur ' +
-        'durchgeleitet, nicht gespeichert.</p>' +
+        'durchgeleitet, nicht gespeichert. Bei der Einrichtung der Zwei-Faktor-Anmeldung lädt dein ' +
+        'Browser zusätzlich eine Programmbibliothek für den QR-Code über cdnjs (Cloudflare).</p>' +
         '<p><b>Frankfurter (api.frankfurter.dev) — Wechselkurse:</b> dein Browser ruft höchstens ' +
         'zweimal am Tag die Referenzkurse der Europäischen Zentralbank ab, um Beträge aus der ' +
         'Kontowährung in deine Anzeigewährung umzurechnen. Dabei wird technisch bedingt deine ' +
@@ -436,6 +437,11 @@ window.APEX_PRICES = (function () {
         '<p><b>Dein Broker bzw. deine Prop-Firm (MetaQuotes-Handelsserver):</b> nur wenn du den ' +
         'MT5-Cloud-Sync nutzt. Übertragen werden Kontonummer und Investor-Passwort zur Anmeldung, ' +
         'wie bei jeder MetaTrader-Anmeldung.</p>' +
+        '<p><b>Match-Trader (Match-Trade Technologies) und TradeLocker:</b> nur wenn du diese Anbindung selbst ' +
+        'einrichtest. Bei Match-Trader wird dein selbst erzeugter API-Token zur Authentifizierung übertragen und ' +
+        'gespeichert; bei TradeLocker werden E-Mail, Passwort und Server einmalig zur Anmeldung an TradeLocker ' +
+        'durchgereicht, das Passwort wird nicht gespeichert, nur das von TradeLocker ausgegebene Sitzungs-Token, ' +
+        'verschlüsselt. Es fließen keine Daten aus deinem Journal dorthin.</p>' +
         '<p><b>Binance, Bybit, Interactive Brokers:</b> nur wenn du diese Anbindung selbst ' +
         'einrichtest. Übertragen wird ausschließlich dein eigener Lese-Schlüssel zur ' +
         'Authentifizierung; es fließen keine Daten aus deinem Journal dorthin.</p>' +
@@ -1147,7 +1153,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-11-01a';
+  window.APEX_BUILD = '2026-11-01b';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -10063,6 +10069,8 @@ body.light #landingPage * {
         "Exit Lab — every entry replayed on 1-minute prices under other exits (set and forget, fixed targets, break-even, trailing, time stops), with the price after the exit",
         "Account currency per account — broker P&L, commission and swap read in it and converted at daily ECB rates",
         "Merge and split trades — partial fills into one position, undo any time",
+        "MCP server — ask Claude, ChatGPT or Cursor about your own journal, read-only",
+        "Match-Trader & TradeLocker auto-sync — prop-firm platforms, read-only token or a sign-in whose password is never stored",
         "Fee templates per account — commission filled in where a statement has none",
         "Connection health — every sync on one page, with an email when one stops delivering and a check of the broker's P&L against the journal",
         "Live chart with AI zone analysis across five timeframes, judged against your own playbook",
@@ -11559,6 +11567,7 @@ body.light #landingPage * {
         <tr><td>Crypto Auto-Sync — Binance &amp; Bybit read-only API key</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Stream overlay for OBS / Streamlabs — live P&amp;L or R, win rate, streak and open trade, with a read-only overlay key</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>TopstepX Auto-Sync — futures prop accounts on ProjectX, partial exits joined into one trade</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Match-Trader &amp; TradeLocker Auto-Sync — prop-firm platforms, read-only token or a sign-in whose password is never stored</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Statement import — every supported broker &amp; prop firm, the format detected automatically</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Import from another journal — TradeZella, TraderSync, Tradervue, TradesViz, Edgewonk, Trademetria</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Import check — executions, the file's own P&amp;L, duplicates, missing stops and timezone, shown before anything is written</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
@@ -11566,6 +11575,7 @@ body.light #landingPage * {
         <tr><td>Free column mapping &amp; saved import presets</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
         <tr><td>Reports — custom pivots, compare &amp; share links</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>REST API keys — read your journal from any external tool</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>MCP server — ask Claude, ChatGPT or Cursor about your own journal, read-only</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Strategy Lab — indicator rules backtested on real market data</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Parameter optimiser + walk-forward test</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Chart indicators (EMA, RSI, MACD, Bollinger, SuperTrend…)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -12514,6 +12524,7 @@ body.light #landingPage * {
       </div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-video ></use></svg></div><div><div class="apex-feat-label">Stream overlay</div><div class="apex-feat-desc">Put your day on stream: P&amp;L or R, win rate, streak and the trade you are in, updated from your journal every 20 seconds — as a card, a bar or a poster, with your referral code for viewers</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg></div><div><div class="apex-feat-label">TopstepX — direct connection</div><div class="apex-feat-desc">Your ProjectX username and API key, and every Topstep account under it syncs on its own — evaluations and funded. Scale-ins and partial exits become one trade with the platform's own P&amp;L and fees</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-chart ></use></svg></div><div><div class="apex-feat-label">Match-Trader &amp; TradeLocker — direct connection</div><div class="apex-feat-desc">The platforms many prop firms run on: Match-Trader with a read-only token, TradeLocker with a sign-in whose password is never stored. Trades arrive every 10 minutes, app open or not</div></div></div>
       <div class="apex-feat-item apex-feat-full">
         <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-bot ></use></svg></div>
         <div>
@@ -12599,6 +12610,13 @@ body.light #landingPage * {
         <div>
           <div class="apex-feat-label">REST API keys</div>
           <div class="apex-feat-desc">Read-only keys to pull your trades, daily summaries and stats into Sheets, a BI tool or your own dashboard</div>
+        </div>
+      </div>
+      <div class="apex-feat-item apex-feat-full">
+        <div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-key ></use></svg></div>
+        <div>
+          <div class="apex-feat-label">MCP server for AI assistants</div>
+          <div class="apex-feat-desc">Ask Claude, ChatGPT or Cursor about your own journal — stats, breakdowns, period comparisons — with a read-only key</div>
         </div>
       </div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon">🔔</div><div><div class="apex-feat-label">Outgoing webhooks</div><div class="apex-feat-desc">Every closed trade, a daily summary, a guardrail or prop-rule breach &mdash; sent to Zapier, Make, n8n or any endpoint as signed JSON, or straight into a Discord or Slack channel as a message</div></div></div>
@@ -13081,6 +13099,8 @@ body.light .oauth-btn:hover:not(:disabled) { background:#f6f7f9; }
         <div class="auth-spinner"></div>
       </button>
       <div class="auth-error" id="login-error"></div>
+      <!-- In the store apps: a way in without an account (app review, curious first-timers) -->
+      <a class="forgot-link apx-shell-only" href="?demo=1" style="display:none;text-align:center;margin:10px 0 0">Try the demo — no account needed</a>
       <div class="auth-sep">or</div>
       <div class="auth-oauth">
         <button class="oauth-btn" id="oauth-google-login" onclick="doOAuth('google')">
@@ -14760,6 +14780,8 @@ function _authAction(type) {
           <button class="at-plat-btn"        data-plat="sierrachart" onclick="ApexAutoTrack.select('sierrachart')"><svg class=ic aria-hidden=true><use href=#i-candle ></use></svg> Sierra Chart <span class="at-soon">beta</span></button>
           <button class="at-plat-btn"        data-plat="tradovate"  onclick="ApexAutoTrack.select('tradovate')"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg> Tradovate <span class="at-soon">soon</span></button>
           <button class="at-plat-btn"        data-plat="topstepx"   onclick="ApexAutoTrack.select('exchange');if(window.ApexExchange)ApexExchange.open('projectx')"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg> <span class="notranslate" translate="no">TopstepX</span></button>
+          <button class="at-plat-btn"        data-plat="tradelocker" onclick="ApexAutoTrack.select('exchange');if(window.ApexExchange)ApexExchange.open('tradelocker')"><svg class=ic aria-hidden=true><use href=#i-chart ></use></svg> <span class="notranslate" translate="no">TradeLocker</span></button>
+          <button class="at-plat-btn"        data-plat="matchtrader" onclick="ApexAutoTrack.select('exchange');if(window.ApexExchange)ApexExchange.open('matchtrader')"><svg class=ic aria-hidden=true><use href=#i-chart ></use></svg> <span class="notranslate" translate="no">Match-Trader</span></button>
           <button class="at-plat-btn"        data-plat="exchange"   onclick="ApexAutoTrack.select('exchange')"><svg class=ic aria-hidden=true><use href=#i-coin ></use></svg> Crypto &amp; IBKR</button>
         </div>
 
@@ -15005,6 +15027,9 @@ function _authAction(type) {
     <!-- ═══ TAB: PRIVACY ═══ -->
     <div class="settings-panel" id="spanel-privacy">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:900px">
+
+        <!-- Two-factor sign-in (ApexMfa, 01.11.2026) — filled in by script, hidden until switched on -->
+        <div class="glass-card" id="mfaCard" style="grid-column:1/-1;display:none"></div>
 
         <!-- Profile Visibility -->
         <div class="glass-card">
@@ -16119,6 +16144,12 @@ async function _doLogin() {
     await auth.signInWithEmailAndPassword(email, pw);
     // onAuthStateChanged handles the rest
   } catch(e) {
+    // second factor switched on → ask for the authenticator code (ApexMfa)
+    if (e && e.code === 'auth/multi-factor-auth-required' && window.ApexMfa) {
+      setBtnLoading('btn-login', false);
+      ApexMfa.challenge(e).catch(function () {});
+      return;
+    }
     console.error('Login error:', e);
     errEl.textContent = fmtAuthError(e.code) + (e.code ? '' : ' — ' + e.message);
     setBtnLoading('btn-login', false);
@@ -16217,11 +16248,28 @@ async function doOAuth(which) {
   if (regErr) regErr.textContent = '';
 
   oauthBusy(true);
+  /* Inside the iOS app shell Google refuses OAuth in an embedded web view
+     ("disallowed_useragent"): sign in natively and hand the credential to
+     Firebase (plugin @capacitor-firebase/authentication, mobile/ios-capacitor). */
+  try {
+    var FA = window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.FirebaseAuthentication;
+    if (FA && which === 'google' && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) {
+      var nat = await FA.signInWithGoogle({ skipNativeAuth: true });
+      var idt = nat && nat.credential && nat.credential.idToken;
+      if (!idt) throw { code: 'auth/popup-closed-by-user' };
+      await auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(idt));
+      return;
+    }
+  } catch (ne) {
+    if (ne && ne.code === 'auth/multi-factor-auth-required' && window.ApexMfa) { oauthBusy(false); ApexMfa.challenge(ne).catch(function () {}); return; }
+    oauthBusy(false); if (ne && ne.code !== 'auth/popup-closed-by-user') oauthError(ne && ne.code, ne && ne.message); return;
+  }
   try {
     await auth.signInWithPopup(oauthProvider(which));
     // onAuthStateChanged uebernimmt ab hier und legt das Profil an.
   } catch (e) {
     var c = e && e.code;
+    if (c === 'auth/multi-factor-auth-required' && window.ApexMfa) { oauthBusy(false); ApexMfa.challenge(e).catch(function () {}); return; }
     // Popup ging nicht (installierte App, blockiert, Drittanbieter-Cookies):
     // ueber eine Weiterleitung versuchen. Die verlaesst die Seite, deshalb
     // wird der Ladezustand nicht zurueckgesetzt.
@@ -16248,6 +16296,10 @@ window.doOAuth = doOAuth;
    Der Erfolgsfall laeuft ohnehin ueber onAuthStateChanged. */
 try {
   auth.getRedirectResult().catch(function (e) {
+    if (e && e.code === 'auth/multi-factor-auth-required') {
+      var ask = function () { if (window.ApexMfa) ApexMfa.challenge(e).catch(function () {}); else setTimeout(ask, 300); };
+      oauthBusy(false); ask(); return;
+    }
     if (e && e.code) { oauthError(e.code, e.message); oauthBusy(false); }
   });
 } catch (e) {}
@@ -30366,7 +30418,11 @@ document.addEventListener('keydown', function(e) {
       "Sync & data": ["Sync & Daten", "Sincronización y datos", "Sync e dados", "Synchro et données"],
       "Is my journal still receiving trades?": ["Kommen in meinem Journal noch Trades an?", "¿Sigue llegando operaciones a mi diario?", "Meu diário ainda está recebendo operações?", "Mon journal reçoit-il encore des trades ?"],
       "One page that answers it for every connection at once. A broken link is otherwise invisible: nothing errors, nothing looks missing, the journal simply stops growing and you find out weeks later — at which point you stop believing any number in the app. After three failed attempts in a row you also get an email, so you do not have to be the one checking. Each day’s P&L from the broker is also compared with what the journal computed, and a gap is flagged": ["Eine Seite, die das für jede Verbindung auf einmal beantwortet. Eine kaputte Verbindung ist sonst unsichtbar: Nichts meldet einen Fehler, nichts fehlt sichtbar, das Journal wächst einfach nicht mehr, und du merkst es Wochen später – und glaubst danach keiner Zahl in der App mehr. Nach drei Fehlversuchen in Folge bekommst du zusätzlich eine E-Mail, du musst also nicht selbst nachsehen. Außerdem wird das tägliche P&L des Brokers mit dem verglichen, was das Journal berechnet hat, und eine Abweichung wird markiert", "Una página que lo responde para todas las conexiones a la vez. Una conexión rota es invisible: nada da error, nada parece faltar, el diario simplemente deja de crecer y lo descubres semanas después, cuando ya no te crees ninguna cifra de la app. Tras tres intentos fallidos seguidos también recibes un email, así que no tienes que vigilarlo tú. Además, el P&L diario del bróker se compara con lo que calculó el diario y se marca cualquier diferencia", "Uma página que responde isso para todas as conexões de uma vez. Uma conexão quebrada é invisível: nada dá erro, nada parece faltar, o diário simplesmente para de crescer e você descobre semanas depois — quando já não acredita em nenhum número do app. Depois de três tentativas falhas seguidas você também recebe um e-mail, então não precisa ficar conferindo. O P&L diário da corretora também é comparado com o que o diário calculou, e uma diferença é sinalizada", "Une page qui y répond pour toutes les connexions à la fois. Sinon, une connexion rompue est invisible : rien ne signale d’erreur, rien ne semble manquer, le journal cesse simplement de grandir et vous le découvrez des semaines plus tard — au point de ne plus croire aucun chiffre de l’application. Après trois échecs d’affilée, vous recevez aussi un e-mail, vous n’avez donc pas à surveiller. Le P&L journalier du courtier est aussi comparé à celui calculé par le journal, et tout écart est signalé"],
+      "Match-Trader & TradeLocker — direct connection": ["Match-Trader & TradeLocker – direkte Verbindung", "Match-Trader y TradeLocker: conexión directa", "Match-Trader e TradeLocker — conexão direta", "Match-Trader et TradeLocker — connexion directe"],
+      "The platforms many prop firms run on: Match-Trader with a read-only token, TradeLocker with a sign-in whose password is never stored. Trades arrive every 10 minutes, app open or not": ["Die Plattformen vieler Prop-Firmen: Match-Trader mit nur lesendem Token, TradeLocker mit einer Anmeldung, deren Passwort nie gespeichert wird. Trades kommen alle 10 Minuten an, ob die App offen ist oder nicht", "Las plataformas de muchas prop firms: Match-Trader con un token de solo lectura, TradeLocker con un inicio de sesión cuya contraseña nunca se guarda. Las operaciones llegan cada 10 minutos, con la app abierta o no", "As plataformas de muitas prop firms: Match-Trader com token somente leitura, TradeLocker com um login cuja senha nunca é guardada. As operações chegam a cada 10 minutos, com o app aberto ou não", "Les plateformes de nombreuses prop firms : Match-Trader avec un jeton en lecture seule, TradeLocker avec une connexion dont le mot de passe n’est jamais stocké. Les trades arrivent toutes les 10 minutes, app ouverte ou non"],
       "REST API keys": ["REST-API-Schlüssel", "Claves de API REST", "Chaves de API REST", "Clés d’API REST"],
+      "MCP server for AI assistants": ["MCP-Server für KI-Assistenten", "Servidor MCP para asistentes de IA", "Servidor MCP para assistentes de IA", "Serveur MCP pour assistants IA"],
+      "Ask Claude, ChatGPT or Cursor about your own journal — stats, breakdowns, period comparisons — with a read-only key": ["Frag Claude, ChatGPT oder Cursor nach deinem eigenen Journal – Statistiken, Aufschlüsselungen, Zeitraumvergleiche – mit einem nur lesenden Schlüssel", "Pregunta a Claude, ChatGPT o Cursor sobre tu propio diario (estadísticas, desgloses, comparación de periodos) con una clave de solo lectura", "Pergunte ao Claude, ChatGPT ou Cursor sobre o seu próprio diário — estatísticas, detalhamentos, comparação de períodos — com uma chave somente leitura", "Interroge Claude, ChatGPT ou Cursor sur ton propre journal — statistiques, ventilations, comparaisons de périodes — avec une clé en lecture seule"],
       "Read-only keys to pull your trades, daily summaries and stats into Sheets, a BI tool or your own dashboard": ["Nur lesende Schlüssel, um Trades, Tageszusammenfassungen und Statistiken in Sheets, ein BI-Tool oder dein eigenes Dashboard zu holen", "Claves de solo lectura para llevar tus operaciones, resúmenes diarios y estadísticas a Sheets, una herramienta BI o tu propio panel", "Chaves somente leitura para levar suas operações, resumos diários e estatísticas ao Sheets, a uma ferramenta de BI ou ao seu próprio painel", "Des clés en lecture seule pour récupérer vos trades, résumés journaliers et statistiques dans Sheets, un outil BI ou votre propre tableau de bord"],
       "Outgoing webhooks": ["Ausgehende Webhooks", "Webhooks salientes", "Webhooks de saída", "Webhooks sortants"],
       "Every closed trade, a daily summary, a guardrail or prop-rule breach — sent to Zapier, Make, n8n or any endpoint as signed JSON, or straight into a Discord or Slack channel as a message": ["Jeder geschlossene Trade, eine Tageszusammenfassung, ein Guardrail- oder Prop-Regelbruch – als signiertes JSON an Zapier, Make, n8n oder jeden Endpunkt, oder direkt als Nachricht in einen Discord- oder Slack-Kanal", "Cada operación cerrada, un resumen diario, una infracción de guardrail o de regla de prop, enviados a Zapier, Make, n8n o cualquier endpoint como JSON firmado, o directamente como mensaje a un canal de Discord o Slack", "Cada operação fechada, um resumo diário, uma violação de guardrail ou de regra de prop — enviados ao Zapier, Make, n8n ou qualquer endpoint como JSON assinado, ou direto como mensagem num canal do Discord ou Slack", "Chaque trade clôturé, un résumé journalier, une infraction de garde-fou ou de règle prop — envoyés à Zapier, Make, n8n ou tout endpoint en JSON signé, ou directement en message dans un canal Discord ou Slack"],
@@ -49758,6 +49814,8 @@ body.light .pt-sugg{background:var(--layer)}
     sierrachart:{name:'Sierra Chart',   platform:'Sierra Chart' },
     tradingview:{name:'TradingView',    platform:'TradingView' },
     webhook:   { name:'Webhook Import', platform:'Other' },
+    tradelocker:{ name:'TradeLocker',   platform:'TradeLocker' },
+    matchtrader:{ name:'Match-Trader',  platform:'Match-Trader' },
     csv:       { name:'CSV Import',     platform:'Other' }
   };
 
@@ -79477,6 +79535,23 @@ body.light .pw-fld input, body.light .pw-fld select { color-scheme: light; }
           '<tr><td class="mono">GET /v1/journal/{date}</td><td>One full day, raw</td></tr>' +
         '</tbody></table>' +
         '<div class="dev-hint">Rate limit: 120 requests per key per minute. Figures are reported in pips; a broker-supplied P&amp;L is passed through as&nbsp;<span class="mono">pnl</span>.</div>' +
+      '</div>' +
+
+      /* MCP (01.11.2026) — the same key, read-only, for AI assistants. */
+      '<div class="dev-card"><h3>Connect an AI assistant (MCP)</h3>' +
+        '<p class="dev-sub">Ask Claude, ChatGPT, Cursor or any MCP client about your own journal — “which setup made me the most R last month?”, “do I trade worse on Mondays?”. ' +
+          'It uses one of the API keys above and can only read: it can never place, change or delete a trade.</p>' +
+        '<div class="dev-sub" style="margin:10px 0 4px"><b>Claude Code</b></div>' +
+        '<pre class="dev-code">claude mcp add --transport http evidence \\\n  ' + esc(base) + '/mcp \\\n  --header "Authorization: Bearer YOUR_KEY"</pre>' +
+        '<div class="dev-sub" style="margin:10px 0 4px"><b>Cursor, Claude Desktop and other clients</b> — add a remote server:</div>' +
+        '<pre class="dev-code">{\n  "mcpServers": {\n    "evidence": {\n      "url": "' + esc(base) + '/mcp",\n      "headers": { "Authorization": "Bearer YOUR_KEY" }\n    }\n  }\n}</pre>' +
+        '<table class="dev-table"><thead><tr><th>Tool</th><th>Answers</th></tr></thead><tbody>' +
+          '<tr><td class="mono">get_stats</td><td>Win rate, profit factor, expectancy, drawdown, R over any range and filter</td></tr>' +
+          '<tr><td class="mono">breakdown</td><td>The same split by symbol, setup, session, direction, weekday, hour, month, mistake, grade or account</td></tr>' +
+          '<tr><td class="mono">compare_periods</td><td>Two periods side by side with the change</td></tr>' +
+          '<tr><td class="mono">list_trades · list_days · get_journal_day</td><td>The trades, days, notes and ratings themselves</td></tr>' +
+        '</tbody></table>' +
+        '<div class="dev-hint">Use a key you created for this purpose — you can revoke it above at any time. The assistant sees what the key can read: your trades, notes and day ratings.</div>' +
       '</div>';
   };
 
@@ -80603,6 +80678,31 @@ body.light .apxFR-card { background: #fff; }
         + 'subscribe to <em>ProjectX API Access</em> (a ProjectX subscription, paid to them, not to Evidence) and '
         + 'create a key with <code>Add API Key</code>. Every account under that login syncs — evaluations and funded. '
         + 'Scale-ins and partial exits are joined into one trade with the platform&rsquo;s own P&amp;L and fees.' },
+    /* 01.11.2026: two forex/CFD platforms many prop firms run on. */
+    matchtrader: { name: 'Match-Trader', meta: 'Forex &amp; CFD, prop firms · read-only API token',
+      warn: '<strong>Create the token with read-only access.</strong> Evidence reads your account and closed positions '
+        + 'and never sends an order. The token is stored where no browser can read it back; revoke it in Match-Trader any time.',
+      fields: [
+        { k: 'token', label: 'API token', ph: 'shown by Match-Trader only once', secret: true },
+        { k: 'label', label: 'Broker or prop firm', ph: 'e.g. FundingPips', opt: true }
+      ],
+      help: 'Match-Trader → <code>API Access</code> → generate a token with <strong>read-only</strong> access and the longest '
+        + 'lifetime it allows (up to a year). Your broker or prop firm has to switch the Trader API on — if you do not see '
+        + '<code>API Access</code>, ask them, or import a statement instead. Closed positions arrive with the platform&rsquo;s '
+        + 'own P&amp;L, commission and swap.' },
+    tradelocker: { name: 'TradeLocker', meta: 'Forex &amp; CFD, prop firms · TradeLocker sign-in',
+      warn: '<strong>TradeLocker has no read-only login.</strong> Your password goes once to our sync service to sign in and is '
+        + '<strong>never stored</strong> — only the session TradeLocker hands back, encrypted, which Evidence uses to read your '
+        + 'order history and never to place an order. Changing your TradeLocker password ends the connection.',
+      fields: [
+        { k: 'email', label: 'TradeLocker e-mail', ph: 'the e-mail you sign in with' },
+        { k: 'password', label: 'TradeLocker password', ph: 'used once, never stored', secret: true, transient: true },
+        { k: 'server', label: 'Server', ph: 'as on the TradeLocker login, e.g. OSP-LIVE' },
+        { k: 'tlEnv', label: 'Account type', options: [['live', 'Live / funded'], ['demo', 'Demo / evaluation on demo servers']] }
+      ],
+      help: 'Use the same e-mail, password and server as on the TradeLocker login screen (your prop firm&rsquo;s dashboard shows '
+        + 'the server). Every account under that login syncs. TradeLocker reports orders, not money: the result is priced from '
+        + 'pips × lots like an import — set the account currency and a fee template on the account for exact figures.' },
     /* unavailable: IBKR refuses our sync servers' network (403 from every
        attempt, verified 07.08.2026). The code works; the route does not.
        Showing the form anyway would cost the trader ten minutes creating a
@@ -80668,8 +80768,10 @@ body.light .apxFR-card { background: #fff; }
         + '<div class="apxEx-help">' + e.help + '</div>'
         + e.fields.map(function(f){
             return '<div class="apxEx-field"><label>' + esc(f.label) + (f.opt ? ' <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span>' : '') + '</label>'
-              + '<input class="apxEx-in" id="apxEx_' + f.k + '" autocomplete="off" spellcheck="false" '
-              + 'type="' + (/secret/i.test(f.k) || f.secret ? 'password' : 'text') + '" placeholder="' + esc(f.ph || '') + '"></div>';
+              + (f.options
+                ? '<select class="apxEx-in" id="apxEx_' + f.k + '">' + f.options.map(function(o){ return '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>'; }).join('') + '</select>'
+                : '<input class="apxEx-in" id="apxEx_' + f.k + '" autocomplete="off" spellcheck="false" '
+                  + 'type="' + (/secret/i.test(f.k) || f.secret ? 'password' : 'text') + '" placeholder="' + esc(f.ph || '') + '">') + '</div>';
           }).join('')
         + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'
         + '<button class="apxRef-b primary" id="apxExSave" onclick="ApexExchange.save()">Connect ' + esc(e.name) + '</button>'
@@ -80686,7 +80788,7 @@ body.light .apxFR-card { background: #fff; }
 
     host.innerHTML =
       '<div class="glass-card" style="padding:18px;margin-bottom:14px">'
-      + '<div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:5px">Crypto, futures props &amp; IBKR — direct connection</div>'
+      + '<div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:5px">Crypto, prop firms &amp; more — direct connection</div>'
       + '<div class="apxEx-meta" style="margin-bottom:14px">Your trades arrive by themselves, every 10 minutes, '
         + 'whether or not the app is open. No CSV export, no upload. Requires Pro.</div>'
       + '<div class="apxEx-grid">' + cards + '</div>'
@@ -80758,6 +80860,11 @@ body.light .apxFR-card { background: #fff; }
       }
       if (res.suggestedSymbols && res.suggestedSymbols.length && !cfg.symbols)
         cfg.symbols = res.suggestedSymbols.join(',');
+      /* A transient field (the TradeLocker password) was needed for the check
+         only and is never written anywhere; what the worker hands back to keep
+         (an encrypted session) is stored instead. */
+      EX[ex].fields.forEach(function(f){ if (f.transient) delete cfg[f.k]; });
+      if (res.store && typeof res.store === 'object') Object.keys(res.store).forEach(function(k){ cfg[k] = res.store[k]; });
 
       cfg.uid = window.currentUID;
       cfg.enabled = true;
@@ -105658,6 +105765,8 @@ body.light::before{ opacity:.45; }
     "Confidence on every number — how many trades stand behind each statistic": ["Konfidenz an jeder Zahl — wie viele Trades hinter jeder Kennzahl stehen", "Confianza en cada cifra — cuántas operaciones respaldan cada estadística", "Confiança em cada número — quantas operações sustentam cada estatística", "Fiabilité sur chaque chiffre — combien de trades soutiennent chaque statistique"],
     "Sign in with Google": ["Anmelden mit Google", "Inicio de sesión con Google", "Login com Google", "Connexion avec Google"],
     "16 display currencies & auto-translation": ["16 Anzeigewährungen & automatische Übersetzung", "16 divisas de visualización y traducción automática", "16 moedas de exibição e tradução automática", "16 devises d’affichage et traduction automatique"],
+    "Match-Trader & TradeLocker Auto-Sync — prop-firm platforms, read-only token or a sign-in whose password is never stored": ["Match-Trader- & TradeLocker-Auto-Sync – Prop-Firm-Plattformen, nur lesender Token oder eine Anmeldung, deren Passwort nie gespeichert wird", "Sincronización automática de Match-Trader y TradeLocker: plataformas de prop firms, token de solo lectura o un inicio de sesión cuya contraseña nunca se guarda", "Sincronização automática Match-Trader e TradeLocker — plataformas de prop firms, token somente leitura ou um login cuja senha nunca é guardada", "Synchro auto Match-Trader et TradeLocker — plateformes de prop firms, jeton en lecture seule ou une connexion dont le mot de passe n’est jamais stocké"],
+    "MCP server — ask Claude, ChatGPT or Cursor about your own journal, read-only": ["MCP-Server – frag Claude, ChatGPT oder Cursor nach deinem eigenen Journal, nur lesend", "Servidor MCP: pregunta a Claude, ChatGPT o Cursor sobre tu propio diario, solo lectura", "Servidor MCP — pergunte ao Claude, ChatGPT ou Cursor sobre o seu próprio diário, somente leitura", "Serveur MCP — interroge Claude, ChatGPT ou Cursor sur ton propre journal, en lecture seule"],
     "Merge and split trades — partial fills into one position, undo any time": ["Trades zusammenführen und aufteilen – Teilausführungen zu einer Position, jederzeit rückgängig", "Unir y dividir operaciones: ejecuciones parciales en una posición, reversible en cualquier momento", "Juntar e dividir operações — execuções parciais em uma posição, reversível a qualquer momento", "Fusionner et scinder des trades — exécutions partielles en une position, réversible à tout moment"],
     "Fee templates per account — commission filled in where a statement has none": ["Gebühren-Vorlagen pro Konto – Kommission wird ergänzt, wo ein Kontoauszug keine hat", "Plantillas de comisiones por cuenta: la comisión se completa donde el extracto no la trae", "Modelos de taxas por conta — a comissão é preenchida onde o extrato não a tem", "Modèles de frais par compte — la commission est ajoutée là où le relevé n’en a pas"],
     "Account currency per account — booked P&L converted at daily ECB rates, 16 display currencies & auto-translation": ["Kontowährung je Konto – gebuchter G&V zum EZB-Tageskurs umgerechnet, 16 Anzeigewährungen & automatische Übersetzung", "Divisa por cuenta: P&L contabilizado convertido al tipo diario del BCE, 16 divisas de visualización y traducción automática", "Moeda por conta — P&L lançado convertido à taxa diária do BCE, 16 moedas de exibição e tradução automática", "Devise par compte — P&L comptabilisé converti au taux BCE du jour, 16 devises d’affichage et traduction automatique"],
@@ -112944,7 +113053,11 @@ body.light .tv-ev-dd-pop{background:#fff}
   };
   window.ApexFx = Fx;
   var c0 = cached();
-  if (c0) apply(c0, 'ecb');
+  /* This block sits at the end of a 7 MB page: on a slow line the journal
+     can already be on screen with the built-in rates. Re-render once then. */
+  if (c0 && apply(c0, 'ecb')) setTimeout(function () {
+    try { if (window.journalData && Object.keys(journalData).length) rerender(); } catch (e) {}
+  }, 0);
   // after the first paint — the rate table is never on the critical path
   setTimeout(function () { Fx.refresh(false); }, 2500);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') Fx.refresh(false); });
@@ -113956,6 +114069,332 @@ var ApexMergeEngine = (function () {
   document.addEventListener('DOMContentLoaded', function () { css(); if (!hook()) setTimeout(hook, 1500); });
   // switching day or page ends the selection
   document.addEventListener('apex:page', function () { if (on) G.toggle(false); });
+})();
+</script>
+<script>
+/* ApexMfa — two-factor sign-in with an authenticator app (TOTP), 01.11.2026
+   Evidence stores MT5 investor passwords and exchange read keys; a hijacked
+   login is the one incident worth designing against. Firebase runs the actual
+   second factor (multi-factor auth with TOTP), so it is enforced by the auth
+   server, not by this page — a stolen password alone no longer signs in.
+
+   Two technical facts shape this file:
+     · The compat SDK the app loads (10.7.1) has no TotpMultiFactorGenerator.
+       The modular build of the SAME version has it and works on the compat
+       objects (their _delegate is the modular instance), so it is imported on
+       demand — only when someone sets up 2FA or signs in with it.
+     · TOTP must be switched on for the Firebase project (Identity Platform).
+       Until it is, APEX_MFA_LIVE stays false: the settings card is hidden, and
+       the sign-in challenge below is ready for the day it is switched on.
+   No recovery codes exist in Firebase: the setup key IS the backup — shown
+   once, with a plain note to keep it. */
+window.APEX_MFA_LIVE = window.APEX_MFA_LIVE || false;
+(function () {
+  var M = {};
+  window.ApexMfa = M;
+  var SDK = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+  var QR = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+  var _totp = null, _qr = null, S = null;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function toast(m) { try { if (window.showToast) showToast(m); } catch (e) {} }
+  function fbAuth() { try { return window.auth || (window.firebase && firebase.auth && firebase.auth()); } catch (e) { return null; } }
+  function user() { var a = fbAuth(); return a && a.currentUser; }
+  function totp() {
+    if (!_totp) _totp = import(SDK).then(function (m) {
+      if (!m || !m.TotpMultiFactorGenerator) throw new Error('This browser could not load the two-factor module.');
+      return m;
+    });
+    return _totp;
+  }
+  function qrLib() {
+    if (!_qr) _qr = new Promise(function (res, rej) {
+      if (window.qrcode) return res(window.qrcode);
+      var s = document.createElement('script'); s.src = QR; s.async = true;
+      s.onload = function () { window.qrcode ? res(window.qrcode) : rej(new Error('qr')); };
+      s.onerror = function () { rej(new Error('qr')); };
+      document.head.appendChild(s);
+    });
+    return _qr;
+  }
+  function enrolled() {
+    try { var u = user(); return ((u && u.multiFactor && u.multiFactor.enrolledFactors) || []).filter(function (f) { return f.factorId === 'totp'; }); } catch (e) { return []; }
+  }
+  function providers() { try { return (user().providerData || []).map(function (p) { return p.providerId; }); } catch (e) { return []; } }
+
+  /* Plain words for the auth server's error codes (pure — tested). */
+  M.msg = function (code, fallback) {
+    switch (code) {
+      case 'auth/invalid-verification-code': case 'auth/invalid-code':
+        return 'That code is not right. Codes change every 30 seconds — check the time on your phone and type the newest one.';
+      case 'auth/code-expired': return 'That code has expired — type the current one.';
+      case 'auth/requires-recent-login': return 'For your security, confirm your sign-in first.';
+      case 'auth/operation-not-allowed': case 'auth/admin-restricted-operation':
+        return 'Two-factor sign-in is not switched on for Evidence yet.';
+      case 'auth/too-many-requests': return 'Too many attempts. Wait a few minutes and try again.';
+      case 'auth/wrong-password': case 'auth/invalid-credential': case 'auth/invalid-login-credentials':
+        return 'That password is not right.';
+      case 'auth/popup-closed-by-user': return 'The sign-in window was closed.';
+      case 'auth/unverified-email': return 'Confirm your email address first — Firebase requires it before a second factor can be added.';
+      case 'auth/maximum-second-factor-count-exceeded': return 'This account already has the maximum number of second factors.';
+      default: return fallback || 'Something went wrong. Please try again.';
+    }
+  };
+  /* "JBSWY3DPEHPK3PXP" → "JBSW Y3DP EHPK 3PXP" — easier to type by hand. */
+  M.groupKey = function (k) { return String(k || '').replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim(); };
+  /* Six digits, nothing else — spaces and dashes from copy-paste dropped. */
+  M.cleanCode = function (v) { var d = String(v || '').replace(/\D+/g, ''); return d.length === 6 ? d : ''; };
+
+  function css() {
+    if (document.getElementById('mfaCss')) return;
+    var s = document.createElement('style'); s.id = 'mfaCss';
+    s.textContent =
+      '#mfaOv{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px);z-index:100001;display:none;align-items:center;justify-content:center;padding:16px}' +
+      '#mfaOv.open{display:flex}' +
+      '#mfaBox{background:var(--elevated);border:1px solid var(--rim2);border-radius:var(--r-lg);width:min(440px,100%);max-height:90vh;overflow:auto;padding:22px}' +
+      '#mfaBox h3{margin:0 0 6px;font-size:var(--fs-lg)}' +
+      '#mfaBox p{font-size:var(--fs-sm);color:var(--ink2);line-height:1.55;margin:0 0 12px}' +
+      '.mfa-qr{display:flex;justify-content:center;margin:6px 0 10px}' +
+      '.mfa-qr svg,.mfa-qr img{width:196px;height:196px;background:#fff;padding:8px;border-radius:var(--r-sm)}' +
+      '.mfa-key{font-family:var(--font-mono,DM Mono,monospace);font-size:var(--fs-sm);letter-spacing:.06em;text-align:center;background:var(--surface);border:1px dashed var(--rim2);border-radius:var(--r-sm);padding:8px;word-break:break-all;user-select:all}' +
+      '.mfa-code{width:100%;box-sizing:border-box;text-align:center;font-family:var(--font-mono,DM Mono,monospace);font-size:24px;letter-spacing:.35em;padding:10px;border-radius:var(--r-md);border:1px solid var(--rim2);background:var(--surface);color:var(--ink);margin:6px 0 4px}' +
+      '.mfa-pw{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:var(--r-md);border:1px solid var(--rim2);background:var(--surface);color:var(--ink);font-size:var(--fs-base);margin:4px 0 6px}' +
+      '.mfa-err{min-height:18px;font-size:var(--fs-xs);color:var(--loss);margin:4px 0 2px}' +
+      '.mfa-btns{display:flex;gap:8px;margin-top:12px}.mfa-btns .apex-btn{flex:1;justify-content:center}' +
+      '.mfa-step{font-size:var(--fs-micro);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:12px 0 4px}' +
+      '.mfa-on{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-xs);font-weight:700;color:var(--profit);background:rgba(var(--profit-rgb),.12);border-radius:var(--r-pill);padding:3px 10px}';
+    document.head.appendChild(s);
+    var ov = document.createElement('div'); ov.id = 'mfaOv';
+    ov.innerHTML = '<div id="mfaBox" role="dialog" aria-modal="true" aria-labelledby="mfaTitle"></div>';
+    document.body.appendChild(ov);
+  }
+  function box(html) { css(); var b = document.getElementById('mfaBox'); b.innerHTML = html; document.getElementById('mfaOv').classList.add('open'); var f = b.querySelector('input'); if (f) setTimeout(function () { f.focus(); }, 30); return b; }
+  M.close = function () { var o = document.getElementById('mfaOv'); if (o) o.classList.remove('open'); S = null; };
+  function err(t) { var e = document.getElementById('mfaErr'); if (e) e.textContent = t || ''; }
+  function busy(on) { var b = document.querySelectorAll('#mfaBox button'); b.forEach(function (x) { x.disabled = !!on; }); }
+
+  /* ───────── settings card ───────── */
+  M.render = function () {
+    var host = document.getElementById('mfaCard');
+    if (!host) return;
+    var u = user();
+    if (!window.APEX_MFA_LIVE || !u || window.currentUID === 'demo') { host.style.display = 'none'; return; }
+    host.style.display = '';
+    var f = enrolled();
+    host.innerHTML = '<div class="gc-title" style="margin-bottom:.8rem"><svg class=ic aria-hidden=true><use href=#i-lock ></use></svg> Two-factor sign-in</div>' +
+      (f.length
+        ? '<div class="mfa-on">✓ On — authenticator app</div><p style="font-size:12px;color:var(--ink3);margin:10px 0 12px;line-height:1.55">Signing in now needs your password and a 6-digit code from ' + esc(f[0].displayName || 'your authenticator app') + '.</p>' +
+          '<button class="apex-btn apex-btn--ghost apex-btn--sm" onclick="ApexMfa.turnOff()">Turn off</button>'
+        : '<p style="font-size:12px;color:var(--ink3);margin:0 0 12px;line-height:1.55">Sign in with your password <b>and</b> a code from an authenticator app (Google Authenticator, 1Password, Authy, Microsoft Authenticator). A stolen password alone is then no longer enough — worth it with broker connections on your account.</p>' +
+          '<button class="apex-btn apex-btn--solid apex-btn--sm" onclick="ApexMfa.setup()">Turn on</button>');
+  };
+
+  /* Confirm the sign-in before a security change (Firebase demands a recent
+     login). Resolves when done; a second factor during this step is handled. */
+  function reauth() {
+    return new Promise(function (resolve, reject) {
+      var u = user(), pv = providers();
+      var pw = pv.indexOf('password') >= 0, google = pv.indexOf('google.com') >= 0;
+      box('<h3 id="mfaTitle">Confirm it’s you</h3><p>Changing how you sign in needs a fresh confirmation.</p>' +
+        (pw ? '<input class="mfa-pw" id="mfaPw" type="password" autocomplete="current-password" placeholder="Your Evidence password" aria-label="Password">' : '') +
+        '<div class="mfa-err" id="mfaErr"></div><div class="mfa-btns">' +
+        '<button class="apex-btn apex-btn--ghost" id="mfaCancel">Cancel</button>' +
+        (pw ? '<button class="apex-btn apex-btn--solid" id="mfaOkPw">Confirm</button>' : '') +
+        (google ? '<button class="apex-btn apex-btn--' + (pw ? 'ghost' : 'solid') + '" id="mfaOkG">Continue with Google</button>' : '') + '</div>');
+      document.getElementById('mfaCancel').onclick = function () { M.close(); reject(new Error('cancelled')); };
+      function fail(e) {
+        if (e && e.code === 'auth/multi-factor-auth-required') { M.challenge(e).then(resolve, reject); return; }
+        busy(false); err(M.msg(e && e.code, e && e.message));
+      }
+      if (pw) {
+        var go = function () {
+          var v = (document.getElementById('mfaPw') || {}).value || '';
+          if (!v) { err('Enter your password.'); return; }
+          busy(true);
+          var cred = firebase.auth.EmailAuthProvider.credential(u.email, v);
+          u.reauthenticateWithCredential(cred).then(function () { resolve(); }, fail);
+        };
+        document.getElementById('mfaOkPw').onclick = go;
+        document.getElementById('mfaPw').onkeydown = function (e) { if (e.key === 'Enter') go(); };
+      }
+      if (google) document.getElementById('mfaOkG').onclick = function () {
+        busy(true);
+        u.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider()).then(function () { resolve(); }, fail);
+      };
+    });
+  }
+  function withRecentLogin(fn) {
+    return fn().catch(function (e) {
+      if (e && e.code === 'auth/requires-recent-login') return reauth().then(fn);
+      throw e;
+    });
+  }
+
+  /* ───────── turn on ───────── */
+  M.setup = function () {
+    var u = user();
+    if (!u) return;
+    if (typeof apexDemoBlocked === 'function' && apexDemoBlocked('Two-factor sign-in')) return;
+    box('<h3 id="mfaTitle">Two-factor sign-in</h3><p>Preparing…</p>');
+    var mod;
+    withRecentLogin(function () {
+      return totp().then(function (m) { mod = m; return u.multiFactor.getSession(); })
+        .then(function (session) { return mod.TotpMultiFactorGenerator.generateSecret(session); });
+    }).then(function (secret) {
+      S = { secret: secret, mod: mod };
+      var issuer = 'Evidence Trading', acct = u.email || 'Evidence account';
+      var url = secret.generateQrCodeUrl(acct, issuer);
+      box('<h3 id="mfaTitle">Two-factor sign-in</h3>' +
+        '<div class="mfa-step">1 · Add Evidence to your authenticator app</div>' +
+        '<p>Scan the code with the app — or on this phone, tap <a href="' + esc(url) + '" style="color:var(--gold)">open in authenticator app</a>.</p>' +
+        '<div class="mfa-qr" id="mfaQr"></div>' +
+        '<p style="font-size:12px;color:var(--ink3);margin:0 0 4px">Setup key — keep it somewhere safe. It is the only way to restore the codes on a new phone:</p>' +
+        '<div class="mfa-key notranslate" translate="no">' + esc(M.groupKey(secret.secretKey)) + '</div>' +
+        '<div class="mfa-step">2 · Type the 6-digit code the app shows</div>' +
+        '<input class="mfa-code" id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="9" placeholder="000000" aria-label="Six-digit code">' +
+        '<div class="mfa-err" id="mfaErr"></div>' +
+        '<div class="mfa-btns"><button class="apex-btn apex-btn--ghost" onclick="ApexMfa.close()">Cancel</button><button class="apex-btn apex-btn--solid" id="mfaVerify">Turn on</button></div>');
+      qrLib().then(function (qrcode) {
+        var q = qrcode(0, 'M'); q.addData(url); q.make();
+        var el = document.getElementById('mfaQr'); if (el) el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+      }).catch(function () { var el = document.getElementById('mfaQr'); if (el) el.innerHTML = '<p style="font-size:12px;color:var(--ink3)">The QR code could not load — type the setup key into the app instead.</p>'; });
+      var go = function () {
+        var code = M.cleanCode((document.getElementById('mfaCode') || {}).value);
+        if (!code) { err('Type the 6 digits from the app.'); return; }
+        busy(true);
+        var assertion = S.mod.TotpMultiFactorGenerator.assertionForEnrollment(S.secret, code);
+        u.multiFactor.enroll(assertion, 'Authenticator app').then(function () {
+          box('<h3 id="mfaTitle">Two-factor sign-in is on</h3><p>From now on Evidence asks for a code from your authenticator app after your password. Keep the setup key safe — without it and without the phone, a sign-in needs our support.</p>' +
+            '<div class="mfa-btns"><button class="apex-btn apex-btn--solid" onclick="ApexMfa.close()">Done</button></div>');
+          M.render();
+        }, function (e) { busy(false); err(M.msg(e && e.code, e && e.message)); });
+      };
+      document.getElementById('mfaVerify').onclick = go;
+      document.getElementById('mfaCode').onkeydown = function (e) { if (e.key === 'Enter') go(); };
+    }).catch(function (e) {
+      if (e && e.message === 'cancelled') return;
+      box('<h3 id="mfaTitle">Two-factor sign-in</h3><p>' + esc(M.msg(e && e.code, e && e.message)) + '</p>' +
+        '<div class="mfa-btns"><button class="apex-btn apex-btn--solid" onclick="ApexMfa.close()">Close</button></div>');
+    });
+  };
+
+  /* ───────── turn off ───────── */
+  M.turnOff = function () {
+    var u = user(), f = enrolled()[0];
+    if (!u || !f) return;
+    var ask = window.ApexDialog ? ApexDialog.confirm('Turn off two-factor sign-in? Your password alone will sign in again.', { title: 'Two-factor sign-in', okText: 'Turn off', danger: true }) : Promise.resolve(true);
+    ask.then(function (ok) {
+      if (!ok) return;
+      withRecentLogin(function () { return u.multiFactor.unenroll(f); })
+        .then(function () { M.close(); toast('Two-factor sign-in is off'); M.render(); })
+        .catch(function (e) { if (e && e.message === 'cancelled') return; toast('⚠ ' + M.msg(e && e.code, e && e.message)); });
+    });
+  };
+
+  /* ───────── sign-in challenge ─────────
+     Called by the email and Google sign-in paths when Firebase answers
+     auth/multi-factor-auth-required. Resolves once signed in. */
+  M.challenge = function (e) {
+    return new Promise(function (resolve, reject) {
+      var resolver = e && e.resolver;
+      var hints = (resolver && resolver.hints) || [];
+      var hint = hints.filter(function (h) { return h.factorId === 'totp'; })[0];
+      if (!resolver || !hint) {
+        box('<h3 id="mfaTitle">Second step needed</h3><p>This account asks for a second factor this page cannot show. Please contact support.</p><div class="mfa-btns"><button class="apex-btn apex-btn--solid" onclick="ApexMfa.close()">Close</button></div>');
+        reject(e); return;
+      }
+      box('<h3 id="mfaTitle">Enter your code</h3><p>Open your authenticator app and type the 6-digit code for Evidence Trading.</p>' +
+        '<input class="mfa-code" id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="9" placeholder="000000" aria-label="Six-digit code">' +
+        '<div class="mfa-err" id="mfaErr"></div>' +
+        '<div class="mfa-btns"><button class="apex-btn apex-btn--ghost" id="mfaCancel">Cancel</button><button class="apex-btn apex-btn--solid" id="mfaGo">Sign in</button></div>' +
+        '<p style="font-size:11px;color:var(--ink3);margin:12px 0 0">Lost your phone? Add the setup key you saved to a new authenticator app, or contact support.</p>');
+      document.getElementById('mfaCancel').onclick = function () { M.close(); reject(new Error('cancelled')); };
+      var go = function () {
+        var code = M.cleanCode((document.getElementById('mfaCode') || {}).value);
+        if (!code) { err('Type the 6 digits from the app.'); return; }
+        busy(true);
+        totp().then(function (m) {
+          return resolver.resolveSignIn(m.TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code));
+        }).then(function (cred) { M.close(); resolve(cred); }, function (x) { busy(false); err(M.msg(x && x.code, x && x.message)); });
+      };
+      document.getElementById('mfaGo').onclick = go;
+      document.getElementById('mfaCode').onkeydown = function (k) { if (k.key === 'Enter') go(); };
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    css();
+    try { var a = fbAuth(); if (a && a.onAuthStateChanged) a.onAuthStateChanged(function () { M.render(); }); } catch (e) {}
+    M.render();
+  });
+})();
+</script>
+<script>
+/* ApexShell — the app inside the App Store / Play Store packages (01.11.2026)
+   Android ships as a Trusted Web Activity (mobile/android-twa): the real
+   Chrome engine, so Google sign-in, web push and the service worker work as
+   on the web. iOS ships as a Capacitor shell (mobile/ios-capacitor).
+
+   One rule both stores enforce: digital subscriptions bought inside an app
+   go through the store's own billing (Apple 3.1.1, Google Play payments
+   policy). Evidence keeps Stripe and sells Pro on the web only, so inside a
+   store package nothing offers a purchase — every upgrade path explains,
+   without a link, that Pro is managed on the website. A plan bought there
+   works in the app at once (same account).
+
+   Detection: the TWA starts at ?source=twa (twa-manifest startUrl) and the
+   page is opened from an android-app:// referrer; the iOS shell injects
+   window.Capacitor and appends "EvidenceApp" to the user agent. Kept per
+   session, not forever — the same browser outside the app is the web. */
+(function () {
+  var S = {};
+  window.ApexShell = S;
+  function detect() {
+    try {
+      var q = location.search || '', ua = navigator.userAgent || '';
+      if (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) return (Capacitor.getPlatform && Capacitor.getPlatform()) || 'ios';
+      if (/EvidenceApp\/ios/.test(ua) || /[?&]source=ios\b/.test(q)) return 'ios';
+      if (/[?&]source=twa\b/.test(q) || /^android-app:\/\/com\.evidencetrading\.app/.test(document.referrer || '')) return 'android';
+      var kept = sessionStorage.getItem('apexShell');
+      if (kept === 'ios' || kept === 'android') return kept;
+    } catch (e) {}
+    return '';
+  }
+  var shell = detect();
+  try { if (shell) sessionStorage.setItem('apexShell', shell); } catch (e) {}
+  S.kind = function () { return shell; };
+  S.isStore = function () { return !!shell; };
+  window.apexStoreShell = S.kind;
+  if (!shell) return;
+  document.documentElement.classList.add('apx-store-shell', 'apx-shell-' + shell);
+
+  var MSG = 'Evidence Pro is managed on evidencetrading.com. Once your account has Pro, every Pro feature works here too — just sign in with the same account.';
+  function info() {
+    try { if (window.ApexDialog) { ApexDialog.alert(MSG, { title: 'Evidence Pro' }); return; } } catch (e) {}
+    try { if (window.showToast) showToast(MSG); } catch (e) {}
+  }
+  S.info = info;
+  /* Wrapped after the page has defined them. A purchase never starts here. */
+  function wrap() {
+    ['openUpgradeModal', 'handleStripeClick', 'confirmOrder', 'apexStartCheckout'].forEach(function (n) {
+      var f = window[n];
+      if (typeof f !== 'function' || f._shell) return;
+      var w = function () { info(); return n === 'confirmOrder' ? Promise.resolve(false) : undefined; };
+      w._shell = true; window[n] = w;
+    });
+  }
+  wrap();
+  document.addEventListener('DOMContentLoaded', wrap);
+  setTimeout(wrap, 3000);
+
+  var css = document.createElement('style');
+  css.textContent =
+    /* prices and buy buttons out of sight; the features stay visible */
+    '.apx-store-shell .lp-price-card,.apx-store-shell .lp-prices,.apx-store-shell #apexStripeBtn,.apx-store-shell .apx-buy{display:none!important}' +
+    /* notch and home indicator — the shell draws edge to edge */
+    '.apx-shell-ios body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}' +
+    '.apx-store-shell .apx-shell-only{display:block!important}';
+  document.head.appendChild(css);
 })();
 </script>
 </body>
