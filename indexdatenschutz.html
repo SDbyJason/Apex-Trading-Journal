@@ -1153,7 +1153,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-11-01b';
+  window.APEX_BUILD = '2026-11-01c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -17060,7 +17060,13 @@ function nav(id) {
   /* Recomputed on entry rather than cached: it reads the whole journal, and a
      stale confluence table is worse than a half-second wait. */
   if (id === 'playbooks')   { if (window.ApexConfluence) setTimeout(ApexConfluence.render, 30); }
-  if (id === 'developer')   { if (window.ApexDev) { ApexDev.render(); ApexDev.loadKeys(); } }
+  if (id === 'developer')   { if (window.ApexDev) { ApexDev.render(); ApexDev.loadKeys(); }
+    /* MCP lives in the API worker; until that deploy has landed, say so on the card. */
+    try { var _api = window.APEX_API_URL || ''; if (_api) fetch(_api.replace(/\/$/, '') + '/health', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+      var el = document.getElementById('devMcpState'); if (!el) return;
+      if (j && j.mcp) { el.style.display = 'none'; return; }
+      el.style.display = ''; el.textContent = 'The MCP endpoint goes live with the next API update — the commands below work from then on.';
+    }).catch(function () {}); } catch (e) {} }
 
   // Mobile bottom nav active state
   document.querySelectorAll('.mbn-item').forEach(b => b.classList.remove('active'));
@@ -79538,7 +79544,8 @@ body.light .pw-fld input, body.light .pw-fld select { color-scheme: light; }
       '</div>' +
 
       /* MCP (01.11.2026) — the same key, read-only, for AI assistants. */
-      '<div class="dev-card"><h3>Connect an AI assistant (MCP)</h3>' +
+      '<div class="dev-card" id="devMcpCard"><h3>Connect an AI assistant (MCP)</h3>' +
+        '<div class="dev-hint" id="devMcpState" style="display:none;margin-bottom:10px"></div>' +
         '<p class="dev-sub">Ask Claude, ChatGPT, Cursor or any MCP client about your own journal — “which setup made me the most R last month?”, “do I trade worse on Mondays?”. ' +
           'It uses one of the API keys above and can only read: it can never place, change or delete a trade.</p>' +
         '<div class="dev-sub" style="margin:10px 0 4px"><b>Claude Code</b></div>' +
@@ -80679,7 +80686,7 @@ body.light .apxFR-card { background: #fff; }
         + 'create a key with <code>Add API Key</code>. Every account under that login syncs — evaluations and funded. '
         + 'Scale-ins and partial exits are joined into one trade with the platform&rsquo;s own P&amp;L and fees.' },
     /* 01.11.2026: two forex/CFD platforms many prop firms run on. */
-    matchtrader: { name: 'Match-Trader', meta: 'Forex &amp; CFD, prop firms · read-only API token',
+    matchtrader: { name: 'Match-Trader', meta: 'Forex &amp; CFD, prop firms · read-only API token', minWorker: '2026-11-01',
       warn: '<strong>Create the token with read-only access.</strong> Evidence reads your account and closed positions '
         + 'and never sends an order. The token is stored where no browser can read it back; revoke it in Match-Trader any time.',
       fields: [
@@ -80690,7 +80697,7 @@ body.light .apxFR-card { background: #fff; }
         + 'lifetime it allows (up to a year). Your broker or prop firm has to switch the Trader API on — if you do not see '
         + '<code>API Access</code>, ask them, or import a statement instead. Closed positions arrive with the platform&rsquo;s '
         + 'own P&amp;L, commission and swap.' },
-    tradelocker: { name: 'TradeLocker', meta: 'Forex &amp; CFD, prop firms · TradeLocker sign-in',
+    tradelocker: { name: 'TradeLocker', meta: 'Forex &amp; CFD, prop firms · TradeLocker sign-in', minWorker: '2026-11-01',
       warn: '<strong>TradeLocker has no read-only login.</strong> Your password goes once to our sync service to sign in and is '
         + '<strong>never stored</strong> — only the session TradeLocker hands back, encrypted, which Evidence uses to read your '
         + 'order history and never to place an order. Changing your TradeLocker password ends the connection.',
@@ -80722,7 +80729,14 @@ body.light .apxFR-card { background: #fff; }
         + 'construction — it can pull statements and nothing else.' }
   };
 
-  var _open = null, _status = {};
+  var _open = null, _status = {}, _workerVer = null;
+  /* A platform the deployed sync service does not know yet must not offer a
+     form that can only fail (minWorker vs the worker's /health version). */
+  function tooNew(ex){ var m = EX[ex] && EX[ex].minWorker; return !!(m && _workerVer !== null && String(_workerVer) < m); }
+  function loadWorkerVer(){
+    return fetch(WORKER() + '/health', { cache: 'no-store' }).then(function(r){ return r.json(); })
+      .then(function(j){ _workerVer = (j && j.version) || ''; }).catch(function(){ _workerVer = ''; });
+  }
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -80738,6 +80752,7 @@ body.light .apxFR-card { background: #fff; }
 
   function stateFor(ex){
     if (EX[ex] && EX[ex].unavailable) return { cls: '', text: 'Not available yet' };
+    if (tooNew(ex)) return { cls: '', text: 'Arriving with the next sync update' };
     var run = _status[ex + '_lastRun'], err = _status[ex + '_lastError'];
     if (!run) return { cls: '', text: 'Not connected' };
     if (err) return { cls: 'err', text: 'Error: ' + String(err).slice(0, 60) };
@@ -80797,6 +80812,7 @@ body.light .apxFR-card { background: #fff; }
 
   function open(ex){
     if (!EX[ex]) return;
+    if (tooNew(ex)) { if (window.showToast) showToast('ℹ️ ' + EX[ex].name + ' arrives with the next sync update — very soon'); return; }
     if (EX[ex].unavailable) {
       _open = null; render();
       if (window.showToast) showToast('ℹ️ ' + EX[ex].name + ' — see the note on the card');
@@ -80900,7 +80916,7 @@ body.light .apxFR-card { background: #fff; }
       }).catch(function(e){ msg('Could not disconnect: ' + esc(String(e.message || e)), 'err'); });
   }
 
-  function refresh(){ return loadStatus().then(function(s){ _status = s; render(); }); }
+  function refresh(){ return Promise.all([loadStatus(), loadWorkerVer()]).then(function(r){ _status = r[0]; render(); }); }
 
   window.ApexExchange = { open: open, close: close, save: save, remove: remove, refresh: refresh };
 
