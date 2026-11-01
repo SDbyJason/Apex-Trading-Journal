@@ -1153,7 +1153,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-11-01c';
+  window.APEX_BUILD = '2026-11-01d';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -114100,11 +114100,12 @@ var ApexMergeEngine = (function () {
        objects (their _delegate is the modular instance), so it is imported on
        demand — only when someone sets up 2FA or signs in with it.
      · TOTP must be switched on for the Firebase project (Identity Platform).
-       Until it is, APEX_MFA_LIVE stays false: the settings card is hidden, and
-       the sign-in challenge below is ready for the day it is switched on.
+       Switched on 01.11.2026 (providerConfigs totp ENABLED, Identity Platform
+       on the Blaze plan) — APEX_MFA_LIVE is true; set it false to hide the
+       settings card again. The sign-in challenge works either way.
    No recovery codes exist in Firebase: the setup key IS the backup — shown
    once, with a plain note to keep it. */
-window.APEX_MFA_LIVE = window.APEX_MFA_LIVE || false;
+window.APEX_MFA_LIVE = window.APEX_MFA_LIVE !== undefined ? window.APEX_MFA_LIVE : true;
 (function () {
   var M = {};
   window.ApexMfa = M;
