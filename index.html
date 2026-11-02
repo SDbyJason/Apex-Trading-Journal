@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- The app paints its own dark theme. Without saying so, Chrome's auto-dark and
+     Samsung Internet's dark mode darkened it a second time: gold turned brown. -->
+<meta name="color-scheme" content="dark light">
+<style>:root{color-scheme:dark}:root:has(body.light){color-scheme:light}</style>
 <!-- ══ SEO ══════════════════════════════════════════════════════════
      Added 07.08.2026. The site was not in Google's index at all, and the
      cause was structural (see the AUTH VISIBILITY note further down), not
@@ -1153,7 +1157,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-11-02c';
+  window.APEX_BUILD='2026-11-02d';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -13443,7 +13447,6 @@ function _authAction(type) {
           </button>
           <div class="nav-group-drop" id="navgdrop-analysis">
             <button class="nav-item" onclick="nav('edgelab');closeNavGroups()" id="nav-edgelab">Edge Lab</button>
-            <button class="nav-item" onclick="nav('edgelab');setTimeout(function(){if(window.EdgeLab)EdgeLab.go('twin')},60);closeNavGroups()" id="nav-twin">Your Twin</button>
             <button class="nav-item" onclick="nav('replaylab');closeNavGroups()" id="nav-replaylab">Market Replay</button>
             <!-- Live-Chart vorerst ausgeblendet: es gibt keine kostenlose
                  Kursquelle, die Spot-Gold in Echtzeit liefert, ohne dass der
@@ -66425,7 +66428,7 @@ self.addEventListener('message', async (ev) => {
     if (document.getElementById('rhCss')) return;
     var st = document.createElement('style'); st.id = 'rhCss';
     st.textContent = [
-      '#page-replaylab{--rh-g:var(--gold,#c9a84c);--rh-gh:#f1d488}',
+      '#page-replaylab{--rh-g:var(--gold,#c9a84c);--rh-gh:#f1d488;overflow-x:clip}',
       /* Bühne: dunkel; im hellen Theme gibt es weiter unten eine helle Variante */
       '.rh-hero{position:relative;overflow:hidden;border-radius:26px;min-height:440px;margin:4px 0 22px;color:#f5efe2;' +
         'background:radial-gradient(900px 500px at 78% 40%,rgba(var(--gold-rgb),.18),transparent 60%),radial-gradient(700px 500px at 10% 100%,rgba(60,90,255,.12),transparent 60%),#07070a;' +
@@ -66461,7 +66464,7 @@ self.addEventListener('message', async (ev) => {
       '@property --rha{syntax:"<angle>";inherits:false;initial-value:0deg}',
       '@keyframes rhSpin{to{--rha:360deg}}',
       '.rh-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}',
-      '.rh-chip{display:inline-flex;align-items:baseline;gap:7px;padding:8px 12px;border-radius:999px;font-size:12px;color:rgba(245,239,226,.72);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)}',
+      '.rh-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:999px;font-size:12px;color:rgba(245,239,226,.72);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)}',
       '.rh-chip b{font:700 13px/1 var(--font-display,inherit);color:#fff}',
       '.rh-tag{position:absolute;z-index:2;right:26px;bottom:22px;font:500 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,239,226,.45);text-align:right}',
       '.rh-tag b{color:var(--rh-gh);font-weight:600}',
@@ -66507,7 +66510,7 @@ self.addEventListener('message', async (ev) => {
       '@media (max-width:980px){.rh-modes{grid-template-columns:repeat(2,minmax(0,1fr))}}',
       '@media (max-width:640px){body.light .rh-hero::after{background:linear-gradient(0deg,rgba(247,242,231,.25) 0%,rgba(247,242,231,.85) 45%,rgba(247,242,231,.96) 100%)}' +
         '.rh-hero{min-height:0;border-radius:20px}.rh-in{padding:28px 20px 150px}.rh-hero::after{background:linear-gradient(0deg,rgba(7,7,10,.2) 0%,rgba(7,7,10,.8) 45%,rgba(7,7,10,.95) 100%)}' +
-        '.rh-h1{font-size:26px}.rh-sub{font-size:14px}.rh-tag{display:none}.rh-b{flex:1;justify-content:center}.rh-modes{gap:10px}.rh-m{padding:16px 14px}.rh-m .k{display:none}#rhHost .el-card{padding:18px 16px}}',
+        '.rh-h1{font-size:26px}.rh-sub{font-size:14px}.rh-tag{display:none}.rh-act{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.rh-b{justify-content:center;text-align:center;line-height:1.25;padding:12px 10px;min-height:50px;font-size:13.5px}.rh-b.p{grid-column:1/-1}.rh-b .ic{flex:none}.rh-b.s .ic{display:none}.rh-modes{gap:10px}.rh-m{padding:16px 14px}.rh-m .k{display:none}#rhHost .el-card{padding:18px 16px}}',
       '@media (prefers-reduced-motion:reduce){#page-replaylab *{animation:none!important}}'
     ].join('\n');
     document.head.appendChild(st);
@@ -117028,6 +117031,7 @@ var ApexDuelEngine = (function () {
 
   /* ── card in the Market Replay setup ── */
   D.card = function () {
+    css();      // the card itself needs the styles, not only a filled list
     var l = myList().slice(0, 6);
     var list = l.length ? '<div class="du-list" id="duList">' + l.map(function (x) { return '<div class="du-item" onclick="ApexDuel.view(\'' + x.id + '\')" data-du="' + x.id + '"><span class="t"><span class="notranslate" translate="no">…</span></span><span class="du-st">…</span></div>'; }).join('') + '</div>' : '';
     setTimeout(fillList, 50);
