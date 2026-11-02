@@ -1153,7 +1153,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD = '2026-11-02b';
+  window.APEX_BUILD = '2026-11-02c';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -10068,6 +10068,10 @@ body.light #landingPage * {
         "Import check before anything is written — duplicates, missing stops, timezone and the file's own P&L against the journal",
         "Exit Lab — every entry replayed on 1-minute prices under other exits (set and forget, fixed targets, break-even, trailing, time stops), with the price after the exit",
         "Account currency per account — broker P&L, commission and swap read in it and converted at daily ECB rates",
+        "Decision Trainer — blind decisions at random moments of real history, scored for calibration of your confidence",
+        "Rule Contract — a contract with yourself, checked every day on your synced trades; a broken day tightens tomorrow's Guardrails",
+        "Market Weather — today's conditions looked up in your own journal, a size for the day, and a check of the forecast on its own past",
+        "Blind Duel — challenge anyone to the same hidden day of history in Market Replay, ranked on result and rule-keeping",
         "Prop Challenge Simulator — a complete prop-firm challenge replayed day by day on real history with the firm’s rules, from Phase 1 to funded",
         "Your Twin — a disciplined copy that takes only your entries and keeps your own rules, with the difference split habit by habit",
         "Merge and split trades — partial fills into one position, undo any time",
@@ -11412,6 +11416,10 @@ body.light #landingPage * {
         <li>Exit Lab — your entries replayed on real prices: set and forget, fixed targets, break-even, trailing and time stops, and the price after your exit</li>
         <li>Your Twin — your exact entries with your own rules kept every time; see in R and money what each habit costs you</li>
         <li>Prop Challenge Simulator — a whole FTMO, Topstep or other firm challenge, day after day on real history, Phase 1 to funded</li>
+        <li>Decision Trainer — random blind moments of real history: call it, state how sure you are, see if your 80 % are really 80 %</li>
+        <li>Rule Contract — sign your rules, Evidence checks every day on your synced trades; clean days build a streak, a broken day tightens tomorrow</li>
+        <li>Market Weather — every condition of today (weekday, news, yesterday, streak, sleep, volatility) looked up in your journal: storm, cloudy, fair or sunny, with a size</li>
+        <li>Blind Duel — send a link, everyone plays the same hidden day in Market Replay, the ranking counts result and rule-keeping (playing an invite is free)</li>
         <li>Risk of Ruin, Sharpe &amp; Expectancy / setup</li>
         <li><b>Benchmark vs buy &amp; hold</b>&nbsp;— your Sharpe against S&amp;P 500, Nasdaq, MSCI World, 60/40, gold &amp; BTC</li>
         <li><b>R-Multiple &amp; Kelly</b>&nbsp;— R distribution, R per setup, optimal risk</li>
@@ -11530,6 +11538,10 @@ body.light #landingPage * {
         <tr><td>Exit Lab — set and forget vs your exits, best target tested out of sample, price after the exit</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Your Twin — same entries, your rules kept: exits, revenge trades, overtrading and position size priced one by one</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Prop Challenge Simulator — multi-day challenge on real history, account carried day to day, firm rules, pass/fail report</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Decision Trainer — calibration of your confidence: hit rate per stated confidence, Brier score, R per conviction level</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Rule Contract — daily check on synced trades, clean-day streak, penalty day with tightened Guardrails, value of keeping it</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Market Weather — conditions of today vs your record, ridge-combined, walk-forward checked, optional Guardrails on storm days</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+        <tr><td>Blind Duel — create duels on hidden days of history and rank everyone who plays them (joining an invite is free)</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Risk of Ruin, Sharpe &amp; Expectancy / setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>Benchmark vs buy &amp; hold — annualised Sharpe against S&amp;P 500, Nasdaq 100, MSCI World, 60/40, gold &amp; Bitcoin</td><td class="c no">—</td><td class="c yes">✓</td></tr>
         <tr><td>R-Multiple analytics — distribution, cumulative R &amp; R per setup</td><td class="c no">—</td><td class="c yes">✓</td></tr>
@@ -12669,6 +12681,10 @@ body.light #landingPage * {
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">Exit Lab</div><div class="apex-feat-desc">Your entries replayed on real prices under other exits — and what price did after you got out</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-users ></use></svg></div><div><div class="apex-feat-label">Your Twin</div><div class="apex-feat-desc">A copy of you that takes only your entries and never breaks your rules — and shows what every habit costs</div></div></div>
       <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-trophy ></use></svg></div><div><div class="apex-feat-label">Prop Challenge Simulator</div><div class="apex-feat-desc">A whole firm challenge, day after day on real history with the firm’s rules — the pressure of a real attempt without the fee</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-target ></use></svg></div><div><div class="apex-feat-label">Decision Trainer</div><div class="apex-feat-desc">Blind moments of real history — call it, say how sure you are, and learn whether your confidence can be trusted</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-shield ></use></svg></div><div><div class="apex-feat-label">Rule Contract</div><div class="apex-feat-desc">Sign your rules — every day is checked on your synced trades, and a broken day tightens the next one</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-sun ></use></svg></div><div><div class="apex-feat-label">Market Weather</div><div class="apex-feat-desc">Each morning, today's conditions looked up in your own journal — the kind of day this is for you, and the size it calls for</div></div></div>
+      <div class="apex-feat-item apex-feat-full"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-users ></use></svg></div><div><div class="apex-feat-label">Blind Duel</div><div class="apex-feat-desc">Challenge friends or your Discord to the same hidden day of history — ranked on result and on keeping the rules</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-dice ></use></svg></div><div><div class="apex-feat-label">Risk of Ruin &amp; Sharpe</div><div class="apex-feat-desc">Institutional risk metrics + per-setup expectancy & profit factor</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon"><svg class=ic aria-hidden=true><use href=#i-ruler ></use></svg></div><div><div class="apex-feat-label">R-Multiple &amp; Kelly</div><div class="apex-feat-desc">R distribution, cumulative R and R per setup — plus the growth-optimal risk per trade</div></div></div>
       <div class="apex-feat-item"><div class="apex-feat-icon">⏱</div><div><div class="apex-feat-label">Hold-Time &amp; Scale-Out Analysis</div><div class="apex-feat-desc">Expectancy by time in trade, and whether your partial exits beat simply holding</div></div></div>
@@ -15821,6 +15837,7 @@ body.light .re-rule,body.light .re-ex button{background:#faf8f4;border-color:rgb
       <p>Your own hard limits — checked against every trade, with proof of what following them is worth.</p>
     </div>
     <div id="reOverview"></div>
+    <div id="contractHost"></div>
     <div class="glass-card re-card">
       <div class="re-h"><div><div class="stat-group-title">Your trading rules</div>
         <div class="re-sub">Every trade is checked automatically. A broken rule gets a warning badge in your journal and counts against your compliance.</div></div></div>
@@ -28399,6 +28416,10 @@ function joinChallenge(id) {
     },
     // signed minutes from the trade to the nearest relevant high-impact event within ±2 h, else null
     nearHigh: function (ms, sym) { return nearIn(_alertEvents, ms, sym); },
+    // for the market weather: is this event high-impact on that symbol, the event's time, the loaded week
+    highFor: function (ev, sym) { return parseImpact(ev.impact) === 'high' && newsRelevant(ev, sym); },
+    parseMs: function (s) { return parseEventMs(s); },
+    events: function () { return _alertEvents.slice(); },
     backfill: function () { _bfDone = false; backfillNews(); },
     state: function () { return { events: _alertEvents.length, lastOk: _lastOk, failures: _failN, cfg: _alertCfg }; },
     _setEvents: function (list) { _alertEvents = list || []; _lastOk = Date.now(); _nextTry = _lastOk + REFRESH_MS; }
@@ -30492,6 +30513,14 @@ document.addEventListener('keydown', function(e) {
       "Session review": ["Session-Bewertung", "Revisión de sesión", "Revisão da sessão", "Analyse de session"],
       "Intraday give-back, revenge windows, size drift after losses and rule adherence — with a coach verdict on the process, not the P&L": ["Zurückgegebene Gewinne im Tagesverlauf, Revenge-Fenster, Größenanstieg nach Verlusten und Regeltreue – mit einem Coach-Urteil über den Prozess, nicht über das P&L", "Ganancias devueltas en el día, ventanas de revenge, aumento de tamaño tras pérdidas y disciplina con las reglas, con un veredicto del coach sobre el proceso, no sobre el P&L", "Lucro devolvido no dia, janelas de revenge, aumento de tamanho após perdas e disciplina com as regras — com um veredito do coach sobre o processo, não sobre o P&L", "Gains rendus en séance, fenêtres de revenge, dérive de taille après les pertes et respect des règles — avec un verdict du coach sur le process, pas sur le P&L"],
       "Auto MFE / MAE": ["Automatisches MFE / MAE", "MFE / MAE automático", "MFE / MAE automático", "MFE / MAE automatique"],
+      "Decision Trainer": ["Entscheidungs-Training", "Entrenador de decisiones", "Treino de decisões", "Entraîneur de décisions"],
+      "Rule Contract": ["Regel-Vertrag", "Contrato de reglas", "Contrato de regras", "Contrat de règles"],
+      "Market Weather": ["Marktwetter", "Clima de mercado", "Clima de mercado", "Météo de marché"],
+      "Blind Duel": ["Blind-Duell", "Duelo a ciegas", "Duelo às cegas", "Duel à l’aveugle"],
+      "Challenge friends or your Discord to the same hidden day of history — ranked on result and on keeping the rules": ["Fordere Freunde oder deinen Discord zum selben verborgenen Tag der Historie heraus – gewertet nach Ergebnis und Regeltreue", "Reta a tus amigos o a tu Discord al mismo día oculto de la historia, clasificado por resultado y respeto de las reglas", "Desafie amigos ou seu Discord para o mesmo dia oculto do histórico — classificado por resultado e respeito às regras", "Défie tes amis ou ton Discord sur la même journée cachée de l’historique — classé selon le résultat et le respect des règles"],
+      "Each morning, today's conditions looked up in your own journal — the kind of day this is for you, and the size it calls for": ["Jeden Morgen die heutigen Bedingungen in deinem eigenen Journal nachgeschlagen – was für ein Tag das für dich ist und welche Größe er verlangt", "Cada mañana, las condiciones de hoy consultadas en tu propio diario: qué tipo de día es para ti y qué tamaño pide", "Toda manhã, as condições de hoje consultadas no seu próprio diário — que tipo de dia é para você e o tamanho que ele pede", "Chaque matin, les conditions du jour cherchées dans ton propre journal — le genre de journée que c’est pour toi, et la taille qu’elle demande"],
+      "Sign your rules — every day is checked on your synced trades, and a broken day tightens the next one": ["Unterschreib deine Regeln – jeder Tag wird an deinen synchronisierten Trades geprüft, und ein gebrochener Tag verschärft den nächsten", "Firma tus reglas: cada día se comprueba con tus operaciones sincronizadas y un día roto endurece el siguiente", "Assine suas regras — cada dia é verificado nas suas operações sincronizadas, e um dia quebrado endurece o seguinte", "Signe tes règles — chaque jour est vérifié sur tes trades synchronisés, et un jour rompu durcit le suivant"],
+      "Blind moments of real history — call it, say how sure you are, and learn whether your confidence can be trusted": ["Blinde Momente echter Historie – entscheide, sag wie sicher du bist, und lerne, ob du deiner Sicherheit trauen kannst", "Momentos a ciegas de historia real: decide, di qué tan seguro estás y aprende si puedes fiarte de tu confianza", "Momentos às cegas de histórico real — decida, diga o quão seguro está e aprenda se pode confiar na sua confiança", "Des moments à l’aveugle d’un historique réel — décide, dis à quel point tu es sûr et apprends si ta confiance est fiable"],
       "Prop Challenge Simulator": ["Prop-Challenge-Simulator", "Simulador de desafíos prop", "Simulador de desafios prop", "Simulateur de challenge prop"],
       "A whole firm challenge, day after day on real history with the firm’s rules — the pressure of a real attempt without the fee": ["Eine ganze Firmen-Challenge, Tag für Tag auf echter Historie mit den Regeln der Firma – der Druck eines echten Versuchs ohne die Gebühr", "Un desafío completo de la firma, día a día con historia real y sus reglas: la presión de un intento real sin la tarifa", "Um desafio inteiro da firma, dia após dia em histórico real com as regras dela — a pressão de uma tentativa real sem a taxa", "Un challenge complet de la firme, jour après jour sur un historique réel avec ses règles — la pression d’une vraie tentative sans les frais"],
       "Your Twin": ["Dein Zwilling", "Tu gemelo", "Seu gêmeo", "Ton jumeau"],
@@ -55295,7 +55324,7 @@ body.light .pt-sugg{background:var(--layer)}
     return c;
   }
 
-  var MEM_ROOTS = { apexServers:1, apexInvites:1, apexTrack:1, apexModNotices:1, apexBanAppeals:1, apexAnnouncements:1, apexFeed:1, apexDMs:1 };
+  var MEM_ROOTS = { apexServers:1, apexInvites:1, apexTrack:1, apexModNotices:1, apexBanAppeals:1, apexAnnouncements:1, apexFeed:1, apexDMs:1, apexDuels:1 };
   var Mem = window.ApexDemoMem = {
     FV: FV, TS: TS,
     handles: function(name){ return !!MEM_ROOTS[name]; },
@@ -62394,7 +62423,7 @@ self.addEventListener('message', async (ev) => {
      when it is torn down (tab switch, reload, closing the app), removed only
      when the trader ends it on purpose. */
   function snapshotResume() {
-    if (S.campaign) return;      // a campaign day is resumed from the campaign, not from here
+    if (S.campaign || S.duel) return;      // a campaign or duel day is resumed from there, not from here
     var s = S.session;
     if (!s || !s.data || S._rebuilding) return;
     var rec = currentRecord(S.savedName || defaultName());
@@ -63266,6 +63295,8 @@ self.addEventListener('message', async (ev) => {
       '<p class="el-sub">Rewind the real market to any date and trade it forward candle by candle — the future stays hidden.</p>' +
       resumeHtml() +
       (window.ApexCampaign ? ApexCampaign.setupCard() : '') +
+      (window.ApexCalib ? ApexCalib.card() : '') +
+      (window.ApexDuel ? ApexDuel.card() : '') +
       presetsHtml() +
       (S.err ? errBoxHtml() : '') +
       '<div class="arp-row">' +
@@ -65735,6 +65766,7 @@ self.addEventListener('message', async (ev) => {
   function start(body) {
     readSetupForm();
     S.campaign = null;          // a session started from the form is never a campaign day
+    S.duel = null;              // …nor a duel day
     S.err = null;
     S.errRetry = false;
     S.errGaps = null; S._retryRec = null; S._allowGaps = false; S._skipDays = null;
@@ -66251,9 +66283,22 @@ self.addEventListener('message', async (ev) => {
     S.blind = !!o.blind; S.mystery = false; S.revealed = false; S.playbook = '';
     S.funded = true; S.fundedFirm = o.firm; S.fundedSize = o.size; S.balance = o.balance;
     if (o.commRT != null) S.commRT = o.commRT;
-    S.campaign = o; S.err = null; S.errRetry = false; S.savedId = null; S.savedName = null; S.pbChecks = [];
+    S.campaign = o; S.duel = null; S.err = null; S.errRetry = false; S.savedId = null; S.savedName = null; S.pbChecks = [];
     launch(body);
   };
+  /* One day of a Blind Duel: the same hidden day for everyone, a plain
+     account of the duel's size, no funded mode. */
+  window.ApexReplayUI.duelDay = function (body, o) {
+    try { teardown(); } catch (e) {}
+    try { var rv0 = document.getElementById('arpReview'); if (rv0) rv0.remove(); } catch (e) {}
+    S.symbol = o.symbol; S.date = o.date; S.tf = o.tf || '5m'; S.days = 1; S.startAt = 'auto';
+    S.blind = true; S.mystery = false; S.revealed = false; S.playbook = '';
+    S.funded = false; S.balance = o.balance || 10000;
+    S.duel = o; S.campaign = null; S.err = null; S.errRetry = false; S.savedId = null; S.savedName = null; S.pbChecks = [];
+    launch(body);
+  };
+  /* The session analysis (closed trades with R, P&L, risk) for the duel's score. */
+  window.ApexReplayUI.summary = function () { try { return S.session ? analyse() : null; } catch (e) { return null; } };
 
   /* ─────────────── "back to <year>" on the landing page ───────────────
      A competitor writes "since September 2014"; we wrote "free tick-accurate
@@ -66739,6 +66784,8 @@ self.addEventListener('message', async (ev) => {
             '<button type="button" class="rh-b p" data-rh="start">' + icon('i-play') + 'Start a replay</button>' +
             '<button type="button" class="rh-b s" data-rh="dice">' + icon('i-dice') + 'Roll a random day</button>' +
             '<button type="button" class="rh-b s" onclick="if(window.ApexCampaign)ApexCampaign.openNew()">' + icon('i-trophy') + 'Prop challenge</button>' +
+            '<button type="button" class="rh-b s" onclick="if(window.ApexCalib)ApexCalib.open()">' + icon('i-target') + 'Decision trainer</button>' +
+            '<button type="button" class="rh-b s" onclick="if(window.ApexDuel)ApexDuel.openNew()">' + icon('i-users') + 'Blind duel</button>' +
           '</div>' +
           '<div class="rh-chips">' +
             '<span class="rh-chip"><b id="rhNInstr">61</b> instruments</span>' +
@@ -66919,6 +66966,8 @@ self.addEventListener('message', async (ev) => {
     'Start a replay': ['Replay starten', 'Iniciar replay', 'Iniciar replay', 'Lancer un replay'],
     'Roll a random day': ['Zufälligen Tag würfeln', 'Día al azar', 'Dia aleatório', 'Jour au hasard'],
     'Prop challenge': ['Prop-Challenge', 'Desafío prop', 'Desafio prop', 'Challenge prop'],
+    'Decision trainer': ['Entscheidungs-Training', 'Entrenador de decisiones', 'Treino de decisões', 'Entraîneur de décisions'],
+    'Blind duel': ['Blind-Duell', 'Duelo a ciegas', 'Duelo às cegas', 'Duel à l’aveugle'],
     'instruments': ['Instrumente', 'instrumentos', 'instrumentos', 'instruments'],
     'accurate': ['genau', 'exacto', 'exato', 'précis'],
     'spreads': ['Spreads', 'spreads', 'spreads', 'spreads'],
@@ -75361,10 +75410,16 @@ self.addEventListener('message', async (ev) => {
   }
   G.evaluate = function () {
     var cfg = load();
+    // Rule contract: the day after a broken contract runs on tightened limits.
+    try { if (window.ApexContract && ApexContract.tightenGuard) cfg = ApexContract.tightenGuard(cfg); } catch (e) {}
+    // Market weather: a storm day tightens the limits too, when the trader asked for it.
+    try { if (window.ApexWeather && ApexWeather.tightenGuard) cfg = ApexWeather.tightenGuard(cfg); } catch (e) {}
     var res = { enabled: cfg.enabled, breaches: [], warnings: [], stats: null };
     var prop = propStopChecks(res);
     if (prop) res.enabled = true;
     if (!cfg.enabled) { paint(res); return res; }
+    if (cfg._storm) res.warnings.push({ rule: 'weather', msg: 'Storm day by your own record — today: ' + (cfg.maxTrades > 0 ? 'at most ' + cfg.maxTrades + (cfg.maxTrades === 1 ? ' trade, ' : ' trades, ') : '') + (cfg.maxLoss > 0 ? 'daily loss ' + money(-cfg.maxLoss) + ', ' : '') + cfg.cooldownMin + ' min pause after a loss.' });
+    if (cfg._penalty) res.warnings.push({ rule: 'contract', msg: 'Penalty day — your rule contract broke on your last trading day. Today: ' + (cfg.maxTrades > 0 ? 'at most ' + cfg.maxTrades + (cfg.maxTrades === 1 ? ' trade, ' : ' trades, ') : '') + (cfg.maxLoss > 0 ? 'daily loss ' + money(-cfg.maxLoss) + ', ' : '') + cfg.cooldownMin + ' min pause after a loss.' });
 
     var trades = todaysTrades();
     var vals = trades.map(valueOf).filter(function (v) { return v != null; });
@@ -79030,6 +79085,12 @@ body.light .pw-fld input, body.light .pw-fld select { color-scheme: light; }
     'running': ['läuft', 'en curso', 'em andamento', 'en cours'],
     'reached': ['erreicht', 'alcanzada', 'alcançada', 'atteinte'],
     'No trades in this period yet.': ['In diesem Zeitraum gibt es noch keine Trades.', 'Aún no hay operaciones en este periodo.', 'Ainda não há operações neste período.', 'Pas encore de trade sur cette période.'],
+    'Your last 60 days under these terms': ['Deine letzten 60 Tage unter diesen Bedingungen', 'Tus últimos 60 días con estos términos', 'Seus últimos 60 dias com estes termos', 'Tes 60 derniers jours avec ces termes'],
+    'You would have kept this contract on most days.': ['Du hättest diesen Vertrag an den meisten Tagen eingehalten.', 'Habrías cumplido este contrato la mayoría de los días.', 'Você teria cumprido este contrato na maioria dos dias.', 'Tu aurais tenu ce contrat la plupart des jours.'],
+    'You would have broken this contract on many days.': ['Du hättest diesen Vertrag an vielen Tagen gebrochen.', 'Habrías roto este contrato muchos días.', 'Você teria quebrado este contrato em muitos dias.', 'Tu aurais rompu ce contrat de nombreux jours.'],
+    'Your clean days earned more than your broken days.': ['Deine sauberen Tage brachten mehr als deine gebrochenen.', 'Tus días limpios ganaron más que tus días rotos.', 'Seus dias limpos renderam mais que os quebrados.', 'Tes jours propres ont rapporté plus que tes jours rompus.'],
+    'Your broken days earned more than your clean days.': ['Deine gebrochenen Tage brachten mehr als deine sauberen.', 'Tus días rotos ganaron más que tus días limpios.', 'Seus dias quebrados renderam mais que os limpos.', 'Tes jours rompus ont rapporté plus que tes jours propres.'],
+    'Pro shows the numbers.': ['Pro zeigt die Zahlen.', 'Pro muestra las cifras.', 'O Pro mostra os números.', 'Pro affiche les chiffres.'],
     'Daily loss': ['Tagesverlust', 'Pérdida diaria', 'Perda diária', 'Perte journalière'],
     'Max drawdown': ['Max. Drawdown', 'Drawdown máximo', 'Drawdown máximo', 'Drawdown max.'],
     'Min. days': ['Mindesttage', 'Días mín.', 'Dias mín.', 'Jours min.'],
@@ -105807,6 +105868,10 @@ body.light::before{ opacity:.45; }
     "Session review": ["Sitzungsauswertung", "Revisión de la sesión", "Revisão da sessão", "Revue de session"],
     "— sequence, size drift & revenge-window detection": ["— Reihenfolge, Positionsgrößen-Drift & Revenge-Fenster", "— secuencia, deriva del tamaño y ventanas de revenge trading", "— sequência, desvio de tamanho e janelas de revenge trading", "— séquence, dérive de taille et fenêtres de revenge trading"],
     "Auto MFE / MAE from real price data": ["Automatisches MFE / MAE aus echten Kursdaten", "MFE / MAE automáticos con datos de precio reales", "MFE / MAE automáticos com dados de preço reais", "MFE / MAE automatiques à partir de vraies données de prix"],
+    "Decision Trainer — random blind moments of real history: call it, state how sure you are, see if your 80 % are really 80 %": ["Entscheidungs-Training – zufällige blinde Momente echter Historie: entscheiden, sagen wie sicher, sehen ob deine 80 % wirklich 80 % sind", "Entrenador de decisiones: momentos a ciegas al azar de historia real; decide, di qué tan seguro estás y comprueba si tu 80 % es de verdad 80 %", "Treino de decisões — momentos aleatórios às cegas de histórico real: decida, diga o quão seguro está e veja se seus 80 % são mesmo 80 %", "Entraîneur de décisions — des moments à l’aveugle d’un historique réel : décide, dis à quel point tu es sûr, vois si tes 80 % sont vraiment 80 %"],
+    "Rule Contract — sign your rules, Evidence checks every day on your synced trades; clean days build a streak, a broken day tightens tomorrow": ["Regel-Vertrag – unterschreib deine Regeln, Evidence prüft jeden Tag an deinen synchronisierten Trades; saubere Tage bauen eine Serie auf, ein gebrochener Tag verschärft den nächsten", "Contrato de reglas: firma tus reglas, Evidence comprueba cada día con tus operaciones sincronizadas; los días limpios crean una racha y un día roto endurece el siguiente", "Contrato de regras — assine suas regras, o Evidence verifica todos os dias nas suas operações sincronizadas; dias limpos criam uma sequência, um dia quebrado endurece o seguinte", "Contrat de règles — signe tes règles, Evidence vérifie chaque jour sur tes trades synchronisés ; les jours propres font une série, un jour rompu durcit le lendemain"],
+    "Market Weather — every condition of today (weekday, news, yesterday, streak, sleep, volatility) looked up in your journal: storm, cloudy, fair or sunny, with a size": ["Marktwetter – jede Bedingung von heute (Wochentag, News, gestern, Serie, Schlaf, Volatilität) in deinem Journal nachgeschlagen: Sturm, bewölkt, heiter oder sonnig, mit Positionsgröße", "Clima de mercado: cada condición de hoy (día, noticias, ayer, racha, sueño, volatilidad) consultada en tu diario: tormenta, nublado, despejado o soleado, con un tamaño", "Clima de mercado — cada condição de hoje (dia, notícias, ontem, sequência, sono, volatilidade) consultada no seu diário: tempestade, nublado, firme ou ensolarado, com um tamanho", "Météo de marché — chaque condition du jour (jour, news, la veille, série, sommeil, volatilité) cherchée dans ton journal : tempête, nuageux, beau ou ensoleillé, avec une taille"],
+    "Blind Duel — send a link, everyone plays the same hidden day in Market Replay, the ranking counts result and rule-keeping (playing an invite is free)": ["Blind-Duell – Link schicken, alle spielen denselben verborgenen Tag im Market Replay, die Rangliste zählt Ergebnis und Regeltreue (eine Einladung zu spielen ist kostenlos)", "Duelo a ciegas: envía un enlace, todos juegan el mismo día oculto en Market Replay y la clasificación cuenta resultado y respeto de las reglas (jugar una invitación es gratis)", "Duelo às cegas — envie um link, todos jogam o mesmo dia oculto no Market Replay, o ranking conta resultado e respeito às regras (jogar um convite é grátis)", "Duel à l’aveugle — envoie un lien, tout le monde joue la même journée cachée dans Market Replay, le classement compte le résultat et le respect des règles (jouer une invitation est gratuit)"],
     "Prop Challenge Simulator — a whole FTMO, Topstep or other firm challenge, day after day on real history, Phase 1 to funded": ["Prop-Challenge-Simulator – eine ganze FTMO-, Topstep- oder andere Firmen-Challenge, Tag für Tag auf echter Historie, von Phase 1 bis funded", "Simulador de desafíos prop: un desafío completo de FTMO, Topstep u otra firma, día a día con historia real, de la fase 1 a fondeado", "Simulador de desafios prop — um desafio inteiro da FTMO, Topstep ou outra firma, dia após dia em histórico real, da fase 1 ao financiado", "Simulateur de challenge prop — un challenge FTMO, Topstep ou autre complet, jour après jour sur un historique réel, de la phase 1 au financement"],
     "Your Twin — your exact entries with your own rules kept every time; see in R and money what each habit costs you": ["Dein Zwilling – exakt deine Einstiege, deine eigenen Regeln jedes Mal eingehalten; in R und Geld sehen, was dich jede Gewohnheit kostet", "Tu gemelo: exactamente tus entradas con tus reglas cumplidas siempre; ve en R y en dinero lo que te cuesta cada hábito", "Seu gêmeo — exatamente suas entradas com suas regras cumpridas sempre; veja em R e em dinheiro quanto cada hábito custa", "Ton jumeau — exactement tes entrées, tes propres règles respectées à chaque fois ; vois en R et en argent ce que coûte chaque habitude"],
     "Exit Lab — your entries replayed on real prices: set and forget, fixed targets, break-even, trailing and time stops, and the price after your exit": ["Exit-Labor – deine Einstiege auf echten Kursen nachgespielt: Stop und Ziel stehen lassen, feste Ziele, Break-even, Trailing- und Zeitstopps und der Kurs nach deinem Ausstieg", "Laboratorio de salidas: tus entradas reproducidas con precios reales — dejar stop y objetivo, objetivos fijos, break-even, trailing y stops por tiempo, y el precio tras tu salida", "Laboratório de saídas — suas entradas reproduzidas com preços reais: deixar stop e alvo, alvos fixos, break-even, trailing e stops por tempo, e o preço após sua saída", "Labo des sorties — tes entrées rejouées sur des prix réels : stop et objectif laissés, objectifs fixes, break-even, stops suiveurs et temporels, et le prix après ta sortie"],
@@ -105920,6 +105985,10 @@ body.light::before{ opacity:.45; }
     "Notes, tags & chart snapshots written during the replay": ["Notizen, Tags & Chart-Schnappschüsse während des Replays", "Notas, etiquetas y capturas del gráfico durante el replay", "Notas, tags e capturas do gráfico durante o replay", "Notes, tags et captures du graphique pendant le replay"],
     "Stop-vs-target collisions resolved from real ticks, not guessed": ["Stop-gegen-Ziel-Kollisionen aus echten Ticks entschieden, nicht geraten", "Choques entre stop y objetivo resueltos con ticks reales, no adivinados", "Colisões entre stop e alvo resolvidas com ticks reais, não adivinhadas", "Collisions stop/objectif tranchées avec les vrais ticks, pas devinées"],
     "Auto MFE / MAE from price data": ["Automatisches MFE / MAE aus Kursdaten", "MFE / MAE automáticos con datos de precio", "MFE / MAE automáticos com dados de preço", "MFE / MAE automatiques à partir des données de prix"],
+    "Decision Trainer — calibration of your confidence: hit rate per stated confidence, Brier score, R per conviction level": ["Entscheidungs-Training – Kalibrierung deiner Sicherheit: Trefferquote je angegebener Sicherheit, Brier-Score, R je Überzeugungsstufe", "Entrenador de decisiones: calibración de tu confianza; acierto por confianza declarada, puntuación Brier, R por nivel de convicción", "Treino de decisões — calibração da sua confiança: acerto por confiança declarada, pontuação Brier, R por nível de convicção", "Entraîneur de décisions — calibration de ta confiance : réussite par confiance annoncée, score de Brier, R par niveau de conviction"],
+    "Rule Contract — daily check on synced trades, clean-day streak, penalty day with tightened Guardrails, value of keeping it": ["Regel-Vertrag – tägliche Prüfung an synchronisierten Trades, Serie sauberer Tage, Straftag mit engeren Guardrails, was das Einhalten wert ist", "Contrato de reglas: control diario con operaciones sincronizadas, racha de días limpios, día de penalización con Guardrails más estrictos y lo que vale cumplirlo", "Contrato de regras — verificação diária nas operações sincronizadas, sequência de dias limpos, dia de penalidade com Guardrails mais rígidos, o valor de cumpri-lo", "Contrat de règles — contrôle quotidien sur les trades synchronisés, série de jours propres, jour de pénalité avec Guardrails plus stricts, ce que vaut le respecter"],
+    "Market Weather — conditions of today vs your record, ridge-combined, walk-forward checked, optional Guardrails on storm days": ["Marktwetter – heutige Bedingungen gegen deine Bilanz, per Ridge kombiniert, Walk-forward geprüft, optional Guardrails an Sturmtagen", "Clima de mercado: condiciones de hoy frente a tu historial, combinadas con ridge, comprobadas walk-forward, Guardrails opcionales en días de tormenta", "Clima de mercado — condições de hoje vs. seu histórico, combinadas por ridge, verificadas walk-forward, Guardrails opcionais em dias de tempestade", "Météo de marché — conditions du jour face à ton historique, combinées par ridge, vérifiées en walk-forward, Guardrails optionnels les jours de tempête"],
+    "Blind Duel — create duels on hidden days of history and rank everyone who plays them (joining an invite is free)": ["Blind-Duell – Duelle auf verborgenen Tagen der Historie erstellen und alle Teilnehmer ranken (eine Einladung anzunehmen ist kostenlos)", "Duelo a ciegas: crea duelos en días ocultos de la historia y clasifica a todos los que los juegan (aceptar una invitación es gratis)", "Duelo às cegas — crie duelos em dias ocultos do histórico e classifique todos que jogam (aceitar um convite é grátis)", "Duel à l’aveugle — crée des duels sur des journées cachées de l’historique et classe tous ceux qui les jouent (rejoindre une invitation est gratuit)"],
     "Prop Challenge Simulator — multi-day challenge on real history, account carried day to day, firm rules, pass/fail report": ["Prop-Challenge-Simulator – mehrtägige Challenge auf echter Historie, Konto von Tag zu Tag weitergeführt, Firmenregeln, Bericht zu Bestanden/Gescheitert", "Simulador de desafíos prop: desafío de varios días con historia real, cuenta llevada día a día, reglas de la firma, informe de aprobado/suspendido", "Simulador de desafios prop — desafio de vários dias em histórico real, conta levada dia a dia, regras da firma, relatório de aprovado/reprovado", "Simulateur de challenge prop — challenge sur plusieurs jours sur un historique réel, compte reporté de jour en jour, règles de la firme, rapport réussi/échoué"],
     "Your Twin — same entries, your rules kept: exits, revenge trades, overtrading and position size priced one by one": ["Dein Zwilling – gleiche Einstiege, deine Regeln eingehalten: Ausstiege, Revenge-Trades, Overtrading und Positionsgröße einzeln beziffert", "Tu gemelo: mismas entradas, tus reglas cumplidas; salidas, operaciones de venganza, sobreoperar y tamaño de posición valorados uno a uno", "Seu gêmeo — mesmas entradas, suas regras cumpridas: saídas, operações de vingança, overtrading e tamanho da posição avaliados um a um", "Ton jumeau — mêmes entrées, tes règles respectées : sorties, trades de revanche, surtrading et taille de position chiffrés un par un"],
     "Exit Lab — set and forget vs your exits, best target tested out of sample, price after the exit": ["Exit-Labor – Stop und Ziel stehen lassen gegen deine Ausstiege, bestes Ziel außerhalb der Stichprobe geprüft, Kurs nach dem Ausstieg", "Laboratorio de salidas: dejar stop y objetivo frente a tus salidas, mejor objetivo probado fuera de muestra, precio tras la salida", "Laboratório de saídas — deixar stop e alvo vs. suas saídas, melhor alvo testado fora da amostra, preço após a saída", "Labo des sorties — stop et objectif laissés contre tes sorties, meilleur objectif testé hors échantillon, prix après la sortie"],
@@ -115413,5 +115482,1655 @@ var ApexCampaignEngine = (function () {
   document.addEventListener('DOMContentLoaded', function () { css(); setTimeout(CP.pullCloud, 5000); });
 })();
 </script>
+<script>
+/* ApexCalib — Decision Trainer (03.11.2026)
+   "When you feel 80 % sure, are you right 80 % of the time?" Professional
+   poker players and forecasters train exactly this; no trading journal does.
+
+   A round is ten decisions at random moments of real history (date hidden).
+   At each one the trader sees the chart up to that bar and commits:
+   long, short or no trade · how sure (55–95 %) · stop and target. Then the
+   hidden future plays out bar by bar and the trade is settled on real
+   prices — stop first when a bar touches both, mark-to-market if neither is
+   reached within the horizon. Over many rounds:
+     · calibration: stated confidence vs actual hit rate, per bucket
+     · Brier score and over/under-confidence, trend over time
+     · R per confidence level — where conviction pays and where it does not
+     · "no trade" checked against what both directions would have done
+   Engine between the markers is pure — .claude/tests/calib.test.js. */
+/* CALIB-ENGINE-START */
+var ApexCalibEngine = (function () {
+  var C = {};
+  C.CONF = [55, 65, 75, 85, 95];
+  C.HORIZON = 72;            // bars of future revealed after a decision
+
+  /* Average true range of the last n bars before index i (exclusive end). */
+  C.atr = function (b, i, n) {
+    n = n || 14; var s = 0, k = 0;
+    for (var j = Math.max(1, i - n); j < i; j++) { s += Math.max(b.h[j] - b.l[j], Math.abs(b.h[j] - b.c[j - 1]), Math.abs(b.l[j] - b.c[j - 1])); k++; }
+    return k ? s / k : null;
+  };
+  /* Settle a decision on the bars after index i (entry = close of bar i). */
+  C.settle = function (b, i, dir, sl, tp, horizon) {
+    var entry = b.c[i], d = dir === 'long' ? 1 : -1, risk = Math.abs(entry - sl);
+    if (!(risk > 0)) return null;
+    var end = Math.min(b.n, i + 1 + (horizon || C.HORIZON));
+    for (var j = i + 1; j < end; j++) {
+      var hitS = d > 0 ? b.l[j] <= sl : b.h[j] >= sl;
+      var hitT = d > 0 ? b.h[j] >= tp : b.l[j] <= tp;
+      if (hitS) { var ps = (d > 0 ? b.o[j] < sl : b.o[j] > sl) ? b.o[j] : sl; return { R: (ps - entry) * d / risk, how: 'stop', bars: j - i }; }
+      if (hitT) { var pt = (d > 0 ? b.o[j] > tp : b.o[j] < tp) ? b.o[j] : tp; return { R: (pt - entry) * d / risk, how: 'target', bars: j - i }; }
+    }
+    if (end - 1 <= i) return null;
+    return { R: (b.c[end - 1] - entry) * d / risk, how: 'open', bars: end - 1 - i };
+  };
+  /* Default bracket: stop 1.5 ATR, target 3 ATR (2R). */
+  C.bracket = function (b, i, dir) {
+    var a = C.atr(b, i, 14); if (!a) return null;
+    var e = b.c[i], d = dir === 'long' ? 1 : -1;
+    return { sl: e - d * 1.5 * a, tp: e + d * 3 * a, atr: a };
+  };
+
+  function mean(a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; }
+  /* decisions: [{ at, dir:'long'|'short'|'none', conf, R, win, noneLong, noneShort }] */
+  C.stats = function (list) {
+    var all = list || [], taken = all.filter(function (d) { return d.dir !== 'none' && d.R != null; });
+    var buckets = C.CONF.map(function (c) {
+      var x = taken.filter(function (d) { return d.conf === c; });
+      return { conf: c, n: x.length, hit: x.length ? x.filter(function (d) { return d.R > 0; }).length / x.length : null, avgR: mean(x.map(function (d) { return d.R; })) };
+    });
+    var brier = taken.length ? mean(taken.map(function (d) { var p = d.conf / 100, o = d.R > 0 ? 1 : 0; return (p - o) * (p - o); })) : null;
+    var hit = taken.length ? taken.filter(function (d) { return d.R > 0; }).length / taken.length : null;
+    var conf = mean(taken.map(function (d) { return d.conf / 100; }));
+    var none = all.filter(function (d) { return d.dir === 'none'; });
+    // a skip was right when neither default bracket would have reached its target
+    var goodSkip = none.filter(function (d) { return !(d.noneLong > 0) && !(d.noneShort > 0); }).length;
+    var half = Math.floor(taken.length / 2), early = taken.slice(0, half), late = taken.slice(half);
+    var b2 = function (x) { return x.length ? mean(x.map(function (d) { var p = d.conf / 100, o = d.R > 0 ? 1 : 0; return (p - o) * (p - o); })) : null; };
+    return { n: all.length, taken: taken.length, skipped: none.length, goodSkip: goodSkip,
+             hit: hit, conf: conf, over: conf != null && hit != null ? conf - hit : null,
+             brier: brier, brierEarly: half >= 10 ? b2(early) : null, brierLate: half >= 10 ? b2(late) : null,
+             totalR: taken.reduce(function (a, d) { return a + d.R; }, 0), avgR: mean(taken.map(function (d) { return d.R; })),
+             buckets: buckets };
+  };
+  /* The plain-language verdict on calibration. */
+  C.verdict = function (S) {
+    if (!S || S.taken < 10) return 'thin';
+    if (S.over > 0.08) return 'over';
+    if (S.over < -0.08) return 'under';
+    return 'good';
+  };
+  return C;
+})();
+/* CALIB-ENGINE-END */
+
+(function () {
+  var CL = {};
+  window.ApexCalib = CL;
+  var E = ApexCalibEngine;
+  var R = null;   // current round
+  function uid() { return window.currentUID || 'local'; }
+  function key() { return 'apexCalib_v1_' + uid(); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function load() { try { return JSON.parse(localStorage.getItem(key()) || '[]') || []; } catch (e) { return []; } }
+  function save(l) { try { localStorage.setItem(key(), JSON.stringify(l.slice(-1500))); } catch (e) {} cloud(l); }
+  function cloud(l) { try { if (window.db && window.currentUID && currentUID !== 'demo') db.collection('apexUsers').doc(currentUID).collection('private').doc('calibration').set({ list: JSON.stringify(l.slice(-1500)), at: Date.now() }); } catch (e) {} }
+  CL.pull = function () {
+    try {
+      if (!(window.db && window.currentUID && currentUID !== 'demo')) return;
+      db.collection('apexUsers').doc(currentUID).collection('private').doc('calibration').get().then(function (d) {
+        if (!d.exists) return; var r = []; try { r = JSON.parse(d.data().list || '[]'); } catch (e) {}
+        var l = load(), seen = {}; l.forEach(function (x) { seen[x.at] = 1; }); r.forEach(function (x) { if (!seen[x.at]) l.push(x); });
+        l.sort(function (a, b) { return a.at - b.at; });
+        try { localStorage.setItem(key(), JSON.stringify(l.slice(-1500))); } catch (e) {}
+      }).catch(function () {});
+    } catch (e) {}
+  };
+  function fR(v) { if (v == null || !isFinite(v)) return '—'; return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + 'R'; }
+  function pct(v) { return v == null || !isFinite(v) ? '—' : Math.round(v * 100) + '%'; }
+  function toast(m) { try { if (window.showToast) showToast(m); } catch (e) {} }
+  function i18n(el) { try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {} }
+  function isPro() { return window.currentPlan === 'pro' || window.currentUID === 'demo'; }
+  var TF_MS = { '5m': 300000, '15m': 900000, '1h': 3600000 };
+
+  function css() {
+    if (document.getElementById('calCss')) return;
+    var s = document.createElement('style'); s.id = 'calCss';
+    s.textContent =
+      '#calOv{position:fixed;inset:0;z-index:100000;background:var(--surface);color:var(--ink);display:none;flex-direction:column}#calOv.open{display:flex}' +
+      '.cal-top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--rim2);flex-wrap:wrap}' +
+      '.cal-top h3{margin:0;font-size:var(--fs-md);flex:1}' +
+      '.cal-main{flex:1;display:grid;grid-template-columns:1fr 320px;min-height:0}@media(max-width:820px){.cal-main{grid-template-columns:1fr;grid-template-rows:1fr auto}}' +
+      '#calChart{min-height:260px;position:relative}' +
+      '.cal-side{border-left:1px solid var(--rim2);padding:14px;overflow:auto;background:var(--elevated)}@media(max-width:820px){.cal-side{border-left:0;border-top:1px solid var(--rim2);max-height:52vh}}' +
+      '.cal-q{font-size:var(--fs-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin:12px 0 6px}' +
+      '.cal-row{display:flex;gap:6px;flex-wrap:wrap}' +
+      '.cal-b{flex:1;min-width:58px;border:1px solid var(--rim2);background:var(--surface);color:var(--ink);border-radius:var(--r-sm);padding:9px 6px;font-size:var(--fs-sm);cursor:pointer;font-weight:600}' +
+      '.cal-b.on{border-color:var(--gold);background:rgba(var(--gold-rgb),.14);color:var(--gold)}' +
+      '.cal-b.long.on{border-color:var(--profit);background:rgba(var(--profit-rgb),.14);color:var(--profit)}.cal-b.short.on{border-color:var(--loss);background:rgba(var(--loss-rgb),.12);color:var(--loss)}' +
+      '.cal-in{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;font-size:var(--fs-xs);color:var(--ink2)}' +
+      '.cal-in input{width:100%;box-sizing:border-box;background:var(--surface);color:var(--ink);border:1px solid var(--rim2);border-radius:var(--r-sm);padding:7px 9px;font-family:var(--font-mono,DM Mono,monospace);font-size:var(--fs-sm)}' +
+      '.cal-go{width:100%;margin-top:14px;justify-content:center}' +
+      '.cal-note{font-size:var(--fs-xs);color:var(--ink3);line-height:1.5;margin-top:8px}' +
+      '.cal-res{font-size:var(--fs-sm);line-height:1.6;margin-top:10px;padding:10px;border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--rim2)}' +
+      '.cal-dots{display:flex;gap:4px;align-items:center}.cal-dots i{width:9px;height:9px;border-radius:50%;background:var(--rim2);display:inline-block}.cal-dots i.w{background:var(--profit)}.cal-dots i.l{background:var(--loss)}.cal-dots i.s{background:var(--ink3)}.cal-dots i.c{outline:2px solid var(--gold);outline-offset:1px}' +
+      '.cal-card{border:1px solid var(--rim2);border-radius:var(--r-lg);padding:16px 18px;margin:0 0 14px;background:var(--surface)}.cal-card h3{margin:0 0 4px;font-size:var(--fs-md)}' +
+      '.cal-svg{width:100%;max-width:420px;height:auto;display:block;margin:8px 0}' +
+      '.cal-kpis{display:flex;gap:18px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--ink3);margin:8px 0}.cal-kpis b{display:block;font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:20px;color:var(--ink)}' +
+      '.cal-tbl{overflow-x:auto}.cal-tbl table{width:100%;border-collapse:collapse;font-size:var(--fs-xs);font-family:var(--font-mono,DM Mono,monospace)}.cal-tbl th{text-align:left;color:var(--ink3);padding:5px 7px;border-bottom:1px solid var(--rim2)}.cal-tbl td{padding:5px 7px;border-bottom:1px solid var(--rim)}';
+    document.head.appendChild(s);
+  }
+
+  /* ── one round of ten decisions ── */
+  function syms() { try { return ApexMarketData.instruments() || []; } catch (e) { return [['XAUUSD', 'Gold']]; } }
+  /* Days in the R2 archive load at once and cost the throttled Dukascopy
+     feed nothing; the trainer draws from them (same cursor as the replay
+     dice: everything after backfill.day up to top is complete). */
+  var _arc = null;
+  function archive() {
+    if (_arc) return Promise.resolve(_arc);
+    var late = new Promise(function (res) { setTimeout(function () { res(null); }, 2500); });
+    return Promise.race([late, fetch('https://dukascopy-worker.4kjyyyftv6.workers.dev/health').then(function (r) { return r.json(); })])
+      .then(function (h) {
+        var b = h && h.backfill, a = Date.now() - 300 * 86400000, z = Date.now() - 4 * 86400000;
+        if (b && b.top) { a = b.done ? Date.UTC(2020, 0, 6) : b.day + 2 * 86400000; z = Math.min(z, b.top - 86400000); }
+        _arc = [a, z]; return _arc;
+      }).catch(function () { _arc = [Date.now() - 300 * 86400000, Date.now() - 4 * 86400000]; return _arc; });
+  }
+  function rndDay(rg) {
+    var a = rg[0], b = rg[1];
+    for (var k = 0; k < 50; k++) { var t = a + Math.floor(Math.random() * Math.max(1, (b - a) / 86400000)) * 86400000; t = Math.floor(t / 86400000) * 86400000; var w = new Date(t).getUTCDay(); if (w > 1 && w < 6) return t; }
+    return Math.floor(b / 86400000) * 86400000;
+  }
+  /* Enough history for 120 bars of context and the horizon after it. */
+  function windowFor(tf, day) {
+    var back = tf === '1h' ? 7 : tf === '15m' ? 2 : 1, fwd = tf === '1h' ? 4 : 1;
+    return [day - back * 86400000, day + fwd * 86400000 - 60000];
+  }
+  /* The next moment is fetched while the trader is still deciding. */
+  function prefetch() {
+    if (!R) return;
+    var sym = R.sym, tf = R.tf;
+    archive().then(function (rg) {
+      var day = rndDay(rg), w = windowFor(tf, day);
+      R.pre = { sym: sym, tf: tf, day: day, p: ApexMarketData.getBars(sym, w[0], w[1], tf).catch(function () { return null; }) };
+    });
+  }
+  CL.open = function (opt) {
+    if (!isPro()) { try { openUpgradeModal(); } catch (e) {} return; }
+    css();
+    var ov = document.getElementById('calOv');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'calOv'; document.body.appendChild(ov); }
+    var list = syms();
+    var sym = (opt && opt.symbol) || (list.some(function (s) { return s[0] === 'XAUUSD'; }) ? 'XAUUSD' : list[0][0]);
+    R = { sym: sym, tf: (opt && opt.tf) || '15m', i: 0, n: 10, results: [], cur: null, chart: null };
+    ov.innerHTML = '<div class="cal-top"><h3>Decision Trainer</h3>' +
+      '<select id="calSym" aria-label="Instrument">' + list.map(function (s) { return '<option value="' + esc(s[0]) + '"' + (s[0] === sym ? ' selected' : '') + '>' + esc(s[1] || s[0]) + '</option>'; }).join('') + '</select>' +
+      '<select id="calTf" aria-label="Timeframe">' + Object.keys(TF_MS).map(function (t) { return '<option' + (t === R.tf ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select>' +
+      '<div class="cal-dots" id="calDots"></div><button class="apex-btn apex-btn--ghost apex-btn--sm" onclick="ApexCalib.close()">Close</button></div>' +
+      '<div class="cal-main"><div id="calChart"></div><div class="cal-side" id="calSide"></div></div>';
+    ov.classList.add('open');
+    document.getElementById('calSym').onchange = function () { R.sym = this.value; next(true); };
+    document.getElementById('calTf').onchange = function () { R.tf = this.value; next(true); };
+    i18n(ov);
+    next(false);
+  };
+  CL.close = function () {
+    var ov = document.getElementById('calOv'); if (ov) ov.classList.remove('open');
+    try { if (R && R.chart) R.chart.destroy(); } catch (e) {}
+    R = null;
+    try { document.dispatchEvent(new Event('apex:calib')); } catch (e) {}
+  };
+  function dots() {
+    var el = document.getElementById('calDots'); if (!el || !R) return;
+    var h = '';
+    for (var k = 0; k < R.n; k++) { var r = R.results[k]; h += '<i class="' + (r ? (r.dir === 'none' ? 's' : r.R > 0 ? 'w' : 'l') : '') + (k === R.i ? ' c' : '') + '"></i>'; }
+    el.innerHTML = h;
+  }
+  function side(html) { var el = document.getElementById('calSide'); if (el) { el.innerHTML = html; i18n(el); } }
+
+  function next(restart) {
+    if (!R) return;
+    if (restart) { R.i = R.results.length; }
+    if (R.i >= R.n) { roundDone(); return; }
+    dots();
+    side('<div class="cal-note">Finding a moment in history…</div>');
+    var host = document.getElementById('calChart');
+    var pre = R.pre && R.pre.sym === R.sym && R.pre.tf === R.tf ? R.pre : null; R.pre = null;
+    var barsP = pre ? pre.p : archive().then(function (rg) { var w = windowFor(R.tf, rndDay(rg)); return ApexMarketData.getBars(R.sym, w[0], w[1], R.tf); });
+    var go = function (chart) {
+      return Promise.resolve(barsP).then(function (b) {
+        if (!R) return;
+        if (!b || b.n < 200) { R.tries = (R.tries || 0) + 1; if (R.tries > 6) { R.tries = 0; return fail(); } return next(false); }
+        R.tries = 0;
+        var i = 120 + Math.floor(Math.random() * Math.max(1, b.n - 120 - E.HORIZON - 1));
+        if (i + E.HORIZON >= b.n) i = b.n - E.HORIZON - 1;
+        var atr = E.atr(b, i, 14);
+        if (!atr) { R.tries = (R.tries || 0) + 1; if (R.tries > 6) { R.tries = 0; return fail(); } return next(false); }
+        R.cur = { b: b, i: i, dir: null, conf: null, at: Date.now() };
+        chart.setBars(b); chart.reveal(i + 1); chart.setLevels(null); try { chart.followTail(120); } catch (e) {}
+        ask();
+        prefetch();
+      });
+    };
+    if (R.chart && R.chart.symbol === R.sym && R.chart.tf === R.tf) { go(R.chart).catch(fail); return; }
+    try { if (R.chart) R.chart.destroy(); } catch (e) {}
+    host.innerHTML = '';
+    ApexChart.create(host, { symbol: R.sym, timeframe: R.tf, volume: false }).then(function (ch) { R.chart = ch; blind(ch); return go(ch); }).catch(fail);
+    function fail(e) { side('<div class="cal-res">The price feed did not answer. <button class="apex-btn apex-btn--sm" onclick="ApexCalib._retry()">Try another moment</button></div>'); }
+  }
+  CL._retry = function () { next(false); };
+  /* The date stays hidden — a remembered news day must not do the deciding.
+     Day boundaries show as "Day 1, Day 2…", times as plain clock times. */
+  function blind(ch) {
+    try {
+      var hh = function (ms) { var d = new Date(ms); return String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0'); };
+      ch.chart.applyOptions({
+        timeScale: { tickMarkFormatter: function (time, tickType) { var ms = time * 1000; if (tickType <= 2) { var b = R && R.cur && R.cur.b; var d0 = b ? Math.floor(b.t[0] / 86400000) : 0; return 'Day ' + (Math.floor(ms / 86400000) - d0 + 1); } return hh(ms); } },
+        localization: { timeFormatter: function (time) { return hh(time * 1000); } }
+      });
+    } catch (e) {}
+  }
+
+  function ask() {
+    var c = R.cur, b = c.b, e = b.c[c.i];
+    var dec = function (v) { var s = String(e).split('.')[1]; return Math.min(6, Math.max(2, s ? s.length : 2)); };
+    c.dp = dec();
+    side('<div class="cal-q"><span>Decision</span> <span class="notranslate" translate="no">' + (R.i + 1) + ' / ' + R.n + '</span></div>' +
+      '<div class="cal-note" style="margin-top:0"><span>The last candle just closed at</span> <b class="notranslate" translate="no">' + e.toFixed(c.dp) + '</b><br><span>What do you do now?</span></div>' +
+      '<div class="cal-q">Your call</div><div class="cal-row">' +
+        '<button class="cal-b long" data-d="long" onclick="ApexCalib._dir(\'long\')">Long</button><button class="cal-b short" data-d="short" onclick="ApexCalib._dir(\'short\')">Short</button><button class="cal-b" data-d="none" onclick="ApexCalib._dir(\'none\')">No trade</button></div>' +
+      '<div id="calMore"></div>');
+  }
+  CL._dir = function (d) {
+    var c = R && R.cur; if (!c) return;
+    c.dir = d;
+    document.querySelectorAll('#calSide .cal-b[data-d]').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-d') === d); });
+    var more = document.getElementById('calMore');
+    if (d === 'none') { more.innerHTML = '<button class="apex-btn apex-btn--solid cal-go" onclick="ApexCalib._submit()">Stay out — show what happened</button>'; i18n(more); return; }
+    var br = E.bracket(c.b, c.i, d);
+    c.sl = +br.sl.toFixed(c.dp); c.tp = +br.tp.toFixed(c.dp);
+    more.innerHTML = '<div class="cal-q">How sure are you?</div><div class="cal-row">' + E.CONF.map(function (p) { return '<button class="cal-b" data-c="' + p + '" onclick="ApexCalib._conf(' + p + ')">' + p + '%</button>'; }).join('') + '</div>' +
+      '<div class="cal-note">Sure that this trade reaches its target before its stop.</div>' +
+      '<div class="cal-q">Stop and target</div><div class="cal-in"><span>Stop</span><input id="calSl" type="number" step="any" value="' + c.sl + '"><span>Target</span><input id="calTp" type="number" step="any" value="' + c.tp + '"></div>' +
+      '<div class="cal-note" id="calRr"></div>' +
+      '<button class="apex-btn apex-btn--solid cal-go" id="calGo" disabled onclick="ApexCalib._submit()">Commit and play forward</button>';
+    var upd = function () {
+      c.sl = parseFloat(document.getElementById('calSl').value); c.tp = parseFloat(document.getElementById('calTp').value);
+      var e = c.b.c[c.i], ok = d === 'long' ? (c.sl < e && c.tp > e) : (c.sl > e && c.tp < e);
+      var rr = ok ? Math.abs(c.tp - e) / Math.abs(e - c.sl) : null;
+      document.getElementById('calRr').innerHTML = ok ? '<span>Reward to risk</span> <b class="notranslate" translate="no">' + rr.toFixed(2) + '</b> · <span>Stop distance</span> <b class="notranslate" translate="no">' + (Math.abs(e - c.sl) / br.atr).toFixed(1) + ' × ATR</b>' : '<span class="neg">Stop and target must be on either side of the price.</span>';
+      i18n(document.getElementById('calRr'));
+      c.valid = ok;
+      try { R.chart.setLevels({ entry: e, sl: ok ? c.sl : null, tp: ok ? c.tp : null }); } catch (x) {}
+      var g = document.getElementById('calGo'); if (g) g.disabled = !(ok && c.conf);
+    };
+    document.getElementById('calSl').oninput = upd; document.getElementById('calTp').oninput = upd;
+    i18n(more); upd();
+  };
+  CL._conf = function (p) {
+    var c = R && R.cur; if (!c) return; c.conf = p;
+    document.querySelectorAll('#calSide .cal-b[data-c]').forEach(function (x) { x.classList.toggle('on', +x.getAttribute('data-c') === p); });
+    var g = document.getElementById('calGo'); if (g) g.disabled = !(c.valid && c.conf);
+  };
+  CL._submit = function () {
+    var c = R && R.cur; if (!c || !c.dir) return;
+    var b = c.b, i = c.i, rec = { at: c.at, sym: R.sym, tf: R.tf, dir: c.dir, conf: c.conf || null };
+    if (c.dir === 'none') {
+      var bl = E.bracket(b, i, 'long'), bs = E.bracket(b, i, 'short');
+      var sl = E.settle(b, i, 'long', bl.sl, bl.tp), ss = E.settle(b, i, 'short', bs.sl, bs.tp);
+      rec.noneLong = sl ? +sl.R.toFixed(2) : null; rec.noneShort = ss ? +ss.R.toFixed(2) : null; rec.R = null;
+    } else {
+      var st = E.settle(b, i, c.dir, c.sl, c.tp);
+      if (!st) { toast('⚠ Not enough future data for this moment'); return next(false); }
+      rec.R = +st.R.toFixed(3); rec.how = st.how; rec.rr = +(Math.abs(c.tp - b.c[i]) / Math.abs(b.c[i] - c.sl)).toFixed(2);
+    }
+    R.results.push(rec);
+    var l = load(); l.push(rec); save(l);
+    // play the future forward
+    var k = 0, end = Math.min(b.n, i + 1 + E.HORIZON);
+    side('<div class="cal-note">Playing forward…</div>');
+    var tick = function () {
+      if (!R || !R.chart) return;
+      k += 2; R.chart.reveal(Math.min(end, i + 1 + k));
+      if (i + 1 + k < end) return setTimeout(tick, 28);
+      show(rec);
+    };
+    tick();
+  };
+  function show(rec) {
+    var txt;
+    if (rec.dir === 'none') {
+      var w = function (v) { return v == null ? '—' : v > 0 ? '<b class="pos">would have won ' + fR(v) + '</b>' : '<b class="neg">would have lost ' + fR(v).replace('−', '') + '</b>'; };
+      txt = '<span>You stayed out.</span><br><span>A standard long</span> ' + w(rec.noneLong) + '<br><span>A standard short</span> ' + w(rec.noneShort) +
+        '<div class="cal-note">Standard = stop 1.5 × ATR, target 3 × ATR.</div>';
+    } else {
+      txt = (rec.how === 'target' ? '<b class="pos">Target hit</b>' : rec.how === 'stop' ? '<b class="neg">Stopped out</b>' : '<b>Neither reached</b> — <span>valued at the last price</span>') +
+        ' · <b class="notranslate ' + (rec.R > 0 ? 'pos' : 'neg') + '" translate="no">' + fR(rec.R) + '</b><br><span>You were</span> <b class="notranslate" translate="no">' + rec.conf + '%</b> <span>sure.</span>';
+    }
+    R.i++; dots();
+    side('<div class="cal-q"><span>Decision</span> <span class="notranslate" translate="no">' + R.i + ' / ' + R.n + '</span></div><div class="cal-res">' + txt + '</div>' +
+      '<button class="apex-btn apex-btn--solid cal-go" onclick="ApexCalib._next()">' + (R.i >= R.n ? 'See the round' : 'Next moment') + '</button>');
+  }
+  CL._next = function () { next(false); };
+
+  function roundDone() {
+    var S = E.stats(R.results), all = E.stats(load());
+    try { R.chart.setLevels(null); } catch (e) {}
+    side('<div class="cal-q">Round done</div><div class="cal-kpis"><div><b class="notranslate" translate="no">' + fR(S.totalR) + '</b>this round</div><div><b class="notranslate" translate="no">' + pct(S.hit) + '</b>hit rate</div><div><b class="notranslate" translate="no">' + pct(S.conf) + '</b>your average confidence</div></div>' +
+      verdictHtml(all) + '<button class="apex-btn apex-btn--solid cal-go" onclick="ApexCalib.open({symbol:\'' + esc(R.sym) + '\',tf:\'' + esc(R.tf) + '\'})">Another round</button>' +
+      '<button class="apex-btn apex-btn--ghost cal-go" onclick="ApexCalib.close()">Done</button>');
+  }
+
+  function verdictHtml(S) {
+    var v = E.verdict(S);
+    var t = v === 'thin' ? '<span>After ten committed trades your calibration becomes readable — keep going.</span>'
+      : v === 'over' ? '<b class="neg">You are overconfident.</b> <span>You say</span> ' + pct(S.conf) + ' <span>and are right</span> ' + pct(S.hit) + '. <span>Size down when you feel sure.</span>'
+      : v === 'under' ? '<b>You are underconfident.</b> <span>You say</span> ' + pct(S.conf) + ' <span>and are right</span> ' + pct(S.hit) + '. <span>Your reads are better than you trust them to be.</span>'
+      : '<b class="pos">Well calibrated.</b> <span>When you say</span> ' + pct(S.conf) + ' <span>you are right</span> ' + pct(S.hit) + ' <span>of the time.</span>';
+    return '<div class="cal-res">' + t + '</div>';
+  }
+  function reliabilitySvg(S) {
+    var W = 360, H = 220, P = 30, x = function (p) { return P + (p - 0.5) / 0.5 * (W - 2 * P); }, y = function (p) { return H - P - p * (H - 2 * P); };
+    var pts = S.buckets.filter(function (b) { return b.n > 0; });
+    return '<svg class="cal-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Stated confidence against actual hit rate">' +
+      '<line x1="' + x(0.5) + '" y1="' + y(0.5) + '" x2="' + x(1) + '" y2="' + y(1) + '" style="stroke:var(--rim2);stroke-dasharray:4 4"/>' +
+      '<line x1="' + P + '" y1="' + (H - P) + '" x2="' + (W - P) + '" y2="' + (H - P) + '" style="stroke:var(--rim2)"/>' +
+      [0.5, 0.75, 1].map(function (p) { return '<text x="' + x(p) + '" y="' + (H - P + 14) + '" text-anchor="middle" style="fill:var(--ink3);font-size:10px">' + Math.round(p * 100) + '%</text>'; }).join('') +
+      [0, 0.5, 1].map(function (p) { return '<text x="' + (P - 6) + '" y="' + (y(p) + 3) + '" text-anchor="end" style="fill:var(--ink3);font-size:10px">' + Math.round(p * 100) + '%</text>'; }).join('') +
+      pts.map(function (b) { var r = Math.min(14, 3 + Math.sqrt(b.n) * 2); return '<circle cx="' + x(b.conf / 100).toFixed(1) + '" cy="' + y(b.hit).toFixed(1) + '" r="' + r.toFixed(1) + '" style="fill:var(--gold);opacity:.8"><title>' + b.conf + '%: right ' + Math.round(b.hit * 100) + '% of ' + b.n + '</title></circle>'; }).join('') +
+      '<text x="' + (W - P) + '" y="' + (y(1) + 12) + '" text-anchor="end" style="fill:var(--ink3);font-size:10px">perfectly calibrated</text></svg>';
+  }
+
+  /* ── card on the Market Replay start screen ── */
+  CL.card = function () {
+    css();
+    var S = E.stats(load());
+    var head = '<div class="cal-card"><h3>Decision Trainer</h3><div class="cal-note" style="margin-top:0">Ten random moments of real history, date hidden. Call long, short or no trade, say how sure you are, set stop and target — then the future plays out. Over time you see whether your 80 % really are 80 %.</div>';
+    if (!S.n) return head + '<div style="margin-top:12px"><button class="apex-btn apex-btn--solid" onclick="ApexCalib.open()">Start a round</button></div></div>';
+    var rows = S.buckets.filter(function (b) { return b.n; }).map(function (b) {
+      return '<tr><td>' + b.conf + '%</td><td>' + b.n + '</td><td class="' + (b.hit * 100 >= b.conf - 5 ? 'pos' : 'neg') + '">' + pct(b.hit) + '</td><td class="' + (b.avgR > 0 ? 'pos' : 'neg') + '">' + fR(b.avgR) + '</td></tr>';
+    }).join('');
+    return head + '<div class="cal-kpis"><div><b class="notranslate" translate="no">' + S.n + '</b>decisions</div><div><b class="notranslate" translate="no">' + pct(S.hit) + '</b>hit rate</div><div><b class="notranslate" translate="no">' + (S.brier != null ? S.brier.toFixed(3) : '—') + '</b>Brier score</div><div><b class="notranslate" translate="no">' + fR(S.avgR) + '</b>per trade</div>' +
+      (S.skipped ? '<div><b class="notranslate" translate="no">' + S.goodSkip + '/' + S.skipped + '</b>skips that were right</div>' : '') + '</div>' +
+      verdictHtml(S) +
+      (S.taken >= 5 ? reliabilitySvg(S) + '<div class="cal-tbl"><table><tr><th>You said</th><th>Trades</th><th>Right</th><th>Avg R</th></tr>' + rows + '</table></div>' : '') +
+      (S.brierEarly != null ? '<div class="cal-note">Brier score, first half → second half: <b class="notranslate" translate="no">' + S.brierEarly.toFixed(3) + ' → ' + S.brierLate.toFixed(3) + '</b> ' + (S.brierLate < S.brierEarly ? '<span class="pos">— improving</span>' : '<span>— not improving yet</span>') + '. Lower is better; 0.25 is a coin flip.</div>' : '') +
+      '<div style="margin-top:12px"><button class="apex-btn apex-btn--solid" onclick="ApexCalib.open()">Start a round</button></div></div>';
+  };
+
+  var T = {
+    'Decision Trainer': ['Entscheidungs-Training', 'Entrenador de decisiones', 'Treino de decisões', 'Entraîneur de décisions'],
+    'Ten random moments of real history, date hidden. Call long, short or no trade, say how sure you are, set stop and target — then the future plays out. Over time you see whether your 80 % really are 80 %.': ['Zehn zufällige Momente echter Historie, Datum verborgen. Entscheide Long, Short oder kein Trade, sag, wie sicher du bist, setz Stop und Ziel – dann läuft die Zukunft ab. Mit der Zeit siehst du, ob deine 80 % wirklich 80 % sind.', 'Diez momentos al azar de historia real, fecha oculta. Decide largo, corto o sin operación, di qué tan seguro estás, pon stop y objetivo; luego se reproduce el futuro. Con el tiempo ves si tu 80 % es de verdad 80 %.', 'Dez momentos aleatórios de histórico real, data oculta. Decida comprado, vendido ou sem operação, diga o quão seguro está, defina stop e alvo — então o futuro se desenrola. Com o tempo você vê se seus 80 % são mesmo 80 %.', 'Dix moments au hasard d’un historique réel, date masquée. Décide long, short ou pas de trade, dis à quel point tu es sûr, place stop et objectif — puis le futur se déroule. Avec le temps, tu vois si tes 80 % sont vraiment 80 %.'],
+    'Start a round': ['Runde starten', 'Empezar una ronda', 'Começar uma rodada', 'Lancer une manche'], 'Close': ['Schließen', 'Cerrar', 'Fechar', 'Fermer'],
+    'Your call': ['Deine Entscheidung', 'Tu decisión', 'Sua decisão', 'Ta décision'], 'Long': ['Long', 'Largo', 'Comprado', 'Long'], 'Short': ['Short', 'Corto', 'Vendido', 'Short'], 'No trade': ['Kein Trade', 'Sin operación', 'Sem operação', 'Pas de trade'],
+    'How sure are you?': ['Wie sicher bist du?', '¿Qué tan seguro estás?', 'Quão seguro você está?', 'À quel point es-tu sûr ?'],
+    'Sure that this trade reaches its target before its stop.': ['Sicher, dass dieser Trade sein Ziel vor seinem Stop erreicht.', 'Seguro de que esta operación alcanza su objetivo antes que su stop.', 'Seguro de que esta operação atinge o alvo antes do stop.', 'Sûr que ce trade atteint son objectif avant son stop.'],
+    'Stop and target': ['Stop und Ziel', 'Stop y objetivo', 'Stop e alvo', 'Stop et objectif'], 'Stop': ['Stop', 'Stop', 'Stop', 'Stop'], 'Target': ['Ziel', 'Objetivo', 'Alvo', 'Objectif'],
+    'Commit and play forward': ['Festlegen und vorspielen', 'Confirmar y avanzar', 'Confirmar e avançar', 'Valider et faire défiler'],
+    'Stay out — show what happened': ['Draußen bleiben – zeigen, was passiert ist', 'Quedarme fuera: mostrar qué pasó', 'Ficar de fora — mostrar o que aconteceu', 'Rester dehors — montrer ce qui s’est passé'],
+    'Next moment': ['Nächster Moment', 'Siguiente momento', 'Próximo momento', 'Moment suivant'], 'See the round': ['Runde ansehen', 'Ver la ronda', 'Ver a rodada', 'Voir la manche'],
+    'Round done': ['Runde fertig', 'Ronda terminada', 'Rodada concluída', 'Manche terminée'], 'Another round': ['Noch eine Runde', 'Otra ronda', 'Mais uma rodada', 'Une autre manche'], 'Done': ['Fertig', 'Listo', 'Concluído', 'Terminé'],
+    'Target hit': ['Ziel erreicht', 'Objetivo alcanzado', 'Alvo atingido', 'Objectif atteint'], 'Stopped out': ['Ausgestoppt', 'Stop tocado', 'Stopado', 'Stoppé'], 'Neither reached': ['Keins erreicht', 'Ninguno alcanzado', 'Nenhum atingido', 'Aucun atteint'],
+    'valued at the last price': ['zum letzten Kurs bewertet', 'valorado al último precio', 'avaliado pelo último preço', 'valorisé au dernier prix'],
+    'You were': ['Du warst', 'Estabas', 'Você estava', 'Tu étais'], 'sure.': ['sicher.', 'seguro.', 'seguro.', 'sûr.'], 'You stayed out.': ['Du bist draußen geblieben.', 'Te quedaste fuera.', 'Você ficou de fora.', 'Tu es resté dehors.'],
+    'A standard long': ['Ein Standard-Long', 'Un largo estándar', 'Uma compra padrão', 'Un long standard'], 'A standard short': ['Ein Standard-Short', 'Un corto estándar', 'Uma venda padrão', 'Un short standard'],
+    'Standard = stop 1.5 × ATR, target 3 × ATR.': ['Standard = Stop 1,5 × ATR, Ziel 3 × ATR.', 'Estándar = stop 1,5 × ATR, objetivo 3 × ATR.', 'Padrão = stop 1,5 × ATR, alvo 3 × ATR.', 'Standard = stop 1,5 × ATR, objectif 3 × ATR.'],
+    'decisions': ['Entscheidungen', 'decisiones', 'decisões', 'décisions'], 'hit rate': ['Trefferquote', 'acierto', 'acerto', 'taux de réussite'], 'Brier score': ['Brier-Score', 'Puntuación Brier', 'Pontuação Brier', 'Score de Brier'],
+    'per trade': ['pro Trade', 'por operación', 'por operação', 'par trade'], 'skips that were right': ['richtige Verzichte', 'omisiones acertadas', 'abstenções certas', 'abstentions justes'],
+    'this round': ['diese Runde', 'esta ronda', 'esta rodada', 'cette manche'], 'your average confidence': ['deine mittlere Sicherheit', 'tu confianza media', 'sua confiança média', 'ta confiance moyenne'],
+    'You said': ['Du sagtest', 'Dijiste', 'Você disse', 'Tu as dit'], 'Trades': ['Trades', 'Operaciones', 'Operações', 'Trades'], 'Right': ['Richtig', 'Acierto', 'Certo', 'Juste'], 'Avg R': ['Ø R', 'R medio', 'R médio', 'R moyen'],
+    'You are overconfident.': ['Du bist zu selbstsicher.', 'Tienes exceso de confianza.', 'Você é confiante demais.', 'Tu es trop sûr de toi.'],
+    'You are underconfident.': ['Du traust dir zu wenig zu.', 'Te subestimas.', 'Você se subestima.', 'Tu te sous-estimes.'],
+    'Well calibrated.': ['Gut kalibriert.', 'Bien calibrado.', 'Bem calibrado.', 'Bien calibré.'],
+    'You say': ['Du sagst', 'Dices', 'Você diz', 'Tu dis'], 'and are right': ['und liegst richtig in', 'y aciertas', 'e acerta', 'et tu as raison à'],
+    'Size down when you feel sure.': ['Geh kleiner rein, wenn du dich sicher fühlst.', 'Reduce el tamaño cuando te sientas seguro.', 'Reduza o tamanho quando se sentir seguro.', 'Réduis la taille quand tu te sens sûr.'],
+    'Your reads are better than you trust them to be.': ['Deine Einschätzungen sind besser, als du ihnen zutraust.', 'Tus lecturas son mejores de lo que confías.', 'Suas leituras são melhores do que você confia.', 'Tes lectures sont meilleures que ce que tu crois.'],
+    'When you say': ['Wenn du', 'Cuando dices', 'Quando você diz', 'Quand tu dis'], 'you are right': ['sagst, liegst du richtig in', 'aciertas', 'você acerta', 'tu as raison'], 'of the time.': ['der Fälle.', 'de las veces.', 'das vezes.', 'des cas.'],
+    'Decision': ['Entscheidung', 'Decisión', 'Decisão', 'Décision'],
+    'After ten committed trades your calibration becomes readable — keep going.': ['Ab zehn festgelegten Trades wird deine Kalibrierung lesbar – mach weiter.', 'A partir de diez operaciones confirmadas tu calibración se vuelve legible; sigue.', 'Depois de dez operações confirmadas sua calibração fica legível — continue.', 'À partir de dix trades validés, ta calibration devient lisible — continue.'],
+    'The last candle just closed at': ['Die letzte Kerze hat gerade geschlossen bei', 'La última vela acaba de cerrar en', 'O último candle acabou de fechar em', 'La dernière bougie vient de clôturer à'],
+    'What do you do now?': ['Was tust du jetzt?', '¿Qué haces ahora?', 'O que você faz agora?', 'Que fais-tu maintenant ?'],
+    'Reward to risk': ['Chance zu Risiko', 'Beneficio a riesgo', 'Retorno sobre risco', 'Gain sur risque'], 'Stop distance': ['Stop-Abstand', 'Distancia del stop', 'Distância do stop', 'Distance du stop'],
+    'Stop and target must be on either side of the price.': ['Stop und Ziel müssen auf verschiedenen Seiten des Kurses liegen.', 'El stop y el objetivo deben estar a ambos lados del precio.', 'Stop e alvo devem ficar em lados opostos do preço.', 'Le stop et l’objectif doivent être de part et d’autre du prix.'],
+    'Playing forward…': ['Spielt vor…', 'Avanzando…', 'Avançando…', 'Défilement…'], 'Finding a moment in history…': ['Suche einen Moment in der Historie…', 'Buscando un momento en la historia…', 'Procurando um momento no histórico…', 'Recherche d’un moment dans l’historique…']
+  };
+  function reg() { if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('#calOv, .cal-card', T); else setTimeout(reg, 300); }
+  reg();
+  document.addEventListener('DOMContentLoaded', function () { setTimeout(CL.pull, 6000); });
+})();
+</script>
+<script>
+/* ApexContract — Rule Contract (03.11.2026)
+   Good intentions are free; a commitment with a consequence is not. The
+   trader signs a contract with themselves — a handful of rules for every
+   trading day — and Evidence checks it on the synced trades, automatically,
+   every day. Clean days build a streak. A broken day has a real consequence
+   inside the app: the next trading day runs on tightened Guardrails (half the
+   trade cap, half the daily loss limit, double the cooldown). And the
+   contract proves its own worth: R on clean days against R on broken days.
+
+   Past days are re-derived from the journal each time — never stored as a
+   verdict that could drift — against the contract version that was active on
+   that day (contract changes start the next day, so nobody rewrites a
+   broken day into a clean one).
+   Engine between the markers is pure — .claude/tests/contract.test.js. */
+/* CONTRACT-ENGINE-START */
+var ApexContractEngine = (function () {
+  var K = {};
+  K.DEFAULT = { maxTrades: 3, dailyLossR: 2, stopAlways: true, cooldownMin: 20, banned: [], maxRiskPct: 0, rulesFlag: true, penalty: true };
+  K.LABELS = { maxTrades: 'Trades per day', dailyLossR: 'Daily loss', stopAlways: 'Every trade has a stop', cooldownMin: 'Pause after a loss',
+               banned: 'Banned mistakes', maxRiskPct: 'Risk per trade', rulesFlag: 'No “rules broken” trades' };
+  function num(v) { if (v === '' || v == null) return null; var n = +v; return isFinite(n) ? n : null; }
+
+  /* trades of ONE day: [{ R, openMs, closeMs, hasStop, riskPct, mistakes, followedRules, symbol }] */
+  K.evalDay = function (trades, c) {
+    var br = [];
+    var ts = (trades || []).slice().sort(function (a, b) { return (num(a.openMs) || 0) - (num(b.openMs) || 0); });
+    if (c.maxTrades > 0 && ts.length > c.maxTrades) br.push({ rule: 'maxTrades', detail: ts.length + ' trades, contract ' + c.maxTrades });
+    if (c.dailyLossR > 0) {
+      var run = 0, hit = false;
+      ts.forEach(function (t, i) {
+        if (hit && num(t.R) != null) br.push({ rule: 'dailyLossR', detail: 'traded on after the daily loss limit', i: i });
+        if (num(t.R) != null) run += +t.R;
+        if (run <= -c.dailyLossR + 1e-9) hit = true;
+      });
+      if (run < -c.dailyLossR - 1e-9 && !br.some(function (b) { return b.rule === 'dailyLossR'; })) br.push({ rule: 'dailyLossR', detail: 'day closed at ' + run.toFixed(2) + 'R' });
+    }
+    if (c.stopAlways) ts.forEach(function (t, i) { if (!t.hasStop) br.push({ rule: 'stopAlways', detail: (t.symbol || 'trade') + ' without a stop', i: i }); });
+    if (c.cooldownMin > 0) {
+      var lastLoss = null;
+      ts.forEach(function (t, i) {
+        var op = num(t.openMs);
+        if (lastLoss != null && op != null && op < lastLoss + c.cooldownMin * 60000) br.push({ rule: 'cooldownMin', detail: Math.max(0, Math.round((op - lastLoss) / 60000)) + ' min after a loss', i: i });
+        if (num(t.R) != null && t.R < 0 && num(t.closeMs) != null) lastLoss = +t.closeMs;
+      });
+    }
+    var banned = (c.banned || []).map(function (x) { return String(x).toLowerCase(); });
+    if (banned.length) ts.forEach(function (t, i) {
+      var hit2 = (t.mistakes || []).filter(function (m) { return banned.indexOf(String(m).toLowerCase()) >= 0; });
+      if (hit2.length) br.push({ rule: 'banned', detail: hit2.join(', '), i: i });
+    });
+    if (c.maxRiskPct > 0) ts.forEach(function (t, i) { if (num(t.riskPct) != null && t.riskPct > c.maxRiskPct * 1.1) br.push({ rule: 'maxRiskPct', detail: (+t.riskPct).toFixed(2) + '% risked', i: i }); });
+    if (c.rulesFlag) ts.forEach(function (t, i) { if (String(t.followedRules || '').toLowerCase() === 'no') br.push({ rule: 'rulesFlag', detail: (t.symbol || 'trade') + ' marked rules broken', i: i }); });
+    var R = ts.reduce(function (a, t) { return a + (num(t.R) || 0); }, 0);
+    return { ok: !br.length, breaches: br, n: ts.length, R: R };
+  };
+
+  /* The contract version active on a day: the last one whose `from` ≤ day. */
+  K.versionFor = function (versions, day) {
+    var v = null; (versions || []).forEach(function (x) { if (x.from <= day) v = x; }); return v;
+  };
+  /* byDay: { 'YYYY-MM-DD': [trades] } → evaluated days (only days with trades
+     and a contract in force), oldest first, plus streaks and value. */
+  K.history = function (byDay, versions, today) {
+    var days = Object.keys(byDay || {}).filter(function (d) { return (!today || d <= today) && byDay[d] && byDay[d].length; }).sort();
+    var out = [];
+    days.forEach(function (d) { var v = K.versionFor(versions, d); if (!v) return; var e = K.evalDay(byDay[d], v.rules); e.day = d; out.push(e); });
+    var streak = 0; for (var i = out.length - 1; i >= 0 && out[i].ok; i--) streak++;
+    var best = 0, cur = 0; out.forEach(function (e) { cur = e.ok ? cur + 1 : 0; if (cur > best) best = cur; });
+    var clean = out.filter(function (e) { return e.ok; }), broken = out.filter(function (e) { return !e.ok; });
+    var avg = function (a) { return a.length ? a.reduce(function (x, e) { return x + e.R; }, 0) / a.length : null; };
+    var byRule = {}; broken.forEach(function (e) { var seen = {}; e.breaches.forEach(function (b) { if (!seen[b.rule]) { seen[b.rule] = 1; byRule[b.rule] = (byRule[b.rule] || 0) + 1; } }); });
+    return { days: out, streak: streak, best: best, clean: clean.length, broken: broken.length,
+             compliance: out.length ? clean.length / out.length : null, avgClean: avg(clean), avgBroken: avg(broken), byRule: byRule };
+  };
+  /* Penalty day: the first trading day after a broken one, if the contract
+     asks for it. Returns the broken day it pays for, or null. */
+  K.penaltyFor = function (hist, versions, today) {
+    var last = null; (hist.days || []).forEach(function (e) { if (e.day < today) last = e; });
+    if (!last || last.ok) return null;
+    var v = K.versionFor(versions, today); if (!v || !v.rules.penalty) return null;
+    return last.day;
+  };
+  /* Tightened Guardrails for a penalty day. */
+  K.tighten = function (g, rules) {
+    var o = {}; for (var k in g) o[k] = g[k];
+    o.enabled = true;
+    var cap = g.maxTrades > 0 ? g.maxTrades : (rules && rules.maxTrades) || 0;
+    if (cap > 0) o.maxTrades = Math.max(1, Math.floor(cap / 2));
+    if (g.maxLoss > 0) o.maxLoss = g.maxLoss / 2;
+    o.cooldownMin = Math.max(30, (g.cooldownMin || (rules && rules.cooldownMin) || 15) * 2);
+    o._penalty = true;
+    return o;
+  };
+  return K;
+})();
+/* CONTRACT-ENGINE-END */
+
+(function () {
+  var CT = {};
+  window.ApexContract = CT;
+  var K = ApexContractEngine;
+  function uid() { return window.currentUID || 'local'; }
+  function key() { return 'apexContract_v1_' + uid(); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function tomorrow() { var d = new Date(Date.now() + 86400000); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function load() { try { return JSON.parse(localStorage.getItem(key()) || 'null') || { versions: [] }; } catch (e) { return { versions: [] }; } }
+  function save(s) { try { localStorage.setItem(key(), JSON.stringify(s)); } catch (e) {} try { if (window.db && window.currentUID && currentUID !== 'demo') db.collection('apexUsers').doc(currentUID).collection('private').doc('contract').set({ data: JSON.stringify(s), at: Date.now() }); } catch (e) {} }
+  CT.pull = function () {
+    try {
+      if (!(window.db && window.currentUID && currentUID !== 'demo')) return;
+      db.collection('apexUsers').doc(currentUID).collection('private').doc('contract').get().then(function (d) {
+        if (!d.exists) return; var r = null; try { r = JSON.parse(d.data().data || 'null'); } catch (e) {}
+        var l = load(); if (r && (r.versions || []).length > (l.versions || []).length) { try { localStorage.setItem(key(), JSON.stringify(r)); } catch (e) {} CT.refresh(); }
+      }).catch(function () {});
+    } catch (e) {}
+  };
+  function fR(v) { if (v == null || !isFinite(v)) return '—'; return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + 'R'; }
+  function toast(m) { try { if (window.showToast) showToast(m); } catch (e) {} }
+  function i18n(el) { try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {} }
+
+  function byDay() {
+    var out = {};
+    try {
+      (getAllTrades() || []).forEach(function (t) {
+        if (!t._date || t.planned) return;
+        if ((t.exit === '' || t.exit == null) && (t.pnl === '' || t.pnl == null)) return;
+        var R = window.apexRealR ? apexRealR(t) : null;
+        if (R == null) { try { var c = calcTradePnl(t); if (c && t.riskUsd > 0) R = c.pnlUsd / t.riskUsd; } catch (e) {} }
+        (out[t._date] = out[t._date] || []).push({ R: R, openMs: +t.openTime || null, closeMs: +t.closeTime || null,
+          hasStop: !!(window.apexInitialSl ? apexInitialSl(t) : (t.initialSl || t.sl)), riskPct: t.riskPct, mistakes: t.mistakes || [],
+          followedRules: t.followedRules || '', symbol: t.symbol || '' });
+      });
+    } catch (e) {}
+    return out;
+  }
+  CT.state = function () {
+    var s = load(), td = today();
+    if (!s.versions.length) return { active: false };
+    var h = K.history(byDay(), s.versions, td);
+    var pen = K.penaltyFor(h, s.versions, td);
+    var cur = K.versionFor(s.versions, td) || s.versions[s.versions.length - 1];
+    var todayE = h.days.filter(function (e) { return e.day === td; })[0] || null;
+    return { active: true, s: s, h: h, penalty: pen, rules: cur.rules, pendingFrom: s.versions[s.versions.length - 1].from > td ? s.versions[s.versions.length - 1].from : null, today: todayE };
+  };
+  /* Guardrails ask this on every evaluation. */
+  CT.tightenGuard = function (g) {
+    try { if (!isPro()) return g; var st = CT.state(); if (st.active && st.penalty) return K.tighten(g, st.rules); } catch (e) {}
+    return g;
+  };
+  function isPro() { return window.currentPlan === 'pro' || window.currentUID === 'demo'; }
+
+  /* ── sign / change ── */
+  function readForm() {
+    var v = function (id) { return document.getElementById(id); };
+    if (!v('ctMax')) return null;
+    return {
+      maxTrades: Math.max(0, parseInt(v('ctMax').value, 10) || 0), dailyLossR: Math.max(0, parseFloat(v('ctLoss').value) || 0),
+      stopAlways: !!v('ctStop').checked, cooldownMin: Math.max(0, parseInt(v('ctCool').value, 10) || 0),
+      maxRiskPct: Math.max(0, parseFloat(v('ctRisk').value) || 0), rulesFlag: !!v('ctFlag').checked, penalty: !!v('ctPen').checked,
+      banned: [].slice.call(document.querySelectorAll('.ct-tag.on')).map(function (x) { return x.getAttribute('data-t'); })
+    };
+  }
+  /* What these terms would have meant on the last 60 days — before signing. */
+  CT.preview = function () {
+    var el = document.getElementById('ctPreview'), r = readForm(); if (!el || !r) return;
+    var d = new Date(Date.now() - 60 * 86400000), from = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    var y = new Date(Date.now() - 86400000), upto = y.getFullYear() + '-' + String(y.getMonth() + 1).padStart(2, '0') + '-' + String(y.getDate()).padStart(2, '0');
+    var h = K.history(byDay(), [{ from: from, rules: r }], upto);
+    if (h.days.length < 3) { el.innerHTML = ''; return; }
+    var worst = Object.keys(h.byRule).sort(function (a, b) { return h.byRule[b] - h.byRule[a]; })[0];
+    if (!isPro()) {
+      el.innerHTML = '<div class="ct-today"><b>Your last 60 days under these terms</b><br><span>' + (h.compliance >= 0.7 ? 'You would have kept this contract on most days.' : 'You would have broken this contract on many days.') + '</span> ' +
+        (h.avgClean != null && h.avgBroken != null ? '<span>' + (h.avgClean > h.avgBroken ? 'Your clean days earned more than your broken days.' : 'Your broken days earned more than your clean days.') + '</span>' : '') + ' <span>Pro shows the numbers.</span></div>';
+    } else {
+      el.innerHTML = '<div class="ct-today"><b>Your last 60 days under these terms</b>' +
+        '<div class="ct-kpis" style="margin:8px 0 2px"><div><b class="notranslate" translate="no">' + h.clean + ' / ' + h.days.length + '</b>days kept</div>' +
+        (h.avgClean != null ? '<div><b class="notranslate ' + (h.avgClean >= 0 ? 'pos' : 'neg') + '" translate="no">' + fR(h.avgClean) + '</b>average clean day</div>' : '') +
+        (h.avgBroken != null ? '<div><b class="notranslate ' + (h.avgBroken >= 0 ? 'pos' : 'neg') + '" translate="no">' + fR(h.avgBroken) + '</b>average broken day</div>' : '') +
+        '<div><b class="notranslate" translate="no">' + h.best + '</b>best streak</div></div>' +
+        (worst ? '<span>Most broken:</span> <b>' + esc(K.LABELS[worst] || worst) + '</b>' : '') + '</div>';
+    }
+    i18n(el);
+  };
+  CT.sign = function () {
+    if (!isPro()) { try { openUpgradeModal(); } catch (e) {} return; }
+    var r = readForm(); if (!r) return;
+    var s = load(), first = !s.versions.length;
+    // the first contract starts today; a change starts tomorrow
+    var from = first ? today() : tomorrow();
+    s.versions = s.versions.filter(function (x) { return x.from < from; });
+    s.versions.push({ from: from, rules: r, at: Date.now() });
+    save(s); CT._edit = false; CT.refresh();
+    toast(first ? '✓ Contract signed — it applies from today' : '✓ Contract changed — the new terms start tomorrow');
+  };
+  CT.edit = function (on) { CT._edit = on !== false; CT.refresh(); };
+  CT.toggleTag = function (el) { el.classList.toggle('on'); CT.preview(); };
+  CT.end = function () {
+    var go = function () { save({ versions: [] }); CT._edit = false; CT.refresh(); toast('Contract ended'); };
+    if (window.ApexDialog) ApexDialog.confirm('End your contract? The streak and its history are cleared.', { title: 'End contract', okText: 'End it', danger: true }).then(function (ok) { if (ok) go(); }); else go();
+  };
+
+  function css() {
+    if (document.getElementById('ctCss')) return;
+    var s = document.createElement('style'); s.id = 'ctCss';
+    s.textContent =
+      '.ct-card{margin-bottom:14px}.ct-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}' +
+      '.ct-streak{min-width:120px;text-align:center;border:1px solid var(--gold-line);border-radius:var(--r-lg);padding:10px 14px;background:rgba(var(--gold-rgb),.07)}' +
+      '.ct-streak b{display:block;font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:34px;line-height:1.05;color:var(--gold)}' +
+      '.ct-streak span{font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.08em;color:var(--ink3)}' +
+      '.ct-terms{flex:1 1 260px;font-size:var(--fs-sm);line-height:1.7;color:var(--ink2)}.ct-terms li{margin-left:16px}' +
+      '.ct-kpis{display:flex;gap:18px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--ink3);margin:12px 0 4px}.ct-kpis b{display:block;font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:20px;color:var(--ink)}' +
+      '.ct-cal{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}.ct-cal i{width:14px;height:14px;border-radius:3px;background:var(--rim2);display:inline-block}.ct-cal i.ok{background:var(--profit)}.ct-cal i.bad{background:var(--loss)}' +
+      '.ct-pen{border:1px solid var(--loss);background:rgba(var(--loss-rgb),.08);color:var(--ink2);border-radius:var(--r-md);padding:10px 12px;font-size:var(--fs-sm);line-height:1.55;margin:10px 0}' +
+      '.ct-today{border:1px solid var(--rim2);border-radius:var(--r-md);padding:8px 12px;font-size:var(--fs-xs);margin:10px 0;color:var(--ink2)}' +
+      '.ct-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}' +
+      '.ct-f{border:1px solid var(--rim2);border-radius:var(--r-md);padding:10px 12px;background:var(--surface)}.ct-f label{display:block;font-size:var(--fs-xs);font-weight:600;color:var(--ink2);margin-bottom:6px}' +
+      '.ct-f input[type=number]{width:100%;box-sizing:border-box;background:var(--elevated);color:var(--ink);border:1px solid var(--rim2);border-radius:var(--r-sm);padding:7px 9px}' +
+      '.ct-f .h{font-size:var(--fs-micro);color:var(--ink3);margin-top:5px;line-height:1.45}' +
+      '.ct-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ct-tag{font-size:var(--fs-xs);border:1px solid var(--rim2);border-radius:var(--r-pill);padding:3px 10px;cursor:pointer;color:var(--ink2);background:var(--elevated)}.ct-tag.on{border-color:var(--loss);color:var(--loss);background:rgba(var(--loss-rgb),.08)}' +
+      '.ct-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}';
+    document.head.appendChild(s);
+  }
+  function terms(r) {
+    var l = [];
+    if (r.maxTrades > 0) l.push('<span>At most</span> <b class="notranslate" translate="no">' + r.maxTrades + '</b> <span>' + (r.maxTrades === 1 ? 'trade a day' : 'trades a day') + '</span>');
+    if (r.dailyLossR > 0) l.push('<span>Stop for the day at</span> <b class="notranslate" translate="no">−' + r.dailyLossR + 'R</b>');
+    if (r.stopAlways) l.push('<span>Every trade has a stop</span>');
+    if (r.cooldownMin > 0) l.push('<b class="notranslate" translate="no">' + r.cooldownMin + ' min</b> <span>pause after a loss</span>');
+    if (r.maxRiskPct > 0) l.push('<span>At most</span> <b class="notranslate" translate="no">' + r.maxRiskPct + '%</b> <span>risk per trade</span>');
+    if (r.rulesFlag) l.push('<span>No trade I mark “rules broken”</span>');
+    if (r.banned && r.banned.length) l.push('<span>Never:</span> <b>' + esc(r.banned.join(', ')) + '</b>');
+    return '<ul class="ct-terms">' + l.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>';
+  }
+  function form(r) {
+    var tags = [], seen = {};
+    try { (getAllTrades() || []).forEach(function (t) { (t.mistakes || []).forEach(function (m) { var s = String(m).trim(); if (s && !seen[s.toLowerCase()]) { seen[s.toLowerCase()] = 1; tags.push(s); } }); }); } catch (e) {}
+    var b = (r.banned || []).map(function (x) { return x.toLowerCase(); });
+    return '<div class="ct-form">' +
+      '<div class="ct-f"><label>Trades per day</label><input id="ctMax" type="number" min="0" value="' + r.maxTrades + '"><div class="h">0 = no cap</div></div>' +
+      '<div class="ct-f"><label>Daily loss limit</label><input id="ctLoss" type="number" min="0" step="0.5" value="' + r.dailyLossR + '"><div class="h">In R. No trade after it is reached.</div></div>' +
+      '<div class="ct-f"><label>Pause after a loss</label><input id="ctCool" type="number" min="0" step="5" value="' + r.cooldownMin + '"><div class="h">Minutes between a losing exit and the next entry.</div></div>' +
+      '<div class="ct-f"><label>Risk per trade</label><input id="ctRisk" type="number" min="0" step="0.25" value="' + r.maxRiskPct + '"><div class="h">In % of the account, needs stop and size. 0 = off.</div></div>' +
+      '<div class="ct-f"><label><input type="checkbox" id="ctStop"' + (r.stopAlways ? ' checked' : '') + ' style="margin-right:6px;accent-color:var(--gold)">Every trade has a stop</label></div>' +
+      '<div class="ct-f"><label><input type="checkbox" id="ctFlag"' + (r.rulesFlag ? ' checked' : '') + ' style="margin-right:6px;accent-color:var(--gold)">No “rules broken” trades</label></div>' +
+      '<div class="ct-f"><label><input type="checkbox" id="ctPen"' + (r.penalty ? ' checked' : '') + ' style="margin-right:6px;accent-color:var(--gold)">Consequence: a broken day tightens tomorrow</label><div class="h">Half the trade cap, half the daily loss limit, double the pause — enforced by your Guardrails.</div></div>' +
+      '</div>' +
+      (tags.length ? '<div style="margin-top:10px;font-size:var(--fs-xs);font-weight:600;color:var(--ink2)">Mistakes I never make</div><div class="ct-tags">' + tags.map(function (t) { return '<span class="ct-tag' + (b.indexOf(t.toLowerCase()) >= 0 ? ' on' : '') + '" data-t="' + esc(t) + '" onclick="ApexContract.toggleTag(this)">' + esc(t) + '</span>'; }).join('') + '</div>' : '');
+  }
+
+  CT.render = function () {
+    var host = document.getElementById('contractHost'); if (!host) return;
+    css();
+    var st = CT.state();
+    if (!st.active || CT._edit) {
+      var r = st.active ? st.rules : K.DEFAULT;
+      host.innerHTML = '<div class="glass-card ct-card"><div class="stat-group-title">Rule contract</div>' +
+        '<div class="re-sub">Sign a contract with yourself. Evidence checks it on your synced trades every day — clean days build a streak, a broken day tightens the next one.</div>' +
+        '<div oninput="ApexContract.preview()" onchange="ApexContract.preview()">' + form(r) + '</div><div id="ctPreview"></div><div class="ct-btns"><button class="apex-btn apex-btn--solid" onclick="ApexContract.sign()">' + (st.active ? 'Change — from tomorrow' : isPro() ? 'Sign the contract' : 'Sign the contract with Pro') + '</button>' +
+        (st.active ? '<button class="apex-btn apex-btn--ghost" onclick="ApexContract.edit(false)">Cancel</button>' : '') + '</div></div>';
+      i18n(host); CT.preview(); return;
+    }
+    var h = st.h, last = h.days.slice(-42);
+    var cal = '<div class="ct-cal" title="Last trading days: green clean, red broken">' + last.map(function (e) { return '<i class="' + (e.ok ? 'ok' : 'bad') + '" title="' + esc(e.day) + (e.ok ? '' : ' — ' + esc(e.breaches.map(function (b) { return b.detail; }).join('; '))) + '"></i>'; }).join('') + '</div>';
+    var value = (h.avgClean != null && h.avgBroken != null) ? '<div class="ct-kpis"><div><b class="notranslate ' + (h.avgClean >= 0 ? 'pos' : 'neg') + '" translate="no">' + fR(h.avgClean) + '</b>average clean day</div><div><b class="notranslate ' + (h.avgBroken >= 0 ? 'pos' : 'neg') + '" translate="no">' + fR(h.avgBroken) + '</b>average broken day</div>' +
+      '<div><b class="notranslate" translate="no">' + Math.round(h.compliance * 100) + '%</b>days kept</div><div><b class="notranslate" translate="no">' + h.best + '</b>best streak</div></div>' : '';
+    var worst = Object.keys(h.byRule).sort(function (a, b) { return h.byRule[b] - h.byRule[a]; })[0];
+    var td = st.today;
+    host.innerHTML = '<div class="glass-card ct-card"><div class="stat-group-title">Rule contract</div>' +
+      '<div class="ct-head"><div class="ct-streak"><b class="notranslate" translate="no">' + h.streak + '</b><span>clean days in a row</span></div>' + terms(st.rules) + '</div>' +
+      (st.penalty ? '<div class="ct-pen"><b>Penalty day.</b> <span>Your contract broke on</span> <span class="notranslate" translate="no">' + esc(st.penalty) + '</span><span>. Today your Guardrails run tighter: half the trades, half the daily loss, double the pause.</span></div>' : '') +
+      (td ? '<div class="ct-today"><span>Today so far:</span> ' + (td.ok ? '<b class="pos">clean</b>' : '<b class="neg">broken</b> — <span class="notranslate" translate="no">' + esc(td.breaches.map(function (b) { return b.detail; }).join('; ')) + '</span>') + '</div>' : '') +
+      cal + value +
+      (worst ? '<div class="re-sub"><span>Most broken:</span> <b>' + esc(K.LABELS[worst] || worst) + '</b></div>' : '') +
+      (st.pendingFrom ? '<div class="re-sub"><span>Changed terms start on</span> <span class="notranslate" translate="no">' + esc(st.pendingFrom) + '</span>.</div>' : '') +
+      '<div class="ct-btns"><button class="apex-btn apex-btn--ghost apex-btn--sm" onclick="ApexContract.edit()">Change the terms</button><button class="apex-btn apex-btn--ghost apex-btn--sm" onclick="ApexContract.end()">End the contract</button></div></div>';
+    i18n(host);
+  };
+  CT.refresh = function () { try { CT.render(); } catch (e) {} try { CT.renderOverview(); } catch (e) {} try { if (window.ApexGuard && ApexGuard.evaluate) ApexGuard.evaluate(); } catch (e) {} };
+
+  /* Overview strip — only while a contract is in force. */
+  CT.renderOverview = function () {
+    var page = document.getElementById('page-overview'); if (!page) return;
+    var el = document.getElementById('ctOvCard');
+    var st = isPro() ? CT.state() : { active: false };
+    if (!st.active) { if (el) el.remove(); return; }
+    css();
+    if (!el) {
+      el = document.createElement('div'); el.id = 'ctOvCard'; el.className = 'glass-card'; el.style.margin = '0 0 14px'; el.style.cursor = 'pointer';
+      el.setAttribute('onclick', "if(window.nav)nav('rules')");
+      var anchor = document.getElementById('twinOvCard') || document.getElementById('dashboardEmptyState');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor.nextSibling); else page.appendChild(el);
+    }
+    var h = st.h, td = st.today;
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div class="ct-streak" style="min-width:96px;padding:6px 12px"><b class="notranslate" translate="no" style="font-size:26px">' + h.streak + '</b><span>clean days in a row</span></div>' +
+      '<div style="flex:1;min-width:200px;font-size:var(--fs-sm);line-height:1.6;color:var(--ink2)"><b style="color:var(--gold)">Rule contract</b><br>' +
+      (st.penalty ? '<span class="neg">Penalty day — your Guardrails run tighter today.</span>'
+        : td ? (td.ok ? '<span>Today so far:</span> <b class="pos">clean</b>' : '<span>Today so far:</span> <b class="neg">broken</b>')
+        : '<span>No trades today yet — the contract is in force.</span>') +
+      (h.avgClean != null && h.avgBroken != null ? '<br><span>Clean day vs broken day:</span> <b class="notranslate" translate="no">' + fR(h.avgClean) + ' · ' + fR(h.avgBroken) + '</b>' : '') + '</div></div>';
+    i18n(el);
+  };
+  function hookOv() {
+    if (typeof window.updateOverview !== 'function' || window.updateOverview._ct) return false;
+    var o = window.updateOverview;
+    var w = function () { var x = o.apply(this, arguments); try { setTimeout(CT.renderOverview, 10); } catch (e) {} return x; };
+    w._ct = true; for (var k in o) w[k] = o[k]; window.updateOverview = w; return true;
+  }
+  function hookNav() {
+    if (typeof window.nav !== 'function' || window.nav._ct) return false;
+    var o = window.nav;
+    var w = function (id) { var r = o.apply(this, arguments); if (id === 'rules') { try { CT.render(); } catch (e) {} } return r; };
+    w._ct = true; for (var k in o) w[k] = o[k]; window.nav = w; return true;
+  }
+
+  var T = {
+    'Rule contract': ['Regel-Vertrag', 'Contrato de reglas', 'Contrato de regras', 'Contrat de règles'],
+    'Sign a contract with yourself. Evidence checks it on your synced trades every day — clean days build a streak, a broken day tightens the next one.': ['Schließ einen Vertrag mit dir selbst. Evidence prüft ihn jeden Tag an deinen synchronisierten Trades – saubere Tage bauen eine Serie auf, ein gebrochener Tag verschärft den nächsten.', 'Firma un contrato contigo mismo. Evidence lo comprueba cada día con tus operaciones sincronizadas: los días limpios crean una racha, un día roto endurece el siguiente.', 'Assine um contrato consigo mesmo. O Evidence verifica todos os dias nas suas operações sincronizadas — dias limpos criam uma sequência, um dia quebrado endurece o seguinte.', 'Signe un contrat avec toi-même. Evidence le vérifie chaque jour sur tes trades synchronisés — les jours propres font une série, un jour rompu durcit le suivant.'],
+    'Trades per day': ['Trades pro Tag', 'Operaciones por día', 'Operações por dia', 'Trades par jour'], '0 = no cap': ['0 = keine Grenze', '0 = sin tope', '0 = sem limite', '0 = pas de plafond'],
+    'Daily loss limit': ['Tagesverlust-Limit', 'Límite de pérdida diaria', 'Limite de perda diária', 'Limite de perte journalière'],
+    'In R. No trade after it is reached.': ['In R. Danach kein Trade mehr.', 'En R. Ninguna operación después de alcanzarlo.', 'Em R. Nenhuma operação depois de atingido.', 'En R. Plus de trade une fois atteinte.'],
+    'Pause after a loss': ['Pause nach einem Verlust', 'Pausa tras una pérdida', 'Pausa após uma perda', 'Pause après une perte'],
+    'Minutes between a losing exit and the next entry.': ['Minuten zwischen einem Verlust-Ausstieg und dem nächsten Einstieg.', 'Minutos entre una salida perdedora y la siguiente entrada.', 'Minutos entre uma saída perdedora e a próxima entrada.', 'Minutes entre une sortie perdante et l’entrée suivante.'],
+    'Risk per trade': ['Risiko pro Trade', 'Riesgo por operación', 'Risco por operação', 'Risque par trade'],
+    'In % of the account, needs stop and size. 0 = off.': ['In % vom Konto, braucht Stop und Größe. 0 = aus.', 'En % de la cuenta, necesita stop y tamaño. 0 = desactivado.', 'Em % da conta, precisa de stop e tamanho. 0 = desligado.', 'En % du compte, nécessite stop et taille. 0 = désactivé.'],
+    'Every trade has a stop': ['Jeder Trade hat einen Stop', 'Cada operación tiene stop', 'Toda operação tem stop', 'Chaque trade a un stop'],
+    'No “rules broken” trades': ['Keine „Regeln gebrochen“-Trades', 'Ninguna operación con «reglas rotas»', 'Nenhuma operação com "regras quebradas"', 'Aucun trade « règles enfreintes »'],
+    'Consequence: a broken day tightens tomorrow': ['Folge: Ein gebrochener Tag verschärft den nächsten', 'Consecuencia: un día roto endurece el siguiente', 'Consequência: um dia quebrado endurece o seguinte', 'Conséquence : un jour rompu durcit le lendemain'],
+    'Half the trade cap, half the daily loss limit, double the pause — enforced by your Guardrails.': ['Halbe Trade-Grenze, halbes Tagesverlust-Limit, doppelte Pause – durchgesetzt von deinen Guardrails.', 'La mitad del tope de operaciones, la mitad del límite diario, el doble de pausa, aplicado por tus Guardrails.', 'Metade do limite de operações, metade do limite diário, o dobro da pausa — aplicado pelos seus Guardrails.', 'Moitié du plafond de trades, moitié de la limite journalière, double pause — appliqué par tes Guardrails.'],
+    'Mistakes I never make': ['Fehler, die ich nie mache', 'Errores que nunca cometo', 'Erros que nunca cometo', 'Erreurs que je ne fais jamais'],
+    'Sign the contract': ['Vertrag unterschreiben', 'Firmar el contrato', 'Assinar o contrato', 'Signer le contrat'], 'Change — from tomorrow': ['Ändern – ab morgen', 'Cambiar, desde mañana', 'Alterar — a partir de amanhã', 'Modifier — dès demain'], 'Cancel': ['Abbrechen', 'Cancelar', 'Cancelar', 'Annuler'],
+    'clean days in a row': ['saubere Tage in Folge', 'días limpios seguidos', 'dias limpos seguidos', 'jours propres d’affilée'],
+    'At most': ['Höchstens', 'Como máximo', 'No máximo', 'Au plus'], 'trades a day': ['Trades am Tag', 'operaciones al día', 'operações por dia', 'trades par jour'], 'trade a day': ['Trade am Tag', 'operación al día', 'operação por dia', 'trade par jour'],
+    'Stop for the day at': ['Schluss für den Tag bei', 'Parar el día en', 'Parar o dia em', 'Arrêt pour la journée à'], 'pause after a loss': ['Pause nach einem Verlust', 'pausa tras una pérdida', 'pausa após uma perda', 'pause après une perte'],
+    'risk per trade': ['Risiko pro Trade', 'riesgo por operación', 'risco por operação', 'risque par trade'], 'No trade I mark “rules broken”': ['Kein Trade, den ich als „Regeln gebrochen“ markiere', 'Ninguna operación que marque como «reglas rotas»', 'Nenhuma operação que eu marque como "regras quebradas"', 'Aucun trade que je marque « règles enfreintes »'],
+    'Never:': ['Nie:', 'Nunca:', 'Nunca:', 'Jamais :'], 'Penalty day.': ['Straftag.', 'Día de penalización.', 'Dia de penalidade.', 'Jour de pénalité.'],
+    'Your contract broke on': ['Dein Vertrag wurde gebrochen am', 'Tu contrato se rompió el', 'Seu contrato foi quebrado em', 'Ton contrat a été rompu le'],
+    '. Today your Guardrails run tighter: half the trades, half the daily loss, double the pause.': ['. Heute laufen deine Guardrails enger: halb so viele Trades, halber Tagesverlust, doppelte Pause.', '. Hoy tus Guardrails son más estrictos: la mitad de operaciones, la mitad de pérdida diaria, el doble de pausa.', '. Hoje seus Guardrails ficam mais rígidos: metade das operações, metade da perda diária, o dobro da pausa.', '. Aujourd’hui tes Guardrails sont plus stricts : moitié moins de trades, moitié de perte journalière, double pause.'],
+    'Today so far:': ['Heute bisher:', 'Hoy hasta ahora:', 'Hoje até agora:', 'Aujourd’hui jusqu’ici :'], 'clean': ['sauber', 'limpio', 'limpo', 'propre'], 'broken': ['gebrochen', 'roto', 'quebrado', 'rompu'],
+    'average clean day': ['Ø sauberer Tag', 'día limpio medio', 'dia limpo médio', 'jour propre moyen'], 'average broken day': ['Ø gebrochener Tag', 'día roto medio', 'dia quebrado médio', 'jour rompu moyen'],
+    'days kept': ['Tage eingehalten', 'días cumplidos', 'dias cumpridos', 'jours tenus'], 'best streak': ['beste Serie', 'mejor racha', 'melhor sequência', 'meilleure série'],
+    'Most broken:': ['Am häufigsten gebrochen:', 'Lo más roto:', 'Mais quebrado:', 'Le plus rompu :'], 'Change the terms': ['Bedingungen ändern', 'Cambiar los términos', 'Alterar os termos', 'Modifier les termes'], 'End the contract': ['Vertrag beenden', 'Terminar el contrato', 'Encerrar o contrato', 'Mettre fin au contrat'],
+    'Changed terms start on': ['Geänderte Bedingungen gelten ab', 'Los términos cambiados empiezan el', 'Os termos alterados começam em', 'Les nouveaux termes commencent le'],
+    'Sign the contract with Pro': ['Vertrag mit Pro unterschreiben', 'Firmar el contrato con Pro', 'Assinar o contrato com Pro', 'Signer le contrat avec Pro'],
+    'Penalty day — your Guardrails run tighter today.': ['Straftag – deine Guardrails laufen heute enger.', 'Día de penalización: hoy tus Guardrails son más estrictos.', 'Dia de penalidade — seus Guardrails ficam mais rígidos hoje.', 'Jour de pénalité — tes Guardrails sont plus stricts aujourd’hui.'],
+    'No trades today yet — the contract is in force.': ['Heute noch keine Trades – der Vertrag gilt.', 'Aún no hay operaciones hoy: el contrato está en vigor.', 'Nenhuma operação hoje ainda — o contrato está em vigor.', 'Pas encore de trade aujourd’hui — le contrat est en vigueur.'],
+    'Clean day vs broken day:': ['Sauberer gegen gebrochenen Tag:', 'Día limpio frente a día roto:', 'Dia limpo vs. dia quebrado:', 'Jour propre contre jour rompu :'],
+    'Contract signed — it applies from today': ['Vertrag unterschrieben – gilt ab heute', 'Contrato firmado: vale desde hoy', 'Contrato assinado — vale a partir de hoje', 'Contrat signé — il s’applique dès aujourd’hui'],
+    'Your last 60 days under these terms': ['Deine letzten 60 Tage unter diesen Bedingungen', 'Tus últimos 60 días con estos términos', 'Seus últimos 60 dias com estes termos', 'Tes 60 derniers jours avec ces termes'],
+    'You would have kept this contract on most days.': ['Du hättest diesen Vertrag an den meisten Tagen eingehalten.', 'Habrías cumplido este contrato la mayoría de los días.', 'Você teria cumprido este contrato na maioria dos dias.', 'Tu aurais tenu ce contrat la plupart des jours.'],
+    'You would have broken this contract on many days.': ['Du hättest diesen Vertrag an vielen Tagen gebrochen.', 'Habrías roto este contrato muchos días.', 'Você teria quebrado este contrato em muitos dias.', 'Tu aurais rompu ce contrat de nombreux jours.'],
+    'Your clean days earned more than your broken days.': ['Deine sauberen Tage brachten mehr als deine gebrochenen.', 'Tus días limpios ganaron más que tus días rotos.', 'Seus dias limpos renderam mais que os quebrados.', 'Tes jours propres ont rapporté plus que tes jours rompus.'],
+    'Your broken days earned more than your clean days.': ['Deine gebrochenen Tage brachten mehr als deine sauberen.', 'Tus días rotos ganaron más que tus días limpios.', 'Seus dias quebrados renderam mais que os limpos.', 'Tes jours rompus ont rapporté plus que tes jours propres.'],
+    'Pro shows the numbers.': ['Pro zeigt die Zahlen.', 'Pro muestra las cifras.', 'O Pro mostra os números.', 'Pro affiche les chiffres.'],
+    'Daily loss': ['Tagesverlust', 'Pérdida diaria', 'Perda diária', 'Perte journalière'], 'Banned mistakes': ['Verbotene Fehler', 'Errores prohibidos', 'Erros proibidos', 'Erreurs interdites']
+  };
+  function reg() { if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('#contractHost, #ctOvCard', T); else setTimeout(reg, 300); }
+  reg();
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!hookOv()) setTimeout(hookOv, 1500);
+    if (!hookNav()) setTimeout(hookNav, 1500);
+    setTimeout(function () { CT.pull(); CT.render(); CT.renderOverview(); }, 5000);
+  });
+})();
+</script>
+
+<script>
+/* ApexWeather — Your Market Weather (03.11.2026)
+   Start my day says what is on the calendar. The weather says what kind of
+   day this is FOR YOU: every condition of today that is known before the
+   open — the weekday, high-impact news on your instruments, how yesterday
+   went, a losing streak, a break, a red week, your sleep and readiness from
+   Evidence Fit, an expanding or a quiet market — looked up in your own
+   journal. Each condition is a comparison: your days WITH it against your
+   days without it, with a Welch t and shrinkage toward zero, so ten lucky
+   Mondays do not make a sunny Monday. The conditions that stand out go into
+   one ridge regression together — they overlap, and a Monday after a winning
+   Friday must not count twice — which gives the day's weather and a size: storm half, cloudy three quarters, never more than
+   normal.
+   And it is checked on its own record: a walk-forward over your history,
+   each day forecast only from the days before it. If the stormy days were
+   not actually worse, the card says so and the forecast stays a note.
+   Engine between the markers is pure — .claude/tests/weather.test.js. */
+/* WEATHER-ENGINE-START */
+var ApexWeatherEngine = (function () {
+  var K = {};
+  K.MIN_DAYS = 20; K.MIN_N = 6; K.SHRINK = 10;
+  var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  K.dow = function (day) { return DOW[new Date(day + 'T12:00:00Z').getUTCDay()]; };
+  function gap(a, b) { return Math.round((Date.parse(b + 'T12:00:00Z') - Date.parse(a + 'T12:00:00Z')) / 86400000); }
+  function mean(a) { return a.reduce(function (x, y) { return x + y; }, 0) / a.length; }
+  function vari(a, m) { return a.length > 1 ? a.reduce(function (x, y) { return x + (y - m) * (y - m); }, 0) / (a.length - 1) : 0; }
+  /* The values worth a comparison. "Not after a losing streak" is most days
+     and tells nothing; the weekday and the news are worth both ways. */
+  K.NOTABLE = { prev: ['loss', 'win'], streak: ['yes'], back: ['yes'], dd: ['yes'], news: ['yes', 'no'], sleep: ['short'], ready: ['low'], vol: ['high', 'low'] };
+
+  /* Features of a day from the days BEFORE it, plus outside facts that are
+     known before the open (news calendar, last night's sleep, yesterday's
+     range). Nothing of the day itself. */
+  K.featuresFor = function (day, prior, ex) {
+    ex = ex || {};
+    var f = { dow: K.dow(day) };
+    var last = prior.length ? prior[prior.length - 1] : null;
+    if (last) {
+      f.prev = last.R < 0 ? 'loss' : last.R > 0 ? 'win' : 'flat';
+      var k = 0; for (var i = prior.length - 1; i >= 0 && prior[i].R < 0; i--) k++;
+      f.streak = k >= 2 ? 'yes' : 'no';
+      f.back = gap(last.day, day) >= 4 ? 'yes' : 'no';            // Fri → Mon is 3: a weekend is not a break
+      if (prior.length >= 5) { var s = 0; for (var j = prior.length - 5; j < prior.length; j++) s += prior[j].R; f.dd = s < 0 ? 'yes' : 'no'; }
+    }
+    if (ex.news && ex.news[day] != null) f.news = ex.news[day] ? 'yes' : 'no';
+    if (ex.sleep && ex.sleep[day] != null) f.sleep = ex.sleep[day] < 6 ? 'short' : 'ok';
+    if (ex.ready && ex.ready[day] != null) f.ready = ex.ready[day] < 50 ? 'low' : 'ok';
+    if (ex.vol && ex.vol[day]) f.vol = ex.vol[day];
+    return f;
+  };
+  /* byDay: { 'YYYY-MM-DD': R of the day } → rows, oldest first, each with
+     its causal features. */
+  K.rows = function (byDay, ex) {
+    var out = [];
+    Object.keys(byDay || {}).filter(function (d) { return byDay[d] != null && isFinite(byDay[d]); }).sort()
+      .forEach(function (d) { out.push({ day: d, R: +byDay[d], f: K.featuresFor(d, out, ex) }); });
+    return out;
+  };
+
+  /* Volatility regime of a day: the PREVIOUS day's range against the median
+     of the 20 ranges before it. ranges: [{day, range}] ascending. */
+  K.volFor = function (ranges, day) {
+    var before = (ranges || []).filter(function (r) { return r.day < day && r.range > 0; });
+    if (before.length < 21) return null;
+    var y = before[before.length - 1].range;
+    var ref = before.slice(-21, -1).map(function (r) { return r.range; }).sort(function (a, b) { return a - b; });
+    var med = (ref[9] + ref[10]) / 2;
+    if (!(med > 0)) return null;
+    var q = y / med;
+    return q >= 1.3 ? 'high' : q <= 0.75 ? 'low' : 'normal';
+  };
+  K.volMap = function (ranges, days) { var m = {}; (days || []).forEach(function (d) { var v = K.volFor(ranges, d); if (v) m[d] = v; }); return m; };
+
+  K.LAMBDA = 10;
+  function solve(A, b) {
+    var n = b.length, M = A.map(function (r, i) { return r.concat([b[i]]); });
+    for (var c = 0; c < n; c++) {
+      var p = c; for (var r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+      var t = M[c]; M[c] = M[p]; M[p] = t;
+      if (Math.abs(M[c][c]) < 1e-12) continue;
+      for (var r2 = 0; r2 < n; r2++) { if (r2 === c) continue; var f = M[r2][c] / M[c][c]; for (var k = c; k <= n; k++) M[r2][k] -= f * M[c][k]; }
+    }
+    return M.map(function (r, i) { return Math.abs(r[i]) < 1e-12 ? 0 : r[n] / r[i]; });
+  }
+  K.compare = function (rows, key, val) {
+    var a = [], b = [];
+    rows.forEach(function (r) { var v = r.f[key]; if (v == null) return; (v === val ? a : b).push(r.R); });
+    var o = { key: key, val: val, nIn: a.length, nOut: b.length, level: 'none' };
+    if (a.length < K.MIN_N || b.length < K.MIN_N) { o.level = 'few'; return o; }
+    var ma = mean(a), mb = mean(b), se = Math.sqrt(vari(a, ma) / a.length + vari(b, mb) / b.length);
+    o.meanIn = ma; o.meanOut = mb; o.diff = ma - mb;
+    o.t = se > 0 ? o.diff / se : 0;
+    o.shrunk = o.diff * a.length / (a.length + K.SHRINK);
+    o.level = Math.abs(o.t) >= 1.64 ? 'signal' : Math.abs(o.t) >= 1 ? 'hint' : 'none';
+    return o;
+  };
+  K.forecast = function (rows, f) {
+    if (!rows || rows.length < K.MIN_DAYS) return { ready: false, n: rows ? rows.length : 0 };
+    var Rs = rows.map(function (r) { return r.R; }), base = mean(Rs), sd = Math.sqrt(vari(Rs, base));
+    var factors = Object.keys(f || {}).filter(function (k) { return f[k] != null && (!K.NOTABLE[k] || K.NOTABLE[k].indexOf(f[k]) >= 0); })
+      .map(function (k) { return K.compare(rows, k, f[k]); });
+    /* The conditions overlap (a Monday follows a Friday; a red week follows
+       losing days), so they are not simply added up: a ridge regression of
+       the day's R on the conditions that stand out on their own, centred,
+       with the penalty K.LAMBDA — one condition alone gives the same
+       shrinkage as compare(), two that say the same thing share it. */
+    var used = factors.filter(function (x) { return x.level === 'signal' || x.level === 'hint'; });
+    var delta = 0;
+    if (used.length) {
+      var m = used.map(function (x) { var k = 0, n = 0; rows.forEach(function (r) { var v = r.f[x.key]; if (v == null) return; n++; if (v === x.val) k++; }); return n ? k / n : 0; });
+      var X = rows.map(function (r) { return used.map(function (x, j) { var v = r.f[x.key]; return (v == null ? m[j] : v === x.val ? 1 : 0) - m[j]; }); });
+      var A = used.map(function (_, i) { return used.map(function (_, j) { var s = i === j ? K.LAMBDA : 0; X.forEach(function (row) { s += row[i] * row[j]; }); return s; }); });
+      var bv = used.map(function (_, i) { var s = 0; X.forEach(function (row, q) { s += row[i] * (rows[q].R - base); }); return s; });
+      var beta = solve(A, bv);
+      used.forEach(function (x, j) { x.effect = beta[j] * (1 - m[j]); delta += x.effect; });
+    }
+    var z = sd > 0 ? delta / sd : 0;
+    var weather = z <= -0.5 ? 'storm' : z <= -0.2 ? 'cloudy' : z >= 0.2 ? 'sunny' : 'fair';
+    factors.sort(function (a, b) { return (b.shrunk != null ? Math.abs(b.shrunk) : -1) - (a.shrunk != null ? Math.abs(a.shrunk) : -1); });
+    return { ready: true, n: rows.length, base: base, sd: sd, delta: delta, expected: base + delta, z: z, weather: weather,
+             size: weather === 'storm' ? 0.5 : weather === 'cloudy' ? 0.75 : 1, factors: factors,
+             signals: factors.filter(function (x) { return x.level === 'signal'; }).length };
+  };
+  /* The forecast on its own record: every past day forecast only from the
+     days before it. */
+  K.walkForward = function (rows, minHist) {
+    minHist = Math.max(K.MIN_DAYS, minHist || 30);
+    var by = {};
+    for (var i = minHist; i < (rows || []).length; i++) {
+      var fc = K.forecast(rows.slice(0, i), rows[i].f);
+      if (fc.ready) (by[fc.weather] = by[fc.weather] || []).push(rows[i].R);
+    }
+    var agg = {}; Object.keys(by).forEach(function (k) { agg[k] = { n: by[k].length, avg: mean(by[k]) }; });
+    var bad = (by.storm || []).concat(by.cloudy || []), good = (by.fair || []).concat(by.sunny || []);
+    var pack = function (a) { return a.length ? { n: a.length, avg: mean(a) } : null; };
+    return { tested: bad.length + good.length, by: agg, bad: pack(bad), good: pack(good),
+             helps: bad.length >= 5 && good.length >= 5 ? mean(bad) < mean(good) : null };
+  };
+  return K;
+})();
+/* WEATHER-ENGINE-END */
+
+(function () {
+  var W = {};
+  window.ApexWeather = W;
+  var K = ApexWeatherEngine;
+  function uid() { return window.currentUID || 'local'; }
+  function isPro() { return window.currentPlan === 'pro' || window.currentUID === 'demo'; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function today() { return ymd(new Date()); }
+  function fR(v) { if (v == null || !isFinite(v)) return '—'; return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + 'R'; }
+  function nb(v, cls) { return '<b class="notranslate' + (cls ? ' ' + cls : '') + '" translate="no">' + v + '</b>'; }
+  function i18n(el) { try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {} }
+  function lsGet(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function cfg() { return lsGet('apexWx_v1_' + uid()) || { autoGuard: false, hidden: '' }; }
+  function setCfg(p) { var c = cfg(); for (var k in p) c[k] = p[k]; lsSet('apexWx_v1_' + uid(), c); }
+
+  /* ── inputs ── */
+  function trades() { try { return (getAllTrades() || []).filter(function (t) { return t._date && !t.planned && !((t.exit === '' || t.exit == null) && (t.pnl === '' || t.pnl == null)); }); } catch (e) { return []; } }
+  function byDay(ts) {
+    var m = {};
+    ts.forEach(function (t) { var r = window.apexRealR ? apexRealR(t) : null; if (r == null || !isFinite(r)) return; m[t._date] = (m[t._date] || 0) + r; });
+    return m;
+  }
+  function symbols(ts) {
+    var c = {}; ts.forEach(function (t) { var s = (window.normalizeSymbol ? normalizeSymbol(t.symbol || '') : t.symbol) || ''; if (s) c[s] = (c[s] || 0) + 1; });
+    return Object.keys(c).sort(function (a, b) { return c[b] - c[a]; });
+  }
+  /* News: the econ worker's weekly archive, once a day, flags each day that
+     had a high-impact event on one of the instruments you trade. Weeks the
+     archive does not hold stay unknown — not "no news". */
+  var _news = null, _newsBusy = false;
+  function newsFlags(syms, days) {
+    var k = 'apexWxNews_v1_' + uid(), c = lsGet(k);
+    if (c && c.day === today() && c.syms === syms.slice(0, 8).join(',')) return c.flags;
+    if (_newsBusy || !window.ApexNewsAlert || !ApexNewsAlert.highFor || !days.length) return c ? c.flags : null;
+    _newsBusy = true;
+    var from = days[0] < ymd(new Date(Date.now() - 400 * 86400000)) ? ymd(new Date(Date.now() - 400 * 86400000)) : days[0];
+    fetch((window.APEX_ECO_WORKER || '') + '/archive?from=' + from + '&to=' + today())
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (d) {
+        var weeks = {}; (d.weeks || []).forEach(function (w) { weeks[w] = 1; });
+        var flags = {}, top = syms.slice(0, 8);
+        // every weekday of an archived week is known; a day with a relevant event is "yes"
+        Object.keys(weeks).forEach(function (w) { for (var i = 0; i < 5; i++) { var x = new Date(w + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + i); flags[x.toISOString().slice(0, 10)] = false; } });
+        (d.events || []).forEach(function (ev) {
+          var ms = ApexNewsAlert.parseMs(ev.time); if (!ms) return;
+          if (!top.some(function (s) { return ApexNewsAlert.highFor(ev, s); })) return;
+          flags[ymd(new Date(ms))] = true;
+        });
+        lsSet(k, { day: today(), syms: top.join(','), flags: flags });
+        _newsBusy = false; W.render();
+      })
+      .catch(function () { _newsBusy = false; });
+    return c ? c.flags : null;
+  }
+  function todayNews(syms) {
+    try {
+      var evs = ApexNewsAlert.events(), td = today(), top = syms.slice(0, 8), seen = false, any = false;
+      evs.forEach(function (ev) { var ms = ApexNewsAlert.parseMs(ev.time); if (!ms || ymd(new Date(ms)) !== td) return; seen = true; if (top.some(function (s) { return ApexNewsAlert.highFor(ev, s); })) any = true; });
+      return evs.length ? any : null;
+    } catch (e) { return null; }
+  }
+  function fitMaps(days) {
+    var sl = {}, rd = {}, n = 0;
+    if (!window.ApexFit || !ApexFit.day) return null;
+    days.forEach(function (d) { var b = ApexFit.day(d); if (!b) return; if (b.sleepH != null) { sl[d] = +b.sleepH; n++; } if (b.readiness != null) rd[d] = +b.readiness; });
+    return n ? { sleep: sl, ready: rd } : null;
+  }
+  /* Volatility: daily ranges of the instrument you trade most, measured on
+     request (about six months of daily files, once) and kept up to date in
+     small steps after that. */
+  function volSym(syms) { var m = window.ApexMarketData; if (!m || !m.supports) return null; for (var i = 0; i < syms.length && i < 6; i++) if (m.supports(syms[i])) return syms[i]; return null; }
+  function volStore(sym) { return lsGet('apexWxVol_v1_' + sym); }
+  function tdSym(sym) {
+    var s = String(sym || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (/^XAUUSD/.test(s)) return 'XAU/USD'; if (/^XAGUSD/.test(s)) return 'XAG/USD';
+    if (/^(BTC|ETH|XRP|LTC|SOL|ADA|DOGE|BNB)USDT?$/.test(s)) return s.replace(/USDT?$/, '') + '/USD';
+    if (/^[A-Z]{6}$/.test(s)) return s.slice(0, 3) + '/' + s.slice(3);
+    return null;                                            // indices are not on the free data plan
+  }
+  var _volBusy = false;
+  W.measureVol = function (quiet) {
+    var sym = volSym(symbols(trades())); if (!sym || _volBusy) return;
+    var st = volStore(sym), now = Date.now();
+    var from = st && st.ranges.length ? Date.parse(st.ranges[Math.max(0, st.ranges.length - 3)].day + 'T00:00:00Z') : now - 190 * 86400000;
+    _volBusy = true; if (!quiet) W.render();
+    /* Daily candles in one request from the candle worker (Twelve Data); the
+       Dukascopy path is the fallback — it builds days from minute files and
+       the recent ones come from the throttled live feed, which is slow. */
+    var tds = tdSym(sym), td = new Date().toISOString().slice(0, 10);
+    var viaTd = !tds ? Promise.reject(new Error('no symbol')) :
+      fetch(String(window.CANDLE_WORKER_URL || 'https://candles-worker.4kjyyyftv6.workers.dev').replace(/\/$/, '') + '/candles?symbol=' + encodeURIComponent(tds) + '&interval=1day&start_date=' + encodeURIComponent(new Date(from).toISOString().slice(0, 10)) + '&end_date=' + encodeURIComponent(td))
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j || !Array.isArray(j.values) || j.values.length < 5) throw new Error('empty');
+          return j.values.map(function (x) { return { day: String(x.datetime).slice(0, 10), range: +x.high - +x.low }; });
+        });
+    var viaDk = function () {
+      return ApexMarketData.getBars(sym, from, now, '1d', { allowGaps: true }).then(function (b) {
+        var out = []; for (var i = 0; i < b.n; i++) out.push({ day: new Date(b.t[i]).toISOString().slice(0, 10), range: b.h[i] - b.l[i] }); return out;
+      });
+    };
+    viaTd.catch(viaDk).then(function (list) {
+      var m = {};
+      (st ? st.ranges : []).forEach(function (r) { m[r.day] = r.range; });
+      // weekend stubs (a few minutes of Sunday-evening trading) are not days — except for crypto
+      var crypto = /^(BTC|ETH|XRP|LTC|SOL|ADA|DOGE|BNB)/.test(String(sym).toUpperCase());
+      var wk = function (d) { var g = new Date(d + 'T12:00:00Z').getUTCDay(); return g === 0 || g === 6; };
+      list.forEach(function (r) { if (r.day < td && r.range > 0 && isFinite(r.range) && (crypto || !wk(r.day))) m[r.day] = r.range; });
+      if (!crypto) Object.keys(m).forEach(function (d) { if (wk(d)) delete m[d]; });
+      var ranges = Object.keys(m).sort().map(function (d) { return { day: d, range: m[d] }; });
+      lsSet('apexWxVol_v1_' + sym, { ranges: ranges, at: Date.now() });
+      _volBusy = false; W.render();
+    }).catch(function () { _volBusy = false; if (!quiet) { try { showToast('The price feed is busy — try again in a minute'); } catch (e) {} } W.render(); });
+  };
+
+  /* ── compute ── */
+  var _memo = null;
+  W.compute = function () {
+    var ts = trades(), bd = byDay(ts), days = Object.keys(bd).sort(), td = today();
+    if (bd[td] != null) delete bd[td];                      // today is what we forecast
+    days = Object.keys(bd).sort();
+    var syms = symbols(ts), ex = {};
+    var nf = newsFlags(syms, days); if (nf) { ex.news = {}; for (var d in nf) ex.news[d] = nf[d]; }
+    var tn = todayNews(syms); if (tn != null) { ex.news = ex.news || {}; ex.news[td] = tn; }
+    var fm = fitMaps(days.concat([td])); if (fm) { ex.sleep = fm.sleep; ex.ready = fm.ready; }
+    var vs = volSym(syms), vst = vs ? volStore(vs) : null;
+    if (vst) ex.vol = K.volMap(vst.ranges, days.concat([td]));
+    var key = [days.length, days[days.length - 1], JSON.stringify(ex).length, td].join('|');
+    if (_memo && _memo.key === key) return _memo.v;
+    var rows = K.rows(bd, ex), f = K.featuresFor(td, rows, ex);
+    var fc = K.forecast(rows, f), wf = fc.ready ? K.walkForward(rows, 30) : null;
+    var v = { fc: fc, wf: wf, f: f, rows: rows, volSym: vs, volAt: vst ? vst.at : null, hasFit: !!fm, hasNews: !!ex.news };
+    _memo = { key: key, v: v };
+    return v;
+  };
+
+  /* Guardrails: on a storm day — when the user asked for it and the forecast
+     has earned it on its own record — the day runs on tightened limits. */
+  W.tightenGuard = function (g) {
+    try {
+      if (!isPro() || !cfg().autoGuard || g._penalty) return g;
+      var v = W.compute();
+      if (!v.fc.ready || v.fc.weather !== 'storm' || v.wf.helps === false) return g;
+      var o = window.ApexContractEngine ? ApexContractEngine.tighten(g, {}) : g;
+      o._storm = true; return o;
+    } catch (e) { return g; }
+  };
+  W.setAuto = function (on) { setCfg({ autoGuard: !!on }); _memo = null; W.render(); try { ApexGuard.evaluate(); } catch (e) {} };
+
+  /* ── text ── */
+  var DOWS = { Mon: 'Mondays', Tue: 'Tuesdays', Wed: 'Wednesdays', Thu: 'Thursdays', Fri: 'Fridays', Sat: 'Saturdays', Sun: 'Sundays' };
+  function label(x) {
+    var v = x.val;
+    switch (x.key) {
+      case 'dow': return DOWS[v] || v;
+      case 'news': return v === 'yes' ? 'Days with high-impact news on your instruments' : 'Days without high-impact news on your instruments';
+      case 'prev': return v === 'loss' ? 'The day after a losing day' : 'The day after a winning day';
+      case 'streak': return 'After two or more losing days in a row';
+      case 'back': return 'First day back after a break';
+      case 'dd': return 'While your last five days are negative';
+      case 'sleep': return 'After under 6 h of sleep';
+      case 'ready': return 'Readiness under 50';
+      case 'vol': return v === 'high' ? 'After an expanding day — range well above normal' : 'After a quiet day — range well below normal';
+    }
+    return x.key;
+  }
+  var WX = {
+    storm: { name: 'Storm', plan: 'Half size. A-grade setups only — or sit this one out.' },
+    cloudy: { name: 'Cloudy', plan: 'Three-quarter size. Skip the marginal setups.' },
+    fair: { name: 'Fair', plan: 'A normal day by your record. Trade your plan.' },
+    sunny: { name: 'Sunny', plan: 'Your record on days like this is good. Normal size — a forecast is no reason to size up.' }
+  };
+  function icon(w, sz) {
+    sz = sz || 46;
+    var sun = '<circle cx="24" cy="22" r="8" fill="var(--gold)"/>' + [0, 45, 90, 135, 180, 225, 270, 315].map(function (a) { var r = a * Math.PI / 180; return '<line x1="' + (24 + Math.cos(r) * 12).toFixed(1) + '" y1="' + (22 + Math.sin(r) * 12).toFixed(1) + '" x2="' + (24 + Math.cos(r) * 16).toFixed(1) + '" y2="' + (22 + Math.sin(r) * 16).toFixed(1) + '" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round"/>'; }).join('');
+    var cloud = function (fill, dx, dy) { return '<path transform="translate(' + (dx || 0) + ',' + (dy || 0) + ')" d="M14 34h20a7 7 0 0 0 0-14 10 10 0 0 0-19-2 8 8 0 0 0-1 16z" fill="' + fill + '"/>'; };
+    var body = w === 'sunny' ? sun
+      : w === 'fair' ? '<g transform="translate(-5,-5)">' + sun + '</g>' + cloud('var(--ink4)', 6, 6)
+      : w === 'cloudy' ? cloud('var(--ink4)', 4, -6) + cloud('var(--ink3)', -2, 2)
+      : cloud('var(--ink3)', 0, -6) + '<path d="M25 30l-5 9h5l-3 8 9-11h-5l3-6z" fill="var(--loss)"/>';
+    return '<svg viewBox="0 0 48 48" width="' + sz + '" height="' + sz + '" aria-hidden="true">' + body + '</svg>';
+  }
+  function css() {
+    if (document.getElementById('wxCss')) return;
+    var s = document.createElement('style'); s.id = 'wxCss';
+    s.textContent =
+      '#wxCard{margin:0 0 14px}.wx-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.wx-name{font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:26px;line-height:1.05;color:var(--ink)}' +
+      '.wx-eyebrow{font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.1em;color:var(--ink3)}.wx-plan{font-size:var(--fs-sm);color:var(--ink2);line-height:1.55;margin-top:2px}' +
+      '.wx-size{margin-left:auto;text-align:right}.wx-size b{display:block;font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:24px;color:var(--gold)}.wx-size span{font-size:var(--fs-micro);color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;display:block;max-width:170px}' +
+      '.wx-storm .wx-name{color:var(--loss)}.wx-sunny .wx-name{color:var(--gold)}' +
+      '.wx-list{margin-top:12px;display:flex;flex-direction:column;gap:6px}.wx-f{display:flex;align-items:baseline;gap:10px;font-size:var(--fs-xs);line-height:1.5;border-top:1px solid var(--rim2);padding-top:6px}' +
+      '.wx-f{flex-wrap:wrap}.wx-f .l{flex:1 1 220px;color:var(--ink2)}.wx-f .n{color:var(--ink3);white-space:nowrap}.wx-chip{font-size:var(--fs-micro);border-radius:var(--r-pill);padding:1px 8px;border:1px solid var(--rim2);color:var(--ink3);white-space:nowrap}' +
+      '.wx-chip.signal{border-color:var(--gold-line);color:var(--gold);background:rgba(var(--gold-rgb),.08)}.wx-chip.hint{color:var(--ink2)}' +
+      '.wx-note{font-size:var(--fs-micro);color:var(--ink3);line-height:1.55;margin-top:10px}.wx-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;font-size:var(--fs-xs);color:var(--ink2)}' +
+      '.wx-check{border:1px solid var(--rim2);border-radius:var(--r-md);padding:8px 12px;font-size:var(--fs-xs);line-height:1.55;color:var(--ink2);margin-top:10px}';
+    document.head.appendChild(s);
+  }
+  function chip(x) {
+    if ((x.level === 'signal' || x.level === 'hint') && x.effect != null && Math.abs(x.effect) < Math.abs(x.shrunk) * 0.25) return '<span class="wx-chip">explained by the others</span>';
+    var t = x.level === 'signal' ? 'clear' : x.level === 'hint' ? 'weak' : x.level === 'few' ? 'too few days' : 'no difference';
+    return '<span class="wx-chip ' + x.level + '">' + t + '</span>';
+  }
+  function factorLine(x) {
+    var nums = x.level === 'few'
+      ? '<span class="n"><span>only</span> ' + nb(x.nIn) + ' <span>days like this</span></span>'
+      : '<span class="n">' + nb(fR(x.meanIn), x.meanIn >= 0 ? 'pos' : 'neg') + ' <span>a day</span> (' + nb('n=' + x.nIn) + ') <span>vs</span> ' + nb(fR(x.meanOut)) + ' <span>otherwise</span></span>';
+    return '<div class="wx-f"><span class="l">' + label(x) + '</span>' + nums + chip(x) + '</div>';
+  }
+
+  W.render = function () {
+    var page = document.getElementById('page-overview'); if (!page) return;
+    var el = document.getElementById('wxCard');
+    if (cfg().hidden === today()) { if (el) el.remove(); return; }
+    var v; try { v = W.compute(); } catch (e) { return; }
+    if (!v.fc.ready) { if (el) el.remove(); return; }
+    css();
+    if (!el) { el = document.createElement('div'); el.id = 'wxCard'; el.className = 'glass-card'; }
+    var anchor = document.getElementById('startDayCard') || document.getElementById('propOvCard');
+    if (anchor && anchor.parentNode === page) { if (anchor.nextSibling !== el) page.insertBefore(el, anchor.nextSibling); }
+    else if (page.firstElementChild !== el) page.insertBefore(el, page.firstElementChild);
+    var fc = v.fc, w = WX[fc.weather];
+    el.className = 'glass-card wx-' + fc.weather;
+    var close = '<button onclick="ApexWeather.hideToday()" aria-label="Hide for today" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:15px;align-self:flex-start">✕</button>';
+    if (!isPro()) {
+      el.innerHTML = '<div class="wx-head">' + icon(fc.weather) + '<div><div class="wx-eyebrow">Your market weather · today</div><div class="wx-name">' + w.name + '</div>' +
+        '<div class="wx-plan">' + (fc.signals ? '<span>Some of today’s conditions have a clear record in your journal.</span>' : '<span>None of today’s conditions stands out in your journal.</span>') + '</div></div>' +
+        '<div class="wx-size"><button class="apex-btn apex-btn--solid apex-btn--sm" onclick="if(window.openUpgradeModal)openUpgradeModal()">See why with Pro</button></div>' + close + '</div>';
+      i18n(el); return;
+    }
+    var shown = fc.factors.filter(function (x) { return x.level !== 'none' || x.key === 'news' || x.key === 'dow'; }).slice(0, 7);
+    var quiet = fc.factors.filter(function (x) { return shown.indexOf(x) < 0; });
+    var wf = v.wf, check = '';
+    if (wf && wf.helps != null) {
+      check = '<div class="wx-check"><b>' + (wf.helps ? 'Checked on your past' : 'Checked on your past — not separating') + '</b><br>' +
+        '<span>Each past day forecast only from the days before it. Stormy or cloudy days:</span> ' + nb(fR(wf.bad.avg), wf.bad.avg >= 0 ? 'pos' : 'neg') + ' <span>a day</span> (' + nb('n=' + wf.bad.n) + ')<span>; fair or sunny days:</span> ' + nb(fR(wf.good.avg), wf.good.avg >= 0 ? 'pos' : 'neg') + ' (' + nb('n=' + wf.good.n) + ').' +
+        (wf.helps ? '' : ' <span>So far the weather has not told your good days from your bad ones — read it as a note, not a rule.</span>') + '</div>';
+    } else if (wf) {
+      check = '<div class="wx-note">Not enough history yet to check the forecast on its own past — it needs a few stormy and a few fair days first.</div>';
+    }
+    var volLine = '';
+    if (v.volSym && !v.volAt) volLine = '<div class="wx-row"><span>Volatility is not measured yet.</span> <button class="apex-btn apex-btn--ghost apex-btn--sm" onclick="ApexWeather.measureVol()"' + (_volBusy ? ' disabled' : '') + '>' + (_volBusy ? 'Measuring…' : 'Measure on <span class="notranslate" translate="no">' + esc(v.volSym) + '</span>') + '</button><span class="wx-note" style="margin:0">about six months of daily ranges, once</span></div>';
+    var auto = '<label class="wx-row" style="cursor:pointer"><input type="checkbox" style="accent-color:var(--gold)"' + (cfg().autoGuard ? ' checked' : '') + ' onchange="ApexWeather.setAuto(this.checked)"> <span>On a storm day, tighten my Guardrails automatically</span></label>';
+    el.innerHTML = '<div class="wx-head">' + icon(fc.weather) + '<div style="flex:1;min-width:200px"><div class="wx-eyebrow">Your market weather · today</div><div class="wx-name">' + w.name + '</div><div class="wx-plan">' + w.plan + '</div></div>' +
+      (v.wf && v.wf.helps === false ? '<div class="wx-size"><span>No size change — not proven on your past</span></div>'
+        : '<div class="wx-size">' + nb(Math.round(fc.size * 100) + '%') + '<span>of your normal size</span></div>') + close + '</div>' +
+      '<div class="wx-row"><span>Your average day:</span> ' + nb(fR(fc.base)) + ' <span>· a day like today, by your record:</span> ' + nb(fR(fc.expected), fc.expected >= 0 ? 'pos' : 'neg') + ' <span class="wx-note" style="margin:0">(' + nb(fc.n) + ' <span>trading days</span>)</span></div>' +
+      '<div class="wx-list">' + shown.map(factorLine).join('') + '</div>' +
+      (quiet.length ? '<div class="wx-note"><span>Also true today, without a difference in your record:</span> ' + quiet.map(function (x) { return '<span>' + label(x) + '</span>'; }).join(' · ') + '</div>' : '') +
+      volLine + check + auto +
+      '<div class="wx-note">Counted from your own journal. A clear condition differs from your other days by more than chance would usually give (Welch t ≥ 1.64), shrunk toward zero for small samples. Nothing here is generated by an AI.' + (v.hasFit ? '' : ' <span>Connect Evidence Fit to add sleep and readiness.</span>') + '</div>';
+    i18n(el);
+  };
+  W.hideToday = function () { setCfg({ hidden: today() }); var el = document.getElementById('wxCard'); if (el) el.remove(); };
+
+  var T = {
+    'Your market weather · today': ['Dein Marktwetter · heute', 'Tu clima de mercado · hoy', 'Seu clima de mercado · hoje', 'Ta météo de marché · aujourd’hui'],
+    'Storm': ['Sturm', 'Tormenta', 'Tempestade', 'Tempête'], 'Cloudy': ['Bewölkt', 'Nublado', 'Nublado', 'Nuageux'], 'Fair': ['Heiter', 'Despejado', 'Firme', 'Beau'], 'Sunny': ['Sonnig', 'Soleado', 'Ensolarado', 'Ensoleillé'],
+    'Half size. A-grade setups only — or sit this one out.': ['Halbe Größe. Nur A-Setups – oder heute aussetzen.', 'Medio tamaño. Solo setups A, o no operes hoy.', 'Metade do tamanho. Só setups A — ou fique de fora hoje.', 'Demi-taille. Setups A uniquement — ou passe ton tour.'],
+    'Three-quarter size. Skip the marginal setups.': ['Dreiviertel-Größe. Lass die Grenzfälle aus.', 'Tres cuartos del tamaño. Sáltate los setups dudosos.', 'Três quartos do tamanho. Pule os setups marginais.', 'Trois quarts de la taille. Laisse les setups limites.'],
+    'A normal day by your record. Trade your plan.': ['Nach deiner Bilanz ein normaler Tag. Handle deinen Plan.', 'Un día normal según tu historial. Opera tu plan.', 'Um dia normal pelo seu histórico. Opere seu plano.', 'Une journée normale selon ton historique. Suis ton plan.'],
+    'Your record on days like this is good. Normal size — a forecast is no reason to size up.': ['Deine Bilanz an solchen Tagen ist gut. Normale Größe – eine Vorhersage ist kein Grund, größer zu gehen.', 'Tu historial en días así es bueno. Tamaño normal: un pronóstico no es motivo para aumentar.', 'Seu histórico em dias assim é bom. Tamanho normal — previsão não é motivo para aumentar.', 'Ton historique sur ces jours est bon. Taille normale — une prévision n’est pas une raison d’augmenter.'],
+    'of your normal size': ['deiner normalen Größe', 'de tu tamaño normal', 'do seu tamanho normal', 'de ta taille normale'],
+    'Your average day:': ['Dein Durchschnittstag:', 'Tu día medio:', 'Seu dia médio:', 'Ta journée moyenne :'], '· a day like today, by your record:': ['· ein Tag wie heute, nach deiner Bilanz:', '· un día como hoy, según tu historial:', '· um dia como hoje, pelo seu histórico:', '· une journée comme aujourd’hui, selon ton historique :'],
+    'trading days': ['Handelstage', 'días de trading', 'dias de trading', 'jours de trading'],
+    'Mondays': ['Montage', 'Lunes', 'Segundas-feiras', 'Lundis'], 'Tuesdays': ['Dienstage', 'Martes', 'Terças-feiras', 'Mardis'], 'Wednesdays': ['Mittwoche', 'Miércoles', 'Quartas-feiras', 'Mercredis'], 'Thursdays': ['Donnerstage', 'Jueves', 'Quintas-feiras', 'Jeudis'], 'Fridays': ['Freitage', 'Viernes', 'Sextas-feiras', 'Vendredis'], 'Saturdays': ['Samstage', 'Sábados', 'Sábados', 'Samedis'], 'Sundays': ['Sonntage', 'Domingos', 'Domingos', 'Dimanches'],
+    'Days with high-impact news on your instruments': ['Tage mit wichtigen News auf deinen Instrumenten', 'Días con noticias de alto impacto en tus instrumentos', 'Dias com notícias de alto impacto nos seus instrumentos', 'Jours avec des news à fort impact sur tes instruments'],
+    'Days without high-impact news on your instruments': ['Tage ohne wichtige News auf deinen Instrumenten', 'Días sin noticias de alto impacto en tus instrumentos', 'Dias sem notícias de alto impacto nos seus instrumentos', 'Jours sans news à fort impact sur tes instruments'],
+    'The day after a losing day': ['Der Tag nach einem Verlusttag', 'El día después de un día perdedor', 'O dia após um dia de perda', 'Le lendemain d’une journée perdante'],
+    'The day after a winning day': ['Der Tag nach einem Gewinntag', 'El día después de un día ganador', 'O dia após um dia de ganho', 'Le lendemain d’une journée gagnante'],
+    'After two or more losing days in a row': ['Nach zwei oder mehr Verlusttagen in Folge', 'Tras dos o más días perdedores seguidos', 'Após dois ou mais dias de perda seguidos', 'Après deux journées perdantes ou plus d’affilée'],
+    'First day back after a break': ['Erster Tag nach einer Pause', 'Primer día tras una pausa', 'Primeiro dia após uma pausa', 'Premier jour après une pause'],
+    'While your last five days are negative': ['Wenn deine letzten fünf Tage im Minus sind', 'Cuando tus últimos cinco días están en negativo', 'Quando seus últimos cinco dias estão negativos', 'Quand tes cinq derniers jours sont négatifs'],
+    'After under 6 h of sleep': ['Nach weniger als 6 h Schlaf', 'Tras menos de 6 h de sueño', 'Após menos de 6 h de sono', 'Après moins de 6 h de sommeil'],
+    'Readiness under 50': ['Readiness unter 50', 'Readiness por debajo de 50', 'Readiness abaixo de 50', 'Readiness sous 50'],
+    'After an expanding day — range well above normal': ['Nach einem ausgedehnten Tag – Spanne deutlich über normal', 'Tras un día expansivo: rango muy por encima de lo normal', 'Após um dia expansivo — amplitude bem acima do normal', 'Après une journée en expansion — amplitude bien au-dessus de la normale'],
+    'After a quiet day — range well below normal': ['Nach einem ruhigen Tag – Spanne deutlich unter normal', 'Tras un día tranquilo: rango muy por debajo de lo normal', 'Após um dia calmo — amplitude bem abaixo do normal', 'Après une journée calme — amplitude bien en dessous de la normale'],
+    'clear': ['deutlich', 'claro', 'claro', 'net'], 'weak': ['schwach', 'débil', 'fraco', 'faible'], 'too few days': ['zu wenige Tage', 'pocos días', 'poucos dias', 'trop peu de jours'], 'no difference': ['kein Unterschied', 'sin diferencia', 'sem diferença', 'aucune différence'],
+    'No size change — not proven on your past': ['Keine Größenänderung – an deiner Vergangenheit nicht bewiesen', 'Sin cambio de tamaño: no probado en tu pasado', 'Sem mudança de tamanho — não comprovado no seu passado', 'Pas de changement de taille — non prouvé sur ton passé'],
+    'explained by the others': ['durch die anderen erklärt', 'explicado por los demás', 'explicado pelos outros', 'expliqué par les autres'],
+    'only': ['nur', 'solo', 'só', 'seulement'], 'days like this': ['solche Tage', 'días así', 'dias assim', 'jours comme celui-ci'], 'a day': ['pro Tag', 'al día', 'por dia', 'par jour'], 'vs': ['gegen', 'frente a', 'vs.', 'contre'], 'otherwise': ['sonst', 'en otros', 'nos outros', 'sinon'],
+    'Also true today, without a difference in your record:': ['Heute auch zutreffend, ohne Unterschied in deiner Bilanz:', 'También hoy, sin diferencia en tu historial:', 'Também hoje, sem diferença no seu histórico:', 'Aussi vrai aujourd’hui, sans différence dans ton historique :'],
+    'Checked on your past': ['An deiner Vergangenheit geprüft', 'Comprobado con tu pasado', 'Verificado no seu passado', 'Vérifié sur ton passé'],
+    'Checked on your past — not separating': ['An deiner Vergangenheit geprüft – trennt nicht', 'Comprobado con tu pasado: no separa', 'Verificado no seu passado — não separa', 'Vérifié sur ton passé — ne sépare pas'],
+    'Each past day forecast only from the days before it. Stormy or cloudy days:': ['Jeder vergangene Tag nur aus den Tagen davor vorhergesagt. Stürmische oder bewölkte Tage:', 'Cada día pasado pronosticado solo con los días anteriores. Días de tormenta o nublados:', 'Cada dia passado previsto só com os dias anteriores. Dias de tempestade ou nublados:', 'Chaque jour passé prévu uniquement à partir des jours précédents. Jours de tempête ou nuageux :'],
+    '; fair or sunny days:': ['; heitere oder sonnige Tage:', '; días despejados o soleados:', '; dias firmes ou ensolarados:', ' ; jours beaux ou ensoleillés :'],
+    'So far the weather has not told your good days from your bad ones — read it as a note, not a rule.': ['Bisher hat das Wetter deine guten nicht von deinen schlechten Tagen getrennt – lies es als Hinweis, nicht als Regel.', 'Hasta ahora el clima no ha separado tus días buenos de los malos: tómalo como una nota, no como una regla.', 'Até agora o clima não separou seus dias bons dos ruins — leia como nota, não como regra.', 'Jusqu’ici la météo n’a pas séparé tes bons jours des mauvais — lis-la comme une note, pas une règle.'],
+    'Not enough history yet to check the forecast on its own past — it needs a few stormy and a few fair days first.': ['Noch zu wenig Verlauf, um die Vorhersage an ihrer eigenen Vergangenheit zu prüfen – dafür braucht es erst einige stürmische und einige heitere Tage.', 'Aún no hay historial suficiente para comprobar el pronóstico con su propio pasado: primero necesita algunos días de tormenta y algunos despejados.', 'Ainda não há histórico suficiente para verificar a previsão no próprio passado — precisa primeiro de alguns dias de tempestade e alguns firmes.', 'Pas encore assez d’historique pour vérifier la prévision sur son propre passé — il faut d’abord quelques jours de tempête et quelques beaux jours.'],
+    'Volatility is not measured yet.': ['Volatilität ist noch nicht gemessen.', 'La volatilidad aún no está medida.', 'A volatilidade ainda não foi medida.', 'La volatilité n’est pas encore mesurée.'],
+    'Measuring…': ['Messe…', 'Midiendo…', 'Medindo…', 'Mesure…'], 'Measure on': ['Messen auf', 'Medir en', 'Medir em', 'Mesurer sur'],
+    'about six months of daily ranges, once': ['etwa sechs Monate Tagesspannen, einmalig', 'unos seis meses de rangos diarios, una vez', 'cerca de seis meses de amplitudes diárias, uma vez', 'environ six mois d’amplitudes journalières, une fois'],
+    'On a storm day, tighten my Guardrails automatically': ['An einem Sturmtag meine Guardrails automatisch verschärfen', 'En un día de tormenta, endurecer mis Guardrails automáticamente', 'Em um dia de tempestade, endurecer meus Guardrails automaticamente', 'Un jour de tempête, durcir mes Guardrails automatiquement'],
+    'Counted from your own journal. A clear condition differs from your other days by more than chance would usually give (Welch t ≥ 1.64), shrunk toward zero for small samples. Nothing here is generated by an AI.': ['Aus deinem eigenen Journal gezählt. Eine deutliche Bedingung unterscheidet sich von deinen anderen Tagen stärker, als der Zufall meist ergibt (Welch-t ≥ 1,64), bei kleinen Stichproben Richtung null geschrumpft. Nichts hier stammt von einer KI.', 'Contado a partir de tu propio diario. Una condición clara difiere de tus otros días más de lo que suele dar el azar (t de Welch ≥ 1,64), reducida hacia cero en muestras pequeñas. Nada aquí lo genera una IA.', 'Contado a partir do seu próprio diário. Uma condição clara difere dos seus outros dias mais do que o acaso costuma dar (t de Welch ≥ 1,64), encolhida em direção a zero em amostras pequenas. Nada aqui é gerado por IA.', 'Compté à partir de ton propre journal. Une condition nette diffère de tes autres jours plus que le hasard ne le donne d’habitude (t de Welch ≥ 1,64), réduite vers zéro pour les petits échantillons. Rien ici n’est généré par une IA.'],
+    'Connect Evidence Fit to add sleep and readiness.': ['Verbinde Evidence Fit, um Schlaf und Readiness hinzuzufügen.', 'Conecta Evidence Fit para añadir sueño y readiness.', 'Conecte o Evidence Fit para adicionar sono e readiness.', 'Connecte Evidence Fit pour ajouter le sommeil et la readiness.'],
+    'Some of today’s conditions have a clear record in your journal.': ['Einige der heutigen Bedingungen haben eine deutliche Bilanz in deinem Journal.', 'Algunas condiciones de hoy tienen un historial claro en tu diario.', 'Algumas condições de hoje têm um histórico claro no seu diário.', 'Certaines conditions du jour ont un historique net dans ton journal.'],
+    'None of today’s conditions stands out in your journal.': ['Keine der heutigen Bedingungen sticht in deinem Journal heraus.', 'Ninguna condición de hoy destaca en tu diario.', 'Nenhuma condição de hoje se destaca no seu diário.', 'Aucune condition du jour ne ressort dans ton journal.'],
+    'See why with Pro': ['Mit Pro sehen, warum', 'Ver por qué con Pro', 'Ver por que com Pro', 'Voir pourquoi avec Pro']
+  };
+  function reg() { if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('#wxCard', T); else setTimeout(reg, 300); }
+  reg();
+  function hook() {
+    if (typeof window.updateOverview !== 'function' || window.updateOverview._wx) return false;
+    var o = window.updateOverview;
+    var w = function () { var x = o.apply(this, arguments); try { setTimeout(W.render, 20); } catch (e) {} return x; };
+    for (var k in o) w[k] = o[k]; w._wx = true; window.updateOverview = w; return true;
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!hook()) setTimeout(hook, 1500);
+    setTimeout(function () {
+      try { W.render(); } catch (e) {}
+      // keep a measured volatility series current, in small steps
+      try { var s = volSym(symbols(trades())), st = s ? volStore(s) : null; if (st && Date.now() - st.at > 12 * 3600000) W.measureVol(true); } catch (e) {}
+    }, 6000);
+  });
+})();
+</script>
+
+<script>
+/* ApexDuel — Blind Duel (03.11.2026)
+   One real day of history, date hidden, played in Market Replay by everyone
+   who gets the link. Nobody sees anyone else's trades before playing (the
+   database rules hide the other entries until your own is written). Then
+   the reveal: a ranking on the same candles — result in % of the account,
+   R, trades, drawdown — and the house rules (trades per day, risk per
+   trade, a stop on every trade). In a strict duel a broken rule ranks you
+   below everyone who kept them: the duel rewards trading well, not
+   gambling well.
+   Creating a duel is Pro; playing one you were invited to is free — the
+   link is how a friend sees Market Replay for the first time.
+   Engine between the markers is pure — .claude/tests/duel.test.js. */
+/* DUEL-ENGINE-START */
+var ApexDuelEngine = (function () {
+  var K = {};
+  K.RULES = { maxTrades: 5, maxRiskPct: 1, stopAlways: true, strict: true };
+  K.START = 10000;
+  /* trades: replay trades grouped per position — { side, r, pnl, pips, risk, openT, closeT };
+     risk: 0 = no stop, null = unknown. */
+  K.summarize = function (trades, start, t0) {
+    start = start || K.START;
+    var T = (trades || []).slice().sort(function (a, b) { return a.openT - b.openT; });
+    var pnl = 0, R = 0, rn = 0, wins = 0;
+    T.forEach(function (t) { pnl += t.pnl || 0; if (t.r != null && isFinite(t.r)) { R += t.r; rn++; } if (t.pnl > 0) wins++; });
+    var run = 0, peak = 0, dd = 0;
+    T.slice().sort(function (a, b) { return a.closeT - b.closeT; }).forEach(function (t) { run += t.pnl || 0; if (run > peak) peak = run; if (peak - run > dd) dd = peak - run; });
+    var compact = T.map(function (t) {
+      var perPip = t.pips ? Math.abs(t.pnl / t.pips) : null;
+      var k = t.risk > 0 && perPip ? t.risk * perPip / start * 100 : (t.risk === 0 ? 0 : null);
+      return { s: t.side === 'buy' ? 'L' : 'S', o: Math.round((t.openT - t0) / 60000), c: Math.round((t.closeT - t0) / 60000),
+               r: t.r != null && isFinite(t.r) ? Math.round(t.r * 100) / 100 : null, p: Math.round((t.pnl || 0) / start * 10000) / 100,
+               k: k == null ? null : Math.round(k * 100) / 100 };
+    });
+    return { ret: Math.round(pnl / start * 10000) / 100, R: rn ? Math.round(R * 100) / 100 : null, n: T.length, wins: wins,
+             maxDDPct: Math.round(dd / start * 10000) / 100, trades: compact };
+  };
+  K.check = function (sum, rules) {
+    rules = rules || K.RULES;
+    var br = [];
+    if (rules.maxTrades > 0 && sum.n > rules.maxTrades) br.push({ rule: 'maxTrades', n: sum.n });
+    if (rules.stopAlways) { var ns = sum.trades.filter(function (t) { return t.k === 0; }).length; if (ns) br.push({ rule: 'stopAlways', n: ns }); }
+    if (rules.maxRiskPct > 0) { var big = sum.trades.filter(function (t) { return t.k != null && t.k > rules.maxRiskPct * 1.1; }); if (big.length) br.push({ rule: 'maxRiskPct', n: big.length, max: Math.max.apply(null, big.map(function (t) { return t.k; })) }); }
+    return br;
+  };
+  /* Ranking: in a strict duel everyone who kept the rules ranks above
+     everyone who broke one; then the result; a tie inside 0.01 % goes to
+     the higher R, then to whoever finished first. */
+  K.rank = function (entries, rules) {
+    rules = rules || K.RULES;
+    var list = (entries || []).map(function (e) { var o = {}; for (var k in e) o[k] = e[k]; o.breaches = K.check(e, rules); o.dq = !!(rules.strict && o.breaches.length); return o; });
+    list.sort(function (a, b) {
+      if (a.dq !== b.dq) return a.dq ? 1 : -1;
+      if (Math.abs(a.ret - b.ret) >= 0.01) return b.ret - a.ret;
+      var ar = a.R == null ? -1e9 : a.R, brr = b.R == null ? -1e9 : b.R;
+      if (ar !== brr) return brr - ar;
+      return (a.at || 0) - (b.at || 0);
+    });
+    var place = 0;
+    list.forEach(function (e, i) {
+      var p = list[i - 1];
+      if (!p || p.dq !== e.dq || Math.abs(p.ret - e.ret) >= 0.01 || (p.R == null ? -1e9 : p.R) !== (e.R == null ? -1e9 : e.R)) place = i + 1;
+      e.place = place;
+    });
+    return list;
+  };
+  K.validId = function (s) { return /^[A-Za-z0-9]{8,24}$/.test(String(s || '')); };
+  K.newId = function (rnd) { rnd = rnd || Math.random; var A = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789', s = ''; for (var i = 0; i < 12; i++) s += A[Math.floor(rnd() * A.length)]; return s; };
+  return K;
+})();
+/* DUEL-ENGINE-END */
+
+(function () {
+  var D = {};
+  window.ApexDuel = D;
+  var K = ApexDuelEngine;
+  var KEY = 'apexDuelPending';
+  function me() { return window.currentUID || null; }
+  function isPro() { return window.currentPlan === 'pro' || window.currentUID === 'demo'; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function toast(m) { try { if (window.showToast) showToast(m); } catch (e) {} }
+  function i18n(el) { try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) {} }
+  function nb(v, cls) { return '<b class="notranslate' + (cls ? ' ' + cls : '') + '" translate="no">' + v + '</b>'; }
+  function fP(v) { return v == null || !isFinite(v) ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + '%'; }
+  function fR(v) { return v == null || !isFinite(v) ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + 'R'; }
+  function col() { return window.db ? db.collection('apexDuels') : null; }
+  function myName() { return window.currentName || 'Trader'; }
+  function listKey() { return 'apexDuels_v1_' + (me() || 'local'); }
+  function myList() { try { return JSON.parse(localStorage.getItem(listKey()) || '[]'); } catch (e) { return []; } }
+  function remember(id, role) { var l = myList().filter(function (x) { return x.id !== id; }); l.unshift({ id: id, role: role, at: Date.now() }); try { localStorage.setItem(listKey(), JSON.stringify(l.slice(0, 40))); } catch (e) {} }
+  function link(id) {
+    var base = /evidencetrading\.com$/.test(location.hostname) ? 'https://evidencetrading.com/' : location.origin + location.pathname;
+    return base + '?duel=' + id;
+  }
+  function ruleText(r) {
+    var l = [];
+    if (r.maxTrades > 0) l.push('<span>at most</span> ' + nb(r.maxTrades) + ' <span>' + (r.maxTrades === 1 ? 'trade' : 'trades') + '</span>');
+    if (r.maxRiskPct > 0) l.push('<span>at most</span> ' + nb(r.maxRiskPct + '%') + ' <span>risk per trade</span>');
+    if (r.stopAlways) l.push('<span>a stop on every trade</span>');
+    return l.join(' · ') + (r.strict ? ' · <span>breaking a rule ranks you last</span>' : '');
+  }
+  var BR = { maxTrades: 'Too many trades', stopAlways: 'Trade without a stop', maxRiskPct: 'Risk above the cap' };
+
+  /* R2 archive range — those days load at once (same source as the trainer). */
+  var _arc = null;
+  function archive() {
+    if (_arc) return Promise.resolve(_arc);
+    var late = new Promise(function (res) { setTimeout(function () { res(null); }, 2500); });
+    return Promise.race([late, fetch('https://dukascopy-worker.4kjyyyftv6.workers.dev/health').then(function (r) { return r.json(); })])
+      .then(function (h) {
+        var b = h && h.backfill, a = Date.now() - 300 * 86400000, z = Date.now() - 4 * 86400000;
+        if (b && b.top) { a = b.done ? Date.UTC(2020, 0, 6) : b.day + 2 * 86400000; z = Math.min(z, b.top - 86400000); }
+        _arc = [a, z]; return _arc;
+      }).catch(function () { _arc = [Date.now() - 300 * 86400000, Date.now() - 4 * 86400000]; return _arc; });
+  }
+  function rndDay(rg) {
+    for (var k = 0; k < 60; k++) {
+      var t = Math.floor((rg[0] + Math.random() * Math.max(1, rg[1] - rg[0])) / 86400000) * 86400000, w = new Date(t).getUTCDay();
+      if (w > 1 && w < 6) return new Date(t).toISOString().slice(0, 10);      // Tue–Fri: a full session behind and ahead
+    }
+    return new Date(Math.floor(rg[1] / 86400000) * 86400000).toISOString().slice(0, 10);
+  }
+
+  function css() {
+    if (document.getElementById('duelCss')) return;
+    var s = document.createElement('style'); s.id = 'duelCss';
+    s.textContent =
+      '.du-card{border:1px solid var(--rim2);border-radius:var(--r-lg);padding:16px 18px;margin:0 0 14px;background:var(--surface)}.du-card h3{margin:0 0 4px;font-size:var(--fs-md)}' +
+      '.du-sub{font-size:var(--fs-sm);color:var(--ink2);line-height:1.6}.du-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}' +
+      '.du-item{display:flex;align-items:center;gap:10px;border:1px solid var(--rim2);border-radius:var(--r-md);padding:8px 10px;font-size:var(--fs-xs);cursor:pointer;background:var(--elevated)}.du-item:hover{border-color:var(--gold-line)}' +
+      '.du-item .t{flex:1}.du-st{font-size:var(--fs-micro);border-radius:var(--r-pill);padding:2px 9px;border:1px solid var(--rim2);color:var(--ink3);white-space:nowrap}.du-st.turn{border-color:var(--gold-line);color:var(--gold)}.du-st.won{border-color:var(--profit);color:var(--profit)}.du-st.lost{border-color:var(--loss);color:var(--loss)}' +
+      '.du-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin:12px 0}.du-f label{display:block;font-size:var(--fs-xs);font-weight:600;color:var(--ink2);margin-bottom:5px}' +
+      '.du-f select,.du-f input[type=number]{width:100%;box-sizing:border-box;background:var(--elevated);color:var(--ink);border:1px solid var(--rim2);border-radius:var(--r-sm);padding:7px 9px}' +
+      '.du-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}' +
+      '#duBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--gold-line);background:rgba(var(--gold-rgb),.08);border-radius:var(--r-md);padding:8px 12px;margin:0 0 8px;font-size:var(--fs-xs);color:var(--ink2)}#duBar .sp{flex:1}' +
+      '.du-rank{width:100%;border-collapse:collapse;font-size:var(--fs-xs);margin-top:10px}.du-rank th{text-align:left;color:var(--ink3);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--rim2);white-space:nowrap}.du-rank td{padding:7px 8px;border-bottom:1px solid var(--rim2);white-space:nowrap}' +
+      '.du-rank tr.me td{background:rgba(var(--gold-rgb),.07)}.du-rank .pl{font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:18px;color:var(--gold)}.du-rank tr.dq .pl{color:var(--ink4)}' +
+      '.du-win{font-family:Syne,sans-serif;font-weight:700;letter-spacing:-0.03em;font-size:26px;line-height:1.1;color:var(--ink)}.du-svg{width:100%;height:auto;display:block;margin:10px 0}' +
+      '.du-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:var(--fs-micro);color:var(--ink3)}.du-leg i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}' +
+      '.du-scroll{overflow-x:auto}.du-link{display:flex;gap:6px;margin-top:10px}.du-link input{flex:1;min-width:0;background:var(--elevated);color:var(--ink);border:1px solid var(--rim2);border-radius:var(--r-sm);padding:7px 9px;font-family:var(--font-mono,DM Mono,monospace);font-size:var(--fs-xs)}';
+    document.head.appendChild(s);
+  }
+  var _box = null;
+  function box(html) {
+    css(); try { if (window.ApexDialog && ApexDialog.ensureCss) ApexDialog.ensureCss(); } catch (e) {}
+    D.close();
+    var back = document.createElement('div'); back.className = 'apxd-back'; back.id = 'duelBox';
+    back.innerHTML = '<div class="apxd" role="dialog" aria-modal="true" aria-label="Blind duel" style="max-width:680px;width:calc(100% - 32px)">' + html + '</div>';
+    back.addEventListener('click', function (e) { if (e.target === back) D.close(); });
+    document.body.appendChild(back); _box = back; i18n(back);
+    return back;
+  }
+  D.close = function () { var b = document.getElementById('duelBox'); if (b) b.remove(); _box = null; };
+
+  /* ── create ── */
+  D.openNew = function () {
+    if (!isPro()) { try { openUpgradeModal(); } catch (e) {} return; }
+    if (!col() || !me()) { toast('⚠ Sign in to create a duel'); return; }
+    var syms = []; try { syms = ApexMarketData.instruments() || []; } catch (e) {}
+    if (!syms.length) syms = [['XAUUSD', 'Gold'], ['EURUSD', 'EUR/USD'], ['NAS100', 'Nasdaq 100']];
+    var opts = syms.map(function (s) { return '<option value="' + esc(s[0]) + '"' + (s[0] === 'XAUUSD' ? ' selected' : '') + '>' + esc(s[1] || s[0]) + '</option>'; }).join('');
+    box('<h3 style="margin:0 0 4px">Blind duel</h3><div class="du-sub">One real day of history, date hidden. You play it first, then send the link — everyone who opens it plays the same day blind, and nobody sees anyone else’s trades until they have played.</div>' +
+      '<div class="du-form"><div class="du-f"><label>Instrument</label><select id="duSym" class="notranslate" translate="no">' + opts + '</select></div>' +
+      '<div class="du-f"><label>Timeframe</label><select id="duTf"><option value="1m">1m</option><option value="5m" selected>5m</option><option value="15m">15m</option></select></div>' +
+      '<div class="du-f"><label>Trades at most</label><input id="duMax" type="number" min="0" value="5"></div>' +
+      '<div class="du-f"><label>Risk per trade at most (%)</label><input id="duRisk" type="number" min="0" step="0.25" value="1"></div></div>' +
+      '<label style="display:block;font-size:var(--fs-xs);color:var(--ink2);margin:4px 0"><input type="checkbox" id="duStop" checked style="accent-color:var(--gold);margin-right:6px">A stop on every trade</label>' +
+      '<label style="display:block;font-size:var(--fs-xs);color:var(--ink2);margin:4px 0"><input type="checkbox" id="duStrict" checked style="accent-color:var(--gold);margin-right:6px">Strict: breaking a rule ranks you below everyone who kept them</label>' +
+      '<div class="du-sub" style="font-size:var(--fs-xs);color:var(--ink3);margin-top:8px">Everyone starts with the same 10,000 account. The day is drawn at random from the history that loads instantly.</div>' +
+      '<div class="du-btns"><button class="apex-btn apex-btn--ghost" onclick="ApexDuel.close()">Cancel</button><button class="apex-btn apex-btn--solid" id="duGo" onclick="ApexDuel.create()">Draw the day and play</button></div>');
+  };
+  D.create = function () {
+    var v = function (id) { return document.getElementById(id); };
+    var rules = { maxTrades: Math.max(0, parseInt(v('duMax').value, 10) || 0), maxRiskPct: Math.max(0, parseFloat(v('duRisk').value) || 0), stopAlways: !!v('duStop').checked, strict: !!v('duStrict').checked };
+    var sym = v('duSym').value, tf = v('duTf').value, btn = v('duGo'); if (btn) { btn.disabled = true; btn.textContent = '…'; }
+    archive().then(function (rg) {
+      var id = K.newId(), day = rndDay(rg);
+      return col().doc(id).set({ owner: me(), ownerName: myName(), symbol: sym, day: day, tf: tf, rules: rules, createdAt: Date.now() }).then(function () { return id; });
+    }).then(function (id) { remember(id, 'owner'); D.close(); D.play(id); })
+      .catch(function (e) { toast('⚠ ' + (e && e.message || e)); if (btn) { btn.disabled = false; btn.textContent = 'Draw the day and play'; } });
+  };
+
+  /* ── play ── */
+  var _active = null;
+  D.play = function (id) {
+    if (!col()) return;
+    col().doc(id).get().then(function (d) {
+      if (!d.exists) { toast('⚠ This duel does not exist'); return; }
+      var x = d.data(); x.id = id;
+      return col().doc(id).collection('entries').doc(me()).get().then(function (mine) {
+        if (mine.exists) { D.view(id); return; }
+        _active = x;
+        try { if (window.nav) nav('replaylab'); } catch (e) {}
+        var tries = 0;
+        (function go() {
+          var host = document.getElementById('rhHost');
+          if (!host || !window.ApexReplayUI || !ApexReplayUI.duelDay) { if (++tries < 40) return setTimeout(go, 150); toast('⚠ Market Replay is not ready'); return; }
+          ApexReplayUI.duelDay(host, { id: id, symbol: x.symbol, date: x.day, tf: x.tf || '5m', balance: K.START });
+          setTimeout(bar, 600);
+        })();
+      });
+    }).catch(function (e) { toast('⚠ ' + (e && e.message || e)); });
+  };
+  function bar() {
+    var x = _active; if (!x) return;
+    var host = document.getElementById('challengeBar'); if (!host || !host.parentNode) { setTimeout(bar, 500); return; }
+    var el = document.getElementById('duBar');
+    if (!el) { el = document.createElement('div'); el.id = 'duBar'; host.parentNode.insertBefore(el, host); }
+    css();
+    el.innerHTML = '<b>Blind duel</b> <span class="notranslate" translate="no">' + esc(x.symbol + ' · ' + (x.tf || '5m')) + '</span> <span>·</span> ' + ruleText(x.rules || K.RULES) +
+      '<span class="sp"></span><button class="apex-btn apex-btn--solid apex-btn--sm" onclick="ApexDuel.finish()">Finish the duel</button>';
+    i18n(el);
+  }
+  D.finish = function () {
+    var x = _active; if (!x) return;
+    var R = window.ApexReplayUI && ApexReplayUI._state, sess = R && R.session;
+    if (!sess || !R.duel || R.duel.id !== x.id || R.date !== x.day) { toast('⚠ This replay is not the duel day any more — open the duel again'); return; }
+    var st0 = null; try { st0 = sess.state(); } catch (e) {}
+    var openN = st0 ? (st0.openPositions | 0) : 0;
+    var go = function () {
+      try { sess.closeAll(); sess.pause(); } catch (e) {}
+      var a = ApexReplayUI.summary && ApexReplayUI.summary();
+      if (!a) { toast('⚠ No session to score'); return; }
+      var sum = K.summarize(a.trades, a.start, Date.parse(x.day + 'T00:00:00Z'));
+      var entry = { uid: me(), name: myName(), at: Date.now(), ret: sum.ret, R: sum.R, n: sum.n, wins: sum.wins, maxDDPct: sum.maxDDPct, trades: sum.trades.slice(0, 60) };
+      col().doc(x.id).collection('entries').doc(me()).set(entry).then(function () {
+        remember(x.id, x.owner === me() ? 'owner' : 'guest');
+        var b = document.getElementById('duBar'); if (b) b.remove();
+        _active = null; D.view(x.id, true);
+      }).catch(function (e) { toast('⚠ ' + (e && e.message || e)); });
+    };
+    if (openN > 0 && window.ApexDialog) ApexDialog.confirm('You have ' + openN + ' open position' + (openN === 1 ? '' : 's') + '. The duel ends flat — they are closed at the current price.', { title: 'Finish the duel', okText: 'Close and finish' }).then(function (ok) { if (ok) go(); });
+    else go();
+  };
+
+  /* ── results ── */
+  function curves(list, t0x) {
+    var W = 600, H = 170, P = 22, end = 24 * 60, mx = 0, mn = 0;
+    list.forEach(function (e) { var run = 0; (e.trades || []).slice().sort(function (a, b) { return a.c - b.c; }).forEach(function (t) { run += t.p; if (run > mx) mx = run; if (run < mn) mn = run; }); });
+    if (mx === mn) { mx += 0.5; mn -= 0.5; }
+    var x = function (m) { return P + Math.max(0, Math.min(end, m)) * (W - 2 * P) / end; }, y = function (v) { return P + (mx - v) * (H - 2 * P) / (mx - mn); };
+    var COL = ['var(--gold)', 'var(--profit)', '#7aa2ff', '#c58bff', 'var(--loss)', 'var(--ink3)'];
+    var paths = list.slice(0, 6).map(function (e, i) {
+      var run = 0, d = 'M' + x(0).toFixed(1) + ' ' + y(0).toFixed(1);
+      (e.trades || []).slice().sort(function (a, b) { return a.c - b.c; }).forEach(function (t) { d += ' H' + x(t.c).toFixed(1); run += t.p; d += ' V' + y(run).toFixed(1); });
+      d += ' H' + x(end).toFixed(1);
+      return '<path d="' + d + '" style="fill:none;stroke:' + COL[i] + ';stroke-width:' + (e.uid === me() ? 3 : 2) + '"/>';
+    }).join('');
+    var ticks = [0, 6, 12, 18, 24].map(function (h) { return '<text x="' + x(h * 60).toFixed(1) + '" y="' + (H - 4) + '" style="font-size:10px;fill:var(--ink4)" text-anchor="middle">' + (h < 10 ? '0' : '') + h + ':00</text>'; }).join('');
+    var leg = '<div class="du-leg">' + list.slice(0, 6).map(function (e, i) { return '<span><i style="background:' + COL[i] + '"></i><span class="notranslate" translate="no">' + esc(e.name || 'Trader') + '</span></span>'; }).join('') + '</div>';
+    return '<svg class="du-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Result through the day, in % of the account">' +
+      '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '" style="stroke:var(--rim2);stroke-dasharray:3 4"/>' + paths + ticks + '</svg>' + leg;
+  }
+  /* The other entries can only be read once your own exists (database
+     rules) — so ask for your own first. */
+  function entriesOf(id) {
+    return col().doc(id).get().then(function (d) {
+      if (!d.exists) return null;
+      var duel = d.data();
+      return col().doc(id).collection('entries').doc(me()).get().then(function (mine) {
+        if (!mine.exists) return { duel: duel, entries: [] };
+        return col().doc(id).collection('entries').get().then(function (q) { var es = []; q.forEach(function (e) { es.push(e.data()); }); return { duel: duel, entries: es }; });
+      });
+    });
+  }
+  D.view = function (id, fresh) {
+    if (!col()) return;
+    entriesOf(id).then(function (r) {
+      if (!r) { toast('⚠ This duel does not exist'); return; }
+      var x = r.duel, entries = r.entries;
+      var rules = x.rules || K.RULES, list = K.rank(entries, rules), mine = list.filter(function (e) { return e.uid === me(); })[0];
+      var others = list.length - (mine ? 1 : 0);
+      var head;
+      if (!mine) head = '<div class="du-win">Your turn</div>';
+      else if (!others) head = '<div class="du-win">Waiting for an opponent</div><div class="du-sub">Your result is in. Send the link — the day stays hidden until each of them has played it.</div>';
+      else if (mine.place === 1 && list.filter(function (e) { return e.place === 1; }).length === 1) head = '<div class="du-win" style="color:var(--gold)">You won</div>';
+      else if (mine.place === 1) head = '<div class="du-win">A draw at the top</div>';
+      else head = '<div class="du-win"><span>Place</span> ' + nb(mine.place) + ' <span>of</span> ' + nb(list.length) + '</div>';
+      var reveal = '<div class="du-sub" style="margin-top:4px"><span class="notranslate" translate="no">' + esc(x.symbol + ' · ' + (x.tf || '5m')) + '</span>' + (mine ? ' · <span>the day was</span> <b class="notranslate" translate="no">' + esc(new Date(x.day + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + '</b>' : '') + '</div>' +
+        '<div class="du-sub" style="font-size:var(--fs-xs);color:var(--ink3)">' + ruleText(rules) + '</div>';
+      var table = mine ? '<div class="du-scroll"><table class="du-rank cf-skip" data-cf-skip><thead><tr><th>#</th><th>Trader</th><th>Result</th><th>R</th><th>Trades</th><th>Max DD</th><th>Rules</th></tr></thead><tbody>' +
+        list.map(function (e) {
+          return '<tr class="' + (e.uid === me() ? 'me ' : '') + (e.dq ? 'dq' : '') + '"><td class="pl notranslate" translate="no">' + e.place + '</td><td class="notranslate" translate="no">' + esc(e.name || 'Trader') + '</td>' +
+            '<td>' + nb(fP(e.ret), e.ret >= 0 ? 'pos' : 'neg') + '</td><td>' + nb(fR(e.R)) + '</td><td>' + nb(e.n + (e.n ? ' · ' + Math.round(e.wins / e.n * 100) + '%' : '')) + '</td><td>' + nb(fP(-e.maxDDPct)) + '</td>' +
+            '<td>' + (e.breaches.length ? e.breaches.map(function (b) { return '<span class="neg">' + BR[b.rule] + '</span>'; }).join(', ') : '<span class="pos">kept</span>') + '</td></tr>';
+        }).join('') + '</tbody></table></div>' + curves(list) : '';
+      var share = '<div class="du-link"><input readonly class="notranslate" translate="no" value="' + esc(link(id)) + '" onclick="this.select()"><button class="apex-btn apex-btn--ghost apex-btn--sm" onclick="ApexDuel.share(\'' + id + '\')">Share the link</button></div>';
+      box('<h3 style="margin:0 0 6px">Blind duel</h3>' + head + reveal + table + share +
+        '<div class="du-btns">' + (!mine ? '<button class="apex-btn apex-btn--solid" onclick="ApexDuel.close();ApexDuel.play(\'' + id + '\')">Play the day</button>' : '') +
+        '<button class="apex-btn apex-btn--ghost" onclick="ApexDuel.close()">Close</button>' + (mine && isPro() ? '<button class="apex-btn apex-btn--solid" onclick="ApexDuel.openNew()">New duel</button>' : '') + '</div>');
+      if (fresh && mine && !others) D.share(id, true);
+    }).catch(function (e) { toast('⚠ ' + (e && e.message || e)); });
+  };
+  D.share = function (id, quiet) {
+    var u = link(id), text = 'Blind duel on Evidence — one real day of history, date hidden. Beat me:';
+    if (!quiet && navigator.share) { navigator.share({ title: 'Blind duel', text: text, url: u }).catch(function () {}); return; }
+    try { navigator.clipboard.writeText(u).then(function () { toast('✓ Duel link copied'); }); } catch (e) {}
+  };
+
+  /* ── card in the Market Replay setup ── */
+  D.card = function () {
+    var l = myList().slice(0, 6);
+    var list = l.length ? '<div class="du-list" id="duList">' + l.map(function (x) { return '<div class="du-item" onclick="ApexDuel.view(\'' + x.id + '\')" data-du="' + x.id + '"><span class="t"><span class="notranslate" translate="no">…</span></span><span class="du-st">…</span></div>'; }).join('') + '</div>' : '';
+    setTimeout(fillList, 50);
+    return '<div class="du-card"><h3>Blind duel</h3><div class="du-sub">Challenge a friend, your Discord or your trading group to the same hidden day. Everyone plays it blind; the ranking counts result and rule-keeping.</div>' + list +
+      '<div style="margin-top:12px"><button class="apex-btn apex-btn--solid" onclick="ApexDuel.openNew()">' + (isPro() ? 'Start a duel' : 'Start a duel with Pro') + '</button></div></div>';
+  };
+  function fillList() {
+    var host = document.getElementById('duList'); if (!host || !col()) return;
+    css();
+    [].slice.call(host.querySelectorAll('[data-du]')).forEach(function (row) {
+      var id = row.getAttribute('data-du');
+      entriesOf(id).then(function (r) {
+        if (!r) { row.remove(); return; }
+        var x = r.duel, es = r.entries;
+        row.querySelector('.t').innerHTML = '<span class="notranslate" translate="no">' + esc(x.symbol + ' · ' + (x.tf || '5m') + (x.owner === me() ? '' : ' · ' + (x.ownerName || ''))) + '</span>';
+        (function () {
+          var L = K.rank(es, x.rules || K.RULES), mine = L.filter(function (e) { return e.uid === me(); })[0], st = row.querySelector('.du-st');
+          if (!mine) { st.className = 'du-st turn'; st.textContent = 'Your turn'; }
+          else if (L.length < 2) { st.textContent = 'Waiting'; }
+          else if (mine.place === 1) { st.className = 'du-st won'; st.textContent = 'Won'; }
+          else { st.className = 'du-st lost'; st.innerHTML = '<span>Place</span> <span class="notranslate" translate="no">' + mine.place + '/' + L.length + '</span>'; }
+          i18n(row);
+        })();
+      }).catch(function () { var st = row.querySelector('.du-st'); if (st) { st.className = 'du-st turn'; st.textContent = 'Your turn'; i18n(row); } });
+    });
+  }
+
+  /* ── invite link ── */
+  function pending() { try { var p = JSON.parse(localStorage.getItem(KEY) || 'null'); return p && Date.now() - p.at < 7 * 86400000 ? p.id : null; } catch (e) { return null; } }
+  function setPending(id) { try { if (id) localStorage.setItem(KEY, JSON.stringify({ id: id, at: Date.now() })); else localStorage.removeItem(KEY); } catch (e) {} }
+  function invite(id) {
+    col().doc(id).get().then(function (d) {
+      if (!d.exists) { setPending(null); return; }
+      var x = d.data(); setPending(null); remember(id, x.owner === me() ? 'owner' : 'guest');
+      if (x.owner === me()) { D.view(id); return; }
+      box('<h3 style="margin:0 0 6px">Blind duel</h3><div class="du-win"><span class="notranslate" translate="no">' + esc(x.ownerName || 'A trader') + '</span> <span>challenges you</span></div>' +
+        '<div class="du-sub" style="margin-top:6px"><span>One real day of</span> <b class="notranslate" translate="no">' + esc(x.symbol) + '</b> <span>on</span> <b class="notranslate" translate="no">' + esc(x.tf || '5m') + '</b><span>, date hidden. You see nobody’s trades until you have played it. Everyone starts with the same 10,000 account.</span></div>' +
+        '<div class="du-sub" style="font-size:var(--fs-xs);color:var(--ink3);margin-top:6px">' + ruleText(x.rules || K.RULES) + '</div>' +
+        '<div class="du-btns"><button class="apex-btn apex-btn--ghost" onclick="ApexDuel.close()">Later</button><button class="apex-btn apex-btn--solid" onclick="ApexDuel.close();ApexDuel.play(\'' + id + '\')">Play the day</button></div>');
+    }).catch(function () {});
+  }
+  function boot() {
+    var id = null; try { id = new URLSearchParams(location.search).get('duel'); } catch (e) {}
+    if (id && !K.validId(id)) id = null;
+    if (id) {
+      setPending(id);
+      try { var u = new URL(location.href); u.searchParams.delete('duel'); history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) {}
+    }
+    var c = id || pending(); if (!c) return;
+    var tries = 0;
+    (function wait() {
+      if (window.db && me()) { invite(c); return; }
+      if (id && tries === 6 && !me() && window.goToAuth && !window.APEX_DEMO) { toast('Sign in or create a free account to play the duel'); try { goToAuth('register'); } catch (e) {} }
+      if (++tries < 400) setTimeout(wait, 1500);
+    })();
+  }
+  if (document.readyState === 'complete') boot(); else window.addEventListener('load', boot);
+
+  /* Demo: one open duel from two seeded members, so the card and the
+     ranking show something real. Their entries are only readable after the
+     visitor plays — same as for everyone. */
+  function seedDemo() {
+    if (!window.APEX_DEMO || !col() || me() !== 'demo') return;
+    var id = 'demoDuelGold01', ref = col().doc(id);
+    ref.set({ owner: 'st_leon', ownerName: 'Leon K.', symbol: 'XAUUSD', day: '2025-03-12', tf: '5m', rules: K.RULES, createdAt: Date.now() - 2 * 86400000 });
+    ref.collection('entries').doc('st_leon').set({ uid: 'st_leon', name: 'Leon K.', at: Date.now() - 2 * 86400000, ret: 1.38, R: 1.6, n: 3, wins: 2, maxDDPct: 0.52,
+      trades: [{ s: 'L', o: 545, c: 610, r: 1.9, p: 0.95, k: 0.5 }, { s: 'S', o: 780, c: 806, r: -1, p: -0.5, k: 0.5 }, { s: 'L', o: 870, c: 960, r: 0.7, p: 0.93, k: 1 }] });
+    ref.collection('entries').doc('st_dario').set({ uid: 'st_dario', name: 'Dario M.', at: Date.now() - 86400000, ret: 2.9, R: 1.1, n: 6, wins: 3, maxDDPct: 1.9,
+      trades: [{ s: 'L', o: 500, c: 520, r: 0.8, p: 0.8, k: 1 }, { s: 'L', o: 560, c: 575, r: -1, p: -1, k: 1 }, { s: 'S', o: 600, c: 640, r: null, p: 2.4, k: 0 }, { s: 'L', o: 700, c: 720, r: -0.6, p: -0.6, k: 1 }, { s: 'L', o: 800, c: 900, r: 1.9, p: 1.9, k: 1 }, { s: 'S', o: 950, c: 990, r: 0, p: -0.6, k: 1 }] });
+    if (!myList().some(function (x) { return x.id === id; })) remember(id, 'guest');
+  }
+  setTimeout(seedDemo, 3000);
+
+  var T = {
+    'Blind duel': ['Blind-Duell', 'Duelo a ciegas', 'Duelo às cegas', 'Duel à l’aveugle'],
+    'One real day of history, date hidden. You play it first, then send the link — everyone who opens it plays the same day blind, and nobody sees anyone else’s trades until they have played.': ['Ein echter Tag aus der Historie, Datum verborgen. Du spielst ihn zuerst, dann schickst du den Link – jeder, der ihn öffnet, spielt denselben Tag blind, und niemand sieht fremde Trades, bevor er selbst gespielt hat.', 'Un día real de historia, con la fecha oculta. Lo juegas primero y luego envías el enlace: quien lo abra juega el mismo día a ciegas, y nadie ve las operaciones de otros hasta haber jugado.', 'Um dia real do histórico, com a data oculta. Você joga primeiro e depois envia o link — quem abrir joga o mesmo dia às cegas, e ninguém vê as operações dos outros antes de jogar.', 'Une vraie journée d’historique, date cachée. Tu la joues d’abord, puis tu envoies le lien — chacun joue la même journée à l’aveugle, et personne ne voit les trades des autres avant d’avoir joué.'],
+    'Instrument': ['Instrument', 'Instrumento', 'Instrumento', 'Instrument'], 'Timeframe': ['Zeiteinheit', 'Temporalidad', 'Tempo gráfico', 'Unité de temps'],
+    'Trades at most': ['Höchstens Trades', 'Operaciones como máximo', 'Operações no máximo', 'Trades au maximum'], 'Risk per trade at most (%)': ['Risiko pro Trade höchstens (%)', 'Riesgo por operación como máximo (%)', 'Risco por operação no máximo (%)', 'Risque par trade au maximum (%)'],
+    'A stop on every trade': ['Ein Stop bei jedem Trade', 'Un stop en cada operación', 'Um stop em cada operação', 'Un stop sur chaque trade'],
+    'Strict: breaking a rule ranks you below everyone who kept them': ['Streng: Wer eine Regel bricht, landet hinter allen, die sie eingehalten haben', 'Estricto: romper una regla te coloca por debajo de todos los que las cumplieron', 'Estrito: quebrar uma regra coloca você abaixo de todos que as cumpriram', 'Strict : enfreindre une règle te classe derrière tous ceux qui les ont respectées'],
+    'Everyone starts with the same 10,000 account. The day is drawn at random from the history that loads instantly.': ['Alle starten mit demselben 10.000er-Konto. Der Tag wird zufällig aus der Historie gezogen, die sofort lädt.', 'Todos empiezan con la misma cuenta de 10.000. El día se elige al azar de la historia que carga al instante.', 'Todos começam com a mesma conta de 10.000. O dia é sorteado do histórico que carrega na hora.', 'Tout le monde démarre avec le même compte de 10 000. Le jour est tiré au hasard dans l’historique qui se charge instantanément.'],
+    'Cancel': ['Abbrechen', 'Cancelar', 'Cancelar', 'Annuler'], 'Draw the day and play': ['Tag ziehen und spielen', 'Sortear el día y jugar', 'Sortear o dia e jogar', 'Tirer le jour et jouer'],
+    'at most': ['höchstens', 'como máximo', 'no máximo', 'au plus'], 'trade': ['Trade', 'operación', 'operação', 'trade'], 'trades': ['Trades', 'operaciones', 'operações', 'trades'],
+    'risk per trade': ['Risiko pro Trade', 'riesgo por operación', 'risco por operação', 'risque par trade'], 'a stop on every trade': ['ein Stop bei jedem Trade', 'un stop en cada operación', 'um stop em cada operação', 'un stop sur chaque trade'],
+    'breaking a rule ranks you last': ['Regelbruch heißt letzter Platz', 'romper una regla te pone último', 'quebrar uma regra põe você em último', 'enfreindre une règle te classe dernier'],
+    'Finish the duel': ['Duell beenden', 'Terminar el duelo', 'Encerrar o duelo', 'Terminer le duel'],
+    'Your turn': ['Du bist dran', 'Tu turno', 'Sua vez', 'À toi'], 'Waiting for an opponent': ['Warte auf einen Gegner', 'Esperando a un rival', 'Aguardando um adversário', 'En attente d’un adversaire'],
+    'Your result is in. Send the link — the day stays hidden until each of them has played it.': ['Dein Ergebnis steht. Schick den Link – der Tag bleibt verborgen, bis jeder ihn gespielt hat.', 'Tu resultado está guardado. Envía el enlace: el día sigue oculto hasta que cada uno lo haya jugado.', 'Seu resultado está salvo. Envie o link — o dia fica oculto até cada um jogar.', 'Ton résultat est enregistré. Envoie le lien — le jour reste caché jusqu’à ce que chacun l’ait joué.'],
+    'You won': ['Du hast gewonnen', 'Has ganado', 'Você venceu', 'Tu as gagné'], 'A draw at the top': ['Gleichstand an der Spitze', 'Empate en cabeza', 'Empate no topo', 'Égalité en tête'], 'Place': ['Platz', 'Puesto', 'Lugar', 'Place'], 'of': ['von', 'de', 'de', 'sur'],
+    'the day was': ['der Tag war', 'el día fue', 'o dia foi', 'le jour était'], 'Trader': ['Trader', 'Trader', 'Trader', 'Trader'], 'Result': ['Ergebnis', 'Resultado', 'Resultado', 'Résultat'], 'Trades': ['Trades', 'Operaciones', 'Operações', 'Trades'], 'Max DD': ['Max. DD', 'DD máx.', 'DD máx.', 'DD max'], 'Rules': ['Regeln', 'Reglas', 'Regras', 'Règles'],
+    'kept': ['eingehalten', 'cumplidas', 'cumpridas', 'respectées'], 'Too many trades': ['Zu viele Trades', 'Demasiadas operaciones', 'Operações demais', 'Trop de trades'], 'Trade without a stop': ['Trade ohne Stop', 'Operación sin stop', 'Operação sem stop', 'Trade sans stop'], 'Risk above the cap': ['Risiko über der Grenze', 'Riesgo por encima del tope', 'Risco acima do limite', 'Risque au-dessus du plafond'],
+    'Share the link': ['Link teilen', 'Compartir el enlace', 'Compartilhar o link', 'Partager le lien'], 'Play the day': ['Den Tag spielen', 'Jugar el día', 'Jogar o dia', 'Jouer la journée'], 'Close': ['Schließen', 'Cerrar', 'Fechar', 'Fermer'], 'New duel': ['Neues Duell', 'Nuevo duelo', 'Novo duelo', 'Nouveau duel'],
+    'Challenge a friend, your Discord or your trading group to the same hidden day. Everyone plays it blind; the ranking counts result and rule-keeping.': ['Fordere einen Freund, deinen Discord oder deine Trading-Gruppe zum selben verborgenen Tag heraus. Alle spielen ihn blind; die Rangliste zählt Ergebnis und Regeltreue.', 'Reta a un amigo, a tu Discord o a tu grupo de trading al mismo día oculto. Todos lo juegan a ciegas; la clasificación cuenta resultado y respeto de las reglas.', 'Desafie um amigo, seu Discord ou seu grupo de trading para o mesmo dia oculto. Todos jogam às cegas; o ranking conta resultado e respeito às regras.', 'Défie un ami, ton Discord ou ton groupe de trading sur la même journée cachée. Tout le monde la joue à l’aveugle ; le classement compte le résultat et le respect des règles.'],
+    'Start a duel': ['Duell starten', 'Empezar un duelo', 'Começar um duelo', 'Lancer un duel'], 'Start a duel with Pro': ['Duell mit Pro starten', 'Empezar un duelo con Pro', 'Começar um duelo com Pro', 'Lancer un duel avec Pro'],
+    'Waiting': ['Wartet', 'Esperando', 'Aguardando', 'En attente'], 'Won': ['Gewonnen', 'Ganado', 'Vencido', 'Gagné'],
+    'challenges you': ['fordert dich heraus', 'te reta', 'desafia você', 'te défie'], 'One real day of': ['Ein echter Tag', 'Un día real de', 'Um dia real de', 'Une vraie journée de'], 'on': ['auf', 'en', 'em', 'en'],
+    ', date hidden. You see nobody’s trades until you have played it. Everyone starts with the same 10,000 account.': [', Datum verborgen. Du siehst keine fremden Trades, bevor du selbst gespielt hast. Alle starten mit demselben 10.000er-Konto.', ', con la fecha oculta. No ves las operaciones de nadie hasta haber jugado. Todos empiezan con la misma cuenta de 10.000.', ', com a data oculta. Você não vê as operações de ninguém antes de jogar. Todos começam com a mesma conta de 10.000.', ', date cachée. Tu ne vois les trades de personne avant d’avoir joué. Tout le monde démarre avec le même compte de 10 000.'],
+    'Later': ['Später', 'Más tarde', 'Mais tarde', 'Plus tard']
+  };
+  function reg() { if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('#duelBox, .du-card, #duBar', T); else setTimeout(reg, 300); }
+  reg();
+})();
+</script>
+
 </body>
 </html>
