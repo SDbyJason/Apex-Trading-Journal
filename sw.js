@@ -13,7 +13,7 @@
    byteweise ändert — bleibt sie liegen, behalten installierte Apps die
    alten Icons/Manifest-Einträge (cache-first) und das alte SW-Verhalten.
    Die index.html selbst kommt dank network-first trotzdem frisch an. */
-const CACHE = 'evidence-v209';
+const CACHE = 'evidence-v211';
 
 /* Alle Pfade relativ zum Ablageort dieser Datei — NICHT ab "/".
    Auf GitHub Pages liegt die App unter /<repo>/, dort zeigt "/" auf
@@ -21,14 +21,19 @@ const CACHE = 'evidence-v209';
    Fällen: im Unterordner und später unter der eigenen Domain im Wurzelpfad. */
 const BASE = new URL('./', self.location).href;
 
-/* Bewusst das Verzeichnis, nicht die HTML-Datei: Wie die Datei im
-   Repository heißt (index.html oder indexdatenschutz.html), entscheidet der
-   Hoster — das Verzeichnis liefert immer das Richtige aus. */
-const APP = BASE;
+/* Seit 11.11.2026 sind Landingpage und App getrennt: "/" (index.html) ist nur
+   noch die Landing, die App liegt unter app.html (indexdatenschutz.html ist
+   dieselbe Datei unter ihrem alten Namen). Offline gehalten wird allein die
+   App — unter EINEM Schlüssel, egal mit welcher Query sie geöffnet wurde.
+   Fällt eine Navigation offline aus (auch eine auf "/", etwa der alte
+   PWA-Start ./?source=pwa), kommt diese Kopie zurück. */
+const APP = BASE + 'app.html';
 const BASE_PATH = new URL(BASE).pathname;
-const isAppPath = (p) => p === BASE_PATH ||
-  p === BASE_PATH + 'index.html' || p === BASE_PATH + 'indexdatenschutz.html';
-const SHELL = [BASE, BASE + 'manifest.webmanifest',
+const isAppPath = (p) => p === BASE_PATH + 'app.html' || p === BASE_PATH + 'indexdatenschutz.html';
+/* Die App selbst steht bewusst NICHT in der Vorab-Liste: wer nur die Landing
+   liest und von früher noch einen Service Worker hat, soll dafür keine 2 MB
+   im Hintergrund laden. Sie wird beim ersten Öffnen abgelegt. */
+const SHELL = [BASE + 'manifest.webmanifest',
   BASE + 'icons/icon-192.png', BASE + 'icons/icon-512.png', BASE + 'icons/icon-512-maskable.png'];
 
 self.addEventListener('install', (e) => {
@@ -54,8 +59,11 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== self.location.origin) return; // never touch CDN / Firebase / API calls
 
   // Navigations → network-first, fall back to cached shell offline.
+  /* Die App-Datei immer als Navigation behandeln — auch wenn sie nur vorab
+     geholt wird (<link rel="prefetch"> von der Landing): sonst läge sie im
+     Cache-first-Zweig und bliebe dort bis zum nächsten CACHE-Wechsel stehen. */
   const isNav = req.mode === 'navigate' ||
-    (req.headers.get('accept') || '').includes('text/html');
+    (req.headers.get('accept') || '').includes('text/html') || isAppPath(url.pathname);
   if (isNav) {
     /* no-cache: beim Server nachfragen statt bis zu 10 Minuten (max-age=600
        bei GitHub Pages) eine alte Kopie aus dem HTTP-Cache zu zeigen. Ist die

@@ -18,8 +18,7 @@
      ═══════════════════════════════════════════════════════════════════ -->
 <title>Trading Journal with Auto-Sync &amp; Market Replay | Evidence</title>
 <meta name="description" content="A trading journal that fills itself. Sync trades from cTrader, MT5, TradingView or Binance, then see where your edge really is. Free plan, no card.">
-<link rel="canonical" href="https://evidencetrading.com/">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="robots" content="noindex, follow">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Evidence Trading">
@@ -84,7 +83,7 @@ window.APEX_FIT_APP = 'https://fit.evidencetrading.com';</script>
 <script>window.APEX_API_URL = 'https://apexapi.4kjyyyftv6.workers.dev';</script>
 
 <!-- Partner-Zuordnung (?ref=CODE) -->
-<script>
+<script data-lp>
 /* Muss FRÜH laufen und der Aufbewahrungsort muss localStorage sein, nicht die
    URL: der Code wurde lange erst im Moment des Upgrade-Klicks aus
    `location.search` gelesen. Zwischen dem Klick auf den Influencer-Link und
@@ -154,7 +153,7 @@ window.APEX_FIT_APP = 'https://fit.evidencetrading.com';</script>
 })();
 </script>
 
-<script>
+<script data-lp>
 /* ════════════════════════════════════════════════════════════════
    Evidence — PREISE, eine einzige Quelle  (window.APEX_PRICES)
    ────────────────────────────────────────────────────────────────
@@ -254,7 +253,7 @@ window.APEX_PRICES = (function () {
 })();
 </script>
 
-<script>
+<script data-lp="late">
 /* ════════════════════════════════════════════════════════════════
    Evidence — legal pages & cancellation  (window.ApexLegal)
    ────────────────────────────────────────────────────────────────
@@ -1157,7 +1156,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD='2026-11-02e';
+  window.APEX_BUILD='2026-11-12a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -9813,7 +9812,12 @@ body.light #landingPage * {
 #landingPage .footer-links a:hover{ color:var(--lp-gold); }
 
 /* ── REVEAL MOTION ───────────────────────────── */
-#landingPage .reveal{ opacity:0; transform:translateY(30px); transition:opacity .85s cubic-bezier(.2,.7,.2,1),transform .85s cubic-bezier(.2,.7,.2,1); }
+/* Versteckt wird nur, wenn Skripte laufen (html.lp-js setzt das Inline-Skript
+   beim Splash bzw. die Weiche der eigenständigen Landing). Ohne JavaScript —
+   oder wenn der Start scheitert — bleibt jeder Abschnitt lesbar. :where()
+   hält die Spezifität gleich, die Regeln für den Hero gewinnen wie bisher. */
+:where(html.lp-js) #landingPage .reveal{ opacity:0; transform:translateY(30px); }
+#landingPage .reveal{ transition:opacity .85s cubic-bezier(.2,.7,.2,1),transform .85s cubic-bezier(.2,.7,.2,1); }
 #landingPage .reveal.in{ opacity:1; transform:none; }
 #landingPage .reveal.d1{ transition-delay:.08s; } #landingPage .reveal.d2{ transition-delay:.16s; }
 #landingPage .reveal.d3{ transition-delay:.24s; } #landingPage .reveal.d4{ transition-delay:.32s; }
@@ -10352,8 +10356,29 @@ body.light #landingPage * {
    first attempt used currentScript.nextElementSibling and silently did
    nothing. Correct in theory, unreliable in practice; an id lookup cannot
    misfire. */
+/* Anmelde-Absicht aus der Adresse (11.11.2026): die eigenständige Landingpage
+   (/index.html, siehe .claude/build-landing.js) schickt „Create free account"
+   und „Sign in" hierher — app.html#auth=register bzw. #auth=login, auch als
+   ?auth=… Wer so ankommt, sieht den Splash und danach die Anmeldekarte, nie
+   die eingebettete Landing darunter. */
+window.apexAuthIntent = function () {
+  try { var m = /[?&#]auth=(login|register)\b/.exec(location.search + location.hash); return m ? m[1] : ''; }
+  catch (e) { return ''; }
+};
+/* Platzhalter, bis die echten Funktionen stehen (gleich hinter der
+   Anmeldekarte): sie merken sich nur den Wunsch. Ein Klick auf einen Knopf
+   der Landing in den ersten Sekunden ging vorher ins Leere (ReferenceError),
+   weil goToAuth erst nach einem Viertel der Datei definiert war. */
+window.goToAuth = function (screen) {
+  window.__apexAuthWant = screen || 'register';
+  var sp = document.getElementById('apexAuthSplash'); if (sp) sp.classList.add('armed');
+};
+window.goToAuthPro = function (screen) { try { sessionStorage.setItem('apexWantsPro', '1'); } catch (e) {} window.goToAuth(screen); };
+window.lpStartImport = function (preset) { try { sessionStorage.setItem('apexWantsImport', preset); } catch (e) {} window.goToAuth('register'); };
+try { document.documentElement.classList.add('lp-js'); } catch (e) {}
 (function(){ try {
   if (/[?&]demo=1/.test(location.search)) return;   // demo drives the app directly
+  if (window.apexAuthIntent()) { var sp0 = document.getElementById('apexAuthSplash'); if (sp0) sp0.classList.add('armed'); return; }
   /* Nur wer auf diesem Gerät schon angemeldet war, bekommt den Splash
      (23.10.2026). Vorher lag er über JEDEM Besucher, bis Firebase „nicht
      angemeldet" meldete — ein neuer Besucher sah die ersten Sekunden nur ein
@@ -10666,9 +10691,41 @@ body.light #landingPage * {
     out.hidden = false;
     out.innerHTML = '<p class="lp-ec-err">We could not read trades from this file. Try the CSV export of your platform — after signing up you can also map the columns by hand.</p>';
   }
+  /* Die Import-Engine (parseCsvContent, ApexConfidence) gehört zur App. In der
+     App-Datei ist sie beim Klick meist schon da — sonst wird kurz gewartet.
+     Auf der eigenständigen Landingpage (APEX_LANDING_ONLY) gibt es sie nicht:
+     statt sie zu kopieren, wird die App einmal unsichtbar geladen (gleiche
+     Herkunft) und ihre Funktionen werden benutzt. Das ist exakt dieselbe
+     Auswertung wie nach der Anmeldung — und die App liegt danach schon im
+     Cache, wenn der Besucher sein Konto anlegt. */
+  var enginePromise = null;
+  function engine(){
+    if (window.parseCsvContent) return Promise.resolve({ parse: window.parseCsvContent, C: window.ApexConfidence });
+    if (enginePromise) return enginePromise;
+    enginePromise = new Promise(function(res, rej){
+      var f = null, t0 = Date.now();
+      if (window.APEX_LANDING_ONLY) {
+        f = document.createElement('iframe');
+        f.setAttribute('aria-hidden', 'true'); f.tabIndex = -1; f.title = 'engine';
+        f.style.cssText = 'position:absolute;width:0;height:0;border:0;visibility:hidden';
+        f.src = (window.APEX_APP_URL || 'app.html') + '#engine=1';
+        document.body.appendChild(f);
+      }
+      var iv = setInterval(function(){
+        var w = window; if (f) { try { w = f.contentWindow; } catch (e) { w = null; } }
+        if (w && typeof w.parseCsvContent === 'function' && w.ApexConfidence) { clearInterval(iv); res({ parse: w.parseCsvContent, C: w.ApexConfidence }); }
+        else if (Date.now() - t0 > 90000) { clearInterval(iv); enginePromise = null; rej(new Error('engine timeout')); }
+      }, 150);
+    });
+    return enginePromise;
+  }
   function run(text){
+    if (!window.parseCsvContent) { out.hidden = false; out.innerHTML = '<p class="lp-ec-note"><span>Reading your file…</span></p>'; }
+    engine().then(function(E){ show(text, E); }).catch(fail);
+  }
+  function show(text, E){
     var trades = [];
-    try { trades = window.parseCsvContent ? parseCsvContent(text, null, {}) : []; } catch (e) { trades = []; }
+    try { trades = E.parse(text, null, {}) || []; } catch (e) { trades = []; }
     if (!trades.length) return fail();
     // Ergebnis je Trade: Geld, wenn die Datei es hat — sonst Pips. Nie gemischt.
     var useMoney = trades.some(function(t){ return num(t.pnl) !== null; });
@@ -10677,7 +10734,7 @@ body.light #landingPage * {
     var wins = res.filter(function(v){ return v > 0; }), losses = res.filter(function(v){ return v < 0; });
     var net = res.reduce(function(a, b){ return a + b; }, 0);
     var gw = wins.reduce(function(a, b){ return a + b; }, 0), gl = -losses.reduce(function(a, b){ return a + b; }, 0);
-    var C = window.ApexConfidence, wr = C ? C.rate(wins.length, wins.length + losses.length) : null;
+    var C = E.C, wr = C ? C.rate(wins.length, wins.length + losses.length) : null;
     // Bester Wochentag / schwächste Session — erst ab fünf Trades in der Gruppe, sonst Rauschen.
     function group(key){
       var g = {};
@@ -10718,6 +10775,9 @@ body.light #landingPage * {
     r.readAsText(file, 'UTF-8');
   }
   inp.addEventListener('change', function(){ read(inp.files && inp.files[0]); });
+  // Engine schon beim ersten Anzeichen holen (Datei über der Fläche, Klick auf „Datei wählen")
+  function warm(){ if (window.APEX_LANDING_ONLY) engine().catch(function(){}); }
+  inp.addEventListener('click', warm); drop.addEventListener('dragenter', warm);
   drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
   drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
   drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('over'); read(e.dataTransfer.files && e.dataTransfer.files[0]); });
@@ -10960,7 +11020,33 @@ body.light #landingPage * {
 
   <div class="lp-spot reveal">
     <h3>Not a simulator with made-up prices</h3>
-    <p><b><span id="lpCount">61</span> instruments</b>, from free tick-accurate Dukascopy data, on every timeframe from one minute to weekly — so a top-down read runs on the same screen as the entry. You buy at the ask and sell at the bid using the spread that actually existed at that moment, not a convenient constant.<span id="lpHist"></span></p>
+    <p><b><span id="lpCount">61</span> instruments</b>, from free tick-accurate Dukascopy data, on every timeframe from one minute to weekly — so a top-down read runs on the same screen as the entry. You buy at the ask and sell at the bid using the spread that actually existed at that moment, not a convenient constant.<span id="lpHist" data-measured="2003-04-30"></span></p>
+    <script>
+    /* Wie weit die Replay-Daten zurückreichen. Gemessen wird das in der App
+       (ApexMarketData.earliest, siehe landingHistory) — nie aus dem Gedächtnis
+       getippt. Die eigenständige Landingpage hat die Datenschicht aber nicht:
+       deshalb steht der zuletzt gemessene Tag am Element (data-measured) und
+       wird hier in der Seitensprache gesetzt. Die App überschreibt ihn mit
+       ihrer eigenen Messung; weichen beide ab, zeigt es der Vergleich in
+       .claude/tests/landing-cmp.html (Textunterschied) — dann hier nachziehen.
+       Der Satz trägt einen Monatsnamen, auf den kein Wörterbuch-Schlüssel
+       passt; in den vier Wörterbuch-Sprachen wird er deshalb selbst gebaut
+       und für Google Translate gesperrt. */
+    (function(){
+      window.apexLpHist = function (iso) {
+        var el = document.getElementById('lpHist');
+        if (!el || !/^\d{4}-\d{2}/.test(String(iso || ''))) return;
+        var lg = String(window.apexResolvedLang || document.documentElement.lang || 'en').slice(0, 2).toLowerCase();
+        var SENT = { de: ' Die Majors reichen zurück bis %s.', es: ' Los majors se remontan a %s.', pt: ' Os majors vão até %s.', fr: ' Les majors remontent à %s.' };
+        var p = String(iso).split('-'), d = new Date(Date.UTC(+p[0], (+p[1] || 1) - 1, 1)), mo;
+        try { mo = d.toLocaleString(SENT[lg] ? lg : 'en', { month: 'long', year: 'numeric', timeZone: 'UTC' }); } catch (e) { mo = p[1] + '/' + p[0]; }
+        if (SENT[lg]) { el.textContent = SENT[lg].replace('%s', mo); el.setAttribute('translate', 'no'); el.classList.add('notranslate'); }
+        else { el.textContent = ' The majors go back to ' + mo + '.'; el.removeAttribute('translate'); el.classList.remove('notranslate'); }
+      };
+      var el = document.getElementById('lpHist');
+      if (el && el.getAttribute('data-measured')) window.apexLpHist(el.getAttribute('data-measured'));
+    })();
+    </script>
     <p class="lp-cover">Gold and silver · the seven FX majors and 21 crosses · 15 minors including SEK, NOK, PLN, TRY, ZAR, MXN, CNH and SGD · Nasdaq&nbsp;100, S&amp;P&nbsp;500, Dow&nbsp;30, DAX&nbsp;40, FTSE&nbsp;100, CAC&nbsp;40, IBEX&nbsp;35, Nikkei&nbsp;225, ASX&nbsp;200, Hang&nbsp;Seng · WTI and Brent · Bitcoin, Ethereum, Litecoin and XRP.</p>
     <p class="lp-cover"><b>Where the line is, plainly:</b> futures (ES, NQ, YM, GC, CL and the micros) replay in whole contracts with the exchange's tick values, but on the CFD price that tracks each one — CME's own data is licensed, so levels sit a little away from the futures chart. Stocks and options you can journal and analyse in full, but not replay. We would rather say so now than have you find out after you subscribe.</p>
     <div class="lp-spot-grid">
@@ -11945,7 +12031,7 @@ body.light #landingPage * {
      Evidence LANDING 2026 — Engine JS (3D hero · reveals · nav state)
      Inits lazily once #landingPage becomes visible.
      ════════════════════════════════════════════════════════════ -->
-<script>
+<script data-lp>
 (function(){
   var booted = false;
   function boot(){
@@ -12049,27 +12135,13 @@ body.light #landingPage * {
 
     var group = new THREE.Group(); scene.add(group);
 
-    /* candlesticks from a random-walk OHLC series */
-    var N=42, sp=0.72, candles=[]; var price=0; var S=[];
-    for(var i=0;i<N;i++){ var o=price; price+=(Math.random()-0.46)*1.5; var c=price;
-      S.push({o:o,c:c,hi:Math.max(o,c)+Math.random()*0.7,lo:Math.min(o,c)-Math.random()*0.7}); }
-    var mn=Infinity,mx=-Infinity; S.forEach(function(s){ mn=Math.min(mn,s.lo); mx=Math.max(mx,s.hi); });
-    var sy=8/(mx-mn), by=-3;
-    var bull=new THREE.MeshStandardMaterial({color:0x3ecf8e,metalness:.5,roughness:.4});
-    var bear=new THREE.MeshStandardMaterial({color:0xf0636a,metalness:.5,roughness:.45});
-    var wickM=new THREE.MeshStandardMaterial({color:0x9aa0ab,metalness:.6,roughness:.5});
-    var goldM=new THREE.MeshStandardMaterial({color:ACCENT.getHex(),metalness:.85,roughness:.32,emissive:0x3a2c08,emissiveIntensity:.5});
-    S.forEach(function(s,i){ var x=(i-(N-1)/2)*sp, isBull=s.c>=s.o;
-      var bh=Math.max(Math.abs(s.c-s.o)*sy,0.12), bm=((s.o+s.c)/2-mn)*sy+by;
-      var body=new THREE.Mesh(new THREE.BoxGeometry(.42,bh,.42), isBull?bull:bear); body.position.set(x,bm,0);
-      var wm=((s.hi+s.lo)/2-mn)*sy+by, wick=new THREE.Mesh(new THREE.BoxGeometry(.07,(s.hi-s.lo)*sy,.07),wickM); wick.position.set(x,wm,0);
-      var g=new THREE.Group(); g.add(body); g.add(wick); g.scale.y=0.001; g.userData={delay:i*0.018, bob:Math.random()*6}; group.add(g); candles.push(g); });
-
-    /* volume profile bars */
-    var vpBars=[];
-    for(var b=0;b<22;b++){ var t=b/21, vol=Math.exp(-Math.pow((t-0.45)/0.9,2)*4)*(0.6+Math.random()*0.4), len=0.4+vol*9;
-      var bar=new THREE.Mesh(new THREE.BoxGeometry(len,.18,.18),goldM);
-      bar.position.set(-(N-1)/2*sp-len/2-0.6, t*8+by, -2.4); bar.scale.x=0.001; bar.userData={delay:b*0.025}; group.add(bar); vpBars.push(bar); }
+    /* Die Hero-Kerzen und das Volumenprofil standen bis 10.11.2026 hier, in
+       diesem bildschirmgroßen Canvas mit einfacher Pixeldichte. Sie leben
+       jetzt als eigene Bühne im Hero (Apex3D, Objekt „hero", siehe
+       apex-3d-1110): scharf, mit Studio-Spiegelungen, und sie scrollen mit
+       der Seite statt per Skript nachgeführt zu werden. Die beiden Felder
+       bleiben leer bestehen, weil die Schleife unten sie durchläuft. */
+    var candles = [], vpBars = [];
 
     /* ═══════════════════════════════════════════════════════════════
        GOLD DUST — der Hintergrund, der über die ganze Seite läuft
@@ -12478,7 +12550,11 @@ body.light #landingPage * {
 
   /* try now, and whenever #landingPage visibility flips */
   function tryBoot(){ try{ boot(); }catch(e){ console.warn('Evidence landing boot:', e); } }
-  if(document.readyState !== 'loading') tryBoot();
+  /* Sofort starten (11.11.2026): das Skript steht direkt hinter der Landing,
+     ihr Markup ist an dieser Stelle also schon da. Vorher wartete der Start
+     auf DOMContentLoaded — in der großen App-Datei heißt das: bis alle 7,5 MB
+     eingelesen sind. So lange blieben alle .reveal-Abschnitte unsichtbar. */
+  tryBoot();
   document.addEventListener('DOMContentLoaded', tryBoot);
   window.addEventListener('load', tryBoot);
   var lpEl = document.getElementById('landingPage');
@@ -12487,6 +12563,1835 @@ body.light #landingPage * {
   }
 })();
 </script>
+
+<!-- APEX3D:BEGIN — 3D-Engine + Gestaltungsschicht vom 10.11.2026. Laborseite: .claude/tools/3d-lab.html
+     Steht bewusst HIER, gleich hinter der Landing (bei ~8 % der Datei), nicht am Dateiende:
+     die Hero-Szene startet so nach ~150 KB Download statt erst nach den vollen 2,2 MB.
+     Folge: die Styles liegen VOR apex-polish-2609 — wo beide dasselbe regeln, gewinnt diese
+     Schicht über die genauere Auswahl (z. B. section.lp-fold), nicht über die Reihenfolge. -->
+<style id="apex-design-1110">
+/* ═══════════════════════════════════════════════════════════════════
+   Gestaltungsdurchlauf 10.11.2026 — Schicht apex-design-1110
+   Rein additiv. Steht früh im Dokument (siehe Kopfkommentar am Block).
+   Inhalt: Bühnen der 3D-Engine (Apex3D), Hero-Komposition, Teaser-
+   Abschnitte mit Objekt, Footer-Raster, Banner-Rahmen, App-Embleme.
+   Farben unverändert: Obsidian, Gold, dazu Grün/Rot nur als Bedeutung.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Bühnen ──────────────────────────────────────────────────────── */
+.a3-stage{ position:relative; }
+.a3-canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none;
+  opacity:0; transition:opacity .9s cubic-bezier(.2,.7,.2,1); }
+.a3-in > .a3-canvas{ opacity:1; }
+.a3-fail > .a3-canvas{ display:none; }
+@media(prefers-reduced-motion:reduce){ .a3-canvas{ transition:none; } }
+/* Kleine Bühnen laufen zum Rand hin aus: der Lichtfleck unter dem Objekt ist
+   größer als der Canvas und würde sonst an dessen Kante gerade abgeschnitten. */
+.a3-stage:not(.lp-hero-3d) > .a3-canvas{
+  -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 66%,transparent 99%);
+  mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 66%,transparent 99%); }
+
+/* ════════════ LANDINGPAGE ════════════ */
+
+/* Hero: die Kursreihe steht rechts vom Text statt dahinter. Der Canvas
+   liegt UNTER den beiden Schleiern des Heros (::before links, ::after
+   Vignette), die ihn zum Text und zum Rand hin von selbst auslaufen lassen. */
+#landingPage .lp-hero-3d{ position:absolute; top:0; right:0; bottom:0; left:34%; z-index:1; pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 34%); mask-image:linear-gradient(90deg,transparent 0,#000 34%); }
+#landingPage .lp-hero.a3-hero::before{
+  background:linear-gradient(90deg, rgba(6,7,10,.96) 0%, rgba(6,7,10,.86) 26%, rgba(6,7,10,.3) 46%, rgba(6,7,10,0) 58%); }
+#landingPage .lp-hero.a3-hero::after{
+  background:
+    radial-gradient(ellipse at 70% 46%,transparent 0%,transparent 34%,rgba(6,7,10,.5) 70%,var(--lp-bg) 100%),
+    linear-gradient(180deg,rgba(6,7,10,.6) 0%,transparent 20%,transparent 74%,var(--lp-bg) 100%); }
+/* Textspalte: schmaler, damit sie die Szene nicht berührt */
+@media(min-width:1001px){
+  #landingPage .lp-hero.a3-hero .lp-hero-inner > *{ max-width:min(560px,46vw); }
+  #landingPage .lp-hero.a3-hero .lp-badges,
+  #landingPage .lp-hero.a3-hero .lp-pricebar{ max-width:min(620px,50vw); }
+}
+@media(max-width:1000px){
+  /* Schmal: die Szene als Bild über dem Text, nicht dahinter. Hinter Fließtext
+     war sie nur Unruhe; oben am Rand ist sie ein Auftakt. */
+  #landingPage .lp-hero-3d{ left:0; right:0; top:52px; bottom:auto; height:min(46vh,380px);
+    -webkit-mask-image:linear-gradient(180deg,#000 0,#000 54%,transparent 88%); mask-image:linear-gradient(180deg,#000 0,#000 54%,transparent 88%); }
+  #landingPage .lp-hero.a3-hero::before{ background:linear-gradient(180deg, rgba(6,7,10,.25) 0, rgba(6,7,10,.2) 22%, rgba(6,7,10,.9) 44%, rgba(6,7,10,.96) 100%); }
+  #landingPage .lp-hero.a3-hero{ align-items:flex-start; }
+  #landingPage .lp-hero.a3-hero .lp-hero-inner{ padding-top:min(36vh,304px); padding-bottom:40px; }
+}
+
+/* Teaser-Abschnitte: links Marke/Überschrift/Einleitung, rechts das Objekt.
+   Vorher standen dort acht Überschriften nacheinander vor leerem Grund. */
+#landingPage .lp-fold-head{ display:grid; grid-template-columns:minmax(0,1fr) clamp(280px,34vw,430px);
+  gap:clamp(20px,4vw,60px); align-items:center; }
+#landingPage .lp-fold-copy{ min-width:0; }
+#landingPage .lp-fold-copy .lp-lead{ max-width:56ch; }
+#landingPage .lp-fold-art{ aspect-ratio:1/1; width:100%; }
+#landingPage .lp-fold-art::before{ content:""; position:absolute; inset:8%; border-radius:50%; pointer-events:none;
+  background:radial-gradient(closest-side, rgba(var(--gold-rgb),.085), rgba(var(--gold-rgb),0) 72%); }
+/* jeder zweite Abschnitt gespiegelt: Rhythmus statt Liste */
+@media(min-width:901px){
+  #landingPage .lp-fold.a3-flip .lp-fold-head{ grid-template-columns:clamp(280px,34vw,430px) minmax(0,1fr); }
+  #landingPage .lp-fold.a3-flip .lp-fold-art{ order:-1; }
+}
+@media(max-width:900px){
+  #landingPage .lp-fold-head{ grid-template-columns:1fr; gap:6px; }
+  #landingPage .lp-fold-art{ order:-1; width:min(260px,68vw); margin:-10px auto 4px; }
+}
+/* Ohne WebGL oder ohne three.js (Netz, Blocker) bleibt die Bühne leer —
+   dann fällt die Spalte weg und der Text steht wie früher über die Breite. */
+#landingPage .lp-fold-head:has(> .lp-fold-art.a3-fail){ grid-template-columns:1fr; }
+#landingPage .lp-fold-art.a3-fail, #landingPage .lp-final-3d.a3-fail{ display:none; }
+#landingPage section.lp-fold{ contain-intrinsic-size:auto 500px !important; }
+@media(max-width:900px){ #landingPage section.lp-fold{ contain-intrinsic-size:auto 640px !important; } }
+
+/* Abschlussblock: das Monogramm als Körper über der Zeile */
+#landingPage .lp-final-3d{ width:150px; height:150px; margin:-14px auto 8px; }
+@media(max-width:600px){ #landingPage .lp-final-3d{ width:120px; height:120px; } }
+
+/* Footer: die Linkleisten liefen in EINER Zeile ohne Umbruch — achtzehn
+   Einträge teilten sich die Breite, jeder brach wortweise um und die letzten
+   ragten rechts aus dem Bild. Jetzt Raster mit festen Spalten. */
+#landingPage footer{ display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:22px 24px;
+  padding:44px clamp(20px,5vw,52px) 64px; }
+#landingPage footer .footer-links{ grid-column:1/-1; display:flex; flex-wrap:wrap; gap:10px 24px; min-width:0; }
+#landingPage footer .footer-links li{ min-width:0; }
+#landingPage footer .footer-links a{ display:inline-block; padding:2px 0; }
+#landingPage footer .footer-links + .footer-links{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:9px 28px;
+  padding-top:22px; border-top:1px solid var(--lp-line); }
+#landingPage footer .footer-links + .footer-links a{ color:rgba(154,140,116,.82); font-size:12.5px; }
+#landingPage footer .footer-links + .footer-links a:hover{ color:var(--lp-gold); }
+@media(max-width:600px){
+  #landingPage footer{ grid-template-columns:1fr; }
+  #landingPage footer .footer-links + .footer-links{ grid-template-columns:1fr 1fr; gap:9px 16px; }
+}
+
+/* Partner-Banner: seit die Seite color-scheme:dark erklärt, bekam der
+   eingebettete (hell erklärte) Banner einen deckend weißen Grund. Gleiche
+   Angabe am iframe → er ist wieder durchsichtig und steht auf dem Rahmen. */
+.lp-stream-frame iframe{ color-scheme:light; }
+.lp-stream-frame{ box-shadow:0 30px 70px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(var(--gold-rgb),.1); }
+
+/* ════════════ APP ════════════ */
+
+/* Seitenkopf mit Emblem: das Ding, für das die Seite steht, rechts neben
+   dem Titel. Der Kopf behält seine Höhe, das Emblem ragt in den Abstand. */
+.ph.ph-a3{ position:relative; padding-right:150px; }
+.ph .a3-emblem{ position:absolute; right:4px; top:50%; width:128px; height:128px; margin-top:-60px; pointer-events:none; }
+@media(max-width:700px){
+  .ph.ph-a3{ padding-right:88px; }
+  .ph .a3-emblem{ width:88px; height:88px; margin-top:-46px; right:-4px; }
+}
+@media print{ .a3-stage{ display:none!important; } }
+
+/* Leerzustände mit Objekt statt Strich-Icon */
+#dashboardEmptyState .des-icon.a3-on{ display:block; width:168px; height:168px; margin:-6px auto 6px; background:none; border:0; box-shadow:none; }
+#dashboardEmptyState .des-icon.a3-on > svg{ display:none; }
+#page-propfirm .pf-empty .big.a3-on{ width:132px; height:132px; margin:-6px auto 4px; }
+#page-propfirm .pf-empty .big.a3-on > svg{ display:none; }
+.a3-on > .a3-fill{ position:absolute; inset:0; }
+.a3-on{ position:relative; }
+#page-books .bk-empty .a3-empty{ width:150px; height:150px; margin:-10px auto 6px; }
+
+/* Anmeldung: die Karte war auf niedrigen Bildschirmen höher als das Fenster
+   (Registrieren: 863px) und der Rahmen nicht scrollbar — oben fehlte die
+   Marke, unten der Google-Knopf samt Hinweis. Jetzt scrollt der Rahmen, und
+   die Karte steht nur dann mittig, wenn sie hineinpasst (margin:auto). */
+#onboard{ overflow-y:auto; align-items:flex-start; padding:20px 0; overscroll-behavior:contain; }
+#onboard > .onboard-card{ margin:auto; flex:none; }
+.onboard-card .a3-auth{ width:112px; height:112px; margin:-24px auto 2px; }
+.onboard-card.a3-has .onboard-logo{ margin-bottom:1.25rem; }
+@media(max-height:780px){
+  .onboard-card.a3-has{ padding-top:2.2rem; padding-bottom:2.2rem; }
+  .onboard-card .a3-auth{ width:88px; height:88px; margin-top:-20px; }
+}
+
+/* Der Hauptknopf der Anmeldung war ein goldgetönter Schatten mit goldener
+   Schrift — er las sich wie ein gesperrter Knopf. Die eine Handlung, um die
+   es auf dieser Karte geht, bekommt die volle Goldfläche. */
+#onboard .btn-primary{ display:flex; align-items:center; justify-content:center; width:100%;
+  background:linear-gradient(135deg,var(--gold-hi),var(--gold)); color:var(--on-gold); border-color:transparent;
+  font-weight:700; box-shadow:0 12px 30px -12px rgba(var(--gold-rgb),.65), inset 0 1px 0 rgba(255,255,255,.35); }
+#onboard .btn-primary:hover{ filter:brightness(1.05); transform:translateY(-1px); box-shadow:0 16px 36px -12px rgba(var(--gold-rgb),.8), inset 0 1px 0 rgba(255,255,255,.4); }
+#onboard .btn-primary:disabled{ filter:saturate(.5) brightness(.8); transform:none; cursor:default; }
+/* OAuth-Knöpfe, solange Firebase noch lädt (siehe apexAuthWaitState) */
+#onboard.auth-wait .oauth-btn{ opacity:.5; pointer-events:none; cursor:progress; }
+
+/* Upgrade-Fenster: der Kristall neben der Überschrift */
+.apex-upgrade-card .a3-pro{ position:absolute; top:66px; right:24px; width:108px; height:108px; pointer-events:none; }
+.apex-upgrade-card.a3-has .apex-upgrade-title,
+.apex-upgrade-card.a3-has .apex-upgrade-sub{ padding-right:104px; }
+@media(max-width:560px){
+  .apex-upgrade-card .a3-pro{ display:none; }
+  .apex-upgrade-card.a3-has .apex-upgrade-title,
+  .apex-upgrade-card.a3-has .apex-upgrade-sub{ padding-right:0; }
+}
+</style>
+<script id="apex-3d-1110" data-lp>
+/* ═══════════════════════════════════════════════════════════════════
+   Apex3D — eine gemeinsame 3D-Engine für Landing und App (10.11.2026)
+
+   Warum ein eigenes Modul: Hero-Kerzen, Replay-Bühne und Fragekristall
+   hatten jeder einen eigenen Renderer, eigene Lichter und eigene
+   Materialien — drei Handschriften. Hier gibt es EINE Studio-Umgebung,
+   EINEN Materialsatz (poliertes Gold, Obsidian, Rauchglas) und EINE
+   Bewegungssprache, und jedes Objekt wird daraus gebaut.
+
+   Technik:
+   - three.js r128, gleiche URL wie überall (kommt aus dem Cache).
+   - Kleine Bühnen teilen sich EINEN WebGL-Kontext: gerendert wird in
+     einen unsichtbaren Canvas, das Ergebnis per drawImage in den
+     2D-Canvas der Bühne kopiert. Zehn Objekte auf der Seite sind damit
+     ein Kontext statt zehn (Browser erlauben ~16, Handys weniger).
+   - Die große Hero-Bühne bekommt einen eigenen Kontext („direct"): bei
+     der Fläche wäre das Kopieren in Safari spürbar.
+   - Gezeichnet wird nur, was im Bild ist; ohne sichtbare Bühne ruht die
+     Schleife. prefers-reduced-motion → ein Standbild pro Bühne.
+   - Kein AdditiveBlending: auf transparentem Grund entstehen sonst
+     Farbwerte über dem Alphawert, die Safari beim Kopieren kappt.
+   - Canvas-Farben sind Literale (Canvas kennt kein var()).
+
+   Öffentlich: Apex3D.mount(el, kind, opt) → {destroy}, Apex3D.kinds,
+   Apex3D.ready(). Alles andere ist intern.
+   ═══════════════════════════════════════════════════════════════════ */
+(function apex3d() {
+  'use strict';
+  if (window.Apex3D) return;
+
+  var THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  var T = null;                       // die EINE three-Instanz, die dieses Modul benutzt
+  var PI = Math.PI, TAU = PI * 2;
+  var REDUCE = false;
+  try { REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { }
+
+  function webglOk() {
+    try { var c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl'))); }
+    catch (e) { return false; }
+  }
+
+  /* three.js laden. Andere Module der Seite hängen bei Bedarf ihr eigenes
+     <script> an — deshalb zuerst nachsehen, ob schon eines unterwegs ist,
+     und die einmal erhaltene Instanz festhalten (window.THREE kann später
+     durch ein zweites Laden ersetzt werden; gemischte Instanzen vertragen
+     sich nicht). */
+  var _threeP = null;
+  function loadThree() {
+    if (_threeP) return _threeP;
+    _threeP = new Promise(function (res, rej) {
+      if (window.THREE) { T = window.THREE; res(T); return; }
+      var done = false;
+      function ok() { if (done) return; if (window.THREE) { done = true; T = window.THREE; res(T); } }
+      var ex = null, all = document.getElementsByTagName('script');
+      for (var i = 0; i < all.length; i++) if (all[i].src === THREE_URL) { ex = all[i]; break; }
+      if (!ex) { ex = document.createElement('script'); ex.src = THREE_URL; ex.async = true; document.head.appendChild(ex); }
+      ex.addEventListener('load', ok);
+      ex.addEventListener('error', function () { if (!done) { done = true; rej(new Error('three.js could not be loaded')); } });
+      var n = 0, iv = setInterval(function () { ok(); if (done || ++n > 200) clearInterval(iv); }, 100);
+    });
+    return _threeP;
+  }
+
+  /* ───────────────────────── Hilfen ───────────────────────── */
+  function lin(hex) { return new T.Color(hex).convertSRGBToLinear(); }
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function easeOut(x) { x = clamp(x, 0, 1); return 1 - Math.pow(1 - x, 3); }
+  function smooth(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
+  function rng(seed) { var s = seed >>> 0; return function () { s += 0x6D2B79F5; var t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function grp() { return new T.Group(); }
+  function mesh(g, m) { return new T.Mesh(g, m); }
+  function at(o, x, y, z) { o.position.set(x || 0, y || 0, z || 0); return o; }
+
+  /* Abgerundetes Rechteck als Shape, Mitte im Ursprung. Die Ecken werden
+     von Hand abgetastet statt mit absarc gezeichnet: absarc hängt vor jeden
+     Bogen ein Geradenstück zum Bogenanfang, und liegt der (auf 1e-16 genau)
+     auf dem aktuellen Punkt, hat die Kontur zwei fast gleiche Punkte
+     hintereinander — ExtrudeGeometry rechnet dort eine Kerbe in die Fase. */
+  function rrShape(w, h, r) {
+    r = Math.max(0.0005, Math.min(r, w / 2 - 0.0005, h / 2 - 0.0005));
+    var pts = [], x = w / 2 - r, y = h / 2 - r, K = 9, c, i;
+    var C = [[x, -y, -PI / 2], [x, y, 0], [-x, y, PI / 2], [-x, -y, PI]];
+    for (c = 0; c < 4; c++) for (i = 0; i <= K; i++) {
+      var a = C[c][2] + (PI / 2) * i / K;
+      pts.push(new T.Vector2(C[c][0] + Math.cos(a) * r, C[c][1] + Math.sin(a) * r));
+    }
+    return new T.Shape(pts);
+  }
+  /* Vieleck mit gerundeten Ecken. pts: [[x,y],…] im Umlaufsinn; r: Radius
+     (oder Funktion je Ecke). Jede Ecke wird durch eine Quadratkurve ersetzt. */
+  function roundPoly(pts, r) {
+    var s = new T.Shape(), n = pts.length, i;
+    function cut(a, b, d) { var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.sqrt(dx * dx + dy * dy) || 1, k = Math.min(d, L / 2) / L; return [a[0] + dx * k, a[1] + dy * k]; }
+    for (i = 0; i < n; i++) {
+      var p0 = pts[(i + n - 1) % n], p1 = pts[i], p2 = pts[(i + 1) % n];
+      var rr = typeof r === 'function' ? r(i) : r;
+      var a = cut(p1, p0, rr), b = cut(p1, p2, rr);
+      if (i === 0) s.moveTo(a[0], a[1]); else s.lineTo(a[0], a[1]);
+      s.quadraticCurveTo(p1[0], p1[1], b[0], b[1]);
+    }
+    return s;
+  }
+  /* Ecken verschweißen und Normalen neu rechnen: ExtrudeGeometry liefert
+     lose Dreiecke, jede Fase wäre sonst eine sichtbare Stufe. Nach dem
+     Verschweißen gewichtet three die Normalen nach Dreiecksfläche — große
+     Flächen bleiben plan, die Fase wird rund. */
+  function weld(g, tol) {
+    tol = tol || 1e-4;
+    var p = g.attributes.position, n = p.count, map = Object.create(null), idx = new Array(n), np = [], k = 0, i;
+    for (i = 0; i < n; i++) {
+      var x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+      var key = Math.round(x / tol) + '_' + Math.round(y / tol) + '_' + Math.round(z / tol);
+      var j = map[key];
+      if (j === undefined) { j = k++; map[key] = j; np.push(x, y, z); }
+      idx[i] = j;
+    }
+    var src = g.index ? g.index.array : null, ind = [], a, b, c;
+    var m = src ? src.length : n;
+    for (i = 0; i < m; i += 3) {
+      a = idx[src ? src[i] : i]; b = idx[src ? src[i + 1] : i + 1]; c = idx[src ? src[i + 2] : i + 2];
+      if (a !== b && b !== c && a !== c) ind.push(a, b, c);
+    }
+    var out = new T.BufferGeometry();
+    out.setAttribute('position', new T.Float32BufferAttribute(np, 3));
+    out.setIndex(ind);
+    out.computeVertexNormals();
+    g.dispose();
+    return out;
+  }
+  /* Platte: Fläche w×h in XY, Dicke d in Z, Eckradius r, Kantenfase b. */
+  function slab(w, h, d, r, b, seg) {
+    b = Math.min(b, d / 2 - 0.0005, w / 2 - 0.001, h / 2 - 0.001);
+    var g = new T.ExtrudeGeometry(rrShape(w - 2 * b, h - 2 * b, Math.max(r - b, 0.001)), {
+      depth: Math.max(d - 2 * b, 0.0005), bevelEnabled: true, bevelThickness: b, bevelSize: b,
+      bevelSegments: seg || 3, curveSegments: 10, steps: 1
+    });
+    g.center();
+    return weld(g);
+  }
+  /* Beliebige Kontur extrudiert und gefast (Schild, Zahnrad, Haken). */
+  function extrude(shape, d, b, seg, curve) {
+    var g = new T.ExtrudeGeometry(shape, { depth: Math.max(d - 2 * b, 0.0005), bevelEnabled: b > 0, bevelThickness: b, bevelSize: b, bevelSegments: seg || 3, curveSegments: curve || 16, steps: 1 });
+    g.center();
+    return weld(g);
+  }
+  /* Dünner Stab zwischen zwei Punkten. */
+  function rod(a, b, r, mat) {
+    var d = new T.Vector3().subVectors(b, a), len = d.length();
+    var m = mesh(new T.CylinderGeometry(r, r, len, 10), mat);
+    m.position.copy(a).addScaledVector(d, 0.5);
+    m.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), d.normalize());
+    return m;
+  }
+
+  /* ─────────────── Kontext: Umgebung, Materialien, Texturen ─────────────── */
+  function cv(w, h, draw) { var c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); return c; }
+  function rrPath(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+  /* Studio als kleine Szene statt als Bild: Leuchtflächen mit Werten über 1
+     bleiben beim Vorfiltern (PMREM, RGBE) als echtes HDR erhalten. Genau das
+     macht den Unterschied zwischen „goldfarben" und „Gold": helle, scharfe
+     Glanzlichter neben fast schwarzen Flächen. */
+  function buildEnv(R) {
+    var s = new T.Scene(), keep = [];
+    function add(m) { s.add(m); keep.push(m); return m; }
+    // Raum: oben warm-dunkel, Horizont fast schwarz, unten ein Hauch Wärme
+    var room = new T.SphereGeometry(40, 32, 16), col = [], pos = room.attributes.position;
+    for (var i = 0; i < pos.count; i++) {
+      var y = pos.getY(i) / 40, k = y > 0 ? 0.012 + y * 0.02 : 0.012 + (-y) * 0.03;
+      col.push(k * 1.25, k * 1.05, k * 0.82);
+    }
+    room.setAttribute('color', new T.Float32BufferAttribute(col, 3));
+    add(mesh(room, new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide })));
+    function panel(w, h, x, y, z, r, g, b, k) {
+      var m = mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: new T.Color(r * k, g * k, b * k), side: T.DoubleSide }));
+      m.position.set(x, y, z); m.lookAt(0, 0, 0); add(m);
+    }
+    panel(11, 7, -9, 10, 8, 1.0, 0.93, 0.80, 7.5);     // Hauptlicht: große warme Softbox oben links vorn
+    panel(14, 14, 0, 18, 0, 1.0, 0.90, 0.74, 1.6);     // Deckenlicht
+    panel(5, 12, 13, 2, 5, 0.52, 0.66, 1.0, 2.6);      // kühle Aufhellung rechts
+    panel(1.6, 18, -12, 3, -11, 1.0, 0.78, 0.42, 9);   // goldene Kante hinten links
+    panel(1.4, 16, 11, 4, -12, 0.62, 0.72, 1.0, 6);    // kühle Kante hinten rechts
+    panel(3, 3, 6, 12, 10, 1, 1, 1, 10);               // kleiner harter Reflex
+    panel(40, 40, 0, -14, 0, 0.55, 0.42, 0.24, 0.35);  // Bodenrückwurf
+    panel(26, 14, 2, 3, 20, 1.0, 0.86, 0.62, 0.85);    // Front: weiche Fläche hinter der Kamera, damit
+                                                       // dem Betrachter zugewandte Flächen nicht ins Schwarze spiegeln
+    var pm = new T.PMREMGenerator(R), rt = pm.fromScene(s, 0.035);
+    pm.dispose();
+    keep.forEach(function (m) { m.geometry.dispose(); m.material.dispose(); });
+    return rt.texture;
+  }
+
+  function makeCtx(R) {
+    var ctx = { R: R, tex: {}, env: buildEnv(R) };
+    function std(o) { return new T.MeshStandardMaterial(o); }
+    function phy(o) { return new T.MeshPhysicalMaterial(o); }
+    ctx.mat = {
+      gold:   std({ color: lin(0xe6bb5c), metalness: 1, roughness: 0.2, envMapIntensity: 1.15 }),
+      goldS:  std({ color: lin(0xd8ad52), metalness: 1, roughness: 0.4, envMapIntensity: 1.0 }),
+      goldD:  std({ color: lin(0xa67a28), metalness: 1, roughness: 0.3, envMapIntensity: 1.0 }),
+      obs:    phy({ color: lin(0x0b0c10), metalness: 0.35, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.14, envMapIntensity: 1.0 }),
+      matte:  std({ color: lin(0x14161b), metalness: 0.25, roughness: 0.6, envMapIntensity: 0.7 }),
+      /* Dunkler Stahl für fallende Kerzen: reines Schwarz verschwindet vor
+         dem dunklen Grund, Stahl fängt die Softboxen und bleibt lesbar. */
+      steel:  std({ color: lin(0x7a808c), metalness: 1, roughness: 0.34, envMapIntensity: 1.1 }),
+      glass:  phy({ color: lin(0x1b202b), metalness: 0, roughness: 0.05, transmission: 0.9, transparent: true, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.5, depthWrite: false }),
+      ivory:  std({ color: lin(0xe9e1cd), metalness: 0, roughness: 0.85, envMapIntensity: 0.45 }),
+      up:     phy({ color: lin(0x17b377), metalness: 0.3, roughness: 0.26, clearcoat: 1, clearcoatRoughness: 0.1, emissive: lin(0x0a6b43), emissiveIntensity: 0.45, envMapIntensity: 0.9 }),
+      dn:     phy({ color: lin(0xdd4458), metalness: 0.3, roughness: 0.26, clearcoat: 1, clearcoatRoughness: 0.1, emissive: lin(0x7a1424), emissiveIntensity: 0.45, envMapIntensity: 0.9 }),
+      glowG:  new T.MeshBasicMaterial({ color: lin(0xffe3a0), toneMapped: false }),
+      glowUp: new T.MeshBasicMaterial({ color: lin(0x5fe8ae), toneMapped: false }),
+      glowDn: new T.MeshBasicMaterial({ color: lin(0xff8795), toneMapped: false }),
+      wire:   new T.LineBasicMaterial({ color: lin(0xe7c46e), transparent: true, opacity: 0.75 }),
+      link:   new T.LineBasicMaterial({ color: lin(0xe7c46e), transparent: true, opacity: 0.4 })
+    };
+    return ctx;
+  }
+  function tex(ctx, key, w, h, draw) {
+    if (ctx.tex[key]) return ctx.tex[key];
+    var t = new T.CanvasTexture(cv(w, h, draw));
+    t.encoding = T.sRGBEncoding; t.anisotropy = 4;
+    ctx.tex[key] = t; return t;
+  }
+  /* Lichtfleck unter dem Objekt: erdet es, ohne einen Sockel zu brauchen. */
+  function pool(ctx, r, y) {
+    var t = tex(ctx, 'pool', 256, 256, function (g) {
+      var rg = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+      rg.addColorStop(0, 'rgba(255,216,146,.40)'); rg.addColorStop(0.32, 'rgba(232,186,96,.15)'); rg.addColorStop(0.7, 'rgba(201,168,76,.04)'); rg.addColorStop(1, 'rgba(201,168,76,0)');
+      g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+    });
+    var sh = tex(ctx, 'poolShadow', 256, 256, function (g) {
+      var rg = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+      rg.addColorStop(0, 'rgba(40,30,10,.34)'); rg.addColorStop(0.45, 'rgba(40,30,10,.12)'); rg.addColorStop(1, 'rgba(40,30,10,0)');
+      g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+    });
+    var m = mesh(new T.PlaneGeometry(r * 2, r * 2), new T.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, toneMapped: false }));
+    m.rotation.x = -PI / 2; m.position.y = y; m.renderOrder = -2;
+    m.userData.pool = { glow: t, shadow: sh };
+    return m;
+  }
+  /* Weicher Leuchtpunkt als Sprite (normale Mischung, siehe Kopfkommentar). */
+  function glowSprite(ctx, size, hex, op) {
+    var t = tex(ctx, 'dot', 128, 128, function (g) {
+      var rg = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+      rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(0.18, 'rgba(255,255,255,.75)'); rg.addColorStop(0.5, 'rgba(255,255,255,.16)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = rg; g.fillRect(0, 0, 128, 128);
+    });
+    var s = new T.Sprite(new T.SpriteMaterial({ map: t, color: lin(hex || 0xffe3a0), transparent: true, opacity: op == null ? 1 : op, depthWrite: false, toneMapped: false }));
+    s.scale.setScalar(size);
+    return s;
+  }
+
+  /* ───────────────────────── Objekte ─────────────────────────
+     Jeder Bauer liefert { root, update(t, dt, s), radius }.
+     s = { mx, my (Zeiger, −1…1, geglättet), k (Auftritt 0…1), light } */
+  var KINDS = {};
+
+  /* Eine Kerze: gefaster Körper, runder Docht. Gold = aufwärts,
+     Obsidian = abwärts — die Markenfarben tragen die Richtung. */
+  function candle(ctx, w, o, c, hi, lo, sem) {
+    var up = c >= o, bh = Math.max(Math.abs(c - o), w * 0.3), g = grp();
+    var body = mesh(slab(w, bh, w, w * 0.14, w * 0.085, 3), sem ? (up ? ctx.mat.up : ctx.mat.dn) : (up ? ctx.mat.gold : ctx.mat.steel));
+    body.position.y = (o + c) / 2;
+    var wick = mesh(new T.CylinderGeometry(w * 0.055, w * 0.055, Math.max(hi - lo, bh), 10), up ? ctx.mat.goldS : ctx.mat.goldD);
+    wick.position.y = (hi + lo) / 2;
+    g.add(wick); g.add(body);
+    g.userData = { up: up, body: body, o: o, c: c, bh: bh };
+    return g;
+  }
+  function series(n, seed, drift, vol) {
+    var r = rng(seed), p = 0, S = [], i;
+    for (i = 0; i < n; i++) {
+      var o = p, c = o + (r() - 0.5 + drift) * vol * (0.5 + r());
+      S.push({ o: o, c: c, hi: Math.max(o, c) + r() * vol * 0.45, lo: Math.min(o, c) - r() * vol * 0.45 });
+      p = c;
+    }
+    return S;
+  }
+  /* Kerzen für Schaustücke: kräftige Körper in einem Kanal statt eines
+     freien Zufallswegs. Ein freier Weg über 30 Kerzen hat eine Spanne, gegen
+     die jeder einzelne Körper zum Strich schrumpft. slope hebt den Kanal je
+     Kerze, pull zieht den Kurs zur Kanalmitte zurück. */
+  function showSeries(n, seed, slope, pull) {
+    var r = rng(seed), p = 0, S = [], i;
+    for (i = 0; i < n; i++) {
+      var mid = i * slope, o = p;
+      var up = r() < 0.5 + clamp((mid - o) * 0.5, -0.36, 0.36);
+      var body = (0.34 + r() * 0.62) * (up ? 1 : -0.82);
+      var c = o + body;
+      S.push({ o: o, c: c, hi: Math.max(o, c) + 0.1 + r() * 0.34, lo: Math.min(o, c) - 0.1 - r() * 0.34 });
+      p = c + (mid - c) * pull * 0.25;
+    }
+    var mn = Infinity; S.forEach(function (s) { mn = Math.min(mn, s.lo); });
+    return S.map(function (s) { return { o: s.o - mn, c: s.c - mn, hi: s.hi - mn, lo: s.lo - mn }; });
+  }
+  function fitSeries(S, height) {
+    var mn = Infinity, mx = -Infinity;
+    S.forEach(function (s) { mn = Math.min(mn, s.lo); mx = Math.max(mx, s.hi); });
+    var k = height / (mx - mn);
+    return S.map(function (s) { return { o: (s.o - mn) * k, c: (s.c - mn) * k, hi: (s.hi - mn) * k, lo: (s.lo - mn) * k }; });
+  }
+
+  /* ── Marke: das ET-Monogramm als Körper ───────────────────────── */
+  KINDS.mark = function (ctx) {
+    var root = grp(), tilt = grp(); root.add(tilt);
+    var S = 2.6 / 512;                                    // SVG-Einheiten → Welt
+    var tile = mesh(slab(2.6, 2.6, 0.36, 0.6, 0.06, 4), ctx.mat.obs);
+    var rim = mesh(slab(2.72, 2.72, 0.26, 0.66, 0.05, 4), ctx.mat.goldD);
+    rim.position.z = -0.03;
+    tilt.add(rim); tilt.add(tile);
+    // Das Monogramm als EIN Körper (Umriss der vier Balken des Logos), damit
+    // keine Nähte entstehen, wo sich die Balken treffen.
+    var P = [[98, 112], [385, 112], [385, 196], [266, 196], [266, 231], [364, 231], [364, 308], [266, 308], [266, 357], [364, 357], [364, 441], [175, 441], [175, 196], [98, 196]]
+      .map(function (p) { return [(p[0] - 256) * S, -(p[1] - 256) * S]; });
+    var concave = { 3: 1, 4: 1, 7: 1, 8: 1, 12: 1 };
+    var glyph = mesh(extrude(roundPoly(P, function (i) { return (concave[i] ? 7 : 24) * S; }), 0.2, 0.035, 3, 8), ctx.mat.gold);
+    // extrude() zentriert die Geometrie: zurück an die Stelle im Logo
+    glyph.position.set(((98 + 385) / 2 - 256) * S, -((112 + 441) / 2 - 256) * S, 0.2);
+    tilt.add(glyph);
+    var ring = mesh(new T.TorusGeometry(2.25, 0.012, 8, 160), ctx.mat.goldS); ring.rotation.x = 1.25; root.add(ring);
+    var sat = mesh(new T.SphereGeometry(0.06, 16, 12), ctx.mat.glowG); root.add(sat);
+    root.add(pool(ctx, 2.6, -1.75));
+    return {
+      root: root, radius: 2.1,
+      update: function (t, dt, s) {
+        tilt.rotation.y = Math.sin(t * 0.45) * 0.42 + s.mx * 0.5;
+        tilt.rotation.x = Math.sin(t * 0.33) * 0.07 - s.my * 0.25;
+        tilt.position.y = Math.sin(t * 0.9) * 0.05;
+        ring.rotation.z = t * 0.25;
+        sat.position.set(Math.cos(t * 0.7) * 2.25, Math.sin(t * 0.7) * 2.25 * Math.cos(1.25), Math.sin(t * 0.7) * 2.25 * Math.sin(1.25));
+      }
+    };
+  };
+
+  /* ── Vorhängeschloss (Sicherheit, Regeln) ─────────────────────── */
+  KINDS.lock = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var body = mesh(slab(2.0, 1.62, 0.72, 0.34, 0.09, 4), ctx.mat.obs); body.position.y = -0.55;
+    var plate = mesh(slab(2.12, 1.74, 0.5, 0.4, 0.06, 4), ctx.mat.goldD); plate.position.set(0, -0.55, 0);
+    g.add(plate); g.add(body);
+    // Bügel: halber Torus + zwei Schenkel
+    var sh = grp(), R = 0.62, tube = 0.135;
+    var arc = mesh(new T.TorusGeometry(R, tube, 20, 48, PI), ctx.mat.gold); arc.position.y = 0.72;
+    var l1 = mesh(new T.CylinderGeometry(tube, tube, 0.62, 20), ctx.mat.gold); l1.position.set(-R, 0.41, 0);
+    var l2 = mesh(new T.CylinderGeometry(tube, tube, 0.62, 20), ctx.mat.gold); l2.position.set(R, 0.41, 0);
+    sh.add(arc); sh.add(l1); sh.add(l2); g.add(sh);
+    // Schlüsselloch: Goldring, dunkler Grund, leuchtender Schlitz
+    var kh = grp(); kh.position.set(0, -0.5, 0.37);
+    kh.add(mesh(new T.TorusGeometry(0.27, 0.035, 12, 48), ctx.mat.gold));
+    var dot = mesh(new T.CircleGeometry(0.105, 32), ctx.mat.glowG); dot.position.set(0, 0.06, 0.005);
+    var slot = mesh(new T.PlaneGeometry(0.075, 0.2), ctx.mat.glowG); slot.position.set(0, -0.08, 0.005);
+    kh.add(dot); kh.add(slot); g.add(kh);
+    var halo = glowSprite(ctx, 1.3, 0xffd98a, 0.5); halo.position.set(0, -0.5, 0.5); g.add(halo);
+    // Messring: liest mit, greift nicht ein
+    var ring = grp(), tk = [];
+    ring.add(mesh(new T.TorusGeometry(1.95, 0.011, 8, 180), ctx.mat.goldS));
+    for (var i = 0; i < 72; i++) { var a = i / 72 * TAU, L = i % 6 === 0 ? 0.13 : 0.05; tk.push(Math.cos(a) * 1.95, Math.sin(a) * 1.95, 0, Math.cos(a) * (1.95 + L), Math.sin(a) * (1.95 + L), 0); }
+    var tg = new T.BufferGeometry(); tg.setAttribute('position', new T.Float32BufferAttribute(tk, 3));
+    ring.add(new T.LineSegments(tg, ctx.mat.link));
+    ring.rotation.x = 1.32; root.add(ring);
+    root.add(pool(ctx, 2.5, -1.62));
+    return {
+      root: root, radius: 1.95, look: 0.1,
+      update: function (t, dt, s) {
+        g.rotation.y = Math.sin(t * 0.5) * 0.38 + s.mx * 0.5;
+        g.rotation.x = Math.sin(t * 0.37) * 0.05 - s.my * 0.22;
+        g.position.y = 0.12 + Math.sin(t * 0.95) * 0.045;
+        halo.material.opacity = 0.38 + Math.sin(t * 1.6) * 0.14;
+        ring.rotation.z = -t * 0.16;
+      }
+    };
+  };
+
+
+  /* Gemeinsames Motiv: ein feiner Messring mit Skalenstrichen und einem
+     Lichtpunkt, der umläuft. Evidence misst — der Ring sagt das ohne Text. */
+  function orbit(ctx, R, ticks) {
+    var g = grp();
+    g.add(mesh(new T.TorusGeometry(R, 0.011, 8, 180), ctx.mat.goldS));
+    if (ticks) {
+      var tk = [];
+      for (var i = 0; i < ticks; i++) { var a = i / ticks * TAU, L = i % 6 === 0 ? 0.13 : 0.05; tk.push(Math.cos(a) * R, Math.sin(a) * R, 0, Math.cos(a) * (R + L), Math.sin(a) * (R + L), 0); }
+      var tg = new T.BufferGeometry(); tg.setAttribute('position', new T.Float32BufferAttribute(tk, 3));
+      g.add(new T.LineSegments(tg, ctx.mat.link));
+    }
+    var sat = mesh(new T.SphereGeometry(0.055, 16, 12), ctx.mat.glowG); sat.position.x = R; g.add(sat);
+    g.userData.sat = sat; g.userData.R = R;
+    return g;
+  }
+  function spinSat(o, a) { var R = o.userData.R; o.userData.sat.position.set(Math.cos(a) * R, Math.sin(a) * R, 0); }
+  /* Karte mit gezeichneter Oberfläche: Körper + Bildfläche knapp davor. */
+  function faceCard(ctx, w, h, d, r, bodyMat, key, tw, th, draw) {
+    var g = grp();
+    g.add(mesh(slab(w, h, d, r, Math.min(0.03, d / 2.2), 3), bodyMat));
+    var t = tex(ctx, key, tw, th, draw);
+    var f = mesh(new T.PlaneGeometry(w * 0.955, h * 0.955), new T.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false }));
+    f.position.z = d / 2 + 0.004; g.add(f);
+    g.userData.face = f;
+    return g;
+  }
+  function bar(g, x, y, w, h, col, r) { rrPath(g, x, y, w, h, r == null ? Math.min(h / 2, 6) : r); g.fillStyle = col; g.fill(); }
+  function miniCandles(g, x, y, w, h, n, seed) {
+    var S = fitSeries(series(n, seed, 0.12, 1), h), sp = w / n, i;
+    for (i = 0; i < n; i++) {
+      var d = S[i], up = d.c >= d.o, cx = x + sp * (i + 0.5);
+      g.strokeStyle = up ? 'rgba(62,207,142,.9)' : 'rgba(240,99,106,.9)'; g.lineWidth = Math.max(1.5, sp * 0.1);
+      g.beginPath(); g.moveTo(cx, y + h - d.hi); g.lineTo(cx, y + h - d.lo); g.stroke();
+      g.fillStyle = up ? '#3ecf8e' : '#f0636a';
+      var top = y + h - Math.max(d.o, d.c), bh = Math.max(3, Math.abs(d.c - d.o));
+      rrPath(g, cx - sp * 0.3, top, sp * 0.6, bh, Math.min(3, sp * 0.15)); g.fill();
+    }
+  }
+
+  /* ── Hero: die Kursreihe als Schmuckstück ─────────────────────────
+     Goldene und Obsidian-Kerzen auf einem dunklen Spiegel, dahinter das
+     Konfidenzband: breit, wo wenige Trades dahinterstehen, schmal, wo viele.
+     Rechts ein geplanter Trade — Einstieg, Stop, Ziel und die R-Leiter. Das
+     ist die Aussage der Seite als Bild: nicht der Kurs, sondern das Maß. */
+  KINDS.hero = function (ctx, opt) {
+    var root = grp(), world = grp(); root.add(world);
+    var N = 30, SP = 0.62, W = 0.38, i;
+    var S = showSeries(N, 23, 0.105, 1.1), H = 0;
+    S.forEach(function (d) { H = Math.max(H, d.hi); });
+    var X = function (i) { return (i - (N - 1) / 2) * SP; };
+    var cs = [];
+    S.forEach(function (d, k) {
+      var c = candle(ctx, W, d.o, d.c, d.hi, d.lo, false, true); c.position.x = X(k); world.add(c); cs.push(c);
+    });
+    // Konfidenzband hinter den Kerzen
+    var ema = S[0].c, top = [], bot = [], mid = [], z0 = -W * 1.7;
+    for (i = 0; i < N; i++) {
+      ema += (S[i].c - ema) * 0.3;
+      var hw = 0.22 + 1.5 / Math.sqrt(i + 1.3);
+      top.push(new T.Vector3(X(i), ema + hw, z0)); bot.push(new T.Vector3(X(i), ema - hw, z0)); mid.push(new T.Vector3(X(i), ema, z0));
+    }
+    var cTop = new T.CatmullRomCurve3(top), cBot = new T.CatmullRomCurve3(bot), cMid = new T.CatmullRomCurve3(mid);
+    var SEG = 120, bp = [], bi = [], bc = [];
+    for (i = 0; i <= SEG; i++) {
+      var a = cTop.getPoint(i / SEG), b = cBot.getPoint(i / SEG), f = Math.min(1, i / SEG * 4) * Math.min(1, (1 - i / SEG) * 14);
+      bp.push(a.x, a.y, a.z, b.x, b.y, b.z); bc.push(f, f, f, f, f, f);
+      if (i < SEG) { var q = i * 2; bi.push(q, q + 1, q + 2, q + 1, q + 3, q + 2); }
+    }
+    var bg = new T.BufferGeometry();
+    bg.setAttribute('position', new T.Float32BufferAttribute(bp, 3)); bg.setAttribute('color', new T.Float32BufferAttribute(bc, 3)); bg.setIndex(bi);
+    var bandMat = new T.MeshBasicMaterial({ color: lin(0xe9c56e), vertexColors: true, transparent: true, opacity: 0.1, side: T.DoubleSide, depthWrite: false, toneMapped: false });
+    var band = mesh(bg, bandMat); band.renderOrder = -1; world.add(band);
+    var edgeMat = new T.MeshBasicMaterial({ color: lin(0xe9c56e), transparent: true, opacity: 0.45, toneMapped: false });
+    var midMat = new T.MeshBasicMaterial({ color: lin(0xffe6a8), transparent: true, opacity: 0.95, toneMapped: false });
+    world.add(mesh(new T.TubeGeometry(cTop, 160, 0.008, 6, false), edgeMat));
+    world.add(mesh(new T.TubeGeometry(cBot, 160, 0.008, 6, false), edgeMat));
+    world.add(mesh(new T.TubeGeometry(cMid, 160, 0.02, 8, false), midMat));
+    // Boden: Raster, das nach außen ausläuft
+    var gt = tex(ctx, 'heroGrid', 1024, 1024, function (g, w, h) {
+      g.clearRect(0, 0, w, h);
+      g.strokeStyle = 'rgba(233,197,110,.26)'; g.lineWidth = 1.2;
+      var n = 32, st = w / n, k;
+      for (k = 0; k <= n; k++) { g.beginPath(); g.moveTo(k * st, 0); g.lineTo(k * st, h); g.stroke(); g.beginPath(); g.moveTo(0, k * st); g.lineTo(w, k * st); g.stroke(); }
+      g.globalCompositeOperation = 'destination-in';
+      var rg = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+      rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(0.3, 'rgba(0,0,0,.6)'); rg.addColorStop(0.75, 'rgba(0,0,0,.1)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = rg; g.fillRect(0, 0, w, h);
+    });
+    var floor = mesh(new T.PlaneGeometry(34, 34), new T.MeshBasicMaterial({ map: gt, transparent: true, depthWrite: false, toneMapped: false }));
+    floor.rotation.x = -PI / 2; floor.position.set(X(N - 8), -0.25, 0); floor.renderOrder = -3; world.add(floor);
+    var glowFloor = pool(ctx, 8, -0.24); glowFloor.position.x = X(N - 7); world.add(glowFloor);
+    // Lote: jede Kerze steht mit einer feinen Linie auf dem Boden
+    var dl = [];
+    for (i = 0; i < N; i++) dl.push(X(i), -0.25, 0, X(i), S[i].lo, 0);
+    var dg = new T.BufferGeometry(); dg.setAttribute('position', new T.Float32BufferAttribute(dl, 3));
+    var dropMat = new T.LineBasicMaterial({ color: lin(0xe7c46e), transparent: true, opacity: 0.16 });
+    world.add(new T.LineSegments(dg, dropMat));
+
+    // Der geplante Trade: Einstieg / Stop / Ziel über den letzten Kerzen + R-Leiter
+    var e0 = S[N - 6].o, risk = 0.72, stop = e0 - risk, tgt = Math.min(H + 0.35, e0 + risk * 3);
+    var zf = W * 0.95, xa = X(N - 6) - SP * 0.55, xb = X(N - 1) + SP * 1.5;
+    function hline(y, mat, r) { var m = rod(new T.Vector3(xa, y, zf), new T.Vector3(xb, y, zf), r || 0.011, mat); world.add(m); return m; }
+    hline(e0, ctx.mat.glowG, 0.012); hline(stop, ctx.mat.glowDn, 0.01); hline(tgt, ctx.mat.glowUp, 0.01);
+    world.add(rod(new T.Vector3(xb, stop, zf), new T.Vector3(xb, tgt, zf), 0.014, ctx.mat.goldS));
+    for (i = 0; i <= 4; i++) {
+      var yy = stop + risk * i;
+      if (yy > tgt + 0.01) break;
+      world.add(rod(new T.Vector3(xb, yy, zf), new T.Vector3(xb + 0.24, yy, zf), 0.01, ctx.mat.goldS));
+      if (i < 4 && yy + risk / 2 < tgt) world.add(rod(new T.Vector3(xb, yy + risk / 2, zf), new T.Vector3(xb + 0.12, yy + risk / 2, zf), 0.008, ctx.mat.goldS));
+    }
+    var tagE = mesh(slab(0.46, 0.19, 0.06, 0.095, 0.02, 2), ctx.mat.gold); tagE.position.set(xa - 0.3, e0, zf); world.add(tagE);
+    var tagS = mesh(slab(0.34, 0.16, 0.05, 0.08, 0.02, 2), ctx.mat.dn); tagS.position.set(xa - 0.24, stop, zf); world.add(tagS);
+    var tagT = mesh(slab(0.34, 0.16, 0.05, 0.08, 0.02, 2), ctx.mat.up); tagT.position.set(xa - 0.24, tgt, zf); world.add(tagT);
+    // Live-Kurs: Lichtpunkt und Marke an der letzten Kerze
+    var live = glowSprite(ctx, 1.5, 0xffe3a0, 0.55); world.add(live);
+    var mark = mesh(new T.SphereGeometry(0.075, 16, 12), ctx.mat.glowG); world.add(mark);
+
+    world.position.set(-X(N - 8), -H * 0.52, 0);
+    root.rotation.y = -0.5;
+    var lb = cs[N - 1].userData;
+
+    return {
+      root: root, radius: 6, noIntro: true,
+      camera: function (cam, aspect, t, s) {
+        /* Hochkant (Handy) rückt die Kamera weiter weg und schaut etwas höher;
+           quer bleibt der Abstand, das Bild wird nur breiter. */
+        var d = 17.4 / Math.min(1, Math.pow(aspect, 0.92));
+        cam.fov = 30;
+        var ox = Math.sin(t * 0.11) * 0.45 + s.mx * 0.8, oy = Math.cos(t * 0.09) * 0.16 - s.my * 0.4;
+        /* Schmale Fassung: die Bühne liegt als Band ÜBER dem Text. Dort rückt
+           die Reihe im Bild nach oben, damit ihr Fuß die erste Zeile nicht trifft. */
+        var up = opt && opt.narrow && opt.narrow() ? 1.15 : 0;
+        cam.position.set(2.3 + ox, 0.75 + oy - up * 0.5, d);
+        cam.lookAt(1.15, 0.05 - up, 0);
+      },
+      update: function (t, dt, s) {
+        for (var k = 0; k < N; k++) cs[k].scale.y = Math.max(0.001, easeOut((t - 0.1 - k * 0.032) / 0.7));
+        // die letzte Kerze lebt
+        var c2 = lb.c + Math.sin(t * 1.25) * 0.2 + Math.sin(t * 3.3) * 0.06;
+        var nh = Math.max(Math.abs(c2 - lb.o), W * 0.3), mid2 = (lb.o + c2) / 2;
+        lb.body.scale.y = nh / lb.bh; lb.body.position.y = mid2;
+        var px = X(N - 1) + W * 0.95;
+        live.position.set(px, c2, zf); mark.position.set(px, c2, zf);
+        live.material.opacity = (0.4 + Math.sin(t * 2.4) * 0.15) * s.k;
+        var e = smooth((t - 0.6) / 1.2);
+        bandMat.opacity = 0.1 * e; edgeMat.opacity = 0.45 * e; midMat.opacity = 0.95 * smooth((t - 0.5) / 1.0); dropMat.opacity = 0.16 * e;
+        root.rotation.y = -0.5 + Math.sin(t * 0.13) * 0.035;
+      }
+    };
+  };
+
+  /* ── Replay: links, was geschah — rechts, was verborgen ist ────── */
+  KINDS.replay = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var base = mesh(new T.CylinderGeometry(2.0, 2.06, 0.1, 80), ctx.mat.obs); base.position.y = -1.3; g.add(base);
+    var edge = mesh(new T.TorusGeometry(2.02, 0.024, 10, 140), ctx.mat.gold); edge.rotation.x = PI / 2; edge.position.y = -1.255; g.add(edge);
+    var N = 7, SP = 0.52, W = 0.34, S = fitSeries(showSeries(N + 8, 5, 0, 1.6), 2.9), items = [], BL = 0.4;
+    var ghostMat = ctx.mat.wire;
+    for (var i = 0; i < N + 8; i++) {
+      var d = S[i], it = grp(), solid = candle(ctx, W, d.o, d.c, d.hi, d.lo), ghost = grp();
+      var bh = solid.userData.bh;
+      var ge = new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(W, bh, W)), ghostMat); ge.position.y = (d.o + d.c) / 2;
+      var gw = new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(0.02, d.hi - d.lo, 0.02)), ghostMat); gw.position.y = (d.hi + d.lo) / 2;
+      ghost.add(ge); ghost.add(gw); it.add(solid); it.add(ghost);
+      it.userData = { solid: solid, ghost: ghost, rev: 0, d: d };
+      it.position.y = -1.22; g.add(it); items.push(it);
+    }
+    // die „Jetzt"-Ebene
+    var bt = tex(ctx, 'blade', 64, 256, function (c, w, h) {
+      var lg = c.createLinearGradient(0, 0, w, 0);
+      lg.addColorStop(0, 'rgba(255,214,130,0)'); lg.addColorStop(0.46, 'rgba(255,214,130,.34)'); lg.addColorStop(0.5, 'rgba(255,246,220,.95)'); lg.addColorStop(0.54, 'rgba(255,214,130,.34)'); lg.addColorStop(1, 'rgba(255,214,130,0)');
+      c.fillStyle = lg; c.fillRect(0, 0, w, h);
+      c.globalCompositeOperation = 'destination-in';
+      var vg = c.createLinearGradient(0, 0, 0, h); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(0.2, 'rgba(0,0,0,1)'); vg.addColorStop(0.9, 'rgba(0,0,0,1)'); vg.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = vg; c.fillRect(0, 0, w, h);
+    });
+    var bm = new T.MeshBasicMaterial({ map: bt, transparent: true, depthWrite: false, side: T.DoubleSide, toneMapped: false });
+    var blade = mesh(new T.PlaneGeometry(1.7, 4.0), bm); blade.rotation.y = PI / 2; blade.position.set(BL, 0.5, 0); g.add(blade);
+    var blade2 = mesh(new T.PlaneGeometry(0.6, 4.0), bm); blade2.position.set(BL, 0.5, 0); g.add(blade2);
+    var strip = mesh(new T.BoxGeometry(0.03, 0.012, 3.6), ctx.mat.glowG); strip.position.set(BL, -1.25, 0); g.add(strip);
+    // Rückspul-Ring mit Pfeilspitze
+    var rw = grp();
+    var arcR = 2.32, arc = mesh(new T.TorusGeometry(arcR, 0.018, 10, 120, PI * 1.55), ctx.mat.goldS); arc.rotation.x = PI / 2; rw.add(arc);
+    var head = mesh(new T.ConeGeometry(0.085, 0.24, 20), ctx.mat.gold);
+    head.position.set(arcR, 0, 0); head.rotation.x = -PI / 2; rw.add(head);
+    rw.position.y = -1.15; g.add(rw);
+    root.add(pool(ctx, 3.0, -1.46));
+    var SPAN = (N + 8) * SP;
+    return {
+      root: root, radius: 2.35, look: 0.05,
+      update: function (t, dt, s) {
+        g.rotation.y = -0.3 + Math.sin(t * 0.4) * 0.2 + s.mx * 0.45;
+        g.rotation.x = -s.my * 0.15;
+        var head2 = t * 0.26;
+        for (var k = 0; k < items.length; k++) {
+          var it = items[k], u = it.userData;
+          var x = ((k * SP - head2) % SPAN + SPAN) % SPAN - SPAN / 2;
+          it.position.x = x;
+          var edgeFade = smooth((1.85 - Math.abs(x)) / 0.3);
+          it.visible = edgeFade > 0.01;
+          var target = x < BL ? 1 : 0;
+          u.rev = clamp(u.rev + (target - u.rev) * Math.min(1, dt * 6), 0, 1);
+          if (Math.abs(x) > SPAN / 2 - SP) u.rev = target;
+          var r = u.rev;
+          u.solid.visible = r > 0.02; u.ghost.visible = r < 0.98;
+          u.solid.scale.set(1, Math.max(0.001, r), 1);
+          u.solid.position.y = (1 - r) * (u.d.o + u.d.c) / 2;
+          it.scale.setScalar(Math.max(0.001, edgeFade));
+        }
+        bm.opacity = 0.82 + Math.sin(t * 2.1) * 0.14;
+        rw.rotation.y = t * 0.35;
+      }
+    };
+  };
+
+  /* ── Telefon: der Trade vom Handy landet im Journal ────────────── */
+  KINDS.phone = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var ph = grp(); g.add(ph);
+    var frame = mesh(slab(1.62, 3.2, 0.16, 0.3, 0.035, 4), ctx.mat.goldS);
+    var back = mesh(slab(1.54, 3.12, 0.2, 0.27, 0.03, 4), ctx.mat.obs);
+    ph.add(frame); ph.add(back);
+    var st = tex(ctx, 'phoneScreen', 512, 1060, function (c, w, h) {
+      c.clearRect(0, 0, w, h);
+      rrPath(c, 0, 0, w, h, 78); c.fillStyle = '#07080b'; c.fill(); c.save(); c.clip();
+      var gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(201,168,76,.16)'); gr.addColorStop(0.36, 'rgba(201,168,76,0)');
+      c.fillStyle = gr; c.fillRect(0, 0, w, h);
+      bar(c, w / 2 - 62, 26, 124, 30, '#000', 15);                                   // Notch
+      bar(c, 40, 96, 54, 54, '#c9a84c', 14); bar(c, 110, 104, 150, 16, 'rgba(243,239,231,.9)'); bar(c, 110, 130, 96, 11, 'rgba(154,140,116,.8)');
+      bar(c, w - 124, 106, 84, 34, 'rgba(62,207,142,.16)', 17); c.fillStyle = '#3ecf8e'; c.beginPath(); c.arc(w - 102, 123, 6, 0, TAU); c.fill(); bar(c, w - 88, 118, 36, 10, 'rgba(62,207,142,.9)');
+      rrPath(c, 32, 186, w - 64, 320, 26); c.fillStyle = 'rgba(255,255,255,.035)'; c.fill(); c.strokeStyle = 'rgba(201,168,76,.22)'; c.lineWidth = 2; c.stroke();
+      miniCandles(c, 54, 212, w - 108, 262, 15, 9);
+      // der frisch erfasste Trade — die goldene Zeile
+      rrPath(c, 32, 536, w - 64, 132, 26); c.fillStyle = 'rgba(201,168,76,.13)'; c.fill(); c.strokeStyle = 'rgba(236,203,116,.75)'; c.lineWidth = 2.5; c.stroke();
+      c.fillStyle = '#3ecf8e'; c.beginPath(); c.arc(74, 602, 13, 0, TAU); c.fill();
+      bar(c, 104, 574, 150, 18, 'rgba(243,239,231,.95)'); bar(c, 104, 606, 210, 12, 'rgba(154,140,116,.85)'); bar(c, w - 150, 584, 96, 34, 'rgba(62,207,142,.95)', 12);
+      for (var r = 0; r < 3; r++) {
+        var y = 700 + r * 104;
+        rrPath(c, 32, y, w - 64, 84, 22); c.fillStyle = 'rgba(255,255,255,.03)'; c.fill();
+        c.fillStyle = r === 1 ? 'rgba(240,99,106,.9)' : 'rgba(62,207,142,.8)'; c.beginPath(); c.arc(70, y + 42, 9, 0, TAU); c.fill();
+        bar(c, 96, y + 24, 120 + r * 22, 13, 'rgba(243,239,231,.6)'); bar(c, 96, y + 48, 170 - r * 20, 10, 'rgba(154,140,116,.5)');
+        bar(c, w - 132, y + 28, 76, 26, r === 1 ? 'rgba(240,99,106,.5)' : 'rgba(62,207,142,.45)', 10);
+      }
+      c.restore();
+    });
+    var screen = mesh(new T.PlaneGeometry(1.42, 2.98), new T.MeshBasicMaterial({ map: st, transparent: true, toneMapped: false }));
+    screen.position.z = 0.102; ph.add(screen);
+    var sheen = mesh(new T.PlaneGeometry(1.42, 2.98), ctx.mat.glass); sheen.position.z = 0.106; ph.add(sheen);
+    ph.rotation.set(-0.06, 0.34, 0.04); ph.position.set(-0.55, 0.05, 0);
+    // Journal-Karte, in die der Trade wandert
+    var card = faceCard(ctx, 1.55, 1.08, 0.07, 0.16, ctx.mat.obs, 'journalCard', 512, 356, function (c, w, h) {
+      c.clearRect(0, 0, w, h);
+      rrPath(c, 3, 3, w - 6, h - 6, 44); c.strokeStyle = 'rgba(236,203,116,.85)'; c.lineWidth = 4; c.stroke();
+      bar(c, 40, 42, 46, 46, '#c9a84c', 12); bar(c, 102, 48, 170, 16, 'rgba(243,239,231,.92)'); bar(c, 102, 74, 110, 11, 'rgba(154,140,116,.8)');
+      bar(c, w - 140, 46, 100, 40, 'rgba(62,207,142,.95)', 14);
+      miniCandles(c, 40, 120, w - 80, 130, 13, 14);
+      bar(c, 40, 280, 120, 12, 'rgba(154,140,116,.7)'); bar(c, 176, 280, 84, 12, 'rgba(201,168,76,.9)'); bar(c, 276, 280, 150, 12, 'rgba(154,140,116,.5)');
+    });
+    card.position.set(1.28, 0.62, -0.5); card.rotation.set(-0.08, -0.42, 0.05); g.add(card);
+    var rimC = mesh(slab(1.63, 1.16, 0.05, 0.19, 0.02, 3), ctx.mat.goldD); rimC.position.z = -0.02; card.add(rimC);
+    // Datenbogen Telefon → Karte, mit wandernden Lichtpunkten
+    var curve = new T.QuadraticBezierCurve3(new T.Vector3(-0.2, 1.25, 0.2), new T.Vector3(0.75, 2.25, 0.1), new T.Vector3(1.28, 1.2, -0.4));
+    g.add(mesh(new T.TubeGeometry(curve, 60, 0.008, 6, false), ctx.mat.goldS));
+    var dots = [];
+    for (var i = 0; i < 4; i++) { var d = glowSprite(ctx, 0.3, 0xffe3a0, 0.95); g.add(d); dots.push(d); }
+    root.add(pool(ctx, 2.8, -1.78));
+    return {
+      root: root, radius: 2.0, look: 0.05,
+      update: function (t, dt, s) {
+        g.rotation.y = Math.sin(t * 0.42) * 0.22 + s.mx * 0.42;
+        g.rotation.x = Math.sin(t * 0.31) * 0.04 - s.my * 0.2;
+        g.position.y = Math.sin(t * 0.9) * 0.05;
+        card.position.y = 0.62 + Math.sin(t * 1.1 + 1) * 0.06;
+        for (var k = 0; k < dots.length; k++) {
+          var u = (t * 0.33 + k / dots.length) % 1, p = curve.getPoint(u);
+          dots[k].position.copy(p);
+          dots[k].material.opacity = Math.sin(u * PI) * 0.95;
+          dots[k].scale.setScalar(0.16 + Math.sin(u * PI) * 0.18);
+        }
+      }
+    };
+  };
+
+  /* ── Schild: Prop-Regeln, bestanden ────────────────────────────── */
+  KINDS.shield = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    function shape(k) {
+      var s = new T.Shape();
+      s.moveTo(0, 1.62 * k);
+      s.bezierCurveTo(0.45 * k, 1.38 * k, 0.86 * k, 1.22 * k, 1.3 * k, 1.17 * k);
+      s.bezierCurveTo(1.37 * k, 0.1 * k, 1.05 * k, -0.95 * k, 0, -1.64 * k);
+      s.bezierCurveTo(-1.05 * k, -0.95 * k, -1.37 * k, 0.1 * k, -1.3 * k, 1.17 * k);
+      s.bezierCurveTo(-0.86 * k, 1.22 * k, -0.45 * k, 1.38 * k, 0, 1.62 * k);
+      return s;
+    }
+    var rim = mesh(extrude(shape(1.075), 0.26, 0.05, 4, 20), ctx.mat.goldD); rim.position.z = -0.04;
+    var face = mesh(extrude(shape(1), 0.36, 0.08, 4, 20), ctx.mat.obs);
+    g.add(rim); g.add(face);
+    // goldene Einlage entlang der Kontur
+    var pts = shape(0.8).getPoints(28).map(function (p) { return new T.Vector3(p.x, p.y, 0.185); });
+    pts.pop();
+    g.add(mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts, true, 'catmullrom', 0.2), 200, 0.013, 6, true), ctx.mat.gold));
+    // Haken
+    function seg(a, b) {
+      var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.sqrt(dx * dx + dy * dy);
+      var m = mesh(slab(L + 0.2, 0.2, 0.14, 0.1, 0.035, 3), ctx.mat.gold);
+      m.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 0.22); m.rotation.z = Math.atan2(dy, dx); return m;
+    }
+    var chk = grp(); chk.add(seg([-0.5, 0.0], [-0.14, -0.4])); chk.add(seg([-0.14, -0.4], [0.58, 0.46])); chk.position.y = 0.05; g.add(chk);
+    var halo = glowSprite(ctx, 2.2, 0xffd98a, 0.22); halo.position.set(0, 0, 0.2); g.add(halo);
+    var o1 = orbit(ctx, 2.15, 72); o1.rotation.x = 1.3; root.add(o1);
+    root.add(pool(ctx, 2.6, -1.95));
+    return {
+      root: root, radius: 1.95,
+      update: function (t, dt, s) {
+        g.rotation.y = Math.sin(t * 0.48) * 0.42 + s.mx * 0.5;
+        g.rotation.x = Math.sin(t * 0.36) * 0.05 - s.my * 0.22;
+        g.position.y = Math.sin(t * 0.92) * 0.05;
+        halo.material.opacity = 0.16 + Math.sin(t * 1.4) * 0.07;
+        o1.rotation.z = t * 0.14; spinSat(o1, t * 0.8);
+      }
+    };
+  };
+
+  /* ── Buch: ein Kapitel endet mit einer Zahl ────────────────────── */
+  function zPage(u) { return 0.05 + 0.24 * Math.sin(Math.sqrt(clamp(u, 0, 1)) * PI * 0.82); }
+  function pageBlock(PW, PL) {
+    var s = new T.Shape(), n = 26, i;
+    s.moveTo(0.025, 0.035); s.lineTo(PW, 0.035);
+    for (i = n; i >= 0; i--) { var u = i / n; s.lineTo(0.025 + (PW - 0.025) * u, zPage(u)); }
+    var g = new T.ExtrudeGeometry(s, { depth: PL, bevelEnabled: false, steps: 1, curveSegments: 4 });
+    g.translate(0, 0, -PL / 2); g.rotateX(PI / 2);
+    return weld(g);
+  }
+  function pageFace(ctx, PW, PL, key, draw) {
+    var g = new T.PlaneGeometry(PW - 0.07, PL - 0.1, 26, 1), p = g.attributes.position, i;
+    for (i = 0; i < p.count; i++) { var x = p.getX(i) + (PW - 0.07) / 2 + 0.045, u = (x - 0.025) / (PW - 0.025); p.setX(i, x); p.setZ(i, zPage(u) + 0.004); }
+    g.computeVertexNormals();
+    return mesh(g, new T.MeshBasicMaterial({ map: tex(ctx, key, 384, 512, draw), transparent: true, toneMapped: false }));
+  }
+  KINDS.book = function (ctx) {
+    var root = grp(), g = grp(), bk = grp(); root.add(g); g.add(bk);
+    var PW = 1.62, PL = 2.26;
+    var cover = mesh(slab(PW * 2 + 0.22, PL + 0.16, 0.07, 0.07, 0.02, 3), ctx.mat.obs); bk.add(cover);
+    var crim = mesh(slab(PW * 2 + 0.3, PL + 0.24, 0.04, 0.09, 0.015, 3), ctx.mat.goldD); crim.position.z = -0.02; bk.add(crim);
+    var right = mesh(pageBlock(PW, PL), ctx.mat.ivory); bk.add(right);
+    var left = mesh(right.geometry, ctx.mat.ivory); left.scale.x = -1; bk.add(left);
+    var ink = 'rgba(52,44,30,.62)';
+    var fr = pageFace(ctx, PW, PL, 'pageR', function (c, w, h) {
+      c.clearRect(0, 0, w, h);
+      bar(c, 40, 44, 150, 16, 'rgba(120,88,24,.9)', 4);
+      for (var i = 0; i < 4; i++) bar(c, 40, 86 + i * 30, [290, 300, 268, 210][i], 9, ink, 4);
+      bar(c, 40, 396, 120, 34, 'rgba(160,118,30,.95)', 6); bar(c, 174, 408, 150, 9, ink, 4); bar(c, 40, 452, 250, 9, ink, 4);
+    });
+    bk.add(fr);
+    var fl = pageFace(ctx, PW, PL, 'pageL', function (c, w, h) {
+      c.clearRect(0, 0, w, h);
+      bar(c, 44, 44, 190, 18, 'rgba(52,44,30,.85)', 4);
+      for (var i = 0; i < 11; i++) { var wd = [300, 286, 296, 240, 300, 292, 180, 300, 276, 296, 150][i]; bar(c, 44, 92 + i * 33, wd, 9, i === 4 ? 'rgba(160,118,30,.95)' : ink, 4); }
+    });
+    fl.scale.x = -1; bk.add(fl);
+    // Lesezeichen
+    var rib = mesh(slab(0.11, PL + 0.3, 0.014, 0.02, 0.005, 2), ctx.mat.gold); rib.position.set(0.1, -0.16, zPage(0.05) + 0.012); bk.add(rib);
+    // die Zahl: Balken wachsen aus der rechten Seite
+    var bars = [], hs = [0.34, 0.52, 0.42, 0.74, 0.98];
+    for (var i = 0; i < 5; i++) {
+      var x = 0.5 + i * 0.2, u = (x - 0.025) / (PW - 0.025);
+      var b = mesh(slab(0.13, 0.13, 1, 0.03, 0.02, 2), i === 2 ? ctx.mat.obs : ctx.mat.gold);
+      b.position.set(x, -0.12, zPage(u)); b.userData = { h: hs[i], z: zPage(u) }; bk.add(b); bars.push(b);
+    }
+    bk.rotation.set(-1.02, 0, 0.0); g.rotation.z = 0.05;
+    root.add(pool(ctx, 3.0, -1.5));
+    return {
+      root: root, radius: 1.85, look: -0.2,
+      update: function (t, dt, s) {
+        g.rotation.y = Math.sin(t * 0.4) * 0.3 + s.mx * 0.45;
+        g.rotation.x = Math.sin(t * 0.3) * 0.04 - s.my * 0.2;
+        g.position.y = Math.sin(t * 0.9) * 0.05;
+        for (var k = 0; k < bars.length; k++) {
+          var b = bars[k], gro = smooth((t - 0.5 - k * 0.14) / 0.8), h = b.userData.h * (gro * (0.92 + Math.sin(t * 0.9 + k) * 0.08));
+          b.scale.z = Math.max(0.001, h); b.position.z = b.userData.z + h / 2;
+        }
+      }
+    };
+  };
+
+  /* ── Space: Beiträge, an denen die Trades hängen ───────────────── */
+  KINDS.network = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var card = faceCard(ctx, 2.05, 1.36, 0.08, 0.18, ctx.mat.obs, 'postCard', 640, 424, function (c, w, h) {
+      c.clearRect(0, 0, w, h);
+      rrPath(c, 3, 3, w - 6, h - 6, 52); c.strokeStyle = 'rgba(236,203,116,.8)'; c.lineWidth = 4; c.stroke();
+      c.fillStyle = '#c9a84c'; c.beginPath(); c.arc(78, 80, 32, 0, TAU); c.fill();
+      bar(c, 128, 58, 190, 17, 'rgba(243,239,231,.95)'); bar(c, 128, 88, 120, 12, 'rgba(154,140,116,.8)');
+      bar(c, w - 170, 58, 122, 44, 'rgba(62,207,142,.95)', 14);
+      bar(c, 46, 140, w - 92, 11, 'rgba(243,239,231,.55)'); bar(c, 46, 164, w - 190, 11, 'rgba(243,239,231,.4)');
+      rrPath(c, 46, 198, w - 92, 176, 22); c.fillStyle = 'rgba(255,255,255,.04)'; c.fill();
+      miniCandles(c, 62, 212, w - 124, 148, 17, 31);
+    });
+    var rimC = mesh(slab(2.13, 1.44, 0.06, 0.21, 0.02, 3), ctx.mat.goldD); rimC.position.z = -0.02; card.add(rimC);
+    g.add(card);
+    var orbs = [], N = 5, lp = new Float32Array(N * 6);
+    var lg = new T.BufferGeometry(); lg.setAttribute('position', new T.BufferAttribute(lp, 3));
+    g.add(new T.LineSegments(lg, ctx.mat.link));
+    for (var i = 0; i < N; i++) {
+      var o = grp();
+      o.add(mesh(new T.SphereGeometry(0.2, 32, 24), i % 2 ? ctx.mat.obs : ctx.mat.gold));
+      var hr = mesh(new T.TorusGeometry(0.29, 0.014, 8, 60), ctx.mat.gold); hr.rotation.x = 1.2; o.add(hr);
+      var pill = mesh(slab(0.36, 0.14, 0.06, 0.07, 0.02, 2), (i === 1 || i === 4) ? ctx.mat.dn : ctx.mat.up); pill.position.set(0.02, -0.36, 0); o.add(pill);
+      o.userData = { a: i / N * TAU + 0.5, r: 2.0 + (i % 2) * 0.22, y: [0.95, -0.75, 0.25, 1.0, -0.9][i], sp: 0.14 + (i % 3) * 0.03 };
+      g.add(o); orbs.push(o);
+    }
+    root.add(pool(ctx, 2.9, -1.75));
+    return {
+      root: root, radius: 2.05,
+      update: function (t, dt, s) {
+        g.rotation.y = Math.sin(t * 0.38) * 0.2 + s.mx * 0.42;
+        g.rotation.x = Math.sin(t * 0.3) * 0.04 - s.my * 0.2;
+        card.position.y = Math.sin(t * 0.9) * 0.05;
+        card.rotation.y = Math.sin(t * 0.5) * 0.12;
+        for (var k = 0; k < orbs.length; k++) {
+          var o = orbs[k], u = o.userData, a = u.a + t * u.sp;
+          o.position.set(Math.cos(a) * u.r, u.y + Math.sin(t * 0.8 + k) * 0.08, Math.sin(a) * u.r * 0.55);
+          o.children[1].rotation.z = t * 0.6 + k;
+          lp[k * 6] = o.position.x; lp[k * 6 + 1] = o.position.y; lp[k * 6 + 2] = o.position.z;
+          lp[k * 6 + 3] = clamp(o.position.x, -0.9, 0.9) * 0.9; lp[k * 6 + 4] = card.position.y + clamp(o.position.y, -0.55, 0.55) * 0.9; lp[k * 6 + 5] = 0;
+        }
+        lg.attributes.position.needsUpdate = true;
+      }
+    };
+  };
+
+  /* ── KI: liest die gezählten Zeilen, rechnet nicht selbst ──────── */
+  KINDS.core = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var fm = ctx.mat.gold.clone(); fm.flatShading = true; fm.roughness = 0.12;
+    var inner = mesh(new T.IcosahedronGeometry(0.58, 0), fm); g.add(inner);
+    var shell = mesh(new T.SphereGeometry(1.0, 56, 40), ctx.mat.glass); shell.renderOrder = 2; g.add(shell);
+    var halo = glowSprite(ctx, 3.1, 0xffd98a, 0.2); g.add(halo);
+    var r1 = orbit(ctx, 1.42, 60), r2 = orbit(ctx, 1.62, 0), r3 = orbit(ctx, 1.82, 0);
+    r1.rotation.set(1.25, 0, 0.2); r2.rotation.set(1.8, 0.5, 0); r3.rotation.set(0.5, 1.1, 0.3);
+    g.add(r1); g.add(r2); g.add(r3);
+    g.position.y = 0.55;
+    // die Journalzeilen darunter
+    var tab = grp(); tab.position.set(0, -1.5, 0.1); tab.rotation.x = -1.12; root.add(tab);
+    tab.add(mesh(slab(2.7, 1.5, 0.08, 0.14, 0.025, 3), ctx.mat.obs));
+    var trim = mesh(slab(2.78, 1.58, 0.05, 0.17, 0.02, 3), ctx.mat.goldD); trim.position.z = -0.025; tab.add(trim);
+    var rows = mesh(new T.PlaneGeometry(2.55, 1.36), new T.MeshBasicMaterial({ map: tex(ctx, 'rows', 640, 340, function (c, w, h) {
+      c.clearRect(0, 0, w, h);
+      for (var i = 0; i < 5; i++) {
+        var y = 26 + i * 62;
+        bar(c, 24, y, w - 48, 44, i === 2 ? 'rgba(201,168,76,.16)' : 'rgba(255,255,255,.035)', 12);
+        bar(c, 44, y + 16, 80, 12, 'rgba(243,239,231,.75)'); bar(c, 150, y + 16, 60, 12, 'rgba(154,140,116,.7)');
+        bar(c, 250, y + 16, 110 - i * 8, 12, 'rgba(154,140,116,.5)');
+        bar(c, w - 150, y + 11, 104, 22, (i === 1 || i === 3) ? 'rgba(240,99,106,.75)' : 'rgba(62,207,142,.8)', 8);
+      }
+    }), transparent: true, toneMapped: false }));
+    rows.position.z = 0.045; tab.add(rows);
+    var scan = mesh(new T.BoxGeometry(0.03, 1.36, 0.012), ctx.mat.glowG); scan.position.z = 0.055; tab.add(scan);
+    var scanGlow = glowSprite(ctx, 0.9, 0xffe3a0, 0.5); tab.add(scanGlow);
+    // Lichtkegel vom Kern auf die Zeilen
+    var ct = tex(ctx, 'cone', 32, 256, function (c, w, h) {
+      var lg = c.createLinearGradient(0, 0, 0, h); lg.addColorStop(0, 'rgba(255,224,150,.34)'); lg.addColorStop(1, 'rgba(255,224,150,0)');
+      c.fillStyle = lg; c.fillRect(0, 0, w, h);
+    });
+    var cone = mesh(new T.CylinderGeometry(0.1, 1.05, 1.75, 40, 1, true), new T.MeshBasicMaterial({ map: ct, transparent: true, depthWrite: false, side: T.DoubleSide, toneMapped: false }));
+    cone.position.set(0, -0.5, 0.05); cone.renderOrder = 1; root.add(cone);
+    root.add(pool(ctx, 2.8, -1.98));
+    return {
+      root: root, radius: 2.05, look: -0.25,
+      update: function (t, dt, s) {
+        g.rotation.y = s.mx * 0.4; g.rotation.x = -s.my * 0.2;
+        g.position.y = 0.55 + Math.sin(t * 0.9) * 0.05;
+        inner.rotation.set(t * 0.31, t * 0.47, 0);
+        halo.material.opacity = 0.16 + Math.sin(t * 1.5) * 0.06;
+        r1.rotation.z = t * 0.3; r2.rotation.z = -t * 0.22; r3.rotation.z = t * 0.17;
+        spinSat(r2, t * 0.9); spinSat(r3, -t * 0.7 + 2);
+        var x = Math.sin(t * 0.8) * 1.2;
+        scan.position.x = x; scanGlow.position.set(x, 0, 0.1);
+        cone.material.opacity = 0.75 + Math.sin(t * 1.5) * 0.2;
+        tab.rotation.z = s.mx * 0.08;
+      }
+    };
+  };
+
+  /* ── Umzug: die Historie kommt mit ─────────────────────────────── */
+  KINDS.migrate = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    // Ziel: eine Obsidian-Plattform mit Goldrand
+    var plat = grp(); plat.position.set(0.85, -1.05, 0); g.add(plat);
+    var top = mesh(slab(2.1, 2.1, 0.24, 0.3, 0.05, 4), ctx.mat.obs); top.rotation.x = -PI / 2; plat.add(top);
+    var pr = mesh(slab(2.22, 2.22, 0.16, 0.34, 0.04, 4), ctx.mat.goldD); pr.rotation.x = -PI / 2; pr.position.y = -0.03; plat.add(pr);
+    var ringT = mesh(new T.TorusGeometry(0.62, 0.014, 8, 90), ctx.mat.gold); ringT.rotation.x = PI / 2; ringT.position.y = 0.13; plat.add(ringT);
+    var pulse = mesh(new T.TorusGeometry(0.62, 0.01, 8, 90), new T.MeshBasicMaterial({ color: lin(0xffe3a0), transparent: true, opacity: 0, toneMapped: false })); pulse.rotation.x = PI / 2; pulse.position.y = 0.135; plat.add(pulse);
+    // der Stapel, der dort schon liegt
+    var stack = [];
+    for (var i = 0; i < 3; i++) { var b = mesh(slab(0.62, 0.62, 0.2, 0.08, 0.03, 3), i === 1 ? ctx.mat.goldS : ctx.mat.gold); b.rotation.x = -PI / 2; b.rotation.z = i * 0.25; b.position.y = 0.23 + i * 0.215; plat.add(b); stack.push(b); }
+    // Quelle: das alte Journal als Drahtkörper
+    var src = grp(); src.position.set(-1.45, 1.05, -0.2); g.add(src);
+    src.add(new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(1.15, 1.15, 1.15)), ctx.mat.wire));
+    src.add(new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(0.6, 0.6, 0.6)), ctx.mat.link));
+    var curve = new T.CubicBezierCurve3(new T.Vector3(-1.45, 1.05, -0.2), new T.Vector3(-0.2, 2.3, 0.2), new T.Vector3(0.85, 1.9, 0.1), new T.Vector3(0.85, -0.05, 0));
+    g.add(mesh(new T.TubeGeometry(curve, 70, 0.007, 6, false), ctx.mat.goldS));
+    var fly = [], cubeGeo = slab(0.3, 0.3, 0.3, 0.06, 0.03, 3), wireGeo = new T.EdgesGeometry(new T.BoxGeometry(0.3, 0.3, 0.3));
+    for (i = 0; i < 5; i++) {
+      var f = grp(), so = mesh(cubeGeo, ctx.mat.gold), wi = new T.LineSegments(wireGeo, ctx.mat.wire);
+      f.add(so); f.add(wi); f.userData = { so: so, wi: wi }; g.add(f); fly.push(f);
+    }
+    root.add(pool(ctx, 2.9, -1.42));
+    return {
+      root: root, radius: 2.05, look: 0.3,
+      update: function (t, dt, s) {
+        g.rotation.y = -0.25 + Math.sin(t * 0.4) * 0.2 + s.mx * 0.42;
+        g.rotation.x = 0.12 - s.my * 0.18;
+        src.rotation.set(t * 0.3, t * 0.42, 0);
+        var land = 0;
+        for (var k = 0; k < fly.length; k++) {
+          var f = fly[k], u = (t * 0.2 + k / fly.length) % 1, p = curve.getPoint(u);
+          f.position.copy(p); f.rotation.set(u * 5 + k, u * 4, 0);
+          var solid = smooth((u - 0.16) / 0.2);
+          f.userData.so.visible = solid > 0.02; f.userData.so.scale.setScalar(Math.max(0.001, solid));
+          f.userData.wi.visible = solid < 0.98;
+          f.scale.setScalar(Math.max(0.001, smooth(u / 0.07) * smooth((1 - u) / 0.07)));
+          if (u > 0.93) land = Math.max(land, (u - 0.93) / 0.07);
+        }
+        pulse.material.opacity = land * 0.9; pulse.scale.setScalar(1 + land * 0.5);
+        for (k = 0; k < stack.length; k++) stack[k].rotation.z = k * 0.25 + Math.sin(t * 0.5 + k) * 0.05;
+      }
+    };
+  };
+
+
+  /* ═════════ Embleme für die App-Seiten ═════════
+     Kleiner, ruhiger, gleiche Materialien. Jede Seite bekommt das Ding,
+     für das sie steht. */
+
+  /* Edge Lab: der Kristall — eine Kante, die man messen kann. */
+  KINDS.edge = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var fm = ctx.mat.gold.clone(); fm.flatShading = true; fm.roughness = 0.1; fm.envMapIntensity = 1.35;
+    var geo = new T.OctahedronGeometry(1, 0); geo.scale(0.82, 1.5, 0.82);
+    var gem = mesh(geo, fm); g.add(gem);
+    g.add(new T.LineSegments(new T.EdgesGeometry(geo), ctx.mat.wire));
+    var inner = mesh(new T.OctahedronGeometry(0.34, 0), ctx.mat.glowG); inner.scale.set(0.8, 1.5, 0.8); inner.visible = false; g.add(inner);
+    var halo = glowSprite(ctx, 3.0, 0xffd98a, 0.2); g.add(halo);
+    var o1 = orbit(ctx, 1.55, 60), o2 = orbit(ctx, 1.85, 0);
+    o1.rotation.set(1.32, 0, 0.15); o2.rotation.set(1.75, 0.45, 0); root.add(o1); root.add(o2);
+    var base = mesh(new T.CylinderGeometry(0.7, 0.76, 0.1, 56), ctx.mat.obs); base.position.y = -1.78; root.add(base);
+    var br = mesh(new T.TorusGeometry(0.73, 0.02, 10, 80), ctx.mat.gold); br.rotation.x = PI / 2; br.position.y = -1.73; root.add(br);
+    root.add(pool(ctx, 2.4, -1.85));
+    return {
+      root: root, radius: 1.95, look: -0.1,
+      update: function (t, dt, s) {
+        g.rotation.y = t * 0.4 + s.mx * 0.5; g.rotation.x = -s.my * 0.2; g.position.y = 0.05 + Math.sin(t * 0.9) * 0.06;
+        halo.material.opacity = 0.16 + Math.sin(t * 1.5) * 0.06;
+        o1.rotation.z = t * 0.22; o2.rotation.z = -t * 0.16; spinSat(o1, t * 0.8); spinSat(o2, -t * 0.6);
+      }
+    };
+  };
+
+  /* Statistik: Balken auf einem Sockel, einer davon ein Verlierer. */
+  KINDS.bars = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var base = mesh(slab(3.0, 1.25, 0.16, 0.2, 0.04, 3), ctx.mat.obs); base.rotation.x = -PI / 2; base.position.y = -1.2; g.add(base);
+    var br = mesh(slab(3.1, 1.35, 0.1, 0.24, 0.03, 3), ctx.mat.goldD); br.rotation.x = -PI / 2; br.position.y = -1.23; g.add(br);
+    var hs = [0.7, 1.15, 0.85, 1.6, 2.25], bars = [], pts = [];
+    for (var i = 0; i < 5; i++) {
+      var b = mesh(slab(0.36, 1, 0.36, 0.07, 0.04, 3), i === 2 ? ctx.mat.steel : ctx.mat.gold);
+      b.position.set(-1.1 + i * 0.55, -1.12, 0); b.userData.h = hs[i]; g.add(b); bars.push(b);
+      pts.push(new T.Vector3(-1.1 + i * 0.55, -1.12 + hs[i] + 0.28, 0.24));
+    }
+    var line = mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 60, 0.016, 8, false), ctx.mat.glowG); g.add(line);
+    var tip = glowSprite(ctx, 0.5, 0xffe3a0, 0.9); tip.position.copy(pts[4]); g.add(tip);
+    root.add(pool(ctx, 2.6, -1.36));
+    return {
+      root: root, radius: 2.0, look: -0.05,
+      update: function (t, dt, s) {
+        g.rotation.y = -0.45 + Math.sin(t * 0.42) * 0.22 + s.mx * 0.45;
+        g.rotation.x = -s.my * 0.18;
+        for (var k = 0; k < 5; k++) {
+          var h = bars[k].userData.h * smooth((t - 0.15 - k * 0.12) / 0.7);
+          bars[k].scale.y = Math.max(0.001, h); bars[k].position.y = -1.12 + h / 2;
+        }
+        var e = smooth((t - 0.9) / 0.6); line.scale.setScalar(e > 0.01 ? 1 : 0.001); tip.material.opacity = 0.9 * e * (0.8 + Math.sin(t * 2.2) * 0.2);
+      }
+    };
+  };
+
+  /* Kalender: Tage als Kacheln — grün, rot, heute in Gold. */
+  KINDS.calendar = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    g.add(mesh(slab(2.7, 2.5, 0.24, 0.28, 0.05, 4), ctx.mat.obs));
+    var rim = mesh(slab(2.8, 2.6, 0.16, 0.32, 0.04, 4), ctx.mat.goldD); rim.position.z = -0.03; g.add(rim);
+    var head = mesh(slab(2.44, 0.42, 0.1, 0.14, 0.03, 3), ctx.mat.gold); head.position.set(0, 0.9, 0.11); g.add(head);
+    [-0.7, 0.7].forEach(function (x) {
+      var r = mesh(new T.TorusGeometry(0.16, 0.04, 12, 40), ctx.mat.goldS); r.position.set(x, 1.25, 0); r.rotation.y = PI / 2; g.add(r);
+    });
+    var kinds = '0102010110021010102010130'.split(''), tiles = [];
+    for (var r2 = 0; r2 < 4; r2++) for (var c = 0; c < 5; c++) {
+      var k = kinds[r2 * 5 + c], m = k === '1' ? ctx.mat.up : k === '2' ? ctx.mat.dn : k === '3' ? ctx.mat.gold : ctx.mat.matte;
+      var tl = mesh(slab(0.4, 0.34, 0.09, 0.07, 0.025, 2), m);
+      tl.position.set(-0.98 + c * 0.49, 0.36 - r2 * 0.43, 0.13); g.add(tl); tiles.push(tl);
+    }
+    root.add(pool(ctx, 2.6, -1.75));
+    return {
+      root: root, radius: 2.0,
+      update: function (t, dt, s) {
+        g.rotation.y = Math.sin(t * 0.44) * 0.38 + s.mx * 0.5;
+        g.rotation.x = -0.12 + Math.sin(t * 0.33) * 0.05 - s.my * 0.2;
+        g.position.y = Math.sin(t * 0.9) * 0.05;
+        for (var i = 0; i < tiles.length; i++) tiles[i].position.z = 0.13 + smooth((t - 0.2 - i * 0.03) / 0.4) * 0.0 + (kinds[i] === '3' ? 0.03 + Math.sin(t * 2) * 0.015 : 0);
+      }
+    };
+  };
+
+  /* Psychologie: ein Kreisel — ruhig bleibt, was in der Mitte ruht. */
+  KINDS.gyro = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var core = mesh(new T.SphereGeometry(0.52, 48, 32), ctx.mat.obs); g.add(core);
+    var band = mesh(new T.TorusGeometry(0.53, 0.035, 12, 80), ctx.mat.gold); band.rotation.x = PI / 2; g.add(band);
+    var rings = [];
+    [[0.92, 0.05], [1.24, 0.045], [1.56, 0.04]].forEach(function (d, i) {
+      var r = mesh(new T.TorusGeometry(d[0], d[1], 16, 140), i === 1 ? ctx.mat.goldS : ctx.mat.gold);
+      var piv = grp(); piv.add(r); g.add(piv); rings.push(piv);
+      // Lagerzapfen
+      [-1, 1].forEach(function (sg) { var pin = mesh(new T.SphereGeometry(d[1] * 1.7, 14, 10), ctx.mat.goldD); pin.position.x = sg * d[0]; r.add(pin); });
+    });
+    var halo = glowSprite(ctx, 2.2, 0xffd98a, 0.16); g.add(halo);
+    root.add(pool(ctx, 2.4, -1.85));
+    return {
+      root: root, radius: 1.85,
+      update: function (t, dt, s) {
+        g.rotation.y = s.mx * 0.45; g.rotation.x = -s.my * 0.22; g.position.y = Math.sin(t * 0.9) * 0.05;
+        rings[0].rotation.set(t * 0.9, 0, t * 0.3);
+        rings[1].rotation.set(0.6, t * 0.6, 0);
+        rings[2].rotation.set(t * 0.28 + 1.1, 0.4, t * 0.2);
+        core.rotation.y = t * 0.2;
+      }
+    };
+  };
+
+  /* Rangliste: der Pokal. */
+  KINDS.trophy = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var P = [[0, -0.42], [0.2, -0.42], [0.13, -0.3], [0.11, 0.02], [0.2, 0.14], [0.5, 0.36], [0.82, 0.92], [0.93, 1.62], [0.9, 1.7], [0.82, 1.64], [0.72, 0.98], [0.42, 0.5], [0, 0.42]]
+      .map(function (p) { return new T.Vector2(p[0], p[1]); });
+    var cup = mesh(new T.LatheGeometry(P, 72), ctx.mat.gold); cup.position.y = -0.55; g.add(cup);
+    var foot = mesh(new T.CylinderGeometry(0.46, 0.52, 0.14, 56), ctx.mat.goldS); foot.position.y = -1.04; g.add(foot);
+    var base = mesh(slab(1.3, 1.3, 0.36, 0.14, 0.04, 3), ctx.mat.obs); base.rotation.x = -PI / 2; base.position.y = -1.29; g.add(base);
+    var plate = mesh(slab(0.7, 0.16, 0.04, 0.05, 0.012, 2), ctx.mat.gold); plate.position.set(0, -1.29, 0.66); g.add(plate);
+    // Henkel: ein offener Bogen je Seite, die Enden zeigen zum Kelch
+    [-1, 1].forEach(function (sg) {
+      var h = mesh(new T.TorusGeometry(0.34, 0.05, 14, 56, PI * 1.22), ctx.mat.gold);
+      h.position.set(sg * 0.86, 0.5, 0); h.rotation.z = sg > 0 ? -PI * 0.61 : PI * 0.39;
+      g.add(h);
+    });
+    var star = glowSprite(ctx, 1.1, 0xffe3a0, 0.5); star.position.set(0.3, 0.95, 0.9); g.add(star);
+    root.add(pool(ctx, 2.4, -1.5));
+    return {
+      root: root, radius: 1.95, look: 0.0,
+      update: function (t, dt, s) {
+        g.rotation.y = t * 0.35 + s.mx * 0.5; g.rotation.x = -s.my * 0.18; g.position.y = Math.sin(t * 0.9) * 0.04;
+        star.material.opacity = 0.25 + Math.pow(Math.max(0, Math.sin(t * 1.3)), 6) * 0.6;
+      }
+    };
+  };
+
+  /* Einstellungen: zwei Zahnräder, die ineinandergreifen. */
+  function gearShape(n, ro, ri, hole) {
+    var s = new T.Shape(), i, st = TAU / n;
+    for (i = 0; i < n; i++) {
+      var a = i * st;
+      var p = [[ri, a - st * 0.25], [ro, a - st * 0.14], [ro, a + st * 0.14], [ri, a + st * 0.25]];
+      p.forEach(function (q, k) { var x = Math.cos(q[1]) * q[0], y = Math.sin(q[1]) * q[0]; if (i === 0 && k === 0) s.moveTo(x, y); else s.lineTo(x, y); });
+    }
+    s.closePath();
+    var h = new T.Path(), K = 40;
+    for (i = 0; i <= K; i++) { var b = -i / K * TAU, x = Math.cos(b) * hole, y = Math.sin(b) * hole; if (i === 0) h.moveTo(x, y); else h.lineTo(x, y); }
+    s.holes.push(h);
+    return s;
+  }
+  KINDS.gear = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var g1 = mesh(extrude(gearShape(12, 1.3, 1.06, 0.46), 0.36, 0.05, 3, 4), ctx.mat.gold); g1.position.set(-0.42, -0.12, 0); g.add(g1);
+    var hub = mesh(new T.TorusGeometry(0.58, 0.05, 12, 60), ctx.mat.goldD); hub.position.z = 0.17; g1.add(hub);
+    var g2 = mesh(extrude(gearShape(8, 0.9, 0.7, 0.3), 0.3, 0.045, 3, 4), ctx.mat.steel); g2.position.set(1.24, 0.92, 0); g.add(g2);
+    var hub2 = mesh(new T.TorusGeometry(0.4, 0.04, 12, 50), ctx.mat.gold); hub2.position.z = 0.14; g2.add(hub2);
+    root.add(pool(ctx, 2.6, -1.75));
+    return {
+      root: root, radius: 2.1, look: 0.15,
+      update: function (t, dt, s) {
+        g.rotation.y = -0.2 + Math.sin(t * 0.4) * 0.32 + s.mx * 0.5; g.rotation.x = -0.1 - s.my * 0.2; g.position.y = Math.sin(t * 0.9) * 0.04;
+        g1.rotation.z = t * 0.28; g2.rotation.z = -t * 0.28 * 12 / 8 + 0.2;
+      }
+    };
+  };
+
+  /* Drills: die Scheibe und der Pfeil in der Mitte. */
+  KINDS.target = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    [[1.55, ctx.mat.obs, 0.16], [1.18, ctx.mat.goldS, 0.2], [0.82, ctx.mat.obs, 0.24], [0.44, ctx.mat.gold, 0.28]].forEach(function (d) {
+      var c = mesh(new T.CylinderGeometry(d[0], d[0], d[2], 72), d[1]); c.rotation.x = PI / 2; g.add(c);
+    });
+    var rim = mesh(new T.TorusGeometry(1.56, 0.05, 14, 120), ctx.mat.gold); g.add(rim);
+    var dart = grp();
+    dart.add(mesh(new T.CylinderGeometry(0.035, 0.035, 1.5, 14), ctx.mat.goldS));
+    var tipc = mesh(new T.ConeGeometry(0.07, 0.26, 18), ctx.mat.steel); tipc.position.y = -0.86; tipc.rotation.x = PI; dart.add(tipc);
+    for (var i = 0; i < 3; i++) { var f = mesh(slab(0.26, 0.4, 0.02, 0.05, 0.008, 2), ctx.mat.gold); f.position.set(0, 0.6, 0); f.rotation.y = i * TAU / 3; f.geometry.translate(0.13, 0, 0); dart.add(f); }
+    dart.rotation.set(PI / 2 - 0.42, 0, 0.5); dart.position.set(0.24, 0.42, 0.95); g.add(dart);
+    var hit = glowSprite(ctx, 0.9, 0xffe3a0, 0.6); hit.position.set(0, 0, 0.2); g.add(hit);
+    root.add(pool(ctx, 2.5, -1.85));
+    return {
+      root: root, radius: 1.95,
+      update: function (t, dt, s) {
+        g.rotation.y = -0.35 + Math.sin(t * 0.42) * 0.3 + s.mx * 0.5; g.rotation.x = -0.05 - s.my * 0.2; g.position.y = Math.sin(t * 0.9) * 0.05;
+        hit.material.opacity = 0.4 + Math.sin(t * 2) * 0.18;
+      }
+    };
+  };
+
+  /* Playbooks / Konten: ein Fächer aus Karten, vorn die Checkliste. */
+  KINDS.cards = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var cs = [];
+    for (var i = 0; i < 3; i++) {
+      var c;
+      if (i === 2) {
+        c = faceCard(ctx, 1.7, 2.3, 0.07, 0.18, ctx.mat.obs, 'checkCard', 420, 568, function (x, w, h) {
+          x.clearRect(0, 0, w, h);
+          rrPath(x, 3, 3, w - 6, h - 6, 44); x.strokeStyle = 'rgba(236,203,116,.85)'; x.lineWidth = 4; x.stroke();
+          bar(x, 40, 44, 56, 56, '#c9a84c', 14); bar(x, 112, 52, 190, 18, 'rgba(243,239,231,.95)'); bar(x, 112, 80, 120, 12, 'rgba(154,140,116,.8)');
+          for (var r = 0; r < 5; r++) {
+            var y = 150 + r * 76, ok = r !== 3;
+            rrPath(x, 40, y, 40, 40, 11); x.fillStyle = ok ? 'rgba(62,207,142,.95)' : 'rgba(255,255,255,.08)'; x.fill();
+            if (ok) { x.strokeStyle = '#06110b'; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(50, y + 21); x.lineTo(58, y + 29); x.lineTo(71, y + 13); x.stroke(); }
+            bar(x, 100, y + 8, 210 - (r % 3) * 30, 13, 'rgba(243,239,231,.75)'); bar(x, 100, y + 28, 130, 9, 'rgba(154,140,116,.6)');
+          }
+        });
+      } else {
+        c = grp(); c.add(mesh(slab(1.7, 2.3, 0.07, 0.18, 0.03, 3), i === 0 ? ctx.mat.steel : ctx.mat.goldS));
+      }
+      var rimc = mesh(slab(1.78, 2.38, 0.05, 0.21, 0.02, 3), ctx.mat.goldD); rimc.position.z = -0.02; c.add(rimc);
+      c.userData.i = i; g.add(c); cs.push(c);
+    }
+    root.add(pool(ctx, 2.5, -1.75));
+    return {
+      root: root, radius: 2.0,
+      update: function (t, dt, s) {
+        g.rotation.y = Math.sin(t * 0.42) * 0.25 + s.mx * 0.45; g.rotation.x = -0.05 - s.my * 0.2; g.position.y = Math.sin(t * 0.9) * 0.05;
+        var op = smooth((t - 0.2) / 0.9), br = Math.sin(t * 0.7) * 0.03;
+        for (var k = 0; k < 3; k++) {
+          var f = (k - 2) * (0.24 + br) * op;
+          cs[k].rotation.z = -f; cs[k].position.set(f * 1.5, Math.abs(f) * -0.25, k * 0.11 - 0.11);
+        }
+      }
+    };
+  };
+
+  /* Wirtschaftskalender / Sitzungen: die Erdkugel mit den drei Handelsplätzen. */
+  KINDS.globe = function (ctx) {
+    var root = grp(), g = grp(), ball = grp(); root.add(g); g.add(ball);
+    ball.add(mesh(new T.SphereGeometry(1.38, 56, 40), ctx.mat.obs));
+    var ln = [], R = 1.4, i, j;
+    for (i = 1; i < 6; i++) { var la = -PI / 2 + i * PI / 6, rr = Math.cos(la) * R, y = Math.sin(la) * R; for (j = 0; j < 72; j++) { var a = j / 72 * TAU, b = (j + 1) / 72 * TAU; ln.push(Math.cos(a) * rr, y, Math.sin(a) * rr, Math.cos(b) * rr, y, Math.sin(b) * rr); } }
+    for (i = 0; i < 12; i++) { var lo = i / 12 * TAU; for (j = 0; j < 48; j++) { var p = -PI / 2 + j / 48 * PI, q = -PI / 2 + (j + 1) / 48 * PI; ln.push(Math.cos(p) * Math.cos(lo) * R, Math.sin(p) * R, Math.cos(p) * Math.sin(lo) * R, Math.cos(q) * Math.cos(lo) * R, Math.sin(q) * R, Math.cos(q) * Math.sin(lo) * R); } }
+    var lg = new T.BufferGeometry(); lg.setAttribute('position', new T.Float32BufferAttribute(ln, 3));
+    ball.add(new T.LineSegments(lg, ctx.mat.link));
+    function ll(lat, lon, r) { var a = lat * PI / 180, b = -lon * PI / 180; return new T.Vector3(Math.cos(a) * Math.cos(b) * r, Math.sin(a) * r, Math.cos(a) * Math.sin(b) * r); }
+    var cities = [[40.7, -74], [51.5, 0], [35.7, 139.7], [-33.9, 151.2]], dots = [];
+    cities.forEach(function (c) {
+      var p = ll(c[0], c[1], 1.41), d = mesh(new T.SphereGeometry(0.055, 14, 10), ctx.mat.glowG); d.position.copy(p); ball.add(d);
+      var h = glowSprite(ctx, 0.5, 0xffe3a0, 0.7); h.position.copy(p); ball.add(h); dots.push(h);
+    });
+    for (i = 0; i < cities.length - 1; i++) {
+      var p0 = ll(cities[i][0], cities[i][1], 1.41), p1 = ll(cities[i + 1][0], cities[i + 1][1], 1.41), mid = p0.clone().add(p1).multiplyScalar(0.5);
+      mid.normalize().multiplyScalar(1.41 + p0.distanceTo(p1) * 0.3);
+      ball.add(mesh(new T.TubeGeometry(new T.QuadraticBezierCurve3(p0, mid, p1), 48, 0.011, 6, false), ctx.mat.gold));
+    }
+    var o = orbit(ctx, 1.95, 72); o.rotation.x = 1.3; root.add(o);
+    ball.rotation.z = 0.25;
+    root.add(pool(ctx, 2.5, -1.85));
+    return {
+      root: root, radius: 1.95,
+      update: function (t, dt, s) {
+        g.rotation.y = s.mx * 0.4; g.rotation.x = -s.my * 0.2; g.position.y = Math.sin(t * 0.9) * 0.04;
+        ball.rotation.y = t * 0.22;
+        for (var k = 0; k < dots.length; k++) dots[k].material.opacity = 0.35 + Math.pow(Math.max(0, Math.sin(t * 0.9 - k * 1.4)), 2) * 0.6;
+        o.rotation.z = -t * 0.12; spinSat(o, t * 0.6);
+      }
+    };
+  };
+
+  /* Journal: das geschlossene Buch mit dem Monogramm. */
+  function closedBook(ctx, w, h, d, coverMat) {
+    var b = grp();
+    var pages = mesh(slab(w - 0.1, h - 0.1, d - 0.08, 0.03, 0.012, 2), ctx.mat.ivory); pages.position.x = 0.03; b.add(pages);
+    var cov = extrudeCover(w, h, d);
+    b.add(mesh(cov, coverMat));
+    return b;
+  }
+  /* Einband als U-Profil (Rücken links), damit rechts der Buchblock zu sehen ist. */
+  function extrudeCover(w, h, d) {
+    var t = 0.045, s = new T.Shape();
+    s.moveTo(-w / 2, -d / 2); s.lineTo(w / 2, -d / 2); s.lineTo(w / 2, -d / 2 + t); s.lineTo(-w / 2 + t, -d / 2 + t);
+    s.lineTo(-w / 2 + t, d / 2 - t); s.lineTo(w / 2, d / 2 - t); s.lineTo(w / 2, d / 2); s.lineTo(-w / 2, d / 2); s.closePath();
+    var g = new T.ExtrudeGeometry(s, { depth: h, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.012, bevelSegments: 2, steps: 1 });
+    g.translate(0, 0, -h / 2); g.rotateX(PI / 2);
+    return weld(g);
+  }
+  KINDS.journal = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var bk = closedBook(ctx, 1.85, 2.45, 0.42, ctx.mat.obs); g.add(bk);
+    // Goldbänder am Rücken, Monogramm auf dem Deckel, Lesezeichen
+    [0.8, -0.8].forEach(function (y) { var bd = mesh(slab(0.16, 0.06, 0.46, 0.02, 0.01, 2), ctx.mat.gold); bd.position.set(-0.86, y, 0); g.add(bd); });
+    var S = 1.0 / 512, P = [[98, 112], [385, 112], [385, 196], [266, 196], [266, 231], [364, 231], [364, 308], [266, 308], [266, 357], [364, 357], [364, 441], [175, 441], [175, 196], [98, 196]]
+      .map(function (p) { return [(p[0] - 256) * S, -(p[1] - 256) * S]; });
+    var concave = { 3: 1, 4: 1, 7: 1, 8: 1, 12: 1 };
+    var glyph = mesh(extrude(roundPoly(P, function (i) { return (concave[i] ? 7 : 24) * S; }), 0.05, 0.012, 2, 6), ctx.mat.gold);
+    glyph.position.set(0.06 + ((98 + 385) / 2 - 256) * S, 0.2 - ((112 + 441) / 2 - 256) * S, 0.225); g.add(glyph);
+    var frame = mesh(new T.TorusGeometry(0.62, 0.012, 8, 4), ctx.mat.goldS); frame.rotation.z = PI / 4; frame.scale.set(1.12, 1.12, 1); frame.position.set(0.06, 0.2, 0.215); g.add(frame);
+    var rib = mesh(slab(0.12, 0.7, 0.012, 0.02, 0.004, 2), ctx.mat.gold); rib.position.set(0.5, -1.4, 0.02); g.add(rib);
+    root.add(pool(ctx, 2.4, -1.8));
+    return {
+      root: root, radius: 1.9, look: -0.1,
+      update: function (t, dt, s) {
+        // leicht nach rechts gedreht: der helle Buchblock zeigt zum Betrachter,
+        // sonst steht ein schwarzer Deckel vor dunklem Grund
+        g.rotation.y = 0.5 + Math.sin(t * 0.45) * 0.26 + s.mx * 0.5; g.rotation.x = -0.08 + Math.sin(t * 0.33) * 0.04 - s.my * 0.2;
+        g.rotation.z = -0.05; g.position.y = Math.sin(t * 0.9) * 0.05;
+      }
+    };
+  };
+
+  /* Books: der Stapel. */
+  KINDS.stack = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var mats = [ctx.mat.obs, ctx.mat.goldS, ctx.mat.steel], dims = [[2.4, 1.7, 0.4], [2.2, 1.55, 0.34], [2.0, 1.45, 0.3]], y = -1.0;
+    for (var i = 0; i < 3; i++) {
+      var d = dims[i], b = closedBook(ctx, d[0], d[1], d[2], mats[i]);
+      b.rotation.x = -PI / 2; b.rotation.z = [0.12, -0.2, 0.3][i]; b.position.set([0, 0.06, -0.05][i], y + d[2] / 2, 0);
+      y += d[2] + 0.005; g.add(b);
+      var bd = mesh(slab(0.14, d[1] * 0.3, 0.012, 0.02, 0.004, 2), ctx.mat.gold); bd.position.set(d[0] * 0.2, 0, d[2] / 2 + 0.008); b.add(bd);
+    }
+    root.add(pool(ctx, 2.6, -1.14));
+    return {
+      root: root, radius: 1.9, look: -0.35,
+      update: function (t, dt, s) {
+        g.rotation.y = -0.4 + Math.sin(t * 0.42) * 0.3 + s.mx * 0.5; g.rotation.x = 0.12 - s.my * 0.18; g.position.y = Math.sin(t * 0.9) * 0.04;
+      }
+    };
+  };
+
+  /* Chart / Live: fünf Kerzen und die Linie durch die Schlusskurse. */
+  KINDS.candles = function (ctx) {
+    var root = grp(), g = grp(); root.add(g);
+    var S = fitSeries(showSeries(6, 41, 0.3, 1.2), 2.9), cs = [], pts = [];
+    S.forEach(function (d, i) {
+      var c = candle(ctx, 0.4, d.o, d.c, d.hi, d.lo); c.position.set(-1.5 + i * 0.6, -1.45, 0); g.add(c); cs.push(c);
+      pts.push(new T.Vector3(-1.5 + i * 0.6, -1.45 + d.c, 0.3));
+    });
+    var base = mesh(slab(4.0, 1.0, 0.1, 0.2, 0.03, 3), ctx.mat.obs); base.rotation.x = -PI / 2; base.position.y = -1.55; g.add(base);
+    var br = mesh(slab(4.1, 1.1, 0.06, 0.24, 0.02, 3), ctx.mat.goldD); br.rotation.x = -PI / 2; br.position.y = -1.57; g.add(br);
+    g.add(mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 60, 0.014, 8, false), ctx.mat.glowG));
+    var tip = glowSprite(ctx, 0.55, 0xffe3a0, 0.85); tip.position.copy(pts[5]); g.add(tip);
+    root.add(pool(ctx, 2.7, -1.66));
+    return {
+      root: root, radius: 2.1, look: -0.05,
+      update: function (t, dt, s) {
+        g.rotation.y = -0.4 + Math.sin(t * 0.42) * 0.22 + s.mx * 0.45; g.rotation.x = -s.my * 0.18;
+        for (var k = 0; k < cs.length; k++) cs[k].scale.y = Math.max(0.001, easeOut((t - 0.1 - k * 0.09) / 0.6));
+        tip.material.opacity = 0.6 + Math.sin(t * 2.2) * 0.25;
+      }
+    };
+  };
+
+  /* ───────────────────────── Bühnen ───────────────────────── */
+  var E = { stages: [], shared: null, sharedCtx: null, scale: 1, raf: 0, idle: 0, px: -1, py: -1, lost: false, tOff: 0 };
+
+  function sharedRenderer() {
+    if (E.shared) return E.shared;
+    var c = document.createElement('canvas');
+    var R = new T.WebGLRenderer({ canvas: c, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: 'high-performance' });
+    R.setPixelRatio(1);
+    R.outputEncoding = T.sRGBEncoding;
+    R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.12;
+    R.setClearColor(0x000000, 0);
+    R.setSize(640, 640, false);
+    c.addEventListener('webglcontextlost', function (e) { e.preventDefault(); E.lost = true; });
+    c.addEventListener('webglcontextrestored', function () { E.lost = false; });
+    E.shared = R; E.sharedCtx = makeCtx(R);
+    return R;
+  }
+
+  function fitCamera(st) {
+    var w = st.w || 1, h = st.h || 1, cam = st.cam, r = st.obj.radius || 2;
+    cam.aspect = w / h;
+    if (st.obj.camera) { cam.updateProjectionMatrix(); return; }   // Objekt führt die Kamera selbst
+    var fov = cam.fov * PI / 180, d = r / Math.sin(fov / 2);
+    if (cam.aspect < 1) d /= cam.aspect;                 // hochkant: nach der Breite einpassen
+    d *= (st.opt.zoom ? 1 / st.opt.zoom : 1);
+    var el = st.opt.elev == null ? 0.16 : st.opt.elev;
+    cam.position.set(0, Math.sin(el) * d, Math.cos(el) * d);
+    cam.lookAt(0, st.opt.lookY != null ? st.opt.lookY : (st.obj.look || 0), 0);
+    cam.updateProjectionMatrix();
+  }
+
+  function buildStage(st, ctx) {
+    var scene = new T.Scene();
+    scene.environment = ctx.env;
+    var key = new T.DirectionalLight(0xfff1d6, 0.9); key.position.set(-4, 6, 6); scene.add(key);
+    var rim = new T.DirectionalLight(0x7f9bff, 0.7); rim.position.set(5, 2.5, -6); scene.add(rim);
+    st.scene = scene; st.key = key;
+    st.cam = new T.PerspectiveCamera(st.opt.fov || 26, 1, 0.1, 200);
+    st.obj = KINDS[st.kind](ctx, st.opt);
+    scene.add(st.obj.root);
+    st.ctx = ctx;
+    applyTheme(st);
+  }
+  function isLight(st) { return st.opt.theme === 'auto' ? document.body.classList.contains('light') : st.opt.theme === 'light'; }
+  function applyTheme(st) {
+    var L = isLight(st); st.light = L;
+    st.obj.root.traverse(function (o) {
+      if (o.userData && o.userData.pool) { o.material.map = L ? o.userData.pool.shadow : o.userData.pool.glow; o.material.needsUpdate = true; }
+    });
+    if (st.obj.theme) st.obj.theme(L);
+  }
+
+  function measure(st) {
+    var r = st.el.getBoundingClientRect();
+    st.rect = r;
+    var vis = st.el.offsetParent !== null && r.width > 8 && r.height > 8 && r.bottom > -60 && r.top < innerHeight + 60 && r.right > 0 && r.left < innerWidth;
+    if (!vis) return false;
+    var dpr = Math.min(window.devicePixelRatio || 1, st.opt.maxDpr || 2) * E.scale;
+    var w = Math.max(2, Math.round(r.width * dpr)), h = Math.max(2, Math.round(r.height * dpr));
+    if (w !== st.w || h !== st.h) {
+      st.w = w; st.h = h;
+      if (st.direct) st.R.setSize(w, h, false); else { st.canvas.width = w; st.canvas.height = h; }
+      fitCamera(st); st.dirty = true;
+    }
+    return true;
+  }
+
+  function drawStage(st, t, dt) {
+    var s = st.s;
+    if (!st.seen) { st.seen = true; st.t0 = t; st.el.classList.add('a3-in'); }
+    s.k = REDUCE ? 1 : easeOut((t - st.t0) / 1.25);
+    // Zeiger: Neigung relativ zur Bühnenmitte, weich nachgeführt
+    var tx = 0, ty = 0;
+    if (E.px >= 0 && !REDUCE && !st.opt.still) {
+      tx = clamp((E.px - (st.rect.left + st.rect.width / 2)) / (innerWidth * 0.5), -1, 1);
+      ty = clamp((E.py - (st.rect.top + st.rect.height / 2)) / (innerHeight * 0.5), -1, 1);
+    }
+    var f = Math.min(1, dt * 3);
+    s.mx += (tx - s.mx) * f; s.my += (ty - s.my) * f;
+    var tt = REDUCE ? 2.4 : t - st.t0 + (st.opt.phase || 0);
+    st.obj.update(tt, dt, s);
+    if (st.obj.camera) { st.obj.camera(st.cam, st.w / st.h, tt, s); st.cam.updateProjectionMatrix(); }
+    if (!st.opt.noIntro && !st.obj.noIntro) {
+      var k = s.k, sc = 0.9 + 0.1 * k;
+      st.obj.root.scale.setScalar(sc);
+      st.obj.root.rotation.y = (1 - k) * -0.55;
+    }
+    st.key.position.x = -4 + Math.sin(tt * 0.35) * 2.2;
+
+    if (st.direct) { st.R.render(st.scene, st.cam); return; }
+    var R = E.shared, c = R.domElement;
+    /* Auf hellem Grund wirkt im dunklen Studio beleuchtetes Gold bronzen —
+       dort wird heller belichtet. */
+    R.toneMappingExposure = st.light ? 1.5 : 1.12;
+    if (c.width < st.w || c.height < st.h) R.setSize(Math.max(c.width, Math.ceil(st.w / 64) * 64), Math.max(c.height, Math.ceil(st.h / 64) * 64), false);
+    R.setViewport(0, 0, st.w, st.h); R.setScissor(0, 0, st.w, st.h); R.setScissorTest(true);
+    R.clear();
+    R.render(st.scene, st.cam);
+    st.g2.clearRect(0, 0, st.w, st.h);
+    st.g2.drawImage(c, 0, c.height - st.h, st.w, st.h, 0, 0, st.w, st.h);
+  }
+
+  /* Bühne abräumen, deren Element nicht mehr im Dokument hängt. */
+  function drop(st) {
+    st.dead = true;
+    var i = E.stages.indexOf(st); if (i >= 0) E.stages.splice(i, 1);
+    try { if (st.obj) st.obj.root.traverse(function (o) { if (o.geometry) o.geometry.dispose(); }); } catch (e) { }
+    if (st.R) { try { st.R.dispose(); st.R.forceContextLoss(); } catch (e2) { } }
+    st.obj = null;
+  }
+
+  var last = 0, acc = 0, accN = 0;
+  function frame(now) {
+    if (E.raf) cancelAnimationFrame(E.raf);   // von Hand angestoßen (_step), während ein Bild ansteht
+    E.raf = 0;
+    if (document.hidden || E.lost) return;
+    /* dt nie negativ: läuft die Uhr einmal rückwärts (von Hand gerechnete
+       Bilder, Uhrenkorrektur), schießen gedämpfte Werte sonst über ihr Ziel
+       hinaus — eine Kerze wurde so zur Säule. */
+    var t = now / 1000 + E.tOff, dt = Math.max(0, Math.min(0.05, last ? t - last : 0.016)); last = t;
+    var any = false;
+    for (var i = 0; i < E.stages.length; i++) {
+      var st = E.stages[i];
+      if (st.obj && !st.el.isConnected) { drop(st); i--; continue; }   // Seite hat ihren Kopf neu gebaut
+      if (!st.obj) continue;
+      if (!measure(st)) continue;
+      any = true;
+      if (REDUCE && st.drawn && !st.dirty) continue;
+      try { drawStage(st, t, dt); } catch (e) { st.obj = null; if (window.console) console.warn('Apex3D', st.kind, e); continue; }
+      st.drawn = true; st.dirty = false;
+    }
+    /* Auflösung nachregeln: dauerhaft langsame Bilder → kleinere Puffer.
+       Nach oben nur vorsichtig zurück. */
+    if (any && !REDUCE) {
+      acc += dt; accN++;
+      if (accN >= 90) {
+        var avg = acc / accN;
+        if (avg > 0.024 && E.scale > 0.6) { E.scale = Math.max(0.6, E.scale * 0.85); }
+        else if (avg < 0.0125 && E.scale < 1) { E.scale = Math.min(1, E.scale * 1.08); }
+        acc = 0; accN = 0;
+      }
+    }
+    if (any && !REDUCE) { E.raf = requestAnimationFrame(frame); }
+    else { last = 0; clearTimeout(E.idle); E.idle = setTimeout(kick, REDUCE ? 400 : 260); }
+  }
+  function kick() { clearTimeout(E.idle); if (!E.raf && !document.hidden && E.stages.length) E.raf = requestAnimationFrame(frame); }
+
+  var wired = false;
+  function wire() {
+    if (wired) return; wired = true;
+    addEventListener('pointermove', function (e) { if (e.pointerType === 'touch') return; E.px = e.clientX; E.py = e.clientY; }, { passive: true });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) { last = 0; kick(); } });
+    addEventListener('resize', function () { E.stages.forEach(function (s) { s.dirty = true; }); kick(); }, { passive: true });
+    try {
+      new MutationObserver(function () { E.stages.forEach(function (s) { if (s.obj && s.opt.theme === 'auto') { applyTheme(s); s.dirty = true; } }); kick(); })
+        .observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    } catch (e) { }
+  }
+
+  /* el: Container (bekommt den Canvas). opt: { direct, theme:'dark'|'light'|'auto',
+     fov, elev, zoom, lookY, maxDpr, still, phase, noIntro } */
+  function mount(el, kind, opt) {
+    opt = opt || {};
+    if (!el || !KINDS[kind] || !webglOk()) return null;
+    var st = { el: el, kind: kind, opt: opt, s: { mx: 0, my: 0, k: 0 }, w: 0, h: 0, direct: !!opt.direct, obj: null, seen: false, drawn: false, dirty: true };
+    if (!opt.theme) opt.theme = 'dark';
+    var canvas = document.createElement('canvas');
+    canvas.setAttribute('aria-hidden', 'true'); canvas.className = 'a3-canvas';
+    el.appendChild(canvas); el.classList.add('a3-stage');
+    st.canvas = canvas;
+    E.stages.push(st);
+    loadThree().then(function () {
+      if (st.dead) return;
+      try {
+        if (st.direct) {
+          var R = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: 'high-performance' });
+          R.setPixelRatio(1); R.outputEncoding = T.sRGBEncoding; R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.12;
+          R.setClearColor(0x000000, 0);
+          st.R = R; buildStage(st, makeCtx(R));
+        } else {
+          sharedRenderer();
+          st.g2 = canvas.getContext('2d');
+          buildStage(st, E.sharedCtx);
+        }
+      } catch (e) { if (window.console) console.warn('Apex3D mount', kind, e); st.obj = null; el.classList.add('a3-fail'); return; }
+      wire(); kick();
+    }).catch(function () { el.classList.add('a3-fail'); });
+    return {
+      destroy: function () {
+        st.dead = true;
+        var i = E.stages.indexOf(st); if (i >= 0) E.stages.splice(i, 1);
+        if (st.R) { try { st.R.dispose(); st.R.forceContextLoss(); } catch (e) { } }
+        if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+        el.classList.remove('a3-stage', 'a3-in');
+      },
+      stage: st
+    };
+  }
+
+  window.Apex3D = {
+    mount: mount, kinds: KINDS, ready: loadThree, webgl: webglOk,
+    _e: E, _h: { slab: slab, extrude: extrude, rrShape: rrShape, roundPoly: roundPoly, weld: weld, rod: rod, pool: pool, glowSprite: glowSprite, tex: tex, candle: candle, series: series, showSeries: showSeries, fitSeries: fitSeries, lin: lin, mesh: mesh, grp: grp, rrPath: rrPath },
+    _T: function () { return T; },
+    /* Zum Prüfen: n Bilder von Hand rechnen. Ein versteckter Browser-Tab
+       hält requestAnimationFrame an — dann steht auch die Szene. */
+    _step: function (n, ms) {
+      n = n || 1; ms = ms || 16;
+      var t0 = performance.now();
+      for (var i = 0; i < n; i++) frame(t0 + i * ms);
+      E.tOff += n * ms / 1000;                      // echte Bilder danach schließen nahtlos an
+    }
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   Apex3D — Einbau in die Landing
+   Hero-Bühne (eigener Kontext), ein Objekt je Teaser-Abschnitt, das
+   Monogramm im Abschlussblock. Ohne WebGL passiert hier nichts: die
+   Seite bleibt, wie sie ohne diese Schicht war.
+   ═══════════════════════════════════════════════════════════════════ */
+(function apex3dLanding() {
+  'use strict';
+  var A = window.Apex3D, lp = document.getElementById('landingPage');
+  if (!A || !lp || window.APEX3D_LAB || !A.webgl()) return;
+  var FOLD = { mt5sync: 'phone', replay: 'replay', prop: 'shield', academy: 'book', spaces: 'network', ai: 'core', 'switch': 'migrate', security: 'lock' };
+  var built = false;
+
+  function div(cls) { var d = document.createElement('div'); d.className = cls; d.setAttribute('aria-hidden', 'true'); return d; }
+
+  /* Die Hero-Bühne hat einen eigenen WebGL-Kontext. Ist die Landing nicht zu
+     sehen (angemeldet), wird er freigegeben und beim Wiedererscheinen neu
+     angelegt — sonst hielte jede App-Sitzung einen Kontext für nichts. */
+  var heroH = null, mq = null;
+  try { mq = matchMedia('(max-width:1000px)'); } catch (e) { }
+  function hero() {
+    var h = lp.querySelector('.lp-hero');
+    if (!h || heroH) return;
+    var st = h.querySelector('.lp-hero-3d');
+    if (!st) { st = div('lp-hero-3d'); h.insertBefore(st, h.querySelector('.lp-hero-inner')); }
+    h.classList.add('a3-hero');
+    heroH = A.mount(st, 'hero', { direct: true, maxDpr: 2, narrow: function () { return !!(mq && mq.matches); } });
+  }
+  function heroOff() { if (heroH) { heroH.destroy(); heroH = null; } }
+
+  /* Die Teaser-Abschnitte baut die Polish-Schicht (Klasse lp-fold, Knopf
+     „Show details"). Hier werden Marke, Überschrift, Einleitung und Knopf in
+     eine linke Spalte gefasst; rechts daneben kommt das Objekt. Die Elemente
+     werden verschoben, nicht kopiert — Text, Übersetzung und Einblend-
+     Beobachter hängen an den Elementen selbst und wandern mit. */
+  function folds() {
+    var n = 0;
+    Object.keys(FOLD).forEach(function (id) {
+      var s = document.getElementById(id);
+      if (!s || s.querySelector('.lp-fold-head')) return;
+      var kids = [].slice.call(s.children), end = -1, i;
+      for (i = 0; i < kids.length; i++) {
+        var k = kids[i];
+        if (k.matches('.lp-fold-btn')) { end = i; break; }
+        if (!k.matches('.lp-label, .lp-title, .lp-lead, .lp-notrade')) break;
+        end = i;
+      }
+      if (end < 1) return;
+      var head = document.createElement('div'), copy = document.createElement('div'), art = div('lp-fold-art');
+      head.className = 'lp-fold-head lp-keep'; copy.className = 'lp-fold-copy';
+      s.insertBefore(head, kids[0]);
+      for (i = 0; i <= end; i++) copy.appendChild(kids[i]);
+      head.appendChild(copy); head.appendChild(art);
+      if (n % 2 === 1) s.classList.add('a3-flip');
+      n++;
+      A.mount(art, FOLD[id], { theme: 'dark', phase: n * 1.7 });
+    });
+  }
+
+  function finale() {
+    var box = lp.querySelector('.lp-final-box');
+    if (!box || box.querySelector('.lp-final-3d')) return;
+    var st = div('lp-final-3d');
+    box.insertBefore(st, box.firstChild);
+    A.mount(st, 'mark', { theme: 'dark' });
+  }
+
+  /* Wann gebaut wird:
+     - nie im Demo-Modus (?demo=1) — dort ist die Landing nur beim Laden kurz da;
+     - nicht, solange der Anmelde-Hinweis gesetzt ist (apexSignedInHint): dann
+       liegt der Splash über der Landing und die App übernimmt gleich. Stimmt
+       der Hinweis nicht mehr, löscht ihn die Anmeldeprüfung, und der nächste
+       Blick hier baut;
+     - die Hero-Szene SOFORT (dieses Skript läuft, während der Rest der Datei
+       noch lädt), Teaser und Abschluss erst, wenn die Polish-Schicht die
+       Teaser angelegt hat — die kommt bei ~83 % der Datei. */
+  function signedInHint() { try { return localStorage.getItem('apexSignedInHint') === '1'; } catch (e) { return false; } }
+  function visible() { return lp.offsetParent !== null; }
+  function later() {
+    if (built) return;
+    if (!document.querySelector('#landingPage .lp-fold')) {
+      // Polish-Schicht noch unterwegs. Ist das Dokument fertig und sie kam
+      // nicht (Fehler dort), gibt es wenigstens das Monogramm.
+      if (document.readyState === 'complete' && later.n++ > 12) { built = true; try { finale(); } catch (e) { } return; }
+      clearTimeout(later.t); later.t = setTimeout(later, 300);
+      return;
+    }
+    built = true;
+    try { folds(); } catch (e2) { if (window.console) console.warn('Apex3D folds', e2); }
+    try { finale(); } catch (e3) { if (window.console) console.warn('Apex3D final', e3); }
+  }
+  later.n = 0;
+  function when() {
+    if (/[?&]demo=1(?:&|$)/.test(location.search)) return;
+    if (!visible()) { heroOff(); return; }
+    if (signedInHint()) { if (when.h++ < 40) setTimeout(when, 1500); return; }
+    try { hero(); } catch (e) { if (window.console) console.warn('Apex3D hero', e); }
+    later();
+  }
+  when.h = 0;
+  when();
+  document.addEventListener('DOMContentLoaded', when);
+  try { new MutationObserver(function () { setTimeout(when, 0); }).observe(lp, { attributes: true, attributeFilter: ['style', 'class'] }); } catch (e) { }
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   Apex3D — Einbau in die App
+   Ein Emblem je Seitenkopf (.ph) und Objekte in drei Leerzuständen.
+   Gebaut wird erst, wenn die Seite wirklich offen ist; three.js wird
+   damit erst nach der Anmeldung geladen, nicht für jeden Besucher.
+   Aus: localStorage.apex3d = 'off' (Einstellungen → Profil → 3D accents).
+   ═══════════════════════════════════════════════════════════════════ */
+(function apex3dApp() {
+  'use strict';
+  var A = window.Apex3D;
+  if (!A || window.APEX3D_LAB || !A.webgl()) {
+    /* Ohne WebGL gibt es nichts zu schalten: die Einstellungskarte ausblenden. */
+    try { document.addEventListener('DOMContentLoaded', function () { var t = document.getElementById('apex3dToggle'); if (t) { var c = t.closest('.glass-card'); if (c) c.style.display = 'none'; } }); } catch (e) { }
+    return;
+  }
+  var PAGE = {
+    overview: 'mark', journal: 'journal', calendar: 'calendar', stats: 'bars', edgelab: 'edge', insights: 'core',
+    psychology: 'gyro', propfirm: 'shield', rules: 'lock', playbooks: 'cards', setups: 'cards', reports: 'cards',
+    accounts: 'cards', econews: 'globe', calculators: 'gear', settings: 'gear', developer: 'gear', indicator: 'candles',
+    live: 'candles', academy: 'book', glossary: 'stack', drills: 'target', community: 'trophy', feed: 'network',
+    channels: 'network', mentor: 'network'
+  };
+  var handles = [];
+  function off() { try { return localStorage.getItem('apex3d') === 'off'; } catch (e) { return false; } }
+  function stage(cls) { var d = document.createElement('div'); d.className = cls; d.setAttribute('aria-hidden', 'true'); return d; }
+  function put(el, kind) { var h = A.mount(el, kind, { theme: 'auto' }); if (h) handles.push(h); }
+
+  function emblem(p, id) {
+    var ph = p.querySelector('.ph');
+    if (!ph || ph.querySelector('.a3-emblem')) return;
+    // nur schlichte Köpfe (Marke, Titel, Unterzeile) — Köpfe mit eigenen
+    // Knöpfen rechts bleiben, wie sie sind
+    for (var i = 0; i < ph.children.length; i++) {
+      var c = ph.children[i];
+      if (!(c.tagName === 'H1' || c.tagName === 'P' || c.classList.contains('ph-eyebrow'))) return;
+    }
+    var e = stage('a3-emblem');
+    ph.classList.add('ph-a3'); ph.appendChild(e);
+    put(e, PAGE[id]);
+  }
+  function empties(p, id) {
+    var el, s;
+    if (id === 'overview') {
+      el = document.querySelector('#dashboardEmptyState .des-icon');
+      if (el && !el.querySelector('.a3-fill') && el.offsetParent !== null) { s = stage('a3-fill'); el.classList.add('a3-on'); el.appendChild(s); put(s, 'candles'); }
+    } else if (id === 'propfirm') {
+      el = p.querySelector('.pf-empty .big');
+      if (el && !el.querySelector('.a3-fill')) { s = stage('a3-fill'); el.classList.add('a3-on'); el.appendChild(s); put(s, 'shield'); }
+    } else if (id === 'books') {
+      el = p.querySelector('.bk-empty');
+      if (el && el.querySelector('button') && !el.querySelector('.a3-empty')) { s = stage('a3-empty'); el.insertBefore(s, el.firstChild); put(s, 'stack'); }
+    }
+  }
+  function shown(el) { return !!el && el.style.display !== 'none' && getComputedStyle(el).display !== 'none'; }
+  /* Fenster, die über allem liegen: Anmeldung und Upgrade. */
+  function overlays() {
+    var o = document.getElementById('onboard'), c, s;
+    if (shown(o)) {
+      c = o.querySelector('.onboard-card');
+      if (c && !c.querySelector('.a3-auth')) { s = stage('a3-auth'); c.insertBefore(s, c.firstChild); c.classList.add('a3-has'); put(s, 'mark'); }
+    }
+    var u = document.getElementById('apexUpgradeOverlay');
+    if (shown(u)) {
+      c = u.querySelector('.apex-upgrade-card');
+      if (c && !c.querySelector('.a3-pro')) { s = stage('a3-pro'); c.appendChild(s); c.classList.add('a3-has'); put(s, 'edge'); }
+    }
+  }
+  function tick() {
+    var cb = document.getElementById('apex3dToggle');
+    if (cb && cb.checked === off()) cb.checked = !off();
+    if (off()) return;
+    try { overlays(); } catch (e0) { }
+    var shell = document.getElementById('shell');
+    if (!shell || shell.offsetParent === null) return;          // Landing oder Anmeldung
+    var p = document.querySelector('.page.active');
+    if (!p) return;
+    var id = p.id.replace(/^page-/, '');
+    try { if (PAGE[id]) emblem(p, id); empties(p, id); } catch (e) { }
+  }
+  /* Aus- und wieder einschalten (Einstellungen → Profil → 3D accents). */
+  function set(on) {
+    try { localStorage.setItem('apex3d', on ? 'on' : 'off'); } catch (e) { }
+    if (on) { tick(); return; }
+    handles.forEach(function (h) { try { h.destroy(); } catch (e) { } });
+    handles = [];
+    [].slice.call(document.querySelectorAll('.a3-emblem, .a3-fill, .a3-empty, .a3-auth, .a3-pro')).forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+    [].slice.call(document.querySelectorAll('.ph-a3, .a3-on, .a3-has')).forEach(function (n) { n.classList.remove('ph-a3', 'a3-on', 'a3-has'); });
+  }
+  /* Seiten bauen ihren Kopf teils erst beim Öffnen und teils neu (innerHTML).
+     Ein Blick alle 400 ms kostet nichts und trifft beides; die Engine räumt
+     Bühnen ab, deren Element aus dem Dokument verschwunden ist. */
+  setInterval(tick, 400);
+  window.Apex3DApp = { tick: tick, set: set, pages: PAGE };
+})();
+</script>
+<!-- APEX3D:END -->
 
 <!-- ══════ STRIPE UPGRADE MODAL ══════ -->
 <div id="apexUpgradeOverlay" style="display:none" onclick="if(event.target===this)closeUpgradeModal()">
@@ -13233,14 +15138,20 @@ function _authAction(type) {
   const errEl = document.getElementById(errId);
   const btn   = document.getElementById(btnId);
 
-  // auth is set after window.load + firebase.initializeApp — wait for it
-  if (!auth) {
+  // auth is set after window.load + firebase.initializeApp — wait for it.
+  // `auth` selbst wird erst im Hauptskript deklariert: bis dahin wäre schon
+  // das Nachschauen ein ReferenceError (11.11.2026).
+  const authReady = () => (typeof auth !== 'undefined') && !!auth;
+  if (!authReady()) {
     if (errEl) errEl.textContent = '⏳ Firebase loading… please wait.';
     if (btn) btn.disabled = true;
     let attempts = 0;
     const wait = setInterval(() => {
-      attempts++;
-      if (auth) {
+      // Solange die Seite noch lädt, läuft die Frist nicht: auf einer langsamen
+      // Leitung kam sonst nach 10 s „could not connect", obwohl nur der Rest
+      // der Datei noch unterwegs war.
+      if (document.readyState === 'complete') attempts++;
+      if (authReady()) {
         clearInterval(wait);
         if (errEl) errEl.textContent = '';
         if (btn) btn.disabled = false;
@@ -13260,6 +15171,102 @@ function _authAction(type) {
   if (type === 'register') _doRegister();
   if (type === 'reset')    _doReset();
 }
+
+/* Google-Knopf: doOAuth kommt erst mit dem Hauptskript, Firebase erst nach dem
+   Laden der Seite. Bis dahin sind die OAuth-Knöpfe sichtbar, aber nicht
+   klickbar (#onboard.auth-wait) — ein Klick ins Leere oder ein Pop-up, das
+   der Browser ohne frischen Klick blockt, wäre schlechter als kurzes Warten.
+   Kommt Firebase gar nicht (Werbeblocker), gibt die Sperre nach dem Laden
+   wieder frei: dann meldet der echte Knopf den Fehler. */
+function doOAuth() { /* Platzhalter bis zum Hauptskript */ }
+function apexAuthWaitState() {
+  var ob = document.getElementById('onboard');
+  if (!ob) return;
+  function ready() { return (typeof auth !== 'undefined') && !!auth; }
+  if (ready()) { ob.classList.remove('auth-wait'); return; }
+  if (ob.classList.contains('auth-wait')) return;
+  ob.classList.add('auth-wait');
+  var n = 0, t = setInterval(function () {
+    if (ready() || (document.readyState === 'complete' && ++n > 50)) { clearInterval(t); ob.classList.remove('auth-wait'); }
+  }, 200);
+}
+
+// ═══ LANDING ↔ APP ═══
+// (11.11.2026 von weiter unten hierher geholt: die Anmeldekarte steht an dieser
+// Stelle schon im Dokument, also arbeiten die Knöpfe der Landing ab hier —
+// vorher erst nach einem Viertel der Datei.)
+function goToAuth(screen) {
+  // Landing Page verstecken
+  var lp = document.getElementById('landingPage');
+  if (lp) lp.style.display = 'none';
+  // Onboard (Login/Register Modal) anzeigen
+  var ob = document.getElementById('onboard');
+  ob.style.display = 'flex';
+  // Mode-Toggle bleibt versteckt auf Auth-Screens
+  var btn = document.getElementById('modeToggleBtn');
+  if (btn) btn.style.display = 'none';
+  window.scrollTo(0, 0);
+  if (typeof showScreen === 'function') showScreen(screen);
+  apexAuthWaitState();
+}
+
+// Wechsel-Import: merkt sich die Herkunft, öffnet nach der Anmeldung den Import (25.10.2026)
+function lpStartImport(preset) {
+  if (window.currentUID && window.currentUID !== 'demo' && typeof openCsvImportWith === 'function') {
+    var lp = document.getElementById('landingPage'); if (lp) lp.style.display = 'none';
+    openCsvImportWith(preset); return;
+  }
+  sessionStorage.setItem('apexWantsImport', preset);
+  goToAuth('register');
+}
+window.lpStartImport = lpStartImport;
+
+// Wie goToAuth, aber setzt ein Flag damit nach Login → Upgrade Modal öffnet
+function goToAuthPro(screen) {
+  sessionStorage.setItem('apexWantsPro', '1');
+  goToAuth(screen);
+}
+
+/* Die Anmelde-Absicht aus der Adresse wieder entfernen (#auth=… / ?auth=…):
+   ein späteres Neuladen soll nicht noch einmal die Karte öffnen. */
+function apexAuthIntentClear() {
+  try {
+    var u = new URL(location.href), had = u.searchParams.has('auth') || /(^|[#&])auth=/.test(u.hash);
+    if (!had) return;
+    u.searchParams.delete('auth');
+    var h = u.hash.replace(/^#/, '').split('&').filter(function (p) { return p && !/^auth=/.test(p); }).join('&');
+    history.replaceState(null, '', u.pathname + u.search + (h ? '#' + h : ''));
+  } catch (e) {}
+}
+
+/* Jetzt erfüllen, was bis hierher nur gemerkt war: ein Klick aus den ersten
+   Sekunden (Platzhalter beim Splash) oder die Absicht aus der Adresse
+   (app.html#auth=register von der eigenständigen Landingpage). Wer auf diesem
+   Gerät als angemeldet gilt, behält den Splash: die App startet gleich, und
+   stimmt der Hinweis nicht mehr, öffnet onAuthStateChanged die Karte. */
+(function () {
+  try {
+    if (/[?&]demo=1/.test(location.search)) return;
+    var clicked = window.__apexAuthWant || '';
+    window.__apexAuthWant = null;
+    var hint = null; try { hint = localStorage.getItem('apexSignedInHint'); } catch (_) {}
+    var want = clicked || (hint === '1' ? '' : (window.apexAuthIntent ? window.apexAuthIntent() : ''));
+    if (!want) return;
+    goToAuth(want);
+    var sp = document.getElementById('apexAuthSplash');
+    if (sp) sp.classList.remove('armed');
+    apexAuthIntentClear();
+  } catch (e) {}
+})();
+/* Dieselbe Absicht, wenn nur der Hash wechselt (Seite ist schon offen). */
+window.addEventListener('hashchange', function () {
+  try {
+    var w = window.apexAuthIntent ? window.apexAuthIntent() : '';
+    if (!w || window.APEX_DEMO) return;
+    if (typeof currentUID !== 'undefined' && currentUID) { apexAuthIntentClear(); return; }
+    goToAuth(w); apexAuthIntentClear();
+  } catch (e) {}
+});
 </script>
 
 <!-- ══════════════════════════════════
@@ -15141,6 +17148,17 @@ function _authAction(type) {
           <div class="notranslate" style="font-size:11px;color:var(--ink4);margin-top:10px">Auto-translation is powered by Google Translate (machine translation) — quality varies and it requires an internet connection.</div>
         </div>
 
+        <!-- 3D-Objekte (11.11.2026): Embleme in den Seitenköpfen und Objekte in
+             Leerzuständen (Apex3D). Abschaltbar für schwächere Geräte; der Zustand
+             liegt in localStorage.apex3d, den Haken setzt Apex3DApp. -->
+        <div class="glass-card">
+          <div class="gc-title" style="margin-bottom:0.6rem"><svg class=ic aria-hidden=true><use href=#i-star ></use></svg> 3D accents</div>
+          <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:13px;line-height:1.55;color:var(--ink2)">
+            <input type="checkbox" id="apex3dToggle" checked onchange="if(window.Apex3DApp)Apex3DApp.set(this.checked)" style="margin-top:4px;accent-color:var(--gold)" aria-label="3D accents">
+            <span>Show the animated 3D objects in page headers, empty states and the sign-in and upgrade windows. Switch them off if the app feels slow on your device.</span>
+          </label>
+        </div>
+
         <!-- Profile Picture -->
         <div class="glass-card">
           <div class="gc-title" style="margin-bottom:1rem"><svg class=ic aria-hidden=true><use href=#i-image ></use></svg> Profile Picture</div>
@@ -16006,6 +18024,7 @@ window.addEventListener('load', () => {
       document.getElementById('landingPage').style.display = 'none';
       // Merkt sich das Gerät für den Splash beim nächsten Laden (siehe #apexAuthSplash).
       try { localStorage.setItem('apexSignedInHint', '1'); } catch(_){}
+      try { if (typeof apexAuthIntentClear === 'function') apexAuthIntentClear(); } catch(_){}
       // Splash sanft ausblenden
       var splash = document.getElementById('apexAuthSplash');
       if (splash) {
@@ -16026,6 +18045,13 @@ window.addEventListener('load', () => {
       if (window.APEX_DEMO) return;
       // ── Not signed in: Splash ausblenden → Landing zeigen ──
       try { localStorage.removeItem('apexSignedInHint'); } catch(_){}
+      /* Kam jemand mit Anmelde-Absicht (app.html#auth=…) und galt nur
+         fälschlich als angemeldet, steht die Absicht noch in der Adresse:
+         dann die Karte öffnen statt der eingebetteten Landing (11.11.2026). */
+      try {
+        var wantAuth = window.apexAuthIntent ? window.apexAuthIntent() : '';
+        if (wantAuth && typeof goToAuth === 'function') { goToAuth(wantAuth); if (typeof apexAuthIntentClear === 'function') apexAuthIntentClear(); }
+      } catch(_){}
       currentUser = null;
       currentUID  = null;
       currentName = '';
@@ -32838,36 +34864,8 @@ async function submitBugReport() {
 }
 
 // ═══ LANDING ↔ APP ═══
-function goToAuth(screen) {
-  // Landing Page verstecken
-  var lp = document.getElementById('landingPage');
-  if (lp) lp.style.display = 'none';
-  // Onboard (Login/Register Modal) anzeigen
-  var ob = document.getElementById('onboard');
-  ob.style.display = 'flex';
-  // Mode-Toggle bleibt versteckt auf Auth-Screens
-  var btn = document.getElementById('modeToggleBtn');
-  if (btn) btn.style.display = 'none';
-  window.scrollTo(0, 0);
-  if (typeof showScreen === 'function') showScreen(screen);
-}
-
-// Wechsel-Import: merkt sich die Herkunft, öffnet nach der Anmeldung den Import (25.10.2026)
-function lpStartImport(preset) {
-  if (window.currentUID && window.currentUID !== 'demo' && typeof openCsvImportWith === 'function') {
-    var lp = document.getElementById('landingPage'); if (lp) lp.style.display = 'none';
-    openCsvImportWith(preset); return;
-  }
-  sessionStorage.setItem('apexWantsImport', preset);
-  goToAuth('register');
-}
-window.lpStartImport = lpStartImport;
-
-// Wie goToAuth, aber setzt ein Flag damit nach Login → Upgrade Modal öffnet
-function goToAuthPro(screen) {
-  sessionStorage.setItem('apexWantsPro', '1');
-  goToAuth(screen);
-}
+// goToAuth, lpStartImport und goToAuthPro stehen seit 11.11.2026 weiter oben,
+// gleich hinter der Anmeldekarte (Skript mit showScreen).
 (function() {
   // Wenn Onboard geschlossen wird (z.B. nach erfolgreichem Login via bootApp),
   // Landing Page ebenfalls versteckt halten — Auth-State regelt alles.
@@ -37830,7 +39828,7 @@ function goToAuthPro(screen) {
 </script>
 
 <!-- Evidence — Region / Time-format engine (global, locale-aware) -->
-<script>
+<script data-lp="i18n">
 (function(){
   'use strict';
   var COUNTRIES=[
@@ -38469,7 +40467,7 @@ function goToAuthPro(screen) {
      usernames, display names, chat authors, account and server names — gets
      translate="no" + .notranslate so GT skips it. App copy still translates.
      ════════════════════════════════════════════════════════════════════ -->
-<script>
+<script data-lp="i18n">
 (function apexKeepNames(){
   'use strict';
 
@@ -55864,7 +57862,7 @@ body.light .pt-sugg{background:var(--layer)}
 <!-- ════ /Evidence DEMO MODE ════ -->
 
 <!-- ════ LANDING: live product tour + testimonials ════ -->
-<script>
+<script data-lp>
 /* ════════════════════════════════════════════════════════════════
    Evidence — Landing showcase
    Embeds the REAL application (demo mode, kiosk chrome) in a browser
@@ -55876,6 +57874,10 @@ body.light .pt-sugg{background:var(--layer)}
 (function(){
   "use strict";
   if(window.APEX_DEMO) return;                       // never inside the demo itself
+
+  /* Wo die App liegt: in der App-Datei selbst unter der eigenen Adresse, auf
+     der eigenständigen Landingpage unter app.html (setzt APEX_APP_URL). */
+  function appUrl(){ return window.APEX_APP_URL || location.pathname; }
 
   var SCREENS = [
     { k:'overview',   label:'Dashboard',  url:'overview',
@@ -55948,7 +57950,7 @@ body.light .pt-sugg{background:var(--layer)}
     fitFrame();
   }
   function frameURL(k){
-    return location.pathname + '?demo=1&kiosk=1&screen=' + k + (isPhone() ? '&mobile=1' : '');
+    return appUrl() + '?demo=1&kiosk=1&screen=' + k + (isPhone() ? '&mobile=1' : '');
   }
 
   function load(){
@@ -55985,7 +57987,7 @@ body.light .pt-sugg{background:var(--layer)}
     poster.classList.remove('gone');
     poster.innerHTML = '<div class="lp-poster-t">The embedded demo could not start here</div>'+
       '<div class="lp-poster-s">Some browsers block embedded frames. Open the demo in its own tab instead — same app, same sample data.</div>'+
-      '<a class="lp-btn primary" href="'+location.pathname+'?demo=1" target="_blank" rel="noopener">Open the demo ↗</a>';
+      '<a class="lp-btn primary" href="'+appUrl()+'?demo=1" target="_blank" rel="noopener">Open the demo ↗</a>';
   }
 
   function show(i, immediate){
@@ -56033,7 +58035,7 @@ body.light .pt-sugg{background:var(--layer)}
     buildTabs();
 
     var openBtn = $('lpDemoOpen');
-    if(openBtn){ openBtn.setAttribute('href', location.pathname + '?demo=1'); openBtn.setAttribute('target','_blank'); openBtn.setAttribute('rel','noopener'); }
+    if(openBtn){ openBtn.setAttribute('href', appUrl() + '?demo=1'); openBtn.setAttribute('target','_blank'); openBtn.setAttribute('rel','noopener'); }
     var playBtn = $('lpPlay');
     if(playBtn) playBtn.addEventListener('click', load);
 
@@ -56166,9 +58168,51 @@ body.light .pt-sugg{background:var(--layer)}
     sec.style.display = '';
     if(div) div.style.display = '';
   }
+  function sortVoices(out){
+    out.sort(function(a,b){
+      var f=(b.featured?1:0)-(a.featured?1:0); if(f) return f;
+      // verified reviews first — never sorted by star rating
+      var v=((b.verified&&b.verified.trades)?1:0)-((a.verified&&a.verified.trades)?1:0); if(v) return v;
+      return (b.createdAt||0)-(a.createdAt||0);
+    });
+    return out;
+  }
+  /* Eigenständige Landingpage (APEX_LANDING_ONLY): dort gibt es kein
+     Firebase-SDK. Dieselbe Abfrage über die REST-Schnittstelle von Firestore —
+     die Regel erlaubt das Lesen freigegebener Stimmen ohne Anmeldung. */
+  function restVoices(){
+    function val(v){
+      if(!v) return null;
+      if('stringValue' in v) return v.stringValue;
+      if('integerValue' in v) return Number(v.integerValue);
+      if('doubleValue' in v) return v.doubleValue;
+      if('booleanValue' in v) return v.booleanValue;
+      if('timestampValue' in v) return Date.parse(v.timestampValue);
+      if('mapValue' in v) return obj(v.mapValue.fields);
+      if('arrayValue' in v) return (v.arrayValue.values||[]).map(val);
+      return null;
+    }
+    function obj(f){ var o={}; Object.keys(f||{}).forEach(function(k){ o[k]=val(f[k]); }); return o; }
+    return fetch('https://firestore.googleapis.com/v1/projects/sd-indikator-by-jason/databases/(default)/documents:runQuery', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ structuredQuery:{ from:[{collectionId:'apexTestimonials'}],
+        where:{ fieldFilter:{ field:{fieldPath:'approved'}, op:'EQUAL', value:{booleanValue:true} } }, limit:24 } })
+    }).then(function(r){ return r.ok ? r.json() : []; }).then(function(rows){
+      return (Array.isArray(rows)?rows:[]).filter(function(x){ return x && x.document; }).map(function(x){
+        var o=obj(x.document.fields); o.id=String(x.document.name||'').split('/').pop(); return o; });
+    });
+  }
   function loadVoices(){
     var tries = 0;
     var lp = document.getElementById('landingPage');
+    if(window.APEX_LANDING_ONLY){
+      // erst beim ersten Scrollen — kein Abruf für jemanden, der oben abspringt
+      var done = false;
+      var once = function(){ if(done) return; done = true;
+        restVoices().then(function(out){ if(out.length) renderVoices(sortVoices(out)); }).catch(function(){}); };
+      addEventListener('scroll', once, { once:true, passive:true });
+      return;
+    }
     var iv = setInterval(function(){
       tries++;
       // only spend a read when the landing is actually on screen (logged-out visitors)
@@ -56179,13 +58223,7 @@ body.light .pt-sugg{background:var(--layer)}
           .then(function(q){
             var out=[];
             q.forEach(function(d){ var o=d.data()||{}; o.id=d.id; out.push(o); });
-            out.sort(function(a,b){
-              var f=(b.featured?1:0)-(a.featured?1:0); if(f) return f;
-              // verified reviews first — never sorted by star rating
-              var v=((b.verified&&b.verified.trades)?1:0)-((a.verified&&a.verified.trades)?1:0); if(v) return v;
-              return (b.createdAt||0)-(a.createdAt||0);
-            });
-            renderVoices(out);
+            renderVoices(sortVoices(out));
           }).catch(function(){});
       }
       if(tries>60) clearInterval(iv);
@@ -66349,17 +68387,10 @@ self.addEventListener('message', async (ev) => {
       if (!el || !window.ApexMarketData || !window.ApexMarketData.earliest) return;
       window.ApexMarketData.earliest('EURUSD').then(function (iso) {
         if (!iso || !document.getElementById('lpHist')) return;
-        /* Der Satz trägt einen Monatsnamen — kein Wörterbuch-Schlüssel passt
-           darauf, und GT übersetzte ihn sonst als einzigen Satz der Sektion.
-           Deshalb hier selbst in der Seitensprache gebaut und gesperrt. */
-        var lg = String(window.apexResolvedLang || document.documentElement.lang || 'en').slice(0, 2).toLowerCase();
-        var SENT = { de: ' Die Majors reichen zurück bis %s.', es: ' Los majors se remontan a %s.', pt: ' Os majors vão até %s.', fr: ' Les majors remontent à %s.' };
-        if (SENT[lg]) {
-          var p = String(iso).split('-'), d = new Date(Date.UTC(+p[0], (+p[1] || 1) - 1, 1));
-          var mo; try { mo = d.toLocaleString(lg, { month: 'long', year: 'numeric', timeZone: 'UTC' }); } catch (e) { mo = earliestLabel(iso); }
-          el.textContent = SENT[lg].replace('%s', mo);
-          el.setAttribute('translate', 'no'); el.classList.add('notranslate');
-        } else el.textContent = ' The majors go back to ' + earliestLabel(iso) + '.';
+        /* Gesetzt wird der Satz von apexLpHist (Inline-Skript beim Element,
+           auch auf der eigenständigen Landingpage) — hier kommt nur die
+           frische Messung dazu, in der inzwischen bekannten Seitensprache. */
+        if (window.apexLpHist) window.apexLpHist(iso);
       }, function () {});
     }
     // After boot: the landing is above the fold and must not wait on a probe.
@@ -66593,10 +68624,16 @@ self.addEventListener('message', async (ev) => {
     var wickGeo = new THREE.CylinderGeometry(0.025, 0.025, 1, 8);
     var edgeGeo = new THREE.EdgesGeometry(bodyGeo);
     var UP = 0x0db36a, DN = 0xd9223f;
+    /* Der Renderer gibt sRGB aus; ein Hex-Wert muss dafür erst linear werden.
+       Ohne das kam das Rot als blasses Rosa und das Grün als Mint heraus. */
+    function lin(hex) { return new THREE.Color(hex).convertSRGBToLinear(); }
     var ambient = null;
     var mats = {
-      up: new THREE.MeshStandardMaterial({ color: UP, metalness: 0.15, roughness: 0.3, envMap: env, envMapIntensity: 0.18, emissive: 0x06572f, emissiveIntensity: 0.8 }),
-      dn: new THREE.MeshStandardMaterial({ color: DN, metalness: 0.15, roughness: 0.3, envMap: env, envMapIntensity: 0.18, emissive: 0x6e0d1c, emissiveIntensity: 0.8 }),
+      /* 11.11.2026: weniger Eigenleuchten, mehr Spiegelung — die Kerzen waren
+         leuchtende Plastikklötze; jetzt lackiertes Grün und Rot, das die
+         Umgebung fängt. Werte auch in applyTheme (dunkel) unten. */
+      up: new THREE.MeshStandardMaterial({ color: lin(UP), metalness: 0.35, roughness: 0.24, envMap: env, envMapIntensity: 0.55, emissive: lin(0x0a8f52), emissiveIntensity: 0.42 }),
+      dn: new THREE.MeshStandardMaterial({ color: lin(DN), metalness: 0.35, roughness: 0.24, envMap: env, envMapIntensity: 0.55, emissive: lin(0xb01e36), emissiveIntensity: 0.42 }),
       wick: new THREE.MeshStandardMaterial({ color: 0xd9c9a3, metalness: 0.8, roughness: 0.3, envMap: env })
     };
     var ghostMat = new THREE.LineBasicMaterial({ color: 0xe7c46e, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false });
@@ -66665,9 +68702,9 @@ self.addEventListener('message', async (ev) => {
       line.material.color.setHex(L ? 0xa8781f : 0xffe3a0);
       strip.material.color.setHex(L ? 0xc99b3c : 0xffdb8a);
       dust.material.opacity = L ? 0.35 : 0.7;
-      mats.up.emissiveIntensity = mats.dn.emissiveIntensity = L ? 0 : 0.8;
-      mats.up.color.setHex(L ? 0x0a8f52 : UP); mats.dn.color.setHex(L ? 0xc4213c : DN);
-      mats.up.envMapIntensity = mats.dn.envMapIntensity = L ? 0 : 0.18;
+      mats.up.emissiveIntensity = mats.dn.emissiveIntensity = L ? 0 : 0.42;
+      mats.up.color.copy(lin(L ? 0x0a8f52 : UP)); mats.dn.color.copy(lin(L ? 0xc4213c : DN));
+      mats.up.envMapIntensity = mats.dn.envMapIntensity = L ? 0 : 0.55;
       mats.wick.color.setHex(L ? 0x8a7650 : 0xd9c9a3);
       key.intensity = L ? 0.7 : 1.1; rim.intensity = L ? 0.3 : 1.2; nowLight.distance = L ? 5 : 9;
     }
@@ -98194,7 +100231,7 @@ body.light #page-glossary mark { background: rgba(var(--gold-rgb),0.18); }
 })();
 </script>
 
-<script>
+<script data-lp="i18n">
 /* ══════════════════════════════════════════════════════════════════
    AUTHORED TRANSLATIONS  —  ApexI18n
 
@@ -104695,7 +106732,8 @@ body:not(.lp-on) #lpProgress{ display:none; }
 
 /* Einblenden: etwas Unschärfe beim Hereinkommen wirkt hochwertiger als
    reines Verschieben — nur bei Überschriften und Hero, nicht bei allem. */
-#landingPage .lp-title.reveal{ filter:blur(10px); transition:opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1), filter .9s cubic-bezier(.2,.7,.2,1); }
+:where(html.lp-js) #landingPage .lp-title.reveal{ filter:blur(10px); }
+#landingPage .lp-title.reveal{ transition:opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1), filter .9s cubic-bezier(.2,.7,.2,1); }
 #landingPage .lp-title.reveal.in{ filter:none; }
 /* Der Hero ist ab dem ersten Bild da (23.10.2026). Vorher hing er an .reveal:
    unsichtbar und unscharf, bis das Skript der 100.000-Zeilen-Seite lief, dann
@@ -105008,7 +107046,7 @@ body.light::before{ opacity:.45; }
 .lp-stream-cap{text-align:center;font-size:12px;color:var(--ink3,#8a93a6);margin-top:10px}
 </style>
 
-<script id="apex-polish-2609-js">
+<script id="apex-polish-2609-js" data-lp>
 (function () {
   'use strict';
   var RM = false; try { RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { }
@@ -105384,7 +107422,7 @@ body.light::before{ opacity:.45; }
      Wer angenommen ist, bekommt an einer späteren Kundenstimme beta:true —
      die Landingpage kennzeichnet sie dann als „received Pro for free".
 ══════════════════════════════════════════════════════════════════ -->
-<script>
+<script data-lp>
 (function () {
   'use strict';
   if (window.ApexBeta) return;
@@ -105504,7 +107542,7 @@ body.light::before{ opacity:.45; }
      fehlt, übersetzt weiter Google. Schlüssel = exakter englischer Textknoten.
      Anrede wie in der App: du / tú / você / vous.
 ══════════════════════════════════════════════════════════════════ -->
-<script>
+<script data-lp="i18n">
 (function () {
   'use strict';
   var LP = {
@@ -106403,6 +108441,7 @@ body.light::before{ opacity:.45; }
     "Solid": ["Belastbar", "Sólida", "Sólida", "Solide"],
     "Every number here is counted from your file — nothing is estimated.": ["Jede Zahl hier ist aus deiner Datei gezählt – nichts ist geschätzt.", "Cada cifra se cuenta a partir de tu archivo; nada se estima.", "Cada número aqui é contado do seu arquivo — nada é estimado.", "Chaque chiffre est compté à partir de votre fichier — rien n’est estimé."],
     "Save it and get the full report →": ["Speichern und vollen Bericht holen →", "Guárdalo y obtén el informe completo →", "Salve e receba o relatório completo →", "Enregistrez-le et obtenez le rapport complet →"],
+    "Reading your file…": ["Deine Datei wird gelesen …", "Leyendo tu archivo…", "Lendo seu arquivo…", "Lecture de votre fichier…"],
     "Free account. Your trades are carried into your new journal — you check them before anything is saved.": ["Kostenloses Konto. Deine Trades wandern in dein neues Journal – du prüfst sie, bevor etwas gespeichert wird.", "Cuenta gratuita. Tus operaciones pasan a tu nuevo diario; las revisas antes de guardar nada.", "Conta grátis. Suas operações vão para o seu novo diário — você confere antes de qualquer coisa ser salva.", "Compte gratuit. Vos trades sont repris dans votre nouveau journal — vous les vérifiez avant tout enregistrement."],
     "Everything in Free, plus three things:": ["Alles aus Free, dazu drei Dinge:", "Todo lo de Free, más tres cosas:", "Tudo do Free, mais três coisas:", "Tout ce qui est dans Free, plus trois choses :"],
     "Automatic": ["Automatisch", "Automático", "Automático", "Automatique"],
@@ -106462,7 +108501,7 @@ body.light::before{ opacity:.45; }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
 })();
 </script>
-<script>
+<script data-lp>
 /* ═══════════════════════════════════════════════════════════════════
    LANDING-ASSISTENT  —  ApexAsk   (20.10.2026)
 
@@ -114503,7 +116542,7 @@ window.APEX_MFA_LIVE = window.APEX_MFA_LIVE !== undefined ? window.APEX_MFA_LIVE
   });
 })();
 </script>
-<script>
+<script data-lp>
 /* ApexShell — the app inside the App Store / Play Store packages (01.11.2026)
    Android ships as a Trusted Web Activity (mobile/android-twa): the real
    Chrome engine, so Google sign-in, web push and the service worker work as

@@ -3,7 +3,7 @@
   "short_name": "Evidence",
   "description": "Professional trading journal, analytics and AI coach — cTrader, MT5, ATAS, Quantower & TradingView auto-tracking.",
   "id": "./?source=pwa",
-  "start_url": "./?source=pwa",
+  "start_url": "./app.html?source=pwa",
   "scope": "./",
   "display": "standalone",
   "display_override": [
@@ -43,7 +43,7 @@
       "name": "Plan a trade",
       "short_name": "Plan",
       "description": "Write the plan before you place the order",
-      "url": "./?source=pwa&quick=plan",
+      "url": "./app.html?source=pwa&quick=plan",
       "icons": [
         {
           "src": "icons/icon-192.png",
@@ -56,7 +56,7 @@
       "name": "Quick log",
       "short_name": "Quick log",
       "description": "Five answers for the trades you just closed",
-      "url": "./?source=pwa&quick=log",
+      "url": "./app.html?source=pwa&quick=log",
       "icons": [
         {
           "src": "icons/icon-192.png",
@@ -69,7 +69,7 @@
       "name": "Log a trade",
       "short_name": "Log trade",
       "description": "Record a trade in a few taps",
-      "url": "./?source=pwa&quick=trade",
+      "url": "./app.html?source=pwa&quick=trade",
       "icons": [
         {
           "src": "icons/icon-192.png",
@@ -81,7 +81,7 @@
     {
       "name": "Journal",
       "short_name": "Journal",
-      "url": "./?source=pwa&go=journal",
+      "url": "./app.html?source=pwa&go=journal",
       "icons": [
         {
           "src": "icons/icon-192.png",
