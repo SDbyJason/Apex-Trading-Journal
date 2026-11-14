@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prop Firm Drawdown & Position Size Calculator (Free) | Evidence</title>
+<meta name="description" content="Free calculator for prop firm traders: see how much room you have left before your trailing or static drawdown, your daily loss limit, and how many contracts or lots to trade.">
+<link rel="canonical" href="https://evidencetrading.com/prop-firm-drawdown-calculator.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/prop-firm-drawdown-calculator.html">
+<meta property="og:title" content="Prop Firm Drawdown & Position Size Calculator (Free)">
+<meta property="og:description" content="How much room is left before your drawdown, and how big should your next trade be? Free, no signup.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400&family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080b;--panel:#0d0f13;--line:rgba(255,255,255,.09);--gold:#c9a84c;--gold-hi:#e8c96a;--ink:#f2efe9;--ink2:#c8c2b6;--mute:#8b8578;--pos:#3ecf8e;--neg:#ef5b5b;--warn:#f0b44c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px}
+header.nav{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(7,8,11,.9);backdrop-filter:blur(10px);z-index:10}
+header.nav .wrap{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--ink);font-size:15px}
+.brand-mark{width:28px;height:28px;border-radius:8px;display:block;flex:none}
+.nav-cta{margin-left:auto;border:1px solid rgba(201,168,76,.4);border-radius:9px;padding:8px 16px;font-size:13.5px;font-weight:600}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,2.9rem);line-height:1.12;letter-spacing:-.02em;color:var(--ink);margin:44px 0 12px;font-weight:800;text-wrap:balance}
+h2{font-family:'Syne',sans-serif;font-size:clamp(1.3rem,3vw,1.65rem);color:var(--ink);margin:40px 0 12px;font-weight:700}
+.lede{font-size:1.1rem;margin-bottom:24px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-top:40px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px}
+.tabs button{font:600 14px 'Instrument Sans',sans-serif;color:var(--ink2);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:9px 16px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:#0b0b0b;background:linear-gradient(90deg,var(--gold-hi),var(--gold));border-color:var(--gold)}
+.card{border:1px solid var(--line);border-radius:16px;padding:22px;background:rgba(255,255,255,.015)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px}
+label small{font-weight:400;color:var(--mute)}
+input,select{width:100%;font:500 16px 'Instrument Sans',sans-serif;color:var(--ink);background:#0a0b0f;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-variant-numeric:tabular-nums}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.out{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#0a0b0f}
+.tile .k{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.tile .v{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.25}
+.tile.pos .v{color:var(--pos)}.tile.neg .v{color:var(--neg)}.tile.warn .v{color:var(--warn)}
+.bar{height:12px;border-radius:99px;background:#1a1b20;overflow:hidden;margin-top:18px}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pos),var(--warn) 70%,var(--neg));transition:width .3s}
+.note{font-size:13.5px;color:var(--mute);margin-top:14px}
+.cta{margin:36px 0;border:1px solid rgba(201,168,76,.35);background:rgba(201,168,76,.06);border-radius:16px;padding:22px}
+.cta h2{margin-top:0}
+.btn{display:inline-block;background:linear-gradient(90deg,var(--gold-hi),var(--gold));color:#0b0b0b;font-weight:700;border-radius:10px;padding:12px 20px;margin-top:8px}
+.btn:hover{text-decoration:none;filter:brightness(1.05)}
+footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0;font-size:13.5px;color:var(--mute)}
+footer .links{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="/"><svg class="brand-mark" viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/></svg> Evidence Trading</a>
+  <a class="nav-cta" href="/">Open the app →</a>
+</div></header>
+
+<main class="wrap">
+  <p class="eyebrow">Free tool · no signup</p>
+  <h1>Prop firm drawdown &amp; position size calculator</h1>
+  <p class="lede">See how much room you have before your drawdown and daily loss limit, and how big your next trade can be without breaking a rule.</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-dd" aria-selected="true" aria-controls="p-dd">Drawdown room</button>
+    <button role="tab" id="t-ps" aria-selected="false" aria-controls="p-ps">Position size</button>
+  </div>
+
+  <section class="card" id="p-dd" role="tabpanel" aria-labelledby="t-dd">
+    <div class="grid">
+      <div><label for="dd-type">Drawdown type</label>
+        <select id="dd-type"><option value="trail">Trailing (intraday)</option><option value="eod">Trailing (end of day)</option><option value="static">Static</option></select></div>
+      <div><label for="dd-size">Account size <small>($)</small></label><input id="dd-size" type="number" inputmode="decimal" value="50000"></div>
+      <div><label for="dd-max">Max drawdown <small>($)</small></label><input id="dd-max" type="number" inputmode="decimal" value="2500"></div>
+      <div><label for="dd-peak">Highest balance so far <small>($)</small></label><input id="dd-peak" type="number" inputmode="decimal" value="51200"></div>
+      <div><label for="dd-bal">Current balance <small>($)</small></label><input id="dd-bal" type="number" inputmode="decimal" value="50600"></div>
+      <div><label for="dd-lock">Drawdown stops trailing at <small>($, optional)</small></label><input id="dd-lock" type="number" inputmode="decimal" placeholder="e.g. 50100"></div>
+      <div><label for="dd-daily">Daily loss limit <small>($, optional)</small></label><input id="dd-daily" type="number" inputmode="decimal" placeholder="e.g. 1000"></div>
+      <div><label for="dd-today">Today's P&amp;L so far <small>($)</small></label><input id="dd-today" type="number" inputmode="decimal" value="-150"></div>
+    </div>
+    <div class="out">
+      <div class="tile" id="o-floor"><div class="k">Account fails at</div><div class="v">–</div></div>
+      <div class="tile" id="o-room"><div class="k">Room left</div><div class="v">–</div></div>
+      <div class="tile" id="o-day" hidden><div class="k">Room left today</div><div class="v">–</div></div>
+      <div class="tile" id="o-limit"><div class="k">Real limit today</div><div class="v">–</div></div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="o-bar" style="width:0"></i></div>
+    <p class="note" id="o-text"></p>
+    <p class="note">Rules differ by firm and change over time. Enter the values from your firm's current rules page.</p>
+  </section>
+
+  <section class="card" id="p-ps" role="tabpanel" aria-labelledby="t-ps" hidden>
+    <div class="grid">
+      <div><label for="ps-inst">Instrument</label>
+        <select id="ps-inst">
+          <option value="50|0.25">ES (E-mini S&amp;P) · $50/pt</option>
+          <option value="5|0.25">MES (Micro S&amp;P) · $5/pt</option>
+          <option value="20|0.25" selected>NQ (E-mini Nasdaq) · $20/pt</option>
+          <option value="2|0.25">MNQ (Micro Nasdaq) · $2/pt</option>
+          <option value="100|0.1">GC (Gold) · $100/pt</option>
+          <option value="10|0.1">MGC (Micro Gold) · $10/pt</option>
+          <option value="fx">Forex (lots, pips)</option>
+        </select></div>
+      <div><label for="ps-risk">Risk per trade <small>($)</small></label><input id="ps-risk" type="number" inputmode="decimal" value="250"></div>
+      <div><label for="ps-stop" id="ps-stop-l">Stop distance <small>(points)</small></label><input id="ps-stop" type="number" inputmode="decimal" value="10"></div>
+      <div id="ps-pipwrap" hidden><label for="ps-pip">Pip value per lot <small>($)</small></label><input id="ps-pip" type="number" inputmode="decimal" value="10"></div>
+      <div><label for="ps-room">Room left before drawdown <small>($, optional)</small></label><input id="ps-room" type="number" inputmode="decimal" placeholder="from the first tab"></div>
+    </div>
+    <div class="out">
+      <div class="tile pos" id="o-size"><div class="k">Trade size</div><div class="v">–</div></div>
+      <div class="tile" id="o-real"><div class="k">Real risk</div><div class="v">–</div></div>
+      <div class="tile" id="o-losses"><div class="k">Losses until fail</div><div class="v">–</div></div>
+    </div>
+    <p class="note" id="o-ps-text"></p>
+  </section>
+
+  <div class="cta">
+    <h2>Stop calculating by hand</h2>
+    <p>Evidence connects to your MT5, cTrader and prop accounts and tracks your drawdown, daily limit and position size on every trade, live. It warns you before a rule breaks, and shows which trades cost you the most.</p>
+    <a class="btn" href="/?utm_source=tool&utm_medium=organic&utm_campaign=dd-calculator">Create Free Account</a>
+    <a href="/?demo=1&utm_source=tool&utm_medium=organic&utm_campaign=dd-calculator" style="margin-left:14px">Try the live demo</a>
+  </div>
+
+  <h2>How the drawdown types work</h2>
+  <p><b style="color:var(--ink)">Trailing (intraday):</b> the fail line moves up with your highest balance, including open profit during the day. A winning trade you give back still moves the line.</p>
+  <p><b style="color:var(--ink)">Trailing (end of day):</b> the fail line only moves up with your closing balance at the end of each day.</p>
+  <p><b style="color:var(--ink)">Static:</b> the fail line stays at account size minus max drawdown and never moves.</p>
+  <p>Many firms stop trailing once the line reaches a set level (often the starting balance). Enter that level in "Drawdown stops trailing at".</p>
+</main>
+
+<footer><div class="wrap">
+  <div class="links">
+    <a href="/">Home</a><a href="/?demo=1">Live demo</a><a href="/prop-firm-trading-journal.html">Prop firm journal</a><a href="/apex-trading-journal.html">Apex journal</a><a href="/topstep-trading-journal.html">Topstep journal</a><a href="/evidence-vs-tradezella.html">vs TradeZella</a>
+  </div>
+  <div>© 2026 Evidence Trading · Journal, analytics and market replay for traders.</div>
+</div></footer>
+
+<script>
+const $=id=>document.getElementById(id), num=id=>{const v=parseFloat($(id).value);return isNaN(v)?null:v};
+const usd=v=>(v<0?'-$':'$')+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:0});
+function setTile(id,val,cls){const t=$(id);t.querySelector('.v').textContent=val;t.classList.remove('pos','neg','warn');if(cls)t.classList.add(cls)}
+function dd(){
+  const type=$('dd-type').value,size=num('dd-size')||0,max=num('dd-max')||0,peak=Math.max(num('dd-peak')||size,size),bal=num('dd-bal')||size,lock=num('dd-lock'),daily=num('dd-daily'),today=num('dd-today')||0;
+  $('dd-peak').closest('div').hidden=type==='static';$('dd-lock').closest('div').hidden=type==='static';
+  let floor=type==='static'?size-max:peak-max; if(type!=='static'&&lock!=null)floor=Math.min(floor,lock);
+  const room=bal-floor, used=max>0?Math.min(1,Math.max(0,1-room/max)):0;
+  setTile('o-floor',usd(floor));
+  setTile('o-room',usd(room),room<=0?'neg':room<max*.3?'warn':'pos');
+  let limit=room,why='your max drawdown';
+  $('o-day').hidden=daily==null;
+  if(daily!=null){const dRoom=daily+today;setTile('o-day',usd(dRoom),dRoom<=0?'neg':dRoom<daily*.3?'warn':'pos');if(dRoom<limit){limit=dRoom;why='your daily loss limit'}}
+  setTile('o-limit',usd(Math.max(0,limit)),limit<=0?'neg':'');
+  $('o-bar').style.width=(used*100).toFixed(1)+'%';
+  $('o-text').textContent=room<=0?'This balance is at or below the fail line.':`You can lose ${usd(Math.max(0,limit))} more today before you hit ${why}. ${Math.round(used*100)}% of your drawdown is used.`;
+  if(!$('ps-room').dataset.touched)$('ps-room').value=Math.max(0,Math.round(limit));
+  ps();
+}
+function ps(){
+  const inst=$('ps-inst').value,fx=inst==='fx',risk=num('ps-risk')||0,stop=num('ps-stop')||0,room=num('ps-room');
+  $('ps-pipwrap').hidden=!fx;$('ps-stop-l').innerHTML='Stop distance <small>('+(fx?'pips':'points')+')</small>';
+  let size,real,unit;
+  if(fx){const pip=num('ps-pip')||10;size=stop>0?Math.floor(risk/(stop*pip)*100)/100:0;real=size*stop*pip;unit=' lots'}
+  else{const pv=parseFloat(inst.split('|')[0]);size=stop>0?Math.floor(risk/(stop*pv)):0;real=size*stop*pv;unit=size===1?' contract':' contracts'}
+  setTile('o-size',size>0?size+unit:'0',size>0?'pos':'neg');
+  setTile('o-real',usd(real));
+  const losses=room!=null&&real>0?Math.floor(room/real):null;
+  setTile('o-losses',losses==null?'–':String(losses),losses==null?'':losses<=2?'neg':losses<=4?'warn':'pos');
+  $('o-ps-text').textContent=size>0?`Trade ${size}${unit} to risk ${usd(real)}.`+(losses!=null?` ${losses} full losses in a row would fail the account.`:''):'Your risk is too small for one unit at this stop. Widen the risk or tighten the stop.';
+}
+document.querySelectorAll('#p-dd input,#p-dd select').forEach(e=>e.addEventListener('input',dd));
+document.querySelectorAll('#p-ps input,#p-ps select').forEach(e=>e.addEventListener('input',ps));
+$('ps-room').addEventListener('input',()=>$('ps-room').dataset.touched=1);
+document.querySelectorAll('[role=tab]').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('[role=tab]').forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);$(x.getAttribute('aria-controls')).hidden=!on})}));
+dd();
+</script>
+</body>
+</html>

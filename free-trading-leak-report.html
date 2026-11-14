@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Trading Leak Report – Find Where You Lose Money | Evidence</title>
+<meta name="description" content="Upload your MT5 report or trade CSV and see your biggest leak in seconds: the hour, day, symbol or habit that costs you the most. Free, runs in your browser, nothing is uploaded.">
+<link rel="canonical" href="https://evidencetrading.com/free-trading-leak-report.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Evidence Trading">
+<meta property="og:url" content="https://evidencetrading.com/free-trading-leak-report.html">
+<meta property="og:title" content="Free Trading Leak Report – Find Where You Lose Money">
+<meta property="og:description" content="Drop in your trade history and see the one habit that costs you the most. Free, private, no signup.">
+<meta property="og:image" content="https://evidencetrading.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400&family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080b;--panel:#0d0f13;--line:rgba(255,255,255,.09);--gold:#c9a84c;--gold-hi:#e8c96a;--ink:#f2efe9;--ink2:#c8c2b6;--mute:#8b8578;--pos:#3ecf8e;--neg:#ef5b5b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink2);font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px}
+header.nav{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(7,8,11,.9);backdrop-filter:blur(10px);z-index:10}
+header.nav .wrap{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--ink);font-size:15px}
+.brand-mark{width:28px;height:28px;border-radius:8px;display:block;flex:none}
+.nav-cta{margin-left:auto;border:1px solid rgba(201,168,76,.4);border-radius:9px;padding:8px 16px;font-size:13.5px;font-weight:600}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,2.9rem);line-height:1.12;letter-spacing:-.02em;color:var(--ink);margin:44px 0 12px;font-weight:800;text-wrap:balance}
+h2{font-family:'Syne',sans-serif;font-size:clamp(1.3rem,3vw,1.65rem);color:var(--ink);margin:40px 0 12px;font-weight:700}
+.lede{font-size:1.1rem;margin-bottom:24px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-top:40px}
+.drop{border:1.5px dashed rgba(201,168,76,.45);border-radius:18px;padding:34px 22px;text-align:center;background:rgba(201,168,76,.04);cursor:pointer;transition:background .2s}
+.drop.over{background:rgba(201,168,76,.1)}
+.drop b{color:var(--ink);font-size:1.1rem}
+.drop p{margin:6px 0 0;font-size:14px;color:var(--mute)}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.btn{display:inline-block;background:linear-gradient(90deg,var(--gold-hi),var(--gold));color:#0b0b0b;font:700 15px 'Instrument Sans',sans-serif;border:0;border-radius:10px;padding:12px 20px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--gold);border:1px solid rgba(201,168,76,.45)}
+.btn:hover{text-decoration:none;filter:brightness(1.06)}
+button:focus-visible,.drop:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.err{color:var(--neg);margin-top:12px;font-size:14.5px}
+.leak{margin-top:26px;border:1px solid rgba(239,91,91,.4);background:linear-gradient(180deg,rgba(239,91,91,.08),rgba(239,91,91,.02));border-radius:18px;padding:24px}
+.leak .k{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--neg)}
+.leak h2{margin:8px 0 6px;font-size:clamp(1.5rem,4vw,2rem)}
+.leak .big{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2.2rem,7vw,3.2rem);color:var(--neg);line-height:1.1;font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#0a0b0f}
+.tile .k{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.tile .v{font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.v.pos{color:var(--pos)}.v.neg{color:var(--neg)}
+.more{position:relative;margin-top:22px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.more ul{list-style:none;margin:0;padding:18px 20px;filter:blur(6px);user-select:none}
+.more li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;background:rgba(7,8,11,.55)}
+.lock b{color:var(--ink);font-size:1.1rem}
+.note{font-size:13.5px;color:var(--mute)}
+details{border-top:1px solid var(--line);padding:12px 0}
+summary{cursor:pointer;color:var(--ink);font-weight:600}
+footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0;font-size:13.5px;color:var(--mute)}
+footer .links{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="/"><svg class="brand-mark" viewBox="0 0 512 512" role="img" aria-label="Evidence Trading"><defs><linearGradient id="etG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E894"/><stop offset=".42" stop-color="#E8C24A"/><stop offset="1" stop-color="#AE801A"/></linearGradient></defs><rect width="512" height="512" rx="118" fill="#131313"/><rect x="9" y="9" width="494" height="494" rx="110" fill="none" stroke="#8C7220" stroke-width="18"/><rect x="98" y="112" width="287" height="84" rx="25" fill="url(#etG)"/><rect x="175" y="112" width="91" height="329" rx="25" fill="url(#etG)"/><rect x="175" y="231" width="189" height="77" rx="25" fill="url(#etG)"/><rect x="175" y="357" width="189" height="84" rx="25" fill="url(#etG)"/></svg> Evidence Trading</a>
+  <a class="nav-cta" href="/">Open the app →</a>
+</div></header>
+
+<main class="wrap">
+  <p class="eyebrow">Free tool · runs in your browser</p>
+  <h1>Find the one habit that costs you the most</h1>
+  <p class="lede">Drop in your MT5 report or a trade CSV. In seconds you see your biggest leak: the hour, the weekday, the symbol or the revenge trades that eat your profit.</p>
+
+  <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose a trade history file">
+    <b>Drop your file here or tap to choose</b>
+    <p>MT5 report (.html / .htm) or CSV with close time and profit · nothing leaves your device</p>
+    <input type="file" id="file" accept=".csv,.html,.htm,.txt" hidden>
+  </div>
+  <div class="row"><button class="btn ghost" id="sample" type="button">Try it with sample trades</button></div>
+  <p class="err" id="err" hidden></p>
+
+  <section id="result" hidden>
+    <div class="leak">
+      <div class="k">Your biggest leak</div>
+      <h2 id="l-title"></h2>
+      <div class="big" id="l-amt"></div>
+      <p id="l-text"></p>
+    </div>
+    <div class="stats">
+      <div class="tile"><div class="k">Trades</div><div class="v" id="s-n"></div></div>
+      <div class="tile"><div class="k">Net P&amp;L</div><div class="v" id="s-net"></div></div>
+      <div class="tile"><div class="k">Win rate</div><div class="v" id="s-wr"></div></div>
+      <div class="tile"><div class="k">Without this leak</div><div class="v pos" id="s-without"></div></div>
+    </div>
+    <div class="more">
+      <ul id="others"></ul>
+      <div class="lock">
+        <b id="lock-t">3 more leaks found</b>
+        <p class="note" style="margin:6px 0 12px">Create a free account to see every leak, your best setups and a guardrail that warns you live.</p>
+        <a class="btn" href="/?utm_source=tool&utm_medium=organic&utm_campaign=leak-report">Create Free Account</a>
+      </div>
+    </div>
+  </section>
+
+  <h2>How to export your trades</h2>
+  <details><summary>MetaTrader 5</summary><p>Open the History tab, right-click, choose Report, then HTML. Drop that file here.</p></details>
+  <details><summary>cTrader, TradingView, Tradovate or any broker</summary><p>Export your closed trades as CSV. The file needs a close time and a profit column. Symbol and side are used when present.</p></details>
+  <details><summary>Is my data safe?</summary><p>The file is read by your own browser. Nothing is uploaded or stored by this page.</p></details>
+</main>
+
+<footer><div class="wrap">
+  <div class="links"><a href="/">Home</a><a href="/?demo=1">Live demo</a><a href="/prop-firm-drawdown-calculator.html">Drawdown calculator</a><a href="/prop-firm-trading-journal.html">Prop firm journal</a><a href="/evidence-vs-tradezella.html">vs TradeZella</a></div>
+  <div>© 2026 Evidence Trading · Journal, analytics and market replay for traders.</div>
+</div></footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const usd=v=>(v<0?'-$':'$')+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:0});
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function fail(m){$('err').textContent=m;$('err').hidden=false;$('result').hidden=true}
+function num(s){if(s==null)return NaN;s=String(s).replace(/[\s$€£]/g,'');if(/^-?[\d.]*,\d{1,2}$/.test(s))s=s.replace(/\./g,'').replace(',','.');else s=s.replace(/,/g,'');return parseFloat(s)}
+function date(s){if(!s)return null;s=String(s).trim().replace(/^(\d{4})\.(\d\d)\.(\d\d)/,'$1-$2-$3').replace(/^(\d\d)\.(\d\d)\.(\d{4})/,'$3-$2-$1');const d=new Date(s.replace(' ','T'));return isNaN(d)?null:d}
+function fromRows(rows){
+  const head=rows.findIndex(r=>r.some(c=>/profit|p\/?&?l|pnl|net/i.test(c))&&r.some(c=>/time|date|close/i.test(c)));if(head<0)return null;
+  const h=rows[head].map(c=>c.toLowerCase().trim()),find=re=>h.findIndex(c=>re.test(c));
+  const timeCols=h.map((c,i)=>/time|date/.test(c)?i:-1).filter(i=>i>=0);
+  let ti=find(/close.*(time|date)|exit.*(time|date)/);if(ti<0)ti=timeCols.length>1?timeCols[timeCols.length-1]:timeCols[0];
+  const pi=find(/^net|net p|profit|p\/?&?l|pnl/),si=find(/symbol|instrument|market|ticker/),di=find(/^type$|side|direction|buy\/sell/);
+  const out=[];
+  for(const r of rows.slice(head+1)){const t=date(r[ti]),p=num(r[pi]);if(!t||isNaN(p))continue;if(di>=0&&/balance|deposit|withdraw/i.test(r[di]||''))continue;out.push({t,p,sym:si>=0?(r[si]||'').trim().toUpperCase():'',side:di>=0?(r[di]||'').trim().toLowerCase():''})}
+  return out.length?out:null}
+function parseCSV(text){const sep=(text.split('\n')[0].match(/;/g)||[]).length>(text.split('\n')[0].match(/,/g)||[]).length?';':(text.includes('\t')?'\t':',');
+  return text.split(/\r?\n/).filter(l=>l.trim()).map(l=>{const o=[];let c='',q=false;for(const ch of l){if(ch==='"')q=!q;else if(ch===sep&&!q){o.push(c);c=''}else c+=ch}o.push(c);return o})}
+function parseHTML(text){const doc=new DOMParser().parseFromString(text,'text/html');let rows=[...doc.querySelectorAll('tr')].map(tr=>[...tr.children].map(td=>td.textContent.trim()));
+  const ps=rows.findIndex(r=>r.length<=2&&/^positions$/i.test(r[0]||''));if(ps>=0){const end=rows.findIndex((r,i)=>i>ps+1&&r.length<=2&&/^(orders|deals)$/i.test(r[0]||''));rows=rows.slice(ps+1,end>0?end:undefined)}return rows}
+function analyze(trades){
+  trades.sort((a,b)=>a.t-b.t);const n=trades.length,net=trades.reduce((s,x)=>s+x.p,0),wins=trades.filter(x=>x.p>0).length;
+  const buckets={},add=(key,label,x)=>{(buckets[key]||(buckets[key]={label,sum:0,n:0})).sum+=x.p;buckets[key].n++};
+  trades.forEach((x,i)=>{
+    add('d'+x.t.getDay(),'Trades on '+DAYS[x.t.getDay()]+'s',x);
+    const h=x.t.getHours();add('h'+h,`Trades between ${String(h).padStart(2,'0')}:00 and ${String(h+1).padStart(2,'0')}:00`,x);
+    if(x.sym)add('s'+x.sym,'Trades on '+x.sym,x);
+    if(/buy|long/.test(x.side))add('long','Long trades',x);else if(/sell|short/.test(x.side))add('short','Short trades',x);
+    const prev=trades[i-1];if(prev&&prev.p<0&&x.t-prev.t<30*60e3)add('revenge','Trades within 30 min after a loss',x);
+    const sameDay=trades.filter((y,j)=>j<i&&y.t.toDateString()===x.t.toDateString()).length;if(sameDay>=3)add('over','4th+ trade of the day',x);
+  });
+  const min=Math.max(5,Math.round(n*.04));
+  const leaks=Object.entries(buckets).filter(([,b])=>b.n>=min&&b.sum<0&&b.n<n).map(([k,b])=>({k,...b})).sort((a,b)=>a.sum-b.sum);
+  return{n,net,wins,leaks}}
+const TEXT={revenge:'Revenge trades: entries soon after a loss lose money for you. A short break after each loss would keep this.',over:'Overtrading: after three trades a day, your results turn negative. A daily trade limit protects this.',long:'Your long trades lose money overall. Check whether your edge is only on one side.',short:'Your short trades lose money overall. Check whether your edge is only on one side.'};
+function show(trades){
+  $('err').hidden=true;if(!trades||trades.length<10)return fail('We need at least 10 closed trades with a close time and a profit column. Check the export steps below.');
+  const r=analyze(trades);$('result').hidden=false;
+  $('s-n').textContent=r.n;$('s-net').textContent=usd(r.net);$('s-net').className='v '+(r.net>=0?'pos':'neg');$('s-wr').textContent=Math.round(r.wins/r.n*100)+'%';
+  if(!r.leaks.length){$('l-title').textContent='No clear leak found';$('l-amt').textContent='';$('l-text').textContent='No group of your trades loses money on its own. The full journal tests dozens more conditions.';$('s-without').textContent=usd(r.net);$('others').innerHTML='';$('lock-t').textContent='See your best setups';return}
+  const L=r.leaks[0],key=L.k.replace(/\d+$/,'').replace(/^[dhs]$/,c=>c);
+  $('l-title').textContent=L.label;$('l-amt').textContent=usd(L.sum);
+  $('l-text').textContent=(TEXT[L.k]||`${L.n} trades in this group lost ${usd(L.sum)} in total. Without them your net would be ${usd(r.net-L.sum)}.`);
+  $('s-without').textContent=usd(r.net-L.sum);
+  const rest=r.leaks.slice(1,6);$('lock-t').textContent=rest.length?`${rest.length} more leak${rest.length>1?'s':''} found`:'See your best setups';
+  $('others').innerHTML=(rest.length?rest:[{label:'Your best hour',sum:420},{label:'Your best setup',sum:910},{label:'Your worst symbol',sum:-300}]).map(x=>`<li><span>${x.label.replace(/[<>&]/g,'')}</span><span>${usd(x.sum)}</span></li>`).join('');
+  $('result').scrollIntoView({behavior:'smooth',block:'start'})}
+function read(f){if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const t=rd.result;const rows=/<table|<tr/i.test(t)?parseHTML(t):parseCSV(t);show(fromRows(rows))}catch(e){fail('This file could not be read. Try a CSV export.')}};rd.readAsText(f)}
+$('drop').addEventListener('click',()=>$('file').click());
+$('drop').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file').click()}});
+$('file').addEventListener('change',e=>read(e.target.files[0]));
+['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('over')}));
+['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('over')}));
+$('drop').addEventListener('drop',e=>read(e.dataTransfer.files[0]));
+$('sample').addEventListener('click',()=>{let s=7;const R=()=>(s=(s*16807)%2147483647)/2147483647,out=[],syms=['NQ','ES','NQ','GC'];let t=new Date('2026-09-01T15:35:00'),last=0;
+  for(let i=0;i<160;i++){t=new Date(t.getTime()+(20+R()*200)*60e3);if(t.getHours()>21){t.setDate(t.getDate()+1);t.setHours(15,30+R()*20|0)}if(t.getDay()===0||t.getDay()===6){t.setDate(t.getDate()+(t.getDay()===6?2:1))}
+    const revenge=last<0&&R()<.5;if(revenge)t=new Date(t.getTime()-15*60e3);let p=(R()-.44)*420;if(revenge)p-=160;if(t.getDay()===5&&t.getHours()>=19)p-=120;last=p;out.push({t:new Date(t),p,sym:syms[R()*4|0],side:R()<.5?'buy':'sell'})}
+  show(out)});
+</script>
+</body>
+</html>
