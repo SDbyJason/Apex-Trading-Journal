@@ -82566,14 +82566,14 @@ body.light .apxFR-card { background: #fff; }
     g.fillStyle = GOLD; g.font = '800 40px Sora, system-ui, sans-serif'; spaced(g, 'EVIDENCE', 100, 150, 12);
     g.fillStyle = '#8F8F98'; g.font = '600 34px Sora, system-ui, sans-serif'; g.fillText(st.label.toUpperCase(), 100, 300);
     var big = fmt$(st.pnl); var fs = 220; g.font = '800 ' + fs + 'px Sora, system-ui, sans-serif'; while (g.measureText(big).width > W - 220 && fs > 90) { fs -= 6; g.font = '800 ' + fs + 'px Sora, system-ui, sans-serif'; } g.fillStyle = green ? '#4EC38A' : '#EF4444'; g.fillText(big, 92, 300 + fs * 0.95);
-    g.fillStyle = '#F2F2F4'; g.font = '700 44px Sora, system-ui, sans-serif'; g.fillText(green ? 'Green week. Plan followed.' : 'Red week. Still journaling.', 100, 620);
+    g.fillStyle = '#F2F2F4'; g.font = '700 44px Sora, system-ui, sans-serif'; var wkL = st.label === 'This week'; g.fillText(green ? (wkL ? 'Green week. Plan followed.' : 'In the green. Plan followed.') : (wkL ? 'Red week. Still journaling.' : 'Down, but still journaling.'), 100, 620);
     var y = 720, cols = [['WIN RATE', st.wr + '%'], ['TRADES', String(st.n)], ['BEST TRADE', fmt$(st.best)]];
     cols.forEach(function(cl, i){ var x = 100 + i * 300; g.fillStyle = '#16161A'; roundRect(g, x, y, 270, 190, 26); g.fill(); g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 2; g.stroke();
       g.fillStyle = '#8F8F98'; g.font = '700 26px Sora, system-ui, sans-serif'; g.fillText(cl[0], x + 28, y + 62); g.fillStyle = HI; g.font = '800 64px Sora, system-ui, sans-serif'; g.fillText(cl[1], x + 28, y + 148); });
     g.fillStyle = GOLD; g.fillRect(100, 1000, W - 200, 3);
     g.fillStyle = '#C9C9D1'; g.font = '600 36px Sora, system-ui, sans-serif'; g.fillText('Tracked with Evidence — the journal that fills itself.', 100, 1075);
     g.fillStyle = '#F2F2F4'; g.font = '800 46px Sora, system-ui, sans-serif'; g.fillText('10% off your first month', 100, 1160);
-    g.fillStyle = HI; g.font = '800 46px Sora, system-ui, sans-serif'; g.fillText('code ' + String(code).toUpperCase() + '  ·  evidencetrading.com', 100, 1232);
+    g.fillStyle = HI; var ft = 'code ' + String(code).toUpperCase() + '  ·  evidencetrading.com', ff = 46; g.font = '800 ' + ff + 'px Sora, system-ui, sans-serif'; while (g.measureText(ft).width > W - 200 && ff > 26) { ff -= 2; g.font = '800 ' + ff + 'px Sora, system-ui, sans-serif'; } g.fillText(ft, 100, 1232);
     return c;
   }
   function roundRect(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
