@@ -198,6 +198,40 @@
   };
 })();
 </script>
+<style>
+.apxInv{position:fixed;left:50%;top:14px;transform:translate(-50%,-160%);z-index:100000;width:min(620px,calc(100% - 24px));display:flex;align-items:center;gap:14px;padding:12px 12px 12px 16px;border-radius:18px;background:rgba(12,12,14,.96);backdrop-filter:blur(14px);border:1px solid rgba(212,175,55,.5);box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(212,175,55,.15);transition:transform .45s cubic-bezier(.2,.9,.3,1.15);font-family:inherit}
+.apxInv.in{transform:translate(-50%,0)}
+.apxInv-av{width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#0a0b0c;background:linear-gradient(135deg,#f0d682,#d4af37 60%,#a68120)}
+.apxInv-tx{flex:1;min-width:0;line-height:1.35}
+.apxInv-tx b{display:block;color:#f2f2f4;font-size:15px}
+.apxInv-tx span{color:#a9a9b2;font-size:13px}
+.apxInv-tx em{font-style:normal;color:#f0d682;font-weight:700}
+.apxInv-cta{flex:none;text-decoration:none;font-weight:800;font-size:14px;color:#0a0b0c;background:linear-gradient(135deg,#f0d682,#d4af37);border-radius:12px;padding:11px 16px;white-space:nowrap}
+.apxInv-x{flex:none;background:none;border:0;color:#8f8f98;font-size:17px;cursor:pointer;padding:4px 6px}
+@media(max-width:520px){.apxInv{flex-wrap:wrap;gap:10px 12px}.apxInv-tx{flex:1 1 calc(100% - 110px)}.apxInv-cta{flex:1 1 100%;order:3;text-align:center;padding:12px}}
+</style>
+<script>
+/* Persönliche Einladung: ?ref=<Empfehlungscode> → „Jason invited you – 10% off“ */
+(function(){
+  try {
+    var code = new URLSearchParams(location.search).get('ref') || '';
+    if (!/^[A-Za-z0-9_-]{3,64}$/.test(code)) return;
+    fetch('https://firestore.googleapis.com/v1/projects/sd-indikator-by-jason/databases/(default)/documents/apexReferralCodes/' + encodeURIComponent(code.toLowerCase()))
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(doc){
+        if (!doc || !doc.fields) return;               // kein persönlicher Code (z. B. Partner-Link)
+        var name = code.replace(/[^A-Za-z]/g, ''); name = name ? name.charAt(0).toUpperCase() + name.slice(1, 14).toLowerCase() : 'A friend';
+        var el = document.createElement('div'); el.className = 'apxInv'; el.setAttribute('role', 'status');
+        el.innerHTML = '<div class="apxInv-av">' + name.charAt(0) + '</div>'
+          + '<div class="apxInv-tx"><b>' + name + ' invited you 🎁</b><span><em>10% off</em> your first month of Evidence Pro — applied automatically.</span></div>'
+          + '<a class="apxInv-cta" href="app.html">Claim 10% off</a><button class="apxInv-x" aria-label="Close">✕</button>';
+        function show(){ document.body.appendChild(el); requestAnimationFrame(function(){ el.classList.add('in'); }); }
+        el.querySelector('.apxInv-x').onclick = function(){ el.classList.remove('in'); setTimeout(function(){ el.remove(); }, 400); };
+        if (document.body) setTimeout(show, 700); else document.addEventListener('DOMContentLoaded', function(){ setTimeout(show, 700); });
+      }).catch(function(){});
+  } catch(e){}
+})();
+</script>
 <script>
 /* ════════════════════════════════════════════════════════════════
    Evidence — PREISE, eine einzige Quelle  (window.APEX_PRICES)

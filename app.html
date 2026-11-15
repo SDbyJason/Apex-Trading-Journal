@@ -18455,7 +18455,7 @@ async function loadUserProfile() {
       currentName = data.username || fallbackName();
       var _trialActive = (data.trialUntil && Number(data.trialUntil) > Date.now());
       window.trialUntil = _trialActive ? Number(data.trialUntil) : null;
-      currentPlan = (data.plan === 'pro' || data.subscriptionActive === true || _trialActive) ? 'pro' : 'free';
+      currentPlan = (data.plan === 'pro' || data.subscriptionActive === true || data.lifetimePro === true || _trialActive) ? 'pro' : 'free';
     } else {
       /* Kein Profil da: erste Anmeldung ueber Google oder Apple — dort gibt
          es kein Formular, in dem ein Trader-Name abgefragt wuerde. Also hier
@@ -32767,7 +32767,7 @@ document.addEventListener('keydown', function(e) {
         var data = doc.data();
         var _trial = (data.trialUntil && Number(data.trialUntil) > Date.now());
         window.trialUntil = _trial ? Number(data.trialUntil) : null;
-        var newPlan = (data.plan === 'pro' || data.subscriptionActive === true || _trial) ? 'pro' : 'free';
+        var newPlan = (data.plan === 'pro' || data.subscriptionActive === true || data.lifetimePro === true || _trial) ? 'pro' : 'free';
 
         if (newPlan === 'pro' && currentPlan !== 'pro') {
           console.log('✓ Plan-Listener: User upgraded to PRO');
@@ -82411,6 +82411,33 @@ body.light .apxFR-card { background: #fff; }
 .apxRef-fine { font-size: 11px; color: var(--ink3, #8b939c); line-height: 1.65; margin-top: 12px;
   padding-top: 11px; border-top: 0.5px solid var(--rim, #23262a); }
 @media (max-width: 600px) { .apxRef-stats { grid-template-columns: 1fr; } }
+.apxRef-tiers { display: grid; gap: 10px; margin: 0 0 14px; }
+.apxRef-tier { display: flex; gap: 12px; align-items: center; border: 0.5px solid var(--rim, #23262a); border-radius: 14px; padding: 13px 14px; background: var(--raised, #16191c); }
+.apxRef-tier.done { border-color: var(--gold-line, rgba(212,176,98,0.4)); background: rgba(212,176,98,0.06); }
+.apxRef-tier-ic { width: 38px; height: 38px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; background: rgba(212,176,98,0.1); color: var(--gold, #d4af37); font-weight: 800; }
+.apxRef-tier.done .apxRef-tier-ic { background: linear-gradient(135deg, var(--gold, #d4af37), #b8923d); color: #0a0b0c; }
+.apxRef-tier-tx { flex: 1; min-width: 0; }
+.apxRef-tier-t { font-size: 14px; font-weight: 800; color: var(--ink, #e9ecef); display: flex; justify-content: space-between; gap: 8px; }
+.apxRef-tier-t span { font-size: 11px; font-weight: 600; color: var(--ink3, #8b939c); letter-spacing: .04em; white-space: nowrap; }
+.apxRef-tier-d { font-size: 12px; color: var(--ink3, #8b939c); margin: 2px 0 8px; line-height: 1.5; }
+.apxRef-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.apxRef-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #b8923d, var(--gold, #d4af37), #f0d682); transition: width .6s ease; }
+.apxRef-badge { justify-self: start; font-size: 12px; font-weight: 800; letter-spacing: .04em; color: #0a0b0c; background: linear-gradient(135deg, #f0d682, var(--gold, #d4af37)); border-radius: 99px; padding: 6px 12px; }
+.apxRef-badge.legend { background: linear-gradient(135deg, #fff1b8, #d4af37 55%, #a68120); }
+.apxRef-cardbtn { width: 100%; margin: 0 0 4px; padding: 12px 15px; font-weight: 700; }
+.apxCard-modal { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.78); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 18px; }
+.apxCard-box { width: min(440px, 100%); background: var(--elevated, #121417); border: 0.5px solid var(--gold-line, rgba(212,176,98,0.4)); border-radius: 18px; padding: 14px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+.apxCard-img { width: 100%; display: block; border-radius: 12px; }
+.apxCard-acts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+.apxCard-acts .apxRef-b { text-align: center; text-decoration: none; }
+.apxMoment { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translate(-50%, 140%); z-index: 99998; width: min(560px, calc(100% - 24px)); display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 14px; border-radius: 16px; background: rgba(18,20,23,0.97); border: 0.5px solid var(--gold-line, rgba(212,176,98,0.45)); box-shadow: 0 18px 50px rgba(0,0,0,0.55); transition: transform .35s cubic-bezier(.2,.9,.3,1.2); }
+.apxMoment.in { transform: translate(-50%, 0); }
+.apxMoment-ic { font-size: 24px; }
+.apxMoment-tx { flex: 1; min-width: 0; font-size: 12px; color: var(--ink3, #8b939c); line-height: 1.45; }
+.apxMoment-tx b { display: block; font-size: 14px; color: var(--ink, #e9ecef); }
+.apxMoment-x { background: none; border: 0; color: var(--ink3, #8b939c); font-size: 16px; cursor: pointer; padding: 6px; }
+@media (max-width: 520px) { .apxMoment { flex-wrap: wrap; } .apxMoment-tx { flex: 1 1 calc(100% - 90px); } .apxMoment .apxRef-b { flex: 1 1 100%; order: 3; padding: 12px; } }
+
 
 /* ── exchange connections ── */
 .apxEx-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
@@ -82500,6 +82527,95 @@ body.light .apxFR-card { background: #fff; }
       .catch(function(){ return {}; });
   }
 
+  /* ── Stufen: 3 Freunde = +2 Bonusmonate & Ambassador, 10 = Pro für immer ── */
+  function tiersHtml(n, badge, lifetime){
+    function row(goal, title, desc, icon){
+      var done = n >= goal, pct = Math.min(100, Math.round(n / goal * 100));
+      return '<div class="apxRef-tier' + (done ? ' done' : '') + '">'
+        + '<div class="apxRef-tier-ic">' + (done ? '✓' : icon) + '</div>'
+        + '<div class="apxRef-tier-tx"><div class="apxRef-tier-t">' + title + ' <span>' + Math.min(n, goal) + ' / ' + goal + ' friends</span></div>'
+        + '<div class="apxRef-tier-d">' + desc + '</div>'
+        + '<div class="apxRef-bar"><i style="width:' + pct + '%"></i></div></div></div>';
+    }
+    var b = lifetime ? '<div class="apxRef-badge legend">👑 Legend · Pro free forever</div>'
+          : badge === 'ambassador' ? '<div class="apxRef-badge">⭐ Evidence Ambassador</div>' : '';
+    return '<div class="apxRef-tiers">' + b
+      + row(3, 'Ambassador', '+2 bonus months on top and the Ambassador badge', '⭐')
+      + row(10, 'Legend', 'Evidence Pro free — forever', '👑') + '</div>';
+  }
+
+  /* ── Teilbare Erfolgskarte ── */
+  function money(t){ var v = Number(t.pnl != null && t.pnl !== '' ? t.pnl : (t.profit != null ? t.profit : (t.netPnl || 0))); return isFinite(v) ? v : 0; }
+  function weekStats(){
+    var all = []; try { all = (typeof getAllTrades === 'function') ? getAllTrades() : []; } catch(e){}
+    var since = Date.now() - 7 * 86400000, wk = all.filter(function(t){ var d = Date.parse(t._date || t.date || ''); return isFinite(d) && d >= since; });
+    var label = 'This week';
+    if (wk.length < 3) { wk = all.slice(-30); label = 'Last ' + wk.length + ' trades'; }
+    var pnl = 0, wins = 0, best = 0;
+    wk.forEach(function(t){ var m = money(t); pnl += m; if (m > 0) wins++; if (m > best) best = m; });
+    return { label: label, n: wk.length, pnl: pnl, wr: wk.length ? Math.round(wins / wk.length * 100) : 0, best: best };
+  }
+  function fmt$(v){ var a = Math.abs(v), s = a >= 10000 ? Math.round(a).toLocaleString('en-US') : a.toLocaleString('en-US', { maximumFractionDigits: 0 }); return (v < 0 ? '−$' : '+$') + s; }
+  function drawCard(st, code){
+    var W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H; var g = c.getContext('2d');
+    var GOLD = '#D4AF37', HI = '#F0D682', green = st.pnl >= 0;
+    g.fillStyle = '#0A0A0B'; g.fillRect(0, 0, W, H);
+    var rg = g.createRadialGradient(W / 2, 260, 40, W / 2, 260, 900); rg.addColorStop(0, green ? 'rgba(212,175,55,0.22)' : 'rgba(239,68,68,0.16)'); rg.addColorStop(1, 'rgba(10,10,11,0)'); g.fillStyle = rg; g.fillRect(0, 0, W, H);
+    g.strokeStyle = 'rgba(212,175,55,0.35)'; g.lineWidth = 3; roundRect(g, 40, 40, W - 80, H - 80, 44); g.stroke();
+    g.textBaseline = 'alphabetic'; g.textAlign = 'left';
+    g.fillStyle = GOLD; g.font = '800 40px Sora, system-ui, sans-serif'; spaced(g, 'EVIDENCE', 100, 150, 12);
+    g.fillStyle = '#8F8F98'; g.font = '600 34px Sora, system-ui, sans-serif'; g.fillText(st.label.toUpperCase(), 100, 300);
+    var big = fmt$(st.pnl); var fs = 220; g.font = '800 ' + fs + 'px Sora, system-ui, sans-serif'; while (g.measureText(big).width > W - 220 && fs > 90) { fs -= 6; g.font = '800 ' + fs + 'px Sora, system-ui, sans-serif'; } g.fillStyle = green ? '#4EC38A' : '#EF4444'; g.fillText(big, 92, 300 + fs * 0.95);
+    g.fillStyle = '#F2F2F4'; g.font = '700 44px Sora, system-ui, sans-serif'; g.fillText(green ? 'Green week. Plan followed.' : 'Red week. Still journaling.', 100, 620);
+    var y = 720, cols = [['WIN RATE', st.wr + '%'], ['TRADES', String(st.n)], ['BEST TRADE', fmt$(st.best)]];
+    cols.forEach(function(cl, i){ var x = 100 + i * 300; g.fillStyle = '#16161A'; roundRect(g, x, y, 270, 190, 26); g.fill(); g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 2; g.stroke();
+      g.fillStyle = '#8F8F98'; g.font = '700 26px Sora, system-ui, sans-serif'; g.fillText(cl[0], x + 28, y + 62); g.fillStyle = HI; g.font = '800 64px Sora, system-ui, sans-serif'; g.fillText(cl[1], x + 28, y + 148); });
+    g.fillStyle = GOLD; g.fillRect(100, 1000, W - 200, 3);
+    g.fillStyle = '#C9C9D1'; g.font = '600 36px Sora, system-ui, sans-serif'; g.fillText('Tracked with Evidence — the journal that fills itself.', 100, 1075);
+    g.fillStyle = '#F2F2F4'; g.font = '800 46px Sora, system-ui, sans-serif'; g.fillText('10% off your first month', 100, 1160);
+    g.fillStyle = HI; g.font = '800 46px Sora, system-ui, sans-serif'; g.fillText('code ' + String(code).toUpperCase() + '  ·  evidencetrading.com', 100, 1232);
+    return c;
+  }
+  function roundRect(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function spaced(g, t, x, y, sp){ for (var i = 0; i < t.length; i++) { g.fillText(t[i], x, y); x += g.measureText(t[i]).width + sp; } }
+  function card(){
+    function go(code){
+      var st = weekStats(), cv = drawCard(st, code), url = cv.toDataURL('image/png');
+      var old = document.getElementById('apxCardModal'); if (old) old.remove();
+      var m = document.createElement('div'); m.id = 'apxCardModal'; m.className = 'apxCard-modal';
+      m.innerHTML = '<div class="apxCard-box"><img class="apxCard-img" alt="Share card" src="' + url + '">'
+        + '<div class="apxCard-acts"><button class="apxRef-b primary" id="apxCardShare">Share</button><a class="apxRef-b" id="apxCardDl" download="evidence-card.png" href="' + url + '">Download</a><button class="apxRef-b" id="apxCardX">Close</button></div>'
+        + '<div class="apxRef-fine" style="border:0;margin-top:8px;text-align:center">Post it anywhere — your code gives friends 10% off, and you earn a free month per friend.</div></div>';
+      document.body.appendChild(m);
+      m.addEventListener('click', function(e){ if (e.target === m || e.target.id === 'apxCardX') m.remove(); });
+      document.getElementById('apxCardShare').onclick = function(){
+        cv.toBlob(function(b){ var f = new File([b], 'evidence-card.png', { type: 'image/png' }), text = 'Tracked with Evidence. 10% off your first month with my code ' + code + ': ' + shareLink(code);
+          if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], text: text }).catch(function(){});
+          else if (navigator.share) navigator.share({ text: text, url: shareLink(code) }).catch(function(){});
+          else document.getElementById('apxCardDl').click(); });
+      };
+    }
+    if (_code) go(_code); else claim().then(go).catch(function(){ alert('Please sign in to create your card.'); });
+  }
+
+  /* ── Im richtigen Moment fragen: grüne Woche ── */
+  function momentPrompt(){
+    try {
+      if (!window.currentUID || document.getElementById('apxMoment')) return;
+      var st = weekStats(); if (st.label !== 'This week' || st.n < 3 || st.pnl <= 0) return;
+      var wk = new Date(); wk.setHours(0,0,0,0); wk.setDate(wk.getDate() - wk.getDay()); var key = 'apxMoment:' + wk.toISOString().slice(0, 10);
+      if (localStorage.getItem(key)) return; localStorage.setItem(key, '1');
+      var t = document.createElement('div'); t.id = 'apxMoment'; t.className = 'apxMoment';
+      t.innerHTML = '<div class="apxMoment-ic">🔥</div><div class="apxMoment-tx"><b>Green week: ' + fmt$(st.pnl) + '</b><span>Share your card — friends get 10% off, you get a free month.</span></div>'
+        + '<button class="apxRef-b primary" id="apxMomentGo">Create card</button><button class="apxMoment-x" id="apxMomentX" aria-label="Close">✕</button>';
+      document.body.appendChild(t); requestAnimationFrame(function(){ t.classList.add('in'); });
+      document.getElementById('apxMomentGo').onclick = function(){ t.remove(); card(); };
+      document.getElementById('apxMomentX').onclick = function(){ t.classList.remove('in'); setTimeout(function(){ t.remove(); }, 300); };
+      setTimeout(function(){ if (t.parentNode) { t.classList.remove('in'); setTimeout(function(){ t.remove(); }, 300); } }, 20000);
+    } catch(e){}
+  }
+  setTimeout(function waitUser(){ if (window.currentUID) setTimeout(momentPrompt, 6000); else setTimeout(waitUser, 3000); }, 4000);
+
   function render(){
     var el = document.getElementById('spanel-invite');
     if (!el) return;
@@ -82511,10 +82627,10 @@ body.light .apxFR-card { background: #fff; }
 
       el.innerHTML =
         '<div class="apxRef-hero">'
-        + '<h3 class="apxRef-h">Give ' + FRIEND_DISCOUNT + ' %, get a free month</h3>'
+        + '<h3 class="apxRef-h">Give ' + FRIEND_DISCOUNT + '&nbsp;%, get a free month</h3>'
         + '<p class="apxRef-p">Send your link to someone who trades. They get <strong>'
-        + FRIEND_DISCOUNT + ' % off their first month</strong>. When their first payment goes through, '
-        + 'you get <strong>a full month of Pro for free</strong>&nbsp;— credited automatically, no limit on how many.</p>'
+        + FRIEND_DISCOUNT + '&nbsp;% off their first month</strong>. When their first payment goes through, '
+        + 'you get <strong>a full month of Pro for free</strong>&nbsp;— credited automatically, no limit on how many. Hit <strong>3 friends</strong> for 2 bonus months, <strong>10</strong> for Pro free forever.</p>'
         + (_code
             ? '<div class="apxRef-linkrow">'
               + '<input class="apxRef-link notranslate" translate="no" id="apxRefLink" readonly value="' + esc(link) + '">'
@@ -82526,6 +82642,8 @@ body.light .apxFR-card { background: #fff; }
             : '<button class="apxRef-b primary" id="apxRefGen" onclick="ApexReferral.create()">Create my referral link</button>')
         + '</div>'
 
+        + tiersHtml(converted, u.referralBadge, u.lifetimePro)
+        + (_code ? '<button class="apxRef-b apxRef-cardbtn" onclick="ApexReferral.card()">🎴 Create my share card</button>' : '')
         + '<div class="apxRef-stats">'
         + '<div class="apxRef-stat"><div class="apxRef-num">' + converted + '</div><div class="apxRef-lab">Friends subscribed</div></div>'
         + '<div class="apxRef-stat"><div class="apxRef-num">' + months + '</div><div class="apxRef-lab">Free months earned</div></div>'
@@ -82586,7 +82704,7 @@ body.light .apxFR-card { background: #fff; }
     else copy();
   }
 
-  window.ApexReferral = { render: render, create: create, copy: copy, share: share,
+  window.ApexReferral = { render: render, create: create, copy: copy, share: share, card: card, moment: momentPrompt,
     code: function(){ return _code; } };
 
   /* ── mount the settings tab ── */
@@ -119177,5 +119295,15 @@ var ApexDuelEngine = (function () {
 })();
 </script>
 
+<script>
+/* EVI LIVE-Bot: Bereiche fernsteuern (nur von evi.evidencetrading.com) */
+(function(){var OK=/^https:\/\/evi\.evidencetrading\.com$|^http:\/\/localhost:3333$/;
+function go(id){try{if(id&&typeof nav==='function'){nav(id);window.scrollTo({top:0});var a=document.querySelector('.page.active');if(a)a.scrollTop=0}}catch(e){}}
+function scr(dy){var a=document.querySelector('.page.active');[a,document.querySelector('.main'),document.querySelector('main'),document.scrollingElement].forEach(function(el){if(el&&el.scrollHeight>el.clientHeight+10)el.scrollBy({top:dy,behavior:'smooth'})})}
+window.addEventListener('message',function(e){if(!OK.test(e.origin))return;var d=e.data||{};if(d.evi_nav)go(d.evi_nav);if(d.evi_scroll)scr(d.evi_scroll);if(d.evi_top)scr(-1e6)});
+function fh(){var m=(location.hash||'').match(/evi=([a-z0-9_-]+)/);if(m){go(m[1]);setTimeout(function(){go(m[1])},1500)}}
+window.addEventListener('hashchange',fh);if(document.readyState==='complete')fh();else window.addEventListener('load',function(){setTimeout(fh,600)});
+try{if(window.top!==window)parent.postMessage({evi_ready:1},'*')}catch(e){}})();
+</script>
 </body>
 </html>
