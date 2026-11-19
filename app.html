@@ -152,6 +152,31 @@ window.APEX_FIT_APP = 'https://fit.evidencetrading.com';</script>
   };
 })();
 </script>
+<script data-lp>
+/* Persönliche Einladung: ?ref=<Empfehlungscode> → „Jason invited you – 10% off“ */
+(function(){
+  if (!window.APEX_LANDING_ONLY) return;   // nur auf der Landing (index.html), nicht in der App
+  try {
+    /* Stil per JS: der Landing-Build kürzt CSS nach Nutzung, und .apxInv entsteht erst zur Laufzeit. */
+    if (!document.getElementById('apxInvCss')) { var st = document.createElement('style'); st.id = 'apxInvCss'; st.textContent = '.apxInv{position:fixed;left:50%;top:14px;transform:translate(-50%,-160%);z-index:100000;width:min(620px,calc(100% - 24px));display:flex;align-items:center;gap:14px;padding:12px 12px 12px 16px;border-radius:18px;background:rgba(12,12,14,.96);backdrop-filter:blur(14px);border:1px solid rgba(212,175,55,.5);box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(212,175,55,.15);transition:transform .45s cubic-bezier(.2,.9,.3,1.15);font-family:inherit}.apxInv.in{transform:translate(-50%,0)}.apxInv-av{width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#0a0b0c;background:linear-gradient(135deg,#f0d682,#d4af37 60%,#a68120)}.apxInv-tx{flex:1;min-width:0;line-height:1.35}.apxInv-tx b{display:block;color:#f2f2f4;font-size:15px}.apxInv-tx span{color:#a9a9b2;font-size:13px}.apxInv-tx em{font-style:normal;color:#f0d682;font-weight:700}.apxInv-cta{flex:none;text-decoration:none;font-weight:800;font-size:14px;color:#0a0b0c;background:linear-gradient(135deg,#f0d682,#d4af37);border-radius:12px;padding:11px 16px;white-space:nowrap}.apxInv-x{flex:none;background:none;border:0;color:#8f8f98;font-size:17px;cursor:pointer;padding:4px 6px}@media(max-width:520px){.apxInv{flex-wrap:wrap;gap:10px 12px}.apxInv-tx{flex:1 1 calc(100% - 110px)}.apxInv-cta{flex:1 1 100%;order:3;text-align:center;padding:12px}}'; (document.head || document.documentElement).appendChild(st); }
+    var code = new URLSearchParams(location.search).get('ref') || '';
+    if (!/^[A-Za-z0-9_-]{3,64}$/.test(code)) return;
+    fetch('https://firestore.googleapis.com/v1/projects/sd-indikator-by-jason/databases/(default)/documents/apexReferralCodes/' + encodeURIComponent(code.toLowerCase()))
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(doc){
+        if (!doc || !doc.fields) return;               // kein persönlicher Code (z. B. Partner-Link)
+        var name = code.replace(/[^A-Za-z]/g, ''); name = name ? name.charAt(0).toUpperCase() + name.slice(1, 14).toLowerCase() : 'A friend';
+        var el = document.createElement('div'); el.className = 'apxInv'; el.setAttribute('role', 'status');
+        el.innerHTML = '<div class="apxInv-av">' + name.charAt(0) + '</div>'
+          + '<div class="apxInv-tx"><b>' + name + ' invited you 🎁</b><span><em>10% off</em> your first month of Evidence Pro — applied automatically.</span></div>'
+          + '<a class="apxInv-cta" href="app.html">Claim 10% off</a><button class="apxInv-x" aria-label="Close">✕</button>';
+        function show(){ document.body.appendChild(el); requestAnimationFrame(function(){ el.classList.add('in'); }); }
+        el.querySelector('.apxInv-x').onclick = function(){ el.classList.remove('in'); setTimeout(function(){ el.remove(); }, 400); };
+        if (document.body) setTimeout(show, 700); else document.addEventListener('DOMContentLoaded', function(){ setTimeout(show, 700); });
+      }).catch(function(){});
+  } catch(e){}
+})();
+</script>
 
 <script data-lp>
 /* ════════════════════════════════════════════════════════════════
@@ -1156,7 +1181,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD='2026-11-12a';
+  window.APEX_BUILD='2026-11-19a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;
@@ -115020,7 +115045,7 @@ body.light .tv-ev-dd-pop{background:#fff}
       var cats = Object.keys(CAT).filter(function(k){ return LINK.consent && LINK.consent[k]; }).map(function(k){ return CAT[k]; });
       var days = Object.keys(BODY).sort(), last = days[days.length - 1];
       html = '<div class="fit-p"><b>Connected.</b> <span>Shared:</span> ' + cats.map(function(c){ return '<span>' + c + '</span>'; }).join(' · ') + '.</div>' +
-        '<div class="fit-p fit-meta">' + (last ? '<span>Days received:</span> ' + nb(days.length) + ' · <span>latest</span> ' + nb(esc(last)) : '<span>No days received yet — they arrive after the next change in Evidence Fit.</span>') + '</div>' +
+        '<div class="fit-p fit-meta">' + (last ? '<span>Days received:</span> ' + nb(days.length) + ' · <span>latest</span> ' + nb(esc(last)) : '<span>No days received yet. Open Evidence Fit once: it sends your whole history automatically (Dashboard → Jetzt alles senden).</span>') + '</div>' +
         '<div class="fit-acts"><a class="mc-b" href="' + esc(app()) + '" target="_blank" rel="noopener">Open Evidence Fit ↗</a>' +
         '<button class="mc-b" onclick="ApexFit.unlink()"' + (_busy ? ' disabled' : '') + '>Disconnect and delete shared data</button></div>';
     } else {
@@ -115092,7 +115117,7 @@ body.light .tv-ev-dd-pop{background:#fff}
       'Sick': ['Krank', 'Enfermo', 'Doente', 'Malade'],
       'Days received:': ['Empfangene Tage:', 'Días recibidos:', 'Dias recebidos:', 'Jours reçus :'],
       'latest': ['zuletzt', 'el último', 'o último', 'dernier'],
-      'No days received yet — they arrive after the next change in Evidence Fit.': ['Noch keine Tage empfangen – sie kommen nach der nächsten Änderung in Evidence Fit.', 'Aún no hay días: llegan tras el próximo cambio en Evidence Fit.', 'Nenhum dia ainda — eles chegam após a próxima alteração no Evidence Fit.', 'Aucun jour reçu pour l’instant — ils arrivent après la prochaine modification dans Evidence Fit.'],
+      'No days received yet. Open Evidence Fit once: it sends your whole history automatically (Dashboard → Jetzt alles senden).': ['Noch keine Tage empfangen. Öffne Evidence Fit einmal: Es sendet deinen ganzen Verlauf automatisch (Dashboard → Jetzt alles senden).', 'Aún no hay días. Abre Evidence Fit una vez: envía todo tu historial automáticamente (Dashboard → Jetzt alles senden).', 'Ainda nenhum dia. Abra o Evidence Fit uma vez: ele envia todo o seu histórico automaticamente (Dashboard → Jetzt alles senden).', 'Aucun jour reçu. Ouvrez Evidence Fit une fois : il envoie tout votre historique automatiquement (Dashboard → Jetzt alles senden).'],
       'Open Evidence Fit ↗': ['Evidence Fit öffnen ↗', 'Abrir Evidence Fit ↗', 'Abrir o Evidence Fit ↗', 'Ouvrir Evidence Fit ↗'],
       'Disconnect and delete shared data': ['Trennen und geteilte Daten löschen', 'Desconectar y borrar los datos compartidos', 'Desconectar e apagar os dados compartilhados', 'Déconnecter et supprimer les données partagées'],
       'Connect your': ['Verbinde', 'Conecta tu cuenta de', 'Conecte sua conta do', 'Connectez votre compte'],
@@ -119304,6 +119329,181 @@ window.addEventListener('message',function(e){if(!OK.test(e.origin))return;var d
 function fh(){var m=(location.hash||'').match(/evi=([a-z0-9_-]+)/);if(m){go(m[1]);setTimeout(function(){go(m[1])},1500)}}
 window.addEventListener('hashchange',fh);if(document.readyState==='complete')fh();else window.addEventListener('load',function(){setTimeout(fh,600)});
 try{if(window.top!==window)parent.postMessage({evi_ready:1},'*')}catch(e){}})();
+</script>
+<!-- ═══ Körper × Trading (19.11.2026) — Karte in der Übersicht ═══════════
+     Liest die von Evidence Fit geteilten Tage (ApexFit) neben den eigenen
+     Trades: Tagesergebnis an Tagen MIT einer Körper-Bedingung gegen Tage
+     OHNE sie, mit Stichprobe; dazu „heute trifft zu …“. Rechnet nur
+     beschreibend — die statistische Prüfung macht Edge & Leaks. -->
+<script id="apex-body-edge">
+(function () {
+  'use strict';
+  var B = {}; window.ApexBodyEdge = B;
+  var MIN = 3, SOLID = 8;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function nb(v, cls) { return '<b class="notranslate' + (cls ? ' ' + cls : '') + '" translate="no">' + v + '</b>'; }
+  function isPro() { return window.currentPlan === 'pro' || window.currentUID === 'demo'; }
+  function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function money(v) {
+    var lg = String(window.apexResolvedLang || document.documentElement.lang || 'en').slice(0, 2);
+    try { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toLocaleString(lg, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }); }
+    catch (e) { return (v >= 0 ? '+$' : '−$') + Math.abs(Math.round(v)); }
+  }
+  function pnl(t) { try { var c = calcTradePnl(t); if (c && c.pnlUsd != null && isFinite(c.pnlUsd)) return +c.pnlUsd; } catch (e) { } var n = parseFloat(t.pnl); return isFinite(n) ? n : null; }
+  function prevDay(d) { var x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() - 1); return x.toISOString().slice(0, 10); }
+
+  /* Die Bedingungen — dieselben Schwellen wie die „Body: …“-Merkmale in Edge & Leaks. */
+  var CONDS = [
+    { k: 'sleep', label: 'Slept under 6.5 h', on: function (b) { return b && b.sleepH != null ? b.sleepH < 6.5 : null; } },
+    { k: 'alc', label: 'Alcohol the day before', prev: true, on: function (b, p) { return p && p.alcoholDrinks != null ? p.alcoholDrinks > 0 : null; } },
+    { k: 'ready', label: 'Readiness under 50', on: function (b) { return b && b.readiness != null ? b.readiness < 50 : null; } },
+    { k: 'stress', label: 'High stress', on: function (b) { return b && b.stress != null ? b.stress >= 4 : null; } },
+    { k: 'quality', label: 'Slept poorly', on: function (b) { return b && b.sleepQ != null ? b.sleepQ <= 2 : null; } },
+    { k: 'late', label: 'Went to bed after midnight', on: function (b) { return b && b.bedHour != null ? b.bedHour >= 24 : null; } },
+    { k: 'energy', label: 'Low energy', on: function (b) { return b && b.energy != null ? b.energy <= 2 : null; } },
+    { k: 'trained', label: 'Trained that day', good: true, on: function (b) { return b && b.trained != null ? b.trained === true : null; } },
+    { k: 'caf', label: '400 mg caffeine or more', on: function (b) { return b && b.caffeineMg != null ? b.caffeineMg >= 400 : null; } }
+  ];
+
+  B.compute = function () {
+    if (!window.ApexFit || !ApexFit.linked || !ApexFit.linked()) return null;
+    var trades = []; try { trades = (getAllTrades() || []).filter(function (t) { return t._date && !t.planned; }); } catch (e) { }
+    var days = {};
+    trades.forEach(function (t) {
+      var v = pnl(t); if (v == null) return;
+      var d = days[t._date] || (days[t._date] = { pnl: 0, n: 0, w: 0 });
+      d.pnl += v; d.n++; if (v > 0) d.w++;
+    });
+    var tradeDays = Object.keys(days), bodyDays = 0;
+    var rows = CONDS.map(function (c) {
+      var A = { pnl: 0, d: 0, n: 0, w: 0 }, Z = { pnl: 0, d: 0, n: 0, w: 0 };
+      tradeDays.forEach(function (d) {
+        var b = ApexFit.day(d), p = ApexFit.day(prevDay(d)), on = c.on(b, p);
+        if (on == null) return;
+        var g = on ? A : Z, x = days[d]; g.pnl += x.pnl; g.d++; g.n += x.n; g.w += x.w;
+      });
+      if (A.d < MIN || Z.d < MIN) return null;
+      var a = A.pnl / A.d, z = Z.pnl / Z.d;
+      return { c: c, on: A, off: Z, avgOn: a, avgOff: z, diff: a - z, wrOn: A.n ? A.w / A.n : 0, wrOff: Z.n ? Z.w / Z.n : 0, solid: A.d >= SOLID && Z.d >= SOLID };
+    }).filter(Boolean);
+    tradeDays.forEach(function (d) { if (ApexFit.day(d)) bodyDays++; });
+    rows.sort(function (x, y) { return Math.abs(y.diff) - Math.abs(x.diff); });
+    var td = ymd(new Date()), tb = ApexFit.day(td), tp = ApexFit.day(prevDay(td));
+    var today = rows.filter(function (r) { return r.c.on(tb, tp) === true; });
+    return { rows: rows, today: today, hasToday: !!(tb || tp), bodyDays: bodyDays, tradeDays: tradeDays.length };
+  };
+
+  var _sig = '';
+  B.render = function (force) {
+    var page = document.getElementById('page-overview'); if (!page) return;
+    var el = document.getElementById('bodyCard');
+    var v = null; try { v = B.compute(); } catch (e) { v = null; }
+    if (!v || v.bodyDays < 5) { if (el) el.remove(); _sig = ''; return; }
+    var sig = JSON.stringify([v.bodyDays, v.tradeDays, v.rows.length, v.rows.map(function (r) { return Math.round(r.diff); }), v.today.length, isPro()]);
+    if (!force && el && el.isConnected && sig === _sig) return;
+    _sig = sig;
+    css();
+    if (!el) { el = document.createElement('div'); el.id = 'bodyCard'; el.className = 'glass-card'; }
+    var anchor = document.getElementById('wxCard') || document.getElementById('startDayCard');
+    if (anchor && anchor.parentNode === page) { if (anchor.nextSibling !== el) page.insertBefore(el, anchor.nextSibling); }
+    else if (el.parentNode !== page) page.insertBefore(el, page.firstElementChild);
+    var head = '<div class="be-head"><div class="be-ic" aria-hidden="true">◐</div><div><div class="be-eyebrow"><span>Body × Trading</span> · <span class="notranslate" translate="no">Evidence Fit</span></div>' +
+      '<div class="be-title">' + (v.rows.length ? '<span>What your body does to your trading</span>' : '<span>Collecting days</span>') + '</div></div></div>';
+    var html;
+    if (!v.rows.length) {
+      html = '<p class="be-p"><span>Trading days with body data so far:</span> ' + nb(v.bodyDays) + '. <span>A condition shows up here once it has at least 3 trading days with it and 3 without.</span></p>';
+    } else if (!isPro()) {
+      html = '<p class="be-p">' + nb(v.rows.length) + ' <span>body conditions already have enough trading days to compare — which ones, and what they cost you, is in Pro.</span></p>' +
+        '<button class="apex-btn apex-btn--solid apex-btn--sm" onclick="if(window.openUpgradeModal)openUpgradeModal()">See them with Pro</button>';
+    } else {
+      var max = Math.max.apply(null, v.rows.map(function (r) { return Math.max(Math.abs(r.avgOn), Math.abs(r.avgOff)); })) || 1;
+      var todayHtml = '';
+      if (v.today.length) {
+        var worst = v.today.filter(function (r) { return r.diff < 0; }), good = v.today.filter(function (r) { return r.diff >= 0; });
+        todayHtml = worst.length
+          ? '<div class="be-today warn"><b><span>Today</span></b> · ' + worst.map(function (r) { return '<span>' + r.c.label + '</span> (' + nb(money(r.diff), 'neg') + ' <span>a day</span>)'; }).join(' · ') +
+            '. <span>Consider smaller size or fewer trades today.</span></div>'
+          : '<div class="be-today ok"><b><span>Today</span></b> · ' + good.map(function (r) { return '<span>' + r.c.label + '</span>'; }).join(' · ') + ' — <span>on days like this you have done fine so far.</span></div>';
+      } else if (v.hasToday) {
+        todayHtml = '<div class="be-today ok"><b><span>Today</span></b> · <span>none of the conditions that cost you money applies.</span></div>';
+      }
+      html = todayHtml + '<div class="be-rows">' + v.rows.slice(0, 5).map(function (r) {
+        var wOn = Math.round(Math.abs(r.avgOn) / max * 100), wOff = Math.round(Math.abs(r.avgOff) / max * 100);
+        return '<div class="be-row"><div class="be-lbl"><span>' + r.c.label + '</span>' + ' <i class="be-diff ' + (r.diff >= 0 ? 'pos' : 'neg') + '">' + nb(money(r.diff)) + ' <span>a day</span></i>' + (r.solid ? '' : ' <i class="be-small">small sample</i>') + '</div>' +
+          '<div class="be-bars"><div class="be-bar"><i class="' + (r.avgOn >= 0 ? 'pos' : 'neg') + '" style="width:' + wOn + '%"></i><em><span>with</span> ' + nb(money(r.avgOn), r.avgOn >= 0 ? 'pos' : 'neg') + ' · ' + nb(r.on.d) + ' <span>days</span> · ' + nb(Math.round(r.wrOn * 100) + '%') + ' <span>wins</span></em></div>' +
+          '<div class="be-bar off"><i style="width:' + wOff + '%"></i><em><span>without</span> ' + nb(money(r.avgOff), r.avgOff >= 0 ? 'pos' : 'neg') + ' · ' + nb(r.off.d) + ' <span>days</span> · ' + nb(Math.round(r.wrOff * 100) + '%') + ' <span>wins</span></em></div></div></div>';
+      }).join('') + '</div>' +
+        '<p class="be-foot"><span>Average result per trading day, from</span> ' + nb(v.bodyDays) + ' <span>trading days with body data. Description, not proof — Edge & Leaks tests the same conditions statistically.</span></p>';
+    }
+    el.innerHTML = head + html;
+    try { if (window.ApexI18n && ApexI18n.apply) ApexI18n.apply(el); } catch (e) { }
+  };
+
+  var _css = false;
+  function css() {
+    if (_css) return; _css = true;
+    var s = document.createElement('style'); s.id = 'apex-body-edge-css';
+    s.textContent =
+      '#bodyCard .be-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}' +
+      '#bodyCard .be-ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:20px;color:var(--gold);background:rgba(var(--gold-rgb,201,168,76),.1);border:0.5px solid rgba(var(--gold-rgb,201,168,76),.35)}' +
+      '#bodyCard .be-eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}' +
+      '#bodyCard .be-title{font-size:16px;font-weight:700;color:var(--ink)}' +
+      '#bodyCard .be-p,#bodyCard .be-foot{font-size:13px;color:var(--ink2);line-height:1.6;margin:6px 0 10px}#bodyCard .be-foot{font-size:11.5px;color:var(--ink3);margin:10px 0 0}' +
+      '#bodyCard .be-today{font-size:13px;padding:9px 12px;border-radius:10px;margin-bottom:12px;line-height:1.55;border:0.5px solid var(--rim)}' +
+      '#bodyCard .be-today.warn{background:rgba(221,68,88,.08);border-color:rgba(221,68,88,.35)}#bodyCard .be-today.ok{background:rgba(23,179,119,.07);border-color:rgba(23,179,119,.3)}' +
+      '#bodyCard .be-rows{display:grid;gap:12px}' +
+      '#bodyCard .be-lbl{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:5px}#bodyCard .be-small{font-style:normal;font-weight:500;font-size:10.5px;color:var(--ink3);border:0.5px solid var(--rim2);border-radius:20px;padding:1px 7px;margin-left:4px}' +
+      '#bodyCard .be-bars{display:grid;gap:4px}#bodyCard .be-bar{position:relative;height:22px;border-radius:6px;background:var(--layer);overflow:hidden}' +
+      '#bodyCard .be-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:rgba(var(--gold-rgb,201,168,76),.35)}#bodyCard .be-bar i.pos{background:rgba(23,179,119,.35)}#bodyCard .be-bar i.neg{background:rgba(221,68,88,.38)}#bodyCard .be-bar.off i{background:rgba(140,140,150,.22)}' +
+      '#bodyCard .be-bar em{position:relative;font-style:normal;font-size:11.5px;line-height:22px;padding-left:8px;color:var(--ink2);white-space:nowrap}' +
+      '#bodyCard .be-diff{font-style:normal;font-size:11.5px;font-weight:700;border-radius:20px;padding:1px 8px;margin-left:6px}#bodyCard .be-diff.pos{color:var(--green,#17b377);background:rgba(23,179,119,.1)}#bodyCard .be-diff.neg{color:var(--red,#dd4458);background:rgba(221,68,88,.1)}' +
+      '#bodyCard b.pos{color:var(--green,#17b377)}#bodyCard b.neg{color:var(--red,#dd4458)}';
+    document.head.appendChild(s);
+  }
+
+  (function () {
+    var PV = {
+      'Body × Trading': ['Körper × Trading', 'Cuerpo × Trading', 'Corpo × Trading', 'Corps × Trading'],
+      'What your body does to your trading': ['Was dein Körper mit deinem Trading macht', 'Lo que tu cuerpo le hace a tu trading', 'O que seu corpo faz com seu trading', 'Ce que ton corps fait à ton trading'],
+      'Collecting days': ['Tage werden gesammelt', 'Reuniendo días', 'Coletando dias', 'Collecte des jours'],
+      'Trading days with body data so far:': ['Trading-Tage mit Körperdaten bisher:', 'Días de trading con datos corporales:', 'Dias de trading com dados do corpo:', 'Jours de trading avec données corporelles :'],
+      'A condition shows up here once it has at least 3 trading days with it and 3 without.': ['Eine Bedingung erscheint, sobald es mindestens 3 Trading-Tage mit und 3 ohne sie gibt.', 'Una condición aparece cuando tiene al menos 3 días con ella y 3 sin ella.', 'Uma condição aparece quando tem pelo menos 3 dias com ela e 3 sem.', 'Une condition apparaît dès qu’elle a au moins 3 jours avec et 3 sans.'],
+      'body conditions already have enough trading days to compare — which ones, and what they cost you, is in Pro.': ['Körper-Bedingungen haben schon genug Trading-Tage zum Vergleich – welche, und was sie dich kosten, zeigt Pro.', 'condiciones corporales ya tienen suficientes días para comparar: cuáles y cuánto te cuestan, en Pro.', 'condições do corpo já têm dias suficientes para comparar — quais e quanto custam, no Pro.', 'conditions corporelles ont déjà assez de jours pour comparer — lesquelles et ce qu’elles te coûtent, dans Pro.'],
+      'See them with Pro': ['Mit Pro ansehen', 'Verlas con Pro', 'Ver com Pro', 'Les voir avec Pro'],
+      'Today': ['Heute', 'Hoy', 'Hoje', 'Aujourd’hui'],
+      'a day': ['pro Tag', 'por día', 'por dia', 'par jour'],
+      'Consider smaller size or fewer trades today.': ['Heute lieber kleinere Größe oder weniger Trades.', 'Hoy considera menor tamaño o menos operaciones.', 'Hoje considere tamanho menor ou menos trades.', 'Aujourd’hui, envisage une taille plus petite ou moins de trades.'],
+      'on days like this you have done fine so far.': ['an solchen Tagen lief es bei dir bisher gut.', 'en días así te ha ido bien hasta ahora.', 'em dias assim você foi bem até agora.', 'les jours comme ça, ça t’a plutôt réussi.'],
+      'none of the conditions that cost you money applies.': ['keine der Bedingungen, die dich Geld kosten, trifft zu.', 'no se cumple ninguna condición que te cueste dinero.', 'nenhuma condição que te custa dinheiro se aplica.', 'aucune condition qui te coûte de l’argent ne s’applique.'],
+      'with': ['mit', 'con', 'com', 'avec'],
+      'without': ['ohne', 'sin', 'sem', 'sans'],
+      'days': ['Tage', 'días', 'dias', 'jours'],
+      'wins': ['Gewinner', 'ganadoras', 'vencedores', 'gagnants'],
+      'small sample': ['kleine Stichprobe', 'muestra pequeña', 'amostra pequena', 'petit échantillon'],
+      'Average result per trading day, from': ['Durchschnittliches Ergebnis pro Trading-Tag, aus', 'Resultado medio por día de trading, de', 'Resultado médio por dia de trading, de', 'Résultat moyen par jour de trading, sur'],
+      'trading days with body data. Description, not proof — Edge & Leaks tests the same conditions statistically.': ['Trading-Tagen mit Körperdaten. Beschreibung, kein Beweis – Edge & Leaks prüft dieselben Bedingungen statistisch.', 'días con datos corporales. Descripción, no prueba: Edge & Leaks prueba las mismas condiciones estadísticamente.', 'dias com dados do corpo. Descrição, não prova — o Edge & Leaks testa as mesmas condições estatisticamente.', 'jours avec données corporelles. Description, pas preuve — Edge & Leaks teste les mêmes conditions statistiquement.'],
+      'Slept under 6.5 h': ['Unter 6,5 h geschlafen', 'Dormí menos de 6,5 h', 'Dormiu menos de 6,5 h', 'Dormi moins de 6,5 h'],
+      'Alcohol the day before': ['Alkohol am Vortag', 'Alcohol el día anterior', 'Álcool no dia anterior', 'Alcool la veille'],
+      'Readiness under 50': ['Readiness unter 50', 'Readiness bajo 50', 'Readiness abaixo de 50', 'Readiness sous 50'],
+      'High stress': ['Hoher Stress', 'Estrés alto', 'Estresse alto', 'Stress élevé'],
+      'Slept poorly': ['Schlecht geschlafen', 'Dormí mal', 'Dormiu mal', 'Mal dormi'],
+      'Went to bed after midnight': ['Nach Mitternacht ins Bett', 'Me acosté después de medianoche', 'Deitou depois da meia-noite', 'Couché après minuit'],
+      'Low energy': ['Wenig Energie', 'Poca energía', 'Pouca energia', 'Peu d’énergie'],
+      'Trained that day': ['Am selben Tag trainiert', 'Entrené ese día', 'Treinou no dia', 'Entraîné ce jour-là'],
+      '400 mg caffeine or more': ['400 mg Koffein oder mehr', '400 mg de cafeína o más', '400 mg de cafeína ou mais', '400 mg de caféine ou plus']
+    };
+    function reg() { if (window.ApexI18n && ApexI18n.addScoped) ApexI18n.addScoped('#bodyCard', PV); else setTimeout(reg, 300); }
+    reg();
+  })();
+
+  /* Die Übersicht baut sich oft neu auf; ein Blick alle 1,5 s genügt und trifft
+     auch das Nachladen der Fit-Tage (ApexFit.load ist asynchron). */
+  setInterval(function () {
+    var p = document.getElementById('page-overview');
+    if (!p || !p.classList.contains('active') || document.hidden) return;
+    try { B.render(false); } catch (e) { }
+  }, 1500);
+})();
 </script>
 </body>
 </html>

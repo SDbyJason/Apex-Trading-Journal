@@ -17,7 +17,7 @@
    #kuendigung …) bleiben auf der Landing. */
 (function () {
   var W = window, L = location, D = document;
-  W.APEX_LANDING_ONLY = true; W.APEX_APP_URL = 'app.html'; W.APEX_BUILD = "2026-11-12a";
+  W.APEX_LANDING_ONLY = true; W.APEX_APP_URL = 'app.html'; W.APEX_BUILD = "2026-11-19a";
   W.CHECKOUT_WORKER_URL = "https://apex-checkout.4kjyyyftv6.workers.dev"; W.APEX_MAIL_URL = "https://apex-stripe-webhook.4kjyyyftv6.workers.dev";
   var hint = null; try { hint = localStorage.getItem('apexSignedInHint'); } catch (e) {}
   try {
@@ -198,22 +198,13 @@
   };
 })();
 </script>
-<style>
-.apxInv{position:fixed;left:50%;top:14px;transform:translate(-50%,-160%);z-index:100000;width:min(620px,calc(100% - 24px));display:flex;align-items:center;gap:14px;padding:12px 12px 12px 16px;border-radius:18px;background:rgba(12,12,14,.96);backdrop-filter:blur(14px);border:1px solid rgba(212,175,55,.5);box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(212,175,55,.15);transition:transform .45s cubic-bezier(.2,.9,.3,1.15);font-family:inherit}
-.apxInv.in{transform:translate(-50%,0)}
-.apxInv-av{width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#0a0b0c;background:linear-gradient(135deg,#f0d682,#d4af37 60%,#a68120)}
-.apxInv-tx{flex:1;min-width:0;line-height:1.35}
-.apxInv-tx b{display:block;color:#f2f2f4;font-size:15px}
-.apxInv-tx span{color:#a9a9b2;font-size:13px}
-.apxInv-tx em{font-style:normal;color:#f0d682;font-weight:700}
-.apxInv-cta{flex:none;text-decoration:none;font-weight:800;font-size:14px;color:#0a0b0c;background:linear-gradient(135deg,#f0d682,#d4af37);border-radius:12px;padding:11px 16px;white-space:nowrap}
-.apxInv-x{flex:none;background:none;border:0;color:#8f8f98;font-size:17px;cursor:pointer;padding:4px 6px}
-@media(max-width:520px){.apxInv{flex-wrap:wrap;gap:10px 12px}.apxInv-tx{flex:1 1 calc(100% - 110px)}.apxInv-cta{flex:1 1 100%;order:3;text-align:center;padding:12px}}
-</style>
 <script>
 /* Persönliche Einladung: ?ref=<Empfehlungscode> → „Jason invited you – 10% off“ */
 (function(){
+  if (!window.APEX_LANDING_ONLY) return;   // nur auf der Landing (index.html), nicht in der App
   try {
+    /* Stil per JS: der Landing-Build kürzt CSS nach Nutzung, und .apxInv entsteht erst zur Laufzeit. */
+    if (!document.getElementById('apxInvCss')) { var st = document.createElement('style'); st.id = 'apxInvCss'; st.textContent = '.apxInv{position:fixed;left:50%;top:14px;transform:translate(-50%,-160%);z-index:100000;width:min(620px,calc(100% - 24px));display:flex;align-items:center;gap:14px;padding:12px 12px 12px 16px;border-radius:18px;background:rgba(12,12,14,.96);backdrop-filter:blur(14px);border:1px solid rgba(212,175,55,.5);box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(212,175,55,.15);transition:transform .45s cubic-bezier(.2,.9,.3,1.15);font-family:inherit}.apxInv.in{transform:translate(-50%,0)}.apxInv-av{width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#0a0b0c;background:linear-gradient(135deg,#f0d682,#d4af37 60%,#a68120)}.apxInv-tx{flex:1;min-width:0;line-height:1.35}.apxInv-tx b{display:block;color:#f2f2f4;font-size:15px}.apxInv-tx span{color:#a9a9b2;font-size:13px}.apxInv-tx em{font-style:normal;color:#f0d682;font-weight:700}.apxInv-cta{flex:none;text-decoration:none;font-weight:800;font-size:14px;color:#0a0b0c;background:linear-gradient(135deg,#f0d682,#d4af37);border-radius:12px;padding:11px 16px;white-space:nowrap}.apxInv-x{flex:none;background:none;border:0;color:#8f8f98;font-size:17px;cursor:pointer;padding:4px 6px}@media(max-width:520px){.apxInv{flex-wrap:wrap;gap:10px 12px}.apxInv-tx{flex:1 1 calc(100% - 110px)}.apxInv-cta{flex:1 1 100%;order:3;text-align:center;padding:12px}}'; (document.head || document.documentElement).appendChild(st); }
     var code = new URLSearchParams(location.search).get('ref') || '';
     if (!/^[A-Za-z0-9_-]{3,64}$/.test(code)) return;
     fetch('https://firestore.googleapis.com/v1/projects/sd-indikator-by-jason/databases/(default)/documents/apexReferralCodes/' + encodeURIComponent(code.toLowerCase()))
@@ -6724,7 +6715,7 @@ window.APEX_PRICES = (function () {
 
   // Bump on every deploy — it is the only way to tell which release an
   // error came from once several are in the wild.
-  window.APEX_BUILD='2026-11-12a';
+  window.APEX_BUILD='2026-11-19a';
 
   var MAX = 10;                 // reports per session
   var seen = {}, sent = 0, queue = [], timer = null;

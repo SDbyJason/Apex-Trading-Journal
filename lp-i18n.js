@@ -1,5 +1,5 @@
 /* Evidence — Übersetzung der Landingpage. Erzeugt von .claude/build-landing.js aus
-   indexdatenschutz.html (Blöcke data-lp="i18n"); Build 2026-11-12a. Nicht von Hand ändern. */
+   indexdatenschutz.html (Blöcke data-lp="i18n"); Build 2026-11-19a. Nicht von Hand ändern. */
 try {
 (function(){
   'use strict';
